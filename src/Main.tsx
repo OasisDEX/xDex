@@ -5,7 +5,7 @@ import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 import { map } from 'rxjs/operators';
 import { setupAppContext, theAppContext } from './AppContext';
-import { BalancesView } from './balances/BalancesView';
+import { BalancesView } from './balances-nomt/BalancesView';
 import { WalletStatus, walletStatus$ } from './blockchain/wallet';
 import { ExchangeViewTxRx } from './exchange/ExchangeView';
 import { HeaderTxRx } from './header/Header';

@@ -5,6 +5,8 @@ import { GasPrice$ } from '../network';
 import { send } from '../transactions';
 import { TxMetaKind } from './txMeta';
 
+export const DEFAULT_GAS = 1000000;
+
 export interface BaseDef<A> {
   call: (args: A, context: NetworkConfig, account?: string) => any;
   prepareArgs: (args: A, context: NetworkConfig, account?: string) => any[];

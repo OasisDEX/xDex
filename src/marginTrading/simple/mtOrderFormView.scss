@@ -1,0 +1,179 @@
+@import "../../utils/Variables";
+@import "../../utils/Mixins";
+
+// panel header
+.btnGroup {
+  margin-left: auto;
+}
+
+.btn {
+  height: 28px;
+  width: 72px;
+}
+
+// form
+
+.marginBottom {
+  margin-bottom: 20px;
+}
+
+.flexContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.balanceBtn {
+  align-items: center;
+  display: flex;
+  @include fontLatoBold;
+  justify-content: center;
+  letter-spacing: 0.4px;
+  width: 150px;
+  flex-basis: 150px;
+  flex-grow: 1;
+
+  &:disabled,
+  &:disabled:hover {
+    background-color: transparent;
+    border-color: rgba($grey-light, 0.2);
+    color: $font-color-base;
+    opacity: 1;
+  }
+
+  &:first-child {
+    margin-right: 10px;
+  }
+
+  &:last-child {
+    margin-left: 10px;
+  }
+}
+
+.confirmButton {
+  font-size: $font-size-base;
+  height: 35px;
+  margin-top: 2px;
+  width: 100%;
+}
+
+// ---------- horizontal lines
+.hrMargin {
+  margin-top: 0;
+  margin-bottom: 18px;
+}
+
+// ---------- input group modifiers
+.inputHeader {
+  flex-basis: 94px;
+  flex-grow: 2;
+  flex-shrink: 0;
+  padding: 10px 16px;
+  color: $grey-light-mid;
+  border: 0;
+}
+
+.input {
+  flex-basis: 186px;
+  flex-grow: 4;
+  width: 186px;
+  text-align: left;
+}
+
+.inputCurrencyAddon {
+  flex-basis: 82px;
+  flex-grow: 1;
+  flex-shrink: 0;
+  justify-content: start;
+  padding: 10px 16px;
+  white-space: nowrap;
+}
+
+// errors
+.errors {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  color: $red;
+  font-size: 11px;
+  height: 24px;
+  text-align: right;
+}
+
+// border box with infos inside, f.e. purchasing power or order type
+
+// ----------- sizes
+@include formInputHeights('lg');
+
+// style purchasing power box
+.purchasingPowerTitle {
+  @include fontMontserratSemibold;
+  font-size: 15px;
+}
+
+.purchasingPowerAmount {
+  @include fontLatoBold;
+}
+
+// style order type box
+.orderType {
+  text-align: center;
+}
+
+.summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.transitionArrow {
+  display: inline-block;
+  height: 8px;
+  width: 16px;
+  margin: 0 12px;
+  background: url("./icon_arrow_right.svg") no-repeat center;
+}
+
+.orderSummaryRow {
+  font-size: 15px;
+  display: flex;
+  width: 100%;
+  color: #ffffff;
+  margin-bottom: 12px;
+}
+
+.orderSummaryRowDark {
+  .orderSummaryLabel {
+    color: $grey-light-mid;
+  }
+}
+
+.orderSummaryLabel {
+  text-align: left;
+  flex-grow: 2;
+
+}
+
+.orderSummaryValue {
+  text-align: right;
+}
+
+.orderSummaryValuePositive {
+  color: #36EFBA;
+}
+
+.orderSummaryValueNegative {
+  color: #FF6951;
+}
+
+// ---------- horizontal lines spaces
+.hrSmallMargin {
+  margin-top: 0;
+  margin-bottom: 18px;
+}
+
+.hrMargin {
+  margin-top: 18px;
+  margin-bottom: 18px;
+}

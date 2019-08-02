@@ -1,0 +1,18 @@
+@import "../utils/Variables";
+@import "../utils/Mixins";
+
+@include modal();
+
+.eventName {
+  text-transform: capitalize;
+}
+
+.table td {
+  vertical-align: top;
+}
+
+.contentWithScroll {
+  height: 360px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}

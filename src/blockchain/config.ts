@@ -38,7 +38,10 @@ import { SvgImageSimple } from '../utils/icons/utils';
 import * as eth from './abi/ds-eth-token.abi.json';
 import * as dsProxyFactory from './abi/ds-proxy-factory.abi.json';
 import * as erc20 from './abi/erc20.abi.json';
+import * as marginEngine from './abi/margin-engine.abi.json';
 import * as otc from './abi/matching-market.abi.json';
+import * as mcdCat from './abi/mcd-cat.abi.json';
+import * as mcdFlipper from './abi/mcd-flipper.abi.json';
 import * as otcSupport from './abi/otc-support-methods.abi.json';
 import * as proxyCreationAndExecute from './abi/proxy-creation-and-execute.abi.json';
 import * as proxyRegistry from './abi/proxy-registry.abi.json';
@@ -61,6 +64,13 @@ function asMap<D>(key: string, data: D[]): { [key: string]: D } {
   return fromPairs(zip(data.map((row: D) => (row as any)[key]), data));
 }
 
+export enum AssetKind {
+  unknown = 'unknown',
+  cash = 'cash',
+  marginable = 'marginable',
+  nonMarginable = 'nonMarginable'
+}
+
 export const tokens = asMap('symbol', [
   {
     symbol: 'ETH',
@@ -73,6 +83,7 @@ export const tokens = asMap('symbol', [
     // iconInverse: SvgImageSimple(ethInverseSvg),
     iconCircle: SvgImageSimple(ethCircleSvg),
     iconColor: SvgImageSimple(ethColorSvg),
+    assetKind: AssetKind.unknown,
   },
   // ...process.env.REACT_APP_OASIS_DEX_ENABLED !== '1' ? [] : [{
   //   symbol: 'MKR',
@@ -97,6 +108,7 @@ export const tokens = asMap('symbol', [
     // iconInverse: SvgImageSimple(ethCircleSvg),
     iconCircle: SvgImageSimple(ethCircleSvg),
     iconColor: SvgImageSimple(ethColorSvg),
+    assetKind: AssetKind.marginable,
   },
   {
     symbol: 'DAI',
@@ -133,6 +145,7 @@ export const tokens = asMap('symbol', [
     // iconInverse: SvgImageSimple(dgdInverseSvg),
     iconCircle: SvgImageSimple(dgdCircleSvg),
     iconColor: SvgImageSimple(dgdColorSvg),
+    assetKind: AssetKind.marginable,
   },
   {
     symbol: 'REP',
@@ -145,6 +158,7 @@ export const tokens = asMap('symbol', [
     // iconInverse: SvgImageSimple(repInverseSvg),
     iconCircle: SvgImageSimple(repCircleSvg),
     iconColor: SvgImageSimple(repColorSvg),
+    assetKind: AssetKind.marginable,
   },
   {
     symbol: 'OMG',
@@ -157,6 +171,7 @@ export const tokens = asMap('symbol', [
     // iconInverse: SvgImageSimple(mkrInverseSvg),
     iconCircle: SvgImageSimple(omgCircleSvg),
     iconColor: SvgImageSimple(omgColorSvg),
+    assetKind: AssetKind.marginable,
   },
   {
     symbol: 'ZRX',
@@ -169,6 +184,7 @@ export const tokens = asMap('symbol', [
     // iconInverse: SvgImageSimple(mkrInverseSvg),
     iconCircle: SvgImageSimple(zrxCircleSvg),
     iconColor: SvgImageSimple(zrxColorSvg),
+    assetKind: AssetKind.marginable,
   },
   {
     symbol: 'BAT',
@@ -181,6 +197,7 @@ export const tokens = asMap('symbol', [
     // iconInverse: SvgImageSimple(batInverseSvg),
     iconCircle: SvgImageSimple(batCircleSvg),
     iconColor: SvgImageSimple(batColorSvg),
+    assetKind: AssetKind.marginable,
   },
   // {
   //   symbol: 'USDC',
@@ -193,6 +210,7 @@ export const tokens = asMap('symbol', [
   //   // iconInverse: SvgImageSimple(usdcInverseSvg),
   //   iconCircle: SvgImageSimple(usdcCircleSvg),
   //   iconColor: SvgImageSimple(usdcColorSvg),
+  //   assetKind: AssetKind.marginable,
   //   // address: 0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48
   // },
   // {
@@ -206,6 +224,7 @@ export const tokens = asMap('symbol', [
   //   // iconInverse: SvgImageSimple(wbtcInverseSvg),
   //   iconCircle: SvgImageSimple(wbtcCircleSvg),
   //   iconColor: SvgImageSimple(wbtcColorSvg),
+  //   assetKind: AssetKind.marginable,
   //   // address: 0x2260fac5e5542a773aa44fbcfedf7c193bc2c599
   // }
 ]);
@@ -250,6 +269,11 @@ const protoMain = {
       loadToken('BAT', erc20, '0x0d8775f648430679a709e98d2b0cb6250d2887ef'),
     ]);
   },
+  joins: {} as { [key: string]: string },
+  mcd: {} as { [key: string]: any },
+  prices: {} as { [key: string]: string },
+  spots: {} as { [key: string]: string },
+  ilks: {} as { [key: string]: string },
   get otcSupportMethods() {
     return load(otcSupport, '0x9b3f075b12513afe56ca2ed838613b7395f57839');
   },
@@ -261,6 +285,12 @@ const protoMain = {
   },
   get instantProxyCreationAndExecute() {
     return load(proxyCreationAndExecute, '0x793ebbe21607e4f04788f89c7a9b97320773ec59');
+  },
+  get marginProxyRegistry() {
+    return load(proxyRegistry, '');
+  },
+  get marginEngine() {
+    return load(marginEngine, '');
   },
   oasisDataService: {
     url: 'https://cache.eth2dai.com/api/v1'
@@ -303,6 +333,11 @@ const kovan: NetworkConfig = {
       loadToken('BAT', erc20, '0x9f8cfb61d3b2af62864408dd703f9c3beb55dff7'),
     ]);
   },
+  joins: {} as { [key: string]: string },
+  mcd: {} as { [key: string]: any },
+  prices: {} as { [key: string]: string },
+  spots: {} as { [key: string]: string },
+  ilks: {} as { [key: string]: string },
   get otcSupportMethods() {
     return load(otcSupport, '0x303f2bf24d98325479932881657f45567b3e47a8');
   },
@@ -314,6 +349,12 @@ const kovan: NetworkConfig = {
   },
   get instantProxyCreationAndExecute() {
     return load(proxyCreationAndExecute, '0xee419971e63734fed782cfe49110b1544ae8a773');
+  },
+  get marginProxyRegistry() {
+    return load(proxyRegistry, '');
+  },
+  get marginEngine() {
+    return load(marginEngine, '');
   },
   oasisDataService: {
     url: 'https://staging-cache.eth2dai.com/api/v1'
@@ -352,6 +393,38 @@ const localnet: NetworkConfig =   {
       loadToken('BAT', erc20, '0xe80C262f63df9376d2ce9eDd373832EDc9FCA46E'),
     ]);
   },
+  joins: {
+    'W-ETH': '0x69Fb93fA1b0ccF17c22595b842b4853d0E771044',
+    DGX: '0xAB86eD30878D601C9f6aCDEa7BE964fE2b89273e',
+    DAI: '0xEa6e1B7eb531662722405F0701D53cBC93657969',
+  } as { [key: string]: string },
+  mcd: {
+    pit: '0xbe84036C11964E9743F056f4e780a99d302a77c4',
+    vat: '0x174805bDBE92fBb6eC91D602BE4DDaF7F7E51EA6',
+    get cat() {
+      return load(mcdCat, '0x2cd136C8Ab2cB7150E8D6C42DF15271998E5E7EB');
+    },
+    flip: {
+      get 'W-ETH'() {
+        return load(mcdFlipper, '0x7BBABcB1dA23089f6b20502D78B02C5A5cf39861');
+      },
+      get DGX() {
+        return load(mcdFlipper, '0x30ed29c4C4bA30ECCcDd0c0D153E454BFCb0A4Dd');
+      },
+    }
+  } as { [key: string]: any },
+  prices: {
+    'W-ETH': '0xE2ecCEEc6dEB8c7AFF9787E46FEA7078b89ab159',
+    DGX: '0x83fc6817095c1e5915C2F1286d712B8d8017e81d',
+  } as { [key: string]: string },
+  spots: {
+    'W-ETH': '0x0CecaCD65b29f12817E240B188aB61142AA43834',
+    DGX: '0x2C76B1D8B62e4E3c124863020D955f2E2773006D',
+  } as { [key: string]: string },
+  ilks: {
+    'W-ETH': web3.fromAscii('ETH'),
+    DGX: web3.fromAscii('DGX'),
+  } as { [key: string]: string },
   get otcSupportMethods() {
     return load(otcSupport, '0x5de139dbbfd47dd1d2cd906348fd1887135b2804');
   },
@@ -363,6 +436,12 @@ const localnet: NetworkConfig =   {
   },
   get instantProxyCreationAndExecute() {
     return load(proxyCreationAndExecute, '0x99C7F543e310A4143D22ce840a348b4EcDbBA8Ce');
+  },
+  get marginProxyRegistry() {
+    return load(proxyRegistry, '0x3A32AA343fBA264411EF47B00B195165738E4E6b');
+  },
+  get marginEngine() {
+    return load(marginEngine, '0xb92c5af7231f9d448AC99A688BA290C580c707bA');
   },
   oasisDataService: {
     url: 'http://localhost:3001/v1'

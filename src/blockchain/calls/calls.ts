@@ -19,6 +19,7 @@ import {
   proxyAddress$, setOwner, setupProxy, tradePayWithERC20,
   tradePayWithETHNoProxy, tradePayWithETHWithProxy
 } from './instant';
+import {approveMTProxy, mtBalance, mtBuy, mtDraw, mtFund, mtReallocate, mtSell, setupMTProxy} from './mtCalls';
 import { cancelOffer, offerMake, offerMakeDirect } from './offerMake';
 import { unwrap, wrap } from './wrapUnwrapCalls';
 
@@ -51,8 +52,21 @@ function calls([context, account]: [NetworkConfig, string]) {
     setupProxyEstimateGas: estimateGas(setupProxy),
     approveProxy: sendTransaction(approveProxy),
     approveProxyEstimateGas: estimateGas(approveProxy),
+    approveMTProxy: sendTransaction(approveMTProxy),
     disapproveProxy: sendTransaction(disapproveProxy),
     setOwner: sendTransaction(setOwner),
+    setupMTProxy: sendTransaction(setupMTProxy),
+    setupMTProxyEstimateGas: estimateGas(setupMTProxy),
+    mtDraw: sendTransaction(mtDraw),
+    mtDrawEstimateGas: estimateGas(mtDraw),
+    mtFund: sendTransaction(mtFund),
+    mtFundEstimateGas: estimateGas(mtFund),
+    mtBuy: sendTransaction(mtBuy),
+    mtBuyEstimateGas: estimateGas(mtBuy),
+    mtSell: sendTransaction(mtSell),
+    mtSellEstimateGas: estimateGas(mtSell),
+    mtReallocate: sendTransaction(mtReallocate),
+    mtReallocateEstimateGas: estimateGas(mtReallocate),
   };
 }
 
@@ -60,6 +74,7 @@ function readCalls(context: NetworkConfig) {
   const call = callCurried(context);
 
   return {
+    mtBalance: call(mtBalance),
     otcGetBuyAmount: call(getBuyAmount),
     otcGetPayAmount: call(getPayAmount),
     otcGetOffersAmount: call(getOffersAmount),

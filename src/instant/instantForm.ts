@@ -14,7 +14,7 @@ import {
   switchMap,
 } from 'rxjs/operators';
 
-import { Allowances, Balances, DustLimits } from '../balances/balances';
+import { Allowances, Balances, DustLimits } from '../balances-nomt/balances';
 import { Calls, calls$, Calls$, ReadCalls, ReadCalls$ } from '../blockchain/calls/calls';
 import { eth2weth, weth2eth } from '../blockchain/calls/instant';
 import { NetworkConfig, tokens } from '../blockchain/config';

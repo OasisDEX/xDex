@@ -1,7 +1,7 @@
 import { BigNumber } from 'bignumber.js';
 import classnames from 'classnames';
 import * as React from 'react';
-import { Balances } from '../../balances/balances';
+import { Balances } from '../../balances-nomt/balances';
 import { tokens } from '../../blockchain/config';
 import { User } from '../../blockchain/user';
 import { OfferType } from '../../exchange/orderbook/orderbook';

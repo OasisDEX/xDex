@@ -1,0 +1,67 @@
+@import "../../utils/Mixins";
+@import "../../utils/Variables";
+
+@include modal();
+
+.panel {
+  align-items: center;
+  justify-content: space-between;
+  display: flex;
+  font-size: 14px;
+  padding: 15px 20px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.checklistBox {
+  font-size: 12px;
+}
+
+.checklistLine {
+  display: flex;
+  align-content: center;
+  justify-content: space-between;
+}
+
+.checklistTitle {
+  font-weight: 600; // semi bold
+  letter-spacing: 0.1px;
+}
+
+.checklistSummary {
+  font-weight: 500; // medium
+  letter-spacing: 0.4px;
+}
+
+.balanceTable {
+  font-size: 14px;
+  line-height: 1.5;
+  width: 100%;
+
+  td:nth-child(2) {
+    text-align: right;
+    @include fontLatoBold;
+  }
+}
+
+.hrBigMargin {
+  margin-top: 11px;
+  margin-bottom: 18px;
+}
+
+.hrSmallMargin {
+  margin-top: 11px;
+  margin-bottom: 11px;
+}
+
+.buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: auto;
+}
+
+.button {
+  min-width: 95px;
+  padding: 0 20px;
+}
+

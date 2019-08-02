@@ -1,0 +1,15 @@
+@import "../utils/Variables";
+@import "../utils/forms/Buttons.mixins";
+
+.table {
+  th, td {
+    padding: 8px;
+  }
+
+  th {
+    text-transform: unset;
+    vertical-align: top;
+  }
+}
+
+@include tableTextAlign(left);

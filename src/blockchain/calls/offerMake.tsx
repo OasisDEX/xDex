@@ -50,13 +50,12 @@ export interface OfferMakeData {
 }
 
 export const offerMake: TransactionDef<OfferMakeData> = {
-  call: (data: OfferMakeData, context: NetworkConfig) => ({
-    [OfferMatchType.limitOrder]: context.otc.contract.offer
-      ['uint256,address,uint256,address,uint256,bool'],
-    [OfferMatchType.direct]: () => {
-      throw new Error('should not be here');
-    },
-  }[data.matchType]),
+  call: (data: OfferMakeData, context: NetworkConfig) => {
+    if (data.matchType === OfferMatchType.limitOrder) {
+      return context.otc.contract.offer['uint256,address,uint256,address,uint256,bool'];
+    }
+    throw new Error('should not be here');
+  },
   prepareArgs: (
     { buyAmount, buyToken, sellAmount, sellToken, matchType, position }: OfferMakeData,
     context: NetworkConfig

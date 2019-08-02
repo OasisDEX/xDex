@@ -1,6 +1,6 @@
 import classnames from 'classnames';
 import * as React from 'react';
-import { Allowances } from '../../balances/balances';
+import { Allowances } from '../../balances-nomt/balances';
 import { tokens } from '../../blockchain/config';
 import doneSvg from '../../icons/done.svg';
 import { CloseButton } from '../../utils/forms/Buttons';

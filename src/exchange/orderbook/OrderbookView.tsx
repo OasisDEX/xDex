@@ -26,7 +26,7 @@ import * as styles from './OrderbookView.scss';
 
 export function createOrderbookForView(
   currentOrderBook$: Observable<Orderbook>,
-  currentOfferForm$: Observable<OfferFormState>,
+  currentOfferForm$: Observable<{change: (ch: PickOfferChange) => void}>,
   kindChange: (kind: OrderbookViewKind) => void,
 ): Observable<Props> {
   return combineLatest(

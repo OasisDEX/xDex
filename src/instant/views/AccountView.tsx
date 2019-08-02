@@ -1,6 +1,6 @@
 import classnames from 'classnames';
 import * as React from 'react';
-import { Allowances } from '../../balances/balances';
+import { Allowances } from '../../balances-nomt/balances';
 import accountSvg from '../../icons/account.svg';
 import backSvg from '../../icons/back.svg';
 import warningSvg from '../../icons/warning.svg';

@@ -1,13 +1,14 @@
 import { BigNumber } from 'bignumber.js';
 import { combineLatest, Observable, of } from 'rxjs';
 import { takeWhileInclusive } from 'rxjs-take-while-inclusive';
-import { catchError, first, flatMap, map, startWith, switchMap } from 'rxjs/operators';
-import { Balances, DustLimits } from '../balances/balances';
+import {catchError, distinctUntilChanged, first, flatMap, map, startWith, switchMap} from 'rxjs/operators';
+import { Balances, DustLimits } from '../balances-nomt/balances';
 import { Calls, Calls$, ReadCalls, ReadCalls$ } from '../blockchain/calls/calls';
 import { TxState, TxStatus } from '../blockchain/transactions';
 import { User } from '../blockchain/user';
 import { amountFromWei } from '../blockchain/utils';
 import { Offer, OfferType, Orderbook } from '../exchange/orderbook/orderbook';
+import {MTAccount, MTAccountState} from '../marginTrading/state/mtAccount';
 
 export enum FormStage {
   idle = 'idle',
@@ -34,7 +35,10 @@ export enum FormChangeKind {
   formStageChange = 'stage',
   formResetChange = 'reset',
   orderbookChange = 'orderbook',
+  marginTradingAccountChange = 'marginTradingAccount',
   balancesChange = 'balancesChange',
+  tokenChange = 'tokenChange',
+  marginTradingAccountStateChange = 'marginTradingAccountStateChange',
   dustLimitChange = 'dustLimitChange',
   userChange = 'userChange',
   matchTypeChange = 'matchType',
@@ -45,6 +49,8 @@ export enum FormChangeKind {
 
 export enum OfferMatchType {
   limitOrder = 'limitOrder',
+  immediateOrCancel = 'immediateOrCancel',
+  fillOrKill = 'fillOrKill',
   direct = 'direct',
 }
 
@@ -65,6 +71,11 @@ export interface PriceFieldChange {
 export interface AmountFieldChange {
   kind: FormChangeKind.amountFieldChange;
   value?: BigNumber;
+}
+
+export interface TokenChange {
+  kind: FormChangeKind.tokenChange;
+  token: string;
 }
 
 export interface SetMaxChange {
@@ -108,6 +119,16 @@ export interface AllowanceChange {
 export interface OrderbookChange {
   kind: FormChangeKind.orderbookChange;
   orderbook: Orderbook;
+}
+
+export interface MTAccountChange {
+  kind: FormChangeKind.marginTradingAccountChange;
+  mta: MTAccount;
+}
+
+export interface MTAccountStateChange {
+  kind: FormChangeKind.marginTradingAccountStateChange;
+  mtaState: MTAccountState;
 }
 
 export interface BalancesChange {
@@ -199,6 +220,25 @@ export function toDustLimitChange$(
       dustLimitQuote: dustLimits[quote] || new BigNumber(0),
     } as DustLimitChange)
     ));
+}
+
+export function toMTAccountChange(mta$: Observable<MTAccount>) {
+  return mta$.pipe(
+    map(mta => ({
+      mta,
+      kind: FormChangeKind.marginTradingAccountChange,
+    } as MTAccountChange))
+  );
+}
+
+export function toMTAccountStateChange(mta$: Observable<MTAccount>) {
+  return mta$.pipe(
+    map(mta => ({
+      mtaState: mta.state,
+      kind: FormChangeKind.marginTradingAccountStateChange,
+    } as MTAccountStateChange)),
+    distinctUntilChanged()
+  );
 }
 
 export function toBalancesChange(balances$: Observable<Balances>) {

@@ -35,6 +35,8 @@ export class OfferMakeForm extends React.Component<OfferFormState> {
   public orderTypes: {[key in OfferMatchType]: string} = {
     limitOrder: 'Limit order type',
     direct: 'Average price fill or kill order type',
+    fillOrKill: 'Fill or kill',
+    immediateOrCancel: 'Immediate or cancel'
   };
 
   private amountInput?: HTMLElement;
