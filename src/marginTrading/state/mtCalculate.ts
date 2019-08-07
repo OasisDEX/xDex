@@ -74,6 +74,22 @@ export function realPurchasingPowerMarginable(
   return cashAvailable.minus(cashLeft);
 }
 
+// export function calculateRealPurchasingPower(
+//   safeCollRatio: BigNumber,
+//   referencePrice: BigNumber,
+//   cashAvailable: BigNumber,
+//   sellOffers: Offer[]
+// ): BigNumber {
+//   let purchasingPower = zero;
+//   while (cashAvailable.gt(zero) && sellOffers.length > 0) {
+//     const [bought, cashLeft, offersLeft] = eat(cashAvailable, sellOffers);
+//     purchasingPower = purchasingPower.plus(cashAvailable).minus(cashLeft);
+//     cashAvailable = bought.times(referencePrice).div(safeCollRatio);
+//     sellOffers = offersLeft;
+//   }
+//   return purchasingPower;
+// }
+
 export function calculateMarginable(
   ma: MarginableAssetCore,
   totalAvailableCash: BigNumber = zero,

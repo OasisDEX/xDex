@@ -19,7 +19,9 @@ import {
   proxyAddress$, setOwner, setupProxy, tradePayWithERC20,
   tradePayWithETHNoProxy, tradePayWithETHWithProxy
 } from './instant';
-import {approveMTProxy, mtBalance, mtBuy, mtDraw, mtFund, mtReallocate, mtSell, setupMTProxy} from './mtCalls';
+import {
+  approveMTProxy, mtBalance, mtBuy, mtDraw, mtFund, mtReallocate, mtSell, setupMTProxy
+} from './mtCalls';
 import { cancelOffer, offerMake, offerMakeDirect } from './offerMake';
 import { unwrap, wrap } from './wrapUnwrapCalls';
 

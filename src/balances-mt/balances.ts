@@ -10,7 +10,7 @@ import {
   first,
   last,
   map,
-  scan,
+  scan, shareReplay,
   switchMap
 } from 'rxjs/operators';
 
@@ -54,10 +54,6 @@ export function balance$(
     map(balance => {
       return amountFromWei(balance, token);
     }),
-    catchError(err => {
-      console.log('balance', token, err);
-      return throwError(err);
-    })
   );
 }
 
@@ -69,7 +65,7 @@ export const balances$: Observable<Balances> = combineLatest(
   switchMap(([context, account]) =>
     !account ? of({}) :
       forkJoin(
-        Object.keys(context.tokens).map((token: string) =>
+        Object.keys(tokens).map((token: string) =>
           balance$(context, token, account).pipe(
             map(balance => ({
               [token]: balance
@@ -86,15 +82,17 @@ type Dust = (token: string, callback: (err: any, r: BigNumber) => any) => any;
 export const dustLimits$: Observable<DustLimits> = combineLatest(context$).pipe(
   switchMap(([context]) =>
     forkJoin(
-      Object.keys(context.tokens).map((token: string) =>
-        bindNodeCallback(context.otc.contract.dust as Dust)(
+      Object.keys(tokens)
+      .filter(token => context.tokens[token])
+      .map((token: string) => {
+        return bindNodeCallback(context.otc.contract.getMinSell as Dust)(
           context.tokens[token].address
         ).pipe(
           map(dustLimit => ({
             [token]: amountFromWei(dustLimit, token)
           }))
-        )
-      )
+        );
+      })
     ).pipe(concatAll(), scan((a, e) => ({ ...a, ...e }), {}), last())
   ),
   distinctUntilChanged(isEqual)

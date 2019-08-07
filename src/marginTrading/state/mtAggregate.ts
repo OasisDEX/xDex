@@ -1,6 +1,7 @@
 import { BigNumber } from 'bignumber.js';
-import { bindNodeCallback, combineLatest, Observable, of } from 'rxjs/index';
+import {bindNodeCallback, combineLatest, Observable, of, throwError} from 'rxjs/index';
 import {
+  catchError,
   distinctUntilChanged,
   exhaustMap,
   map,
@@ -58,7 +59,6 @@ export function aggregateMTAccountState(
             balance: balanceResult.assets[i].urnBalance,
             ...balanceResult.assets[i],
             safeCollRatio: new BigNumber(tokens[token].safeCollRatio as number),
-            rate: new BigNumber(14.33), // todo: get interest rate from smart contract
             history: events.filter(e => e.token === token)
           });
         });
@@ -109,8 +109,10 @@ function createProxyAddress$(
   return combineLatest(context$, initializedAccount$, onEveryBlock$).pipe(
     exhaustMap(
       ([context, account]) => {
+        console.log('account', account);
         return bindNodeCallback(context.marginProxyRegistry.contract.proxies)(account).pipe(
           mergeMap((proxyAddress: string) => {
+            console.log('proxyAddress', proxyAddress);
             if (proxyAddress === nullAddress) {
               return of(undefined);
             }
@@ -122,6 +124,10 @@ function createProxyAddress$(
                   of(undefined)
               )
             );
+          }),
+          catchError(err => {
+            console.log('aaaaaaaaaaaaaaaaa', err);
+            return throwError(err);
           })
         );
       }

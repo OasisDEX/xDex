@@ -110,35 +110,37 @@ const marginEventFilter = (Event: any, context: NetworkConfig, token: string) =>
 
 const eventFilters: (
   proxy: any, context: NetworkConfig, token: string, marginAccount: any
-) => {[key in MTHistoryEventKind]: any} = (proxy, context, token, marginAccount) => ({
-  [MTHistoryEventKind.fund]: marginEventFilter(marginAccount.Fund, context, token),
-  [MTHistoryEventKind.draw]: marginEventFilter(marginAccount.Draw, context, token),
-  [MTHistoryEventKind.adjust]: marginEventFilter(marginAccount.Adjust, context, token),
-  [MTHistoryEventKind.buy]: marginEventFilter(marginAccount.Buy, context, token),
-  [MTHistoryEventKind.sell]: marginEventFilter(marginAccount.Sell, context, token),
-  [MTHistoryEventKind.buyLev]: marginEventFilter(marginAccount.BuyLev, context, token),
-  [MTHistoryEventKind.sellLev]: marginEventFilter(marginAccount.SellLev, context, token),
-  [MTHistoryEventKind.bite]: context.mcd.cat.contract.Bite(
+) => {[key in MTHistoryEventKind]: any} = (proxy, context, token, marginAccount) => {
+  return ({
+    [MTHistoryEventKind.fund]: marginEventFilter(marginAccount.Fund, context, token),
+    [MTHistoryEventKind.draw]: marginEventFilter(marginAccount.Draw, context, token),
+    [MTHistoryEventKind.adjust]: marginEventFilter(marginAccount.Adjust, context, token),
+    [MTHistoryEventKind.buy]: marginEventFilter(marginAccount.Buy, context, token),
+    [MTHistoryEventKind.sell]: marginEventFilter(marginAccount.Sell, context, token),
+    [MTHistoryEventKind.buyLev]: marginEventFilter(marginAccount.BuyLev, context, token),
+    [MTHistoryEventKind.sellLev]: marginEventFilter(marginAccount.SellLev, context, token),
+    [MTHistoryEventKind.bite]: context.mcd.cat.contract.Bite(
     { urn: bytes32(proxy.address), ilk: context.ilks[token] },
     { fromBlock: context.startingBlock },
   ),
-  [MTHistoryEventKind.kick]: context.mcd.flip[token].contract.Kick(
+    [MTHistoryEventKind.kick]: context.mcd.flip[token].contract.Kick(
     { urn: bytes32(proxy.address) },
     { fromBlock: context.startingBlock },
   ),
-  [MTHistoryEventKind.tend]: context.mcd.flip[token].contract.LogNote(
-    { sig: subBytes(context.mcd.flip.DGX.contract.tend.getData(0, 0, 0), 0, 4) },
+    [MTHistoryEventKind.tend]: context.mcd.flip[token].contract.LogNote(
+    { sig: subBytes(context.mcd.flip[token].contract.tend.getData(0, 0, 0), 0, 4) },
     { fromBlock: context.startingBlock },
   ),
-  [MTHistoryEventKind.dent]: context.mcd.flip[token].contract.LogNote(
-    { sig: subBytes(context.mcd.flip.DGX.contract.dent.getData(0, 0, 0), 0, 4) },
+    [MTHistoryEventKind.dent]: context.mcd.flip[token].contract.LogNote(
+    { sig: subBytes(context.mcd.flip[token].contract.dent.getData(0, 0, 0), 0, 4) },
     { fromBlock: context.startingBlock },
   ),
-  [MTHistoryEventKind.deal]: context.mcd.flip[token].contract.LogNote(
-    { sig: subBytes(context.mcd.flip.DGX.contract.deal.getData(0), 0, 4) },
+    [MTHistoryEventKind.deal]: context.mcd.flip[token].contract.LogNote(
+    { sig: subBytes(context.mcd.flip[token].contract.deal.getData(0), 0, 4) },
     { fromBlock: context.startingBlock },
   ),
-});
+  });
+};
 
 const eventMappers: (token: string) => {[key in MTHistoryEventKind]: (
   event: {blockNumber: string, args: any},

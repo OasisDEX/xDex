@@ -4,10 +4,11 @@ import * as React from 'react';
 import { Operation } from '../../marginTrading/state/mtAccount';
 import { Money } from '../../utils/formatters/Formatters';
 import { Currency } from '../../utils/text/Text';
-import { NetworkConfig } from '../config';
+import {NetworkConfig, tokens} from '../config';
 import { MIN_ALLOWANCE } from '../network';
 import { amountFromWei, amountToWei } from '../utils';
 import { web3 } from '../web3';
+import { ApproveProxyData } from './approveCalls';
 import { DEFAULT_GAS } from './callsHelpers';
 import { TxMetaKind } from './txMeta';
 
@@ -27,7 +28,12 @@ export interface ApproveData {
 export const approveMTProxy = {
   call: ({ token }: ApproveData, context: NetworkConfig) =>
     context.tokens[token].contract.approve['address,uint256'],
-  prepareArgs: ({ proxyAddress }: ApproveData, _context: NetworkConfig) => [proxyAddress, -1],
+  prepareArgs: ({ token, proxyAddress }: ApproveData, context: NetworkConfig) => {
+    console.log('proxyAddress', proxyAddress,
+                'token', token,
+                context.tokens[token].contract.address);
+    return [proxyAddress, -1];
+  },
   options: () => ({ gas: DEFAULT_GAS }),
   kind: TxMetaKind.approveMTProxy,
   description: ({ token }: ApproveData) =>
@@ -48,24 +54,31 @@ export interface MTBalanceResult {
     referencePrice: BigNumber;
     minCollRatio: BigNumber;
     allowance: boolean;
+    fee: BigNumber
   }>;
 }
 
-const BalanceOuts = 7;
+const BalanceOuts = 8;
 
 function mtBalancePostprocess(result: BigNumber[], { tokens }: MTBalanceData) : MTBalanceResult {
   return {
     assets: tokens.map((token, i) => {
       const row = i * BalanceOuts;
+      console.log(
+        'allowance',
+        token,
+        new BigNumber(result[row + 6]).toString(),
+        MIN_ALLOWANCE.toString()
+      );
       return {
         walletBalance: amountFromWei(new BigNumber(result[row]), token),
         marginBalance: amountFromWei(new BigNumber(result[row + 1]), token),
         urnBalance: amountFromWei(new BigNumber(result[row + 2]), token),
         debt: amountFromWei(new BigNumber(result[row + 3]), 'DAI'),
-        // referencePrice: amountFromWei(new BigNumber(result[row + 4]), 'DAI').times(0.6),
         referencePrice: amountFromWei(new BigNumber(result[row + 4]), 'DAI'),
         minCollRatio: amountFromWei(new BigNumber(result[row + 5]), 'ETH'),
         allowance: new BigNumber(result[row + 6]).gte(MIN_ALLOWANCE),
+        fee: new BigNumber(result[row + 7]).div(new BigNumber(10).pow(27))
       };
     })
   };
@@ -73,14 +86,17 @@ function mtBalancePostprocess(result: BigNumber[], { tokens }: MTBalanceData) : 
 
 export const mtBalance = {
   call: (_data: MTBalanceData, context: NetworkConfig) => context.marginEngine.contract.balance,
-  prepareArgs: ({ proxyAddress, tokens }: MTBalanceData, context: NetworkConfig) => [
-    proxyAddress,
-    tokens.map(token => web3.toHex(token === 'W-ETH' ? 'WETH' : token)),
-    tokens.map(token => context.tokens[token].address),
-    tokens.map(token => context.spots[token]),
-    tokens.map(token => context.prices[token]),
-    context.mcd.vat,
-  ],
+  prepareArgs: ({ proxyAddress, tokens }: MTBalanceData, context: NetworkConfig) => {
+    return [
+      proxyAddress,
+      tokens.map(token => web3.toHex(token)),
+      tokens.map(token => context.tokens[token].address),
+      tokens.map(token => context.prices[token]),
+      context.mcd.vat,
+      context.spot,
+      context.jug
+    ];
+  },
   postprocess: mtBalancePostprocess,
 };
 
@@ -105,7 +121,7 @@ function argsOfPerformOperations(
 
   for (const [i, o] of plan.entries()) {
     kinds[i] = web3.toHex(o.kind);
-    names[i] = web3.toHex(o.name === 'W-ETH' ? 'WETH' : o.name);
+    names[i] = web3.toHex(o.name);
     tokens[i] = context.tokens[o.name].address;
     adapters[i] = context.joins[o.name];
     amounts[i] = toWei(o.name, (o as any).amount);
@@ -114,19 +130,30 @@ function argsOfPerformOperations(
     ddais[i] = toWei(o.name, (o as any).ddai);
   }
 
+  console.log('plan', JSON.stringify(plan));
+  console.log('args', JSON.stringify(
+    [
+      context.marginEngine.address,
+      kinds, names, tokens, adapters, amounts,
+      maxTotals, dgems, ddais,
+      [
+        context.mcd.vat, context.otc.address,
+        context.tokens.DAI.address, context.joins.DAI,
+      ],
+    ]
+  ));
+
   const args = [
     context.marginEngine.address,
     context.marginEngine.contract.performOperations.getData(
       kinds, names, tokens, adapters, amounts,
       maxTotals, dgems, ddais,
       [
-        context.mcd.pit, context.mcd.vat,
-        context.otc.address, context.otcSupportMethods.address,
+        context.mcd.vat, context.otc.address,
         context.tokens.DAI.address, context.joins.DAI,
       ],
     )
   ];
-
   return args;
 }
 

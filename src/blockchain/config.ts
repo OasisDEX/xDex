@@ -50,14 +50,14 @@ import { web3 } from './web3';
 
 export const tradingPairs: TradingPair[] = [
   { base: 'WETH', quote: 'DAI' },
-  ...process.env.REACT_APP_OASIS_DEX_ENABLED !== '1' ? [] : [
-    // { base: 'MKR', quote: 'DAI' },
-    // { base: 'MKR', quote: 'WETH' },
-    { base: 'DGD', quote: 'DAI' },
-    { base: 'REP', quote: 'DAI' },
-    { base: 'OMG', quote: 'DAI' },
-    { base: 'ZRX', quote: 'DAI' }
-  ]
+  // ...process.env.REACT_APP_OASIS_DEX_ENABLED !== '1' ? [] : [
+  //   // { base: 'MKR', quote: 'DAI' },
+  //   // { base: 'MKR', quote: 'WETH' },
+  //   { base: 'DGD', quote: 'DAI' },
+  //   { base: 'REP', quote: 'DAI' },
+  //   { base: 'OMG', quote: 'DAI' },
+  //   { base: 'ZRX', quote: 'DAI' }
+  // ]
 ];
 
 function asMap<D>(key: string, data: D[]): { [key: string]: D } {
@@ -77,6 +77,7 @@ export const tokens = asMap('symbol', [
     precision: 18,
     digits: 5,
     digitsInstant: 3,
+    safeCollRatio: undefined,
     maxSell: '10000000',
     name: 'Ether',
     icon: SvgImageSimple(ethSvg),
@@ -102,6 +103,7 @@ export const tokens = asMap('symbol', [
     precision: 18,
     digits: 5,
     digitsInstant: 3,
+    safeCollRatio: 2,
     maxSell: '10000000',
     name: 'Wrapped Ether',
     icon: SvgImageSimple(ethSvg),
@@ -115,6 +117,7 @@ export const tokens = asMap('symbol', [
     precision: 18,
     digits: 2,
     digitsInstant: 2,
+    safeCollRatio: undefined,
     maxSell: '10000000',
     name: 'Dai',
     icon: SvgImageSimple(daiSvg),
@@ -134,71 +137,71 @@ export const tokens = asMap('symbol', [
   //   iconCircle: SvgImageSimple(mkrSvg),
   //   iconColor: SvgImageSimple(mkrInverseSvg),
   // },
-  {
-    symbol: 'DGD',
-    precision: 9,
-    digits: 5,
-    safeCollRatio: 1.5,
-    maxSell: '1000000000000000',
-    name: 'DigixDAO',
-    icon: SvgImageSimple(dgdSvg),
-    // iconInverse: SvgImageSimple(dgdInverseSvg),
-    iconCircle: SvgImageSimple(dgdCircleSvg),
-    iconColor: SvgImageSimple(dgdColorSvg),
-    assetKind: AssetKind.marginable,
-  },
-  {
-    symbol: 'REP',
-    precision: 18,
-    digits: 5,
-    safeCollRatio: 1.5,
-    maxSell: '1000000000000000',
-    name: 'Augur',
-    icon: SvgImageSimple(repSvg),
-    // iconInverse: SvgImageSimple(repInverseSvg),
-    iconCircle: SvgImageSimple(repCircleSvg),
-    iconColor: SvgImageSimple(repColorSvg),
-    assetKind: AssetKind.marginable,
-  },
-  {
-    symbol: 'OMG',
-    precision: 18,
-    digits: 5,
-    safeCollRatio: 1.5,
-    maxSell: '1000000000000000',
-    name: 'OmniseGO',
-    icon: SvgImageSimple(omgSvg),
-    // iconInverse: SvgImageSimple(mkrInverseSvg),
-    iconCircle: SvgImageSimple(omgCircleSvg),
-    iconColor: SvgImageSimple(omgColorSvg),
-    assetKind: AssetKind.marginable,
-  },
-  {
-    symbol: 'ZRX',
-    precision: 18,
-    digits: 5,
-    safeCollRatio: 1.5,
-    maxSell: '1000000000000000',
-    name: '0x',
-    icon: SvgImageSimple(zrxSvg),
-    // iconInverse: SvgImageSimple(mkrInverseSvg),
-    iconCircle: SvgImageSimple(zrxCircleSvg),
-    iconColor: SvgImageSimple(zrxColorSvg),
-    assetKind: AssetKind.marginable,
-  },
-  {
-    symbol: 'BAT',
-    precision: 18,
-    digits: 5,
-    safeCollRatio: 1.5,
-    maxSell: '1000000000000000',
-    name: 'Basic Attention Token',
-    icon: SvgImageSimple(batSvg),
-    // iconInverse: SvgImageSimple(batInverseSvg),
-    iconCircle: SvgImageSimple(batCircleSvg),
-    iconColor: SvgImageSimple(batColorSvg),
-    assetKind: AssetKind.marginable,
-  },
+  // {
+  //   symbol: 'DGD',
+  //   precision: 9,
+  //   digits: 5,
+  //   safeCollRatio: 1.5,
+  //   maxSell: '1000000000000000',
+  //   name: 'DigixDAO',
+  //   icon: SvgImageSimple(dgdSvg),
+  //   // iconInverse: SvgImageSimple(dgdInverseSvg),
+  //   iconCircle: SvgImageSimple(dgdCircleSvg),
+  //   iconColor: SvgImageSimple(dgdColorSvg),
+  //   assetKind: AssetKind.marginable,
+  // },
+  // {
+  //   symbol: 'REP',
+  //   precision: 18,
+  //   digits: 5,
+  //   safeCollRatio: 1.5,
+  //   maxSell: '1000000000000000',
+  //   name: 'Augur',
+  //   icon: SvgImageSimple(repSvg),
+  //   // iconInverse: SvgImageSimple(repInverseSvg),
+  //   iconCircle: SvgImageSimple(repCircleSvg),
+  //   iconColor: SvgImageSimple(repColorSvg),
+  //   assetKind: AssetKind.marginable,
+  // },
+  // {
+  //   symbol: 'OMG',
+  //   precision: 18,
+  //   digits: 5,
+  //   safeCollRatio: 1.5,
+  //   maxSell: '1000000000000000',
+  //   name: 'OmniseGO',
+  //   icon: SvgImageSimple(omgSvg),
+  //   // iconInverse: SvgImageSimple(mkrInverseSvg),
+  //   iconCircle: SvgImageSimple(omgCircleSvg),
+  //   iconColor: SvgImageSimple(omgColorSvg),
+  //   assetKind: AssetKind.marginable,
+  // },
+  // {
+  //   symbol: 'ZRX',
+  //   precision: 18,
+  //   digits: 5,
+  //   safeCollRatio: 1.5,
+  //   maxSell: '1000000000000000',
+  //   name: '0x',
+  //   icon: SvgImageSimple(zrxSvg),
+  //   // iconInverse: SvgImageSimple(mkrInverseSvg),
+  //   iconCircle: SvgImageSimple(zrxCircleSvg),
+  //   iconColor: SvgImageSimple(zrxColorSvg),
+  //   assetKind: AssetKind.marginable,
+  // },
+  // {
+  //   symbol: 'BAT',
+  //   precision: 18,
+  //   digits: 5,
+  //   safeCollRatio: 1.5,
+  //   maxSell: '1000000000000000',
+  //   name: 'Basic Attention Token',
+  //   icon: SvgImageSimple(batSvg),
+  //   // iconInverse: SvgImageSimple(batInverseSvg),
+  //   iconCircle: SvgImageSimple(batCircleSvg),
+  //   iconColor: SvgImageSimple(batColorSvg),
+  //   assetKind: AssetKind.marginable,
+  // },
   // {
   //   symbol: 'USDC',
   //   precision: 6,
@@ -272,7 +275,8 @@ const protoMain = {
   joins: {} as { [key: string]: string },
   mcd: {} as { [key: string]: any },
   prices: {} as { [key: string]: string },
-  spots: {} as { [key: string]: string },
+  spot: '',
+  jug: '',
   ilks: {} as { [key: string]: string },
   get otcSupportMethods() {
     return load(otcSupport, '0x9b3f075b12513afe56ca2ed838613b7395f57839');
@@ -336,7 +340,8 @@ const kovan: NetworkConfig = {
   joins: {} as { [key: string]: string },
   mcd: {} as { [key: string]: any },
   prices: {} as { [key: string]: string },
-  spots: {} as { [key: string]: string },
+  spot: '',
+  jug: '',
   ilks: {} as { [key: string]: string },
   get otcSupportMethods() {
     return load(otcSupport, '0x303f2bf24d98325479932881657f45567b3e47a8');
@@ -379,63 +384,58 @@ const localnet: NetworkConfig =   {
   safeConfirmations: 0,
   avgBlocksPerDay: 1000,
   startingBlock: 1,
-  get otc() { return load(otc, '0x4e5f802405b29ffae4ae2a7da1d9ceeb53904d55'); },
+  get otc() { return load(otc, '0x4e5F802405B29fFae4AE2a7dA1d9cEEB53904D55'); },
   get saiTub() { return { address: '', contract: null }; },
   get tokens() {
     return asMap('token', [
-      loadToken('WETH', eth, '0x28085cefa9103d3a55fb5afccf07ed2038d31cd4'),
-      loadToken('DAI', erc20, '0xff500c51399a282f4563f2713ffcbe9e53cfb6fa'),
-      loadToken('MKR', erc20, '0xe80C262f63df9376d2ce9eDd373832EDc9FCA46E'),
-      loadToken('DGD', erc20, '0xe80C262f63df9376d2ce9eDd373832EDc9FCA46E'),
-      loadToken('REP', erc20, '0xe80C262f63df9376d2ce9eDd373832EDc9FCA46E'),
-      loadToken('OMG', erc20, '0xe80C262f63df9376d2ce9eDd373832EDc9FCA46E'),
-      loadToken('ZRX', erc20, '0xe80C262f63df9376d2ce9eDd373832EDc9FCA46E'),
-      loadToken('BAT', erc20, '0xe80C262f63df9376d2ce9eDd373832EDc9FCA46E'),
+      loadToken('WETH', eth, '0x28085CEfA9103d3a55Fb5AfCcf07eD2038d31cD4'),
+      loadToken('DAI', erc20, '0xff500C51399A282f4563F2713fFCBe9e53cfb6Fa'),
+      // loadToken('MKR', erc20, '0xe80C262f63df9376d2ce9eDd373832EDc9FCA46E'),
+      // loadToken('DGD', erc20, '0xe80C262f63df9376d2ce9eDd373832EDc9FCA46E'),
+      // loadToken('REP', erc20, '0xe80C262f63df9376d2ce9eDd373832EDc9FCA46E'),
+      // loadToken('OMG', erc20, '0xe80C262f63df9376d2ce9eDd373832EDc9FCA46E'),
+      // loadToken('ZRX', erc20, '0xe80C262f63df9376d2ce9eDd373832EDc9FCA46E'),
+      // loadToken('BAT', erc20, '0xe80C262f63df9376d2ce9eDd373832EDc9FCA46E'),
     ]);
   },
   joins: {
-    'W-ETH': '0x69Fb93fA1b0ccF17c22595b842b4853d0E771044',
-    DGX: '0xAB86eD30878D601C9f6aCDEa7BE964fE2b89273e',
-    DAI: '0xEa6e1B7eb531662722405F0701D53cBC93657969',
+    WETH: '0x8bCd17b8199f9Ab8e7E1f266FEED8a0E4ed2D93c',
+    DAI: '0x587635C60eC92BA1AE5db1e1DD7839FED9d23700',
   } as { [key: string]: string },
   mcd: {
-    pit: '0xbe84036C11964E9743F056f4e780a99d302a77c4',
     vat: '0x174805bDBE92fBb6eC91D602BE4DDaF7F7E51EA6',
     get cat() {
-      return load(mcdCat, '0x2cd136C8Ab2cB7150E8D6C42DF15271998E5E7EB');
+      return load(mcdCat, '0x1B2c0f9b05f2ec9f77DeA9CdaEB04c396da5027B');
     },
     flip: {
-      get 'W-ETH'() {
-        return load(mcdFlipper, '0x7BBABcB1dA23089f6b20502D78B02C5A5cf39861');
+      get WETH() {
+        return load(mcdFlipper, '0xda2C4bb255970325df981ac1a9cF3615317081A7');
       },
-      get DGX() {
-        return load(mcdFlipper, '0x30ed29c4C4bA30ECCcDd0c0D153E454BFCb0A4Dd');
-      },
+      // get DGX() {
+      //   return load(mcdFlipper, '0x65A96F05Fe2b2255Cf827695D7Ea0D8F5eB0d285');
+      // },
     }
   } as { [key: string]: any },
   prices: {
-    'W-ETH': '0xE2ecCEEc6dEB8c7AFF9787E46FEA7078b89ab159',
-    DGX: '0x83fc6817095c1e5915C2F1286d712B8d8017e81d',
+    WETH: '0x3546C7E3753C0e1D15878EC1C6dC65573864Dab7',
   } as { [key: string]: string },
-  spots: {
-    'W-ETH': '0x0CecaCD65b29f12817E240B188aB61142AA43834',
-    DGX: '0x2C76B1D8B62e4E3c124863020D955f2E2773006D',
-  } as { [key: string]: string },
+  spot: '0xd1f15AF11A1Fe0CE4B2f60779605BE6b9F3dFD22',
+  jug: '0xE6b8A544B8dbDEB9A69a63603E669cd00f751ad1',
   ilks: {
-    'W-ETH': web3.fromAscii('ETH'),
-    DGX: web3.fromAscii('DGX'),
+    WETH: web3.fromAscii('ETH'),
+    // DGX: web3.fromAscii('DGX'),
   } as { [key: string]: string },
   get otcSupportMethods() {
-    return load(otcSupport, '0x5de139dbbfd47dd1d2cd906348fd1887135b2804');
+    return load(otcSupport, '0x5de139DbBFd47dd1D2cD906348Fd1887135B2804');
   },
   get instantProxyRegistry() {
-    return load(proxyRegistry, '0xA155A86E426CB136334F6B6B6DD2633B73fc0183');
+    return load(proxyRegistry, '0x82bD1c3119dB58Ed8Ec0dD4cC2B16800b7edb362');
   },
   get instantProxyFactory() {
-    return load(dsProxyFactory, '0xCb84a6D7A6b708a5a32c33a03F435D3e10C3d7Ad');
+    return load(dsProxyFactory, '0xDDd2bf368CDa8a6C6eECF6730482fB5E60709fc0');
   },
   get instantProxyCreationAndExecute() {
-    return load(proxyCreationAndExecute, '0x99C7F543e310A4143D22ce840a348b4EcDbBA8Ce');
+    return load(proxyCreationAndExecute, '0x05CD7900FF72DEBcB77453Ef608941E37B1E161E');
   },
   get marginProxyRegistry() {
     return load(proxyRegistry, '0x3A32AA343fBA264411EF47B00B195165738E4E6b');

@@ -14,6 +14,9 @@ export class CDPRiskManagements
     if (this.props.state !== MTAccountState.setup) {
       return null;
     }
+
+    console.log('his.props.marginableAssets', this.props.marginableAssets);
+
     return (
       <React.Fragment>
         { this.props.marginableAssets

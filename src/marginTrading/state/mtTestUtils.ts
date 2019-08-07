@@ -35,8 +35,8 @@ export function getMarginableCore(props?: Partial<MarginableAssetCore>): Margina
     referencePrice: new BigNumber(0),
     minCollRatio: new BigNumber(0),
     safeCollRatio: new BigNumber(0),
-    rate: new BigNumber(0),
     history: [],
+    fee: new BigNumber(1),
     ...props
   };
 }

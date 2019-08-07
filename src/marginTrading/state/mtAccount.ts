@@ -74,8 +74,8 @@ export interface MarginableAssetCore extends Core {
   referencePrice: BigNumber;
   minCollRatio: BigNumber;
   safeCollRatio: BigNumber;
-  rate?: BigNumber;
   history: MarginableAssetHistory;
+  fee: BigNumber;
 }
 
 export interface MarginableAsset extends MarginableAssetCore {

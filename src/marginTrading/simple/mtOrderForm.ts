@@ -1,7 +1,7 @@
 import { BigNumber } from 'bignumber.js';
 import { curry } from 'lodash';
-import { merge, Observable, of, Subject } from 'rxjs';
-import { first, map, scan, switchMap, takeUntil, tap } from 'rxjs/operators';
+import { merge, Observable, of, Subject, throwError } from 'rxjs';
+import { catchError, first, map, scan, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { DustLimits } from '../../balances-nomt/balances';
 import { Calls, Calls$, ReadCalls$ } from '../../blockchain/calls/calls';
 import { AssetKind, tokens } from '../../blockchain/config';
@@ -305,7 +305,7 @@ function addUserConfig(state: MTSimpleFormState) {
 
 function addApr(state: MTSimpleFormState) {
   const baseAsset = findMarginableAsset(state.baseToken, state.mta);
-  // todo: calculate APR from rate
+  // todo: calculate APR from fee
 
   if (!state.mta
     || state.mta.state !== MTAccountState.setup
@@ -317,7 +317,7 @@ function addApr(state: MTSimpleFormState) {
 
   return {
     ...state,
-    apr: baseAsset.rate
+    apr: baseAsset.fee
   };
 }
 
@@ -687,6 +687,14 @@ function prepareSubmit(
 }
 
 function isReadyToProceed(state: MTSimpleFormState): MTSimpleFormState {
+
+  console.log(
+    'readyToProceed',
+    state.messages.length,
+    state.plan,
+    state.gasEstimationStatus
+  );
+
   if (
     state.messages.length === 0 &&
     state.plan && !isImpossible(state.plan) && state.plan.length !== 0 &&
@@ -755,10 +763,17 @@ export function createMTSimpleOrderForm$(
     map(validate),
     map(addPreTradeInfo),
     map(addPlan),
-    tap(state => state.plan && console.log('state:', JSON.stringify(state.plan))),
-    tap(state => console.log('messages:', JSON.stringify(state.messages))),
+    tap(state => state.plan && console.log('plan:', JSON.stringify(state.plan))),
+    tap(state =>
+        state.messages.length > 0 &&
+        console.log('messages:', JSON.stringify(state.messages))
+    ),
     switchMap(curry(estimateGasPrice)(calls$, readCalls$)),
     scan(freezeGasEstimation),
-    map(isReadyToProceed)
+    map(isReadyToProceed),
+    // catchError(e => {
+    //   console.log(e);
+    //   return throwError(e);
+    // })
   );
 }
