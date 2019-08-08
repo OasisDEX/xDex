@@ -2,16 +2,14 @@
 
 import { BigNumber } from 'bignumber.js';
 import { isEqual } from 'lodash';
-import { bindNodeCallback, combineLatest, forkJoin, Observable, of, throwError } from 'rxjs';
+import { bindNodeCallback, combineLatest, forkJoin, Observable, of } from 'rxjs';
 import {
-  catchError,
   concatAll,
   distinctUntilChanged,
   first,
   last,
   map,
-  scan, shareReplay,
-  switchMap
+  scan, switchMap
 } from 'rxjs/operators';
 
 import { AssetKind, NetworkConfig, tokens } from '../blockchain/config';

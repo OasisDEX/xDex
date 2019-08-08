@@ -24,7 +24,7 @@ const cash: CashAssetCore = {
 };
 
 const wethEmpty: MarginableAssetCore = getMarginableCore({
-  name: 'W-ETH',
+  name: 'WETH',
   referencePrice: new BigNumber('200'),
   minCollRatio: new BigNumber('1.5'),
   safeCollRatio: new BigNumber('2'),

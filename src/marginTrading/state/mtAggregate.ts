@@ -1,7 +1,6 @@
 import { BigNumber } from 'bignumber.js';
-import {bindNodeCallback, combineLatest, Observable, of, throwError} from 'rxjs/index';
+import { bindNodeCallback, combineLatest, Observable, of } from 'rxjs';
 import {
-  catchError,
   distinctUntilChanged,
   exhaustMap,
   map,
@@ -157,19 +156,20 @@ export function createMta$(
     .map(t => t.symbol);
 
   // let's fetch history temporarily in a separate pipeline
-  const mtHistory$: Observable<MTHistoryEvent[] | undefined> = combineLatest(context$, proxyAddress$, onEveryBlock$).pipe(
-    exhaustMap(([context, proxyAddress]) => {
-      if (!proxyAddress) {
-        return of(undefined);
-      }
-      const proxy = web3.eth.contract(dsProxy as any).at(proxyAddress);
-      return combineLatest(
-        marginableNames.map(token => createMTHistory2(proxy, context, token))
-      );
-    }),
-    startWith(marginableNames.map(() => [] as MTHistoryEvent[])),
-    shareReplay(1)
-  );
+  const mtHistory$: Observable<MTHistoryEvent[] | undefined> =
+    combineLatest(context$, proxyAddress$, onEveryBlock$).pipe(
+      exhaustMap(([context, proxyAddress]) => {
+        if (!proxyAddress) {
+          return of(undefined);
+        }
+        const proxy = web3.eth.contract(dsProxy as any).at(proxyAddress);
+        return combineLatest(
+          marginableNames.map(token => createMTHistory2(proxy, context, token))
+        );
+      }),
+      startWith(marginableNames.map(() => [] as MTHistoryEvent[])),
+      shareReplay(1)
+    );
 
   return combineLatest(mtAccount$, mtHistory$).pipe(
     map(([mta, histories]) =>

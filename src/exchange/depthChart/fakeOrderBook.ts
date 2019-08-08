@@ -1,5 +1,5 @@
 import { BigNumber } from 'bignumber.js';
-import { of } from 'rxjs/index';
+import { of } from 'rxjs';
 import { Offer, OfferType, Orderbook } from '../orderbook/orderbook';
 import { currentTradingPair$, loadablifyPlusTradingPair } from '../tradingPair/tradingPair';
 

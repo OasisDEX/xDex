@@ -1,38 +1,12 @@
 import { fromPairs, memoize, zip } from 'lodash';
 
 import { TradingPair } from '../exchange/tradingPair/tradingPair';
-import batCircleSvg from '../icons/coins/bat-circle.svg';
-import batColorSvg from '../icons/coins/bat-color.svg';
-import batSvg from '../icons/coins/bat.svg';
 import daiCircleSvg from '../icons/coins/dai-circle.svg';
 import daiColorSvg from '../icons/coins/dai-color.svg';
-// import daiInverseSvg from '../icons/coins/dai-inverse.svg';
 import daiSvg from '../icons/coins/dai.svg';
-import dgdCircleSvg from '../icons/coins/dgd-circle.svg';
-import dgdColorSvg from '../icons/coins/dgd-color.svg';
-import dgdSvg from '../icons/coins/dgd.svg';
 import ethCircleSvg from '../icons/coins/eth-circle.svg';
-// import ethColorInverseSvg from '../icons/coins/eth-color-inverse.svg';
 import ethColorSvg from '../icons/coins/eth-color.svg';
-// import ethInverseSvg from '../icons/coins/eth-inverse.svg';
 import ethSvg from '../icons/coins/eth.svg';
-// import mkrInverseSvg from '../icons/coins/mkr-inverse.svg';
-// import mkrSvg from '../icons/coins/mkr.svg';
-import omgCircleSvg from '../icons/coins/omg-circle.svg';
-import omgColorSvg from '../icons/coins/omg-color.svg';
-import omgSvg from '../icons/coins/omg.svg';
-import repCircleSvg from '../icons/coins/rep-circle.svg';
-import repColorSvg from '../icons/coins/rep-color.svg';
-import repSvg from '../icons/coins/rep.svg';
-// import usdcCircleSvg from '../icons/coins/usdc-circle.svg';
-// import usdcColorSvg from '../icons/coins/usdc-color.svg';
-// import usdcSvg from '../icons/coins/usdc.svg';
-// import wbtcCircleSvg from '../icons/coins/wbtc-circle.svg';
-// import wbtcColorSvg from '../icons/coins/wbtc-color.svg';
-// import wbtcSvg from '../icons/coins/wbtc.svg';
-import zrxCircleSvg from '../icons/coins/zrx-circle.svg';
-import zrxColorSvg from '../icons/coins/zrx-color.svg';
-import zrxSvg from '../icons/coins/zrx.svg';
 
 import { SvgImageSimple } from '../utils/icons/utils';
 import * as eth from './abi/ds-eth-token.abi.json';

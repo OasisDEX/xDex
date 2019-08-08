@@ -1,14 +1,16 @@
 import { BigNumber } from 'bignumber.js';
 import { combineLatest, Observable, of } from 'rxjs';
 import { takeWhileInclusive } from 'rxjs-take-while-inclusive';
-import {catchError, distinctUntilChanged, first, flatMap, map, startWith, switchMap} from 'rxjs/operators';
+import {
+  catchError, distinctUntilChanged, first, flatMap, map, startWith, switchMap
+} from 'rxjs/operators';
 import { Balances, DustLimits } from '../balances-nomt/balances';
 import { Calls, Calls$, ReadCalls, ReadCalls$ } from '../blockchain/calls/calls';
 import { TxState, TxStatus } from '../blockchain/transactions';
 import { User } from '../blockchain/user';
 import { amountFromWei } from '../blockchain/utils';
 import { Offer, OfferType, Orderbook } from '../exchange/orderbook/orderbook';
-import {MTAccount, MTAccountState} from '../marginTrading/state/mtAccount';
+import { MTAccount, MTAccountState } from '../marginTrading/state/mtAccount';
 
 export enum FormStage {
   idle = 'idle',
@@ -49,7 +51,7 @@ export enum FormChangeKind {
 
 export enum OfferMatchType {
   limitOrder = 'limitOrder',
-  immediateOrCancel = 'immediateOrCancel',
+  // immediateOrCancel = 'immediateOrCancel',
   fillOrKill = 'fillOrKill',
   direct = 'direct',
 }
@@ -401,7 +403,7 @@ export function doGasEstimation<S extends HasGasEstimation>(
       );
     }),
     catchError((error) => {
-      console.warn('Error while estimating gas:', error);
+      console.warn('Error while estimating gas:', error.toString());
       return of({
         ...(state as object),
         error,

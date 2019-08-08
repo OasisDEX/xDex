@@ -4,10 +4,10 @@ import { bindNodeCallback, combineLatest, Observable, of, zip } from 'rxjs';
 import { expand, map, reduce, retryWhen, scan, shareReplay, switchMap } from 'rxjs/operators';
 import { NetworkConfig } from '../../blockchain/config';
 import { amountFromWei } from '../../blockchain/utils';
-import {MTFormState} from '../../marginTrading/order/mtOrderForm';
-import {MTSimpleFormState} from '../../marginTrading/simple/mtOrderForm';
-import {PickOfferChange} from '../../utils/form';
-import {LoadableWithTradingPair} from '../../utils/loadable';
+import { MTFormState } from '../../marginTrading/order/mtOrderForm';
+import { MTSimpleFormState } from '../../marginTrading/simple/mtOrderForm';
+import { PickOfferChange } from '../../utils/form';
+import { LoadableWithTradingPair } from '../../utils/loadable';
 import { TradingPair } from '../tradingPair/tradingPair';
 
 export enum OfferType {

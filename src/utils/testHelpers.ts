@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs/index';
+import { Observable } from 'rxjs';
 
 export function unpack<T>(o: Observable<T>): any {
 

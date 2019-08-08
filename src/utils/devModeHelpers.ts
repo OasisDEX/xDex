@@ -1,6 +1,6 @@
 import { BigNumber } from 'bignumber.js';
 import { identity, Observable, of } from 'rxjs';
-import {first, flatMap, map} from 'rxjs/operators';
+import { first, flatMap } from 'rxjs/operators';
 import { Calls$ } from '../blockchain/calls/calls';
 import { NetworkConfig } from '../blockchain/config';
 import { web3 } from '../blockchain/web3';

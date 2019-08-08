@@ -16,7 +16,6 @@ import {
   switchMap,
 } from 'rxjs/operators';
 
-import * as dsValue from './abi/ds-value.abi.json';
 import { NetworkConfig, networks } from './config';
 import { amountFromWei } from './utils';
 import { web3 } from './web3';

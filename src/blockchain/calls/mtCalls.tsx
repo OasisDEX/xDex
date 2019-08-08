@@ -4,11 +4,10 @@ import * as React from 'react';
 import { Operation } from '../../marginTrading/state/mtAccount';
 import { Money } from '../../utils/formatters/Formatters';
 import { Currency } from '../../utils/text/Text';
-import {NetworkConfig, tokens} from '../config';
+import { NetworkConfig } from '../config';
 import { MIN_ALLOWANCE } from '../network';
 import { amountFromWei, amountToWei } from '../utils';
 import { web3 } from '../web3';
-import { ApproveProxyData } from './approveCalls';
 import { DEFAULT_GAS } from './callsHelpers';
 import { TxMetaKind } from './txMeta';
 
@@ -143,7 +142,7 @@ function argsOfPerformOperations(
     ]
   ));
 
-  const args = [
+  return [
     context.marginEngine.address,
     context.marginEngine.contract.performOperations.getData(
       kinds, names, tokens, adapters, amounts,
@@ -154,7 +153,6 @@ function argsOfPerformOperations(
       ],
     )
   ];
-  return args;
 }
 
 interface PerformPlanData {

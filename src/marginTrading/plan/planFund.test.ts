@@ -82,7 +82,7 @@ describe('plan fund', () => {
     //
     //   expect(plan).toEqual([
     //     { amount: new BigNumber('250'), kind: OperationKind.fund, name: 'DAI' },
-    //     { ddai: new BigNumber('-200'), kind: OperationKind.adjust, name: 'W-ETH' },
+    //     { ddai: new BigNumber('-200'), kind: OperationKind.adjust, name: 'WETH' },
     //     { ddai: new BigNumber('-50'), kind: OperationKind.adjust, name: 'DGX' }
     //   ]);
     // });
@@ -92,11 +92,11 @@ describe('plan fund', () => {
 
       const mta: MTAccountSetup = getMTAccount({ marginableAssets: [wethEmpty] });
 
-      const plan = planFund(mta, 'W-ETH', new BigNumber('25'), []);
+      const plan = planFund(mta, 'WETH', new BigNumber('25'), []);
 
       expect(plan).toEqual([
-        { amount: new BigNumber('25'), kind: OperationKind.fund, name: 'W-ETH' },
-        { dgem: new BigNumber('25'), kind: OperationKind.adjust, name: 'W-ETH' }
+        { amount: new BigNumber('25'), kind: OperationKind.fund, name: 'WETH' },
+        { dgem: new BigNumber('25'), kind: OperationKind.adjust, name: 'WETH' }
       ]);
     });
   });

@@ -17,10 +17,10 @@ describe('prepareBuyAllocationRequest', () => {
     const request = prepareBuyAllocationRequest(
       mta,
       sellOffers,
-      'W-ETH',
+      'WETH',
       new BigNumber('100'),
       new BigNumber('200'),
-      findMarginableAsset('W-ETH', mta)!.purchasingPower);
+      findMarginableAsset('WETH', mta)!.purchasingPower);
     expect(request).toEqual(impossible('purchasing power too low'));
   });
 
@@ -28,10 +28,10 @@ describe('prepareBuyAllocationRequest', () => {
     const request = prepareBuyAllocationRequest(
       mtaOnlyWeth,
       [sell1, sell2],
-      'W-ETH',
+      'WETH',
       new BigNumber('300'),
       new BigNumber('200'),
-      findMarginableAsset('W-ETH', mtaOnlyWeth)!.purchasingPower
+      findMarginableAsset('WETH', mtaOnlyWeth)!.purchasingPower
       );
     expect(request).toEqual(impossible('orderbook too shallow'));
   });
@@ -41,10 +41,10 @@ describe('prepareBuyAllocationRequest', () => {
     const request: AllocationRequestPilot | Impossible = prepareBuyAllocationRequest(
       mta,
       sellOffers,
-      'W-ETH',
+      'WETH',
       new BigNumber('100'),
       new BigNumber('200'),
-      findMarginableAsset('W-ETH', mtaOnlyWeth)!.purchasingPower
+      findMarginableAsset('WETH', mtaOnlyWeth)!.purchasingPower
     );
 
     if (isImpossible(request)) {
@@ -57,7 +57,7 @@ describe('prepareBuyAllocationRequest', () => {
     expect(request.targetDaiBalance).toEqual(new BigNumber('10000'));
 
     const wethInfo = request.assets[0];
-    expect(wethInfo.name).toEqual('W-ETH');
+    expect(wethInfo.name).toEqual('WETH');
     expect(wethInfo.balance).toEqual(new BigNumber('100'));
 
     const dgxInfo = request.assets[1];
@@ -70,12 +70,12 @@ describe('prepareBuyAllocationRequest', () => {
 describe('planBuy', () => {
   test.only('just buy', () => {
     const plan = planBuy(
-      'W-ETH',
+      'WETH',
       new BigNumber('10'),
       new BigNumber('2000'),
       [
         {
-          name:'W-ETH',
+          name:'WETH',
           balance: new BigNumber('10'),
           debt: zero,
           maxDebt: new BigNumber('1000'),
@@ -112,7 +112,7 @@ describe('planBuy', () => {
           kind: OperationKind.buyRecursively,
           amount: new BigNumber('10'),
           maxTotal: new BigNumber('2000'),
-          name: 'W-ETH'
+          name: 'WETH'
         }
       ]
     );

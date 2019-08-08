@@ -305,7 +305,7 @@ function estimateGasPrice(
 ): Observable<MTAllocateState> {
   return doGasEstimation(
     theCalls$, readCalls$, theState,
-    (calls: Calls, readCalls: ReadCalls, state: MTAllocateState) => {
+    (calls: Calls, _readCalls: ReadCalls, state: MTAllocateState) => {
       if (!state.plan || isImpossible(state.plan) || state.progress) {
         return undefined;
       }
