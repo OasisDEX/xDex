@@ -692,7 +692,8 @@ function isReadyToProceed(state: MTSimpleFormState): MTSimpleFormState {
     'readyToProceed',
     state.messages.length,
     state.plan,
-    state.gasEstimationStatus
+    state.gasEstimationStatus,
+    state.messages
   );
 
   if (
