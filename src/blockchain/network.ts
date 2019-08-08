@@ -121,22 +121,24 @@ export const etherPriceUsd$: Observable<BigNumber> = concat(
   context$.pipe(
     filter(context => !!context),
     first(),
-    filter(context => context.saiTub.address !== ''),
-    switchMap(context => bindNodeCallback(context.saiTub.contract.pip)()),
-    map((address: string) => web3.eth.contract(dsValue as any).at(address)),
-    switchMap(pip => bindNodeCallback(pip.read)()),
+    switchMap(context => bindNodeCallback(context.ethPip.contract.read)()),
     map((value: string) => new BigNumber(value).div(new BigNumber(10).pow(18))),
   ),
   onEveryBlock$.pipe(
-    switchMap(() => ajax({
-      url: 'https://api.coinmarketcap.com/v1/ticker/ethereum/',
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-      },
-    })),
+    switchMap(() => {
+      console.log('ajax');
+      return ajax({
+        url: 'https://api.coinmarketcap.com/v1/ticker/ethereum/',
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+        },
+      });
+    }),
     map(({ response }) => new BigNumber(response[0].price_usd)),
-    retryWhen(errors => errors.pipe(delayWhen(() => onEveryBlock$.pipe(skip(1))))),
+    retryWhen(errors => errors.pipe(
+      delayWhen(() => onEveryBlock$.pipe(skip(1)))
+    )),
   ),
 ).pipe(
   distinctUntilChanged((x: BigNumber, y: BigNumber) => x.eq(y)),

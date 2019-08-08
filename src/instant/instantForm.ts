@@ -41,7 +41,6 @@ import {
 import { calculateTradePrice, getQuote } from '../utils/price';
 import { getSlippageLimit } from '../utils/slippage';
 import { switchSpread } from '../utils/switchSpread';
-import { pluginDevModeHelpers } from './instantDevModeHelpers';
 import {
   estimateTradePayWithERC20,
   estimateTradePayWithETH,
@@ -866,8 +865,6 @@ export function createFormController$(
     context$: Observable<NetworkConfig>
   }
 ): Observable<InstantFormState> {
-
-  pluginDevModeHelpers(calls$);
 
   const manualChange$ = new Subject<ManualChange>();
 

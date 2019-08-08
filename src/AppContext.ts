@@ -96,6 +96,7 @@ import {
 import { TradingPairView } from './exchange/tradingPair/TradingPairView';
 import { createFooter$, TheFooter } from './footer/Footer';
 import { Network } from './header/Network';
+import { pluginDevModeHelpers } from './utils/instantDevModeHelpers';
 import { createFormController$ as createInstantFormController$ } from './instant/instantForm';
 import { InstantViewPanel } from './instant/InstantViewPanel';
 import { createMTAllocateForm$ } from './marginTrading/allocate/mtOrderAllocateDebtForm';
@@ -124,6 +125,8 @@ import { ModalOpenerProps, withModal } from './utils/modal';
 import { createWrapUnwrapForm$ } from './wrapUnwrap/wrapUnwrapForm';
 
 export function setupAppContext() {
+
+  pluginDevModeHelpers(context$, calls$, initializedAccount$, onEveryBlock$);
 
   const balances$ = balancesNoMT.createBalances$(context$, initializedAccount$, onEveryBlock$).pipe(
     shareReplay(1)

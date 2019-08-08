@@ -2,7 +2,7 @@ import { combineLatest, merge, Observable, of, Subject } from 'rxjs/index';
 import {
   filter, first, map, scan,
   shareReplay, startWith,
-  switchMap, takeUntil
+  switchMap, takeUntil, tap
 } from 'rxjs/operators';
 
 import {
@@ -61,7 +61,11 @@ function prepareSetup(calls$: Calls$,
     const progress$: Observable<MTSetupProgressState> = calls$.pipe(
       first(),
       switchMap(calls =>
-        combineLatest(calls.setupMTProxyEstimateGas({}), gasPrice$, etherPriceUSD$).pipe(
+        combineLatest(
+          calls.setupMTProxyEstimateGas({}).pipe(tap(() => console.log('A1'))),
+          gasPrice$.pipe(tap(() => console.log('B1'))),
+          etherPriceUSD$.pipe(tap(() => console.log('C1'))),
+        ).pipe(
           first(),
           switchMap(([gasEstimation, gasPrice, etherPriceUSD]) => {
             const gasEstimationEth = amountFromWei(
@@ -134,5 +138,6 @@ export function createMTSetupForm$(
     toMTAccountStateChange(mta$),
   ).pipe(
     scan(applyChange, initialState),
+    tap(state => console.log('state', state.mtaState, state.stage))
   );
 }
