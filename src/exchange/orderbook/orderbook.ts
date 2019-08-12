@@ -4,7 +4,6 @@ import { bindNodeCallback, combineLatest, Observable, of, zip } from 'rxjs';
 import { expand, map, reduce, retryWhen, scan, shareReplay, switchMap } from 'rxjs/operators';
 import { NetworkConfig } from '../../blockchain/config';
 import { amountFromWei } from '../../blockchain/utils';
-import { MTFormState } from '../../marginTrading/order/mtOrderForm';
 import { MTSimpleFormState } from '../../marginTrading/simple/mtOrderForm';
 import { PickOfferChange } from '../../utils/form';
 import { LoadableWithTradingPair } from '../../utils/loadable';
@@ -187,42 +186,22 @@ function hideDusts(dusts: Offer[][]): Offer[][] {
   return dusts.map(offers => offers.filter((o) => !isDustOrder(o)));
 }
 
-export function createPickableOrderBookFromMTFormState$(
-  currentOrderBook$: Observable<LoadableWithTradingPair<Orderbook>>,
-  account$: Observable<string | undefined>,
-  currentOfferForm$: Observable<MTFormState>,
-) {
-  return combineLatest(
-    currentOrderBook$,
-    account$,
-    currentOfferForm$,
-  ).pipe(
-    map(([currentOrderBook, account, { change }]) => ({
-      ...currentOrderBook,
-      account,
-      change: (ch: PickOfferChange) => {
-        console.log('ho change yet!', change, ch);
-      },
-    }))
-  );
-}
-
-export function createPickableOrderBookFromMTSimpleFormState$(
-  currentOrderBook$: Observable<LoadableWithTradingPair<Orderbook>>,
-  account$: Observable<string | undefined>,
-  currentOfferForm$: Observable<MTSimpleFormState>,
-) {
-  return combineLatest(
-    currentOrderBook$,
-    account$,
-    currentOfferForm$,
-  ).pipe(
-    map(([currentOrderBook, account, { change }]) => ({
-      ...currentOrderBook,
-      account,
-      change: (ch: PickOfferChange) => {
-        console.log('ho change yet!', change, ch);
-      },
-    }))
-  );
-}
+// export function createPickableOrderBookFromMTSimpleFormState$(
+//   currentOrderBook$: Observable<LoadableWithTradingPair<Orderbook>>,
+//   account$: Observable<string | undefined>,
+//   currentOfferForm$: Observable<MTSimpleFormState>,
+// ) {
+//   return combineLatest(
+//     currentOrderBook$,
+//     account$,
+//     currentOfferForm$,
+//   ).pipe(
+//     map(([currentOrderBook, account, { change }]) => ({
+//       ...currentOrderBook,
+//       account,
+//       change: (ch: PickOfferChange) => {
+//         console.log('ho change yet!', change, ch);
+//       },
+//     }))
+//   );
+// }

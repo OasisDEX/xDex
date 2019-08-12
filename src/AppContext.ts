@@ -103,9 +103,7 @@ import {
   CreateMTAllocateForm$Props
 } from './marginTrading/allocate/mtOrderAllocateDebtFormView';
 import { ReallocateView } from './marginTrading/allocate/ReallocateView';
-import { createMTOrderForm$, MTFormState } from './marginTrading/order/mtOrderForm';
 
-import { MTOrderPanel, MTOrderPanelInner } from './marginTrading/order/mtOrderPanel';
 import { MTMyPositionPanel } from './marginTrading/positions/MTMyPositionPanel';
 import { createMTSetupForm$, MTSetupFormState } from './marginTrading/setup/mtSetupForm';
 import { MTSetupButton } from './marginTrading/setup/mtSetupFormView';
@@ -208,13 +206,6 @@ export function setupAppContext() {
     memoizeTradingPair(curry(loadPriceDaysAgo)(1, context$, onEveryBlock$)),
     onEveryBlock$,
   );
-
-  const { MTOrderPanelRxTx, MTOrderPanelInnerRxTx, MTOrderbookPanelTxRx } =
-    mtOrderForm(mta$,
-                theCreateMTAllocateForm$,
-                currentOrderbook$,
-                // currentOrderBookWithTradingPair$
-    );
 
   const { MTSimpleOrderPanelRxTx, MTMyPositionPanelRxTx, MTSimpleOrderbookPanelTxRx } =
     mtSimpleOrderForm(mta$, currentOrderbook$);
@@ -387,86 +378,11 @@ export function setupAppContext() {
     MTSimpleOrderbookPanelTxRx,
     MTAccountDetailsRxTx,
     MTBalancesViewRxTx,
-    MTOrderbookPanelTxRx,
-    MTOrderPanelRxTx,
-    MTOrderPanelInnerRxTx,
     MTSetupButtonRxTx,
     MtSummaryViewRxTx,
     ReallocateViewRxTx,
     CDPRiskManagementsRxTx
   };
-}
-
-function mtOrderForm(
-  mta$: Observable<MTAccount>,
-  theCreateMTAllocateForm$: CreateMTAllocateForm$,
-  orderbook$: Observable<Orderbook>,
-  // _orderbookWithTradingPair$: Observable<LoadableWithTradingPair<Orderbook>>
-) {
-  const mtOrderForm$ = currentTradingPair$.pipe(
-    switchMap(tradingPair =>
-                createMTOrderForm$(
-                  tradingPair,
-                  gasPrice$,
-                  etherPriceUsd$,
-                  orderbook$,
-                  mta$,
-                  calls$,
-                  balancesMT.dustLimits$,
-                )
-    ),
-    shareReplay(1)
-  );
-
-  const mtOrderFormLoadable$ = currentTradingPair$.pipe(
-    switchMap(tradingPair =>
-                loadablifyLight(mtOrderForm$).pipe(
-                  map(mtOrderFormLoadablified => ({
-                    tradingPair,
-                    ...mtOrderFormLoadablified
-                  }))
-                )
-    )
-  );
-
-  const MTOrderPanelRxTx = connect(MTOrderPanel, currentTradingPair$);
-
-  const MTOrderPanelInnerRxTx = inject(
-    withModal<CreateMTAllocateForm$Props, ModalOpenerProps>(
-      connect<LoadableWithTradingPair<MTFormState>,
-        ModalOpenerProps & CreateMTAllocateForm$Props>(MTOrderPanelInner, mtOrderFormLoadable$)),
-    { createMTAllocateForm$: theCreateMTAllocateForm$ });
-
-  // const pickableOrderbook$
-  //   = createPickableOrderBookFromMTFormState$(orderbookWithTradingPair$, account$, mtOrderForm$);
-
-  const [kindChange, orderbookPanel$] = createOrderbookPanel$();
-
-  const orderbookForView$ = createOrderbookForView(
-    orderbook$,
-    of({ change: () => { return; } }),
-    kindChange,
-  );
-  const OrderbookViewTxRx = connect(OrderbookView, orderbookForView$);
-
-  const depthChartWithLoading$ = createDepthChartWithLoading$(
-    mtOrderForm$
-    .pipe(
-      map(f => ({ ...f, matchType: OfferMatchType.direct }))
-    ),
-    orderbook$,
-    kindChange
-  );
-
-  const DepthChartWithLoadingTxRx = connect(DepthChartWithLoading, depthChartWithLoading$);
-
-  const MTOrderbookPanelTxRx = connect(
-    inject<OrderbookPanelProps, SubViewsProps>(
-      OrderbookPanel,
-      { DepthChartWithLoadingTxRx, OrderbookViewTxRx }),
-    orderbookPanel$);
-
-  return { MTOrderPanelRxTx, MTOrderPanelInnerRxTx, MTOrderbookPanelTxRx };
 }
 
 function mtSimpleOrderForm(
