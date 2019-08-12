@@ -51,7 +51,7 @@ export enum FormChangeKind {
 
 export enum OfferMatchType {
   limitOrder = 'limitOrder',
-  // immediateOrCancel = 'immediateOrCancel',
+  immediateOrCancel = 'immediateOrCancel',
   fillOrKill = 'fillOrKill',
   direct = 'direct',
 }
