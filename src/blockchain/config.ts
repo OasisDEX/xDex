@@ -399,7 +399,7 @@ const localnet: NetworkConfig =   {
     ]);
   },
   joins: {
-    WETH: '0x8bCd17b8199f9Ab8e7E1f266FEED8a0E4ed2D93c',
+    WETH: '0x74319036dBF0eBCBC024B37D43c6F5CCE1A2b6Cc',
     DAI: '0x587635C60eC92BA1AE5db1e1DD7839FED9d23700',
   } as { [key: string]: string },
   mcd: {

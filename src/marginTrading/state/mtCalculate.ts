@@ -105,11 +105,16 @@ export function calculateMarginable(
   );
   const availableBalance = BigNumber.max(zero, ma.balance.minus(lockedBalance));
 
+  console.log('ma.debt', ma.debt.toString());
+  console.log('balanceInCash', balanceInCash.toString());
   const currentCollRatio = ma.debt.gt(0) ? balanceInCash.dividedBy(ma.debt) : undefined;
   const maxSafeLeverage = one.div(one.minus(one.div(ma.safeCollRatio)));
   const maxDebt = balanceInCash.div(ma.safeCollRatio);
   const availableDebt = BigNumber.max(zero, maxDebt.minus(ma.debt));
 
+  console.log('liq price calc - min coll ratio', ma.minCollRatio);
+  console.log('liq price calc - debt', ma.debt);
+  console.log('liq price calc - balance', ma.balance);
   const liquidationPrice = ma.minCollRatio.times(ma.debt).div(ma.balance);
 
   const purchasingPower = totalAvailableCash.times(maxSafeLeverage);
@@ -126,6 +131,7 @@ export function calculateMarginable(
 
   const liquidationInProgress = biteLastIndex >= 0 && biteLastIndex > dentLastIndex;
 
+  const leverage = ma.balance.times(ma.referencePrice).div(ma.debt);
   // const realPurchasingPower = realPurchasingPowerMarginable(
   //   ma.safeCollRatio,
   //   ma.referencePrice,
@@ -144,6 +150,7 @@ export function calculateMarginable(
     lonelyPurchasingPower,
     maxSafeLeverage,
     liquidationPrice,
+    leverage,
     lockedBalance,
     availableBalance,
     safe,

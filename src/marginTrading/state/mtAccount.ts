@@ -88,7 +88,7 @@ export interface MarginableAsset extends MarginableAssetCore {
   // maxDebtForOther: BigNumber; // max possible debt for other assets
   maxDebt: BigNumber; // max possible targetDebt for this asset
   liquidationPrice: BigNumber;
-  // leverage: BigNumber;
+  leverage: BigNumber;
   availableDebt: BigNumber;
   maxSafeLeverage: BigNumber;
   availableActions: UserActionKind[];

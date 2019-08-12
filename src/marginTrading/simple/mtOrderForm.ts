@@ -38,7 +38,7 @@ import { minusOne, zero } from '../../utils/zero';
 import { EditableDebt } from '../allocate/mtOrderAllocateDebtForm';
 import { prepareBuyAllocationRequest } from '../plan/planBuy';
 import { prepareSellAllocationRequest } from '../plan/planSell';
-import { getTotal } from '../plan/planUtils';
+import { getPriceImpact, getTotal } from '../plan/planUtils';
 import {
   findAsset,
   findMarginableAsset,
@@ -104,11 +104,14 @@ export interface MTSimpleFormState extends HasGasEstimation {
   plan?: Operation[] | Impossible;
   collRatio?: BigNumber;
   collRatioPost?: BigNumber;
+  leverage?: BigNumber;
+  leveragePost?: BigNumber;
   liquidationPrice?: BigNumber;
   liquidationPricePost?: BigNumber;
   apr?: BigNumber;
   isSafePost?: boolean;
   slippageLimit?: BigNumber;
+  priceImpact?: BigNumber;
   submit: (state: MTSimpleFormState) => void;
   change: (change: ManualChange) => void;
 }
@@ -192,9 +195,6 @@ function applyChange(state: MTSimpleFormState, change: MTFormChange): MTSimpleFo
         gasEstimationStatus: GasEstimationStatus.unset
       };
     case FormChangeKind.formResetChange:
-      if (state.progress) {
-        return state;
-      }
       return {
         ...state,
         price: undefined,
@@ -401,11 +401,36 @@ function addPriceTotal(state: MTSimpleFormState) {
   };
 }
 
+function addPriceImpact(state: MTSimpleFormState) {
+  if (!state.amount || !state.orderbook) {
+    return state;
+  }
+
+  const priceImpact = getPriceImpact(
+    state.amount,
+    state.kind === OfferType.buy ?
+      state.orderbook.sell :
+      state.orderbook.buy);
+
+  if (isImpossible(priceImpact)) {
+    return {
+      ...state,
+      priceImpact: undefined,
+    };
+  }
+
+  return {
+    ...state,
+    priceImpact
+  };
+}
+
 type PlanInfo = [
   Operation[] | Impossible,
   {
     collRatioPost?: BigNumber,
     liquidationPricePost?: BigNumber,
+    leveragePost?: BigNumber,
     isSafePost?: boolean
   }
 ];
@@ -431,7 +456,12 @@ function getBuyPlan(
   if (isImpossible(request)) {
     return [
       request,
-      { collRatioPost: undefined, liquidationPricePost: undefined, isSafePost: undefined }
+      {
+        collRatioPost: undefined,
+        liquidationPricePost: undefined,
+        leveragePost: undefined,
+        isSafePost: undefined
+      }
     ];
   }
 
@@ -460,13 +490,14 @@ function getBuyPlan(
   const collRatioPost = postTradeAsset.currentCollRatio;
   const liquidationPricePost = postTradeAsset.liquidationPrice;
   const isSafePost = postTradeAsset.safe;
+  const leveragePost = postTradeAsset.leverage;
 
   return [
     request.createPlan([{
       ...request.assets.find(ai => ai.name === baseToken),
       delta
     } as Required<EditableDebt>]),
-    { collRatioPost, liquidationPricePost, isSafePost }
+    { collRatioPost, liquidationPricePost, isSafePost, leveragePost }
   ];
 }
 
@@ -490,7 +521,12 @@ function getSellPlan(
   if (isImpossible(request)) {
     return [
       request,
-      { collRatioPost: undefined, liquidationPricePost: undefined, isSafePost: undefined }
+      {
+        collRatioPost: undefined,
+        liquidationPricePost: undefined,
+        leveragePost: undefined,
+        isSafePost: undefined
+      }
     ];
   }
 
@@ -498,9 +534,6 @@ function getSellPlan(
     request.assets.find(ai => ai.name === baseToken) as MarginableAsset;
 
   const delta = BigNumber.min(asset.debt, total).times(minusOne);
-
-  console.log('balance', asset.balance.toString());
-  console.log('delta', delta.toString());
 
   const postTradeAsset = calculateMarginable(
     {
@@ -513,14 +546,14 @@ function getSellPlan(
   const collRatioPost = postTradeAsset.currentCollRatio;
   const liquidationPricePost = postTradeAsset.liquidationPrice;
   const isSafePost = postTradeAsset.safe;
+  const leveragePost = postTradeAsset.leverage;
 
-  // console.log('request.assets', JSON.stringify(request.assets[0]));
   return [
     request.createPlan([{
       ...request.assets.find(ai => ai.name === baseToken),
       delta
     } as Required<EditableDebt>]),
-    { collRatioPost, liquidationPricePost, isSafePost }
+    { collRatioPost, liquidationPricePost, leveragePost, isSafePost }
   ];
 }
 
@@ -710,10 +743,15 @@ function addPreTradeInfo(state: MTSimpleFormState): MTSimpleFormState {
 
   const collRatio = ma && ma.currentCollRatio;
   const liquidationPrice = ma && ma.liquidationPrice;
+
+  const leverage = ma && ma.balance
+      .times(ma.referencePrice)
+      .div(ma.debt);
   return {
     ...state,
     collRatio,
-    liquidationPrice
+    liquidationPrice,
+    leverage
   };
 }
 
@@ -760,17 +798,19 @@ export function createMTSimpleOrderForm$(
     map(addPurchasingPower),
     map(addApr),
     map(addPriceTotal),
+    map(addPriceImpact),
     map(validate),
     map(addPreTradeInfo),
     map(addPlan),
+    switchMap(curry(estimateGasPrice)(calls$, readCalls$)),
+    scan(freezeGasEstimation),
+    map(isReadyToProceed),
     tap(state => state.plan && console.log('plan:', JSON.stringify(state.plan))),
     tap(state =>
         state.messages.length > 0 &&
         console.log('messages:', JSON.stringify(state.messages))
     ),
-    switchMap(curry(estimateGasPrice)(calls$, readCalls$)),
-    scan(freezeGasEstimation),
-    map(isReadyToProceed),
+    tap(state => console.log('progress', state.progress))
     // catchError(e => {
     //   console.log(e);
     //   return throwError(e);

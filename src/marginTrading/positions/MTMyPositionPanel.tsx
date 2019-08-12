@@ -6,10 +6,10 @@ import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator'
 import { PanelBody, PanelHeader } from '../../utils/panel/Panel';
 import { MTSimpleFormState } from '../simple/mtOrderForm';
 import { findMarginableAsset, MTAccountState } from '../state/mtAccount';
+import { MTMyPositionView } from './MTMyPositionView';
 
 export class MTMyPositionPanel
-  extends React.Component<
-    LoadableWithTradingPair<MTSimpleFormState>>
+  extends React.Component<LoadableWithTradingPair<MTSimpleFormState>>
 {
   public render() {
     if (this.props.tradingPair.quote !== 'DAI') {
@@ -38,6 +38,7 @@ export class MTMyPositionPanel
             My Position
           </PanelHeader>
           <PanelBody>
+            {ma && <MTMyPositionView {...ma}/>}
             {ma && <CDPHistoryView {...ma}/>}
           </PanelBody>
         </div>

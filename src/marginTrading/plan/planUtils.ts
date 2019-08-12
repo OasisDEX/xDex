@@ -31,6 +31,41 @@ export function getTotal(amount: BigNumber, orders: Offer[]): Impossible | BigNu
   return total;
 }
 
+export function getPriceImpact(amount: BigNumber, orders: Offer[]):
+  Impossible | BigNumber {
+
+  let total = zero;
+  let amountLeft = amount;
+  let priceImpact = zero;
+
+  let firstOffer;
+  let lastOffer;
+  for (const offer of orders) {
+    if (!firstOffer) {
+      firstOffer = offer;
+    }
+    lastOffer = offer;
+    const done = BigNumber.min(amountLeft, offer.baseAmount);
+    const paid = done.times(offer.price);
+
+    amountLeft = amountLeft.minus(done);
+    total = total.plus(paid);
+
+    if (amountLeft.isEqualTo(zero)) {
+      break;
+    }
+  }
+  if (firstOffer !== undefined && lastOffer !== undefined) {
+    priceImpact = lastOffer.price.minus(firstOffer.price).div(firstOffer.price);
+  }
+
+  if (amountLeft.gt(zero)) {
+    return impossible('orderbook too shallow');
+  }
+
+  return priceImpact;
+}
+
 export function eat(
   cash: BigNumber, offers: Offer[]
 ): [BigNumber, BigNumber, Offer[]] {

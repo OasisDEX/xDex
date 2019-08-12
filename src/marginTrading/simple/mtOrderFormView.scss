@@ -69,15 +69,14 @@
   flex-grow: 2;
   flex-shrink: 0;
   padding: 10px 16px;
-  color: $grey-light-mid;
-  border: 0;
+  //color: $grey-light-mid;
 }
 
 .input {
   flex-basis: 186px;
   flex-grow: 4;
   width: 186px;
-  text-align: left;
+  text-align: right;
 }
 
 .inputCurrencyAddon {
