@@ -6,8 +6,9 @@ import { LoadableWithTradingPair } from '../../utils/loadable';
 import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
 import { ModalOpenerProps } from '../../utils/modal';
 import { PanelHeader } from '../../utils/panel/Panel';
+import { CreateMTAllocateForm$Props } from '../allocate/mtOrderAllocateDebtFormView';
 import { MTFormState } from './mtOrderForm';
-import { CreateMTAllocateForm$Props, MtOrderFormView } from './mtOrderFormView';
+import { MtOrderFormView } from './mtOrderFormView';
 
 export class MTOrderPanel extends React.Component<TradingPair>
 {

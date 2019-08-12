@@ -13,7 +13,6 @@ import { ErrorMessage } from '../../utils/forms/ErrorMessage';
 import { InputGroup, InputGroupAddon } from '../../utils/forms/InputGroup';
 import { Currency, Muted } from '../../utils/text/Text';
 
-import { Observable } from 'rxjs';
 import { OfferType } from '../../exchange/orderbook/orderbook';
 import { connect } from '../../utils/connect';
 import { FormChangeKind } from '../../utils/form';
@@ -23,22 +22,14 @@ import { BorderBox, Hr } from '../../utils/layout/LayoutHelpers';
 import { Loadable, loadablifyLight } from '../../utils/loadable';
 import { ModalOpenerProps, ModalProps } from '../../utils/modal';
 import { PanelBody, PanelHeader } from '../../utils/panel/Panel';
-import { AllocationRequestPilot } from '../allocate/allocate';
 import { MTAllocateState } from '../allocate/mtOrderAllocateDebtForm';
 import {
-  BuyAllocateFormView, OrderAllocateFormProps,
+  BuyAllocateFormView, CreateMTAllocateForm$Props, OrderAllocateFormProps,
   SellAllocateFormView
 } from '../allocate/mtOrderAllocateDebtFormView';
 import { findAsset, MTAccountState } from '../state/mtAccount';
 import { FormStage, Message, MessageKind, MTFormState } from './mtOrderForm';
 import * as styles from './mtOrderFormView.scss';
-
-export type CreateMTAllocateForm$ =
-  (proxy: any, request: AllocationRequestPilot) => Observable<MTAllocateState>;
-
-export interface CreateMTAllocateForm$Props {
-  createMTAllocateForm$: CreateMTAllocateForm$;
-}
 
 export class MtOrderFormView
   extends React.Component<MTFormState & ModalOpenerProps & CreateMTAllocateForm$Props>

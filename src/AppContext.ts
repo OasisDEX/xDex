@@ -98,11 +98,13 @@ import { Network } from './header/Network';
 import { createFormController$ as createInstantFormController$ } from './instant/instantForm';
 import { InstantViewPanel } from './instant/InstantViewPanel';
 import { createMTAllocateForm$ } from './marginTrading/allocate/mtOrderAllocateDebtForm';
+import {
+  CreateMTAllocateForm$,
+  CreateMTAllocateForm$Props
+} from './marginTrading/allocate/mtOrderAllocateDebtFormView';
 import { ReallocateView } from './marginTrading/allocate/ReallocateView';
 import { createMTOrderForm$, MTFormState } from './marginTrading/order/mtOrderForm';
-import {
-  CreateMTAllocateForm$, CreateMTAllocateForm$Props
-} from './marginTrading/order/mtOrderFormView';
+
 import { MTOrderPanel, MTOrderPanelInner } from './marginTrading/order/mtOrderPanel';
 import { MTMyPositionPanel } from './marginTrading/positions/MTMyPositionPanel';
 import { createMTSetupForm$, MTSetupFormState } from './marginTrading/setup/mtSetupForm';

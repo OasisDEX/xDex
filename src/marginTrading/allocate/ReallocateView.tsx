@@ -3,11 +3,11 @@ import { connect } from '../../utils/connect';
 import { Button } from '../../utils/forms/Buttons';
 import { Loadable, loadablifyLight } from '../../utils/loadable';
 import { ModalOpenerProps, ModalProps } from '../../utils/modal';
-import { CreateMTAllocateForm$Props } from '../order/mtOrderFormView';
+
 import { prepareReAllocationRequest } from '../plan/planRebalance';
 import { MTAccount, MTAccountState } from '../state/mtAccount';
 import { MTAllocateState } from './mtOrderAllocateDebtForm';
-import { ReallocateFormView } from './mtOrderAllocateDebtFormView';
+import { CreateMTAllocateForm$Props, ReallocateFormView } from './mtOrderAllocateDebtFormView';
 
 export class ReallocateView extends React.Component<
   Loadable<MTAccount> &

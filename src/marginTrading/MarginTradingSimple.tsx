@@ -89,8 +89,8 @@ export class MarginTradingSimple extends React.Component<MarginTradingProps> {
             )}
           />
           <Redirect push={true}
-                    from={'/margin-trading-simple'}
-                    to={`/margin-trading-simple/${tp.base}/${tp.quote}`} />
+                    from={'/leverage'}
+                    to={`/leverage/${tp.base}/${tp.quote}`} />
         </Switch>
       </div>
     );
