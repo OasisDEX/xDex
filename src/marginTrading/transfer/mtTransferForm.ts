@@ -143,7 +143,7 @@ function updatePlan(state: MTTransferFormState): MTTransferFormState {
 function estimateGasPrice(
   calls$: Calls$, readCalls$: ReadCalls$, state: MTTransferFormState
 ): Observable<MTTransferFormState> {
-  return doGasEstimation(calls$, readCalls$, state, (calls: Calls, readCalls: ReadCalls) => {
+  return doGasEstimation(calls$, readCalls$, state, (calls: Calls, _readCalls: ReadCalls) => {
     if (
       state.mta === undefined ||
       state.mta.state === MTAccountState.notSetup) {

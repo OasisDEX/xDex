@@ -22,7 +22,7 @@ const defaultBalances = {
   DAI: new BigNumber(0),
   MKR: new BigNumber(0),
   DGX: new BigNumber(0),
-  'W-ETH': new BigNumber(0),
+  WETH: new BigNumber(0),
 } as Balances;
 
 interface TokenAssertion {
@@ -202,11 +202,11 @@ test('balances with DAI and empty mta', () => {
   }]);
 });
 
-test('balances with DAI and MKR and empty mta', () => {
+test('balances with DAI and WETH and empty mta', () => {
   const balance = {
     ...defaultBalances,
     DAI: new BigNumber(2),
-    MKR: new BigNumber(5),
+    WETH: new BigNumber(5),
   } as Balances;
   const cb = combineBalances(new BigNumber(0), balance, defaultMta);
 
@@ -216,7 +216,7 @@ test('balances with DAI and MKR and empty mta', () => {
     marginBalance: new BigNumber(0),
     mtAssetValueInDAI: new BigNumber(0),
   }, {
-    name: 'MKR',
+    name: 'WETH',
     walletBalance: new BigNumber(5),
     marginBalance: new BigNumber(0),
     mtAssetValueInDAI: new BigNumber(0),
@@ -241,11 +241,11 @@ test('balances with empty balances and mta with DAI cash', () => {
 });
 
 // ---------------- nonempty balances and mta -------------------
-test('balances with DAI and MKR and mta with DAI cash', () => {
+test('balances with DAI and WETH and mta with DAI cash', () => {
   const balance = {
     ...defaultBalances,
     DAI: new BigNumber(2),
-    MKR: new BigNumber(5),
+    WETH: new BigNumber(5),
   } as Balances;
   const mta = getMTAccount({
     cash: getCashCore({
@@ -260,23 +260,23 @@ test('balances with DAI and MKR and mta with DAI cash', () => {
     marginBalance: new BigNumber(4),
     mtAssetValueInDAI: new BigNumber(4),
   }, {
-    name: 'MKR',
+    name: 'WETH',
     walletBalance: new BigNumber(5),
     marginBalance: new BigNumber(0),
     mtAssetValueInDAI: new BigNumber(0),
   }]);
 });
 
-test('balances with DAI and MKR and mta with MKR marginable asset', () => {
+test('balances with DAI and WETH and mta with WETH marginable asset', () => {
   const balance = {
     ...defaultBalances,
     DAI: new BigNumber(2),
-    MKR: new BigNumber(5),
+    WETH: new BigNumber(5),
   } as Balances;
   const mta = getMTAccount({
     cash: defaultCash,
     marginableAssets: [getMarginableCore({
-      name: 'MKR',
+      name: 'WETH',
       balance: new BigNumber(3),
       referencePrice: new BigNumber(10),
     })]
@@ -288,18 +288,18 @@ test('balances with DAI and MKR and mta with MKR marginable asset', () => {
     marginBalance: new BigNumber(0),
     mtAssetValueInDAI: new BigNumber(0),
   }, {
-    name: 'MKR',
+    name: 'WETH',
     walletBalance: new BigNumber(5),
     marginBalance: new BigNumber(3),
     mtAssetValueInDAI: new BigNumber(30),
   }]);
 });
 
-test('balances with DAI and MKR and mta with DAI cash and ETH marginable asset', () => {
+test('balances with DAI and WETH and mta with DAI cash and ETH marginable asset', () => {
   const balance = {
     ...defaultBalances,
     DAI: new BigNumber(2),
-    MKR: new BigNumber(5),
+    WETH: new BigNumber(5),
   } as Balances;
   const mta = getMTAccount({
     cash: getCashCore({
@@ -326,17 +326,17 @@ test('balances with DAI and MKR and mta with DAI cash and ETH marginable asset',
     marginBalance: new BigNumber(4),
     mtAssetValueInDAI: new BigNumber(4),
   }, {
-    name: 'MKR',
+    name: 'WETH',
     walletBalance: new BigNumber(5),
     marginBalance: new BigNumber(0),
     mtAssetValueInDAI: new BigNumber(0),
   }]);
 });
 
-test('balances with MKR and ETH and mta with DAI cash', () => {
+test('balances with WETH and ETH and mta with DAI cash', () => {
   const balance = {
     ...defaultBalances,
-    MKR: new BigNumber(12),
+    WETH: new BigNumber(12),
   } as Balances;
   const mta = getMTAccount({
     cash: getCashCore({
@@ -351,7 +351,7 @@ test('balances with MKR and ETH and mta with DAI cash', () => {
     marginBalance: new BigNumber(71),
     mtAssetValueInDAI: new BigNumber(71),
   }, {
-    name: 'MKR',
+    name: 'WETH',
     walletBalance: new BigNumber(12),
     marginBalance: new BigNumber(0),
     mtAssetValueInDAI: new BigNumber(0),

@@ -34,7 +34,7 @@ describe('prepareSellAllocationRequest', () => {
     const request = prepareSellAllocationRequest(
       mta,
       sellOffers,
-      'W-ETH',
+      'WETH',
       new BigNumber('120'),
       new BigNumber('200'));
     expect(request).toEqual(impossible('balance too small'));
@@ -48,7 +48,7 @@ describe('prepareSellAllocationRequest', () => {
     const request = prepareSellAllocationRequest(
       mta,
       sellOffers,
-      'W-ETH',
+      'WETH',
       new BigNumber('100'),
       new BigNumber('20000'));
     expect(request).toEqual(impossible('price too high'));
@@ -64,7 +64,7 @@ describe('prepareSellAllocationRequest', () => {
     const request = prepareSellAllocationRequest(
       mta,
       sellOffers,
-      'W-ETH',
+      'WETH',
       new BigNumber('100'),
       new BigNumber('200'));
     expect(request).toEqual(impossible('debt at max possible value'));
@@ -74,11 +74,11 @@ describe('prepareSellAllocationRequest', () => {
 describe('planSell', () => {
   test('no debt, sell all', () => {
     const plan = planSell(
-      'W-ETH',
+      'WETH',
       new BigNumber('10'),
       new BigNumber('2000'),
       [{
-        name: 'W-ETH',
+        name: 'WETH',
         balance: zero,
         debt: zero,
         maxDebt: zero,
@@ -94,17 +94,17 @@ describe('planSell', () => {
       amount: new BigNumber('10'),
       kind: 'sellLev',
       maxTotal: new BigNumber('2000'),
-      name: 'W-ETH'
+      name: 'WETH'
     }]);
   });
 
   test('max debt, sell all', () => {
     const plan = planSell(
-      'W-ETH',
+      'WETH',
       new BigNumber('10'),
       new BigNumber('2000'),
       [{
-        name: 'W-ETH',
+        name: 'WETH',
         balance: zero,
         debt: new BigNumber('1000'),
         maxDebt: zero,
@@ -120,17 +120,17 @@ describe('planSell', () => {
       amount: new BigNumber('10'),
       kind: 'sellLev',
       maxTotal: new BigNumber('2000'),
-      name: 'W-ETH'
+      name: 'WETH'
     }]);
   });
 
   test('debt, sell', () => {
     const plan = planSell(
-      'W-ETH',
+      'WETH',
       new BigNumber('1'),
       new BigNumber('200'),
       [{
-        name: 'W-ETH',
+        name: 'WETH',
         balance: new BigNumber('9'),
         debt: new BigNumber('1000'),
         targetDebt: new BigNumber('800'),
@@ -147,7 +147,7 @@ describe('planSell', () => {
         amount: new BigNumber('1'),
         kind: 'sellLev',
         maxTotal: new BigNumber('200'),
-        name: 'W-ETH'
+        name: 'WETH'
       },
     ]);
   });
@@ -155,11 +155,11 @@ describe('planSell', () => {
   test('debt, sell, keep cash, repay necessary debt', () => {
 
     const plan = planSell(
-      'W-ETH',
+      'WETH',
       new BigNumber('1'),
       new BigNumber('200'),
       [{
-        name: 'W-ETH',
+        name: 'WETH',
         balance: new BigNumber('9'),
         debt: new BigNumber('1000'),
         maxDebt: new BigNumber('900'),
@@ -177,24 +177,24 @@ describe('planSell', () => {
         amount: new BigNumber('1'),
         kind: 'sellLev',
         maxTotal: new BigNumber('200'),
-        name: 'W-ETH'
+        name: 'WETH'
       },
       {
         ddai: new BigNumber('100'),
         kind: OperationKind.adjust,
-        name: 'W-ETH'
+        name: 'WETH'
       }
     ]);
   });
 
   test('repay all debt, surplus leave as cash', () => {
     const plan = planSell(
-      'W-ETH',
+      'WETH',
       new BigNumber('2'),
       new BigNumber('400'),
       [
         {
-          name:'W-ETH',
+          name:'WETH',
           balance: new BigNumber('8'),
           debt: new BigNumber('300'),
           maxDebt: new BigNumber('800'),
@@ -213,12 +213,12 @@ describe('planSell', () => {
         amount: new BigNumber('2'),
         kind: 'sellLev',
         maxTotal: new BigNumber('400'),
-        name: 'W-ETH',
+        name: 'WETH',
       },
     ]);
   });
 
-  test('sell non marginable', () => {
+  test.skip('sell non marginable', () => {
     const plan = planSell(
       'MKR',
       new BigNumber('10'),

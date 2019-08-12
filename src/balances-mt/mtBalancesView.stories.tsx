@@ -23,14 +23,14 @@ const stories = storiesOf('Balances/Balances', module)
 
 const wethMarginableFixture = {
   assetKind: AssetKind.marginable,
-  name: 'W-ETH',
+  name: 'WETH',
   balance: new BigNumber(0),
   walletBalance: new BigNumber(3),
   // availableActions: [{ kind: UserActionKind.fund }]
 }  as Partial<MarginableAssetCore>;
 
 const wethBalance = {
-  name: 'W-ETH',
+  name: 'WETH',
   walletBalance: new BigNumber(3),
   marginBalance: new BigNumber(0),
   mtAssetValueInDAI: new BigNumber(4.349804),
@@ -99,7 +99,7 @@ stories.add('Balances when mta not setup', () => {
 stories.add('Sample balances with allowances', () => {
   const wethMarginable = {
     ...wethBalance,
-    asset: findAsset('W-ETH', defaultMta),
+    asset: findAsset('WETH', defaultMta),
   };
   const daiMarginable = {
     ...daiBalance,
@@ -121,7 +121,7 @@ stories.add('Sample balances with allowances', () => {
 stories.add('Sample balances with ETH nonexisting in mta', () => {
   const wethMarginable = {
     ...wethBalance,
-    asset: findAsset('W-ETH', defaultMta),
+    asset: findAsset('WETH', defaultMta),
   };
   const daiMarginable = {
     ...daiBalance,
@@ -159,7 +159,7 @@ stories.add('Balances without allowance for DAI', () => {
   });
   const wethMarginable = {
     ...wethBalance,
-    asset: findAsset('W-ETH', mta),
+    asset: findAsset('WETH', mta),
   };
   const daiMarginable = {
     ...daiBalance,

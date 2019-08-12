@@ -1,7 +1,7 @@
 import { BigNumber } from 'bignumber.js';
 import { curry } from 'lodash';
-import { merge, Observable, of, Subject, throwError } from 'rxjs';
-import { catchError, first, map, scan, switchMap, takeUntil, tap } from 'rxjs/operators';
+import { merge, Observable, of, Subject } from 'rxjs';
+import { first, map, scan, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { DustLimits } from '../../balances-nomt/balances';
 import { Calls, Calls$, ReadCalls$ } from '../../blockchain/calls/calls';
 import { AssetKind, tokens } from '../../blockchain/config';
@@ -725,7 +725,8 @@ function isReadyToProceed(state: MTSimpleFormState): MTSimpleFormState {
     'readyToProceed',
     state.messages.length,
     state.plan,
-    state.gasEstimationStatus
+    state.gasEstimationStatus,
+    state.messages
   );
 
   if (

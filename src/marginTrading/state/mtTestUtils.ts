@@ -24,7 +24,7 @@ export function getCashCore(props?: Partial<CashAssetCore>): CashAssetCore {
 
 export function getMarginableCore(props?: Partial<MarginableAssetCore>): MarginableAssetCore {
   return {
-    name: 'W-ETH',
+    name: 'WETH',
     balance: new BigNumber(0),
     urnBalance: new BigNumber(0),
     walletBalance: new BigNumber(0),

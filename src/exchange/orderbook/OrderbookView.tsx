@@ -17,7 +17,6 @@ import { Scrollbar } from '../../utils/Scrollbar/Scrollbar';
 import { RowClickable, RowHighlighted, Table } from '../../utils/table/Table';
 import * as tableStyles from '../../utils/table/Table.scss';
 import { Currency, InfoLabel, Muted, SellBuySpan } from '../../utils/text/Text';
-import { OfferFormState } from '../offerMake/offerMake';
 import { OrderbookViewKind } from '../OrderbookPanel';
 import { TradingPair, tradingPairResolver } from '../tradingPair/tradingPair';
 import depthChartSvg from './depth-chart.svg';

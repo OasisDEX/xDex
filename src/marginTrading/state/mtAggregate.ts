@@ -1,7 +1,6 @@
 import { BigNumber } from 'bignumber.js';
-import {bindNodeCallback, combineLatest, Observable, of, throwError} from 'rxjs/index';
+import { bindNodeCallback, combineLatest, Observable, of } from 'rxjs';
 import {
-  catchError,
   distinctUntilChanged,
   exhaustMap,
   map,
@@ -101,7 +100,7 @@ const notSetup: MTAccountNotSetup = { state: MTAccountState.notSetup };
 
 const nullAddress = '0x0000000000000000000000000000000000000000';
 
-function createProxyAddress$(
+export function createProxyAddress$(
   context$: Observable<NetworkConfig>,
   initializedAccount$: Observable<string>,
   onEveryBlock$: Observable<number>
@@ -109,10 +108,8 @@ function createProxyAddress$(
   return combineLatest(context$, initializedAccount$, onEveryBlock$).pipe(
     exhaustMap(
       ([context, account]) => {
-        console.log('account', account);
         return bindNodeCallback(context.marginProxyRegistry.contract.proxies)(account).pipe(
           mergeMap((proxyAddress: string) => {
-            console.log('proxyAddress', proxyAddress);
             if (proxyAddress === nullAddress) {
               return of(undefined);
             }
@@ -125,10 +122,6 @@ function createProxyAddress$(
               )
             );
           }),
-          catchError(err => {
-            console.log('aaaaaaaaaaaaaaaaa', err);
-            return throwError(err);
-          })
         );
       }
     ),
@@ -163,19 +156,20 @@ export function createMta$(
     .map(t => t.symbol);
 
   // let's fetch history temporarily in a separate pipeline
-  const mtHistory$ = combineLatest(context$, proxyAddress$, onEveryBlock$).pipe(
-    exhaustMap(([context, proxyAddress]) => {
-      if (!proxyAddress) {
-        return of([]);
-      }
-      const proxy = web3.eth.contract(dsProxy as any).at(proxyAddress);
-      return combineLatest(
-        marginableNames.map(token => createMTHistory2(proxy, context, token))
-      );
-    }),
-    startWith(marginableNames.map(() => [] as MTHistoryEvent[])),
-    shareReplay(1)
-  );
+  const mtHistory$: Observable<MTHistoryEvent[] | undefined> =
+    combineLatest(context$, proxyAddress$, onEveryBlock$).pipe(
+      exhaustMap(([context, proxyAddress]) => {
+        if (!proxyAddress) {
+          return of(undefined);
+        }
+        const proxy = web3.eth.contract(dsProxy as any).at(proxyAddress);
+        return combineLatest(
+          marginableNames.map(token => createMTHistory2(proxy, context, token))
+        );
+      }),
+      startWith(marginableNames.map(() => [] as MTHistoryEvent[])),
+      shareReplay(1)
+    );
 
   return combineLatest(mtAccount$, mtHistory$).pipe(
     map(([mta, histories]) =>
@@ -185,7 +179,10 @@ export function createMta$(
           ...mta,
           marginableAssets: mta.marginableAssets.map(ma => ({
             ...ma,
-            history: histories[marginableNames.indexOf(ma.name)]
+            history: (histories ?
+              histories[marginableNames.indexOf(ma.name)]
+              :
+              []) as MTHistoryEvent[]
           }))
         }
     ),

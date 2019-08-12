@@ -26,14 +26,14 @@ export const cash: CashAssetCore = {
 };
 
 export const wethEmpty: MarginableAssetCore = getMarginableCore({
-  name: 'W-ETH',
+  name: 'WETH',
   referencePrice: new BigNumber('200'),
   minCollRatio: new BigNumber('1.5'),
   safeCollRatio: new BigNumber('2'),
 });
 
 export const weth100: MarginableAssetCore = getMarginableCore({
-  name: 'W-ETH',
+  name: 'WETH',
   referencePrice: new BigNumber('200'),
   minCollRatio: new BigNumber('1.5'),
   safeCollRatio: new BigNumber('2'),
@@ -68,7 +68,7 @@ export const mtaOnlyWeth: MTAccountSetup =
 export const sell1: Offer = {
   offerId: new BigNumber('1'),
   baseAmount: new BigNumber('100'),
-  baseToken: 'W-ETH',
+  baseToken: 'WETH',
   quoteAmount: new BigNumber('20000'),
   quoteToken: 'DAI',
   price: new BigNumber('200'),

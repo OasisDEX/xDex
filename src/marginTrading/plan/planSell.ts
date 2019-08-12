@@ -120,12 +120,12 @@ export function planSell(
   maxTotal: BigNumber,
   debts: Array<Required<EditableDebt>>
 ): Operation[] {
-  console.log(
-    'planSell',
-    amount.toString(),
-    maxTotal.toString(),
-    JSON.stringify(debts.map(d => ({ name: d.name, debt: d.debt, delta: d.delta }))),
-  );
+  // console.log(
+  //   'planSell',
+  //   amount.toString(),
+  //   maxTotal.toString(),
+  //   JSON.stringify(debts.map(d => ({ name: d.name, debt: d.debt, delta: d.delta }))),
+  // );
   return [
     {
       maxTotal,

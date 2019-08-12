@@ -1,4 +1,4 @@
-import { bindNodeCallback, combineLatest, Observable } from 'rxjs/index';
+import { bindNodeCallback, combineLatest, Observable } from 'rxjs';
 import { first, map, switchMap } from 'rxjs/internal/operators';
 import { NetworkConfig } from '../config';
 import { GasPrice$ } from '../network';

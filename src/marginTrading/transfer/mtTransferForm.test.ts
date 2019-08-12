@@ -1,5 +1,5 @@
 import { BigNumber } from 'bignumber.js';
-import { Observable, of } from 'rxjs/index';
+import { Observable, of } from 'rxjs';
 import { shareReplay } from 'rxjs/operators';
 
 import { setupFakeWeb3ForTesting } from '../../blockchain/web3';
@@ -38,9 +38,8 @@ const defParams = {
 
 const defaultBalances = {
   ETH: new BigNumber(3),
-  'W-ETH': new BigNumber(12),
+  WETH: new BigNumber(12),
   DAI: new BigNumber(100),
-  MKR: new BigNumber(0),
 };
 
 // @ts-ignore
@@ -64,13 +63,17 @@ function createForm(props?: {}): Observable<MTTransferFormState> {
     token: 'DAI',
     ...props,
   };
+
+  // calls.mtDrawEstimateGas : calls.mtFundEstimateGas;
+
   return createMTTransferForm$(
     params.mta,
     params.gasPrice,
     params.etherPriceUsd,
     params.balances,
     params.calls,
-    of(),
+    // @ts-ignore
+    of({}),
     params.kind as UserActionKind.fund | UserActionKind.draw,
     params.token
   ).pipe(
@@ -278,10 +281,10 @@ test.skip('proceed draw MKR', () => {
   expect(unpack(transferForm).progress).toEqual(ProgressStage.waitingForApproval);
 });
 
-test('validation -- to big amount for draw W-ETH', () => {
+test('validation -- to big amount for draw WETH', () => {
   const transferForm = createForm({
     kind: UserActionKind.draw,
-    token: 'W-ETH',
+    token: 'WETH',
   });
   const { change } = unpack(transferForm);
 

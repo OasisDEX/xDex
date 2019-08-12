@@ -46,11 +46,11 @@ describe('plan draw', () => {
 
       const plan = planDraw(
         mta,
-        'W-ETH',
+        'WETH',
         new BigNumber('10'),
         []);
 
-      expect(plan).toEqual(impossible('not enough of W-ETH'));
+      expect(plan).toEqual(impossible('not enough of WETH'));
     });
 
     test('not enough asset', () => {

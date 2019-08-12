@@ -1,42 +1,17 @@
 import { fromPairs, memoize, zip } from 'lodash';
 
 import { TradingPair } from '../exchange/tradingPair/tradingPair';
-import batCircleSvg from '../icons/coins/bat-circle.svg';
-import batColorSvg from '../icons/coins/bat-color.svg';
-import batSvg from '../icons/coins/bat.svg';
 import daiCircleSvg from '../icons/coins/dai-circle.svg';
 import daiColorSvg from '../icons/coins/dai-color.svg';
-// import daiInverseSvg from '../icons/coins/dai-inverse.svg';
 import daiSvg from '../icons/coins/dai.svg';
-import dgdCircleSvg from '../icons/coins/dgd-circle.svg';
-import dgdColorSvg from '../icons/coins/dgd-color.svg';
-import dgdSvg from '../icons/coins/dgd.svg';
 import ethCircleSvg from '../icons/coins/eth-circle.svg';
-// import ethColorInverseSvg from '../icons/coins/eth-color-inverse.svg';
 import ethColorSvg from '../icons/coins/eth-color.svg';
-// import ethInverseSvg from '../icons/coins/eth-inverse.svg';
 import ethSvg from '../icons/coins/eth.svg';
-// import mkrInverseSvg from '../icons/coins/mkr-inverse.svg';
-// import mkrSvg from '../icons/coins/mkr.svg';
-import omgCircleSvg from '../icons/coins/omg-circle.svg';
-import omgColorSvg from '../icons/coins/omg-color.svg';
-import omgSvg from '../icons/coins/omg.svg';
-import repCircleSvg from '../icons/coins/rep-circle.svg';
-import repColorSvg from '../icons/coins/rep-color.svg';
-import repSvg from '../icons/coins/rep.svg';
-// import usdcCircleSvg from '../icons/coins/usdc-circle.svg';
-// import usdcColorSvg from '../icons/coins/usdc-color.svg';
-// import usdcSvg from '../icons/coins/usdc.svg';
-// import wbtcCircleSvg from '../icons/coins/wbtc-circle.svg';
-// import wbtcColorSvg from '../icons/coins/wbtc-color.svg';
-// import wbtcSvg from '../icons/coins/wbtc.svg';
-import zrxCircleSvg from '../icons/coins/zrx-circle.svg';
-import zrxColorSvg from '../icons/coins/zrx-color.svg';
-import zrxSvg from '../icons/coins/zrx.svg';
 
 import { SvgImageSimple } from '../utils/icons/utils';
 import * as eth from './abi/ds-eth-token.abi.json';
 import * as dsProxyFactory from './abi/ds-proxy-factory.abi.json';
+import * as dsValue from './abi/ds-value.abi.json';
 import * as erc20 from './abi/erc20.abi.json';
 import * as marginEngine from './abi/margin-engine.abi.json';
 import * as otc from './abi/matching-market.abi.json';
@@ -45,7 +20,6 @@ import * as mcdFlipper from './abi/mcd-flipper.abi.json';
 import * as otcSupport from './abi/otc-support-methods.abi.json';
 import * as proxyCreationAndExecute from './abi/proxy-creation-and-execute.abi.json';
 import * as proxyRegistry from './abi/proxy-registry.abi.json';
-import * as saiTub from './abi/sai-tub.abi.json';
 import { web3 } from './web3';
 
 export const tradingPairs: TradingPair[] = [
@@ -259,7 +233,8 @@ const protoMain = {
   avgBlocksPerDay: 5760 * 1.05,
   startingBlock: 4751582,
   get otc() { return load(otc, '0x39755357759ce0d7f32dc8dc45414cca409ae24e'); },
-  get saiTub() { return load(saiTub, '0x448a5065aebb8e423f0896e6c5d525c040f59af3'); },
+  // get saiTub() { return load(saiTub, '0x448a5065aebb8e423f0896e6c5d525c040f59af3'); },
+  get ethPip() { return load(dsValue, '0x3546C7E3753C0e1D15878EC1C6dC65573864Dab7'); },
   get tokens() {
     return asMap('token', [
       loadToken('WETH', eth, '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'),
@@ -324,7 +299,8 @@ const kovan: NetworkConfig = {
   avgBlocksPerDay: 21600 * 0.55,
   startingBlock: 5216718,
   get otc() { return load(otc, '0x4a6bc4e803c62081ffebcc8d227b5a87a58f1f8f'); },
-  get saiTub() { return load(saiTub, '0xa71937147b55deb8a530c7229c442fd3f31b7db2'); },
+  // get saiTub() { return load(saiTub, '0xa71937147b55deb8a530c7229c442fd3f31b7db2'); },
+  get ethPip() { return load(dsValue, '0x3546C7E3753C0e1D15878EC1C6dC65573864Dab7'); },
   get tokens() {
     return asMap('token', [
       loadToken('WETH', eth, '0xd0a1e359811322d97991e03f863a0c30c2cf029c'),
@@ -385,7 +361,8 @@ const localnet: NetworkConfig =   {
   avgBlocksPerDay: 1000,
   startingBlock: 1,
   get otc() { return load(otc, '0x4e5F802405B29fFae4AE2a7dA1d9cEEB53904D55'); },
-  get saiTub() { return { address: '', contract: null }; },
+  // get saiTub() { return load(saiTub, '0x3546C7E3753C0e1D15878EC1C6dC65573864Dab7'); },
+  get ethPip() { return load(dsValue, '0x3546C7E3753C0e1D15878EC1C6dC65573864Dab7'); },
   get tokens() {
     return asMap('token', [
       loadToken('WETH', eth, '0x28085CEfA9103d3a55Fb5AfCcf07eD2038d31cD4'),

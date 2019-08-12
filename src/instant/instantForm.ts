@@ -15,7 +15,7 @@ import {
 } from 'rxjs/operators';
 
 import { Allowances, Balances, DustLimits } from '../balances-nomt/balances';
-import { Calls, calls$, Calls$, ReadCalls, ReadCalls$ } from '../blockchain/calls/calls';
+import { Calls, Calls$, ReadCalls, ReadCalls$ } from '../blockchain/calls/calls';
 import { eth2weth, weth2eth } from '../blockchain/calls/instant';
 import { NetworkConfig, tokens } from '../blockchain/config';
 import { isDone, TxStatus } from '../blockchain/transactions';
@@ -41,7 +41,6 @@ import {
 import { calculateTradePrice, getQuote } from '../utils/price';
 import { getSlippageLimit } from '../utils/slippage';
 import { switchSpread } from '../utils/switchSpread';
-import { pluginDevModeHelpers } from './instantDevModeHelpers';
 import {
   estimateTradePayWithERC20,
   estimateTradePayWithETH,
@@ -866,8 +865,6 @@ export function createFormController$(
     context$: Observable<NetworkConfig>
   }
 ): Observable<InstantFormState> {
-
-  pluginDevModeHelpers(calls$);
 
   const manualChange$ = new Subject<ManualChange>();
 

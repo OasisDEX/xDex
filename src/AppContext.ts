@@ -33,7 +33,6 @@ import {
 } from './blockchain/network';
 import { user$ } from './blockchain/user';
 import {
-  createPickableOrderBookFromMTFormState$,
   loadOrderbook$,
   Orderbook
 } from './exchange/orderbook/orderbook';
@@ -117,6 +116,7 @@ import { createTransactionNotifier$ } from './transactionNotifier/transactionNot
 import { TransactionNotifierView } from './transactionNotifier/TransactionNotifierView';
 import { Authorizable, authorizablify } from './utils/authorizable';
 import { connect } from './utils/connect';
+import { pluginDevModeHelpers } from './utils/devModeHelpers';
 import { OfferMatchType } from './utils/form';
 import { inject } from './utils/inject';
 import { Loadable, LoadableWithTradingPair, loadablifyLight, } from './utils/loadable';
@@ -124,6 +124,8 @@ import { ModalOpenerProps, withModal } from './utils/modal';
 import { createWrapUnwrapForm$ } from './wrapUnwrap/wrapUnwrapForm';
 
 export function setupAppContext() {
+
+  pluginDevModeHelpers(context$, calls$, initializedAccount$, onEveryBlock$);
 
   const balances$ = balancesNoMT.createBalances$(context$, initializedAccount$, onEveryBlock$).pipe(
     shareReplay(1)
@@ -194,10 +196,10 @@ export function setupAppContext() {
   const currentOrderbook$ = currentTradingPair$.pipe(
     switchMap(pair => loadOrderbook(pair))
   );
-  const currentOrderBookWithTradingPair$ = loadablifyPlusTradingPair(
-    currentTradingPair$,
-    loadOrderbook
-  );
+  // const currentOrderBookWithTradingPair$ = loadablifyPlusTradingPair(
+  //   currentTradingPair$,
+  //   loadOrderbook
+  // );
 
   const marketDetails$ = createMarketDetails$(
     memoizeTradingPair(curry(loadPriceDaysAgo)(0, context$, onEveryBlock$)),
@@ -209,7 +211,8 @@ export function setupAppContext() {
     mtOrderForm(mta$,
                 theCreateMTAllocateForm$,
                 currentOrderbook$,
-                currentOrderBookWithTradingPair$);
+                // currentOrderBookWithTradingPair$
+    );
 
   const { MTSimpleOrderPanelRxTx, MTMyPositionPanelRxTx, MTSimpleOrderbookPanelTxRx } =
     mtSimpleOrderForm(mta$, currentOrderbook$);
@@ -396,7 +399,7 @@ function mtOrderForm(
   mta$: Observable<MTAccount>,
   theCreateMTAllocateForm$: CreateMTAllocateForm$,
   orderbook$: Observable<Orderbook>,
-  orderbookWithTradingPair$: Observable<LoadableWithTradingPair<Orderbook>>
+  // _orderbookWithTradingPair$: Observable<LoadableWithTradingPair<Orderbook>>
 ) {
   const mtOrderForm$ = currentTradingPair$.pipe(
     switchMap(tradingPair =>
@@ -432,8 +435,8 @@ function mtOrderForm(
         ModalOpenerProps & CreateMTAllocateForm$Props>(MTOrderPanelInner, mtOrderFormLoadable$)),
     { createMTAllocateForm$: theCreateMTAllocateForm$ });
 
-  const pickableOrderbook$
-    = createPickableOrderBookFromMTFormState$(orderbookWithTradingPair$, account$, mtOrderForm$);
+  // const pickableOrderbook$
+  //   = createPickableOrderBookFromMTFormState$(orderbookWithTradingPair$, account$, mtOrderForm$);
 
   const [kindChange, orderbookPanel$] = createOrderbookPanel$();
 

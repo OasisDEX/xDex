@@ -11,7 +11,7 @@ const stories = storiesOf('Balances/CDP risk management', module);
 //
 // const wethEmpty = calculateMarginable(
 //   getMarginableCore({
-//     name: 'W-ETH',
+//     name: 'WETH',
 //     referencePrice: new BigNumber('200'),
 //     minCollRatio: new BigNumber('1.5'),
 //     safeCollRatio: new BigNumber('2'),
@@ -20,7 +20,7 @@ const stories = storiesOf('Balances/CDP risk management', module);
 // );
 
 const wethMarginableBase = {
-  name: 'W-ETH',
+  name: 'WETH',
   balance: new BigNumber(2000),
   walletBalance: new BigNumber(1000),
   allowance: true,
@@ -80,7 +80,7 @@ stories.add('Marginable weth below minimum', () => {
     ...wethMarginableBase,
     debt: new BigNumber(275000),
     history: [{
-      token: 'W-ETH',
+      token: 'WETH',
       kind: 'deal',
       timestamp: 1545297643,
       id: new BigNumber(3),

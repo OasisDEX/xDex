@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Observable } from 'rxjs/index';
+import { Observable } from 'rxjs';
 import { tokens } from '../blockchain/config';
 import { TxState } from '../blockchain/transactions';
 import { CreateMTAllocateForm$Props } from '../marginTrading/order/mtOrderFormView';

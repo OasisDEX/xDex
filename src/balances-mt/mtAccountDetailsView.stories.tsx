@@ -20,7 +20,7 @@ const stories = storiesOf('Balances/Account details', module)
 ));
 
 const wethEmpty = getMarginableCore({
-  name: 'W-ETH',
+  name: 'WETH',
   referencePrice: new BigNumber('200'),
   minCollRatio: new BigNumber('1.5'),
   safeCollRatio: new BigNumber('2'),
@@ -61,7 +61,7 @@ const mkrMarginableAsset = getMarginableCore({
 });
 
 const wethNonMarginableAsset = getNonMarginableCore({
-  name: 'W-ETH', // SPANK
+  name: 'WETH', // SPANK
   balance: new BigNumber(20),
   walletBalance: new BigNumber(0),
   allowance: true,
