@@ -92,9 +92,6 @@ export function realPurchasingPowerMarginable(
 
 export function calculateMarginable(
   ma: MarginableAssetCore,
-  totalAvailableCash: BigNumber = zero,
-  cash: BigNumber = zero
-  // sellOffers: Offer[] = []
 ): MarginableAsset {
 
   const availableActions = marginableAvailableActions(ma);
@@ -116,9 +113,6 @@ export function calculateMarginable(
   console.log('liq price calc - debt', ma.debt);
   console.log('liq price calc - balance', ma.balance);
   const liquidationPrice = ma.minCollRatio.times(ma.debt).div(ma.balance);
-
-  const purchasingPower = totalAvailableCash.times(maxSafeLeverage);
-  const lonelyPurchasingPower = cash.plus(availableDebt.times(maxSafeLeverage));
 
   const safe = currentCollRatio !== undefined ?
     currentCollRatio.gte(ma.safeCollRatio) : true;
@@ -146,8 +140,6 @@ export function calculateMarginable(
     maxDebt,
     availableDebt,
     currentCollRatio,
-    purchasingPower,
-    lonelyPurchasingPower,
     maxSafeLeverage,
     liquidationPrice,
     leverage,
@@ -160,20 +152,17 @@ export function calculateMarginable(
 
 function calculateNonMarginable(
   asset: NonMarginableAssetCore,
-  totalAvailableCash: BigNumber = zero,
-  cash: BigNumber = zero
+  // totalAvailableCash: BigNumber = zero,
+  // cash: BigNumber = zero
 ) : NonMarginableAsset {
 
   const availableActions = assetCoreAvailableActions(asset);
   const balanceInCash = asset.balance.times(asset.referencePrice);
-  const purchasingPower = totalAvailableCash;
-  const lonelyPurchasingPower = cash;
+
   return {
     ...asset,
     availableActions,
     balanceInCash,
-    purchasingPower,
-    lonelyPurchasingPower
   };
 }
 
@@ -184,29 +173,17 @@ export function calculateMTAccount(
   nmasCore: NonMarginableAssetCore[]
 ): MTAccountSetup {
 
-  // cashCore = { ...cashCore, balance: new BigNumber('10000') };
-  //
   const totalDebt = masCore.reduce((debt, ma) => debt.plus(ma.debt), zero);
 
-  const totalAvailableCash = masCore.reduce(
-    (total, ma) =>
-      BigNumber.max(zero, ma.balance
-      .times(ma.referencePrice)
-      .div(ma.safeCollRatio)
-      .minus(ma.debt))
-      .plus(total),
-    zero
-  ).plus(cashCore.balance);
-
   const marginableAssets = masCore.map(
-    ma => calculateMarginable(ma, totalAvailableCash, cashCore.balance)
+    ma => calculateMarginable(ma)
   );
 
   const totalAvailableDebt =
     marginableAssets.reduce((debt, ma) => debt.plus(ma.availableDebt), zero);
 
   const nonMarginableAssets = nmasCore.map(
-    nma => calculateNonMarginable(nma, totalAvailableCash, cashCore.balance)
+    nma => calculateNonMarginable(nma)
   );
 
   const totalMAValue = marginableAssets.reduce((t, ma) => t.plus(ma.balanceInCash), zero);

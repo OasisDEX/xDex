@@ -87,7 +87,7 @@ export class CDPRiskManagement
         <Muted>
           Purchasing power
         </Muted>
-        <Money value={this.props.purchasingPower}
+        <Money value={undefined}
                token="DAI"
                className={styles.largeFontSize}
                greyedNonSignZeros={false}

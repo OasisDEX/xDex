@@ -39,7 +39,7 @@ export class NonmarginableManagement
         <Muted>
           Purchasing power
         </Muted>
-        <Money value={this.props.purchasingPower}
+        <Money value={undefined}
                token="DAI"
                className={styles.largeFontSize}
         />

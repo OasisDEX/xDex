@@ -48,7 +48,6 @@ function getParams(history: MTHistoryEvent[]) {
         history,
         name: 'DGX',
       }),
-      zero
     ),
     close: () => null,
   };

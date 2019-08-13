@@ -131,9 +131,6 @@ export interface MarginableAssetCore extends Core {
 export interface MarginableAsset extends MarginableAssetCore {
   balance: BigNumber;
   balanceInCash: BigNumber;
-  // totalPurchasingPower: BigNumber; // total purchasing power for this asset
-  purchasingPower: BigNumber; // remaining purchasing power for this asset
-  lonelyPurchasingPower: BigNumber;
   currentCollRatio?: BigNumber;
   // maxDebtForOther: BigNumber; // max possible debt for other assets
   maxDebt: BigNumber; // max possible targetDebt for this asset
@@ -157,8 +154,6 @@ export interface NonMarginableAssetCore extends Core {
 export interface NonMarginableAsset extends NonMarginableAssetCore {
   balance: BigNumber;
   balanceInCash: BigNumber;
-  purchasingPower: BigNumber;
-  lonelyPurchasingPower: BigNumber;
   availableActions: UserActionKind[];
 }
 

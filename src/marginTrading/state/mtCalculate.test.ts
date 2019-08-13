@@ -59,10 +59,6 @@ test('cash, empty weth', () => {
 
   expect(mta.totalAssetValue).toEqual(cash.balance);
   expect(mta.totalDebt).toEqual(zero);
-
-  const weth = mta.marginableAssets[0];
-
-  expect(weth.purchasingPower).toEqual(cash.balance.times(weth.maxSafeLeverage));
 });
 
 test('weth with debt', () => {
@@ -79,11 +75,6 @@ test('weth with debt', () => {
 
   expect(mta.totalAssetValue).toEqual(weth.balanceInCash);
   expect(mta.totalDebt).toEqual(weth.debt);
-
-  expect(weth.purchasingPower).toEqual(
-    weth.balanceInCash.div(weth.safeCollRatio)
-    .minus(weth.debt)
-    .times(weth.maxSafeLeverage));
 });
 
 test('weth with full debt', () => {
@@ -100,12 +91,6 @@ test('weth with full debt', () => {
 
   expect(mta.totalAssetValue).toEqual(weth.balanceInCash);
   expect(mta.totalDebt).toEqual(weth.debt);
-
-  expect(weth.purchasingPower).toEqual(
-    weth.balanceInCash.div(weth.safeCollRatio)
-    .minus(weth.debt)
-    .times(weth.maxSafeLeverage));
-  expect(weth.purchasingPower).toEqual(zero);
 });
 
 test('weth and dgx with debt', () => {
@@ -131,18 +116,6 @@ test('weth and dgx with debt', () => {
     .toEqual(weth.balanceInCash.plus(dgx.balanceInCash));
 
   expect(mta.totalDebt).toEqual(weth.debt.plus(dgx.debt));
-
-  expect(weth.purchasingPower).toEqual(
-    dgx.balanceInCash.div(dgx.safeCollRatio)
-    .plus(weth.balanceInCash.div(weth.safeCollRatio))
-    .minus(mta.totalDebt)
-    .times(weth.maxSafeLeverage));
-
-  expect(dgx.purchasingPower).toEqual(
-    dgx.balanceInCash.div(dgx.safeCollRatio)
-    .plus(weth.balanceInCash.div(weth.safeCollRatio))
-    .minus(mta.totalDebt)
-    .times(dgx.maxSafeLeverage));
 });
 
 test('cash, weth, dgx and mkr, no debt', () => {
@@ -173,22 +146,4 @@ test('cash, weth, dgx and mkr, no debt', () => {
     .toEqual(cash.balance.plus(weth.balanceInCash).plus(dgx.balanceInCash));
 
   expect(mta.totalDebt).toEqual(zero);
-
-  expect(weth.purchasingPower).toEqual(
-    cash.balance
-    .plus(dgx.balanceInCash.div(dgx.safeCollRatio))
-    .plus(weth.balanceInCash.div(weth.safeCollRatio))
-    .times(weth.maxSafeLeverage));
-
-  expect(dgx.purchasingPower).toEqual(
-    cash.balance
-    .plus(dgx.balanceInCash.div(dgx.safeCollRatio))
-    .plus(weth.balanceInCash.div(weth.safeCollRatio))
-    .times(dgx.maxSafeLeverage));
-
-  expect(mkr.purchasingPower).toEqual(
-    cash.balance
-      .plus(dgx.balanceInCash.div(dgx.safeCollRatio))
-      .plus(weth.balanceInCash.div(weth.safeCollRatio))
-  );
 });

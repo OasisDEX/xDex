@@ -111,21 +111,21 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
           <td><Muted>Margin account</Muted></td>
           <td>{ asset && formatAmount(asset.balance, this.props.token)} {this.props.token}</td>
         </tr>
-        { asset && asset.assetKind === AssetKind.marginable &&
-          <tr>
-            <td><Muted>Available amount</Muted></td>
-            <td><Money value={asset.availableBalance} token={this.props.token} /></td>
-          </tr>
-        }
-        {asset &&
-        (asset.assetKind === AssetKind.marginable ||
-          asset.assetKind === AssetKind.nonMarginable) &&
-          <tr>
-            <td><Muted>Purchasing power</Muted></td>
-            <td>{formatAmount(asset.purchasingPower, 'DAI')} DAI
-            </td>
-          </tr>
-        }
+        {/*{ asset && asset.assetKind === AssetKind.marginable &&*/}
+          {/*<tr>*/}
+            {/*<td><Muted>Available amount</Muted></td>*/}
+            {/*<td><Money value={asset.availableBalance} token={this.props.token} /></td>*/}
+          {/*</tr>*/}
+        {/*}*/}
+        {/*{asset &&*/}
+        {/*(asset.assetKind === AssetKind.marginable ||*/}
+          {/*asset.assetKind === AssetKind.nonMarginable) &&*/}
+          {/*<tr>*/}
+            {/*<td><Muted>Purchasing power</Muted></td>*/}
+            {/*<td>{formatAmount(zero, 'DAI')} DAI*/}
+            {/*</td>*/}
+          {/*</tr>*/}
+        {/*}*/}
         </tbody>
       </table>
     );

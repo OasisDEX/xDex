@@ -174,8 +174,7 @@ function applyChange(state: MTSimpleFormState, change: MTFormChange): MTSimpleFo
             gasEstimationStatus: GasEstimationStatus.unset
           };
         case OfferType.buy:
-          const basePurchasingPower = (baseAsset
-            && (baseAsset as MarginableAsset).purchasingPower) || new BigNumber(0);
+          const basePurchasingPower = state.realPurchasingPower || new BigNumber(0);
           if (state.price) {
             return {
               ...state,
@@ -485,7 +484,6 @@ function getBuyPlan(
       ...asset,
       debt: asset.debt.plus(delta)
     } as MarginableAssetCore,
-    zero
   );
   const collRatioPost = postTradeAsset.currentCollRatio;
   const liquidationPricePost = postTradeAsset.liquidationPrice;
@@ -540,7 +538,6 @@ function getSellPlan(
       ...asset,
       debt: asset.debt.plus(delta)
     } as MarginableAssetCore,
-    zero
   );
 
   const collRatioPost = postTradeAsset.currentCollRatio;

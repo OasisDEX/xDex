@@ -20,7 +20,7 @@ describe('prepareBuyAllocationRequest', () => {
       'WETH',
       new BigNumber('100'),
       new BigNumber('200'),
-      findMarginableAsset('WETH', mta)!.purchasingPower);
+      zero);
     expect(request).toEqual(impossible('purchasing power too low'));
   });
 
@@ -31,7 +31,7 @@ describe('prepareBuyAllocationRequest', () => {
       'WETH',
       new BigNumber('300'),
       new BigNumber('200'),
-      findMarginableAsset('WETH', mtaOnlyWeth)!.purchasingPower
+      mtaOnlyWeth.cash.balance.times(mtaOnlyWeth.marginableAssets[0].safeCollRatio)
       );
     expect(request).toEqual(impossible('orderbook too shallow'));
   });
@@ -44,7 +44,7 @@ describe('prepareBuyAllocationRequest', () => {
       'WETH',
       new BigNumber('100'),
       new BigNumber('200'),
-      findMarginableAsset('WETH', mtaOnlyWeth)!.purchasingPower
+      new BigNumber('20000')
     );
 
     if (isImpossible(request)) {

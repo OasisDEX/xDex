@@ -58,7 +58,7 @@ export class MtAccountDetailsView
                 <td>
                   {ma.maxSafeLeverage.toFixed(1)}
                 </td>
-                <td><FormatAmount value={ma.purchasingPower} token="DAI" /></td>
+                <td><FormatAmount value={undefined} token="DAI" /></td>
               </tr>
             ))}
             {/*<tr>*/}
@@ -79,7 +79,7 @@ export class MtAccountDetailsView
                 <td />
                 <td />
                 <td />
-                <td><FormatAmount value={ma.purchasingPower} token="DAI" /></td>
+                <td><FormatAmount value={undefined} token="DAI" /></td>
               </tr>
             ))}
             {/*<tr>*/}

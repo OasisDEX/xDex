@@ -34,7 +34,6 @@ const wethMarginableBase = {
 
 const ethMarginableAsset = calculateMarginable(
   getMarginableCore(wethMarginableBase),
-  new BigNumber(5000),
 );
 
 // stories.add('Empty weth', () => {
@@ -50,7 +49,6 @@ stories.add('Weth without debt', () => {
   };
   const weth = calculateMarginable(
     getMarginableCore(wethWithoutDebtBase),
-    new BigNumber(5000),
   );
   return (
       <CDPRiskManagement {...weth } open={() => null} />
@@ -68,7 +66,6 @@ stories.add('Unsafe marginable weth ', () => {
   };
   const weth = calculateMarginable(
     getMarginableCore(wethUnsafeBase),
-    new BigNumber(5000),
   );
   return (
       <CDPRiskManagement {...weth } open={() => null} />
@@ -88,7 +85,6 @@ stories.add('Marginable weth below minimum', () => {
   };
   const weth = calculateMarginable(
     getMarginableCore(wethErrorBase),
-    new BigNumber(5000),
   );
   return (
       <CDPRiskManagement {...weth } open={() => null} />
