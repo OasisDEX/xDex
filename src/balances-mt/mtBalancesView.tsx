@@ -3,7 +3,7 @@ import * as React from 'react';
 import { Observable } from 'rxjs';
 import { tokens } from '../blockchain/config';
 import { TxState } from '../blockchain/transactions';
-import { CreateMTAllocateForm$Props } from '../marginTrading/order/mtOrderFormView';
+import { CreateMTAllocateForm$Props } from '../marginTrading/allocate/mtOrderAllocateDebtFormView';
 import { findAsset, MTAccountState, UserActionKind } from '../marginTrading/state/mtAccount';
 import { MTTransferFormState } from '../marginTrading/transfer/mtTransferForm';
 import { MtTransferFormView } from '../marginTrading/transfer/mtTransferFormView';

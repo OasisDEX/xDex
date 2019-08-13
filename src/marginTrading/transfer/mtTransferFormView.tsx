@@ -23,10 +23,10 @@ import { TransactionStateDescription } from '../../utils/text/TransactionStateDe
 import { zero } from '../../utils/zero';
 import { MTAllocateState } from '../allocate/mtOrderAllocateDebtForm';
 import {
+  CreateMTAllocateForm$Props,
   DrawAllocateFormView,
   FundAllocateFormView
 } from '../allocate/mtOrderAllocateDebtFormView';
-import { CreateMTAllocateForm$Props } from '../order/mtOrderFormView';
 import { prepareDrawRequest } from '../plan/planDraw';
 import { prepareFundRequest } from '../plan/planFund';
 import {

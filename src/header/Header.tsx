@@ -122,8 +122,7 @@ class Header extends React.Component<HeaderProps> {
                   <HeaderNavLink to={`${rootUrl}market`} name="Market"/>
                   {process.env.REACT_APP_INSTANT_ENABLED === '1' &&
                   <HeaderNavLink to={`${rootUrl}instant`} name="Instant"/>}
-                  <HeaderNavLink to={`${rootUrl}margin-trading-simple`} name="Margin" />
-                  <HeaderNavLink to={`${rootUrl}margin-trading`} name="Rebalancing" />
+                  <HeaderNavLink to={`${rootUrl}Leverage`} name="Leverage" />
                   {this.props.walletStatus === 'connected' &&
                   <HeaderNavLink to={`${rootUrl}account`} name="Account"/>}
                 </div>

@@ -9,26 +9,15 @@ export class BalancesView extends React.Component<{}> {
       <div>
         <theAppContext.Consumer>
           { ({ MTSetupButtonRxTx,
-               // MTAccountDetailsRxTx,
                MTBalancesViewRxTx,
-               MtSummaryViewRxTx,
-               CDPRiskManagementsRxTx,
-               ReallocateViewRxTx
           }) =>
             <div>
               <div style={{ display: 'flex', flexDirection: 'row-reverse' }}>
-                <MTSetupButtonRxTx/> <ReallocateViewRxTx/>
+                <MTSetupButtonRxTx/>
               </div>
               <FlexLayoutRow>
                 <MTBalancesViewRxTx />
               </FlexLayoutRow>
-              <FlexLayoutRow>
-                <MtSummaryViewRxTx />
-              </FlexLayoutRow>
-              <CDPRiskManagementsRxTx />
-              {/*<FlexLayoutRow>*/}
-                {/*<MTAccountDetailsRxTx />*/}
-              {/*</FlexLayoutRow>*/}
             </div>
           }
         </theAppContext.Consumer>
