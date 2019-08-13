@@ -7,7 +7,7 @@ export class MTMyPositionView
 {
   public render() {
     return <div>
-      Balance: { this.props.balance.toString() }
+      Amount: { this.props.balance.toString() }
       <br />
       Dai generated: { this.props.debt.toString() }
       <br />
@@ -17,7 +17,14 @@ export class MTMyPositionView
       <br />
       Price Feed: { this.props.referencePrice && this.props.referencePrice.toString() }
       <br />
-
+      Type: Long { this.props.leverage && this.props.leverage.toString() }
+      <br />
+      PnL: ?
+      <br />
+      Open Price: ?
+      <br />
+      Interest Owed: ?
+      <br />
     </div>;
   }
 }

@@ -1,8 +1,11 @@
 import * as React from 'react';
 import * as ReactModal from 'react-modal';
 
-import { MarginableAsset } from '../marginTrading/state/mtAccount';
-import { MTHistoryEvent, MTHistoryEventKind } from '../marginTrading/state/mtHistory';
+import {
+  MarginableAsset,
+  MTHistoryEvent,
+  MTHistoryEventKind
+} from '../marginTrading/state/mtAccount';
 import { formatDateTime } from '../utils/formatters/format';
 import { Button } from '../utils/forms/Buttons';
 import { ModalProps } from '../utils/modal';

@@ -7,82 +7,7 @@ import * as marginEngine from '../../blockchain/abi/margin-engine.abi.json';
 import { NetworkConfig } from '../../blockchain/config';
 import { amountFromWei } from '../../blockchain/utils';
 import { web3 } from '../../blockchain/web3';
-
-export enum MTHistoryEventKind {
-  fund = 'fund',
-  draw = 'draw',
-  adjust = 'adjust',
-  buy = 'buy',
-  sell = 'sell',
-  buyLev = 'buyLev',
-  sellLev = 'sellLev',
-  bite = 'bite',
-  kick = 'kick',
-  tend = 'tend',
-  dent = 'dent',
-  deal = 'deal',
-}
-
-export type MTHistoryEvent = MTMarginEvent | MTLiquidationEvent;
-
-type MTMarginEvent = {
-  timestamp: number;
-  token: string;
-} & ({
-  kind: MTHistoryEventKind.fund;
-  amount: BigNumber;
-} | {
-  kind: MTHistoryEventKind.draw;
-  amount: BigNumber;
-} | {
-  kind: MTHistoryEventKind.adjust;
-  dgem: BigNumber;
-  ddai: BigNumber;
-} | {
-  kind: MTHistoryEventKind.buy;
-  amount: BigNumber;
-  payAmount: BigNumber;
-} | {
-  kind: MTHistoryEventKind.sell;
-  amount: BigNumber;
-  payAmount: BigNumber;
-} | {
-  kind: MTHistoryEventKind.buyLev;
-  amount: BigNumber;
-  payAmount: BigNumber;
-} | {
-  kind: MTHistoryEventKind.sellLev;
-  amount: BigNumber;
-  payAmount: BigNumber;
-});
-
-type MTLiquidationEvent = {
-  timestamp: number;
-  token: string;
-} & ({
-  kind: MTHistoryEventKind.bite;
-  id: BigNumber;
-  gem: BigNumber;
-  dai: BigNumber;
-} | {
-  kind: MTHistoryEventKind.kick;
-  id: BigNumber;
-  gem: BigNumber;
-  dai: BigNumber;
-} | {
-  kind: MTHistoryEventKind.tend;
-  id: BigNumber;
-  gem: BigNumber;
-  dai: BigNumber;
-} | {
-  kind: MTHistoryEventKind.dent;
-  id: BigNumber;
-  gem: BigNumber;
-  dai: BigNumber;
-} | {
-  kind: MTHistoryEventKind.deal;
-  id: BigNumber;
-});
+import { MTHistoryEvent, MTHistoryEventKind } from './mtAccount';
 
 export function bytes32(hex: string): string {
   const a = hex.match(/^0x(.*)$/);
@@ -277,19 +202,13 @@ const eventMappers: (token: string) => {[key in MTHistoryEventKind]: (
   } as MTHistoryEvent),
 });
 
-export function createMTHistory(
-  _proxy: any,
-  _context: NetworkConfig,
-  _token: string,
-): Observable<MTHistoryEvent[]> {
-  return of([]);
-}
+export type RawMTHistoryEvent = Exclude<MTHistoryEvent, 'dAmount' | 'dDAIAmount'>;
 
-export function createMTHistory2(
+export function createRawMTHistory(
   proxy: any,
   context: NetworkConfig,
   token: string,
-): Observable<MTHistoryEvent[]> {
+): Observable<RawMTHistoryEvent[]> {
 
   const marginAccount = web3.eth.contract(marginEngine as any).at(proxy.address);
   const filters = eventFilters(proxy, context, token, marginAccount);

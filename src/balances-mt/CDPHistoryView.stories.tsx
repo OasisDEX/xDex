@@ -2,8 +2,8 @@ import { storiesOf } from '@storybook/react';
 import { BigNumber } from 'bignumber.js';
 import * as React from 'react';
 
+import { MTHistoryEvent, MTHistoryEventKind } from '../marginTrading/state/mtAccount';
 import { calculateMarginable } from '../marginTrading/state/mtCalculate';
-import { MTHistoryEvent, MTHistoryEventKind } from '../marginTrading/state/mtHistory';
 import { getMarginableCore } from '../marginTrading/state/mtTestUtils';
 import { one, zero } from '../utils/zero';
 import { CDPHistoryViewModal } from './CDPHistoryView';
@@ -27,6 +27,8 @@ function createEvent(e: {
       timestamp,
       id,
       kind: e.kind,
+      dAmount: zero,
+      dDAIAmount: zero
     };
   }
   return {

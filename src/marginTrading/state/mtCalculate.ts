@@ -11,11 +11,11 @@ import {
   MarginableAssetCore,
   MTAccountSetup,
   MTAccountState,
+  MTHistoryEventKind,
   NonMarginableAsset,
   NonMarginableAssetCore,
   UserActionKind
 } from './mtAccount';
-import { MTHistoryEventKind } from './mtHistory';
 
 function assetCoreAvailableActions(asset: Core) {
   const availableActions: UserActionKind[] = [];

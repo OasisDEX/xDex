@@ -7,7 +7,6 @@ import {
 import { Calls$ } from '../../blockchain/calls/calls';
 import { AssetKind } from '../../blockchain/config';
 import { TxState } from '../../blockchain/transactions';
-import { MTHistoryEvent } from './mtHistory';
 
 export enum OperationKind {
   fund = 'fund',
@@ -64,6 +63,57 @@ export interface CashAsset extends CashAssetCore {
   // calculated:
   availableActions: UserActionKind[];
 }
+
+export enum MTHistoryEventKind {
+  fund = 'fund',
+  draw = 'draw',
+  adjust = 'adjust',
+  buy = 'buy',
+  sell = 'sell',
+  buyLev = 'buyLev',
+  sellLev = 'sellLev',
+  bite = 'bite',
+  kick = 'kick',
+  tend = 'tend',
+  dent = 'dent',
+  deal = 'deal',
+}
+
+export type MTHistoryEvent = {
+  dAmount: BigNumber;
+  dDAIAmount: BigNumber;
+} & (MTMarginEvent | MTLiquidationEvent);
+
+export type MTMarginEvent = {
+  timestamp: number;
+  token: string;
+} & ({
+  kind: MTHistoryEventKind.fund | MTHistoryEventKind.draw;
+  amount: BigNumber;
+} | {
+  kind: MTHistoryEventKind.adjust;
+  dgem: BigNumber;
+  ddai: BigNumber;
+} | {
+  kind: MTHistoryEventKind.buy | MTHistoryEventKind.buyLev|
+    MTHistoryEventKind.sell | MTHistoryEventKind.sellLev;
+  amount: BigNumber;
+  payAmount: BigNumber;
+});
+
+export type MTLiquidationEvent = {
+  timestamp: number;
+  token: string;
+} & ({
+  kind: MTHistoryEventKind.bite | MTHistoryEventKind.kick |
+    MTHistoryEventKind.tend | MTHistoryEventKind.dent;
+  id: BigNumber;
+  gem: BigNumber;
+  dai: BigNumber;
+} | {
+  kind: MTHistoryEventKind.deal;
+  id: BigNumber;
+});
 
 export type MarginableAssetHistory = MTHistoryEvent[];
 

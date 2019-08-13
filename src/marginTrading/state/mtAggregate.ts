@@ -14,10 +14,16 @@ import { web3 } from '../../blockchain/web3';
 
 import { ReadCalls, ReadCalls$ } from '../../blockchain/calls/calls';
 
-import { flatten } from 'lodash';
-import { MTAccount, MTAccountNotSetup, MTAccountSetup, MTAccountState } from './mtAccount';
+import { zero } from '../../utils/zero';
+import {
+  MTAccount,
+  MTAccountNotSetup,
+  MTAccountSetup,
+  MTAccountState,
+  MTHistoryEvent
+} from './mtAccount';
 import { calculateMTAccount, } from './mtCalculate';
-import { createMTHistory, createMTHistory2, MTHistoryEvent } from './mtHistory';
+import { createRawMTHistory, RawMTHistoryEvent } from './mtHistory';
 import { getCashCore, getMarginableCore, getNonMarginableCore } from './mtTestUtils';
 
 export function aggregateMTAccountState(
@@ -40,15 +46,9 @@ export function aggregateMTAccountState(
 
   const tokenNames = [...assetNames, 'DAI'];
 
-  return combineLatest(
-    calls.mtBalance({ tokens: tokenNames, proxyAddress: proxy.address }),
-    combineLatest(
-      ...marginableAssetNames.map(token => createMTHistory(proxy, context, token))
-    ).pipe(
-      map(flatten)
-    )
-  ).pipe(
-    map(([balanceResult, events]) => {
+  return calls.mtBalance({ tokens: tokenNames, proxyAddress: proxy.address })
+  .pipe(
+    map((balanceResult) => {
       const marginables = [...tokenNames.entries()]
         .filter(([_i, token]) => tokens[token].assetKind === AssetKind.marginable)
         .map(([i, token]) => {
@@ -58,7 +58,7 @@ export function aggregateMTAccountState(
             balance: balanceResult.assets[i].urnBalance,
             ...balanceResult.assets[i],
             safeCollRatio: new BigNumber(tokens[token].safeCollRatio as number),
-            history: events.filter(e => e.token === token)
+            history: []
           });
         });
 
@@ -129,6 +129,11 @@ export function createProxyAddress$(
   );
 }
 
+function calculateMTHistoryEvents(rawHistory: RawMTHistoryEvent[]): MTHistoryEvent[] {
+  // TODO: implement
+  return rawHistory.map(h => ({ ...h, dAmount: zero, dDAIAmount: zero }));
+}
+
 export function createMta$(
   context$: Observable<NetworkConfig>,
   initializedAccount$: Observable<string>,
@@ -146,6 +151,7 @@ export function createMta$(
       const proxy = web3.eth.contract(dsProxy as any).at(proxyAddress);
       return onEveryBlock$.pipe(
         switchMap(() => aggregateMTAccountState(proxy, calls, context)),
+        // distinctUntilChanged()
       );
     }),
     shareReplay(1)
@@ -156,7 +162,7 @@ export function createMta$(
     .map(t => t.symbol);
 
   // let's fetch history temporarily in a separate pipeline
-  const mtHistory$: Observable<MTHistoryEvent[] | undefined> =
+  const mtRawHistory$: Observable<MTHistoryEvent[][] | undefined> =
     combineLatest(context$, proxyAddress$, onEveryBlock$).pipe(
       exhaustMap(([context, proxyAddress]) => {
         if (!proxyAddress) {
@@ -164,14 +170,14 @@ export function createMta$(
         }
         const proxy = web3.eth.contract(dsProxy as any).at(proxyAddress);
         return combineLatest(
-          marginableNames.map(token => createMTHistory2(proxy, context, token))
+          marginableNames.map(token => createRawMTHistory(proxy, context, token))
         );
       }),
       startWith(marginableNames.map(() => [] as MTHistoryEvent[])),
       shareReplay(1)
     );
 
-  return combineLatest(mtAccount$, mtHistory$).pipe(
+  return combineLatest(mtAccount$, mtRawHistory$).pipe(
     map(([mta, histories]) =>
       mta.state === MTAccountState.notSetup ?
         mta :
@@ -180,7 +186,7 @@ export function createMta$(
           marginableAssets: mta.marginableAssets.map(ma => ({
             ...ma,
             history: (histories ?
-              histories[marginableNames.indexOf(ma.name)]
+              calculateMTHistoryEvents(histories[marginableNames.indexOf(ma.name)])
               :
               []) as MTHistoryEvent[]
           }))
