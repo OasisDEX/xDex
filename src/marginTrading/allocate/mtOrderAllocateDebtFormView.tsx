@@ -39,7 +39,6 @@ export interface CreateMTAllocateForm$Props {
   createMTAllocateForm$: CreateMTAllocateForm$;
 }
 
-
 function createAllocateFormView<P>(
     AllocateHeader: React.ComponentType,
     AllocateForm: React.ComponentType<P & MTAllocateState>,

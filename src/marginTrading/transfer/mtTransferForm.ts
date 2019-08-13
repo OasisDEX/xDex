@@ -68,6 +68,9 @@ export interface MTTransferFormState extends HasGasEstimation {
   reset: () => void;
 }
 
+export type CreateMTFundForm$ =
+  (actionKind: UserActionKind, token: string) => Observable<MTTransferFormState>;
+
 type EnvironmentChange =
   MTAccountChange | MTAccountStateChange |
   GasPriceChange | EtherPriceUSDChange | BalancesChange;

@@ -111,7 +111,7 @@ import { createMTSimpleOrderForm$ } from './marginTrading/simple/mtOrderForm';
 import { MTSimpleOrderPanel } from './marginTrading/simple/mtOrderPanel';
 import { createMTProxyApprove, MTAccount } from './marginTrading/state/mtAccount';
 import { createMta$ } from './marginTrading/state/mtAggregate';
-import { createMTTransferForm$ } from './marginTrading/transfer/mtTransferForm';
+import { CreateMTFundForm$, createMTTransferForm$ } from './marginTrading/transfer/mtTransferForm';
 import { createTransactionNotifier$ } from './transactionNotifier/transactionNotifier';
 import { TransactionNotifierView } from './transactionNotifier/TransactionNotifierView';
 import { Authorizable, authorizablify } from './utils/authorizable';
@@ -140,7 +140,7 @@ export function setupAppContext() {
 
   const mtBalances$ = balancesMT.createCombinedBalances(etherBalance$, balances$, mta$);
 
-  const createMTFundForm$ =
+  const createMTFundForm$: CreateMTFundForm$ =
     curry(createMTTransferForm$)(mta$, gasPrice$, etherPriceUsd$, balances$, calls$, readCalls$);
 
   const approveMTProxy = createMTProxyApprove(calls$);
@@ -208,7 +208,7 @@ export function setupAppContext() {
   );
 
   const { MTSimpleOrderPanelRxTx, MTMyPositionPanelRxTx, MTSimpleOrderbookPanelTxRx } =
-    mtSimpleOrderForm(mta$, currentOrderbook$);
+    mtSimpleOrderForm(mta$, currentOrderbook$, createMTFundForm$);
 
   const MTAccountDetailsRxTx = connect(MtAccountDetailsView, mta$);
 
@@ -388,7 +388,8 @@ export function setupAppContext() {
 function mtSimpleOrderForm(
   mta$: Observable<MTAccount>,
   orderbook$: Observable<Orderbook>,
-  // orderbookWithTradingPair$: Observable<LoadableWithTradingPair<Orderbook>>
+  // orderbookWithTradingPair$: Observable<LoadableWithTradingPair<Orderbook>>,
+  createMTFundForm$: CreateMTFundForm$
 ) {
   const mtOrderForm$ = currentTradingPair$.pipe(
     switchMap(tradingPair =>
@@ -418,7 +419,12 @@ function mtSimpleOrderForm(
   );
 
   const MTSimpleOrderPanelRxTx = connect(MTSimpleOrderPanel, mtOrderFormLoadable$);
-  const MTMyPositionPanelRxTx = connect(MTMyPositionPanel, mtOrderFormLoadable$);
+
+  const MTMyPositionPanelRxTx = connect(
+    // @ts-ignore
+    withModal(inject(MTMyPositionPanel, { createMTFundForm$ })),
+    mtOrderFormLoadable$
+  );
 
   // const pickableOrderbook$
   //   = createPickableOrderBookFromMTFormState$(orderbookWithTradingPair$, account$, mtOrderForm$);
