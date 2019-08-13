@@ -63,32 +63,49 @@ export function realPurchasingPowerNonMarginable(
   return cashAvailable.minus(cashLeft);
 }
 
-export function realPurchasingPowerMarginable(
-  ma: MarginableAsset,
-  cashAvailable: BigNumber,
-  sellOffers: Offer[]
-): BigNumber {
-  console.log('cashAvailable', cashAvailable.toString(), one.div(ma.safeCollRatio).toString());
-  cashAvailable = cashAvailable.times(one.div(one.minus(one.div(ma.safeCollRatio))));
-  const [, cashLeft] = eat(cashAvailable, sellOffers);
-  return cashAvailable.minus(cashLeft);
-}
-
-// export function calculateRealPurchasingPower(
-//   safeCollRatio: BigNumber,
-//   referencePrice: BigNumber,
+// export function realPurchasingPowerMarginable(
+//   ma: MarginableAsset,
 //   cashAvailable: BigNumber,
 //   sellOffers: Offer[]
 // ): BigNumber {
-//   let purchasingPower = zero;
-//   while (cashAvailable.gt(zero) && sellOffers.length > 0) {
-//     const [bought, cashLeft, offersLeft] = eat(cashAvailable, sellOffers);
-//     purchasingPower = purchasingPower.plus(cashAvailable).minus(cashLeft);
-//     cashAvailable = bought.times(referencePrice).div(safeCollRatio);
-//     sellOffers = offersLeft;
-//   }
-//   return purchasingPower;
+//   console.log('cashAvailable', cashAvailable.toString(), one.div(ma.safeCollRatio).toString());
+//   cashAvailable = cashAvailable.times(one.div(one.minus(one.div(ma.safeCollRatio))));
+//   const [, cashLeft] = eat(cashAvailable, sellOffers);
+//   return cashAvailable.minus(cashLeft);
 // }
+
+export function realPurchasingPowerMarginable(
+  ma: MarginableAsset,
+  initialCash: BigNumber,
+  sellOffers: Offer[]
+): BigNumber {
+  let amount = ma.balance; // TODO: rename totalAmount -> currentAmount
+  let debt = ma.debt;
+  let purchasingPower = zero;
+  let collRatio = amount.times(ma.referencePrice).div(debt);
+  let cash = initialCash;
+
+  while (collRatio.gt(ma.safeCollRatio) && cash.gt(zero) && sellOffers.length > 0) {
+    const [bought, cashLeft, offersLeft] = eat(cash, sellOffers);
+    sellOffers = offersLeft;
+    amount = amount.plus(bought);
+    purchasingPower = purchasingPower.plus(cash).minus(cashLeft);
+
+    // safety condition:
+    // amount * referencePrice / (debt + availableDebt) >= safeCollRatio
+    // ergo:
+    // availableDebt = amount * referencePrice / safeCollRatio - debt
+
+    const availableDebt = amount.times(ma.referencePrice).div(ma.safeCollRatio).minus(debt);
+
+    debt = debt.plus(availableDebt);
+    collRatio = amount.times(ma.referencePrice).div(debt);
+
+    cash = availableDebt;
+  }
+
+  return purchasingPower;
+}
 
 export function calculateMarginable(
   ma: MarginableAssetCore,
