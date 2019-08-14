@@ -41,11 +41,11 @@ function createEvent(e: {
   } as MTHistoryEvent;
 }
 
-function getParams(history: MTHistoryEvent[]) {
+function getParams(rawHistory: MTHistoryEvent[]) {
   return {
     ...calculateMarginable(
       getMarginableCore({
-        history,
+        rawHistory,
         name: 'DGX',
       }),
     ),

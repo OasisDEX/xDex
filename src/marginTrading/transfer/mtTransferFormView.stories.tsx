@@ -26,6 +26,7 @@ const defaultParams = {
       assetKind: AssetKind.cash,
       allowance: true,
       availableActions: [],
+      rawHistory: []
     },
     marginableAssets: [],
     nonMarginableAssets: [],

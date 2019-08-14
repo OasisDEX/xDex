@@ -7,6 +7,7 @@ import {
 import { Calls$ } from '../../blockchain/calls/calls';
 import { AssetKind } from '../../blockchain/config';
 import { TxState } from '../../blockchain/transactions';
+import {RawMTHistoryEvent} from './mtHistory';
 
 export enum OperationKind {
   fund = 'fund',
@@ -53,6 +54,7 @@ export interface Core {
   walletBalance: BigNumber;
   marginBalance: BigNumber;
   allowance: boolean;
+  rawHistory: RawMTHistoryEvent[];
 }
 
 export interface CashAssetCore extends Core {
@@ -124,7 +126,6 @@ export interface MarginableAssetCore extends Core {
   referencePrice: BigNumber;
   minCollRatio: BigNumber;
   safeCollRatio: BigNumber;
-  history: MarginableAssetHistory;
   fee: BigNumber;
 }
 
@@ -143,6 +144,7 @@ export interface MarginableAsset extends MarginableAssetCore {
   lockedBalance: BigNumber;
   safe?: boolean;
   liquidationInProgress: boolean;
+  history: MarginableAssetHistory;
 }
 
 export interface NonMarginableAssetCore extends Core {

@@ -10,12 +10,13 @@ import {
   Core, MarginableAsset,
   MarginableAssetCore,
   MTAccountSetup,
-  MTAccountState,
+  MTAccountState, MTHistoryEvent,
   MTHistoryEventKind,
   NonMarginableAsset,
   NonMarginableAssetCore,
   UserActionKind
 } from './mtAccount';
+import { RawMTHistoryEvent } from './mtHistory';
 
 function assetCoreAvailableActions(asset: Core) {
   const availableActions: UserActionKind[] = [];
@@ -107,6 +108,21 @@ export function realPurchasingPowerMarginable(
   return purchasingPower;
 }
 
+function calculateMTHistoryEvents(rawHistory: RawMTHistoryEvent[]): MTHistoryEvent[] {
+  // TODO: implement
+  return rawHistory.map(h => {
+
+    console.log('calc history', h);
+    if (h.kind === MTHistoryEventKind.adjust) {
+      return { ...h, dAmount: h.dgem, dDAIAmount: h.ddai };
+    }
+    if (h.kind === MTHistoryEventKind.buyLev) {
+      return { ...h, dAmount: h.amount, dDAIAmount: h.payAmount };
+    }
+    return { ...h, dAmount: zero, dDAIAmount: zero };
+  });
+}
+
 export function calculateMarginable(
   ma: MarginableAssetCore,
 ): MarginableAsset {
@@ -131,24 +147,20 @@ export function calculateMarginable(
   console.log('liq price calc - balance', ma.balance);
   const liquidationPrice = ma.minCollRatio.times(ma.debt).div(ma.balance);
 
+  const history = calculateMTHistoryEvents(ma.rawHistory);
+
   const safe = currentCollRatio !== undefined ?
     currentCollRatio.gte(ma.safeCollRatio) : true;
 
   const biteLastIndex =
-    findLastIndex(ma.history, e => e.kind === MTHistoryEventKind.bite);
+    findLastIndex(history, e => e.kind === MTHistoryEventKind.bite);
 
   const dentLastIndex =
-    findLastIndex(ma.history, e => e.kind === MTHistoryEventKind.dent);
+    findLastIndex(history, e => e.kind === MTHistoryEventKind.dent);
 
   const liquidationInProgress = biteLastIndex >= 0 && biteLastIndex > dentLastIndex;
 
   const leverage = ma.balance.times(ma.referencePrice).div(ma.debt);
-  // const realPurchasingPower = realPurchasingPowerMarginable(
-  //   ma.safeCollRatio,
-  //   ma.referencePrice,
-  //   totalAvailableCash,
-  //   sellOffers
-  // );
 
   return {
     ...ma,
@@ -164,6 +176,7 @@ export function calculateMarginable(
     availableBalance,
     safe,
     liquidationInProgress,
+    history
   };
 }
 

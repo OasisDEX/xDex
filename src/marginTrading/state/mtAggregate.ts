@@ -57,7 +57,7 @@ export function aggregateMTAccountState(
             balance: balanceResult.assets[i].urnBalance,
             ...balanceResult.assets[i],
             safeCollRatio: new BigNumber(tokens[token].safeCollRatio as number),
-            history: (rawHistories ? calculateMTHistoryEvents(rawHistories[i]) : [])
+            rawHistory: (rawHistories ? rawHistories[i] : [])
           });
         });
 
@@ -126,21 +126,6 @@ export function createProxyAddress$(
     ),
     distinctUntilChanged()
   );
-}
-
-function calculateMTHistoryEvents(rawHistory: RawMTHistoryEvent[]): MTHistoryEvent[] {
-  // TODO: implement
-  return rawHistory.map(h => {
-
-    console.log('calc history', h);
-    if (h.kind === MTHistoryEventKind.adjust) {
-      return { ...h, dAmount: h.dgem, dDAIAmount: h.ddai };
-    }
-    if (h.kind === MTHistoryEventKind.buyLev) {
-      return { ...h, dAmount: h.amount, dDAIAmount: h.payAmount };
-    }
-    return { ...h, dAmount: zero, dDAIAmount: zero };
-  });
 }
 
 export function createMta$(
