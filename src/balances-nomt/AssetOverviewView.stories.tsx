@@ -38,14 +38,14 @@ const defaultBalancesProps = {
   wrapUnwrapForm$: () => of({} as WrapUnwrapFormState),
 };
 
-stories.add('Empty balances', () => (
+stories.add('Empty balances nomt', () => (
     <AssetsOverviewViewInternal
       {...defaultBalancesProps}
       balances={[]}/>
   )
 );
 
-stories.add('Sample balances with allowances', () => {
+stories.add('Sample balances with allowances nomt', () => {
   return (
     <AssetsOverviewViewInternal
       {...defaultBalancesProps}
@@ -64,7 +64,7 @@ stories.add('Sample balances with ETH ', () => {
   );
 });
 
-stories.add('Balances without allowance for DAI', () => {
+stories.add('Balances without allowance for DAI nomt', () => {
   const daiAssetWoAllowance = {
     ...daiBalance,
     allowance: false,

@@ -45,25 +45,29 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
           <Table className={styles.table}>
               <thead>
               <tr>
-                  <td style={{ width: '125px' }} >Date</td>
-                  <td style={{ width: '60px' }} >Event</td>
-                  <td style={{ width: '40px' }} >Id</td>
-                  <td style={{ width: '190px' }} >Description</td>
+                  <td style={{ width: '125px' }} >Type</td>
+                  <td style={{ width: '125px' }} >Price [DAI]</td>
+                  <td style={{ width: '125px' }} >Amount [WETH]</td>
+                  <td style={{ width: '125px' }} >Total [DAI]</td>
+                  <td style={{ width: '60px' }} >Liq.Price [USD]</td>
+                  <td style={{ width: '40px' }} >CR</td>
+                  <td style={{ width: '190px' }} >Time</td>
               </tr>
               </thead>
               <tbody>
               { this.props.history.map((e, i) => (
                   <tr key={i}>
+                    <td className={styles.eventName}>{e.kind}</td>
+                    <td>-</td>
+                    <td>{e.dAmount && e.dAmount.toString()}</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
                     <td>
                       <InfoLabel>
                         { formatDateTime(new Date(e.timestamp * 1000), true) }
                       </InfoLabel>
                     </td>
-                    <td className={styles.eventName}>{e.kind}</td>
-                    <td>
-                      <InfoLabel>{(e as any).id && (e as any).id.toString()}</InfoLabel>
-                    </td>
-                    <td>{ this.eventDecription(e)}</td>
                   </tr>
                 )
               )}

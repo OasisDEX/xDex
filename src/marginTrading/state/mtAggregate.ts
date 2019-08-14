@@ -20,7 +20,7 @@ import {
   MTAccountNotSetup,
   MTAccountSetup,
   MTAccountState,
-  MTHistoryEvent
+  MTHistoryEvent, MTHistoryEventKind
 } from './mtAccount';
 import { calculateMTAccount, } from './mtCalculate';
 import { createRawMTHistory, RawMTHistoryEvent } from './mtHistory';
@@ -131,7 +131,17 @@ export function createProxyAddress$(
 
 function calculateMTHistoryEvents(rawHistory: RawMTHistoryEvent[]): MTHistoryEvent[] {
   // TODO: implement
-  return rawHistory.map(h => ({ ...h, dAmount: zero, dDAIAmount: zero }));
+  return rawHistory.map(h => {
+
+    console.log('calc history', h);
+    if (h.kind === MTHistoryEventKind.adjust) {
+      return { ...h, dAmount: h.dgem, dDAIAmount: h.ddai };
+    }
+    if (h.kind === MTHistoryEventKind.buyLev) {
+      return { ...h, dAmount: h.amount, dDAIAmount: h.payAmount };
+    }
+    return { ...h, dAmount: zero, dDAIAmount: zero };
+  });
 }
 
 export function createMta$(

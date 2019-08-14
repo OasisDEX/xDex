@@ -3,6 +3,8 @@ import * as styles from '../../balances-mt/mtBalancesView.scss';
 import { connect } from '../../utils/connect';
 import { inject } from '../../utils/inject';
 
+import { Button } from '../../utils/forms/Buttons';
+import { SvgImage } from '../../utils/icons/utils';
 import { LoadableWithTradingPair } from '../../utils/loadable';
 import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
 import { ModalOpenerProps, ModalProps } from '../../utils/modal';
@@ -18,6 +20,8 @@ import {
 import { CreateMTFundForm$, MTTransferFormState } from '../transfer/mtTransferForm';
 import { MtTransferFormView } from '../transfer/mtTransferFormView';
 import { MTMyPositionView } from './MTMyPositionView';
+
+import dottedMenuSvg from './dotted-menu.svg';
 
 type MTMyPositionPanelProps = LoadableWithTradingPair<MTSimpleFormState> &
   ModalOpenerProps &
@@ -55,8 +59,22 @@ export class MTMyPositionPanel extends React.Component<MTMyPositionPanelProps>
 
       return (
         <div>
-          <PanelHeader>
-            My Position
+          <PanelHeader bordered={true}>
+            <span>My Position</span>
+
+            <div className={styles.dropdownMenu} style={{ marginLeft: 'auto', display: 'flex' }}>
+
+              <Button
+                className={styles.dropdownButton}
+                data-test-id="myposition-actions-list"
+              >
+                <SvgImage image={dottedMenuSvg}/>
+              </Button>
+
+              <div className={styles.dropdownList}>
+                xxxx
+              </div>
+            </div>
           </PanelHeader>
           <PanelBody>
             <div>
@@ -96,9 +114,9 @@ export class MTMyPositionPanel extends React.Component<MTMyPositionPanelProps>
     const MTFundFormViewRxTx =
       connect<MTTransferFormState, ModalProps>(
         inject(MtTransferFormView,
-               // cast is safe as CreateMTAllocateForm$Props
-               // is not used inside MtTransferFormView!
-               (this.props as any) as (CreateMTAllocateForm$Props & ModalOpenerProps)),
+          // cast is safe as CreateMTAllocateForm$Props
+          // is not used inside MtTransferFormView!
+          (this.props as any) as (CreateMTAllocateForm$Props & ModalOpenerProps)),
         fundForm$);
     this.props.open(MTFundFormViewRxTx);
   }
