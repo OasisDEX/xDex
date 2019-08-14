@@ -420,11 +420,16 @@ function mtSimpleOrderForm(
 
   const MTSimpleOrderPanelRxTx = connect(MTSimpleOrderPanel, mtOrderFormLoadable$);
 
-  const MTMyPositionPanelRxTx = connect(
+  const MTMyPositionPanelRxTx =
     // @ts-ignore
-    withModal(inject(MTMyPositionPanel, { createMTFundForm$ })),
-    mtOrderFormLoadable$
-  );
+    withModal(
+      // @ts-ignore
+      connect(
+        // @ts-ignore
+        inject(MTMyPositionPanel, { createMTFundForm$ }),
+        mtOrderFormLoadable$
+      )
+    );
 
   // const pickableOrderbook$
   //   = createPickableOrderBookFromMTFormState$(orderbookWithTradingPair$, account$, mtOrderForm$);
