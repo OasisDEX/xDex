@@ -6,7 +6,7 @@ import {
   map,
   mergeMap,
   shareReplay, startWith,
-  switchMap
+  switchMap, withLatestFrom
 } from 'rxjs/operators';
 import * as dsProxy from '../../blockchain/abi/ds-proxy.abi.json';
 import { AssetKind, NetworkConfig, tokens } from '../../blockchain/config';
@@ -29,7 +29,7 @@ import { getCashCore, getMarginableCore, getNonMarginableCore } from './mtTestUt
 export function aggregateMTAccountState(
   proxy: any,
   calls: ReadCalls,
-  context: NetworkConfig
+  rawHistories: MTHistoryEvent[][] | undefined
 ): Observable<MTAccountSetup> {
 
   const assetNames: string[] = Object.values(tokens)
@@ -46,8 +46,7 @@ export function aggregateMTAccountState(
 
   const tokenNames = [...assetNames, 'DAI'];
 
-  return calls.mtBalance({ tokens: tokenNames, proxyAddress: proxy.address })
-  .pipe(
+  return calls.mtBalance({ tokens: tokenNames, proxyAddress: proxy.address }).pipe(
     map((balanceResult) => {
       const marginables = [...tokenNames.entries()]
         .filter(([_i, token]) => tokens[token].assetKind === AssetKind.marginable)
@@ -58,7 +57,7 @@ export function aggregateMTAccountState(
             balance: balanceResult.assets[i].urnBalance,
             ...balanceResult.assets[i],
             safeCollRatio: new BigNumber(tokens[token].safeCollRatio as number),
-            history: []
+            history: (rawHistories ? calculateMTHistoryEvents(rawHistories[i]) : [])
           });
         });
 
@@ -143,20 +142,6 @@ export function createMta$(
 
   const proxyAddress$ = createProxyAddress$(context$, initializedAccount$, onEveryBlock$);
 
-  const mtAccount$: Observable<MTAccount> = combineLatest(context$, calls$, proxyAddress$).pipe(
-    switchMap(([context, calls, proxyAddress]) => {
-      if (proxyAddress === undefined) {
-        return of(notSetup);
-      }
-      const proxy = web3.eth.contract(dsProxy as any).at(proxyAddress);
-      return onEveryBlock$.pipe(
-        switchMap(() => aggregateMTAccountState(proxy, calls, context)),
-        // distinctUntilChanged()
-      );
-    }),
-    shareReplay(1)
-  );
-
   const marginableNames: string[] = Object.values(tokens)
     .filter((t: any) => t.assetKind === AssetKind.marginable)
     .map(t => t.symbol);
@@ -177,20 +162,17 @@ export function createMta$(
       shareReplay(1)
     );
 
-  return combineLatest(mtAccount$, mtRawHistory$).pipe(
-    map(([mta, histories]) =>
-      mta.state === MTAccountState.notSetup ?
-        mta :
-        {
-          ...mta,
-          marginableAssets: mta.marginableAssets.map(ma => ({
-            ...ma,
-            history: (histories ?
-              calculateMTHistoryEvents(histories[marginableNames.indexOf(ma.name)])
-              :
-              []) as MTHistoryEvent[]
-          }))
-        }
-    ),
+  return combineLatest(context$, calls$, proxyAddress$).pipe(
+    switchMap(([context, calls, proxyAddress]) => {
+      if (proxyAddress === undefined) {
+        return of(notSetup);
+      }
+      const proxy = web3.eth.contract(dsProxy as any).at(proxyAddress);
+      return combineLatest(mtRawHistory$, onEveryBlock$).pipe(
+        switchMap(([rawHistory]) => aggregateMTAccountState(proxy, calls, rawHistory)),
+        // distinctUntilChanged()
+      );
+    }),
+    shareReplay(1)
   );
 }
