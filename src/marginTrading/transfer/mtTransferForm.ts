@@ -26,10 +26,12 @@ import { AssetKind } from '../../blockchain/config';
 import { combineAndMerge } from '../../utils/combineAndMerge';
 import { description, impossible, Impossible, isImpossible } from '../../utils/impossible';
 import { firstOfOrTrue } from '../../utils/operators';
+import {minusOne, zero} from '../../utils/zero';
+import {EditableDebt} from '../allocate/mtOrderAllocateDebtForm';
 import { planDraw } from '../plan/planDraw';
 import { planFund } from '../plan/planFund';
 import {
-  findAsset,
+  findAsset, findMarginableAsset,
   MTAccount, MTAccountState,
   Operation, UserActionKind
 } from '../state/mtAccount';
@@ -126,7 +128,14 @@ function updatePlan(state: MTTransferFormState): MTTransferFormState {
 
   const plan =
     (state.actionKind === UserActionKind.fund ? planFund : planDraw)(
-      state.mta, state.token, state.amount, []
+      state.mta, state.token, state.amount,
+      state.actionKind === UserActionKind.fund && state.token === 'DAI' ? [{
+        name: 'WETH',
+        delta: BigNumber.min(
+          findMarginableAsset('WETH', state.mta)!.debt,
+          state.amount
+        ).times(minusOne)
+      } as Required<EditableDebt>] : []
     );
 
   const messages: Message[] =

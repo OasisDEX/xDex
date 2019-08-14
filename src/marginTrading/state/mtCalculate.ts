@@ -99,10 +99,18 @@ export function realPurchasingPowerMarginable(
 
     const availableDebt = amount.times(ma.referencePrice).div(ma.safeCollRatio).minus(debt);
 
-    debt = debt.plus(availableDebt);
     collRatio = amount.times(ma.referencePrice).div(debt);
 
+    debt = debt.plus(availableDebt);
+
     cash = availableDebt;
+
+    console.log(
+      amount.toString(),
+      cash.toString(),
+      collRatio.toString(),
+      sellOffers.length
+    );
   }
 
   return purchasingPower;
