@@ -6,6 +6,5 @@ export const transferBtn: string;
 export const disabled: string;
 export const transferBtnLeft: string;
 export const dropdownButton: string;
-export const dropdownMenu: string;
-export const dropdownlist: string;
 export const dropdownList: string;
+export const dropdownMenu: string;

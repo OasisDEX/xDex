@@ -1,5 +1,6 @@
 export const btnGroup: string;
 export const btn: string;
+export const InstantOrderPanel: string;
 export const marginBottom: string;
 export const flexContainer: string;
 export const balanceBtn: string;

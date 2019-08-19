@@ -79,22 +79,28 @@
 
 .dropdownButton {
   border: 0;
+  padding: 10px 0.833em;
 }
 
-.dropdownMenu {
-  
-  &:hover {
-    .dropdownlist {
-      display: block;
-    }
-  }
-  
-}
 
 .dropdownList {
   width: 200px;
-  height: 300px;
-  background: #232323;
+  min-height: 100px;
   display: none;
   position: absolute;
+  right: 0;
+  top: 30px;
+  background: #35353E;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  padding: 12px 20px;
+}
+
+.dropdownMenu {
+  position: relative;
+  &:hover {
+    .dropdownList {
+      display: block;
+    }
+  }
 }

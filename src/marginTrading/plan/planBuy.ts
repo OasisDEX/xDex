@@ -65,6 +65,10 @@ export function prepareBuyAllocationRequest(
 
   const cashBalance = mta.cash.balance;
   const totalDebt = assets.reduce((sum, a) => sum.plus(a.debt), zero);
+
+  console.log('prepareBuyAllocationRequest maxtotal', maxTotal.toString());
+  console.log('prepareBuyAllocationRequest total debt', totalDebt.toString());
+  console.log('prepareBuyAllocationRequest cashBalance', cashBalance.toString());
   const targetDaiBalance = cashBalance.minus(maxTotal).minus(totalDebt);
   const defaultTargetCash = cashBalance; // BigNumber.max(zero, cashBalance.minus(maxTotal));
 

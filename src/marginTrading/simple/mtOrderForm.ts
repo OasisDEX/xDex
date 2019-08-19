@@ -485,6 +485,17 @@ function getBuyPlan(
       debt: asset.debt.plus(delta)
     } as MarginableAssetCore,
   );
+
+  console.log('amount', amount.toString());
+  console.log('price', price.toString());
+  console.log('realPurchasingPower', realPurchasingPower.toString());
+  console.log('asset debt', asset.debt.toString());
+  console.log('request.targetDaiBalance', request.targetDaiBalance.toString());
+  console.log('delta', delta.toString());
+  console.log('postTradeAsset', postTradeAsset);
+  console.log('postTradeAsset balance', postTradeAsset.balance.toString());
+  console.log('postTradeAsset debt', postTradeAsset.debt.toString());
+  console.log('postTradeAsset ref price', postTradeAsset.referencePrice.toString());
   const collRatioPost = postTradeAsset.currentCollRatio;
   const liquidationPricePost = postTradeAsset.liquidationPrice;
   const isSafePost = postTradeAsset.safe;
@@ -741,10 +752,8 @@ function addPreTradeInfo(state: MTSimpleFormState): MTSimpleFormState {
 
   const collRatio = ma && ma.currentCollRatio;
   const liquidationPrice = ma && ma.liquidationPrice;
+  const leverage = ma && ma.leverage;
 
-  const leverage = ma && ma.balance
-      .times(ma.referencePrice)
-      .div(ma.debt);
   return {
     ...state,
     collRatio,

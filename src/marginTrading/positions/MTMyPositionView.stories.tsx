@@ -1,7 +1,7 @@
 import { storiesOf } from '@storybook/react';
 import { BigNumber } from 'bignumber.js';
 import * as React from 'react';
-import {calculateMarginable} from '../state/mtCalculate';
+import { calculateMarginable } from '../state/mtCalculate';
 import { getMarginableCore } from '../state/mtTestUtils';
 import { MTMyPositionView } from './MTMyPositionView';
 

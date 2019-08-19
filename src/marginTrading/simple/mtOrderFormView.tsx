@@ -141,7 +141,7 @@ export class MtSimpleOrderFormView
 
   public render() {
     return (
-      <div>
+      <div className={styles.InstantOrderPanel}>
         <PanelHeader>
           Instant Order
           { this.headerButtons() }

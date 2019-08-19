@@ -13,6 +13,18 @@
 
 // form
 
+$twoColumnsPanelWidth: 390px;
+$historyPanelsHeight: 550px;
+
+.InstantOrderPanel {
+  width: $twoColumnsPanelWidth;
+  height: $historyPanelsHeight;
+
+  @include media-breakpoint-down(lg) {
+    width: 100%;
+  }
+}
+
 .marginBottom {
   margin-bottom: 20px;
 }

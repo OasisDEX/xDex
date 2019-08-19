@@ -16,12 +16,13 @@ export class MTSimpleOrderPanel
     if (this.props.tradingPair.quote !== 'DAI') {
       return (
         <div>
-          <PanelHeader>Create position</PanelHeader>
+          <PanelHeader>Instant Order</PanelHeader>
           <div style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             height: '357px',
+            width: '390px',
             textAlign: 'center'
           }}>Choose DAI<br/> to create a position</div>
         </div>
@@ -33,8 +34,12 @@ export class MTSimpleOrderPanel
       return (<MtSimpleOrderFormView {...{ ...this.props, ...formState }} />);
     }
 
-    return <div>
-      <PanelHeader>Create position</PanelHeader>
+    return <div style={{
+      height: '357px',
+      width: '390px',
+    }}
+      >
+      <PanelHeader>Instant Order</PanelHeader>
       <LoadingIndicator />
     </div>;
   }

@@ -10,7 +10,6 @@ import { currentTradingPair$, TradingPair } from '../exchange/tradingPair/tradin
 import { connect } from '../utils/connect';
 import { FlexLayoutRow } from '../utils/layout/FlexLayoutRow';
 import { Panel } from '../utils/panel/Panel';
-import * as styles from './MarginTrading.scss';
 
 export interface MarginTradingOwnProps {
   setTradingPair: (tp: TradingPair) => void;
@@ -31,7 +30,7 @@ const Content = (props: any | { parentMatch: string }) => {
   return (
     <div>
       <FlexLayoutRow>
-        <Panel style={{ flexGrow: 1 }} className={styles.panelOther}>
+        <Panel style={{ flexGrow: 1 }}>
           <theAppContext.Consumer>
             { ({ TradingPairsTxRx }) =>
               // @ts-ignore
@@ -41,20 +40,19 @@ const Content = (props: any | { parentMatch: string }) => {
         </Panel>
       </FlexLayoutRow>
       <FlexLayoutRow>
-        <Panel style={{ height: '550px', marginRight: '24px', flexGrow: 1 }}
-               className={styles.panelOther}>
+        <Panel style={{ height: '550px', marginRight: '24px', flexGrow: 1 }}>
           <theAppContext.Consumer>
             { ({ MTSimpleOrderPanelRxTx }) => <MTSimpleOrderPanelRxTx /> }
           </theAppContext.Consumer>
         </Panel>
-        <Panel className={styles.panelOther}>
+        <Panel>
           <theAppContext.Consumer>
             { ({ MTSimpleOrderbookPanelTxRx }) => <MTSimpleOrderbookPanelTxRx /> }
           </theAppContext.Consumer>
         </Panel>
       </FlexLayoutRow>
       <FlexLayoutRow>
-        <Panel style={{ flexGrow: 1 }} className={styles.panelOther}>
+        <Panel style={{ flexGrow: 1 }}>
           <theAppContext.Consumer>
             { ({ MTMyPositionPanelRxTx }) =>
               // @ts-ignore

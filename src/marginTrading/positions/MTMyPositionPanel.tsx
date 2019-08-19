@@ -70,33 +70,33 @@ export class MTMyPositionPanel extends React.Component<MTMyPositionPanelProps>
               >
                 <SvgImage image={dottedMenuSvg}/>
               </Button>
-
-              <div className={styles.dropdownList}>
-                xxxx
+                <div className={styles.dropdownList}>
+                  <div>
+                  <button className={styles.transferBtn}
+                          disabled={!ma.availableActions.includes(UserActionKind.draw)}
+                          onClick={() => this.transfer(UserActionKind.draw, baseToken)}
+                  >
+                    Draw
+                  </button>
+                    <br/>
+                  < button className={styles.transferBtn}
+                           disabled={!ma.availableActions.includes(UserActionKind.fund)}
+                           onClick={() => this.transfer(UserActionKind.fund, baseToken)}
+                  >
+                    Fund
+                  </button>
+                    <br/>
+                  < button className={styles.transferBtn}
+                           disabled={!ma.availableActions.includes(UserActionKind.fund)}
+                           onClick={() => this.transfer(UserActionKind.fund, mta.cash.name)}
+                  >
+                    Payback
+                  </button>
+                </div>
               </div>
             </div>
           </PanelHeader>
           <PanelBody>
-            <div>
-              <button className={styles.transferBtn}
-                      disabled={!ma.availableActions.includes(UserActionKind.draw)}
-                      onClick={() => this.transfer(UserActionKind.draw, baseToken)}
-              >
-                Draw
-              </button>
-              < button className={styles.transferBtn}
-                       disabled={!ma.availableActions.includes(UserActionKind.fund)}
-                       onClick={() => this.transfer(UserActionKind.fund, baseToken)}
-              >
-                Fund
-              </button>
-              < button className={styles.transferBtn}
-                       disabled={!ma.availableActions.includes(UserActionKind.fund)}
-                       onClick={() => this.transfer(UserActionKind.fund, mta.cash.name)}
-              >
-                Payback
-              </button>
-            </div>
             {<MTMyPositionView {...ma}/>}
           </PanelBody>
         </div>

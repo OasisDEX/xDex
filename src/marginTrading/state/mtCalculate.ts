@@ -143,6 +143,8 @@ export function calculateMarginable(
   );
   const availableBalance = BigNumber.max(zero, ma.balance.minus(lockedBalance));
 
+  console.log('ma.balance', ma.balance.toString());
+  console.log('lockedBalance', lockedBalance.toString());
   console.log('ma.debt', ma.debt.toString());
   console.log('balanceInCash', balanceInCash.toString());
   const currentCollRatio = ma.debt.gt(0) ? balanceInCash.dividedBy(ma.debt) : undefined;
@@ -150,9 +152,6 @@ export function calculateMarginable(
   const maxDebt = balanceInCash.div(ma.safeCollRatio);
   const availableDebt = BigNumber.max(zero, maxDebt.minus(ma.debt));
 
-  console.log('liq price calc - min coll ratio', ma.minCollRatio);
-  console.log('liq price calc - debt', ma.debt);
-  console.log('liq price calc - balance', ma.balance);
   const liquidationPrice = ma.minCollRatio.times(ma.debt).div(ma.balance);
 
   const history = calculateMTHistoryEvents(ma.rawHistory);
@@ -168,7 +167,8 @@ export function calculateMarginable(
 
   const liquidationInProgress = biteLastIndex >= 0 && biteLastIndex > dentLastIndex;
 
-  const leverage = ma.balance.times(ma.referencePrice).div(ma.debt);
+  const leverage = ma.balance.times(ma.referencePrice)
+    .div(ma.balance.times(ma.referencePrice).minus(ma.debt));
 
   return {
     ...ma,
