@@ -37,7 +37,7 @@ export class MTBalancesView
     const approveMTProxy = this.props.approveMTProxy;
     const createMTAllocateForm$ = this.props.createMTAllocateForm$;
     return (
-      <Panel>
+      <Panel className={styles.balancesPanel}>
         <PanelHeader>Asset overview</PanelHeader>
         <WithLoadingIndicator loadable={this.props}>
           {(combinedBalances) => (

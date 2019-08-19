@@ -1,6 +1,10 @@
 @import "../utils/Variables";
 @import "../utils/forms/Buttons.mixins";
 
+.balancesPanel {
+  width: 100%;
+}
+
 .table {
   th {
     text-transform: unset;
