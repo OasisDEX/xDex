@@ -86,9 +86,17 @@ export function planDraw(
   const drawOps: Operation[] = asset.assetKind === AssetKind.marginable ?
   [
     { name: asset.name, dgem: minusOne.times(amount), kind: OperationKind.adjust },
-    { amount, name: asset.name, kind: OperationKind.draw },
+    {
+      amount,
+      name: asset.name,
+      kind: asset.name === 'DAI' ? OperationKind.drawDai : OperationKind.drawGem,
+    },
   ] : [
-    { amount, name: token, kind: OperationKind.draw },
+    {
+      amount,
+      name: token,
+      kind: asset.name === 'DAI' ? OperationKind.drawDai : OperationKind.drawGem,
+    },
   ];
 
   return [

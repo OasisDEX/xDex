@@ -7,24 +7,24 @@ import {
 import { Calls$ } from '../../blockchain/calls/calls';
 import { AssetKind } from '../../blockchain/config';
 import { TxState } from '../../blockchain/transactions';
-import {RawMTHistoryEvent} from './mtHistory';
+import { RawMTHistoryEvent } from './mtHistory';
 
 export enum OperationKind {
-  fund = 'fund',
-  draw = 'draw',
+  fundGem = 'fundGem',
+  fundDai = 'fundDai',
+  drawGem = 'drawGem',
+  drawDai = 'drawDai',
   adjust = 'adjust',
-  buy = 'buy',
   buyRecursively = 'buyLev',
-  sell = 'sell',
   sellRecursively = 'sellLev',
 }
 
 export type Operation = {
-  kind: OperationKind.fund;
+  kind: OperationKind.fundGem | OperationKind.fundDai;
   name: string;
   amount: BigNumber;
 } | {
-  kind: OperationKind.draw;
+  kind: OperationKind.drawGem | OperationKind.drawDai;
   name: string;
   amount: BigNumber;
 } | {
@@ -33,9 +33,7 @@ export type Operation = {
   dgem?: BigNumber;
   ddai?: BigNumber;
 } | {
-  kind:
-    OperationKind.buy | OperationKind.sell |
-    OperationKind.buyRecursively | OperationKind.sellRecursively;
+  kind: OperationKind.buyRecursively | OperationKind.sellRecursively;
   name: string;
   amount: BigNumber;
   maxTotal: BigNumber;
@@ -67,11 +65,11 @@ export interface CashAsset extends CashAssetCore {
 }
 
 export enum MTHistoryEventKind {
-  fund = 'fund',
-  draw = 'draw',
+  fundGem = 'fundGem',
+  fundDai = 'fundDai',
+  drawGem = 'drawGem',
+  drawDai = 'drawDai',
   adjust = 'adjust',
-  buy = 'buy',
-  sell = 'sell',
   buyLev = 'buyLev',
   sellLev = 'sellLev',
   bite = 'bite',
@@ -90,15 +88,15 @@ export type MTMarginEvent = {
   timestamp: number;
   token: string;
 } & ({
-  kind: MTHistoryEventKind.fund | MTHistoryEventKind.draw;
+  kind: MTHistoryEventKind.fundGem | MTHistoryEventKind.fundDai |
+    MTHistoryEventKind.drawGem | MTHistoryEventKind.drawDai;
   amount: BigNumber;
 } | {
   kind: MTHistoryEventKind.adjust;
   dgem: BigNumber;
   ddai: BigNumber;
 } | {
-  kind: MTHistoryEventKind.buy | MTHistoryEventKind.buyLev|
-    MTHistoryEventKind.sell | MTHistoryEventKind.sellLev;
+  kind: MTHistoryEventKind.buyLev | MTHistoryEventKind.sellLev;
   amount: BigNumber;
   payAmount: BigNumber;
 });

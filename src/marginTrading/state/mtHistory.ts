@@ -3,7 +3,7 @@ import { curry, unnest } from 'ramda';
 import { bindNodeCallback, combineLatest, Observable, of } from 'rxjs';
 import { concatMap, map, reduce, switchMap } from 'rxjs/operators';
 
-import * as marginEngine from '../../blockchain/abi/margin-engine.abi.json';
+import * as proxyActions from '../../blockchain/abi/proxy-actions.abi.json';
 import { NetworkConfig } from '../../blockchain/config';
 import { amountFromWei } from '../../blockchain/utils';
 import { web3 } from '../../blockchain/web3';
@@ -36,12 +36,13 @@ const marginEventFilter = (Event: any, context: NetworkConfig, token: string) =>
 const eventFilters: (
   proxy: any, context: NetworkConfig, token: string, marginAccount: any
 ) => {[key in MTHistoryEventKind]: any} = (proxy, context, token, marginAccount) => {
+  console.log(marginAccount);
   return ({
-    [MTHistoryEventKind.fund]: marginEventFilter(marginAccount.Fund, context, token),
-    [MTHistoryEventKind.draw]: marginEventFilter(marginAccount.Draw, context, token),
+    [MTHistoryEventKind.fundGem]: marginEventFilter(marginAccount.FundGem, context, token),
+    [MTHistoryEventKind.fundDai]: marginEventFilter(marginAccount.FundDai, context, token),
+    [MTHistoryEventKind.drawGem]: marginEventFilter(marginAccount.DrawGem, context, token),
+    [MTHistoryEventKind.drawDai]: marginEventFilter(marginAccount.DrawDai, context, token),
     [MTHistoryEventKind.adjust]: marginEventFilter(marginAccount.Adjust, context, token),
-    [MTHistoryEventKind.buy]: marginEventFilter(marginAccount.Buy, context, token),
-    [MTHistoryEventKind.sell]: marginEventFilter(marginAccount.Sell, context, token),
     [MTHistoryEventKind.buyLev]: marginEventFilter(marginAccount.BuyLev, context, token),
     [MTHistoryEventKind.sellLev]: marginEventFilter(marginAccount.SellLev, context, token),
     [MTHistoryEventKind.bite]: context.mcd.cat.contract.Bite(
@@ -71,22 +72,40 @@ const eventMappers: (token: string) => {[key in MTHistoryEventKind]: (
   event: {blockNumber: string, args: any},
   block: { timestamp: number },
 ) => MTHistoryEvent | any[]} = (token) => ({
-  [MTHistoryEventKind.fund]: (
+  [MTHistoryEventKind.fundGem]: (
     event: {blockNumber: string, args: any},
     block: { timestamp: number },
   ) => ({
     token,
     timestamp: block.timestamp,
-    kind: MTHistoryEventKind.fund,
+    kind: MTHistoryEventKind.fundGem,
     amount: amountFromWei(event.args.amount, token),
   } as MTHistoryEvent),
-  [MTHistoryEventKind.draw]: (
+  [MTHistoryEventKind.fundDai]: (
     event: {blockNumber: string, args: any},
     block: { timestamp: number },
   ) => ({
     token,
     timestamp: block.timestamp,
-    kind: MTHistoryEventKind.draw,
+    kind: MTHistoryEventKind.fundDai,
+    amount: amountFromWei(event.args.amount, token),
+  } as MTHistoryEvent),
+  [MTHistoryEventKind.drawGem]: (
+    event: {blockNumber: string, args: any},
+    block: { timestamp: number },
+  ) => ({
+    token,
+    timestamp: block.timestamp,
+    kind: MTHistoryEventKind.drawGem,
+    amount: amountFromWei(event.args.amount, token),
+  } as MTHistoryEvent),
+  [MTHistoryEventKind.drawDai]: (
+    event: {blockNumber: string, args: any},
+    block: { timestamp: number },
+  ) => ({
+    token,
+    timestamp: block.timestamp,
+    kind: MTHistoryEventKind.drawDai,
     amount: amountFromWei(event.args.amount, token),
   } as MTHistoryEvent),
   [MTHistoryEventKind.adjust]: (
@@ -98,26 +117,6 @@ const eventMappers: (token: string) => {[key in MTHistoryEventKind]: (
     kind: MTHistoryEventKind.adjust,
     dgem: amountFromWei(event.args.dgem, token),
     ddai: amountFromWei(event.args.ddai, 'DAI'),
-  } as MTHistoryEvent),
-  [MTHistoryEventKind.buy]: (
-    event: {blockNumber: string, args: any},
-    block: { timestamp: number },
-  ) => ({
-    token,
-    timestamp: block.timestamp,
-    kind: MTHistoryEventKind.buy,
-    amount: amountFromWei(event.args.amount, token),
-    payAmount: amountFromWei(event.args.maxPayAmount, 'DAI'),
-  } as MTHistoryEvent),
-  [MTHistoryEventKind.sell]: (
-    event: {blockNumber: string, args: any},
-    block: { timestamp: number },
-  ) => ({
-    token,
-    timestamp: block.timestamp,
-    kind: MTHistoryEventKind.sell,
-    amount: amountFromWei(event.args.amount, token),
-    payAmount: amountFromWei(event.args.minPayAmount, 'DAI'),
   } as MTHistoryEvent),
   [MTHistoryEventKind.buyLev]: (
     event: {blockNumber: string, args: any},
@@ -210,16 +209,16 @@ export function createRawMTHistory(
   token: string,
 ): Observable<RawMTHistoryEvent[]> {
 
-  const marginAccount = web3.eth.contract(marginEngine as any).at(proxy.address);
+  const marginAccount = web3.eth.contract(proxyActions as any).at(proxy.address);
   const filters = eventFilters(proxy, context, token, marginAccount);
   const mappers = eventMappers(token);
 
   const fetchMarginEvents = [
-    MTHistoryEventKind.fund,
-    MTHistoryEventKind.draw,
+    MTHistoryEventKind.fundGem,
+    MTHistoryEventKind.fundDai,
+    MTHistoryEventKind.drawGem,
+    MTHistoryEventKind.drawDai,
     MTHistoryEventKind.adjust,
-    MTHistoryEventKind.buy,
-    MTHistoryEventKind.sell,
     MTHistoryEventKind.buyLev,
     MTHistoryEventKind.sellLev,
   ].map(event =>

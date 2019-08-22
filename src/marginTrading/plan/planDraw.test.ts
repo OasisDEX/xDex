@@ -35,7 +35,7 @@ describe('plan draw', () => {
         []);
 
       expect(plan).toEqual([
-        { kind: OperationKind.draw, name: 'DAI', amount: new BigNumber('20000') },
+        { kind: OperationKind.drawDai, name: 'DAI', amount: new BigNumber('20000') },
       ]);
     });
   });
@@ -79,7 +79,7 @@ describe('plan draw', () => {
 
       expect(plan).toEqual([
         { kind: OperationKind.adjust, name: 'DGX', dgem: new BigNumber('-90') },
-        { kind: OperationKind.draw, amount: new BigNumber('90'), name: 'DGX' }
+        { kind: OperationKind.drawGem, amount: new BigNumber('90'), name: 'DGX' }
       ]);
     });
 
@@ -123,7 +123,7 @@ describe('plan draw', () => {
         []);
 
       expect(plan).toEqual([
-        { kind: OperationKind.draw, amount: new BigNumber('90'), name: 'MKR' }
+        { kind: OperationKind.drawGem, amount: new BigNumber('90'), name: 'MKR' }
       ]);
     });
 

@@ -57,34 +57,29 @@ export interface MTBalanceResult {
   }>;
 }
 
-const BalanceOuts = 8;
+const BalanceOuts = 9;
 
 function mtBalancePostprocess(result: BigNumber[], { tokens }: MTBalanceData) : MTBalanceResult {
   return {
     assets: tokens.map((token, i) => {
       const row = i * BalanceOuts;
-      console.log(
-        'allowance',
-        token,
-        new BigNumber(result[row + 6]).toString(),
-        MIN_ALLOWANCE.toString()
-      );
       return {
         walletBalance: amountFromWei(new BigNumber(result[row]), token),
         marginBalance: amountFromWei(new BigNumber(result[row + 1]), token),
         urnBalance: amountFromWei(new BigNumber(result[row + 2]), token),
         debt: amountFromWei(new BigNumber(result[row + 3]), 'DAI'),
-        referencePrice: amountFromWei(new BigNumber(result[row + 4]), 'DAI'),
-        minCollRatio: amountFromWei(new BigNumber(result[row + 5]), 'ETH'),
-        allowance: new BigNumber(result[row + 6]).gte(MIN_ALLOWANCE),
-        fee: new BigNumber(result[row + 7]).div(new BigNumber(10).pow(27))
+        dai: amountFromWei(new BigNumber(result[row + 4]), 'DAI'),
+        referencePrice: amountFromWei(new BigNumber(result[row + 5]), 'DAI'),
+        minCollRatio: amountFromWei(new BigNumber(result[row + 6]), 'ETH'),
+        allowance: new BigNumber(result[row + 7]).gte(MIN_ALLOWANCE),
+        fee: new BigNumber(result[row + 8]).div(new BigNumber(10).pow(27))
       };
     })
   };
 }
 
 export const mtBalance = {
-  call: (_data: MTBalanceData, context: NetworkConfig) => context.marginEngine.contract.balance,
+  call: (_data: MTBalanceData, context: NetworkConfig) => context.proxyActions.contract.balance,
   prepareArgs: ({ proxyAddress, tokens }: MTBalanceData, context: NetworkConfig) => {
     return [
       proxyAddress,
@@ -93,7 +88,8 @@ export const mtBalance = {
       tokens.map(token => context.prices[token]),
       context.mcd.vat,
       context.spot,
-      context.jug
+      context.jug,
+      context.cdpManager,
     ];
   },
   postprocess: mtBalancePostprocess,
@@ -132,23 +128,23 @@ function argsOfPerformOperations(
   console.log('plan', JSON.stringify(plan));
   console.log('args', JSON.stringify(
     [
-      context.marginEngine.address,
+      context.proxyActions.address,
       kinds, names, tokens, adapters, amounts,
       maxTotals, dgems, ddais,
       [
-        context.mcd.vat, context.otc.address,
+        context.cdpManager, context.mcd.vat, context.otc.address,
         context.tokens.DAI.address, context.joins.DAI,
       ],
     ]
   ));
 
   return [
-    context.marginEngine.address,
-    context.marginEngine.contract.performOperations.getData(
+    context.proxyActions.address,
+    context.proxyActions.contract.performOperations.getData(
       kinds, names, tokens, adapters, amounts,
       maxTotals, dgems, ddais,
       [
-        context.mcd.vat, context.otc.address,
+        context.cdpManager, context.mcd.vat, context.otc.address,
         context.tokens.DAI.address, context.joins.DAI,
       ],
     )

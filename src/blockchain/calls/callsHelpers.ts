@@ -26,11 +26,12 @@ export interface TransactionDef<A> extends GasDef<A> {
   descriptionIcon?: (args: A) => JSX.Element;
 }
 
-export function callCurried(context: NetworkConfig) {
+export function callCurried(context: NetworkConfig, account: string | undefined) {
   return <D, R>({ call, prepareArgs, postprocess }: CallDef<D, R>) => {
     return (args: D) => {
       return bindNodeCallback(call(args, context).call)(
         ...prepareArgs(args, context),
+        { from: account }
       ).pipe(
         map(i => (postprocess ? postprocess(i, args) : i))
       ) as Observable<R>;

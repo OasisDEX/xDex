@@ -16,7 +16,7 @@ describe('plan fund', () => {
       const plan = planFund(mta, 'DAI', new BigNumber('100'), []);
 
       expect(plan).toEqual([
-        { amount: new BigNumber('100'), kind: OperationKind.fund, name: 'DAI' }]);
+        { amount: new BigNumber('100'), kind: OperationKind.fundDai, name: 'DAI' }]);
     });
 
     test('some dgx, no debt', () => {
@@ -25,7 +25,7 @@ describe('plan fund', () => {
       const plan = planFund(mta, 'DAI', new BigNumber('100'), []);
 
       expect(plan).toEqual([
-        { amount: new BigNumber('100'), kind: OperationKind.fund, name: 'DAI' }]);
+        { amount: new BigNumber('100'), kind: OperationKind.fundDai, name: 'DAI' }]);
     });
 
     // test('dgx with debt, little cash', () => {
@@ -95,7 +95,7 @@ describe('plan fund', () => {
       const plan = planFund(mta, 'WETH', new BigNumber('25'), []);
 
       expect(plan).toEqual([
-        { amount: new BigNumber('25'), kind: OperationKind.fund, name: 'WETH' },
+        { amount: new BigNumber('25'), kind: OperationKind.fundGem, name: 'WETH' },
         { dgem: new BigNumber('25'), kind: OperationKind.adjust, name: 'WETH' }
       ]);
     });
@@ -111,7 +111,7 @@ describe('plan fund', () => {
       const plan = planFund(mta, 'MKR', new BigNumber('12'), []);
 
       expect(plan).toEqual([
-        { amount: new BigNumber('12'), kind: OperationKind.fund, name: 'MKR' }
+        { amount: new BigNumber('12'), kind: OperationKind.fundGem, name: 'MKR' }
       ]);
     });
   });

@@ -2,7 +2,7 @@ import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ObservableItem } from '../../utils/observableItem';
 import { NetworkConfig } from '../config';
-import { context$, initializedAccount$ } from '../network';
+import { account$, context$, initializedAccount$ } from '../network';
 import { approveProxy, approveWallet, disapproveProxy, disapproveWallet } from './approveCalls';
 import {
   callCurried,
@@ -72,8 +72,8 @@ function calls([context, account]: [NetworkConfig, string]) {
   };
 }
 
-function readCalls(context: NetworkConfig) {
-  const call = callCurried(context);
+function readCalls([context, account]: [NetworkConfig, string | undefined]) {
+  const call = callCurried(context, account);
 
   return {
     mtBalance: call(mtBalance),
@@ -89,7 +89,7 @@ export const calls$ = combineLatest(context$, initializedAccount$).pipe(
   map(calls),
 );
 
-export const readCalls$ = context$.pipe(
+export const readCalls$ = combineLatest(context$, account$).pipe(
   map(readCalls),
 );
 

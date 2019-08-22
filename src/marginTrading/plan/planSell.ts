@@ -131,9 +131,7 @@ export function planSell(
       maxTotal,
       amount,
       name,
-      kind: tokens[name].assetKind === AssetKind.nonMarginable ?
-        OperationKind.sell :
-        OperationKind.sellRecursively,
+      kind: OperationKind.sellRecursively,
     },
     ...flatten(
       orderDeltas(debts.map(d => {
