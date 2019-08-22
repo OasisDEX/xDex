@@ -13,7 +13,7 @@ import { Observable } from 'rxjs';
 import { Calls } from '../../blockchain/calls/calls';
 import { TxState } from '../../blockchain/transactions';
 import { Impossible, impossible, isImpossible } from '../../utils/impossible';
-import { zero } from '../../utils/zero';
+import { minusOne, zero } from '../../utils/zero';
 import { AllocationRequestPilot } from '../allocate/allocate';
 import { EditableDebt } from '../allocate/mtOrderAllocateDebtForm';
 import { calculateMarginable } from '../state/mtCalculate';
@@ -69,9 +69,14 @@ export function prepareBuyAllocationRequest(
   console.log('prepareBuyAllocationRequest maxtotal', maxTotal.toString());
   console.log('prepareBuyAllocationRequest total debt', totalDebt.toString());
   console.log('prepareBuyAllocationRequest cashBalance', cashBalance.toString());
-  const targetDaiBalance = cashBalance.minus(maxTotal).minus(totalDebt);
+  const targetDaiBalance = cashBalance.gt(zero) ?
+    cashBalance.minus(maxTotal).minus(totalDebt)
+    : maxTotal.times(minusOne)
+  ;
   const defaultTargetCash = cashBalance; // BigNumber.max(zero, cashBalance.minus(maxTotal));
 
+  console.log('prepareBuyAllocationRequest targetDaiBalance', targetDaiBalance.toString());
+  console.log('prepareBuyAllocationRequest defaultTargetCash', defaultTargetCash.toString());
   const createPlan = (debts: Array<Required<EditableDebt>>): Operations =>
     planBuy(baseToken, amount, maxTotal, debts);
 
