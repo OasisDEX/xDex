@@ -1,12 +1,12 @@
 {
   "name": "Eth2Dai",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "private": true,
   "license": "AGPL-3.0-or-later",
   "scripts": {
     "start": "node scripts/start.js",
     "build": "node scripts/build.js",
-    "build:ci": "REACT_APP_ENV='test' node scripts/build.js",
+    "build:ci": "ENV=dev REACT_APP_ENV='test' node scripts/build.js",
     "test": "yarn tslint && yarn tsc &&  node scripts/test.js --env=jsdom",
     "test:unit": "tslint --project . &&  node scripts/test.js --env=jsdom",
     "test:coverage": "yarn tslint && yarn tsc && node scripts/test.js --env=jsdom --coverage",
@@ -69,10 +69,10 @@
     "whatwg-fetch": "2.0.3"
   },
   "devDependencies": {
+    "typecov": "^0.2.1",
     "@codechecks/build-size-watcher": "^0.1.0",
-    "@codechecks/client": "^0.1.5",
+    "@codechecks/client": "^0.1.6",
     "@codechecks/commit-deployment": "^0.1.0",
-    "@codechecks/type-coverage-watcher": "0.0.7",
     "@cypress/webpack-preprocessor": "^1.0.0",
     "@storybook/addon-actions": "^3.4.10",
     "@storybook/addon-links": "^3.4.10",
