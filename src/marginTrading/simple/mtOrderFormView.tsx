@@ -4,10 +4,10 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
 // import { Muted } from '../../utils/text/Text';
-import { OfferType, Orderbook } from '../../exchange/orderbook/orderbook';
+import { OfferType } from '../../exchange/orderbook/orderbook';
 // import { tokens } from '../../blockchain/config';
 import { BigNumberInput } from '../../utils/bigNumberInput/BigNumberInput';
-import { FormChangeKind, ProgressStage } from '../../utils/form';
+import { FormChangeKind } from '../../utils/form';
 import { formatAmount, formatPrecision, formatPrice } from '../../utils/formatters/format';
 import { FormatPercent, Money } from '../../utils/formatters/Formatters';
 import { Button, ButtonGroup } from '../../utils/forms/Buttons';
@@ -17,13 +17,31 @@ import { Hr } from '../../utils/layout/LayoutHelpers';
 import { PanelBody, PanelHeader } from '../../utils/panel/Panel';
 
 // import { GasCost } from '../../utils/gasCost/GasCost';
-import { Impossible } from '../../utils/impossible';
-import { findMarginableAsset, MTAccount, MTAccountState, Operation } from '../state/mtAccount';
-import { ManualChange, Message, MessageKind, MTSimpleFormState } from './mtOrderForm';
+import { findMarginableAsset, MTAccountState } from '../state/mtAccount';
+import { Message, MessageKind, MTSimpleFormState } from './mtOrderForm';
 import * as styles from './mtOrderFormView.scss';
 
-const DevInfos = ({ value }: { value: MTSimpleFormState }) => (
-  <div style={{ position: 'fixed', top: '1em', right: '1em', background: 'rgba(20,20,20, 0.6)', padding: '5px', zIndex: 1000 }}>
+const DevInfos = ({ value }: { value: MTSimpleFormState }) => {
+
+  let balance = null;
+  let debt = null;
+  let referencePrice = null;
+  let leverage = null;
+  if (value.mta && value.mta.state === MTAccountState.setup) {
+    const ma = findMarginableAsset(value.baseToken, value.mta);
+    balance = ma!.balance;
+    debt = ma!.debt;
+    referencePrice = ma!.referencePrice;
+    leverage = balance.times(referencePrice).div(balance.times(referencePrice).minus(debt));
+  }
+  return (<div style={{
+    position: 'fixed',
+    top: '1em',
+    right: '1em',
+    background: 'rgba(20,20,20, 0.6)',
+    padding: '5px',
+    zIndex: 1000
+  }}>
     <h3>Internals:</h3>
     progress:
     {value.progress}
@@ -51,20 +69,21 @@ const DevInfos = ({ value }: { value: MTSimpleFormState }) => (
     <br/>
     MA:
     <br/>
-    {
-      (value.mta && value.mta.state === MTAccountState.setup) ?
         <React.Fragment>
           Balance:
-          {findMarginableAsset(value.baseToken, value.mta)!.balance.toString()}
+          {balance && balance.toString()}
           <br/>
           Debt:
-          {findMarginableAsset(value.baseToken, value.mta)!.debt.toString()}
+          {debt && debt.toString()}
           <br/>
           referencePrice:
-          {findMarginableAsset(value.baseToken, value.mta)!.referencePrice.toString()}
+          {referencePrice && referencePrice.toString()}
+          <br/>
+          LEVERAGE:
+          {leverage && leverage.toString()}
           <br/>
         </React.Fragment> : null
-    }
+
     <br/>
     Plan:
     {value.plan &&
@@ -74,7 +93,7 @@ const DevInfos = ({ value }: { value: MTSimpleFormState }) => (
     {value.messages &&
     <pre>{JSON.stringify(value.messages, null, 4)}</pre>}
   </div>
-);
+  ); };
 
 export class MtSimpleOrderFormView
   extends React.Component<MTSimpleFormState>
