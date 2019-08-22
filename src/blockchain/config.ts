@@ -13,11 +13,11 @@ import * as eth from './abi/ds-eth-token.abi.json';
 import * as dsProxyFactory from './abi/ds-proxy-factory.abi.json';
 import * as dsValue from './abi/ds-value.abi.json';
 import * as erc20 from './abi/erc20.abi.json';
-import * as marginEngine from './abi/margin-engine.abi.json';
 import * as otc from './abi/matching-market.abi.json';
 import * as mcdCat from './abi/mcd-cat.abi.json';
 import * as mcdFlipper from './abi/mcd-flipper.abi.json';
 import * as otcSupport from './abi/otc-support-methods.abi.json';
+import * as proxyActions from './abi/proxy-actions.abi.json';
 import * as proxyCreationAndExecute from './abi/proxy-creation-and-execute.abi.json';
 import * as proxyRegistry from './abi/proxy-registry.abi.json';
 import { web3 } from './web3';
@@ -252,6 +252,7 @@ const protoMain = {
   prices: {} as { [key: string]: string },
   spot: '',
   jug: '',
+  cdpManager: '',
   ilks: {} as { [key: string]: string },
   get otcSupportMethods() {
     return load(otcSupport, '0x9b3f075b12513afe56ca2ed838613b7395f57839');
@@ -268,8 +269,8 @@ const protoMain = {
   get marginProxyRegistry() {
     return load(proxyRegistry, '');
   },
-  get marginEngine() {
-    return load(marginEngine, '');
+  get proxyActions() {
+    return load(proxyActions, '');
   },
   oasisDataService: {
     url: 'https://cache.eth2dai.com/api/v1'
@@ -318,6 +319,7 @@ const kovan: NetworkConfig = {
   prices: {} as { [key: string]: string },
   spot: '',
   jug: '',
+  cdpManager: '',
   ilks: {} as { [key: string]: string },
   get otcSupportMethods() {
     return load(otcSupport, '0x303f2bf24d98325479932881657f45567b3e47a8');
@@ -334,8 +336,8 @@ const kovan: NetworkConfig = {
   get marginProxyRegistry() {
     return load(proxyRegistry, '');
   },
-  get marginEngine() {
-    return load(marginEngine, '');
+  get proxyActions() {
+    return load(proxyActions, '');
   },
   oasisDataService: {
     url: 'https://staging-cache.eth2dai.com/api/v1'
@@ -362,7 +364,7 @@ const localnet: NetworkConfig =   {
   startingBlock: 1,
   get otc() { return load(otc, '0x4e5F802405B29fFae4AE2a7dA1d9cEEB53904D55'); },
   // get saiTub() { return load(saiTub, '0x3546C7E3753C0e1D15878EC1C6dC65573864Dab7'); },
-  get ethPip() { return load(dsValue, '0x3546C7E3753C0e1D15878EC1C6dC65573864Dab7'); },
+  get ethPip() { return load(dsValue, '0x1B2c0f9b05f2ec9f77DeA9CdaEB04c396da5027B'); },
   get tokens() {
     return asMap('token', [
       loadToken('WETH', eth, '0x28085CEfA9103d3a55Fb5AfCcf07eD2038d31cD4'),
@@ -376,28 +378,26 @@ const localnet: NetworkConfig =   {
     ]);
   },
   joins: {
-    WETH: '0x74319036dBF0eBCBC024B37D43c6F5CCE1A2b6Cc',
+    WETH: '0xfEE6cFC4Dee7702733430cE539a704233D7501B5',
     DAI: '0x587635C60eC92BA1AE5db1e1DD7839FED9d23700',
   } as { [key: string]: string },
   mcd: {
     vat: '0x174805bDBE92fBb6eC91D602BE4DDaF7F7E51EA6',
     get cat() {
-      return load(mcdCat, '0x1B2c0f9b05f2ec9f77DeA9CdaEB04c396da5027B');
+      return load(mcdCat, '0xcF24768107824459Be154a9FBb9639785e0Ae462');
     },
     flip: {
       get WETH() {
-        return load(mcdFlipper, '0xda2C4bb255970325df981ac1a9cF3615317081A7');
+        return load(mcdFlipper, '0x30E57a1F60186444e4244828b42BBDC43F63C12B');
       },
-      // get DGX() {
-      //   return load(mcdFlipper, '0x65A96F05Fe2b2255Cf827695D7Ea0D8F5eB0d285');
-      // },
     }
   } as { [key: string]: any },
   prices: {
-    WETH: '0x3546C7E3753C0e1D15878EC1C6dC65573864Dab7',
+    WETH: '0x1B2c0f9b05f2ec9f77DeA9CdaEB04c396da5027B',
   } as { [key: string]: string },
-  spot: '0xd1f15AF11A1Fe0CE4B2f60779605BE6b9F3dFD22',
-  jug: '0xE6b8A544B8dbDEB9A69a63603E669cd00f751ad1',
+  spot: '0xAb14DdBdD66Bd9143c3E3d94E4Ce27Babc2b66eB',
+  jug: '0x3A6Ea44c1386F6745Fa20d7cAD939a22553579B0',
+  cdpManager: '0xC71022a713dA95bD4C926faf180FffBAfEf4bcA6',
   ilks: {
     WETH: web3.fromAscii('ETH'),
     // DGX: web3.fromAscii('DGX'),
@@ -406,19 +406,19 @@ const localnet: NetworkConfig =   {
     return load(otcSupport, '0x5de139DbBFd47dd1D2cD906348Fd1887135B2804');
   },
   get instantProxyRegistry() {
-    return load(proxyRegistry, '0x82bD1c3119dB58Ed8Ec0dD4cC2B16800b7edb362');
+    return load(proxyRegistry, '0x22b6C41D0b18193B20B182D8d5854fEFb744cC6A');
   },
   get instantProxyFactory() {
-    return load(dsProxyFactory, '0xDDd2bf368CDa8a6C6eECF6730482fB5E60709fc0');
+    return load(dsProxyFactory, '0x9c27f7553f12e0178c1D767265dFBD27CAEcec68');
   },
   get instantProxyCreationAndExecute() {
-    return load(proxyCreationAndExecute, '0x05CD7900FF72DEBcB77453Ef608941E37B1E161E');
+    return load(proxyCreationAndExecute, '0x947308140e877E8EeBcCED93B522407A24278c6A');
   },
   get marginProxyRegistry() {
     return load(proxyRegistry, '0x3A32AA343fBA264411EF47B00B195165738E4E6b');
   },
-  get marginEngine() {
-    return load(marginEngine, '0xb92c5af7231f9d448AC99A688BA290C580c707bA');
+  get proxyActions() {
+    return load(proxyActions, '0xb92c5af7231f9d448AC99A688BA290C580c707bA');
   },
   oasisDataService: {
     url: 'http://localhost:3001/v1'

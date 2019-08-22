@@ -81,10 +81,10 @@ export function planFund(
 
   const fundOps: Operation[] = asset.assetKind === AssetKind.marginable ?
   [
-    { amount, name: token, kind: OperationKind.fund },
+    { amount, name: token, kind: token === 'DAI' ? OperationKind.fundDai : OperationKind.fundGem },
     { name: token, dgem: amount, kind: OperationKind.adjust },
   ] : [
-    { amount, kind: OperationKind.fund, name: token },
+    { amount, name: token, kind: token === 'DAI' ? OperationKind.fundDai : OperationKind.fundGem },
   ];
 
   return [

@@ -1,7 +1,7 @@
 import { BigNumber } from 'bignumber.js';
 import { flatten } from 'lodash';
 
-import { AssetKind, tokens } from '../../blockchain/config';
+import { AssetKind } from '../../blockchain/config';
 import { Offer } from '../../exchange/orderbook/orderbook';
 import {
   findAsset, MarginableAsset, MarginableAssetCore, MTAccountSetup,
@@ -126,8 +126,7 @@ export function planBuy(
       maxTotal,
       name,
       amount,
-      kind: tokens[name].assetKind === AssetKind.nonMarginable ?
-        OperationKind.buy : OperationKind.buyRecursively
+      kind: OperationKind.buyRecursively,
     },
     ...extraAdjust
   ];
