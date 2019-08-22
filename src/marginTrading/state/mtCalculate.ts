@@ -86,7 +86,8 @@ export function realPurchasingPowerMarginable(
   let collRatio = amount.times(ma.referencePrice).div(debt);
   let cash = initialCash;
 
-  while (collRatio.gt(ma.safeCollRatio) && cash.gt(zero) && sellOffers.length > 0) {
+  // while (collRatio.gt(ma.safeCollRatio) && cash.gt(zero) && sellOffers.length > 0) {  // why cash should be > 0?
+  while (collRatio.gt(ma.safeCollRatio) && sellOffers.length > 0) {
     const [bought, cashLeft, offersLeft] = eat(cash, sellOffers);
     sellOffers = offersLeft;
     amount = amount.plus(bought);
