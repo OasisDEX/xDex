@@ -20,13 +20,23 @@ export enum OperationKind {
 }
 
 export type Operation = {
-  kind: OperationKind.fundGem | OperationKind.fundDai;
+  kind: OperationKind.fundGem;
   name: string;
   amount: BigNumber;
 } | {
-  kind: OperationKind.drawGem | OperationKind.drawDai;
+  kind: OperationKind.fundDai;
   name: string;
   amount: BigNumber;
+  ilk: string;
+} | {
+  kind: OperationKind.drawGem;
+  name: string;
+  amount: BigNumber;
+} | {
+  kind: OperationKind.drawDai;
+  name: string;
+  amount: BigNumber;
+  ilk: string;
 } | {
   kind: OperationKind.adjust;
   name: string;
@@ -121,6 +131,7 @@ export interface MarginableAssetCore extends Core {
   assetKind: AssetKind.marginable;
   urnBalance: BigNumber;
   debt: BigNumber;
+  dai: BigNumber;
   referencePrice: BigNumber;
   minCollRatio: BigNumber;
   safeCollRatio: BigNumber;

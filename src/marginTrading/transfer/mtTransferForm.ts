@@ -26,12 +26,10 @@ import { AssetKind } from '../../blockchain/config';
 import { combineAndMerge } from '../../utils/combineAndMerge';
 import { description, impossible, Impossible, isImpossible } from '../../utils/impossible';
 import { firstOfOrTrue } from '../../utils/operators';
-import {minusOne, zero} from '../../utils/zero';
-import {EditableDebt} from '../allocate/mtOrderAllocateDebtForm';
 import { planDraw } from '../plan/planDraw';
 import { planFund } from '../plan/planFund';
 import {
-  findAsset, findMarginableAsset,
+  findAsset,
   MTAccount, MTAccountState,
   Operation, UserActionKind
 } from '../state/mtAccount';
@@ -52,7 +50,7 @@ export type Message = {
   message: string;
 };
 
-export type ManualChange = TokenChange | AmountFieldChange;
+export type ManualChange = TokenChange | AmountFieldChange | IlkFieldChange;
 
 export interface MTTransferFormState extends HasGasEstimation {
   readyToProceed?: boolean;
@@ -61,6 +59,7 @@ export interface MTTransferFormState extends HasGasEstimation {
   balances?: Balances;
   messages: Message[];
   amount?: BigNumber;
+  ilk?: string;
   token: string;
   plan?: Operation[] | Impossible;
   progress?: ProgressStage;
@@ -73,13 +72,22 @@ export interface MTTransferFormState extends HasGasEstimation {
 export type CreateMTFundForm$ =
   (actionKind: UserActionKind, token: string) => Observable<MTTransferFormState>;
 
+export enum TransferFormChangeKind {
+  ilkFieldChange = 'ilkFieldChange',
+}
+
+export interface IlkFieldChange {
+  kind: TransferFormChangeKind.ilkFieldChange;
+  value?: string;
+}
+
 type EnvironmentChange =
   MTAccountChange | MTAccountStateChange |
   GasPriceChange | EtherPriceUSDChange | BalancesChange;
 
 // TODO: why not: ManualChange | EnvironmentChange | StageChange?
 type MTSetupFormChange =
-  TokenChange | AmountFieldChange |
+  TokenChange | AmountFieldChange | IlkFieldChange |
   EnvironmentChange |
   ProgressChange;
 
@@ -105,6 +113,10 @@ function applyChange(state: MTTransferFormState, change: MTSetupFormChange): MTT
       return { ...state,
         amount: change.value,
         gasEstimationStatus: GasEstimationStatus.unset };
+    case TransferFormChangeKind.ilkFieldChange:
+      return { ...state,
+        ilk: change.value,
+        gasEstimationStatus: GasEstimationStatus.unset };
     case FormChangeKind.progress:
       return { ...state, progress: change.progress };
     // default:
@@ -128,14 +140,14 @@ function updatePlan(state: MTTransferFormState): MTTransferFormState {
 
   const plan =
     (state.actionKind === UserActionKind.fund ? planFund : planDraw)(
-      state.mta, state.token, state.amount,
-      state.actionKind === UserActionKind.fund && state.token === 'DAI' ? [{
-        name: 'WETH',
-        delta: BigNumber.min(
-          findMarginableAsset('WETH', state.mta)!.debt,
-          state.amount
-        ).times(minusOne)
-      } as Required<EditableDebt>] : []
+      state.mta, state.token, state.ilk, state.amount, []
+      // state.actionKind === UserActionKind.fund && state.token === 'DAI' ? [{
+      //   name: 'WETH',
+      //   delta: BigNumber.min(
+      //     findMarginableAsset('WETH', state.mta)!.debt,
+      //     state.amount
+      //   ).times(minusOne)
+      // } as Required<EditableDebt>] : []
     );
 
   const messages: Message[] =
@@ -244,21 +256,27 @@ function validate(state: MTTransferFormState) {
 
   const messages: Message[] = [];
   const asset = findAsset(state.token, state.mta);
+  const ilkAsset = state.ilk && findAsset(state.ilk, state.mta);
 
   if (state.balances && state.amount) {
+    const drawBalance = state.token !== 'DAI' ?
+      (asset && asset.assetKind === AssetKind.marginable ? asset.availableBalance : undefined) :
+      (ilkAsset && ilkAsset.assetKind === AssetKind.marginable ? ilkAsset.dai : undefined);
     if (state.actionKind === UserActionKind.draw
-      && asset
-      && asset.assetKind === AssetKind.marginable
-      && asset.availableBalance.lt(state.amount)
+      && drawBalance && drawBalance.lt(state.amount)
     ) {
       messages.push({
         kind: MessageKind.insufficientAvailableAmount,
       });
-    } else if ((state.actionKind === UserActionKind.fund ?
-        state.balances[state.token] :
-        asset && asset.balance || new BigNumber(0)
-    ).lt(state.amount)) {
+    } else if (state.actionKind === UserActionKind.draw &&
+      asset && asset.assetKind === AssetKind.nonMarginable &&
+      (asset.balance || new BigNumber(0).lt(state.amount))) {
       messages.push({
+        kind: MessageKind.insufficientAmount,
+      });
+    } else if (state.actionKind === UserActionKind.fund &&
+      state.balances[state.token].lt(state.amount)) {
+      (null || messages).push({
         kind: MessageKind.insufficientAmount,
       });
     }

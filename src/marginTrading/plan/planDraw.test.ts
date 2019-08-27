@@ -18,6 +18,7 @@ describe('plan draw', () => {
       const plan = planDraw(
         mta,
         'DAI',
+        'WETH',
         new BigNumber('25'),
         []);
 
@@ -31,6 +32,7 @@ describe('plan draw', () => {
       const plan = planDraw(
         mta,
         'DAI',
+        'WETH',
         new BigNumber('20000'),
         []);
 
@@ -47,6 +49,7 @@ describe('plan draw', () => {
       const plan = planDraw(
         mta,
         'WETH',
+        undefined,
         new BigNumber('10'),
         []);
 
@@ -60,6 +63,7 @@ describe('plan draw', () => {
       const plan = planDraw(
         mta,
         'DGX',
+        undefined,
         new BigNumber('110'),
         []
         );
@@ -74,6 +78,7 @@ describe('plan draw', () => {
       const plan = planDraw(
         mta,
         'DGX',
+        undefined,
         new BigNumber('90'),
         []);
 
@@ -92,6 +97,7 @@ describe('plan draw', () => {
       const plan = planDraw(
         mta,
         'MKR',
+        undefined,
         new BigNumber('10'),
         []);
 
@@ -105,6 +111,7 @@ describe('plan draw', () => {
       const plan = planDraw(
         mta,
         'MKR',
+        undefined,
         new BigNumber('110'),
         []
         );
@@ -119,6 +126,7 @@ describe('plan draw', () => {
       const plan = planDraw(
         mta,
         'MKR',
+        undefined,
         new BigNumber('90'),
         []);
 

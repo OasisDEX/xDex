@@ -18,6 +18,7 @@ import { calculateMarginable } from '../state/mtCalculate';
 import { deltaToOps, Operations, orderDeltas } from './planUtils';
 
 export function prepareDrawRequest(
+  ilk: string | undefined,
   amount: BigNumber,
   token: string,
   mta: MTAccountSetup,
@@ -45,7 +46,7 @@ export function prepareDrawRequest(
     calls.mtDrawEstimateGas({ proxy, plan });
 
   const createPlan = (debts: Array<Required<EditableDebt>>): Operations =>
-      planDraw(mta, token, amount, debts);
+      planDraw(mta, token, ilk, amount, debts);
 
   return {
     targetDaiBalance,
@@ -61,6 +62,7 @@ export function prepareDrawRequest(
 export function planDraw(
   mta: MTAccountSetup,
   token: string,
+  ilk: string | undefined,
   amount: BigNumber,
   debts: Array<Required<EditableDebt>>,
 ): Operations {
@@ -79,24 +81,15 @@ export function planDraw(
     return impossible(`can't draw with ${token}`);
   }
 
-  if (amount.gt(asset.balance)) {
+  if (asset.name !== 'DAI' && amount.gt(asset.balance)) {
     return impossible(`not enough of ${token}`);
   }
 
-  const drawOps: Operation[] = asset.assetKind === AssetKind.marginable ?
-  [
-    { name: asset.name, dgem: minusOne.times(amount), kind: OperationKind.adjust },
-    {
-      amount,
-      name: asset.name,
-      kind: asset.name === 'DAI' ? OperationKind.drawDai : OperationKind.drawGem,
-    },
+  const drawOps: Operation[] = token === 'DAI' ? [
+    { amount, name: asset.name, ilk: ilk as string, kind: OperationKind.drawDai },
   ] : [
-    {
-      amount,
-      name: token,
-      kind: asset.name === 'DAI' ? OperationKind.drawDai : OperationKind.drawGem,
-    },
+    { name: asset.name, dgem: minusOne.times(amount), kind: OperationKind.adjust },
+    { amount, name: asset.name, kind: OperationKind.drawGem },
   ];
 
   return [

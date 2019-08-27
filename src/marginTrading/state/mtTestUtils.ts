@@ -32,6 +32,7 @@ export function getMarginableCore(props?: Partial<MarginableAssetCore>): Margina
     allowance: true,
     assetKind: AssetKind.marginable,
     debt: new BigNumber(0),
+    dai: new BigNumber(0),
     referencePrice: new BigNumber(0),
     minCollRatio: new BigNumber(0),
     safeCollRatio: new BigNumber(0),

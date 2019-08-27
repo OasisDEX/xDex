@@ -127,7 +127,7 @@ export class MTBalancesViewInternal extends React.Component<CombinedBalances & M
               }
             </td>
             <td className={styles.amount}>
-              {combinedBalance.asset &&
+              {combinedBalance.asset && combinedBalance.name !== 'DAI' &&
                <FormatAmount
                  value={combinedBalance.asset.balance}
                  token={combinedBalance.name}
@@ -135,7 +135,7 @@ export class MTBalancesViewInternal extends React.Component<CombinedBalances & M
               }
             </td>
             <td className={styles.amount}>
-              {combinedBalance.name !== 'ETH' &&
+              {combinedBalance.name !== 'ETH' && combinedBalance.name !== 'DAI' &&
                 <FormatAmount value={combinedBalance.mtAssetValueInDAI} token="DAI"/>
               }
             </td>

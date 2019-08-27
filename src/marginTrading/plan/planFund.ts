@@ -5,11 +5,11 @@ import { Calls } from '../../blockchain/calls/calls';
 import { AssetKind } from '../../blockchain/config';
 import { TxState } from '../../blockchain/transactions';
 import { impossible } from '../../utils/impossible';
-import { zero } from '../../utils/zero';
+import { minusOne, zero } from '../../utils/zero';
 import { AllocationRequestAssetInfo, AllocationRequestPilot } from '../allocate/allocate';
 import { EditableDebt } from '../allocate/mtOrderAllocateDebtForm';
 import {
-  findAsset, MarginableAssetCore,
+  findAsset, findMarginableAsset, MarginableAssetCore,
   MTAccountSetup,
   Operation,
   OperationKind
@@ -18,6 +18,7 @@ import { calculateMarginable } from '../state/mtCalculate';
 import { deltaToOps, Operations, orderDeltas } from './planUtils';
 
 export function prepareFundRequest(
+  ilk: string | undefined,
   amount: BigNumber,
   token: string,
   mta: MTAccountSetup,
@@ -45,7 +46,7 @@ export function prepareFundRequest(
     calls.mtFundEstimateGas({ proxy, plan });
 
   const createPlan = (debts: Array<Required<EditableDebt>>): Operations =>
-      planFund(mta, token, amount, debts);
+      planFund(mta, token, ilk, amount, debts);
 
   return {
     targetDaiBalance,
@@ -61,6 +62,7 @@ export function prepareFundRequest(
 export function planFund(
   mta: MTAccountSetup,
   token: string,
+  ilk: string | undefined,
   amount: BigNumber,
   debts: Array<Required<EditableDebt>>,
 ): Operations {
@@ -79,12 +81,19 @@ export function planFund(
     return impossible(`can\'t fund with ${token}`);
   }
 
-  const fundOps: Operation[] = asset.assetKind === AssetKind.marginable ?
-  [
-    { amount, name: token, kind: token === 'DAI' ? OperationKind.fundDai : OperationKind.fundGem },
-    { name: token, dgem: amount, kind: OperationKind.adjust },
+  const ilkAsset = ilk && findMarginableAsset(ilk, mta);
+  const fundOps: Operation[] = token === 'DAI' ? [
+    { amount, name: token, ilk: ilk as string, kind: OperationKind.fundDai },
+    ...ilkAsset && ilkAsset.debt.isPositive() ? [
+      {
+        name: ilk,
+        ddai: minusOne.times(BigNumber.min(amount, ilkAsset.debt)),
+        kind: OperationKind.adjust,
+      } as Operation,
+    ] : [],
   ] : [
-    { amount, name: token, kind: token === 'DAI' ? OperationKind.fundDai : OperationKind.fundGem },
+    { amount, name: token, kind: OperationKind.fundGem },
+    { name: token, dgem: amount, kind: OperationKind.adjust },
   ];
 
   return [

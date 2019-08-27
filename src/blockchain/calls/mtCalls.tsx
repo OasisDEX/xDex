@@ -1,7 +1,7 @@
 import { BigNumber } from 'bignumber.js';
 import * as React from 'react';
 
-import { Operation } from '../../marginTrading/state/mtAccount';
+import { Operation, OperationKind } from '../../marginTrading/state/mtAccount';
 import { Money } from '../../utils/formatters/Formatters';
 import { Currency } from '../../utils/text/Text';
 import { NetworkConfig } from '../config';
@@ -46,10 +46,11 @@ export interface MTBalanceData {
 
 export interface MTBalanceResult {
   assets: Array<{
-    urnBalance: BigNumber;
     walletBalance: BigNumber;
     marginBalance: BigNumber;
+    urnBalance: BigNumber;
     debt: BigNumber;
+    dai: BigNumber;
     referencePrice: BigNumber;
     minCollRatio: BigNumber;
     allowance: boolean;
@@ -116,7 +117,9 @@ function argsOfPerformOperations(
 
   for (const [i, o] of plan.entries()) {
     kinds[i] = web3.toHex(o.kind);
-    names[i] = web3.toHex(o.name);
+    names[i] = web3.toHex(
+      o.kind === OperationKind.fundDai || o.kind === OperationKind.drawDai ? o.ilk : o.name
+    );
     tokens[i] = context.tokens[o.name].address;
     adapters[i] = context.joins[o.name];
     amounts[i] = toWei(o.name, (o as any).amount);

@@ -3,15 +3,15 @@ import * as React from 'react';
 import * as ReactModal from 'react-modal';
 
 import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
-import { AssetKind, tokens } from '../../blockchain/config';
+import { tokens } from '../../blockchain/config';
 import { BigNumberInput } from '../../utils/bigNumberInput/BigNumberInput';
 import { connect } from '../../utils/connect';
 import { FormChangeKind, ProgressStage } from '../../utils/form';
 import { formatAmount } from '../../utils/formatters/format';
-import { Money } from '../../utils/formatters/Formatters';
 import { Button } from '../../utils/forms/Buttons';
 import { ErrorMessage } from '../../utils/forms/ErrorMessage';
 import { InputGroup, InputGroupAddon } from '../../utils/forms/InputGroup';
+import { Select } from '../../utils/forms/Select';
 import { GasCost } from '../../utils/gasCost/GasCost';
 import { inject } from '../../utils/inject';
 import { BorderBox, Hr } from '../../utils/layout/LayoutHelpers';
@@ -37,7 +37,9 @@ import {
   NonMarginableAsset,
   UserActionKind,
 } from '../state/mtAccount';
-import { Message, MessageKind, MTTransferFormState, } from './mtTransferForm';
+import {
+  Message, MessageKind, MTTransferFormState, TransferFormChangeKind
+} from './mtTransferForm';
 import * as styles from './mtTransferFormView.scss';
 
 type MTFundFormProps =
@@ -47,8 +49,6 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
 
   constructor(p: MTFundFormProps) {
     super(p);
-    this.amountChange = this.amountChange.bind(this);
-    this.close = this.close.bind(this);
   }
 
   public render() {
@@ -80,7 +80,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
       'Finalize transaction';
   }
 
-  private amountChange(e: React.ChangeEvent<HTMLInputElement>) {
+  private amountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/,/g, '');
     this.props.change({
       kind: FormChangeKind.amountFieldChange,
@@ -88,7 +88,15 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
     });
   }
 
-  private close() {
+  private ilkChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    this.props.change({
+      value,
+      kind: TransferFormChangeKind.ilkFieldChange,
+    });
+  }
+
+  private close = () => {
     this.props.cancel();
     this.props.close();
   }
@@ -99,6 +107,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
 
   private AccountSummary = () => {
     const asset = this.getAsset(this.props.token);
+    const ilkAsset = this.props.ilk && this.getAsset(this.props.ilk) as MarginableAsset;
 
     return(
       <table className={styles.balanceTable}>
@@ -109,7 +118,11 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
         </tr>
         <tr>
           <td><Muted>Margin account</Muted></td>
-          <td>{ asset && formatAmount(asset.balance, this.props.token)} {this.props.token}</td>
+          <td>{
+            this.props.token !== 'DAI' ?
+            asset && formatAmount(asset.balance, this.props.token) :
+            ilkAsset && formatAmount(ilkAsset.dai, this.props.token)
+          } {this.props.token}</td>
         </tr>
         {/*{ asset && asset.assetKind === AssetKind.marginable &&*/}
           {/*<tr>*/}
@@ -134,6 +147,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
   private Form() {
     return (
       <div>
+        {this.props.token === 'DAI' ? this.TargetGroup() : null}
         {this.AmountGroup(false)}
         { !!this.props.messages &&
           <ErrorMessage
@@ -215,7 +229,8 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
       const allocateForm$ = this.props.createMTAllocateForm$(
         this.props.mta.proxy,
         prepareRequest(
-          this.props.amount ,
+          this.props.ilk,
+          this.props.amount,
           this.props.token,
           this.props.mta)
       );
@@ -236,7 +251,8 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
     const retry = this.props.progress === ProgressStage.fiasco;
     const depositAgain = this.props.progress === ProgressStage.done;
     const deposit = !retry && !depositAgain;
-    const depositEnabled = this.props.readyToProceed && this.props.progress === undefined;
+    const depositEnabled = this.props.readyToProceed && this.props.progress === undefined &&
+      (this.props.token !== 'DAI' || !!this.props.ilk);
     const proceedName = this.props.actionKind === UserActionKind.fund ? 'Deposit' : 'Withdraw';
     return (
       <PanelFooter className={styles.buttons}>
@@ -289,6 +305,20 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
           placeholderChar={' '}
           disabled={disabled}
         />
+      </InputGroup>
+    );
+  }
+
+  private TargetGroup() {
+    const marginableAssets = this.props.mta &&
+      this.props.mta.state === MTAccountState.setup && this.props.mta.marginableAssets;
+    return (
+      <InputGroup sizer="md" style={{ marginBottom: '1em' }}>
+        <InputGroupAddon border="right">Asset</InputGroupAddon>
+        <Select value={this.props.ilk} onChange={this.ilkChange} style={{ width: '100%' }}>
+          <option hidden={true} />
+          { (marginableAssets || []).map(asset => <option key="asset.name">{asset.name}</option>)}
+        </Select>
       </InputGroup>
     );
   }

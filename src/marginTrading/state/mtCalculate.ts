@@ -32,6 +32,10 @@ function assetCoreAvailableActions(asset: Core) {
   return availableActions;
 }
 
+function assetCashAvailableActions(_asset: CashAssetCore) {
+  return [UserActionKind.fund, UserActionKind.draw];
+}
+
 function marginableAvailableActions(asset: MarginableAssetCore) {
   const availableActions: UserActionKind[] = [];
 
@@ -48,7 +52,7 @@ function marginableAvailableActions(asset: MarginableAssetCore) {
 
 function calculateCash(cash: CashAssetCore): CashAsset {
 
-  const availableActions = assetCoreAvailableActions(cash);
+  const availableActions = assetCashAvailableActions(cash);
 
   return {
     ...cash,

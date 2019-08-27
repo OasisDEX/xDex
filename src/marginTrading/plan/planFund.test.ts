@@ -13,7 +13,7 @@ describe('plan fund', () => {
     test('no cash', () => {
       const mta = getMTAccount({ marginableAssets: [wethEmpty] });
 
-      const plan = planFund(mta, 'DAI', new BigNumber('100'), []);
+      const plan = planFund(mta, 'DAI', 'WETH', new BigNumber('100'), []);
 
       expect(plan).toEqual([
         { amount: new BigNumber('100'), kind: OperationKind.fundDai, name: 'DAI' }]);
@@ -22,7 +22,7 @@ describe('plan fund', () => {
     test('some dgx, no debt', () => {
       const mta = getMTAccount({ marginableAssets: [dgx100] });
 
-      const plan = planFund(mta, 'DAI', new BigNumber('100'), []);
+      const plan = planFund(mta, 'DAI', 'DGX', new BigNumber('100'), []);
 
       expect(plan).toEqual([
         { amount: new BigNumber('100'), kind: OperationKind.fundDai, name: 'DAI' }]);
@@ -92,7 +92,7 @@ describe('plan fund', () => {
 
       const mta: MTAccountSetup = getMTAccount({ marginableAssets: [wethEmpty] });
 
-      const plan = planFund(mta, 'WETH', new BigNumber('25'), []);
+      const plan = planFund(mta, 'WETH', undefined, new BigNumber('25'), []);
 
       expect(plan).toEqual([
         { amount: new BigNumber('25'), kind: OperationKind.fundGem, name: 'WETH' },
@@ -108,7 +108,7 @@ describe('plan fund', () => {
         nonMarginableAssets: [mkrEmpty],
       });
 
-      const plan = planFund(mta, 'MKR', new BigNumber('12'), []);
+      const plan = planFund(mta, 'MKR', undefined, new BigNumber('12'), []);
 
       expect(plan).toEqual([
         { amount: new BigNumber('12'), kind: OperationKind.fundGem, name: 'MKR' }
