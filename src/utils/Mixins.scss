@@ -249,3 +249,13 @@ $inputFontSize: (
     }
   }
 }
+
+@mixin iconsDisabled($background, $content) {
+  :global(.icon-background){
+    fill :$background;
+  }
+
+  :global(.icon-content) {
+    fill: $content;
+  }
+}

@@ -1,9 +1,17 @@
-import * as React from 'react';
-import { BehaviorSubject, combineLatest, interval, Observable, of } from 'rxjs';
-import { distinctUntilChanged, first, flatMap, map, shareReplay, switchMap } from 'rxjs/operators';
-
 import { isEqual } from 'lodash';
 import { curry } from 'ramda';
+import * as React from 'react';
+import { BehaviorSubject, combineLatest, interval, Observable, of } from 'rxjs';
+import {
+  distinctUntilChanged,
+  filter,
+  first,
+  flatMap,
+  map,
+  shareReplay,
+  switchMap
+} from 'rxjs/operators';
+
 import * as balancesMT from './balances-mt/balances';
 import { CDPRiskManagements } from './balances-mt/CDPRiskManagements';
 import { MtAccountDetailsView } from './balances-mt/mtAccountDetailsView';
@@ -17,6 +25,16 @@ import {
   AssetsOverviewActionProps,
   AssetsOverviewExtraProps,
 } from './balances-nomt/AssetOverviewView';
+import {
+  Balances,
+  CombinedBalances,
+  createBalances$,
+  createCombinedBalances$,
+  createDustLimits$, createProxyAllowances$,
+  createWalletApprove,
+  createWalletDisapprove,
+  createWethBalances$,
+} from './balances/balances';
 import * as balancesNoMT from './balances-nomt/balances';
 import { createTaxExport$ } from './balances-nomt/taxExporter';
 import { TaxExporterView } from './balances-nomt/TaxExporterView';
@@ -341,7 +359,14 @@ export function setupAppContext() {
       context$,
       balances$: balancesWithEth$,
       dustLimits$: balancesNoMT.createDustLimits$(context$),
-      allowances$: balancesNoMT.createAllowances$(context$, initializedAccount$, onEveryBlock$),
+      allowances$: createProxyAllowances$(
+        context$,
+        initializedAccount$,
+        proxyAddress$.pipe(
+          filter(address => !!address)
+        ),
+        onEveryBlock$
+      ),
     }
   );
 

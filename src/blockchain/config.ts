@@ -1,12 +1,33 @@
 import { fromPairs, memoize, zip } from 'lodash';
 
 import { TradingPair } from '../exchange/tradingPair/tradingPair';
+import batCircleSvg from '../icons/coins/bat-circle.svg';
+import batColorSvg from '../icons/coins/bat-color.svg';
+import batSvg from '../icons/coins/bat.svg';
 import daiCircleSvg from '../icons/coins/dai-circle.svg';
 import daiColorSvg from '../icons/coins/dai-color.svg';
 import daiSvg from '../icons/coins/dai.svg';
+import dgdCircleSvg from '../icons/coins/dgd-circle.svg';
+import dgdColorSvg from '../icons/coins/dgd-color.svg';
+import dgdSvg from '../icons/coins/dgd.svg';
 import ethCircleSvg from '../icons/coins/eth-circle.svg';
 import ethColorSvg from '../icons/coins/eth-color.svg';
 import ethSvg from '../icons/coins/eth.svg';
+
+// import mkrInverseSvg from '../icons/coins/mkr-inverse.svg';
+// import mkrSvg from '../icons/coins/mkr.svg';
+import repCircleSvg from '../icons/coins/rep-circle.svg';
+import repColorSvg from '../icons/coins/rep-color.svg';
+import repSvg from '../icons/coins/rep.svg';
+// import usdcCircleSvg from '../icons/coins/usdc-circle.svg';
+// import usdcColorSvg from '../icons/coins/usdc-color.svg';
+// import usdcSvg from '../icons/coins/usdc.svg';
+// import wbtcCircleSvg from '../icons/coins/wbtc-circle.svg';
+// import wbtcColorSvg from '../icons/coins/wbtc-color.svg';
+// import wbtcSvg from '../icons/coins/wbtc.svg';
+import zrxCircleSvg from '../icons/coins/zrx-circle.svg';
+import zrxColorSvg from '../icons/coins/zrx-color.svg';
+import zrxSvg from '../icons/coins/zrx.svg';
 
 import { SvgImageSimple } from '../utils/icons/utils';
 import * as eth from './abi/ds-eth-token.abi.json';
@@ -24,14 +45,13 @@ import { web3 } from './web3';
 
 export const tradingPairs: TradingPair[] = [
   { base: 'WETH', quote: 'DAI' },
-  // ...process.env.REACT_APP_OASIS_DEX_ENABLED !== '1' ? [] : [
-  //   // { base: 'MKR', quote: 'DAI' },
-  //   // { base: 'MKR', quote: 'WETH' },
-  //   { base: 'DGD', quote: 'DAI' },
-  //   { base: 'REP', quote: 'DAI' },
-  //   { base: 'OMG', quote: 'DAI' },
-  //   { base: 'ZRX', quote: 'DAI' }
-  // ]
+  ...process.env.REACT_APP_OASIS_DEX_ENABLED !== '1' ? [] : [
+    // { base: 'MKR', quote: 'DAI' },
+    // { base: 'MKR', quote: 'WETH' },
+    { base: 'DGD', quote: 'DAI' },
+    { base: 'REP', quote: 'DAI' },
+    { base: 'ZRX', quote: 'DAI' }
+  ]
 ];
 
 function asMap<D>(key: string, data: D[]): { [key: string]: D } {
@@ -60,18 +80,6 @@ export const tokens = asMap('symbol', [
     iconColor: SvgImageSimple(ethColorSvg),
     assetKind: AssetKind.unknown,
   },
-  // ...process.env.REACT_APP_OASIS_DEX_ENABLED !== '1' ? [] : [{
-  //   symbol: 'MKR',
-  //   precision: 18,
-  //   digits: 5,
-  //   digitsInstant: 3,
-  //   maxSell: '10000000',
-  //   name: 'Maker',
-  //   icon: SvgImageSimple(mkrSvg),
-  //   // iconInverse: SvgImageSimple(mkrInverseSvg),
-  //   iconCircle: SvgImageSimple(mkrInverseSvg),
-  //   iconColor: SvgImageSimple(mkrInverseSvg),
-  // }],
   {
     symbol: 'WETH',
     precision: 18,
@@ -83,7 +91,7 @@ export const tokens = asMap('symbol', [
     icon: SvgImageSimple(ethSvg),
     // iconInverse: SvgImageSimple(ethCircleSvg),
     iconCircle: SvgImageSimple(ethCircleSvg),
-    iconColor: SvgImageSimple(ethColorSvg),
+    iconColor: SvgImageSimple(ethCircleSvg),
     assetKind: AssetKind.marginable,
   },
   {
@@ -99,87 +107,88 @@ export const tokens = asMap('symbol', [
     iconCircle: SvgImageSimple(daiCircleSvg),
     iconColor: SvgImageSimple(daiColorSvg),
   },
-  // {
-  //   symbol: 'DGX',
-  //   precision: 18,
-  //   digits: 5,
-  //   safeCollRatio: 1.5,
-  //   maxSell: '1000000000000000',
-  //   name: 'Digix',
-  //   icon: SvgImageSimple(mkrSvg),
-  //   iconInverse: SvgImageSimple(mkrInverseSvg),
-  //   iconCircle: SvgImageSimple(mkrSvg),
-  //   iconColor: SvgImageSimple(mkrInverseSvg),
-  // },
-  // {
-  //   symbol: 'DGD',
-  //   precision: 9,
-  //   digits: 5,
-  //   safeCollRatio: 1.5,
-  //   maxSell: '1000000000000000',
-  //   name: 'DigixDAO',
-  //   icon: SvgImageSimple(dgdSvg),
-  //   // iconInverse: SvgImageSimple(dgdInverseSvg),
-  //   iconCircle: SvgImageSimple(dgdCircleSvg),
-  //   iconColor: SvgImageSimple(dgdColorSvg),
-  //   assetKind: AssetKind.marginable,
-  // },
-  // {
-  //   symbol: 'REP',
-  //   precision: 18,
-  //   digits: 5,
-  //   safeCollRatio: 1.5,
-  //   maxSell: '1000000000000000',
-  //   name: 'Augur',
-  //   icon: SvgImageSimple(repSvg),
-  //   // iconInverse: SvgImageSimple(repInverseSvg),
-  //   iconCircle: SvgImageSimple(repCircleSvg),
-  //   iconColor: SvgImageSimple(repColorSvg),
-  //   assetKind: AssetKind.marginable,
-  // },
-  // {
-  //   symbol: 'OMG',
-  //   precision: 18,
-  //   digits: 5,
-  //   safeCollRatio: 1.5,
-  //   maxSell: '1000000000000000',
-  //   name: 'OmniseGO',
-  //   icon: SvgImageSimple(omgSvg),
-  //   // iconInverse: SvgImageSimple(mkrInverseSvg),
-  //   iconCircle: SvgImageSimple(omgCircleSvg),
-  //   iconColor: SvgImageSimple(omgColorSvg),
-  //   assetKind: AssetKind.marginable,
-  // },
-  // {
-  //   symbol: 'ZRX',
-  //   precision: 18,
-  //   digits: 5,
-  //   safeCollRatio: 1.5,
-  //   maxSell: '1000000000000000',
-  //   name: '0x',
-  //   icon: SvgImageSimple(zrxSvg),
-  //   // iconInverse: SvgImageSimple(mkrInverseSvg),
-  //   iconCircle: SvgImageSimple(zrxCircleSvg),
-  //   iconColor: SvgImageSimple(zrxColorSvg),
-  //   assetKind: AssetKind.marginable,
-  // },
-  // {
-  //   symbol: 'BAT',
-  //   precision: 18,
-  //   digits: 5,
-  //   safeCollRatio: 1.5,
-  //   maxSell: '1000000000000000',
-  //   name: 'Basic Attention Token',
-  //   icon: SvgImageSimple(batSvg),
-  //   // iconInverse: SvgImageSimple(batInverseSvg),
-  //   iconCircle: SvgImageSimple(batCircleSvg),
-  //   iconColor: SvgImageSimple(batColorSvg),
-  //   assetKind: AssetKind.marginable,
-  // },
+  ...process.env.REACT_APP_OASIS_DEX_ENABLED !== '1' ? [] : [
+    // {
+    //   symbol: 'MKR',
+    //   precision: 18,
+    //   digits: 5,
+    //   digitsInstant: 3,
+    //   maxSell: '10000000',
+    //   name: 'Maker',
+    //   icon: SvgImageSimple(mkrSvg),
+    //   iconCircle: SvgImageSimple(mkrInverseSvg),
+    //   iconColor: SvgImageSimple(mkrInverseSvg),
+    // },
+    // {
+    //   symbol: 'DGX',
+    //   precision: 18,
+    //   digits: 5,
+    //   digitsInstant: 3,
+    //   safeCollRatio: 1.5,
+    //   maxSell: '1000000000000000',
+    //   name: 'Digix',
+    //   icon: SvgImageSimple(dgdSvg),
+    //   // iconInverse: SvgImageSimple(mkrInverseSvg),
+    //   iconCircle: SvgImageSimple(dgdCircleSvg),
+    //   iconColor: SvgImageSimple(dgdColorSvg),
+    // },
+    {
+      symbol: 'DGD',
+      precision: 9,
+      digits: 5,
+      digitsInstant: 3,
+      safeCollRatio: 1.5,
+      maxSell: '1000000000000000',
+      name: 'DigixDAO',
+      icon: SvgImageSimple(dgdSvg),
+    // iconInverse: SvgImageSimple(dgdInverseSvg),
+      iconCircle: SvgImageSimple(dgdCircleSvg),
+      iconColor: SvgImageSimple(dgdColorSvg),
+    },
+    {
+      symbol: 'REP',
+      precision: 18,
+      digits: 5,
+      digitsInstant: 3,
+      safeCollRatio: 1.5,
+      maxSell: '1000000000000000',
+      name: 'Augur',
+      icon: SvgImageSimple(repSvg),
+    // iconInverse: SvgImageSimple(repInverseSvg),
+      iconCircle: SvgImageSimple(repCircleSvg),
+      iconColor: SvgImageSimple(repColorSvg),
+    },
+    {
+      symbol: 'ZRX',
+      precision: 18,
+      digits: 5,
+      digitsInstant: 3,
+      safeCollRatio: 1.5,
+      maxSell: '1000000000000000',
+      name: '0x',
+      icon: SvgImageSimple(zrxSvg),
+    // iconInverse: SvgImageSimple(mkrInverseSvg),
+      iconCircle: SvgImageSimple(zrxCircleSvg),
+      iconColor: SvgImageSimple(zrxColorSvg),
+    },
+    {
+      symbol: 'BAT',
+      precision: 18,
+      digits: 5,
+      digitsInstant: 3,
+      safeCollRatio: 1.5,
+      maxSell: '1000000000000000',
+      name: 'Basic Attention Token',
+      icon: SvgImageSimple(batSvg),
+    // iconInverse: SvgImageSimple(batInverseSvg),
+      iconCircle: SvgImageSimple(batCircleSvg),
+      iconColor: SvgImageSimple(batColorSvg),
+    },
   // {
   //   symbol: 'USDC',
   //   precision: 6,
   //   digits: 5,
+  //   digitsInstant: 2,
   //   safeCollRatio: 1.5,
   //   maxSell: '1000000000000000',
   //   name: 'USD Coin',
@@ -194,6 +203,7 @@ export const tokens = asMap('symbol', [
   //   symbol: 'WBTC',
   //   precision: 8,
   //   digits: 5,
+  //   digitsInstant: 3,
   //   safeCollRatio: 1.5,
   //   maxSell: '1000000000000000',
   //   name: 'Wrapped Bitcoin',
@@ -204,7 +214,7 @@ export const tokens = asMap('symbol', [
   //   assetKind: AssetKind.marginable,
   //   // address: 0x2260fac5e5542a773aa44fbcfedf7c193bc2c599
   // }
-]);
+  ]]);
 
 const load = memoize(
   (abi: any, address: string) => {
@@ -242,7 +252,6 @@ const protoMain = {
       loadToken('MKR', erc20, '0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2'),
       loadToken('DGD', erc20, '0xe0b7927c4af23765cb51314a0e0521a9645f0e2a'),
       loadToken('REP', erc20, '0x1985365e9f78359a9B6AD760e32412f4a445E862'),
-      loadToken('OMG', erc20, '0xd26114cd6EE289AccF82350c8d8487fedB8A0C07'),
       loadToken('ZRX', erc20, '0xe41d2489571d322189246dafa5ebde1f4699f498'),
       loadToken('BAT', erc20, '0x0d8775f648430679a709e98d2b0cb6250d2887ef'),
     ]);
@@ -309,7 +318,6 @@ const kovan: NetworkConfig = {
       loadToken('MKR', erc20, '0xaaf64bfcc32d0f15873a02163e7e500671a4ffcd'),
       loadToken('DGD', erc20, '0x62aeec5fb140bb233b1c5612a8747ca1dc56dc1b'),
       loadToken('REP', erc20, '0xc7aa227823789e363f29679f23f7e8f6d9904a9b'),
-      loadToken('OMG', erc20, '0x441b1a74c69ee6e631834b626b29801d42076d38'),
       loadToken('ZRX', erc20, '0x18392097549390502069c17700d21403ea3c721a'),
       loadToken('BAT', erc20, '0x9f8cfb61d3b2af62864408dd703f9c3beb55dff7'),
     ]);
@@ -340,7 +348,7 @@ const kovan: NetworkConfig = {
     return load(proxyActions, '');
   },
   oasisDataService: {
-    url: 'https://staging-cache.eth2dai.com/api/v1'
+    url: 'https://kovan-cache.eth2dai.com/api/v1'
   },
   etherscan: {
     url: 'https://kovan.etherscan.io',

@@ -11,14 +11,22 @@ import {
   scan,
   shareReplay,
   startWith,
-  switchMap,
+  switchMap, take,
 } from 'rxjs/operators';
 
 import { Allowances, Balances, DustLimits } from '../balances-nomt/balances';
 import { Calls, Calls$, ReadCalls, ReadCalls$ } from '../blockchain/calls/calls';
 import { eth2weth, weth2eth } from '../blockchain/calls/instant';
 import { NetworkConfig, tokens } from '../blockchain/config';
-import { isDone, TxStatus } from '../blockchain/transactions';
+import { EtherscanConfig } from '../blockchain/etherscan';
+import { GasPrice$ } from '../blockchain/network';
+import {
+  isDone,
+  isDoneButNotSuccessful,
+  isSuccess,
+  TxState,
+  TxStatus
+} from '../blockchain/transactions';
 import { User } from '../blockchain/user';
 import { OfferType } from '../exchange/orderbook/orderbook';
 import { combineAndMerge } from '../utils/combineAndMerge';
@@ -53,13 +61,6 @@ export interface FormResetChange {
   kind: InstantFormChangeKind.formResetChange;
 }
 
-export enum Position {
-  TOP = 'top',
-  BOTTOM = 'bottom'
-}
-
-export type Placement = Position.TOP | Position.BOTTOM;
-
 export enum MessageKind {
   noAllowance = 'noAllowance',
   insufficientAmount = 'insufficientAmount',
@@ -67,6 +68,14 @@ export enum MessageKind {
   dustAmount = 'dustAmount',
   orderbookTotalExceeded = 'orderbookTotalExceeded',
   notConnected = 'notConnected',
+  txInProgress = 'txInProgress',
+}
+
+export interface TxInProgressMessage {
+  kind: MessageKind.txInProgress;
+  progress: Progress;
+  field: string;
+  etherscan?: EtherscanConfig;
 }
 
 export type Message = {
@@ -74,31 +83,19 @@ export type Message = {
     | MessageKind.insufficientAmount
     | MessageKind.incredibleAmount;
   field: string;
-  priority: number;
   token: string;
   amount: BigNumber;
-  placement: Placement;
 } | {
   kind: MessageKind.orderbookTotalExceeded
   field: string;
   side: OfferType
   amount: BigNumber,
   token: string;
-  priority: number;
-  placement: Placement;
   error: any
 } | {
   kind: MessageKind.notConnected;
   field: string;
-  priority: number;
-  placement: Placement;
-// } | {
-//   kind: MessageKind.custom
-//   field: string;
-//   priority: number;
-//   placement: Placement;
-//   error: any
-};
+} | TxInProgressMessage;
 
 export enum TradeEvaluationStatus {
   unset = 'unset',
@@ -109,6 +106,7 @@ export enum TradeEvaluationStatus {
 
 export enum ProgressKind {
   onlyProxy = 'onlyProxy',
+  onlyAllowance = 'onlyAllowance',
   proxyPayWithETH = 'proxyPayWithETH',
   noProxyPayWithETH = 'noProxyPayWithETH',
   noProxyNoAllowancePayWithERC20 = 'noProxyNoAllowancePayWithERC20',
@@ -128,12 +126,30 @@ export enum ViewKind {
   summary = 'summary'
 }
 
-export type Progress = {
-  gasUsed?: BigNumber,
-  bought?: BigNumber,
-  sold?: BigNumber
+interface GenericProgress {
+  gasUsed?: BigNumber;
+  bought?: BigNumber;
+  sold?: BigNumber;
   done: boolean;
-} & ({
+}
+
+interface ManualProxyProgress extends GenericProgress {
+  kind: ProgressKind.onlyProxy;
+  proxyTxStatus: TxStatus;
+  txHash?: string;
+  tradeTxStatus?: TxStatus;
+}
+
+export interface ManualAllowanceProgress extends GenericProgress {
+  kind: ProgressKind.onlyAllowance;
+  token: string;
+  direction: 'locking' | 'unlocking';
+  allowanceTxStatus: TxStatus;
+  txHash?: string;
+  tradeTxStatus?: TxStatus;
+}
+
+export type Progress = GenericProgress & ({
   kind: ProgressKind.proxyPayWithETH
     | ProgressKind.noProxyPayWithETH
     | ProgressKind.proxyAllowancePayWithERC20
@@ -153,11 +169,9 @@ export type Progress = {
   allowanceTxHash?: string
   tradeTxStatus?: TxStatus;
   tradeTxHash?: string
-} | {
-  kind: ProgressKind.onlyProxy
-  proxyTxStatus: TxStatus;
-  tradeTxStatus?: TxStatus;
-});
+} | ManualProxyProgress
+  | ManualAllowanceProgress
+  );
 
 interface TradeEvaluationState {
   buyAmount?: BigNumber;
@@ -167,14 +181,24 @@ interface TradeEvaluationState {
   bestPrice?: BigNumber;
 }
 
-export interface InstantFormState extends HasGasEstimation, TradeEvaluationState {
+export interface ManualAllowanceProgressState {
+  toggleAllowance: (token: string) => void;
+  manualAllowancesProgress?: { [token: string]: ManualAllowanceProgress };
+}
+
+export interface InstantFormState extends HasGasEstimation,
+  TradeEvaluationState,
+  ManualAllowanceProgressState {
   view: ViewKind;
   readyToProceed?: boolean;
   progress?: Progress;
   buyToken: string;
   sellToken: string;
   kind?: OfferType;
-  message?: Message;
+  message?: {
+    top?: Message;
+    bottom?: Message;
+  };
   submit: (state: InstantFormState) => void;
   createProxy: () => void;
   change: (change: ManualChange) => void;
@@ -204,6 +228,7 @@ export enum InstantFormChangeKind {
   allowancesChange = 'allowancesChange',
   slippageLimitChange = 'slippageLimitChange',
   contextChange = 'contextChange',
+  manualAllowanceChange = 'manualAllowanceChange'
 }
 
 export interface ProgressChange {
@@ -264,6 +289,12 @@ export interface SlippageLimitChange {
   value: BigNumber;
 }
 
+export interface ManualAllowanceChange {
+  kind: InstantFormChangeKind.manualAllowanceChange;
+  token: string;
+  progress: ManualAllowanceProgress;
+}
+
 export type ManualChange =
   BuyAmountChange |
   SellAmountChange |
@@ -271,7 +302,8 @@ export type ManualChange =
   TokenChange |
   FormResetChange |
   ViewChange |
-  SlippageLimitChange;
+  SlippageLimitChange |
+  ManualAllowanceChange;
 
 export type EnvironmentChange =
   GasPriceChange |
@@ -396,7 +428,7 @@ function applyChange(state: InstantFormState, change: InstantFormChange): Instan
           progress: change.progress,
           view: change.progress.tradeTxStatus === TxStatus.Success
             ? ViewKind.summary
-            : ViewKind.finalization
+            : state.view
         };
       }
 
@@ -423,6 +455,9 @@ function applyChange(state: InstantFormState, change: InstantFormChange): Instan
     case InstantFormChangeKind.proxyChange:
       return {
         ...state,
+        view: state.view === ViewKind.allowances && !change.value
+          ? ViewKind.account
+          : state.view,
         proxyAddress: change.value
       };
     case InstantFormChangeKind.contextChange:
@@ -437,12 +472,24 @@ function applyChange(state: InstantFormState, change: InstantFormChange): Instan
     case FormChangeKind.userChange:
       return {
         ...state,
+        view: !change.user.account && [
+          ViewKind.priceImpactWarning,
+          ViewKind.allowances,
+          ViewKind.account
+        ].includes(state.view) ? ViewKind.new : state.view,
         user: change.user
       };
     case InstantFormChangeKind.slippageLimitChange:
       return {
         ...state,
         slippageLimit: change.value
+      };
+    case InstantFormChangeKind.manualAllowanceChange:
+      const manualAllowancesProgress = ({ ...state.manualAllowancesProgress } || {}) as any;
+      manualAllowancesProgress[change.token] = change.progress;
+      return {
+        ...state,
+        manualAllowancesProgress
       };
   }
 
@@ -460,13 +507,13 @@ function evaluateBuy(calls: ReadCalls, state: InstantFormState) {
   const errorItem = (error?: Error) => ({
     sellAmount: undefined,
     message: {
-      error,
-      kind: MessageKind.orderbookTotalExceeded,
-      amount: buyAmount,
-      side: 'buy',
-      token: buyToken,
-      placement: Position.TOP,
-      priority: 3
+      top: {
+        error,
+        kind: MessageKind.orderbookTotalExceeded,
+        amount: buyAmount,
+        side: 'buy',
+        token: buyToken,
+      }
     }
   });
 
@@ -491,13 +538,13 @@ function evaluateSell(calls: ReadCalls, state: InstantFormState) {
   const errorItem = (error?: Error) => ({
     buyAmount: undefined,
     message: {
-      error,
-      kind: MessageKind.orderbookTotalExceeded,
-      amount: sellAmount,
-      side: 'sell',
-      token: sellToken,
-      placement: Position.TOP,
-      priority: 3
+      top: {
+        error,
+        kind: MessageKind.orderbookTotalExceeded,
+        amount: sellAmount,
+        side: 'sell',
+        token: sellToken,
+      }
     }
   });
 
@@ -633,35 +680,84 @@ function validate(state: InstantFormState): InstantFormState {
     return state;
   }
 
-  let message: Message | undefined = state.message;
+  let message: {
+    top?: Message,
+    bottom?: Message
+  } | undefined = state.message;
 
   const [spendField, receiveField] = ['sellToken', 'buyToken'];
   const [spendToken, receiveToken] = [state.sellToken, state.buyToken];
   const [spendAmount, receiveAmount] = [state.sellAmount, state.buyAmount];
   const dustLimits = state.dustLimits;
+  const manualAllowancesProgress = state.manualAllowancesProgress;
 
+  // In case when the orderbook is not big enough to fill an order
+  // and the user hasn't connected his wallet, we have to display both errors
   if (!state.user || !state.user.account) {
-    message = prioritize(message, {
-      kind: MessageKind.notConnected,
-      field: spendField,
-      priority: 1000,
-      placement: Position.BOTTOM,
-    });
+    message = {
+      ...message,
+      bottom: {
+        kind: MessageKind.notConnected,
+        field: spendField,
+      }
+    };
+
+    return {
+      ...state,
+      message,
+    };
   }
 
-  if (spendAmount && (
-    spendToken === 'ETH' && state.etherBalance && state.etherBalance.lt(spendAmount) ||
-    state.balances && state.balances[spendToken] && state.balances[spendToken].lt(spendAmount)
-  )) {
-    message = prioritize(message, {
-      kind: MessageKind.insufficientAmount,
-      field: spendField,
-      amount: spendAmount,
-      priority: 1,
-      token: spendToken,
-      placement: Position.BOTTOM
-    });
+  // In case there is an error displayed at the top
+  // and the user has his wallet connected
+  // we don't care about potential errors displayed at the bottom
+  if (message && message.top) {
+    return state;
   }
+
+  if (state.progress && !state.progress.done) {
+    message = {
+      ...message,
+      bottom: {
+        kind: MessageKind.txInProgress,
+        etherscan: state.context && state.context.etherscan,
+        progress: state.progress,
+        field: spendField,
+      }
+    };
+
+    return {
+      ...state,
+      message
+    };
+  }
+
+  if (manualAllowancesProgress) {
+    const settingAllowanceInProgress = Object.keys(manualAllowancesProgress).find((token) =>
+      manualAllowancesProgress[token] && !manualAllowancesProgress[token].done
+    );
+
+    if (settingAllowanceInProgress) {
+      message = {
+        ...message,
+        bottom: {
+          kind: MessageKind.txInProgress,
+          etherscan: state.context && state.context.etherscan,
+          progress: manualAllowancesProgress[settingAllowanceInProgress],
+          field: spendField,
+        }
+      };
+    }
+
+    return {
+      ...state,
+      message
+    };
+  }
+
+  // The rest of the errors are in order of importance.
+  // Only bottom error is set since if we got here
+  // that means we don't have any errors for the top
 
   if (
     spendAmount
@@ -669,14 +765,36 @@ function validate(state: InstantFormState): InstantFormState {
     && dustLimits[eth2weth(spendToken)]
     && dustLimits[eth2weth(spendToken)].gt(spendAmount)
   ) {
-    message = prioritize(message, {
-      kind: MessageKind.dustAmount,
-      amount: dustLimits[eth2weth(spendToken)],
-      field: spendField,
-      priority: 2,
-      token: spendToken,
-      placement: Position.BOTTOM
-    });
+    message = {
+      bottom: {
+        kind: MessageKind.dustAmount,
+        amount: dustLimits[eth2weth(spendToken)],
+        field: spendField,
+        token: spendToken,
+      }
+    };
+    return {
+      ...state,
+      message
+    };
+  }
+
+  if (
+    spendAmount
+    && new BigNumber(tokens[eth2weth(spendToken)].maxSell).lt(spendAmount)
+  ) {
+    message = {
+      bottom: {
+        kind: MessageKind.incredibleAmount,
+        field: spendField,
+        token: spendToken,
+        amount: new BigNumber(tokens[eth2weth(spendToken)].maxSell),
+      }
+    };
+    return {
+      ...state,
+      message
+    };
   }
 
   if (
@@ -685,44 +803,62 @@ function validate(state: InstantFormState): InstantFormState {
     && dustLimits[eth2weth(receiveToken)]
     && dustLimits[eth2weth(receiveToken)].gt(receiveAmount)
   ) {
-    message = prioritize(message, {
-      kind: MessageKind.dustAmount,
-      amount: dustLimits[eth2weth(receiveToken)],
-      field: receiveField,
-      priority: 2,
-      token: receiveToken,
-      placement: Position.BOTTOM
-    });
+    message = {
+      bottom: {
+        kind: MessageKind.dustAmount,
+        amount: dustLimits[eth2weth(receiveToken)],
+        field: receiveField,
+        token: receiveToken,
+      }
+    };
+    return {
+      ...state,
+      message
+    };
   }
 
   if (
-    spendAmount && new BigNumber(tokens[eth2weth(spendToken)].maxSell).lt(spendAmount)
+    receiveAmount
+    && new BigNumber(tokens[eth2weth(receiveToken)].maxSell).lt(receiveAmount)
   ) {
-    message = prioritize(message, {
-      kind: MessageKind.incredibleAmount,
-      field: spendField,
-      priority: 2,
-      token: spendToken,
-      amount: new BigNumber(tokens[eth2weth(spendToken)].maxSell),
-      placement: Position.BOTTOM
-    });
+    message = {
+      bottom: {
+        kind: MessageKind.incredibleAmount,
+        field: receiveField,
+        token: receiveToken,
+        amount: new BigNumber(tokens[eth2weth(receiveToken)].maxSell),
+      }
+    };
+    return {
+      ...state,
+      message
+    };
   }
 
-  if (receiveAmount && new BigNumber(tokens[eth2weth(receiveToken)].maxSell).lt(receiveAmount)) {
-    message = prioritize(message, {
-      kind: MessageKind.incredibleAmount,
-      field: receiveField,
-      priority: 2,
-      token: receiveToken,
-      amount: new BigNumber(tokens[eth2weth(receiveToken)].maxSell),
-      placement: Position.BOTTOM
-    });
+  if (spendAmount && (
+    spendToken === 'ETH'
+    && state.etherBalance
+    && state.etherBalance.lt(spendAmount)
+    ||
+    state.balances
+    && state.balances[spendToken]
+    && state.balances[spendToken].lt(spendAmount)
+  )) {
+    message = {
+      bottom: {
+        kind: MessageKind.insufficientAmount,
+        field: spendField,
+        amount: spendAmount,
+        token: spendToken,
+      }
+    };
+    return {
+      ...state,
+      message
+    };
   }
 
-  return {
-    ...state,
-    message
-  };
+  return state;
 }
 
 function calculatePriceAndImpact(state: InstantFormState): InstantFormState {
@@ -770,23 +906,132 @@ function prepareSubmit(
   return [submit, stageChange$];
 }
 
-function manualProxyCreation(
+enum AllowanceDirection {
+  locking = 'locking',
+  unlocking = 'unlocking',
+}
+
+interface UnidirectionalManualAllowanceStatus {
+  token: string;
+  direction: AllowanceDirection;
+  progress: TxState;
+}
+
+export function manualAllowanceSetup(
   theCalls$: Calls$,
+  gasPrice$: GasPrice$,
+  proxyAddress$: Observable<string>,
+  allowances$: Observable<Allowances>
+): [(token: string) => void, Observable<ManualAllowanceChange>] {
+  const manualAllowanceProgressChanges$ = new Subject<ManualAllowanceChange>();
+  const transactionStatus$ = new Subject<UnidirectionalManualAllowanceStatus>();
+
+  function toggleAllowance(token: string) {
+    theCalls$.pipe(
+      first(),
+      flatMap((calls) =>
+        combineLatest(proxyAddress$, allowances$).pipe(
+          take(1),
+          flatMap(([proxyAddress, allowances]) =>
+            combineLatest(calls.approveProxyEstimateGas({ token, proxyAddress }), gasPrice$).pipe(
+              take(1),
+              flatMap(([estimation, gasPrice]) => {
+                const gasCost = {
+                  gasPrice,
+                  gasEstimation: estimation,
+                };
+
+                return allowances[token]
+                  ? calls.disapproveProxy({ proxyAddress, token, ...gasCost }).pipe(
+                    flatMap(progress => of({
+                      token,
+                      progress,
+                      direction: AllowanceDirection.locking,
+                    }))
+                  )
+                  : calls.approveProxy({ proxyAddress, token, ...gasCost }).pipe(
+                    flatMap(progress => of({
+                      token,
+                      progress,
+                      direction: AllowanceDirection.unlocking
+                    }))
+                  );
+              })
+            )
+          )
+        )
+      ),
+    ).subscribe((txStatus) => {
+      transactionStatus$.next(txStatus);
+    });
+  }
+
+  transactionStatus$.pipe(
+    distinctUntilChanged(isEqual),
+    flatMap((txStatus) => allowances$
+      .pipe(
+        flatMap(allowances => of([txStatus, allowances]))
+      )),
+    map(([status, allowances]) => {
+      const { token, direction, progress } = status;
+
+      manualAllowanceProgressChanges$.next({
+        token,
+        kind: InstantFormChangeKind.manualAllowanceChange,
+        progress: {
+          token,
+          direction,
+          kind: ProgressKind.onlyAllowance,
+          allowanceTxStatus: progress.status,
+          txHash: (progress as { txHash: string; }).txHash,
+          done: isSuccess(progress) && (
+            // If we are unlocking the given token, we wait until it's
+            // allowed which will be visible on the next block check.
+            (direction === 'unlocking' && allowances[token])
+            // If we are locking the given token, we wait until it's
+            // not allowed which will be visible on the next block check.
+            || (direction === 'locking' && !allowances[token])
+          ) || isDoneButNotSuccessful(progress)
+        } as ManualAllowanceProgress
+      });
+    }),
+    catchError(err => {
+      console.log('Error caught:', err);
+      return of(undefined);
+    })
+  ).subscribe();
+
+  return [toggleAllowance, manualAllowanceProgressChanges$];
+}
+
+export function manualProxyCreation(
+  theCalls$: Calls$,
+  gasPrice$: GasPrice$,
 ): [() => void, Observable<ProgressChange>] {
 
   const proxyCreationChange$ = new Subject<ProgressChange>();
 
   function createProxy() {
     theCalls$.pipe(
-      flatMap((calls) =>
-        calls.setupProxy({})
-      )
+      first(),
+      switchMap(calls =>
+        combineLatest(calls.setupProxyEstimateGas({}), gasPrice$)
+          .pipe(
+            switchMap(([estimatedGas, gasPrice]) =>
+              calls.setupProxy({
+                gasPrice,
+                gasEstimation: estimatedGas
+              })
+            )
+          )
+      ),
     ).subscribe(progress => {
       proxyCreationChange$.next({
         kind: InstantFormChangeKind.progressChange,
         progress: {
           kind: ProgressKind.onlyProxy,
           proxyTxStatus: progress.status,
+          txHash: (progress as { txHash: string; }).txHash,
           done: isDone(progress)
         }
       });
@@ -840,7 +1085,7 @@ function isReadyToProceed(state: InstantFormState): InstantFormState {
 }
 
 function freezeIfInProgress(previous: InstantFormState, state: InstantFormState): InstantFormState {
-  if (state.progress || previous.view !== state.view) {
+  if (state.view === ViewKind.finalization) {
     return {
       ...previous,
       progress: state.progress,
@@ -883,11 +1128,21 @@ export function createFormController$(
   );
 
   const [submit, submitChange$] = prepareSubmit(params.calls$);
-  const [createProxy, proxyCreationChange$] = manualProxyCreation(params.calls$);
+  const [createProxy, createProxyManuallyChange$] =
+    manualProxyCreation(params.calls$, params.gasPrice$);
+
+  const [toggleAllowance, setAllowanceManuallyChange$] =
+    manualAllowanceSetup(
+      params.calls$,
+      params.gasPrice$,
+      params.proxyAddress$,
+      params.allowances$
+    );
 
   const initialState: InstantFormState = {
     submit,
     createProxy,
+    toggleAllowance,
     change: manualChange$.next.bind(manualChange$),
     buyToken: 'DAI',
     sellToken: 'ETH',
@@ -905,7 +1160,8 @@ export function createFormController$(
   return merge(
     manualChange$,
     submitChange$,
-    proxyCreationChange$,
+    createProxyManuallyChange$,
+    setAllowanceManuallyChange$,
     environmentChange$,
   ).pipe(
     scan(applyChange, initialState),
@@ -922,17 +1178,3 @@ export function createFormController$(
     shareReplay(1),
   );
 }
-
-const prioritize = (current: Message = { priority: 0 } as Message, candidate: Message) => {
-  // Prioritize by priority first
-  if (current.priority < candidate.priority) {
-    return candidate;
-  }
-
-  // and if we have errors with same priority, the one for paying input is more important
-  if (current.priority === candidate.priority) {
-    return current.field === 'sellToken' ? current : candidate;
-  }
-
-  return current;
-};

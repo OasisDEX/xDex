@@ -21,6 +21,7 @@ $lighter-dark-gray-blue: #8D8D96;
 $input-number-color: #ABABAF; //
 $button-border-hover: #707076;
 $button-border-disabled: #3F3F47;
+$yet-another-dark-grayish-blue: #6D6D74; //used in disabled done icon in token allowances view
 
 $soft-cyan: #69F0AE;
 $lime-green: #1AAD77; // main network indicator
@@ -72,6 +73,7 @@ $grid-breakpoints: (
   // below 280px it's really narrow screen and it might look bad or need scrolls etc
   sm: 360px,
   md: 480px, // below is mobile
+  md-lg: 768px,
   lg: 992px, // below is table; up is desktop with 2-columns layout
 ) !default;
 
