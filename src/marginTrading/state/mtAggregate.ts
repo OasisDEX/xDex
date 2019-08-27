@@ -6,7 +6,7 @@ import {
   map,
   mergeMap,
   shareReplay, startWith,
-  switchMap, withLatestFrom
+  switchMap,
 } from 'rxjs/operators';
 import * as dsProxy from '../../blockchain/abi/ds-proxy.abi.json';
 import { AssetKind, NetworkConfig, tokens } from '../../blockchain/config';
@@ -14,16 +14,15 @@ import { web3 } from '../../blockchain/web3';
 
 import { ReadCalls, ReadCalls$ } from '../../blockchain/calls/calls';
 
-import { zero } from '../../utils/zero';
 import {
   MTAccount,
   MTAccountNotSetup,
   MTAccountSetup,
   MTAccountState,
-  MTHistoryEvent, MTHistoryEventKind
+  MTHistoryEvent
 } from './mtAccount';
 import { calculateMTAccount, } from './mtCalculate';
-import { createRawMTHistory, RawMTHistoryEvent } from './mtHistory';
+import { createRawMTHistory } from './mtHistory';
 import { getCashCore, getMarginableCore, getNonMarginableCore } from './mtTestUtils';
 
 export function aggregateMTAccountState(
@@ -40,9 +39,9 @@ export function aggregateMTAccountState(
     )
     .map(t => t.symbol);
 
-  const marginableAssetNames: string[] = Object.values(tokens)
-    .filter((t: any) => t.assetKind === AssetKind.marginable)
-    .map(t => t.symbol);
+  // const marginableAssetNames: string[] = Object.values(tokens)
+  //   .filter((t: any) => t.assetKind === AssetKind.marginable)
+  //   .map(t => t.symbol);
 
   const tokenNames = [...assetNames, 'DAI'];
 
@@ -158,7 +157,7 @@ export function createMta$(
     );
 
   return combineLatest(context$, calls$, proxyAddress$).pipe(
-    switchMap(([context, calls, proxyAddress]) => {
+    switchMap(([_context, calls, proxyAddress]) => {
       if (proxyAddress === undefined) {
         return of(notSetup);
       }

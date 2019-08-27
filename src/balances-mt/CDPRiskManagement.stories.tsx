@@ -2,10 +2,10 @@ import { storiesOf } from '@storybook/react';
 import * as React from 'react';
 
 import { BigNumber } from 'bignumber.js';
+import { MTHistoryEvent } from '../marginTrading/state/mtAccount';
 import { calculateMarginable } from '../marginTrading/state/mtCalculate';
 import { getMarginableCore } from '../marginTrading/state/mtTestUtils';
 import { CDPRiskManagement } from './CDPRiskManagement';
-import { MTHistoryEvent } from '../marginTrading/state/mtAccount';
 
 const stories = storiesOf('Balances/CDP risk management', module);
 //

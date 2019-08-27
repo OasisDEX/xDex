@@ -113,11 +113,14 @@ export class MTMyPositionPanel extends React.Component<MTMyPositionPanelProps>
     const fundForm$ = this.props.createMTFundForm$(actionKind, token);
     const MTFundFormViewRxTx =
       connect<MTTransferFormState, ModalProps>(
-        inject(MtTransferFormView,
+        inject(
+          MtTransferFormView,
           // cast is safe as CreateMTAllocateForm$Props
           // is not used inside MtTransferFormView!
-          (this.props as any) as (CreateMTAllocateForm$Props & ModalOpenerProps)),
-        fundForm$);
+          (this.props as any) as (CreateMTAllocateForm$Props & ModalOpenerProps),
+        ),
+        fundForm$
+      );
     this.props.open(MTFundFormViewRxTx);
   }
 }

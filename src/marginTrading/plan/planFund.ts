@@ -84,7 +84,7 @@ export function planFund(
   const ilkAsset = ilk && findMarginableAsset(ilk, mta);
   const fundOps: Operation[] = token === 'DAI' ? [
     { amount, name: token, ilk: ilk as string, kind: OperationKind.fundDai },
-    ...ilkAsset && ilkAsset.debt.isPositive() ? [
+    ...ilkAsset && ilkAsset.debt.gt(zero) && amount.gt(zero) ? [
       {
         name: ilk,
         ddai: minusOne.times(BigNumber.min(amount, ilkAsset.debt)),

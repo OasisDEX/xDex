@@ -1,11 +1,7 @@
 import * as React from 'react';
 import * as ReactModal from 'react-modal';
 
-import {
-  MarginableAsset,
-  MTHistoryEvent,
-  MTHistoryEventKind
-} from '../marginTrading/state/mtAccount';
+import { MarginableAsset } from '../marginTrading/state/mtAccount';
 import { formatDateTime } from '../utils/formatters/format';
 import { Button } from '../utils/forms/Buttons';
 import { ModalProps } from '../utils/modal';
@@ -77,19 +73,20 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
     );
   }
 
-  private eventDecription(event: MTHistoryEvent) {
-    if (event.kind === MTHistoryEventKind.deal) {
-      return null;
-    }
-    return (
-      <div>
-      <span>
-        { (event as any).gem && (event as any).gem.toString() } { event.token }
-      </span>
-        <span style={{ marginLeft: '1em' }}>
-        { (event as any).dai && (event as any).dai.toString() } DAI
-      </span>
-      </div>
-    );
-  }
+//   private eventDecription(event: MTHistoryEvent) {
+//     if (event.kind === MTHistoryEventKind.deal) {
+//       return null;
+//     }
+//     return (
+//       <div>
+//       <span>
+//         { (event as any).gem && (event as any).gem.toString() } { event.token }
+//       </span>
+//         <span style={{ marginLeft: '1em' }}>
+//         { (event as any).dai && (event as any).dai.toString() } DAI
+//       </span>
+//       </div>
+//     );
+//   }
+
 }

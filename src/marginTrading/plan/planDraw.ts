@@ -9,7 +9,7 @@ import { minusOne, zero } from '../../utils/zero';
 import { AllocationRequestAssetInfo, AllocationRequestPilot } from '../allocate/allocate';
 import { EditableDebt } from '../allocate/mtOrderAllocateDebtForm';
 import {
-  findAsset,
+  findAsset, findMarginableAsset,
   MarginableAssetCore,
   MTAccountSetup, Operation,
   OperationKind
@@ -83,6 +83,10 @@ export function planDraw(
 
   if (asset.name !== 'DAI' && amount.gt(asset.balance)) {
     return impossible(`not enough of ${token}`);
+  }
+  const ilkAsset = ilk && findMarginableAsset(ilk, mta);
+  if (asset.name === 'DAI' && ilkAsset && amount.gt(ilkAsset.dai)) {
+    return impossible(`not enough of ${token} on ${ilk}`);
   }
 
   const drawOps: Operation[] = token === 'DAI' ? [

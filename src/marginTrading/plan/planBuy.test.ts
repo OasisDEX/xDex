@@ -6,7 +6,7 @@ setupFakeWeb3ForTesting();
 import { Impossible, impossible, isImpossible } from '../../utils/impossible';
 import { zero } from '../../utils/zero';
 import { AllocationRequestPilot } from '../allocate/allocate';
-import { findMarginableAsset, OperationKind } from '../state/mtAccount';
+import { OperationKind } from '../state/mtAccount';
 import { getMTAccount } from '../state/mtTestUtils';
 import { planBuy, prepareBuyAllocationRequest } from './planBuy';
 import { cash, dgx100, mtaOnlyWeth, sell1, sell2, sellOffers, wethEmpty } from './planFixtures';

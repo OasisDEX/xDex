@@ -3,7 +3,7 @@ import classnames from 'classnames';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import * as ReactModal from 'react-modal';
-import {Observable} from 'rxjs';
+import { Observable } from 'rxjs';
 
 import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
 import { tokens } from '../../blockchain/config';
@@ -21,7 +21,7 @@ import { Panel, PanelBody, PanelFooter, PanelHeader } from '../../utils/panel/Pa
 import { Muted } from '../../utils/text/Text';
 import { TransactionStateDescription } from '../../utils/text/TransactionStateDescription';
 import { minusOne, zero } from '../../utils/zero';
-import {AllocationRequestPilot} from './allocate';
+import { AllocationRequestPilot } from './allocate';
 import { DebtSlider } from './DebtSlider';
 import {
   AllocateChangeKind,

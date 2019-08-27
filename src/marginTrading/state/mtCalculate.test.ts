@@ -140,7 +140,7 @@ test('cash, weth, dgx and mkr, no debt', () => {
 
   const weth = mta.marginableAssets[0];
   const dgx = mta.marginableAssets[1];
-  const mkr = mta.nonMarginableAssets[0];
+  // const mkr = mta.nonMarginableAssets[0];
 
   expect(mta.totalAssetValue)
     .toEqual(cash.balance.plus(weth.balanceInCash).plus(dgx.balanceInCash));

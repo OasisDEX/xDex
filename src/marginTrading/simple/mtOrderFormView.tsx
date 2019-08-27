@@ -93,7 +93,8 @@ const DevInfos = ({ value }: { value: MTSimpleFormState }) => {
     {value.messages &&
     <pre>{JSON.stringify(value.messages, null, 4)}</pre>}
   </div>
-  ); };
+  );
+};
 
 export class MtSimpleOrderFormView
   extends React.Component<MTSimpleFormState>
