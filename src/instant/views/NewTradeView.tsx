@@ -4,7 +4,7 @@ import * as React from 'react';
 import { etherscan, EtherscanConfig } from '../../blockchain/etherscan';
 import swapArrowsSvg from '../../icons/swap-arrows.svg';
 import { formatAmount } from '../../utils/formatters/format';
-import {  SettingsIcon } from '../../utils/icons/Icons';
+import { AccountIcon, SettingsIcon } from '../../utils/icons/Icons';
 import { SvgImage } from '../../utils/icons/utils';
 import { TopLeftCorner, TopRightCorner } from '../../utils/panel/TopRightCorner';
 import { TradeDetails } from '../details/TradeDetails';
@@ -128,12 +128,11 @@ export class NewTradeView extends React.Component<InstantFormState> {
           />
         </TopRightCorner>
         <TopLeftCorner>
-          {/*<ButtonIcon*/}
-            {/*disabled={!(user && user.account)}*/}
-            {/*className={classnames(styles.cornerIcon, styles.accountIcon)}*/}
-            {/*data-test-id="account-settings"*/}
-            {/*onClick={this.showAccountSettings}*/}
-            {/*image={accountSvg}/>*/}
+          <AccountIcon
+            disabled={!(user && user.account)}
+            data-test-id="account-settings"
+            onClick={this.showAccountSettings}
+          />
         </TopLeftCorner>
         <div className={styles.tradeDetails}>
           {

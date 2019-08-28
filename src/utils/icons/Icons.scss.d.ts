@@ -6,5 +6,6 @@ export const progressIconSm: string;
 export const progressIconLg: string;
 export const socialIcon: string;
 export const btnIcon: string;
+export const accountIcon: string;
 export const settingsIcon: string;
 export const backIcon: string;

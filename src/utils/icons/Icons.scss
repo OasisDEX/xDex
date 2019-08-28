@@ -106,9 +106,28 @@
   border-radius: 100%;
 }
 
+.accountIcon {
+  @extend %defaultIconTheme;
+  border-color: $grey-light;
+
+  :global(.account-icon-background) {
+    fill: transparent;
+  }
+}
+
 .settingsIcon, .backIcon {
   @extend %defaultIconTheme;
   padding: .25rem;
+}
 
+.settingsIcon {
   @include whiteFillGreyBorderIcon('.cog-wheel-icon')
+}
+
+.backIcon {
+  @include whiteFillGreyBorderIcon('.back-icon')
+}
+
+.accountIcon {
+  @include whiteFillGreyBorderIcon('.account-icon-body');
 }

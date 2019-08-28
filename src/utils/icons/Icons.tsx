@@ -1,5 +1,6 @@
 import classnames from 'classnames';
 import * as React from 'react';
+import accountSvg from '../../icons/account.svg';
 import backSvg from '../../icons/back.svg';
 import cogWheelSvg from '../../icons/cog-wheel.svg';
 import { Button, ButtonProps } from '../forms/Buttons';
@@ -68,6 +69,16 @@ export const BackIcon = (props: DefaultIconProps) => (
     disabled={props.disabled}
     onClick={props.onClick}
     image={backSvg}
+    data-test-id={props.dataTestId}
+  />
+);
+
+export const AccountIcon = (props: DefaultIconProps) => (
+  <ButtonIcon
+    className={classnames(styles.accountIcon, props.className)}
+    disabled={props.disabled}
+    onClick={props.onClick}
+    image={accountSvg}
     data-test-id={props.dataTestId}
   />
 );
