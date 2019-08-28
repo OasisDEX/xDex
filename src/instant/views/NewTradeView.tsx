@@ -2,11 +2,9 @@ import { BigNumber } from 'bignumber.js';
 import classnames from 'classnames';
 import * as React from 'react';
 import { etherscan, EtherscanConfig } from '../../blockchain/etherscan';
-import accountSvg from '../../icons/account.svg';
-import cogWheelSvg from '../../icons/cog-wheel.svg';
 import swapArrowsSvg from '../../icons/swap-arrows.svg';
 import { formatAmount } from '../../utils/formatters/format';
-import { ButtonIcon } from '../../utils/icons/Icons';
+import {  SettingsIcon } from '../../utils/icons/Icons';
 import { SvgImage } from '../../utils/icons/utils';
 import { TopLeftCorner, TopRightCorner } from '../../utils/panel/TopRightCorner';
 import { TradeDetails } from '../details/TradeDetails';
@@ -123,21 +121,19 @@ export class NewTradeView extends React.Component<InstantFormState> {
                           btnDataTestId="initiate-trade"
       >
         <TopRightCorner>
-          <ButtonIcon
-            className={classnames(styles.cornerIcon, styles.settingsIcon)}
+          <SettingsIcon
             disabled={!price}
             onClick={this.showTradeSettings}
-            image={cogWheelSvg}
             data-test-id="trade-settings"
           />
         </TopRightCorner>
         <TopLeftCorner>
-          <ButtonIcon
-            disabled={!(user && user.account)}
-            className={classnames(styles.cornerIcon, styles.accountIcon)}
-            data-test-id="account-settings"
-            onClick={this.showAccountSettings}
-            image={accountSvg}/>
+          {/*<ButtonIcon*/}
+            {/*disabled={!(user && user.account)}*/}
+            {/*className={classnames(styles.cornerIcon, styles.accountIcon)}*/}
+            {/*data-test-id="account-settings"*/}
+            {/*onClick={this.showAccountSettings}*/}
+            {/*image={accountSvg}/>*/}
         </TopLeftCorner>
         <div className={styles.tradeDetails}>
           {

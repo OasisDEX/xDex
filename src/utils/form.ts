@@ -47,6 +47,8 @@ export enum FormChangeKind {
   pickOfferChange = 'pickOffer',
   progress = 'progress',
   etherBalanceChange = 'etherBalanceChange',
+  slippageLimitChange = 'slippageLimitChange',
+  viewChange = 'viewChange'
 }
 
 export enum OfferMatchType {
@@ -157,6 +159,11 @@ export interface ProgressChange {
 export interface EtherBalanceChange {
   kind: FormChangeKind.etherBalanceChange;
   etherBalance: BigNumber;
+}
+
+export interface  SlippageLimitChange {
+  kind: FormChangeKind.slippageLimitChange;
+  value: BigNumber;
 }
 
 export function progressChange(progress?: ProgressStage): ProgressChange {

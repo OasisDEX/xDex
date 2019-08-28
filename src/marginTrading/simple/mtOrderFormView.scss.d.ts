@@ -1,4 +1,4 @@
-export const btnGroup: string;
+export const settingsIcon: string;
 export const btn: string;
 export const InstantOrderPanel: string;
 export const instantOrderPanel: string;
@@ -24,3 +24,4 @@ export const orderSummaryValue: string;
 export const orderSummaryValuePositive: string;
 export const orderSummaryValueNegative: string;
 export const hrSmallMargin: string;
+export const settingsFooter: string;

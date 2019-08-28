@@ -1,5 +1,7 @@
 import classnames from 'classnames';
 import * as React from 'react';
+import backSvg from '../../icons/back.svg';
+import cogWheelSvg from '../../icons/cog-wheel.svg';
 import { Button, ButtonProps } from '../forms/Buttons';
 import * as styles from './Icons.scss';
 import { SvgImage } from './utils';
@@ -44,3 +46,28 @@ export const ProgressIcon = (props: ProgressIconProps) => {
     />
   );
 };
+
+export type DefaultIconProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
+  dataTestId?: string
+};
+
+// TODO: Those two can be optimized even further;
+export const SettingsIcon = (props: DefaultIconProps) => (
+  <ButtonIcon
+    className={classnames(styles.settingsIcon, props.className)}
+    disabled={props.disabled}
+    onClick={props.onClick}
+    image={cogWheelSvg}
+    data-test-id={props.dataTestId}
+  />
+);
+
+export const BackIcon = (props: DefaultIconProps) => (
+  <ButtonIcon
+    className={classnames(styles.settingsIcon, props.className)}
+    disabled={props.disabled}
+    onClick={props.onClick}
+    image={backSvg}
+    data-test-id={props.dataTestId}
+  />
+);

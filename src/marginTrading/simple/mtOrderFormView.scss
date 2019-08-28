@@ -2,8 +2,9 @@
 @import "../../utils/Mixins";
 
 // panel header
-.btnGroup {
+.settingsIcon {
   margin-left: auto;
+  margin-right: 14px;
 }
 
 .btn {
@@ -13,10 +14,13 @@
 
 // form
 
-$twoColumnsPanelWidth: 390px;
-$historyPanelsHeight: 550px;
+$twoColumnsPanelWidth: 454px;
+$historyPanelsHeight: 535px;
 
 .InstantOrderPanel {
+  display: inline-flex;
+  flex-direction: column;
+
   width: $twoColumnsPanelWidth;
   height: $historyPanelsHeight;
 
@@ -148,10 +152,11 @@ $historyPanelsHeight: 550px;
 
 .orderSummaryRow {
   font-size: 15px;
+  line-height: 19px;
   display: flex;
   width: 100%;
   color: #ffffff;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .orderSummaryRowDark {
@@ -180,10 +185,14 @@ $historyPanelsHeight: 550px;
 // ---------- horizontal lines spaces
 .hrSmallMargin {
   margin-top: 0;
-  margin-bottom: 18px;
+  margin-bottom: 20px;
 }
 
 .hrMargin {
-  margin-top: 18px;
-  margin-bottom: 18px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.settingsFooter {
+  margin-top: auto;
 }

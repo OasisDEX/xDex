@@ -3,22 +3,26 @@ import classnames from 'classnames';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
-// import { Muted } from '../../utils/text/Text';
+import * as formStyles from '../../exchange/offerMake/OfferMakeForm.scss';
 import { OfferType } from '../../exchange/orderbook/orderbook';
-// import { tokens } from '../../blockchain/config';
 import { BigNumberInput } from '../../utils/bigNumberInput/BigNumberInput';
 import { FormChangeKind } from '../../utils/form';
-import { formatAmount, formatPrecision, formatPrice } from '../../utils/formatters/format';
+import {
+  formatAmount,
+  formatPrecision,
+  formatPrice
+} from '../../utils/formatters/format';
 import { FormatPercent, Money } from '../../utils/formatters/Formatters';
 import { Button, ButtonGroup } from '../../utils/forms/Buttons';
 import { ErrorMessage } from '../../utils/forms/ErrorMessage';
-import { InputGroup, InputGroupAddon } from '../../utils/forms/InputGroup';
+import { InputGroup, InputGroupAddon, lessThanOrEqual } from '../../utils/forms/InputGroup';
+import { Radio } from '../../utils/forms/Radio';
+import { SettingsIcon } from '../../utils/icons/Icons';
 import { Hr } from '../../utils/layout/LayoutHelpers';
-import { PanelBody, PanelHeader } from '../../utils/panel/Panel';
-
-// import { GasCost } from '../../utils/gasCost/GasCost';
+import { PanelBody, PanelFooter, PanelHeader } from '../../utils/panel/Panel';
+import { Muted } from '../../utils/text/Text';
 import { findMarginableAsset, MTAccountState } from '../state/mtAccount';
-import { Message, MessageKind, MTSimpleFormState } from './mtOrderForm';
+import { Message, MessageKind, MTSimpleFormState, ViewKind } from './mtOrderForm';
 import * as styles from './mtOrderFormView.scss';
 
 const DevInfos = ({ value }: { value: MTSimpleFormState }) => {
@@ -96,12 +100,11 @@ const DevInfos = ({ value }: { value: MTSimpleFormState }) => {
   );
 };
 
-export class MtSimpleOrderFormView
-  extends React.Component<MTSimpleFormState>
-{
+export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
 
   private amountInput?: HTMLElement;
   private priceInput?: HTMLElement;
+  private slippageLimitInput?: HTMLElement;
 
   public handleKindChange(kind: OfferType) {
     this.props.change({
@@ -124,6 +127,16 @@ export class MtSimpleOrderFormView
       kind: FormChangeKind.amountFieldChange,
       value: value === '' ? undefined : new BigNumber(value)
     });
+  }
+
+  public handleSlippageLimitChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = new BigNumber(e.target.value.replace(/,/g, ''));
+    if (!value.isNaN()) {
+      this.props.change({
+        kind: FormChangeKind.slippageLimitChange,
+        value: value.div(100),
+      });
+    }
   }
 
   public handleSetMax = () => {
@@ -159,55 +172,120 @@ export class MtSimpleOrderFormView
     }
   }
 
+  public handleSlippageLimitFocus = () => {
+    if (this.slippageLimitInput) {
+      this.slippageLimitInput.focus();
+    }
+  }
+
   public render() {
     return (
       <div className={styles.InstantOrderPanel}>
-        <PanelHeader>
-          Instant Order
-          { this.headerButtons() }
-        </PanelHeader>
-        <Hr color="dark" className={styles.hrSmallMargin}/>
-        <PanelBody>
-          <form
-            onSubmit={this.handleProceed}
-          >
-            {/*{ this.orderType() }*/}
-            {/*{ this.balanceButtons() }*/}
-            {/*{ this.purchasingPower() }*/}
-            { this.purchasingPower2() }
-            { this.accountBalance() }
-            { this.leverage() }
-            {/*{ this.collateralizationRatio() }*/}
-            { this.liquidationPrice() }
-            { this.price2() }
-            { this.slippageLimit() }
-            { this.interestRate() }
-            <Hr color="dark" className={styles.hrMargin}/>
-            { this.amount() }
-            {/*{ this.price() }*/}
-            { this.total() }
-            {/*{ this.gasCost() }*/}
-            { this.proceedButton() }
-          </form>
-        </PanelBody>
-        { this.props && <DevInfos value={this.props as MTSimpleFormState}/>}
-      </div>);
+        {
+          this.props.view === ViewKind.instantTradeForm
+            ? this.instantOrderForm()
+            : this.advancedSettings()
+        }
+      </div>
+    );
   }
 
-  private headerButtons() {
+  private switchToSettings = () => {
+    this.props.change({ kind: FormChangeKind.viewChange, value: ViewKind.settings });
+  }
+
+  private switchToInstantOrderForm = () => {
+    this.props.change({ kind: FormChangeKind.viewChange, value: ViewKind.instantTradeForm });
+  }
+
+  private instantOrderForm = () => (
+    <>
+      <PanelHeader>
+        Instant Order
+        {this.headerButtons()}
+      </PanelHeader>
+      <Hr color="dark" className={styles.hrSmallMargin}/>
+      <PanelBody>
+        <form
+          onSubmit={this.handleProceed}
+        >
+          {/*{ this.orderType() }*/}
+          {/*{ this.balanceButtons() }*/}
+          {/*{ this.purchasingPower() }*/}
+          {this.purchasingPower2()}
+          {this.accountBalance()}
+          {this.leverage()}
+          {/*{ this.collateralizationRatio() }*/}
+          {this.liquidationPrice()}
+          {this.price2()}
+          {this.slippageLimit()}
+          {this.interestRate()}
+          <Hr color="dark" className={styles.hrMargin}/>
+          {this.amount()}
+          {/*{ this.price() }*/}
+          {this.total()}
+          {/*{ this.gasCost() }*/}
+          {this.proceedButton()}
+        </form>
+      </PanelBody>
+      {this.props && <DevInfos value={this.props as MTSimpleFormState}/>}
+    </>
+  )
+
+  private advancedSettings = () => (
+    <>
+      <PanelHeader>
+        Advanced Settings
+      </PanelHeader>
+      <Hr color="dark" className={styles.hrSmallMargin}/>
+      <PanelBody>
+          <div className={formStyles.pickerOrderType}>
+            <Radio
+              dataTestId="fillOrKill"
+              name="orderType"
+              value="direct"
+              defaultChecked={true}
+            >
+              Average price fill or kill order type
+            </Radio>
+            <Muted className={formStyles.pickerDescription}>
+              The order is executed in its entirety such that the average fill price is
+              the limit price or better, otherwise it is canceled
+            </Muted>
+            { this.slippageLimitForm() }
+          </div>
+      </PanelBody>
+      <PanelFooter className={styles.settingsFooter}>
+        <Button
+          className={formStyles.confirmButton}
+          type="submit"
+          onClick={this.switchToInstantOrderForm}
+        >
+          Done
+        </Button>
+      </PanelFooter>
+    </>
+  )
+
+  private headerButtons()   {
     return (
-      <ButtonGroup className={styles.btnGroup}>
-        <Button
-          className={styles.btn}
-          onClick={() => this.handleKindChange(OfferType.buy)}
-          color={ this.props.kind === 'buy' ? 'green' : 'grey' }
-        >Buy</Button>
-        <Button
-          className={styles.btn}
-          onClick={() => this.handleKindChange(OfferType.sell)}
-          color={ this.props.kind === 'sell' ? 'red' : 'grey' }
-        >Sell</Button>
-      </ButtonGroup>
+      <>
+        <SettingsIcon className={styles.settingsIcon}
+                      onClick={this.switchToSettings}
+        />
+        <ButtonGroup>
+          <Button
+            className={styles.btn}
+            onClick={() => this.handleKindChange(OfferType.buy)}
+            color={this.props.kind === 'buy' ? 'green' : 'grey'}
+          >Buy</Button>
+          <Button
+            className={styles.btn}
+            onClick={() => this.handleKindChange(OfferType.sell)}
+            color={this.props.kind === 'sell' ? 'red' : 'grey'}
+          >Sell</Button>
+        </ButtonGroup>
+      </>
     );
   }
 
@@ -377,11 +455,58 @@ export class MtSimpleOrderFormView
             <FormatPercent
               value={this.props.slippageLimit}
               fallback="-"
+              precision={2}
               multiply={true}
             />
           }
         </div>
       </div>
+    );
+  }
+
+  private slippageLimitForm() {
+    const slippageLimit = this.props.slippageLimit
+      ? this.props.slippageLimit.times(100).valueOf()
+      : '';
+    return (
+      <InputGroup
+        sizer="lg"
+        style={ { marginTop: '24px' } }
+        hasError={ (this.props.messages || [])
+          .filter((message: Message) => message.field === 'slippageLimit')
+          .length > 0}
+      >
+        <InputGroupAddon className={formStyles.inputHeader}>
+          Slippage limit
+        </InputGroupAddon>
+        <div className={formStyles.inputTail}>
+          <BigNumberInput
+            ref={ (el: any) =>
+              this.slippageLimitInput = (el && ReactDOM.findDOMNode(el) as HTMLElement) || undefined
+            }
+            data-test-id="slippage-limit"
+            type="text"
+            mask={createNumberMask({
+              allowDecimal: true,
+              precision: 2,
+              prefix: ''
+            })}
+            pipe={
+              lessThanOrEqual(100)
+            }
+            onChange={this.handleSlippageLimitChange}
+            value={ slippageLimit }
+            guide={true}
+            placeholder={ slippageLimit }
+            className={styles.input}
+          />
+          <InputGroupAddon className={formStyles.inputPercentAddon}
+                           onClick={this.handleSlippageLimitFocus}
+          >
+            %
+          </InputGroupAddon>
+        </div>
+      </InputGroup>
     );
   }
 
@@ -439,7 +564,7 @@ export class MtSimpleOrderFormView
       console.log('this.props.mta.state', this.props.mta);
       console.log('this.props.mta.state', this.props.mta.state);
     }
-    return <div className={styles.orderSummaryRow}>
+    return <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
       <div className={styles.orderSummaryLabel}>
         Purchasing power
       </div>
@@ -458,7 +583,7 @@ export class MtSimpleOrderFormView
 
   private accountBalance() {
     const baseTokenAsset = findMarginableAsset(this.props.baseToken, this.props.mta);
-    return <div className={styles.orderSummaryRow}>
+    return <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
       <div className={styles.orderSummaryLabel}>
         Account Balance
       </div>
@@ -476,7 +601,7 @@ export class MtSimpleOrderFormView
   }
 
   private leverage() {
-    return <div className={styles.orderSummaryRow}>
+    return <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
       <div className={styles.orderSummaryLabel}>
         Current Leverage
       </div>
@@ -670,7 +795,7 @@ const Error = ({ field, messages } : { field: string, messages?: Message[] }) =>
     .sort((m1, m2) => m2.priority - m1.priority)
     .map(msg => messageContent(msg));
   return (
-    <ErrorMessage messages={myMsg} />
+    <ErrorMessage messages={myMsg} style={{ height: '28px' }}/>
   );
 };
 
