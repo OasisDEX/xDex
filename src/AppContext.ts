@@ -25,16 +25,16 @@ import {
   AssetsOverviewActionProps,
   AssetsOverviewExtraProps,
 } from './balances-nomt/AssetOverviewView';
-import {
-  Balances,
-  CombinedBalances,
-  createBalances$,
-  createCombinedBalances$,
-  createDustLimits$, createProxyAllowances$,
-  createWalletApprove,
-  createWalletDisapprove,
-  createWethBalances$,
-} from './balances/balances';
+// import {
+//   Balances,
+//   CombinedBalances,
+//   createBalances$,
+//   createCombinedBalances$,
+//   createDustLimits$, createProxyAllowances$,
+//   createWalletApprove,
+//   createWalletDisapprove,
+//   createWethBalances$,
+// } from './balances/balances';
 import * as balancesNoMT from './balances-nomt/balances';
 import { createTaxExport$ } from './balances-nomt/taxExporter';
 import { TaxExporterView } from './balances-nomt/TaxExporterView';
@@ -359,7 +359,7 @@ export function setupAppContext() {
       context$,
       balances$: balancesWithEth$,
       dustLimits$: balancesNoMT.createDustLimits$(context$),
-      allowances$: createProxyAllowances$(
+      allowances$: balancesNoMT.createProxyAllowances$(
         context$,
         initializedAccount$,
         proxyAddress$.pipe(

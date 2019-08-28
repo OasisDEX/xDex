@@ -39,13 +39,14 @@ export function balance$(
   token: string,
   account?: string
 ): Observable<BigNumber> {
+
+  console.log('token', token);
   if (account === undefined) {
     return account$.pipe(
       switchMap(theAccount => balance$(context, token, theAccount)),
       first(),
     );
   }
-
   return bindNodeCallback(context.tokens[token].contract.balanceOf as BalanceOf)(
     account
   ).pipe(

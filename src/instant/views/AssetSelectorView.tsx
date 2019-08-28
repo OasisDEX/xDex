@@ -3,13 +3,12 @@ import classnames from 'classnames';
 import * as React from 'react';
 import { Balances } from '../../balances-nomt/balances';
 import { eth2weth } from '../../blockchain/calls/instant';
+import { tokens, tradingPairs } from '../../blockchain/config';
 import { User } from '../../blockchain/user';
 import { OfferType } from '../../exchange/orderbook/orderbook';
 import { CloseButton } from '../../utils/forms/Buttons';
 import { marketsOf } from '../../utils/markets';
-import { tokens, tradingPairs } from '../../blockchain/config';
 import * as panelStyling from '../../utils/panel/Panel.scss';
-
 import { TopRightCorner } from '../../utils/panel/TopRightCorner';
 import { Asset } from '../asset/Asset';
 import * as instantStyles from '../Instant.scss';
