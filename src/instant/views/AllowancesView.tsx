@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { Allowances } from '../../balances-nomt/balances';
 import { tokens } from '../../blockchain/config';
 import doneSvg from '../../icons/done.svg';
 import { Button, CloseButton } from '../../utils/forms/Buttons';
