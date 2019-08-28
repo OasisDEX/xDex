@@ -356,12 +356,12 @@ const localnet: NetworkConfig =   {
     return asMap('token', [
       loadToken('WETH', eth, '0x28085CEfA9103d3a55Fb5AfCcf07eD2038d31cD4'),
       loadToken('DAI', erc20, '0xff500C51399A282f4563F2713fFCBe9e53cfb6Fa'),
-      // loadToken('DGD', erc20, '0xe80C262f63df9376d2ce9eDd373832EDc9FCA46E'),
+      loadToken('DGD', erc20, '0x2f42E9A9BA1A8BfE0a46a7b116aD5b0D16d2B105'),
       // loadToken('MKR', erc20, '0xe80C262f63df9376d2ce9eDd373832EDc9FCA46E'),
-      // loadToken('REP', erc20, '0xe80C262f63df9376d2ce9eDd373832EDc9FCA46E'),
+      loadToken('REP', erc20, '0x30ed29c4C4bA30ECCcDd0c0D153E454BFCb0A4Dd'),
       // loadToken('OMG', erc20, '0xe80C262f63df9376d2ce9eDd373832EDc9FCA46E'),
-      // loadToken('ZRX', erc20, '0xe80C262f63df9376d2ce9eDd373832EDc9FCA46E'),
-      // loadToken('BAT', erc20, '0xe80C262f63df9376d2ce9eDd373832EDc9FCA46E'),
+      loadToken('ZRX', erc20, '0xE2ecCEEc6dEB8c7AFF9787E46FEA7078b89ab159'),
+      loadToken('BAT', erc20, '0x2f8e256F2f9301d1992CDCCD85A513954C9dDB71'),
     ]);
   },
   joins: {
@@ -399,7 +399,7 @@ const localnet: NetworkConfig =   {
     return load(dsProxyFactory, '0x9c27f7553f12e0178c1D767265dFBD27CAEcec68');
   },
   get instantProxyCreationAndExecute() {
-    return load(proxyCreationAndExecute, '0x947308140e877E8EeBcCED93B522407A24278c6A');
+    return load(proxyCreationAndExecute, '0x2aD8bbFBA09e2fe0a5394E6B4709323EeDbbFD19');
   },
   get marginProxyRegistry() {
     return load(proxyRegistry, '0x3A32AA343fBA264411EF47B00B195165738E4E6b');
