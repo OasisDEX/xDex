@@ -48,37 +48,35 @@ export const ProgressIcon = (props: ProgressIconProps) => {
   );
 };
 
-export type DefaultIconProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  dataTestId?: string
+export const SettingsIcon = (props: ButtonProps) => {
+  const { className, ...other } = props;
+  return (
+    <ButtonIcon
+      className={classnames(styles.settingsIcon, className)}
+      image={cogWheelSvg}
+      {...other}
+    />
+  );
 };
 
-// TODO: Those two can be optimized even further;
-export const SettingsIcon = (props: DefaultIconProps) => (
-  <ButtonIcon
-    className={classnames(styles.settingsIcon, props.className)}
-    disabled={props.disabled}
-    onClick={props.onClick}
-    image={cogWheelSvg}
-    data-test-id={props.dataTestId}
-  />
-);
+export const BackIcon = (props: ButtonProps) => {
+  const { className, ...other } = props;
+  return (
+    <ButtonIcon
+      className={classnames(styles.settingsIcon, className)}
+      image={backSvg}
+      {...other}
+    />
+  );
+};
 
-export const BackIcon = (props: DefaultIconProps) => (
-  <ButtonIcon
-    className={classnames(styles.settingsIcon, props.className)}
-    disabled={props.disabled}
-    onClick={props.onClick}
-    image={backSvg}
-    data-test-id={props.dataTestId}
-  />
-);
-
-export const AccountIcon = (props: DefaultIconProps) => (
-  <ButtonIcon
-    className={classnames(styles.accountIcon, props.className)}
-    disabled={props.disabled}
-    onClick={props.onClick}
-    image={accountSvg}
-    data-test-id={props.dataTestId}
-  />
-);
+export const AccountIcon = (props: ButtonProps) => {
+  const { className, ...other } = props;
+  return (
+    <ButtonIcon
+      className={classnames(styles.accountIcon, className)}
+      image={accountSvg}
+      {...other}
+    />
+  );
+};
