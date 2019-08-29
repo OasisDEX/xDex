@@ -399,7 +399,7 @@ const localnet: NetworkConfig =   {
     return load(dsProxyFactory, '0x9c27f7553f12e0178c1D767265dFBD27CAEcec68');
   },
   get instantProxyCreationAndExecute() {
-    return load(proxyCreationAndExecute, '0x2aD8bbFBA09e2fe0a5394E6B4709323EeDbbFD19');
+    return load(proxyCreationAndExecute, '0x947308140e877E8EeBcCED93B522407A24278c6A');
   },
   get marginProxyRegistry() {
     return load(proxyRegistry, '0x3A32AA343fBA264411EF47B00B195165738E4E6b');
