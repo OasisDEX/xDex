@@ -1,33 +1,12 @@
 import { fromPairs, memoize, zip } from 'lodash';
 
 import { TradingPair } from '../exchange/tradingPair/tradingPair';
-import batCircleSvg from '../icons/coins/bat-circle.svg';
-import batColorSvg from '../icons/coins/bat-color.svg';
-import batSvg from '../icons/coins/bat.svg';
 import daiCircleSvg from '../icons/coins/dai-circle.svg';
 import daiColorSvg from '../icons/coins/dai-color.svg';
 import daiSvg from '../icons/coins/dai.svg';
-import dgdCircleSvg from '../icons/coins/dgd-circle.svg';
-import dgdColorSvg from '../icons/coins/dgd-color.svg';
-import dgdSvg from '../icons/coins/dgd.svg';
 import ethCircleSvg from '../icons/coins/eth-circle.svg';
 import ethColorSvg from '../icons/coins/eth-color.svg';
 import ethSvg from '../icons/coins/eth.svg';
-
-// import mkrInverseSvg from '../icons/coins/mkr-inverse.svg';
-// import mkrSvg from '../icons/coins/mkr.svg';
-import repCircleSvg from '../icons/coins/rep-circle.svg';
-import repColorSvg from '../icons/coins/rep-color.svg';
-import repSvg from '../icons/coins/rep.svg';
-// import usdcCircleSvg from '../icons/coins/usdc-circle.svg';
-// import usdcColorSvg from '../icons/coins/usdc-color.svg';
-// import usdcSvg from '../icons/coins/usdc.svg';
-// import wbtcCircleSvg from '../icons/coins/wbtc-circle.svg';
-// import wbtcColorSvg from '../icons/coins/wbtc-color.svg';
-// import wbtcSvg from '../icons/coins/wbtc.svg';
-import zrxCircleSvg from '../icons/coins/zrx-circle.svg';
-import zrxColorSvg from '../icons/coins/zrx-color.svg';
-import zrxSvg from '../icons/coins/zrx.svg';
 
 import { SvgImageSimple } from '../utils/icons/utils';
 import * as eth from './abi/ds-eth-token.abi.json';
@@ -45,13 +24,13 @@ import { web3 } from './web3';
 
 export const tradingPairs: TradingPair[] = [
   { base: 'WETH', quote: 'DAI' },
-  ...process.env.REACT_APP_OASIS_DEX_ENABLED !== '1' ? [] : [
+  // ...process.env.REACT_APP_OASIS_DEX_ENABLED !== '1' ? [] : [
     // { base: 'MKR', quote: 'DAI' },
     // { base: 'MKR', quote: 'WETH' },
     // { base: 'DGD', quote: 'DAI' },
     // { base: 'REP', quote: 'DAI' },
     // { base: 'ZRX', quote: 'DAI' }
-  ]
+  // ]
 ];
 
 function asMap<D>(key: string, data: D[]): { [key: string]: D } {
@@ -107,7 +86,7 @@ export const tokens = asMap('symbol', [
     iconCircle: SvgImageSimple(daiCircleSvg),
     iconColor: SvgImageSimple(daiColorSvg),
   },
-  ...process.env.REACT_APP_OASIS_DEX_ENABLED !== '1' ? [] : [
+  // ...process.env.REACT_APP_OASIS_DEX_ENABLED !== '1' ? [] : [
     // {
     //   symbol: 'MKR',
     //   precision: 18,
@@ -213,8 +192,8 @@ export const tokens = asMap('symbol', [
   //   iconColor: SvgImageSimple(wbtcColorSvg),
   //   assetKind: AssetKind.marginable,
   //   // address: 0x2260fac5e5542a773aa44fbcfedf7c193bc2c599
-  // }
-  ]]);
+  // }]
+]);
 
 const load = memoize(
   (abi: any, address: string) => {
@@ -377,12 +356,12 @@ const localnet: NetworkConfig =   {
     return asMap('token', [
       loadToken('WETH', eth, '0x28085CEfA9103d3a55Fb5AfCcf07eD2038d31cD4'),
       loadToken('DAI', erc20, '0xff500C51399A282f4563F2713fFCBe9e53cfb6Fa'),
-      loadToken('DGD', erc20, '0xe80C262f63df9376d2ce9eDd373832EDc9FCA46E'),
+      loadToken('DGD', erc20, '0x2f42E9A9BA1A8BfE0a46a7b116aD5b0D16d2B105'),
       // loadToken('MKR', erc20, '0xe80C262f63df9376d2ce9eDd373832EDc9FCA46E'),
-      loadToken('REP', erc20, '0xe80C262f63df9376d2ce9eDd373832EDc9FCA46E'),
+      loadToken('REP', erc20, '0x30ed29c4C4bA30ECCcDd0c0D153E454BFCb0A4Dd'),
       // loadToken('OMG', erc20, '0xe80C262f63df9376d2ce9eDd373832EDc9FCA46E'),
-      loadToken('ZRX', erc20, '0xe80C262f63df9376d2ce9eDd373832EDc9FCA46E'),
-      loadToken('BAT', erc20, '0xe80C262f63df9376d2ce9eDd373832EDc9FCA46E'),
+      loadToken('ZRX', erc20, '0xE2ecCEEc6dEB8c7AFF9787E46FEA7078b89ab159'),
+      loadToken('BAT', erc20, '0x2f8e256F2f9301d1992CDCCD85A513954C9dDB71'),
     ]);
   },
   joins: {

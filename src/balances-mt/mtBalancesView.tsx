@@ -94,6 +94,7 @@ export class MTBalancesViewInternal extends React.Component<CombinedBalances & M
                         combinedBalance.asset.allowance
                       }
                       onClick={this.approve(combinedBalance)}
+                      data-test-id="toggle-leverage-allowance"
                 />
               }
             </td>

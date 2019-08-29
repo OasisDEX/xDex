@@ -1,8 +1,8 @@
 @import "../Variables";
 @import "../Mixins";
 
-$panel-padding-horizontal: 16px;
-$panel-padding-vertical: 12px;
+$panel-padding-horizontal: 20px;
+$panel-padding-vertical: 18px;
 
 
 // panel
@@ -40,7 +40,7 @@ $panel-padding-vertical: 12px;
   text-transform: uppercase;
   font-weight: 500;
   letter-spacing: 0.36px;
-  min-height: 64px;
+  line-height: 30px;
 
   @include media-breakpoint-down(md) {
     font-size: 14px;
@@ -51,8 +51,7 @@ $panel-padding-vertical: 12px;
 }
 
 .panelHeaderBordered {
-  padding-bottom: $panel-padding-vertical - 1px;  // adding border makes header 1px higher,
-                                                  // so subtract this 1px from bottom padding
+  line-height: 30px;
   border-bottom: 1px solid $grey-dark;
 }
 

@@ -24,7 +24,7 @@
 @keyframes spin {
   100% {
     -webkit-transform: rotate(360deg);
-    transform:rotate(360deg);
+    transform: rotate(360deg);
   }
 }
 
@@ -78,4 +78,56 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+@mixin whiteFillGreyBorderIcon($iconContentId) {
+
+  border-color: $grey-light;
+
+  :global(#{$iconContentId}) {
+    fill: $white;
+  }
+
+  &:hover:enabled {
+    border-color: $button-border-hover;
+  }
+
+  &:disabled {
+    :global(#{$iconContentId}) {
+      fill: $grey-light;
+    }
+  }
+}
+
+%defaultIconTheme {
+  height: 28px;
+  width: 28px;
+  border: 1px solid $button-border-disabled;
+  border-radius: 100%;
+}
+
+.accountIcon {
+  @extend %defaultIconTheme;
+  border-color: $grey-light;
+
+  :global(.account-icon-background) {
+    fill: transparent;
+  }
+}
+
+.settingsIcon, .backIcon {
+  @extend %defaultIconTheme;
+  padding: .25rem;
+}
+
+.settingsIcon {
+  @include whiteFillGreyBorderIcon('.cog-wheel-icon')
+}
+
+.backIcon {
+  @include whiteFillGreyBorderIcon('.back-icon')
+}
+
+.accountIcon {
+  @include whiteFillGreyBorderIcon('.account-icon-body');
 }

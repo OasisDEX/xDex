@@ -1,6 +1,5 @@
 import classnames from 'classnames';
 import * as React from 'react';
-import { Allowances } from '../../balances-nomt/balances';
 import { TxStatus } from '../../blockchain/transactions';
 import accountSvg from '../../icons/account.svg';
 import backSvg from '../../icons/back.svg';

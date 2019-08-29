@@ -49,7 +49,7 @@ jobs:
       - run: 
           name: Get & run localnode image
           command: |
-            LOCALNODE_SHA=5199916fa04ee9a8b68b285dfdaa262beb27366a
+            LOCALNODE_SHA=c31a5ca99835e83b7f397c6e7b872e789bc92d65
             docker login -u $DOCKER_USER -p $DOCKER_PASS && docker pull oasisdexorg/localnode:$LOCALNODE_SHA
             docker run -d -p 8545:8545 oasisdexorg/localnode:$LOCALNODE_SHA master
       - run: 

@@ -26,6 +26,7 @@ import {
   ProgressChange,
   ProgressStage,
   SetMaxChange,
+  SlippageLimitChange,
   toDustLimitChange$,
   toEtherPriceUSDChange,
   toGasPriceChange,
@@ -43,8 +44,10 @@ import {
   findAsset,
   findMarginableAsset,
   findNonMarginableAsset,
-  MarginableAsset, MarginableAssetCore,
-  MTAccount, MTAccountSetup,
+  MarginableAsset,
+  MarginableAssetCore,
+  MTAccount,
+  MTAccountSetup,
   MTAccountState,
   NonMarginableAsset,
   Operation
@@ -86,6 +89,16 @@ export type Message = {
   message: string
 };
 
+export enum ViewKind {
+  settings = 'settings',
+  instantTradeForm = 'instantTradeForm'
+}
+
+export interface ViewChange {
+  kind: FormChangeKind.viewChange;
+  value: ViewKind;
+}
+
 export interface MTSimpleFormState extends HasGasEstimation {
   baseToken: string;
   quoteToken: string;
@@ -114,13 +127,16 @@ export interface MTSimpleFormState extends HasGasEstimation {
   priceImpact?: BigNumber;
   submit: (state: MTSimpleFormState) => void;
   change: (change: ManualChange) => void;
+  view: ViewKind;
 }
 
 export type ManualChange =
   PriceFieldChange |
   AmountFieldChange |
   SetMaxChange |
-  KindChange;
+  KindChange |
+  SlippageLimitChange |
+  ViewChange;
 
 export type EnvironmentChange =
   GasPriceChange |
@@ -224,6 +240,16 @@ function applyChange(state: MTSimpleFormState, change: MTFormChange): MTSimpleFo
         ...state,
         progress: change.progress
       };
+    case FormChangeKind.viewChange:
+      return {
+        ...state,
+        view: change.value
+      };
+    case FormChangeKind.slippageLimitChange:
+      return {
+        ...state,
+        slippageLimit: change.value
+      };
   }
 }
 
@@ -298,7 +324,7 @@ function validate(state: MTSimpleFormState): MTSimpleFormState {
 function addUserConfig(state: MTSimpleFormState) {
   return {
     ...state,
-    slippageLimit: new BigNumber(0.05)
+    slippageLimit: state.slippageLimit || new BigNumber(0.05)
   };
 }
 
@@ -793,6 +819,7 @@ export function createMTSimpleOrderForm$(
     gasEstimationStatus: GasEstimationStatus.unset,
     messages: [],
     change: manualChange$.next.bind(manualChange$),
+    view: ViewKind.instantTradeForm
   };
 
   return merge(
