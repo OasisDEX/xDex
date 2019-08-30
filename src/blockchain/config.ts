@@ -302,8 +302,8 @@ const kovan: NetworkConfig = {
     ]);
   },
   joins: {
-    WETH:'0x004ddbf22b90cc5ce715be6096ac2fd89b514bf6',
-    DAI:'0xcf20652c7e9ff777fcb3772b594e852d1154174d'
+    WETH: '0x004ddbf22b90cc5ce715be6096ac2fd89b514bf6',
+    DAI: '0xcf20652c7e9ff777fcb3772b594e852d1154174d'
   } as { [key: string]: string },
   mcd: {
     vat: '0x04c67ea772ebb467383772cb1b64c7a9b1e02bca',
@@ -317,13 +317,13 @@ const kovan: NetworkConfig = {
     }
   } as { [key: string]: any },
   prices: {
-    WETH:'0x75dd74e8afe8110c8320ed397cccff3b8134d981'
+    WETH: '0x75dd74e8afe8110c8320ed397cccff3b8134d981' && '0x0' // FIXME
   } as { [key: string]: string },
   spot: '0x2403ddca8715427fdb04f9e70d8989cddab06b67',
   jug: '0xeffb135cf2e4911de9e478679d358c9df246424a',
   cdpManager: '0x74ecaa6842f118fbd8293202b573c8be263b4ada', // fill
   ilks: {
-    WETH: web3.fromAscii('ETH'),
+    WETH: web3.fromAscii('ETH-A'),
     // DGX: web3.fromAscii('DGX'),
   } as { [key: string]: string },
   get otcSupportMethods() {
