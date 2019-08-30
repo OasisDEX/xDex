@@ -14,7 +14,7 @@ import { TxMetaKind } from './txMeta';
 export const setupMTProxy = {
   call: (_data: {}, context: NetworkConfig) => context.marginProxyRegistry.contract.build[''],
   prepareArgs: () => [],
-  options: () => ({ gas: DEFAULT_GAS }),
+  options: () => ({ gas: DEFAULT_GAS + 2000000 }), // this should be estimated as in setupProxy
   kind: TxMetaKind.setupMTProxy,
   description: () => <React.Fragment>Setup MT proxy</React.Fragment>
 };
