@@ -289,7 +289,7 @@ const kovan: NetworkConfig = {
   startingBlock: 5216718,
   get otc() { return load(otc, '0x4a6bc4e803c62081ffebcc8d227b5a87a58f1f8f'); },
   // get saiTub() { return load(saiTub, '0xa71937147b55deb8a530c7229c442fd3f31b7db2'); },
-  get ethPip() { return load(dsValue, '0x75dd74e8afe8110c8320ed397cccff3b8134d981'); },
+  get ethPip() { return load(dsValue, '0x3546C7E3753C0e1D15878EC1C6dC65573864Dab7'); },
   get tokens() {
     return asMap('token', [
       loadToken('WETH', eth, '0xd0a1e359811322d97991e03f863a0c30c2cf029c'),
