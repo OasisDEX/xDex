@@ -289,25 +289,43 @@ const kovan: NetworkConfig = {
   startingBlock: 5216718,
   get otc() { return load(otc, '0x4a6bc4e803c62081ffebcc8d227b5a87a58f1f8f'); },
   // get saiTub() { return load(saiTub, '0xa71937147b55deb8a530c7229c442fd3f31b7db2'); },
-  get ethPip() { return load(dsValue, '0x3546C7E3753C0e1D15878EC1C6dC65573864Dab7'); },
+  get ethPip() { return load(dsValue, '0x75dd74e8afe8110c8320ed397cccff3b8134d981'); },
   get tokens() {
     return asMap('token', [
       loadToken('WETH', eth, '0xd0a1e359811322d97991e03f863a0c30c2cf029c'),
-      loadToken('DAI', erc20, '0xc4375b7de8af5a38a93548eb8453a498222c4ff2'),
-      loadToken('MKR', erc20, '0xaaf64bfcc32d0f15873a02163e7e500671a4ffcd'),
-      loadToken('DGD', erc20, '0x62aeec5fb140bb233b1c5612a8747ca1dc56dc1b'),
-      loadToken('REP', erc20, '0xc7aa227823789e363f29679f23f7e8f6d9904a9b'),
-      loadToken('ZRX', erc20, '0x18392097549390502069c17700d21403ea3c721a'),
-      loadToken('BAT', erc20, '0x9f8cfb61d3b2af62864408dd703f9c3beb55dff7'),
+      loadToken('DAI', erc20, '0xc4375b7de8af5a38a93548eb8453a498222c4ff2'), // NOT MCD_DAI
+      // loadToken('MKR', erc20, '0xaaf64bfcc32d0f15873a02163e7e500671a4ffcd'),
+      // loadToken('DGD', erc20, '0x62aeec5fb140bb233b1c5612a8747ca1dc56dc1b'),
+      // loadToken('REP', erc20, '0xc7aa227823789e363f29679f23f7e8f6d9904a9b'),
+      // loadToken('ZRX', erc20, '0x18392097549390502069c17700d21403ea3c721a'),
+      // loadToken('BAT', erc20, '0x9f8cfb61d3b2af62864408dd703f9c3beb55dff7'),
     ]);
   },
-  joins: {} as { [key: string]: string },
-  mcd: {} as { [key: string]: any },
-  prices: {} as { [key: string]: string },
-  spot: '',
-  jug: '',
-  cdpManager: '',
-  ilks: {} as { [key: string]: string },
+  joins: {
+    WETH:'0x004ddbf22b90cc5ce715be6096ac2fd89b514bf6',
+    DAI:'0xcf20652c7e9ff777fcb3772b594e852d1154174d'
+  } as { [key: string]: string },
+  mcd: {
+    vat: '0x04c67ea772ebb467383772cb1b64c7a9b1e02bca',
+    get cat() {
+      return load(mcdCat, '0x505795bd482f24da52bba25c072a833696d8c6ee');
+    },
+    flip: {
+      get WETH() {
+        return load(mcdFlipper, '0xe8b1439bbcc5a4da4a8e938257aea3a8d18f78ad');
+      },
+    }
+  } as { [key: string]: any },
+  prices: {
+    WETH:'0x75dd74e8afe8110c8320ed397cccff3b8134d981'
+  } as { [key: string]: string },
+  spot: '0x2403ddca8715427fdb04f9e70d8989cddab06b67',
+  jug: '0xeffb135cf2e4911de9e478679d358c9df246424a',
+  cdpManager: '0x74ecaa6842f118fbd8293202b573c8be263b4ada', // fill
+  ilks: {
+    WETH: web3.fromAscii('ETH'),
+    // DGX: web3.fromAscii('DGX'),
+  } as { [key: string]: string },
   get otcSupportMethods() {
     return load(otcSupport, '0x303f2bf24d98325479932881657f45567b3e47a8');
   },
@@ -321,10 +339,10 @@ const kovan: NetworkConfig = {
     return load(proxyCreationAndExecute, '0xee419971e63734fed782cfe49110b1544ae8a773');
   },
   get marginProxyRegistry() {
-    return load(proxyRegistry, '');
+    return load(proxyRegistry, '0x7da9b18f85cb29c2f756a78acfba6e3d5cd6dc96'); // fill
   },
   get proxyActions() {
-    return load(proxyActions, '');
+    return load(proxyActions, '0x52853948c085889b71792064350bbc0023ff8961'); // fill
   },
   oasisDataService: {
     url: 'https://kovan-cache.eth2dai.com/api/v1'
