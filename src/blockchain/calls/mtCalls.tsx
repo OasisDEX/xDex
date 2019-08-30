@@ -84,7 +84,7 @@ export const mtBalance = {
   prepareArgs: ({ proxyAddress, tokens }: MTBalanceData, context: NetworkConfig) => {
     return [
       proxyAddress,
-      tokens.map(token => web3.toHex(token)),
+      tokens.map(token => context.ilks[token]),
       tokens.map(token => context.tokens[token].address),
       tokens.map(token => context.prices[token]),
       context.mcd.vat,
@@ -117,9 +117,8 @@ function argsOfPerformOperations(
 
   for (const [i, o] of plan.entries()) {
     kinds[i] = web3.toHex(o.kind);
-    names[i] = web3.toHex(
-      o.kind === OperationKind.fundDai || o.kind === OperationKind.drawDai ? o.ilk : o.name
-    );
+    names[i] = context.ilks[o.kind === OperationKind.fundDai || o.kind === OperationKind.drawDai ?
+      o.ilk : o.name];
     tokens[i] = context.tokens[o.name].address;
     adapters[i] = context.joins[o.name];
     amounts[i] = toWei(o.name, (o as any).amount);
