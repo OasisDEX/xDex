@@ -59,11 +59,15 @@ export interface MTBalanceResult {
 }
 
 const BalanceOuts = 9;
+const secondsPerYear = 60 * 60 * 24 * 365;
 
 function mtBalancePostprocess(result: BigNumber[], { tokens }: MTBalanceData) : MTBalanceResult {
   return {
     assets: tokens.map((token, i) => {
       const row = i * BalanceOuts;
+      const duty = new BigNumber(result[row + 8]).div(new BigNumber(10).pow(27));
+      const annualStabilityFee = duty.pow(secondsPerYear);
+
       return {
         walletBalance: amountFromWei(new BigNumber(result[row]), token),
         marginBalance: amountFromWei(new BigNumber(result[row + 1]), token),
@@ -73,7 +77,7 @@ function mtBalancePostprocess(result: BigNumber[], { tokens }: MTBalanceData) : 
         referencePrice: amountFromWei(new BigNumber(result[row + 5]), 'DAI'),
         minCollRatio: amountFromWei(new BigNumber(result[row + 6]), 'ETH'),
         allowance: new BigNumber(result[row + 7]).gte(MIN_ALLOWANCE),
-        fee: new BigNumber(result[row + 8]).div(new BigNumber(10).pow(27))
+        fee: annualStabilityFee
       };
     })
   };
