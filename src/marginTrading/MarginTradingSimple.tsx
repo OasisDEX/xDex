@@ -11,6 +11,8 @@ import { connect } from '../utils/connect';
 import { FlexLayoutRow } from '../utils/layout/FlexLayoutRow';
 import { Panel } from '../utils/panel/Panel';
 
+import * as styles from './MarginTradingSimple.scss';
+
 export interface MarginTradingOwnProps {
   setTradingPair: (tp: TradingPair) => void;
   tp: TradingPair;
@@ -30,7 +32,7 @@ const Content = (props: any | { parentMatch: string }) => {
   return (
     <div>
       <FlexLayoutRow>
-        <Panel style={{ flexGrow: 1 }}>
+        <Panel className={styles.tradingPairPanel}>
           <theAppContext.Consumer>
             { ({ TradingPairsTxRx }) =>
               // @ts-ignore
