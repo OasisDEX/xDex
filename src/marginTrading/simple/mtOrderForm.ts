@@ -125,6 +125,7 @@ export interface MTSimpleFormState extends HasGasEstimation {
   isSafePost?: boolean;
   slippageLimit?: BigNumber;
   priceImpact?: BigNumber;
+  pnl?: BigNumber;
   submit: (state: MTSimpleFormState) => void;
   change: (change: ManualChange) => void;
   view: ViewKind;
@@ -362,10 +363,11 @@ function addPurchasingPower(state: MTSimpleFormState) {
 
   return {
     ...state,
+    pnl: new BigNumber(4),
     realPurchasingPower: baseAsset.assetKind === AssetKind.marginable ?
       realPurchasingPowerMarginable(
         baseAsset,
-        state.mta.cash.balance,
+        state.mta.cash.balance,  // todo: CashAsset - not exists anymore?
         state.orderbook.sell)
         :
         realPurchasingPowerNonMarginable(
@@ -469,6 +471,8 @@ function getBuyPlan(
   realPurchasingPower: BigNumber,
 ): PlanInfo {
 
+  console.log('buy plan amount', amount);
+  console.log('buy plan realPurchasingPower', realPurchasingPower);
   const request = prepareBuyAllocationRequest(
     mta,
     sellOffers,

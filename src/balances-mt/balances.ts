@@ -76,6 +76,10 @@ export const balances$: Observable<Balances> = combineLatest(
   distinctUntilChanged(isEqual)
 );
 
+context$.subscribe(context => {
+  Object.assign(window, { context });
+});
+
 type Dust = (token: string, callback: (err: any, r: BigNumber) => any) => any;
 
 export const dustLimits$: Observable<DustLimits> = combineLatest(context$).pipe(
@@ -102,6 +106,7 @@ export interface CombinedBalance {
   walletBalance: BigNumber;
   asset?: CashAsset | MarginableAsset | NonMarginableAsset;
   mtAssetValueInDAI: BigNumber;
+  cashBalance?: BigNumber;
 }
 
 export interface CombinedBalances {
@@ -124,6 +129,7 @@ export function combineBalances(
           mta.marginableAssets.find(ma => ma.name === name) ||
           mta.nonMarginableAssets.find(ma => ma.name === name);
 
+      console.log('@@ASSET', asset);
       const mtAssetValueInDAI = asset ?
         // walletBalance.plus(asset.balance).times(
           asset.balance.times(
@@ -133,6 +139,8 @@ export function combineBalances(
         ) :
         zero;
 
+      const cashBalance = asset && asset.assetKind === AssetKind.marginable ? asset.dai : zero;
+
       // const totalValueInDAI = asset ?
       //   walletBalance.plus(asset.balance) : walletBalance;
 
@@ -141,6 +149,7 @@ export function combineBalances(
         asset,
         walletBalance,
         mtAssetValueInDAI,
+        cashBalance,
       };
     });
 

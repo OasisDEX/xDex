@@ -24,17 +24,33 @@ import { Muted } from '../../utils/text/Text';
 import { findMarginableAsset, MTAccountState } from '../state/mtAccount';
 import { Message, MessageKind, MTSimpleFormState, ViewKind } from './mtOrderForm';
 import * as styles from './mtOrderFormView.scss';
+import {AssetKind} from "../../blockchain/config";
 
 const DevInfos = ({ value }: { value: MTSimpleFormState }) => {
 
+
+  //  assetKind: AssetKind.marginable;
+  // urnBalance: BigNumber;
+  // debt: BigNumber;
+  // referencePrice: BigNumber;
+  // minCollRatio: BigNumber;
+  // safeCollRatio: BigNumber;
+  // fee: BigNumber;
+
+
   let balance = null;
   let debt = null;
+  let cash = null;
   let referencePrice = null;
   let leverage = null;
+  let urnBalance = null;
+
   if (value.mta && value.mta.state === MTAccountState.setup) {
     const ma = findMarginableAsset(value.baseToken, value.mta);
     balance = ma!.balance;
     debt = ma!.debt;
+    cash = ma!.dai;
+    urnBalance = ma!.urnBalance;
     referencePrice = ma!.referencePrice;
     leverage = balance.times(referencePrice).div(balance.times(referencePrice).minus(debt));
   }
@@ -55,6 +71,9 @@ const DevInfos = ({ value }: { value: MTSimpleFormState }) => {
     <br/>
     price:
     {value.price && value.price.toString()}
+    <br/>
+    DAI:
+    {cash && cash.toString()}
     <br/>
     realPurchasingPower:
     {value.realPurchasingPower && value.realPurchasingPower.toString()}
@@ -79,6 +98,9 @@ const DevInfos = ({ value }: { value: MTSimpleFormState }) => {
           <br/>
           Debt:
           {debt && debt.toString()}
+          <br/>
+          urnBalance:
+          {urnBalance && urnBalance.toString()}
           <br/>
           referencePrice:
           {referencePrice && referencePrice.toString()}
@@ -386,12 +408,12 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
         </div>
         <div className={classnames(styles.orderSummaryValue, styles.orderSummaryValuePositive)}>
           {
-            this.props.liquidationPrice &&
+            this.props.liquidationPrice && !this.props.liquidationPrice.isNaN() ?
             <Money
               value={this.props.liquidationPrice}
-              token={this.props.quoteToken}
+              token="USD"
               fallback="-"
-            />
+            /> : <span>-</span>
           }
           {
             this.props.liquidationPricePost &&
@@ -399,7 +421,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
               <span className={styles.transitionArrow} />
               <Money
                 value={this.props.liquidationPricePost}
-                token={this.props.quoteToken}
+                token="USD"
                 fallback="-"
                 className={
                   classnames({
@@ -607,8 +629,9 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
       </div>
       <div className={styles.orderSummaryValue}>
         {
-          this.props.leverage &&
+          (this.props.leverage && !this.props.leverage.isNaN()) ?
           <React.Fragment>{ formatPrecision(this.props.leverage, 1) }x</React.Fragment>
+            : <span>-</span>
         }
         {this.props.leveragePost && <React.Fragment>
           <span className={styles.transitionArrow}/>

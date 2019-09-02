@@ -90,6 +90,11 @@ export enum MTHistoryEventKind {
 }
 
 export type MTHistoryEvent = {
+  displayName?: string;
+  priceDai?: BigNumber;
+  liquidationPrice?: BigNumber;
+  liquidationPriceDelta?: BigNumber;
+  debtDelta?: BigNumber;
   dAmount: BigNumber;
   dDAIAmount: BigNumber;
 } & (MTMarginEvent | MTLiquidationEvent);
@@ -142,6 +147,7 @@ export interface MarginableAsset extends MarginableAssetCore {
   balance: BigNumber;
   balanceInCash: BigNumber;
   currentCollRatio?: BigNumber;
+  cash: BigNumber;
   // maxDebtForOther: BigNumber; // max possible debt for other assets
   maxDebt: BigNumber; // max possible targetDebt for this asset
   liquidationPrice: BigNumber;

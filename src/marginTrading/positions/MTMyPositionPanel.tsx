@@ -56,7 +56,10 @@ export class MTMyPositionPanel extends React.Component<MTMyPositionPanelProps>
       }
 
       const ma: MarginableAsset = findMarginableAsset(baseToken, mta)!;
-
+      const positionStats = {
+        purchasingPower: this.props.value.realPurchasingPower,
+        pnl: this.props.value.pnl
+      };
       return (
         <div>
           <PanelHeader bordered={true}>
@@ -97,7 +100,7 @@ export class MTMyPositionPanel extends React.Component<MTMyPositionPanelProps>
             </div>
           </PanelHeader>
           <PanelBody>
-            {<MTMyPositionView {...ma}/>}
+            {<MTMyPositionView {...ma } {...positionStats} />}
           </PanelBody>
         </div>
       );

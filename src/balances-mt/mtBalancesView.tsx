@@ -67,17 +67,21 @@ export class MTBalancesViewInternal extends React.Component<CombinedBalances & M
           <th style={{ width: '15%' }}>Symbol</th>
           <th style={{ width: '17%' }}>Asset</th>
           <th style={{ width: '20%' }} className={styles.center}>Unlock on Proxy</th>
-          <th style={{ width: '20%' }} className={styles.amount}>Wallet</th>
+          <th style={{ width: '15%' }} className={styles.amount}>Wallet</th>
           <th style={{ width: '15%' }} className={styles.center}>Transfer</th>
-          <th style={{ width: '20%' }} className={styles.amount}>Margin Account</th>
-          <th style={{ width: '20%' }} className={styles.amount}>Value (DAI)</th>
+          <th style={{ width: '15%' }} className={styles.amount}>Margin Account</th>
+          <th style={{ width: '15%' }} className={styles.amount}>Value (DAI)</th>
+          <th style={{ width: '15%' }} className={styles.amount}>Cash (DAI)</th>
         </tr>
         </thead>
         <tbody>
         { (!this.props.balances || this.props.balances.length === 0) && <tr>
           <td colSpan={7} className={styles.center}>You have no assets</td>
         </tr> }
-        { this.props.balances && this.props.balances.map(combinedBalance => (
+        { this.props.balances && this.props.balances.map(combinedBalance => {
+          console.log('combinedBalance', combinedBalance);
+
+          return (
           <tr data-test-id={`${combinedBalance.name}-overview`} key={combinedBalance.name}>
             <td>{combinedBalance.name}</td>
             <td>
@@ -140,8 +144,12 @@ export class MTBalancesViewInternal extends React.Component<CombinedBalances & M
                 <FormatAmount value={combinedBalance.mtAssetValueInDAI} token="DAI"/>
               }
             </td>
+            <td className={styles.amount}>
+                <FormatAmount value={combinedBalance.cashBalance} token="DAI"/>
+            </td>
           </tr>
-        ))}
+          );
+        })}
         </tbody>
       </Table>
     );

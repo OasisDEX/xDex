@@ -7,8 +7,23 @@
   text-transform: capitalize;
 }
 
-.table td {
+.table td, .table th {
   vertical-align: top;
+  padding: 8px 8px 8px 8px;
+  font-size: 14px;
+  line-height: 15px;
+}
+
+.table th {
+  font-size: 12px;
+  line-height: 15px;
+  text-transform: none;
+  text-align: left;
+}
+
+.headerDark {
+  color: $grey-lightest;
+  margin-right: 5px;
 }
 
 .contentWithScroll {
@@ -16,3 +31,4 @@
   overflow-x: hidden;
   overflow-y: auto;
 }
+

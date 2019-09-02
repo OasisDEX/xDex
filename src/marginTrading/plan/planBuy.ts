@@ -4,7 +4,7 @@ import { flatten } from 'lodash';
 import { AssetKind } from '../../blockchain/config';
 import { Offer } from '../../exchange/orderbook/orderbook';
 import {
-  findAsset, MarginableAsset, MarginableAssetCore, MTAccountSetup,
+  findAsset, findMarginableAsset, MarginableAsset, MarginableAssetCore, MTAccountSetup,
   Operation,
   OperationKind
 } from '../state/mtAccount';
@@ -63,16 +63,19 @@ export function prepareBuyAllocationRequest(
       } as MarginableAssetCore);
   });
 
-  const cashBalance = mta.cash.balance;
+  const baseAsset = findMarginableAsset(baseToken, mta);
+
+  const cashBalance = baseAsset!.dai; // todo: no longer valid!! no cash balance ?
   const totalDebt = assets.reduce((sum, a) => sum.plus(a.debt), zero);
 
   console.log('prepareBuyAllocationRequest maxtotal', maxTotal.toString());
   console.log('prepareBuyAllocationRequest total debt', totalDebt.toString());
   console.log('prepareBuyAllocationRequest cashBalance', cashBalance.toString());
+  // const targetDaiBalance = cashBalance.minus(maxTotal).minus(totalDebt); -- old
   const targetDaiBalance = cashBalance.gt(zero) ?
     cashBalance.minus(maxTotal).minus(totalDebt)
-    : maxTotal.times(minusOne)
-  ;
+    : maxTotal.times(minusOne);
+
   const defaultTargetCash = cashBalance; // BigNumber.max(zero, cashBalance.minus(maxTotal));
 
   console.log('prepareBuyAllocationRequest targetDaiBalance', targetDaiBalance.toString());
@@ -117,11 +120,10 @@ export function planBuy(
   const otherAllocations = debts.filter(a => a.name !== name);
   const otherOps: Operation[] = flatten(orderDeltas(otherAllocations).map(deltaToOps));
 
-  const totalDebtDelta = debts.reduce((s, d) => s.plus(d.delta), zero);
+  const totalDebtDelta = debts.reduce((s, d) => {
+    return s.plus(d.delta);
+  }, zero);
   const extraCash = totalDebtDelta.minus(maxTotal);
-
-  // console.log(totalDebtDelta.toString(), maxTotal.toString(), extraCash.toString());
-
   const extraAdjust: Operation[] = extraCash.gt(zero) ?
     [{ name, kind: OperationKind.adjust, ddai: extraCash }] : [];
 
