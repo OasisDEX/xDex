@@ -79,41 +79,35 @@ export function realPurchasingPowerNonMarginable(
 //   return cashAvailable.minus(cashLeft);
 // }
 
+
 export function realPurchasingPowerMarginable(
   ma: MarginableAsset,
   initialCash: BigNumber,
   sellOffers: Offer[]
 ): BigNumber {
-
-  console.log('PURCHASPOW ma', ma);
-  console.log('PURCHASPOW initial cash', initialCash);
-  console.log('PURCHASPOW debt', ma.debt.toString());
-  let amount = ma.balance || zero; // TODO: rename totalAmount -> currentAmount
+  Object.assign(window, { ma });
+  let amount = ma.balance; // TODO: rename totalAmount -> currentAmount
+  const referencePrice = ma.referencePrice;
   let debt = ma.debt;
   let purchasingPower = zero;
   let collRatio = amount.times(ma.referencePrice).div(debt);
-  let cash = ma.balanceInCash.plus(ma.dai);
-  let dai = ma.dai;
-  console.log('PURCHASPOW  dai', ma.dai.toString());
-  console.log('PURCHASPOW init cash', initialCash.toString());
-  console.log('PURCHASPOW collRatio', collRatio!.toString());
-  console.log('PURCHASPOW safeCollRatio', ma.safeCollRatio!.toString());
+  let availableDebt = amount.times(referencePrice).div(ma.safeCollRatio).minus(debt);
+  let cash = ma.dai;
 
-  // while (collRatio.gt(ma.safeCollRatio) && cash.gt(zero) && sellOffers.length > 0) {
-  // why cash should be > 0?
-  let isSafe = debt.gt(zero) ? collRatio.gt(ma.safeCollRatio) : true;
-
-  if (cash.isEqualTo(zero)) {
-    return purchasingPower;
-  }
-
-  console.log('PURCHASPOW @@@ isSafe', isSafe);
-  while (isSafe && sellOffers.length > 0) {
-    console.log('PURCHASPOW  =============');
+  if (cash.gt(zero)) {
     const [bought, cashLeft, offersLeft] = eat(cash, sellOffers);
     sellOffers = offersLeft;
-    console.log('PURCHASPOW bought', bought.toString());
-    console.log('PURCHASPOW cashLeft', cashLeft.toString());
+    amount = amount.plus(bought);
+    purchasingPower = purchasingPower.plus(cash).minus(cashLeft);
+    availableDebt = amount.times(referencePrice).div(ma.safeCollRatio).minus(debt);
+  }
+
+  let isSafe = debt.gt(zero) ? collRatio.gt(ma.safeCollRatio) : true;
+
+  cash = availableDebt;
+  while (isSafe && cash.gt(zero) && sellOffers.length > 0) {
+    const [bought, cashLeft, offersLeft] = eat(cash, sellOffers);
+    sellOffers = offersLeft;
     amount = amount.plus(bought);
     purchasingPower = purchasingPower.plus(cash).minus(cashLeft);
 
@@ -122,36 +116,103 @@ export function realPurchasingPowerMarginable(
     // ergo:
     // availableDebt = amount * referencePrice / safeCollRatio - debt
 
-    const availableDebt = amount.times(ma.referencePrice).div(ma.safeCollRatio).minus(debt);
-
-    if (dai.gt(zero)) {
-      dai = zero;
-    } else {
-      debt = debt.plus(availableDebt);
-    }
-
-    console.log('PURCHASPOW dai CALC', debt.toString(), dai.toString());
-    collRatio = amount.times(ma.referencePrice).div(debt);
-
-    console.log('PURCHASPOW iter debt', debt.toString());
-    console.log('PURCHASPOW iter collRatio', collRatio.toString());
-    isSafe = debt.gt(zero) ? collRatio.gt(ma.safeCollRatio) : true;
-
-    console.log('PURCHASPOW availableDebt', availableDebt.toString());
+    debt = debt.plus(cash.minus(cashLeft));
+    availableDebt = amount.times(referencePrice).div(ma.safeCollRatio).minus(debt);
+    collRatio = amount.times(referencePrice).div(debt);
     cash = availableDebt;
 
-    console.log('PURCHASPOW isSafe after', isSafe);
+    isSafe = debt.gt(zero) ? collRatio.gt(ma.safeCollRatio) : true;
+    if (cash.lt(new BigNumber(0.001))) {
+      isSafe = false;
+    }
+
     console.log(
       amount.toString(),
       cash.toString(),
       collRatio.toString(),
       sellOffers.length
     );
-
   }
 
   return purchasingPower;
 }
+// export function realPurchasingPowerMarginable(
+//   ma: MarginableAsset,
+//   initialCash: BigNumber,
+//   sellOffers: Offer[]
+// ): BigNumber {
+//
+//   const referencePrice = ma.referencePrice;
+//
+//   console.log('PURCHASPOW START CALC --------------------------------------------');
+//   console.log('PURCHASPOW ma', ma);
+//   console.log('PURCHASPOW initial cash', initialCash.toString());
+//   console.log('PURCHASPOW debt', ma.debt.toString());
+//   let amount = ma.balance || zero; // TODO: rename totalAmount -> currentAmount
+//   let debt = ma.debt;
+//   let purchasingPower = zero;
+//   let collRatio = amount.times(ma.referencePrice).div(debt);
+//   let cash = ma.balanceInCash.plus(ma.dai);
+//   let dai = ma.dai;
+//   console.log('PURCHASPOW  dai', ma.dai.toString());
+//   console.log('PURCHASPOW init cash', initialCash.toString());
+//   console.log('PURCHASPOW collRatio', collRatio!.toString());
+//   console.log('PURCHASPOW safeCollRatio', ma.safeCollRatio!.toString());
+//
+//   let isSafe = debt.gt(zero) ? collRatio.gt(ma.safeCollRatio) : true;
+//   while (isSafe && cash.gt(zero) && sellOffers.length > 0) {
+//   // why cash should be > 0?
+//   // let isSafe = debt.gt(zero) ? collRatio.gt(ma.safeCollRatio) : true;
+//   //
+//   // if (cash.isEqualTo(zero)) {
+//   //   return purchasingPower;
+//   // }
+//
+//   // console.log('PURCHASPOW @@@ isSafe', isSafe);
+//   // while (isSafe && sellOffers.length > 0) {
+//     const [bought, cashLeft, offersLeft] = eat(cash, sellOffers);
+//     sellOffers = offersLeft;
+//     console.log('PURCHASPOW bought', bought.toString());
+//     console.log('PURCHASPOW cashLeft', cashLeft.toString());
+//     amount = amount.plus(bought);
+//     purchasingPower = purchasingPower.plus(cash).minus(cashLeft);
+//
+//     // safety condition:
+//     // amount * referencePrice / (debt + availableDebt) >= safeCollRatio
+//     // ergo:
+//     // availableDebt = amount * referencePrice / safeCollRatio - debt
+//
+//     const availableDebt = amount.times(referencePrice).div(ma.safeCollRatio).minus(debt);
+//
+//     collRatio = amount.times(referencePrice).div(debt);
+//
+//     // if (dai.gt(zero)) {
+//     //   dai = zero;
+//     // } else {
+//     debt = debt.plus(availableDebt);
+//     // }
+//
+//     console.log('PURCHASPOW dai CALC', debt.toString(), dai.toString());
+//
+//     console.log('PURCHASPOW iter debt', debt.toString());
+//     console.log('PURCHASPOW iter collRatio', collRatio.toString());
+//     isSafe = debt.gt(zero) ? collRatio.gt(ma.safeCollRatio) : true;
+//
+//     console.log('PURCHASPOW availableDebt', availableDebt.toString());
+//     cash = availableDebt;
+//
+//     console.log('PURCHASPOW isSafe after', isSafe);
+//     console.log(
+//       amount.toString(),
+//       cash.toString(),
+//       collRatio.toString(),
+//       sellOffers.length
+//     );
+//
+//   }
+//
+//   return purchasingPower;
+// }
 
 function calculateMTHistoryEvents(
   rawHistory: RawMTHistoryEvent[],
@@ -260,6 +321,9 @@ export function calculateMarginable(
 
   const liquidationInProgress = biteLastIndex >= 0 && biteLastIndex > dentLastIndex;
 
+  console.log('LEVERAGE ma.balance', ma.balance.toString());
+  console.log('LEVERAGE ma.referencePrice', ma.referencePrice.toString());
+  console.log('LEVERAGE ma.debt', ma.debt.toString());
   const leverage = ma.balance.times(ma.referencePrice)
     .div(ma.balance.times(ma.referencePrice).minus(ma.debt));
 
