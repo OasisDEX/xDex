@@ -43,7 +43,8 @@ export function aggregateMTAccountState(
   //   .filter((t: any) => t.assetKind === AssetKind.marginable)
   //   .map(t => t.symbol);
 
-  const tokenNames = [...assetNames, 'DAI'];
+  // const tokenNames = [...assetNames, 'DAI'];
+  const tokenNames = assetNames;
 
   return calls.mtBalance({ tokens: tokenNames, proxyAddress: proxy.address }).pipe(
     map((balanceResult) => {

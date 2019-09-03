@@ -4,6 +4,7 @@ import * as React from 'react';
 import { Operation, OperationKind } from '../../marginTrading/state/mtAccount';
 import { Money } from '../../utils/formatters/Formatters';
 import { Currency } from '../../utils/text/Text';
+import { one } from '../../utils/zero';
 import { NetworkConfig } from '../config';
 import { MIN_ALLOWANCE } from '../network';
 import { amountFromWei, amountToWei } from '../utils';
@@ -61,12 +62,19 @@ export interface MTBalanceResult {
 const BalanceOuts = 9;
 const secondsPerYear = 60 * 60 * 24 * 365;
 
+BigNumber.config({ POW_PRECISION: 50 });
+
 function mtBalancePostprocess(result: BigNumber[], { tokens }: MTBalanceData) : MTBalanceResult {
   return {
     assets: tokens.map((token, i) => {
       const row = i * BalanceOuts;
       const duty = new BigNumber(result[row + 8]).div(new BigNumber(10).pow(27));
-      const annualStabilityFee = duty.pow(secondsPerYear);
+      const annualStabilityFee = duty.pow(secondsPerYear).minus(one);
+      console.log(
+        'duty:', duty.toString(),
+        'annualStabilityFee:', annualStabilityFee.toString(),
+        'referencePrice', amountFromWei(new BigNumber(result[row + 5]), 'DAI').toString(),
+      );
 
       return {
         walletBalance: amountFromWei(new BigNumber(result[row]), token),
@@ -121,8 +129,10 @@ function argsOfPerformOperations(
 
   for (const [i, o] of plan.entries()) {
     kinds[i] = web3.toHex(o.kind);
-    names[i] = context.ilks[o.kind === OperationKind.fundDai || o.kind === OperationKind.drawDai ?
-      o.ilk : o.name];
+    // names[i] =
+    //   context.ilks[o.kind === OperationKind.fundDai || o.kind === OperationKind.drawDai ?
+    //   o.ilk : o.name];
+    names[i] = context.ilks[o.name];
     tokens[i] = context.tokens[o.name].address;
     adapters[i] = context.joins[o.name];
     amounts[i] = toWei(o.name, (o as any).amount);
