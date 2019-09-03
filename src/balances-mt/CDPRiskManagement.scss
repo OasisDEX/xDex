@@ -1,0 +1,60 @@
+@import "../utils/Variables";
+@import "../utils/Mixins";
+
+// panel body
+.panelBody {
+  font-size: 14px;
+}
+
+// general
+.green {
+  color: $green;
+}
+
+.warn {
+  color: $daiColor;
+}
+
+.panic {
+  color: $red;
+}
+
+.flex {
+  display: flex;
+}
+
+.box {
+  flex-basis: 30%;
+  flex-grow: 1;
+  padding: 16px 32px;
+}
+
+.centered {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+// top boxes with large values
+.largeFontSize {
+  font-size: 20px;
+  margin-top: 0.2em;
+  @include fontLatoMedium;
+}
+
+// detailed rows
+
+.detailedRow {
+  display: flex;
+  margin-top: 0.8em;
+}
+
+.detailedMoney {
+  @include fontLatoBold;
+  margin-left: auto;
+}
+
+.detailedPercent {
+  @extend .detailedMoney;
+}

@@ -1,5 +1,5 @@
 import { difference } from 'lodash';
-import { combineLatest, Observable, of } from 'rxjs/index';
+import { combineLatest, Observable, of } from 'rxjs';
 import { mergeMap, scan } from 'rxjs/operators';
 
 type O<T> = Observable<T>;

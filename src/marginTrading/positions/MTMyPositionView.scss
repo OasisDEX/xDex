@@ -1,0 +1,36 @@
+@import "../../utils/Variables";
+
+.MTPositionPanel {
+  display: flex;
+  border-bottom: 1px solid #393942;
+  margin-bottom: 24px;
+}
+
+.MTPositionColumn {
+  width: 33%;
+  padding: 20px;
+  flex-shrink: 0;
+  flex-grow: 0;
+  border-left: 1px solid #393942;
+
+  &:first-child {
+    border-left: 0;
+  }
+}
+
+.summaryRow {
+  display: flex;
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.summaryLabel {
+  color: $grey-light-mid;
+  flex-grow: 1;
+}
+
+.summaryValue {
+  color: #fff;
+  flex-grow: 1;
+  text-align: right;
+}

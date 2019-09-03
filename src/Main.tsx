@@ -5,12 +5,13 @@ import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 import { map } from 'rxjs/operators';
 import { setupAppContext, theAppContext } from './AppContext';
-import { BalancesView } from './balances/BalancesView';
+import { BalancesView } from './balances-mt/BalancesView';
 import { WalletStatus, walletStatus$ } from './blockchain/wallet';
 import { ExchangeViewTxRx } from './exchange/ExchangeView';
 import { HeaderTxRx } from './header/Header';
 import * as styles from './index.scss';
 import { InstantExchange } from './instant/InstantViewPanel';
+import { MarginTradingSimpleTxRx } from './marginTrading/MarginTradingSimple';
 import { connect } from './utils/connect';
 
 const browserHistoryInstance = createBrowserHistory();
@@ -64,6 +65,7 @@ class Routes extends React.Component<{ status: WalletStatus }> {
           this.props.status === 'connected' &&
           <Route path={'/account'} component={BalancesView}/>
         }
+        <Route path={'/leverage'} component={MarginTradingSimpleTxRx} />
         <Redirect from={'/balances'} to={'/account'}/>
         <Redirect from={'/'} to={'/market'}/>
       </Switch>

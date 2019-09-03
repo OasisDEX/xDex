@@ -40,10 +40,10 @@ export function withModal<O, P extends ModalOpenerProps>(
         </ReRenderBarrier>
         {this.state.modalType !== undefined &&
         ReactDOM.createPortal(
-          <div onClick={this.close}>
-            <this.state.modalType {...{ close: this.close }}/>
-          </div>,
-          document.body)}
+              <this.state.modalType
+                {...{ close: this.close }}
+              />,
+              document.body)}
       </React.Fragment>;
     }
 

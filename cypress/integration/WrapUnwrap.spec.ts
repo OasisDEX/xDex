@@ -4,7 +4,7 @@ import { WalletConnection } from '../pages/WalletConnection';
 import { unwrapping, wrapping } from '../pages/WrapUnwrap';
 import { cypressVisitWithWeb3 } from '../utils';
 
-describe('Wrapping ETH', () => {
+describe.skip('Wrapping ETH', () => {
 
   beforeEach(() => {
     cypressVisitWithWeb3();
@@ -51,7 +51,7 @@ describe('Wrapping ETH', () => {
   });
 });
 
-describe('Unwrapping ETH', () => {
+describe.skip('Unwrapping ETH', () => {
 
   beforeEach(() => {
     cypressVisitWithWeb3();

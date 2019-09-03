@@ -14,8 +14,8 @@ import {
   switchMap, take,
 } from 'rxjs/operators';
 
-import { Allowances, Balances, DustLimits } from '../balances/balances';
-import { Calls, calls$, Calls$, ReadCalls, ReadCalls$ } from '../blockchain/calls/calls';
+import { Allowances, Balances, DustLimits } from '../balances-nomt/balances';
+import { Calls, Calls$, ReadCalls, ReadCalls$ } from '../blockchain/calls/calls';
 import { eth2weth, weth2eth } from '../blockchain/calls/instant';
 import { NetworkConfig, tokens } from '../blockchain/config';
 import { EtherscanConfig } from '../blockchain/etherscan';
@@ -49,7 +49,6 @@ import {
 import { calculateTradePrice, getQuote } from '../utils/price';
 import { getSlippageLimit } from '../utils/slippage';
 import { switchSpread } from '../utils/switchSpread';
-import { pluginDevModeHelpers } from './instantDevModeHelpers';
 import {
   estimateTradePayWithERC20,
   estimateTradePayWithETH,
@@ -1111,8 +1110,6 @@ export function createFormController$(
     context$: Observable<NetworkConfig>
   }
 ): Observable<InstantFormState> {
-
-  pluginDevModeHelpers(calls$);
 
   const manualChange$ = new Subject<ManualChange>();
 

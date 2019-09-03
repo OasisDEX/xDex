@@ -3,7 +3,7 @@ import { curry } from 'ramda';
 import { merge, Observable, of, Subject } from 'rxjs';
 import { first, map, scan, shareReplay, startWith, switchMap } from 'rxjs/operators';
 
-import { Balances, DustLimits } from '../../balances/balances';
+import { Balances, DustLimits } from '../../balances-nomt/balances';
 import { Calls, Calls$ } from '../../blockchain/calls/calls';
 import { OfferMakeData, OfferMakeDirectData } from '../../blockchain/calls/offerMake';
 import { tokens } from '../../blockchain/config';

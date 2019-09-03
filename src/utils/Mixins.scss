@@ -25,9 +25,8 @@
       @include media-breakpoint-down($breakpoint-down) {
         @include tableColumnWidth($i, $width);
       }
-    }
-    @else {
-        @include tableColumnWidth($i, $width);
+    } @else {
+      @include tableColumnWidth($i, $width);
     }
   }
 }
@@ -69,12 +68,13 @@ $inputFontSize: (
     font-size: map-get($inputFontSize, $name);
   }
 }
+
 // generate class for input heights
 // If $name is given, generate only this one given class (f.e. .lg)
 // otherwise generate all possible classes.
 // Generation base on $inputHeight map
 @mixin formInputSizes($sizeName: null) {
-  @if($sizeName) {
+  @if ($sizeName) {
     // generate only for one given size
     @include formInputSize($sizeName);
   } @else {
@@ -109,7 +109,7 @@ $inputFontSize: (
       width: 100%;
       position: fixed;
       bottom: 0;
-      background: linear-gradient(to bottom, rgba(#1f1f27,0) 0%, #1f1f27 25%);
+      background: linear-gradient(to bottom, rgba(#1f1f27, 0) 0%, #1f1f27 25%);
     }
 
     &:before {
@@ -134,6 +134,7 @@ $inputFontSize: (
     right: 0;
     bottom: 0;
     background-color: rgba(#15151d, 0.8);
+    z-index: 8;
   }
 }
 
@@ -227,6 +228,26 @@ $inputFontSize: (
   overflow: hidden;
   -ms-text-overflow: ellipsis;
   text-overflow: ellipsis;
+}
+
+// generate class for input heights
+// If $name is given, generate only this one given class (f.e. .lg)
+// otherwise generate all possible classes.
+// Generation base on $inputHeight map
+@mixin formInputHeights($name: null) {
+  @if ($name) {
+    @if map-has-key($inputHeight, $name) {
+      .#{$name} {
+        height: map-get($inputHeight, $name);
+      }
+    }
+  } @else {
+    @each $name, $value in $inputHeight {
+      .#{$name} {
+        height: $value;
+      }
+    }
+  }
 }
 
 @mixin iconsDisabled($background, $content) {

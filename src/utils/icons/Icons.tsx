@@ -1,5 +1,8 @@
 import classnames from 'classnames';
 import * as React from 'react';
+import accountSvg from '../../icons/account.svg';
+import backSvg from '../../icons/back.svg';
+import cogWheelSvg from '../../icons/cog-wheel.svg';
 import { Button, ButtonProps } from '../forms/Buttons';
 import * as styles from './Icons.scss';
 import { SvgImage } from './utils';
@@ -41,6 +44,39 @@ export const ProgressIcon = (props: ProgressIconProps) => {
         [styles.progressIconLg]: size === 'lg',
       })}
       {...otherProps}
+    />
+  );
+};
+
+export const SettingsIcon = (props: ButtonProps) => {
+  const { className, ...other } = props;
+  return (
+    <ButtonIcon
+      className={classnames(styles.settingsIcon, className)}
+      image={cogWheelSvg}
+      {...other}
+    />
+  );
+};
+
+export const BackIcon = (props: ButtonProps) => {
+  const { className, ...other } = props;
+  return (
+    <ButtonIcon
+      className={classnames(styles.settingsIcon, className)}
+      image={backSvg}
+      {...other}
+    />
+  );
+};
+
+export const AccountIcon = (props: ButtonProps) => {
+  const { className, ...other } = props;
+  return (
+    <ButtonIcon
+      className={classnames(styles.accountIcon, className)}
+      image={accountSvg}
+      {...other}
     />
   );
 };

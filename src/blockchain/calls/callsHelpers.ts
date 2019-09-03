@@ -1,9 +1,11 @@
-import { bindNodeCallback, combineLatest, Observable } from 'rxjs/index';
+import { bindNodeCallback, combineLatest, Observable } from 'rxjs';
 import { first, map, switchMap } from 'rxjs/internal/operators';
 import { NetworkConfig } from '../config';
 import { GasPrice$ } from '../network';
 import { send } from '../transactions';
 import { TxMetaKind } from './txMeta';
+
+export const DEFAULT_GAS = 1000000;
 
 export interface BaseDef<A> {
   call: (args: A, context: NetworkConfig, account?: string) => any;
@@ -24,11 +26,12 @@ export interface TransactionDef<A> extends GasDef<A> {
   descriptionIcon?: (args: A) => JSX.Element;
 }
 
-export function callCurried(context: NetworkConfig) {
+export function callCurried(context: NetworkConfig, account: string | undefined) {
   return <D, R>({ call, prepareArgs, postprocess }: CallDef<D, R>) => {
     return (args: D) => {
       return bindNodeCallback(call(args, context).call)(
         ...prepareArgs(args, context),
+        { from: account }
       ).pipe(
         map(i => (postprocess ? postprocess(i, args) : i))
       ) as Observable<R>;

@@ -12,7 +12,7 @@ export class Allowance {
 
     return {
       toggle: () => {
-        cy.get(`@${symbol}`).find(tid('toggle-allowance')).click();
+        cy.get(`@${symbol}`).find(tid('toggle-leverage-allowance')).click();
       },
 
       shouldBe: (state: ALLOWANCE_STATE) => {

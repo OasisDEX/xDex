@@ -182,3 +182,23 @@ function isDustOrder(o: Offer): boolean {
 function hideDusts(dusts: Offer[][]): Offer[][] {
   return dusts.map(offers => offers.filter((o) => !isDustOrder(o)));
 }
+
+// export function createPickableOrderBookFromMTSimpleFormState$(
+//   currentOrderBook$: Observable<LoadableWithTradingPair<Orderbook>>,
+//   account$: Observable<string | undefined>,
+//   currentOfferForm$: Observable<MTSimpleFormState>,
+// ) {
+//   return combineLatest(
+//     currentOrderBook$,
+//     account$,
+//     currentOfferForm$,
+//   ).pipe(
+//     map(([currentOrderBook, account, { change }]) => ({
+//       ...currentOrderBook,
+//       account,
+//       change: (ch: PickOfferChange) => {
+//         console.log('ho change yet!', change, ch);
+//       },
+//     }))
+//   );
+// }

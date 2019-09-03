@@ -2,11 +2,11 @@ import { BigNumber } from 'bignumber.js';
 import classnames from 'classnames';
 import * as React from 'react';
 import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
-import backSvg from '../../icons/back.svg';
 import warningSvg from '../../icons/warning.svg';
 import { BigNumberInput } from '../../utils/bigNumberInput/BigNumberInput';
 import { formatPrice } from '../../utils/formatters/format';
-import { ButtonIcon } from '../../utils/icons/Icons';
+import { lessThanOrEqual } from '../../utils/forms/InputGroup';
+import { BackIcon } from '../../utils/icons/Icons';
 import { SvgImage } from '../../utils/icons/utils';
 import { TopLeftCorner } from '../../utils/panel/TopRightCorner';
 import { TradeDetails } from '../details/TradeDetails';
@@ -24,10 +24,8 @@ export class TradeSettingsView extends React.Component<InstantFormState> {
     return (
       <InstantFormWrapper heading="Advanced Settings">
         <TopLeftCorner>
-          <ButtonIcon
-            className={classnames(instantStyles.cornerIcon, instantStyles.backIcon)}
+          <BackIcon
             onClick={this._hideTradeSettings}
-            image={backSvg}
             data-test-id="back"
           />
         </TopLeftCorner>
@@ -117,7 +115,3 @@ export class TradeSettingsView extends React.Component<InstantFormState> {
     return price.plus(price.times(slippageLimit));
   }
 }
-
-const lessThanOrEqual = (max: number) => {
-  return (value: number) => value <= max ? value : false;
-};
