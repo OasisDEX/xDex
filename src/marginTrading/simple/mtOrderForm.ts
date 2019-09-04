@@ -367,7 +367,6 @@ function addPurchasingPower(state: MTSimpleFormState) {
     realPurchasingPower: baseAsset.assetKind === AssetKind.marginable ?
       realPurchasingPowerMarginable(
         baseAsset,
-        state.mta.cash.balance,  // todo: CashAsset - not exists anymore?
         state.orderbook.sell)
         :
         realPurchasingPowerNonMarginable(

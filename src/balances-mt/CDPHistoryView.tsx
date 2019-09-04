@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as ReactModal from 'react-modal';
 
-import {MarginableAsset, MTHistoryEventKind} from '../marginTrading/state/mtAccount';
+import { MarginableAsset, MTHistoryEventKind } from '../marginTrading/state/mtAccount';
 import { formatDateTime } from '../utils/formatters/format';
 import { Button } from '../utils/forms/Buttons';
 import { ModalProps } from '../utils/modal';
@@ -42,11 +42,21 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
               <thead>
               <tr>
                 <th style={{ width: '125px' }} >Type</th>
-                <th style={{ width: '125px' }} ><span className={styles.headerDark}>Price</span> DAI</th>
-                <th style={{ width: '125px' }} ><span className={styles.headerDark}>Amount</span> WETH</th>
-                <th style={{ width: '125px' }} ><span className={styles.headerDark}>Total</span> DAI</th>
-                <th style={{ width: '125px' }} ><span className={styles.headerDark}>Debt</span> DAI</th>
-                <th style={{ width: '125px' }} ><span className={styles.headerDark}>Liq. Price</span> USD</th>
+                <th style={{ width: '125px' }} >
+                  <span className={styles.headerDark}>Price</span> DAI
+                </th>
+                <th style={{ width: '125px' }} ><span className={styles.headerDark}>
+                  Amount</span> WETH
+                </th>
+                <th style={{ width: '125px' }} >
+                  <span className={styles.headerDark}>Total</span> DAI
+                </th>
+                <th style={{ width: '125px' }} >
+                  <span className={styles.headerDark}>Debt</span> DAI
+                </th>
+                <th style={{ width: '125px' }} >
+                  <span className={styles.headerDark}>Liq. Price</span> USD
+                </th>
                 <th style={{ width: '190px' }} >Time</th>
               </tr>
               </thead>
