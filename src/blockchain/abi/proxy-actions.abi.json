@@ -1,23 +1,6 @@
 [{
   "constant": false,
   "inputs": [{
-    "name": "ocm",
-    "type": "address"
-  }, {
-    "name": "ilk",
-    "type": "bytes32"
-  }],
-  "name": "init",
-  "outputs": [{
-    "name": "urn",
-    "type": "address"
-  }],
-  "payable": false,
-  "stateMutability": "nonpayable",
-  "type": "function"
-}, {
-  "constant": false,
-  "inputs": [{
     "name": "contracts",
     "type": "address[7]"
   }, {
@@ -54,6 +37,38 @@
   "outputs": [],
   "payable": false,
   "stateMutability": "nonpayable",
+  "type": "function"
+}, {
+  "constant": true,
+  "inputs": [{
+    "name": "margin",
+    "type": "address"
+  }, {
+    "name": "ilks",
+    "type": "bytes32[]"
+  }, {
+    "name": "tokens",
+    "type": "address[]"
+  }, {
+    "name": "vat",
+    "type": "address"
+  }, {
+    "name": "spotter",
+    "type": "address"
+  }, {
+    "name": "jug",
+    "type": "address"
+  }, {
+    "name": "ocm",
+    "type": "address"
+  }],
+  "name": "balance",
+  "outputs": [{
+    "name": "data",
+    "type": "uint256[]"
+  }],
+  "payable": false,
+  "stateMutability": "view",
   "type": "function"
 }, {
   "constant": false,
@@ -120,41 +135,6 @@
   "outputs": [],
   "payable": false,
   "stateMutability": "nonpayable",
-  "type": "function"
-}, {
-  "constant": true,
-  "inputs": [{
-    "name": "margin",
-    "type": "address"
-  }, {
-    "name": "ilks",
-    "type": "bytes32[]"
-  }, {
-    "name": "tokens",
-    "type": "address[]"
-  }, {
-    "name": "prices",
-    "type": "address[]"
-  }, {
-    "name": "vat",
-    "type": "address"
-  }, {
-    "name": "spot",
-    "type": "address"
-  }, {
-    "name": "jug",
-    "type": "address"
-  }, {
-    "name": "ocm",
-    "type": "address"
-  }],
-  "name": "balance",
-  "outputs": [{
-    "name": "data",
-    "type": "uint256[]"
-  }],
-  "payable": false,
-  "stateMutability": "view",
   "type": "function"
 }, {
   "constant": false,

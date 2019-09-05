@@ -98,7 +98,6 @@ export const mtBalance = {
       proxyAddress,
       tokens.map(token => context.ilks[token]),
       tokens.map(token => context.tokens[token].address),
-      tokens.map(token => context.prices[token]),
       context.mcd.vat,
       context.spot,
       context.jug,

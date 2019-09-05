@@ -237,7 +237,6 @@ const protoMain = {
   },
   joins: {} as { [key: string]: string },
   mcd: {} as { [key: string]: any },
-  prices: {} as { [key: string]: string },
   spot: '',
   jug: '',
   cdpManager: '',
@@ -316,9 +315,6 @@ const kovan: NetworkConfig = {
       },
     }
   } as { [key: string]: any },
-  prices: {
-    WETH: '0x75dd74e8afe8110c8320ed397cccff3b8134d981' && '0x0' // FIXME
-  } as { [key: string]: string },
   spot: '0x2403ddca8715427fdb04f9e70d8989cddab06b67',
   jug: '0xeffb135cf2e4911de9e478679d358c9df246424a',
   cdpManager: '0x74ecaa6842f118fbd8293202b573c8be263b4ada', // fill
@@ -397,9 +393,6 @@ const localnet: NetworkConfig =   {
       },
     }
   } as { [key: string]: any },
-  prices: {
-    WETH: '0x1B2c0f9b05f2ec9f77DeA9CdaEB04c396da5027B',
-  } as { [key: string]: string },
   spot: '0xAb14DdBdD66Bd9143c3E3d94E4Ce27Babc2b66eB',
   jug: '0x3A6Ea44c1386F6745Fa20d7cAD939a22553579B0',
   cdpManager: '0xC71022a713dA95bD4C926faf180FffBAfEf4bcA6',
