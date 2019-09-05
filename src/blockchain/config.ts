@@ -317,7 +317,7 @@ const kovan: NetworkConfig = {
   } as { [key: string]: any },
   spot: '0x2403ddca8715427fdb04f9e70d8989cddab06b67',
   jug: '0xeffb135cf2e4911de9e478679d358c9df246424a',
-  cdpManager: '0x74ecaa6842f118fbd8293202b573c8be263b4ada', // fill
+  cdpManager: '0x948b304ac96380887fed6dd29bd65331fd8c8e68', // fill
   ilks: {
     WETH: web3.fromAscii('ETH-A'),
     // DGX: web3.fromAscii('DGX'),
@@ -335,10 +335,10 @@ const kovan: NetworkConfig = {
     return load(proxyCreationAndExecute, '0xee419971e63734fed782cfe49110b1544ae8a773');
   },
   get marginProxyRegistry() {
-    return load(proxyRegistry, '0x7da9b18f85cb29c2f756a78acfba6e3d5cd6dc96'); // fill
+    return load(proxyRegistry, '0xa42bbce61c51aaab9f6f5b9df809d38ec164908a'); // fill
   },
   get proxyActions() {
-    return load(proxyActions, '0x52853948c085889b71792064350bbc0023ff8961'); // fill
+    return load(proxyActions, '0xac0090f273bbaaf5822ee86ddec69ceecb2c0f97'); // fill
   },
   oasisDataService: {
     url: 'https://kovan-cache.eth2dai.com/api/v1'
