@@ -2,7 +2,7 @@ import { BigNumber } from 'bignumber.js';
 
 import { findLastIndex } from 'lodash';
 import { Offer } from '../../exchange/orderbook/orderbook';
-import {minusOne, one, zero} from '../../utils/zero';
+import { minusOne, one, zero } from '../../utils/zero';
 import { eat } from '../plan/planUtils';
 import {
   CashAsset,
