@@ -68,21 +68,8 @@ export function realPurchasingPowerNonMarginable(
   return cashAvailable.minus(cashLeft);
 }
 
-// export function realPurchasingPowerMarginable(
-//   ma: MarginableAsset,
-//   cashAvailable: BigNumber,
-//   sellOffers: Offer[]
-// ): BigNumber {
-//   console.log('cashAvailable', cashAvailable.toString(), one.div(ma.safeCollRatio).toString());
-//   cashAvailable = cashAvailable.times(one.div(one.minus(one.div(ma.safeCollRatio))));
-//   const [, cashLeft] = eat(cashAvailable, sellOffers);
-//   return cashAvailable.minus(cashLeft);
-// }
-
-
 export function realPurchasingPowerMarginable(
   ma: MarginableAsset,
-  initialCash: BigNumber,
   sellOffers: Offer[]
 ): BigNumber {
   Object.assign(window, { ma });
@@ -126,12 +113,12 @@ export function realPurchasingPowerMarginable(
       isSafe = false;
     }
 
-    console.log(
-      amount.toString(),
-      cash.toString(),
-      collRatio.toString(),
-      sellOffers.length
-    );
+    // console.log(
+    //   amount.toString(),
+    //   cash.toString(),
+    //   collRatio.toString(),
+    //   sellOffers.length
+    // );
   }
 
   return purchasingPower;

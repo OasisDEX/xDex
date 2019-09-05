@@ -27,7 +27,6 @@ export type Operation = {
   kind: OperationKind.fundDai;
   name: string;
   amount: BigNumber;
-  ilk: string;
 } | {
   kind: OperationKind.drawGem;
   name: string;
@@ -36,7 +35,6 @@ export type Operation = {
   kind: OperationKind.drawDai;
   name: string;
   amount: BigNumber;
-  ilk: string;
 } | {
   kind: OperationKind.adjust;
   name: string;

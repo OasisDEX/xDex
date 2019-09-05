@@ -5,7 +5,6 @@ import * as ReactModal from 'react-modal';
 import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
 import { tokens } from '../../blockchain/config';
 import { BigNumberInput } from '../../utils/bigNumberInput/BigNumberInput';
-import { connect } from '../../utils/connect';
 import { FormChangeKind, ProgressStage } from '../../utils/form';
 import { formatAmount } from '../../utils/formatters/format';
 import { Button } from '../../utils/forms/Buttons';
@@ -13,22 +12,13 @@ import { ErrorMessage } from '../../utils/forms/ErrorMessage';
 import { InputGroup, InputGroupAddon } from '../../utils/forms/InputGroup';
 import { Select } from '../../utils/forms/Select';
 import { GasCost } from '../../utils/gasCost/GasCost';
-import { inject } from '../../utils/inject';
 import { BorderBox, Hr } from '../../utils/layout/LayoutHelpers';
-import { Loadable, loadablifyLight } from '../../utils/loadable';
 import { ModalOpenerProps, ModalProps } from '../../utils/modal';
 import { Panel, PanelBody, PanelFooter, PanelHeader } from '../../utils/panel/Panel';
 import { Muted } from '../../utils/text/Text';
 import { TransactionStateDescription } from '../../utils/text/TransactionStateDescription';
-import { zero } from '../../utils/zero';
-import { MTAllocateState } from '../allocate/mtOrderAllocateDebtForm';
 import {
-  CreateMTAllocateForm$Props,
-  DrawAllocateFormView,
-  FundAllocateFormView
-} from '../allocate/mtOrderAllocateDebtFormView';
-import { prepareDrawRequest } from '../plan/planDraw';
-import { prepareFundRequest } from '../plan/planFund';
+  CreateMTAllocateForm$Props} from '../allocate/mtOrderAllocateDebtFormView';
 import {
   CashAsset,
   findAsset,
@@ -210,39 +200,40 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
   }
 
   private transfer() {
+
     if (!this.props.mta || this.props.mta.state === MTAccountState.notSetup || !this.props.amount) {
       return;
     }
 
-    // always false for now -- separate transfer from reallocations
-    if (this.props.mta.totalDebt.lt(zero)) {
-      const prepareRequest = this.props.actionKind === UserActionKind.fund ?
-        prepareFundRequest : prepareDrawRequest;
-      const view = this.props.actionKind === UserActionKind.fund ?
-        FundAllocateFormView : DrawAllocateFormView;
-
-      const transferProps = {
-        amount: this.props.amount,
-        token: this.props.token,
-      };
-
-      const allocateForm$ = this.props.createMTAllocateForm$(
-        this.props.mta.proxy,
-        prepareRequest(
-          this.props.ilk,
-          this.props.amount,
-          this.props.token,
-          this.props.mta)
-      );
-
-      this.props.open(
-        connect<Loadable<MTAllocateState>, ModalProps>(
-          inject(view, transferProps),
-          loadablifyLight(allocateForm$)
-        )
-      );
-      return;
-    }
+    // // always false for now -- separate transfer from reallocations
+    // if (this.props.mta.totalDebt.lt(zero)) {
+    //   const prepareRequest = this.props.actionKind === UserActionKind.fund ?
+    //     prepareFundRequest : prepareDrawRequest;
+    //   const view = this.props.actionKind === UserActionKind.fund ?
+    //     FundAllocateFormView : DrawAllocateFormView;
+    //
+    //   const transferProps = {
+    //     amount: this.props.amount,
+    //     token: this.props.token,
+    //   };
+    //
+    //   const allocateForm$ = this.props.createMTAllocateForm$(
+    //     this.props.mta.proxy,
+    //     prepareRequest(
+    //       this.props.ilk,
+    //       this.props.amount,
+    //       this.props.token,
+    //       this.props.mta)
+    //   );
+    //
+    //   this.props.open(
+    //     connect<Loadable<MTAllocateState>, ModalProps>(
+    //       inject(view, transferProps),
+    //       loadablifyLight(allocateForm$)
+    //     )
+    //   );
+    //   return;
+    // }
 
     this.props.transfer(this.props);
   }

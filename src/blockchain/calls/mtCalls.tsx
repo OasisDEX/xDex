@@ -68,14 +68,7 @@ function mtBalancePostprocess(result: BigNumber[], { tokens }: MTBalanceData) : 
   return {
     assets: tokens.map((token, i) => {
       const row = i * BalanceOuts;
-      const duty = new BigNumber(result[row + 8]).div(new BigNumber(10).pow(27));
-      const annualStabilityFee = duty.pow(secondsPerYear).minus(one);
-      console.log(
-        'duty:', duty.toString(),
-        'annualStabilityFee:', annualStabilityFee.toString(),
-        'referencePrice', amountFromWei(new BigNumber(result[row + 5]), 'DAI').toString(),
-      );
-
+      console.log('dai', amountFromWei(new BigNumber(result[row + 4]), 'DAI'));
       return {
         walletBalance: amountFromWei(new BigNumber(result[row]), token),
         marginBalance: amountFromWei(new BigNumber(result[row + 1]), token),
@@ -85,7 +78,9 @@ function mtBalancePostprocess(result: BigNumber[], { tokens }: MTBalanceData) : 
         referencePrice: amountFromWei(new BigNumber(result[row + 5]), 'DAI'),
         minCollRatio: amountFromWei(new BigNumber(result[row + 6]), 'ETH'),
         allowance: new BigNumber(result[row + 7]).gte(MIN_ALLOWANCE),
-        fee: annualStabilityFee
+        fee: new BigNumber(result[row + 8])
+          .div(new BigNumber(10).pow(27))
+          .pow(secondsPerYear).minus(one)
       };
     })
   };
@@ -118,7 +113,7 @@ function argsOfPerformOperations(
   context: NetworkConfig,
 ) {
   const kinds: string[] = [];
-  const names: string[] = [];
+  const ilks: string[] = [];
   const tokens: string[] = [];
   const adapters: string[] = [];
   const amounts: Array<string | undefined> = [];
@@ -131,9 +126,14 @@ function argsOfPerformOperations(
     // names[i] =
     //   context.ilks[o.kind === OperationKind.fundDai || o.kind === OperationKind.drawDai ?
     //   o.ilk : o.name];
-    names[i] = context.ilks[o.name];
-    tokens[i] = context.tokens[o.name].address;
-    adapters[i] = context.joins[o.name];
+    ilks[i] = context.ilks[o.name];
+    if (o.kind === OperationKind.fundDai || o.kind === OperationKind.drawDai) {
+      tokens[i] = context.tokens.DAI.address;
+      adapters[i] = context.joins.DAI;
+    } else {
+      tokens[i] = context.tokens[o.name].address;
+      adapters[i] = context.joins[o.name];
+    }
     amounts[i] = toWei(o.name, (o as any).amount);
     maxTotals[i] = toWei(o.name, (o as any).maxTotal);
     dgems[i] = toWei(o.name, (o as any).dgem);
@@ -144,7 +144,7 @@ function argsOfPerformOperations(
   console.log('args', JSON.stringify(
     [
       context.proxyActions.address,
-      kinds, names, tokens, adapters, amounts,
+      kinds, ilks, tokens, adapters, amounts,
       maxTotals, dgems, ddais,
       [
         context.cdpManager, context.mcd.vat, context.otc.address,
@@ -156,7 +156,7 @@ function argsOfPerformOperations(
   return [
     context.proxyActions.address,
     context.proxyActions.contract.performOperations.getData(
-      kinds, names, tokens, adapters, amounts,
+      kinds, ilks, tokens, adapters, amounts,
       maxTotals, dgems, ddais,
       [
         context.cdpManager, context.mcd.vat, context.otc.address,

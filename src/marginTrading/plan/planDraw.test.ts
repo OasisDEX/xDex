@@ -6,7 +6,7 @@ setupFakeWeb3ForTesting();
 import { impossible } from '../../utils/impossible';
 import { MTAccountSetup, OperationKind } from '../state/mtAccount';
 import { getMTAccount } from '../state/mtTestUtils';
-import { planDraw } from './planDraw';
+import {planDraw, planDrawDai} from './planDraw';
 import { dgx100, wethEmpty } from './planFixtures';
 
 describe('plan draw', () => {
@@ -15,9 +15,8 @@ describe('plan draw', () => {
 
       const mta: MTAccountSetup = getMTAccount({ marginableAssets: [wethEmpty] });
 
-      const plan = planDraw(
+      const plan = planDrawDai(
         mta,
-        'DAI',
         'WETH',
         new BigNumber('25'),
         []);
@@ -34,7 +33,6 @@ describe('plan draw', () => {
       const plan = planDraw(
         mta,
         'WETH',
-        undefined,
         new BigNumber('10'),
         []);
 
@@ -48,7 +46,6 @@ describe('plan draw', () => {
       const plan = planDraw(
         mta,
         'DGX',
-        undefined,
         new BigNumber('110'),
         []
         );
@@ -63,7 +60,6 @@ describe('plan draw', () => {
       const plan = planDraw(
         mta,
         'DGX',
-        undefined,
         new BigNumber('90'),
         []);
 

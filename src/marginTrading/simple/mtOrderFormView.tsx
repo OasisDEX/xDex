@@ -439,7 +439,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
 
   private price2() {
 
-    console.log('price props', this.props);
+    // console.log('price props', this.props);
     const price = this.props.price || new BigNumber(0);
     return (
       <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
@@ -582,10 +582,10 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
         this.props.mta.nonMarginableAssets.find(a => a.name === this.props.baseToken)
       );
 
-    if (this.props.mta) {
-      console.log('this.props.mta.state', this.props.mta);
-      console.log('this.props.mta.state', this.props.mta.state);
-    }
+    // if (this.props.mta) {
+    //   console.log('this.props.mta.state', this.props.mta);
+    //   console.log('this.props.mta.state', this.props.mta.state);
+    // }
     return <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
       <div className={styles.orderSummaryLabel}>
         Purchasing power

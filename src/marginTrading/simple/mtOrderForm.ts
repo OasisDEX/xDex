@@ -367,7 +367,6 @@ function addPurchasingPower(state: MTSimpleFormState) {
     realPurchasingPower: baseAsset.assetKind === AssetKind.marginable ?
       realPurchasingPowerMarginable(
         baseAsset,
-        state.mta.cash.balance,  // todo: CashAsset - not exists anymore?
         state.orderbook.sell)
         :
         realPurchasingPowerNonMarginable(
@@ -843,12 +842,8 @@ export function createMTSimpleOrderForm$(
     switchMap(curry(estimateGasPrice)(calls$, readCalls$)),
     scan(freezeGasEstimation),
     map(isReadyToProceed),
-    tap(state => state.plan && console.log('plan:', JSON.stringify(state.plan))),
-    tap(state =>
-        state.messages.length > 0 &&
-        console.log('messages:', JSON.stringify(state.messages))
-    ),
-    tap(state => console.log('progress', state.progress))
+    // tap(state => state.plan && console.log('plan:', JSON.stringify(state.plan))),
+    // ),
     // catchError(e => {
     //   console.log(e);
     //   return throwError(e);

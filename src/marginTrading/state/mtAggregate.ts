@@ -6,9 +6,10 @@ import {
   map,
   mergeMap,
   shareReplay, startWith,
-  switchMap,
+  switchMap, tap,
 } from 'rxjs/operators';
 import * as dsProxy from '../../blockchain/abi/ds-proxy.abi.json';
+import * as dsvalue from '../../blockchain/abi/ds-value.abi.json';
 import { AssetKind, NetworkConfig, tokens } from '../../blockchain/config';
 import { web3 } from '../../blockchain/web3';
 
@@ -159,6 +160,11 @@ export function createMta$(
 
   return combineLatest(context$, calls$, proxyAddress$).pipe(
     switchMap(([_context, calls, proxyAddress]) => {
+
+      // const pipLike = web3.eth.contract(dsvalue as any).at(_context.prices.WETH);
+      // bindNodeCallback(pipLike.read.call)()
+      //   .subscribe(r => console.log('result', r));
+
       if (proxyAddress === undefined) {
         return of(notSetup);
       }
