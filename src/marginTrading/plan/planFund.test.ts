@@ -6,7 +6,7 @@ setupFakeWeb3ForTesting();
 import { MTAccountSetup, OperationKind } from '../state/mtAccount';
 import { getMTAccount } from '../state/mtTestUtils';
 import { dgx100, wethEmpty } from './planFixtures';
-import {planFund, planFundDai} from './planFund';
+import { planFund, planFundDai } from './planFund';
 
 describe('plan fund', () => {
   describe('cash', () => {
@@ -16,7 +16,7 @@ describe('plan fund', () => {
       const plan = planFundDai(mta, 'WETH', new BigNumber('100'), []);
 
       expect(plan).toEqual([
-        { amount: new BigNumber('100'), kind: OperationKind.fundDai, name: 'DAI', ilk: 'WETH' }]);
+        { amount: new BigNumber('100'), kind: OperationKind.fundDai, name: 'WETH' }]);
     });
 
     test('some dgx, no debt', () => {
@@ -25,7 +25,7 @@ describe('plan fund', () => {
       const plan = planFundDai(mta, 'DGX', new BigNumber('100'), []);
 
       expect(plan).toEqual([
-        { amount: new BigNumber('100'), kind: OperationKind.fundDai, name: 'DAI', ilk: 'DGX' }]);
+        { amount: new BigNumber('100'), kind: OperationKind.fundDai, name: 'DGX' }]);
     });
 
     // test('dgx with debt, little cash', () => {

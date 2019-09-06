@@ -6,10 +6,9 @@ import {
   map,
   mergeMap,
   shareReplay, startWith,
-  switchMap, tap,
+  switchMap,
 } from 'rxjs/operators';
 import * as dsProxy from '../../blockchain/abi/ds-proxy.abi.json';
-import * as dsvalue from '../../blockchain/abi/ds-value.abi.json';
 import { AssetKind, NetworkConfig, tokens } from '../../blockchain/config';
 import { web3 } from '../../blockchain/web3';
 
