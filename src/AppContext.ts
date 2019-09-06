@@ -13,7 +13,6 @@ import {
 } from 'rxjs/operators';
 
 import * as balancesMT from './balances-mt/balances';
-import { CDPRiskManagements } from './balances-mt/CDPRiskManagements';
 import { MtAccountDetailsView } from './balances-mt/mtAccountDetailsView';
 import {
   MTBalancesCreateMTFundFormProps, MTBalancesOwnProps, MTBalancesView
@@ -233,9 +232,6 @@ export function setupAppContext() {
   const mtSummary$ = createMTSummary$(mta$);
   const MtSummaryViewRxTx = connect(MtSummaryView, mtSummary$);
 
-  const CDPRiskManagementsRxTx =
-    withModal(connect<MTAccount, ModalOpenerProps>(CDPRiskManagements, mta$));
-
   const tradeHistory = memoizeTradingPair(
     curry(loadAllTrades)(context$, onEveryBlock$)
   );
@@ -406,7 +402,6 @@ export function setupAppContext() {
     MTSetupButtonRxTx,
     MtSummaryViewRxTx,
     ReallocateViewRxTx,
-    CDPRiskManagementsRxTx
   };
 }
 
