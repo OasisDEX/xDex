@@ -120,9 +120,12 @@ export function planBuy(
   const otherAllocations = debts.filter(a => a.name !== name);
   const otherOps: Operation[] = flatten(orderDeltas(otherAllocations).map(deltaToOps));
 
-  const totalDebtDelta = debts.reduce((s, d) => {
-    return s.plus(d.delta);
-  },                                  zero);
+  const totalDebtDelta = debts.reduce(
+    (s, d) => {
+      return s.plus(d.delta);
+    },
+    zero
+  );
   const extraCash = totalDebtDelta.minus(maxTotal);
   const extraAdjust: Operation[] = extraCash.gt(zero) ?
     [{ name, kind: OperationKind.adjust, ddai: extraCash }] : [];

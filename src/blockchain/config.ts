@@ -237,7 +237,6 @@ const protoMain = {
   },
   joins: {} as { [key: string]: string },
   mcd: {} as { [key: string]: any },
-  prices: {} as { [key: string]: string },
   spot: '',
   jug: '',
   cdpManager: '',
@@ -293,21 +292,36 @@ const kovan: NetworkConfig = {
   get tokens() {
     return asMap('token', [
       loadToken('WETH', eth, '0xd0a1e359811322d97991e03f863a0c30c2cf029c'),
-      loadToken('DAI', erc20, '0xc4375b7de8af5a38a93548eb8453a498222c4ff2'),
-      loadToken('MKR', erc20, '0xaaf64bfcc32d0f15873a02163e7e500671a4ffcd'),
-      loadToken('DGD', erc20, '0x62aeec5fb140bb233b1c5612a8747ca1dc56dc1b'),
-      loadToken('REP', erc20, '0xc7aa227823789e363f29679f23f7e8f6d9904a9b'),
-      loadToken('ZRX', erc20, '0x18392097549390502069c17700d21403ea3c721a'),
-      loadToken('BAT', erc20, '0x9f8cfb61d3b2af62864408dd703f9c3beb55dff7'),
+      loadToken('DAI', erc20, '0xc4375b7de8af5a38a93548eb8453a498222c4ff2'), // NOT MCD_DAI
+      // loadToken('MKR', erc20, '0xaaf64bfcc32d0f15873a02163e7e500671a4ffcd'),
+      // loadToken('DGD', erc20, '0x62aeec5fb140bb233b1c5612a8747ca1dc56dc1b'),
+      // loadToken('REP', erc20, '0xc7aa227823789e363f29679f23f7e8f6d9904a9b'),
+      // loadToken('ZRX', erc20, '0x18392097549390502069c17700d21403ea3c721a'),
+      // loadToken('BAT', erc20, '0x9f8cfb61d3b2af62864408dd703f9c3beb55dff7'),
     ]);
   },
-  joins: {} as { [key: string]: string },
-  mcd: {} as { [key: string]: any },
-  prices: {} as { [key: string]: string },
-  spot: '',
-  jug: '',
-  cdpManager: '',
-  ilks: {} as { [key: string]: string },
+  joins: {
+    WETH: '0xc6d2c6ac2155461d41621eac97ca0e42cd8c6805',
+    DAI: '0x922253e8bb9905ae4d37bc9bd512db5c91b5ee6c'
+  } as { [key: string]: string },
+  mcd: {
+    vat: '0xdf69460542dbdcf2f1e77941f53cfd4113a06183',
+    get cat() {
+      return load(mcdCat, '0xb30432fc29e1479240e9f107c1e333b962998f06');
+    },
+    flip: {
+      get WETH() {
+        return load(mcdFlipper, '0x02b6c914e29ee4d310e6b8e24340a8a643627d44');
+      },
+    }
+  } as { [key: string]: any },
+  spot: '0xb61db7923f841740c96b24baec4805e522bb8594',
+  jug: '0x269b2ca90b8f5d8e0a78ec9e1ea43ec41f7d1477',
+  cdpManager: '0x948b304ac96380887fed6dd29bd65331fd8c8e68', // fill
+  ilks: {
+    WETH: web3.fromAscii('ETH-A'),
+    // DGX: web3.fromAscii('DGX'),
+  } as { [key: string]: string },
   get otcSupportMethods() {
     return load(otcSupport, '0x303f2bf24d98325479932881657f45567b3e47a8');
   },
@@ -321,10 +335,10 @@ const kovan: NetworkConfig = {
     return load(proxyCreationAndExecute, '0xee419971e63734fed782cfe49110b1544ae8a773');
   },
   get marginProxyRegistry() {
-    return load(proxyRegistry, '');
+    return load(proxyRegistry, '0xa42bbce61c51aaab9f6f5b9df809d38ec164908a'); // fill
   },
   get proxyActions() {
-    return load(proxyActions, '');
+    return load(proxyActions, '0xac0090f273bbaaf5822ee86ddec69ceecb2c0f97'); // fill
   },
   oasisDataService: {
     url: 'https://kovan-cache.eth2dai.com/api/v1'
@@ -379,9 +393,6 @@ const localnet: NetworkConfig =   {
       },
     }
   } as { [key: string]: any },
-  prices: {
-    WETH: '0x1B2c0f9b05f2ec9f77DeA9CdaEB04c396da5027B',
-  } as { [key: string]: string },
   spot: '0xAb14DdBdD66Bd9143c3E3d94E4Ce27Babc2b66eB',
   jug: '0x3A6Ea44c1386F6745Fa20d7cAD939a22553579B0',
   cdpManager: '0xC71022a713dA95bD4C926faf180FffBAfEf4bcA6',

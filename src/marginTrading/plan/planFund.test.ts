@@ -6,26 +6,26 @@ setupFakeWeb3ForTesting();
 import { MTAccountSetup, OperationKind } from '../state/mtAccount';
 import { getMTAccount } from '../state/mtTestUtils';
 import { dgx100, wethEmpty } from './planFixtures';
-import { planFund } from './planFund';
+import { planFund, planFundDai } from './planFund';
 
 describe('plan fund', () => {
   describe('cash', () => {
     test('no cash', () => {
       const mta = getMTAccount({ marginableAssets: [wethEmpty] });
 
-      const plan = planFund(mta, 'DAI', 'WETH', new BigNumber('100'), []);
+      const plan = planFundDai(mta, 'WETH', new BigNumber('100'), []);
 
       expect(plan).toEqual([
-        { amount: new BigNumber('100'), kind: OperationKind.fundDai, name: 'DAI', ilk: 'WETH' }]);
+        { amount: new BigNumber('100'), kind: OperationKind.fundDai, name: 'WETH' }]);
     });
 
     test('some dgx, no debt', () => {
       const mta = getMTAccount({ marginableAssets: [dgx100] });
 
-      const plan = planFund(mta, 'DAI', 'DGX', new BigNumber('100'), []);
+      const plan = planFundDai(mta, 'DGX', new BigNumber('100'), []);
 
       expect(plan).toEqual([
-        { amount: new BigNumber('100'), kind: OperationKind.fundDai, name: 'DAI', ilk: 'DGX' }]);
+        { amount: new BigNumber('100'), kind: OperationKind.fundDai, name: 'DGX' }]);
     });
 
     // test('dgx with debt, little cash', () => {
@@ -92,7 +92,7 @@ describe('plan fund', () => {
 
       const mta: MTAccountSetup = getMTAccount({ marginableAssets: [wethEmpty] });
 
-      const plan = planFund(mta, 'WETH', undefined, new BigNumber('25'), []);
+      const plan = planFund(mta, 'WETH', new BigNumber('25'), []);
 
       expect(plan).toEqual([
         { amount: new BigNumber('25'), kind: OperationKind.fundGem, name: 'WETH' },

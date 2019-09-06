@@ -27,7 +27,7 @@ const defParams = {
       walletBalance: new BigNumber(100),
     }),
     [getMarginableCore({
-      name: 'MKR',
+      name: 'WETH',
       balance: new BigNumber(20),
       walletBalance: new BigNumber(0),
       allowance: true,
@@ -63,7 +63,7 @@ function createForm(props?: {}): Observable<MTTransferFormState> {
     balances: of(defaultBalances),
     calls: of(defaultCalls),
     kind: UserActionKind.fund,
-    token: 'DAI',
+    token: 'WETH',
     ...props,
   };
 
@@ -90,7 +90,7 @@ test('initial fund state', () => {
   expect(unpack(transferForm).balances).toEqual(defaultBalances);
   expect(unpack(transferForm).messages).toEqual([]);
   expect(unpack(transferForm).amount).toBeUndefined();
-  expect(unpack(transferForm).token).toEqual('DAI');
+  expect(unpack(transferForm).token).toEqual('WETH');
   expect(unpack(transferForm).progress).toBeUndefined();
   expect(unpack(transferForm).gasEstimationStatus).toEqual(GasEstimationStatus.unset);
 });
@@ -120,12 +120,12 @@ test('validation -- too big amount for fund', () => {
   expect(unpack(transferForm).messages).toEqual([{ kind: MessageKind.insufficientAmount }]);
 });
 
-test('validation -- too big amount for draw DAI', () => {
-  const transferForm = createForm({ kind: UserActionKind.draw });
+test.only('validation -- too big amount for draw DAI', () => {
+  const transferForm = createForm({ kind: UserActionKind.draw, token: 'DAI' });
   const { change } = unpack(transferForm);
 
   change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(2) });
-  change({ kind: TransferFormChangeKind.ilkFieldChange, value: 'MKR' });
+  change({ kind: TransferFormChangeKind.ilkFieldChange, value: 'WETH' });
 
   expect(unpack(transferForm).amount).toEqual(new BigNumber(2));
   expect(unpack(transferForm).readyToProceed).toBeFalsy();
@@ -237,17 +237,17 @@ test('set amount for fund and cancel', () => {
 });
 
 // ----------------------- draw MKR ------------------
-test('initial draw MKR state', () => {
+test('initial draw WETH state', () => {
   const transferForm = createForm({
     kind: UserActionKind.draw,
-    token: 'MKR',
+    token: 'WETH',
   });
   // expect(unpack(transferForm).stage).toEqual(FormStage.idle);
   expect(unpack(transferForm).actionKind).toEqual(UserActionKind.draw);
   expect(unpack(transferForm).balances).toEqual(defaultBalances);
   expect(unpack(transferForm).messages).toEqual([]);
   expect(unpack(transferForm).amount).toBeUndefined();
-  expect(unpack(transferForm).token).toEqual('MKR');
+  expect(unpack(transferForm).token).toEqual('WETH');
   expect(unpack(transferForm).progress).toBeUndefined();
   expect(unpack(transferForm).gasEstimationStatus).toEqual(GasEstimationStatus.unset);
 });
@@ -287,10 +287,10 @@ test.skip('proceed draw MKR', () => {
   expect(unpack(transferForm).progress).toEqual(ProgressStage.waitingForApproval);
 });
 
-test('validation -- to big amount for draw MKR', () => {
+test('validation -- to big amount for draw WETH', () => {
   const transferForm = createForm({
     kind: UserActionKind.draw,
-    token: 'MKR',
+    token: 'WETH',
   });
   const { change } = unpack(transferForm);
 

@@ -4,6 +4,7 @@ import * as React from 'react';
 import { Operation, OperationKind } from '../../marginTrading/state/mtAccount';
 import { Money } from '../../utils/formatters/Formatters';
 import { Currency } from '../../utils/text/Text';
+import { one } from '../../utils/zero';
 import { NetworkConfig } from '../config';
 import { MIN_ALLOWANCE } from '../network';
 import { amountFromWei, amountToWei } from '../utils';
@@ -14,7 +15,7 @@ import { TxMetaKind } from './txMeta';
 export const setupMTProxy = {
   call: (_data: {}, context: NetworkConfig) => context.marginProxyRegistry.contract.build[''],
   prepareArgs: () => [],
-  options: () => ({ gas: DEFAULT_GAS }),
+  options: () => ({ gas: DEFAULT_GAS + 2000000 }), // this should be estimated as in setupProxy
   kind: TxMetaKind.setupMTProxy,
   description: () => <React.Fragment>Setup MT proxy</React.Fragment>
 };
@@ -61,13 +62,13 @@ export interface MTBalanceResult {
 const BalanceOuts = 9;
 const secondsPerYear = 60 * 60 * 24 * 365;
 
+BigNumber.config({ POW_PRECISION: 50 });
+
 function mtBalancePostprocess(result: BigNumber[], { tokens }: MTBalanceData) : MTBalanceResult {
   return {
     assets: tokens.map((token, i) => {
       const row = i * BalanceOuts;
-      const duty = new BigNumber(result[row + 8]).div(new BigNumber(10).pow(27));
-      const annualStabilityFee = duty.pow(secondsPerYear);
-
+      console.log('dai', amountFromWei(new BigNumber(result[row + 4]), 'DAI'));
       return {
         walletBalance: amountFromWei(new BigNumber(result[row]), token),
         marginBalance: amountFromWei(new BigNumber(result[row + 1]), token),
@@ -77,7 +78,9 @@ function mtBalancePostprocess(result: BigNumber[], { tokens }: MTBalanceData) : 
         referencePrice: amountFromWei(new BigNumber(result[row + 5]), 'DAI'),
         minCollRatio: amountFromWei(new BigNumber(result[row + 6]), 'ETH'),
         allowance: new BigNumber(result[row + 7]).gte(MIN_ALLOWANCE),
-        fee: annualStabilityFee
+        fee: new BigNumber(result[row + 8])
+          .div(new BigNumber(10).pow(27))
+          .pow(secondsPerYear).minus(one)
       };
     })
   };
@@ -88,9 +91,8 @@ export const mtBalance = {
   prepareArgs: ({ proxyAddress, tokens }: MTBalanceData, context: NetworkConfig) => {
     return [
       proxyAddress,
-      tokens.map(token => web3.toHex(token)),
+      tokens.map(token => context.ilks[token]),
       tokens.map(token => context.tokens[token].address),
-      tokens.map(token => context.prices[token]),
       context.mcd.vat,
       context.spot,
       context.jug,
@@ -111,7 +113,7 @@ function argsOfPerformOperations(
   context: NetworkConfig,
 ) {
   const kinds: string[] = [];
-  const names: string[] = [];
+  const ilks: string[] = [];
   const tokens: string[] = [];
   const adapters: string[] = [];
   const amounts: Array<string | undefined> = [];
@@ -121,11 +123,17 @@ function argsOfPerformOperations(
 
   for (const [i, o] of plan.entries()) {
     kinds[i] = web3.toHex(o.kind);
-    names[i] = web3.toHex(
-      o.kind === OperationKind.fundDai || o.kind === OperationKind.drawDai ? o.ilk : o.name
-    );
-    tokens[i] = context.tokens[o.name].address;
-    adapters[i] = context.joins[o.name];
+    // names[i] =
+    //   context.ilks[o.kind === OperationKind.fundDai || o.kind === OperationKind.drawDai ?
+    //   o.ilk : o.name];
+    ilks[i] = context.ilks[o.name];
+    if (o.kind === OperationKind.fundDai || o.kind === OperationKind.drawDai) {
+      tokens[i] = context.tokens.DAI.address;
+      adapters[i] = context.joins.DAI;
+    } else {
+      tokens[i] = context.tokens[o.name].address;
+      adapters[i] = context.joins[o.name];
+    }
     amounts[i] = toWei(o.name, (o as any).amount);
     maxTotals[i] = toWei(o.name, (o as any).maxTotal);
     dgems[i] = toWei(o.name, (o as any).dgem);
@@ -136,7 +144,7 @@ function argsOfPerformOperations(
   console.log('args', JSON.stringify(
     [
       context.proxyActions.address,
-      kinds, names, tokens, adapters, amounts,
+      kinds, ilks, tokens, adapters, amounts,
       maxTotals, dgems, ddais,
       [
         context.cdpManager, context.mcd.vat, context.otc.address,
@@ -148,7 +156,7 @@ function argsOfPerformOperations(
   return [
     context.proxyActions.address,
     context.proxyActions.contract.performOperations.getData(
-      kinds, names, tokens, adapters, amounts,
+      kinds, ilks, tokens, adapters, amounts,
       maxTotals, dgems, ddais,
       [
         context.cdpManager, context.mcd.vat, context.otc.address,

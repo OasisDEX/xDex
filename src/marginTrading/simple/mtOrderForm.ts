@@ -1,7 +1,7 @@
 import { BigNumber } from 'bignumber.js';
 import { curry } from 'lodash';
 import { merge, Observable, of, Subject } from 'rxjs';
-import { first, map, scan, switchMap, takeUntil, tap } from 'rxjs/operators';
+import { first, map, scan, switchMap, takeUntil } from 'rxjs/operators';
 import { DustLimits } from '../../balances-nomt/balances';
 import { Calls, Calls$, ReadCalls$ } from '../../blockchain/calls/calls';
 import { AssetKind, tokens } from '../../blockchain/config';
@@ -842,12 +842,8 @@ export function createMTSimpleOrderForm$(
     switchMap(curry(estimateGasPrice)(calls$, readCalls$)),
     scan(freezeGasEstimation),
     map(isReadyToProceed),
-    tap(state => state.plan && console.log('plan:', JSON.stringify(state.plan))),
-    tap(state =>
-        state.messages.length > 0 &&
-        console.log('messages:', JSON.stringify(state.messages))
-    ),
-    tap(state => console.log('progress', state.progress))
+    // tap(state => state.plan && console.log('plan:', JSON.stringify(state.plan))),
+    // ),
     // catchError(e => {
     //   console.log(e);
     //   return throwError(e);

@@ -68,17 +68,6 @@ export function realPurchasingPowerNonMarginable(
   return cashAvailable.minus(cashLeft);
 }
 
-// export function realPurchasingPowerMarginable(
-//   ma: MarginableAsset,
-//   cashAvailable: BigNumber,
-//   sellOffers: Offer[]
-// ): BigNumber {
-//   console.log('cashAvailable', cashAvailable.toString(), one.div(ma.safeCollRatio).toString());
-//   cashAvailable = cashAvailable.times(one.div(one.minus(one.div(ma.safeCollRatio))));
-//   const [, cashLeft] = eat(cashAvailable, sellOffers);
-//   return cashAvailable.minus(cashLeft);
-// }
-
 export function realPurchasingPowerMarginable(
   ma: MarginableAsset,
   sellOffers: Offer[]

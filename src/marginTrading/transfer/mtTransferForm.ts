@@ -26,8 +26,8 @@ import { AssetKind } from '../../blockchain/config';
 import { combineAndMerge } from '../../utils/combineAndMerge';
 import { description, impossible, Impossible, isImpossible } from '../../utils/impossible';
 import { firstOfOrTrue } from '../../utils/operators';
-import { planDraw } from '../plan/planDraw';
-import { planFund } from '../plan/planFund';
+import { planDraw, planDrawDai } from '../plan/planDraw';
+import { planFund, planFundDai } from '../plan/planFund';
 import {
   findAsset,
   MTAccount, MTAccountState,
@@ -131,24 +131,24 @@ function updatePlan(state: MTTransferFormState): MTTransferFormState {
     state.mta === undefined ||
     state.mta.state === MTAccountState.notSetup ||
     state.amount === undefined ||
-    state.messages.length !== 0
+    state.messages.length !== 0 ||
+    state.token === 'DAI' && state.ilk === undefined
   ) {
     return {
       ...state,
       plan: impossible('state not ready') };
   }
 
-  const plan =
-    (state.actionKind === UserActionKind.fund ? planFund : planDraw)(
-      state.mta, state.token, state.ilk, state.amount, []
-      // state.actionKind === UserActionKind.fund && state.token === 'DAI' ? [{
-      //   name: 'WETH',
-      //   delta: BigNumber.min(
-      //     findMarginableAsset('WETH', state.mta)!.debt,
-      //     state.amount
-      //   ).times(minusOne)
-      // } as Required<EditableDebt>] : []
-    );
+  const createPlan = state.actionKind === UserActionKind.fund ?
+    state.token === 'DAI' ? planFundDai : planFund
+    :
+    state.token === 'DAI' ? planDrawDai : planDraw;
+
+  const plan = createPlan(
+    state.mta,
+    state.token === 'DAI' && state.ilk || state.token,
+    state.amount,
+    []);
 
   const messages: Message[] =
     isImpossible(plan) ?
@@ -176,6 +176,8 @@ function estimateGasPrice(
 
     const proxy = state.mta.proxy;
     const plan = state.plan;
+
+    console.log('plan', JSON.stringify(plan));
 
     if (!plan || isImpossible(plan)) {
       return undefined;

@@ -43,7 +43,8 @@ export function aggregateMTAccountState(
   //   .filter((t: any) => t.assetKind === AssetKind.marginable)
   //   .map(t => t.symbol);
 
-  const tokenNames = [...assetNames, 'DAI'];
+  // const tokenNames = [...assetNames, 'DAI'];
+  const tokenNames = assetNames;
 
   return calls.mtBalance({ tokens: tokenNames, proxyAddress: proxy.address }).pipe(
     map((balanceResult) => {
@@ -159,6 +160,11 @@ export function createMta$(
 
   return combineLatest(context$, calls$, proxyAddress$).pipe(
     switchMap(([_context, calls, proxyAddress]) => {
+
+      // const pipLike = web3.eth.contract(dsvalue as any).at(_context.prices.WETH);
+      // bindNodeCallback(pipLike.read.call)()
+      //   .subscribe(r => console.log('result', r));
+
       if (proxyAddress === undefined) {
         return of(notSetup);
       }
