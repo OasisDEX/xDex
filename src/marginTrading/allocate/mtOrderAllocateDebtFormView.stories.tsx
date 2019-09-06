@@ -1,29 +1,29 @@
-import { storiesOf } from '@storybook/react';
-import { BigNumber } from 'bignumber.js';
-import * as React from 'react';
-
-import { Observable, of } from 'rxjs';
-import { shareReplay } from 'rxjs/operators';
-import { Calls, ReadCalls } from '../../blockchain/calls/calls';
-import { OfferType } from '../../exchange/orderbook/orderbook';
-import { connect } from '../../utils/connect';
-import { GasEstimationStatus, ProgressStage } from '../../utils/form';
-import { impossible } from '../../utils/impossible';
-import { inject } from '../../utils/inject';
-import { Loadable, loadablifyLight } from '../../utils/loadable';
-import { ModalProps } from '../../utils/modal';
-import { unpack } from '../../utils/testHelpers';
-import { AllocationRequestPilot } from './allocate';
-import {
-  AllocateChangeKind,
-  createMTAllocateForm$,
-  MTAllocateState
-} from './mtOrderAllocateDebtForm';
-import {
-  BuyAllocateFormView,
-  OrderAllocateFormProps,
-  SellAllocateFormView
-} from './mtOrderAllocateDebtFormView';
+// import { storiesOf } from '@storybook/react';
+// import { BigNumber } from 'bignumber.js';
+// import * as React from 'react';
+//
+// import { Observable, of } from 'rxjs';
+// import { shareReplay } from 'rxjs/operators';
+// import { Calls, ReadCalls } from '../../blockchain/calls/calls';
+// import { OfferType } from '../../exchange/orderbook/orderbook';
+// import { connect } from '../../utils/connect';
+// import { GasEstimationStatus, ProgressStage } from '../../utils/form';
+// import { impossible } from '../../utils/impossible';
+// import { inject } from '../../utils/inject';
+// import { Loadable, loadablifyLight } from '../../utils/loadable';
+// import { ModalProps } from '../../utils/modal';
+// import { unpack } from '../../utils/testHelpers';
+// import { AllocationRequestPilot } from './allocate';
+// import {
+//   AllocateChangeKind,
+//   createMTAllocateForm$,
+//   MTAllocateState
+// } from './mtOrderAllocateDebtForm';
+// import {
+//   BuyAllocateFormView,
+//   OrderAllocateFormProps,
+//   SellAllocateFormView
+// } from './mtOrderAllocateDebtFormView';
 
 // const stories = storiesOf('Margin Trading/Create position - allocate targetDebt', module);
 //

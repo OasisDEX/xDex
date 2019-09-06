@@ -1,16 +1,16 @@
-import { storiesOf } from '@storybook/react';
-import { BigNumber } from 'bignumber.js';
-import * as React from 'react';
-
-import { AssetKind } from '../blockchain/config';
-import { MTAccount } from '../marginTrading/state/mtAccount';
-import { calculateMTAccount } from '../marginTrading/state/mtCalculate';
-import {
-  getCashCore,
-  getMarginableCore, getMTAccount,
-  getNonMarginableCore
-} from '../marginTrading/state/mtTestUtils';
-import { MtAccountDetailsView } from './mtAccountDetailsView';
+// import { storiesOf } from '@storybook/react';
+// import { BigNumber } from 'bignumber.js';
+// import * as React from 'react';
+//
+// import { AssetKind } from '../blockchain/config';
+// import { MTAccount } from '../marginTrading/state/mtAccount';
+// import { calculateMTAccount } from '../marginTrading/state/mtCalculate';
+// import {
+//   getCashCore,
+//   getMarginableCore, getMTAccount,
+//   getNonMarginableCore
+// } from '../marginTrading/state/mtTestUtils';
+// import { MtAccountDetailsView } from './mtAccountDetailsView';
 
 // const stories = storiesOf('Balances/Account details', module)
 //   .addDecorator(story => (
