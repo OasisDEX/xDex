@@ -26,8 +26,8 @@ import { AssetKind } from '../../blockchain/config';
 import { combineAndMerge } from '../../utils/combineAndMerge';
 import { description, impossible, Impossible, isImpossible } from '../../utils/impossible';
 import { firstOfOrTrue } from '../../utils/operators';
-import {planDraw, planDrawDai} from '../plan/planDraw';
-import {planFund, planFundDai} from '../plan/planFund';
+import { planDraw, planDrawDai } from '../plan/planDraw';
+import { planFund, planFundDai } from '../plan/planFund';
 import {
   findAsset,
   MTAccount, MTAccountState,
@@ -176,6 +176,8 @@ function estimateGasPrice(
 
     const proxy = state.mta.proxy;
     const plan = state.plan;
+
+    console.log('plan', JSON.stringify(plan));
 
     if (!plan || isImpossible(plan)) {
       return undefined;

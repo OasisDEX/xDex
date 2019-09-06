@@ -1,20 +1,14 @@
 import { BigNumber } from 'bignumber.js';
 import { flatten } from 'lodash';
-import { Observable } from 'rxjs';
-import { Calls } from '../../blockchain/calls/calls';
 import { AssetKind } from '../../blockchain/config';
-import { TxState } from '../../blockchain/transactions';
 import { impossible } from '../../utils/impossible';
 import { minusOne, zero } from '../../utils/zero';
-import { AllocationRequestAssetInfo, AllocationRequestPilot } from '../allocate/allocate';
 import { EditableDebt } from '../allocate/mtOrderAllocateDebtForm';
 import {
-  findAsset, findMarginableAsset, MarginableAssetCore,
-  MTAccountSetup,
+  findAsset, MTAccountSetup,
   Operation,
   OperationKind
 } from '../state/mtAccount';
-import { calculateMarginable } from '../state/mtCalculate';
 import { deltaToOps, Operations, orderDeltas } from './planUtils';
 
 // export function prepareFundRequest(
@@ -39,7 +33,8 @@ import { deltaToOps, Operations, orderDeltas } from './planUtils';
 //         ma.balance,
 //     } as MarginableAssetCore)));
 //
-//   const execute = (calls: Calls, proxy: any, plan: Operation[], gas: number): Observable<TxState> =>
+//   const execute =
+//     (calls: Calls, proxy: any, plan: Operation[], gas: number): Observable<TxState> =>
 //     calls.mtFund({ proxy, plan, gas, token, amount });
 //
 //   const estimateGas = (calls: Calls, proxy: any, plan: Operation[]) =>
@@ -110,8 +105,6 @@ export function planFundDai(
     return impossible(`can\'t fund with ${token}`);
   }
 
-  console.log('token!!!!!!!!!!!', token);
-
   const fundOps: Operation[] = [
     { amount, name: token, kind: OperationKind.fundDai },
     ...asset.debt.gt(zero) && amount.gt(zero) ? [
@@ -128,4 +121,3 @@ export function planFundDai(
     ...flatten(orderDeltas(debts).filter(d => !d.delta.eq(zero)).map(deltaToOps))
   ];
 }
-

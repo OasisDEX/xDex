@@ -6,7 +6,7 @@ setupFakeWeb3ForTesting();
 import { impossible } from '../../utils/impossible';
 import { MTAccountSetup, OperationKind } from '../state/mtAccount';
 import { getMTAccount } from '../state/mtTestUtils';
-import {planDraw, planDrawDai} from './planDraw';
+import { planDraw, planDrawDai } from './planDraw';
 import { dgx100, wethEmpty } from './planFixtures';
 
 describe('plan draw', () => {

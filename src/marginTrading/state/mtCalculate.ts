@@ -308,9 +308,9 @@ export function calculateMarginable(
 
   const liquidationInProgress = biteLastIndex >= 0 && biteLastIndex > dentLastIndex;
 
-  console.log('LEVERAGE ma.balance', ma.balance.toString());
-  console.log('LEVERAGE ma.referencePrice', ma.referencePrice.toString());
-  console.log('LEVERAGE ma.debt', ma.debt.toString());
+  // console.log('LEVERAGE ma.balance', ma.balance.toString());
+  // console.log('LEVERAGE ma.referencePrice', ma.referencePrice.toString());
+  // console.log('LEVERAGE ma.debt', ma.debt.toString());
   const leverage = ma.balance.times(ma.referencePrice)
     .div(ma.balance.times(ma.referencePrice).minus(ma.debt));
 
