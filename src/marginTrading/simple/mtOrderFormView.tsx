@@ -24,10 +24,8 @@ import { Muted } from '../../utils/text/Text';
 import { findMarginableAsset, MTAccountState } from '../state/mtAccount';
 import { Message, MessageKind, MTSimpleFormState, ViewKind } from './mtOrderForm';
 import * as styles from './mtOrderFormView.scss';
-import {AssetKind} from "../../blockchain/config";
 
 const DevInfos = ({ value }: { value: MTSimpleFormState }) => {
-
 
   //  assetKind: AssetKind.marginable;
   // urnBalance: BigNumber;
@@ -36,7 +34,6 @@ const DevInfos = ({ value }: { value: MTSimpleFormState }) => {
   // minCollRatio: BigNumber;
   // safeCollRatio: BigNumber;
   // fee: BigNumber;
-
 
   let balance = null;
   let debt = null;

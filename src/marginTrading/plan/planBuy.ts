@@ -122,7 +122,7 @@ export function planBuy(
 
   const totalDebtDelta = debts.reduce((s, d) => {
     return s.plus(d.delta);
-  }, zero);
+  },                                  zero);
   const extraCash = totalDebtDelta.minus(maxTotal);
   const extraAdjust: Operation[] = extraCash.gt(zero) ?
     [{ name, kind: OperationKind.adjust, ddai: extraCash }] : [];

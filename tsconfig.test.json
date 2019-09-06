@@ -3,6 +3,7 @@
   "compilerOptions": {
     "types": ["jest"],
     "module": "commonjs",
+    "lib": ["dom", "dom.iterable", "esnext"]
   },
   "exclude": []
 }

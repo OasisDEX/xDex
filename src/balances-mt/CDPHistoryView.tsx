@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as ReactModal from 'react-modal';
 
-import {MarginableAsset, MTHistoryEventKind} from '../marginTrading/state/mtAccount';
+import { MarginableAsset, MTHistoryEventKind } from '../marginTrading/state/mtAccount';
 import { formatDateTime } from '../utils/formatters/format';
 import { Button } from '../utils/forms/Buttons';
 import { ModalProps } from '../utils/modal';
@@ -41,13 +41,27 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
           <Table className={styles.table}>
               <thead>
               <tr>
-                <th style={{ width: '125px' }} >Type</th>
-                <th style={{ width: '125px' }} ><span className={styles.headerDark}>Price</span> DAI</th>
-                <th style={{ width: '125px' }} ><span className={styles.headerDark}>Amount</span> WETH</th>
-                <th style={{ width: '125px' }} ><span className={styles.headerDark}>Total</span> DAI</th>
-                <th style={{ width: '125px' }} ><span className={styles.headerDark}>Debt</span> DAI</th>
-                <th style={{ width: '125px' }} ><span className={styles.headerDark}>Liq. Price</span> USD</th>
-                <th style={{ width: '190px' }} >Time</th>
+                <th style={{ width: '125px' }} >
+                  Type
+                </th>
+                <th style={{ width: '125px' }} >
+                  <span className={styles.headerDark}>Price</span> DAI
+                </th>
+                <th style={{ width: '125px' }} >
+                  <span className={styles.headerDark}>Amount</span> WETH
+                </th>
+                <th style={{ width: '125px' }} >
+                  <span className={styles.headerDark}>Total</span> DAI
+                </th>
+                <th style={{ width: '125px' }} >
+                  <span className={styles.headerDark}>Debt</span> DAI
+                </th>
+                <th style={{ width: '125px' }} >
+                  <span className={styles.headerDark}>Liq. Price</span> USD
+                </th>
+                <th style={{ width: '190px' }} >
+                  Time
+                </th>
               </tr>
               </thead>
               <tbody>
@@ -56,43 +70,44 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
                 let DAIsign = '';
                 if (
                   e.kind === MTHistoryEventKind.fundGem ||
-                  e.kind === MTHistoryEventKind.fundDai ||
+                  e.kind === MTHistoryEventKind.drawDai ||
                   e.kind === MTHistoryEventKind.buyLev) {
                   sign = '+';
                   DAIsign = '-';
                 }
                 if (
                   e.kind === MTHistoryEventKind.drawGem ||
-                  e.kind === MTHistoryEventKind.drawDai ||
+                  e.kind === MTHistoryEventKind.fundDai ||
                   e.kind === MTHistoryEventKind.sellLev) {
                   sign = '-';
                   DAIsign = '+';
                 }
+
                 return (
                   <tr key={i}>
                     <td className={styles.eventName}>{e.displayName}</td>
                     <td>{
-                      e.priceDai && !e.priceDai.isNaN() ? e.priceDai.toString()
+                      e.priceDai && !e.priceDai.isNaN() ? e.priceDai.toFixed(2)
                         : <span>-</span>
                     }</td>
                     <td>
                       {
                         e.dAmount && !e.dAmount.isNaN() ?
                           <React.Fragment>{sign} {e.dAmount.toString()}</React.Fragment>
-                          : <span>-</span>
+                          : <span>0.0</span>
                       }
                     </td>
                     <td>
                       {
                         e.dDAIAmount && !e.dDAIAmount.isNaN() ?
                           <React.Fragment>{DAIsign} {e.dDAIAmount.toString()}</React.Fragment>
-                          : <span>-</span>
+                          : <span>0.0</span>
                       }
                     </td>
                     <td>
                       { e.debtDelta && !e.debtDelta.isNaN() ?
                         <React.Fragment>{e.debtDelta.toString()}</React.Fragment>
-                        :  <span>-</span>
+                        :  <span>0.0</span>
                       }
                     </td>
                 <td>
@@ -103,7 +118,7 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
                     </td>
                     <td>
                       <InfoLabel>
-                        { formatDateTime(new Date(e.timestamp * 1000), true) }
+                        { formatDateTime(new Date(e.timestamp), true) }
                       </InfoLabel>
                     </td>
                   </tr>

@@ -78,7 +78,7 @@ stories.add('Marginable weth below minimum', () => {
     debt: new BigNumber(275000),
     history: [{
       token: 'WETH',
-      kind: 'deal',
+      kind: 'Deal',
       timestamp: 1545297643,
       id: new BigNumber(3),
     } as MTHistoryEvent]

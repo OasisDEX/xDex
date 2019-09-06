@@ -75,18 +75,18 @@ export interface CashAsset extends CashAssetCore {
 }
 
 export enum MTHistoryEventKind {
-  fundGem = 'fundGem',
-  fundDai = 'fundDai',
-  drawGem = 'drawGem',
-  drawDai = 'drawDai',
-  adjust = 'adjust',
-  buyLev = 'buyLev',
-  sellLev = 'sellLev',
-  bite = 'bite',
-  kick = 'kick',
-  tend = 'tend',
-  dent = 'dent',
-  deal = 'deal',
+  fundGem = 'FundGem',
+  fundDai = 'FundDai',
+  drawGem = 'DrawGem',
+  drawDai = 'DrawDai',
+  adjust = 'Adjust',
+  buyLev = 'BuyLev',
+  sellLev = 'SellLev',
+  bite = 'Bite',
+  kick = 'Kick',
+  tend = 'Tend',
+  dent = 'Dent',
+  deal = 'Deal',
 }
 
 export type MTHistoryEvent = {
@@ -95,6 +95,9 @@ export type MTHistoryEvent = {
   liquidationPrice?: BigNumber;
   liquidationPriceDelta?: BigNumber;
   debtDelta?: BigNumber;
+  ddai?: BigNumber;
+  dgem?: BigNumber;
+  amount?: BigNumber;
   dAmount: BigNumber;
   dDAIAmount: BigNumber;
 } & (MTMarginEvent | MTLiquidationEvent);

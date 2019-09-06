@@ -129,7 +129,6 @@ export function combineBalances(
           mta.marginableAssets.find(ma => ma.name === name) ||
           mta.nonMarginableAssets.find(ma => ma.name === name);
 
-      console.log('@@ASSET', asset);
       const mtAssetValueInDAI = asset ?
         // walletBalance.plus(asset.balance).times(
           asset.balance.times(
