@@ -22,7 +22,9 @@ import {
 import {
   approveMTProxy, mtBalance, mtBuy, mtDraw, mtFund, mtReallocate, mtSell, setupMTProxy
 } from './mtCalls';
-import { cancelOffer, offerMake, offerMakeDirect } from './offerMake';
+import {
+  cancelAllOffers, cancelOffer, makeLinearOffers, offerMake, offerMakeDirect
+} from './offerMake';
 import { unwrap, wrap } from './wrapUnwrapCalls';
 
 function calls([context, account]: [NetworkConfig, string]) {
@@ -69,6 +71,8 @@ function calls([context, account]: [NetworkConfig, string]) {
     mtSellEstimateGas: estimateGas(mtSell),
     mtReallocate: sendTransaction(mtReallocate),
     mtReallocateEstimateGas: estimateGas(mtReallocate),
+    makeLinearOffers: sendTransaction(makeLinearOffers),
+    cancelAllOffers: sendTransaction(cancelAllOffers),
   };
 }
 
