@@ -378,14 +378,15 @@ function addPurchasingPower(state: MTSimpleFormState) {
 
 function addPriceTotal(state: MTSimpleFormState) {
   if (!state.amount) {
-    if (state.orderbook) {
-      return {
-        ...state,
-        price: state.orderbook.sell[0].price,
-        total: new BigNumber(0)
-      };
-    }
-    return state;
+    const orderbook = state.orderbook;
+    return {
+      ...state,
+      price: orderbook && (
+        state.kind === OfferType.buy && orderbook.sell.length > 0 && orderbook.sell[0].price ||
+        state.kind === OfferType.sell && orderbook.buy.length > 0 && orderbook.buy[0].price
+      ) || undefined,
+      total: new BigNumber(0)
+    };
   }
 
   if (!state.orderbook) {
