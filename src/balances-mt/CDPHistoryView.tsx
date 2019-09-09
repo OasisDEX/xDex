@@ -83,9 +83,26 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
                   DAIsign = '+';
                 }
 
+                let displayName = '';
+                switch (e.kind) {
+                  case MTHistoryEventKind.drawDai:
+                  case MTHistoryEventKind.drawGem:
+                    displayName = 'Withdraw';
+                    break;
+                  case MTHistoryEventKind.fundDai:
+                  case MTHistoryEventKind.fundGem:
+                    displayName = 'Deposit';
+                    break;
+                  case MTHistoryEventKind.buyLev:
+                    displayName = 'Buy';
+                    break;
+                  case MTHistoryEventKind.sellLev:
+                    displayName = 'Sell';
+                    break;
+                }
                 return (
                   <tr key={i}>
-                    <td className={styles.eventName}>{e.displayName}</td>
+                    <td className={styles.eventName}>{displayName}</td>
                     <td>{
                       e.priceDai && !e.priceDai.isNaN() ? e.priceDai.toFixed(2)
                         : <span>-</span>

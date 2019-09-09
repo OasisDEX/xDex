@@ -88,7 +88,6 @@ export enum MTHistoryEventKind {
 }
 
 export type MTHistoryEvent = {
-  displayName?: string;
   priceDai?: BigNumber;
   liquidationPrice?: BigNumber;
   liquidationPriceDelta?: BigNumber;
