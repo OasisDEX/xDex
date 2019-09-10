@@ -1,5 +1,6 @@
 @import "../../utils/Variables";
 @import "../../utils/Mixins";
+@import "../../utils/Form";
 
 // panel header
 .settingsIcon {
@@ -15,7 +16,7 @@
 // form
 
 $twoColumnsPanelWidth: 454px;
-$historyPanelsHeight: 535px;
+$historyPanelsHeight: 605px;
 
 .InstantOrderPanel {
   display: inline-flex;
@@ -150,18 +151,18 @@ $historyPanelsHeight: 535px;
   background: url("./icon_arrow_right.svg") no-repeat center;
 }
 
+.summaryBox {
+  border: 1px solid #383842;
+  padding: 15px 12px 0 12px;
+}
+
 .orderSummaryRow {
-  font-size: 15px;
-  line-height: 19px;
-  display: flex;
-  width: 100%;
-  color: #ffffff;
-  margin-bottom: 14px;
+  @include formRow;
 }
 
 .orderSummaryRowDark {
   .orderSummaryLabel {
-    color: $grey-light-mid;
+    @include formLabelDark;
   }
 }
 
@@ -196,3 +197,31 @@ $historyPanelsHeight: 535px;
 .settingsFooter {
   margin-top: auto;
 }
+
+
+.InfoRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #383842;
+  font-size: 15px;
+  line-height: 18px;
+  margin-bottom: 28px;
+}
+
+.InfoBox {
+  flex-grow:1;
+  flex-shrink: 1;
+  text-align: center;
+  box-sizing: border-box;
+  border-radius: 2px;
+  padding: 10px;
+  border-left: 1px solid #383842;
+}
+
+.InfoRowLabel {
+  @include formLabelDark;
+
+  margin-bottom: 5px;
+}
+
