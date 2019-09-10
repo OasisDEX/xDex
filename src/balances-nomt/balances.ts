@@ -39,7 +39,6 @@ export function balance$(
   token: string,
   account: string,
 ): Observable<BigNumber> {
-  console.log('tokennn', token, context.tokens[token]);
   return bindNodeCallback(context.tokens[token].contract.balanceOf as BalanceOf)(
     account
   ).pipe(

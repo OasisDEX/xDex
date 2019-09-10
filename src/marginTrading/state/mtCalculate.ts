@@ -214,9 +214,9 @@ function calculateMTHistoryEvents(
   let equityCash = zero;
 
   const events = rawHistory.map(h => {
-    console.log('calc history balance', balance.toString());
-    console.log('calc history cash', cash.toString());
-    console.log('calc history', h);
+    // console.log('calc history balance', balance.toString());
+    // console.log('calc history cash', cash.toString());
+    // console.log('calc history', h);
     let event = { ...h, dAmount: zero, dDAIAmount: zero };
     if (h.kind === MTHistoryEventKind.adjust) {
       event = { ...h, displayName: '--adjust--', dAmount: h.dgem, dDAIAmount: h.ddai };
@@ -261,8 +261,8 @@ function calculateMTHistoryEvents(
       event = { ...event, debtDelta };
     }
 
-    console.log('calc history equity', equity.toString());
-    console.log('calc history equityCash', equityCash.toString());
+    // console.log('calc history equity', equity.toString());
+    // console.log('calc history equityCash', equityCash.toString());
 
     const prevLiquidationPrice = liquidationPrice;
     liquidationPrice = ma.minCollRatio.times(debt).div(balance);

@@ -36,7 +36,6 @@ const marginEventFilter = (Event: any, context: NetworkConfig, token: string) =>
 const eventFilters: (
   proxy: any, context: NetworkConfig, token: string, marginAccount: any
 ) => {[key in MTHistoryEventKind]: any} = (proxy, context, token, marginAccount) => {
-  console.log(marginAccount);
   return ({
     [MTHistoryEventKind.fundGem]: marginEventFilter(marginAccount.FundGem, context, token),
     [MTHistoryEventKind.fundDai]: marginEventFilter(marginAccount.FundDai, context, token),
