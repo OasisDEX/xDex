@@ -81,10 +81,16 @@ export function pluginDevModeHelpers(
       flatMap(calls =>
         createProxyAddress$(context$, initializedAccount$, onEveryBlock$).pipe(
           first(),
-          tap(proxy => console.log({ proxy })),
-          flatMap(proxy => calls.makeLinearOffers(
-            { baseToken, quoteToken, midPrice, delta, baseAmount, count, proxyAddress: proxy! },
-          )),
+          tap(proxyAddress => console.log({ proxyAddress })),
+          flatMap(proxyAddress => {
+            if (!proxyAddress) {
+              console.log('Proxy not found!');
+              return of();
+            }
+            return calls.makeLinearOffers(
+              { baseToken, quoteToken, midPrice, delta, baseAmount, count, proxyAddress },
+            );
+          }),
         ),
       )
     ).subscribe(identity);
@@ -97,10 +103,16 @@ export function pluginDevModeHelpers(
       flatMap(calls =>
         createProxyAddress$(context$, initializedAccount$, onEveryBlock$).pipe(
           first(),
-          tap(proxy => console.log({ proxy })),
-          flatMap(proxy => calls.cancelAllOffers(
-            { baseToken, quoteToken, proxyAddress: proxy! },
-          )),
+          tap(proxyAddress => console.log({ proxyAddress })),
+          flatMap(proxyAddress => {
+            if (!proxyAddress) {
+              console.log('Proxy not found!');
+              return of();
+            }
+            return calls.cancelAllOffers(
+              { baseToken, quoteToken, proxyAddress },
+            );
+          }),
         ),
       )
     ).subscribe(identity);
