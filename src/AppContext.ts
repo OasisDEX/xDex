@@ -24,6 +24,7 @@ import {
   AssetsOverviewActionProps,
   AssetsOverviewExtraProps,
 } from './balances-nomt/AssetOverviewView';
+import { createAllowances$ } from './balances-nomt/balances';
 // import {
 //   Balances,
 //   CombinedBalances,
@@ -155,12 +156,20 @@ export function setupAppContext() {
     withModal(
       connect<MTSetupFormState, ModalOpenerProps>(MTSetupButton, mtSetupForm$));
 
-  const mtBalances$ = balancesMT.createCombinedBalances(etherBalance$, balances$, mta$);
+  const mtBalances$ = balancesMT.createCombinedBalances(
+    etherBalance$,
+    balances$,
+    createAllowances$(context$, initializedAccount$, onEveryBlock$),
+    mta$
+  );
 
   const createMTFundForm$: CreateMTFundForm$ =
     curry(createMTTransferForm$)(mta$, gasPrice$, etherPriceUsd$, balances$, calls$, readCalls$);
 
   const approveMTProxy = createMTProxyApprove(calls$);
+
+  const approveWallet = balancesNoMT.createWalletApprove(calls$, gasPrice$);
+  const disapproveWallet = balancesNoMT.createWalletDisapprove(calls$, gasPrice$);
 
   const theCreateMTAllocateForm$: CreateMTAllocateForm$ =
     curry(createMTAllocateForm$)(gasPrice$, etherPriceUsd$, calls$, readCalls$);
@@ -173,7 +182,12 @@ export function setupAppContext() {
           loadablifyLight(mtBalances$)
         )
       ),
-      { createMTFundForm$, approveMTProxy, createMTAllocateForm$: theCreateMTAllocateForm$ }
+      {
+        createMTFundForm$,
+        approveMTProxy,
+        approveWallet, disapproveWallet,
+        createMTAllocateForm$: theCreateMTAllocateForm$
+      }
     );
 
   const NetworkTxRx = connect(Network, context$);
@@ -195,9 +209,6 @@ export function setupAppContext() {
   const wrapUnwrapForm$ =
     curry(createWrapUnwrapForm$)(gasPrice$, etherPriceUsd$, etherBalance$, wethBalance$, calls$);
 
-  const approve = balancesNoMT.createWalletApprove(calls$, gasPrice$);
-  const disapprove = balancesNoMT.createWalletDisapprove(calls$, gasPrice$);
-
   const AssetOverviewViewRxTx =
     inject(
       withModal<AssetsOverviewActionProps, AssetsOverviewExtraProps>(
@@ -206,7 +217,7 @@ export function setupAppContext() {
           authorizablify(() => loadablifyLight(combinedBalances$))
         )
       ),
-      { approve, disapprove, wrapUnwrapForm$ }
+      { approveWallet, disapproveWallet, wrapUnwrapForm$ }
     );
 
   const loadOrderbook = memoizeTradingPair(curry(loadOrderbook$)(context$, onEveryBlock$));

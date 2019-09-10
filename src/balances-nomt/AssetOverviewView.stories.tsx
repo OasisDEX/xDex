@@ -31,8 +31,8 @@ const daiBalance = {
 
 const defaultBalancesProps = {
   open: () => null,
-  approve: (_token: string) => of({} as TxState),
-  disapprove: (_token: string) => of({} as TxState),
+  approveWallet: (_token: string) => of({} as TxState),
+  disapproveWallet: (_token: string) => of({} as TxState),
   etherBalance: zero,
   etherValueInUsd: zero,
   wrapUnwrapForm$: () => of({} as WrapUnwrapFormState),

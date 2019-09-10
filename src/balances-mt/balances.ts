@@ -11,6 +11,7 @@ import {
   map,
   scan, switchMap
 } from 'rxjs/operators';
+import { Allowances } from '../balances-nomt/balances';
 
 import { AssetKind, NetworkConfig, tokens } from '../blockchain/config';
 import { account$, context$, onEveryBlock$ } from '../blockchain/network';
@@ -39,8 +40,6 @@ export function balance$(
   token: string,
   account?: string
 ): Observable<BigNumber> {
-
-  console.log('token', token);
   if (account === undefined) {
     return account$.pipe(
       switchMap(theAccount => balance$(context, token, theAccount)),
@@ -107,6 +106,7 @@ export interface CombinedBalance {
   asset?: CashAsset | MarginableAsset | NonMarginableAsset;
   mtAssetValueInDAI: BigNumber;
   cashBalance?: BigNumber;
+  allowance: boolean;
 }
 
 export interface CombinedBalances {
@@ -115,7 +115,7 @@ export interface CombinedBalances {
 }
 
 export function combineBalances(
-  etherBalance: BigNumber, walletBalances: Balances, mta: MTAccount
+  etherBalance: BigNumber, walletBalances: Balances, allowances: Allowances, mta: MTAccount
 ): CombinedBalances {
 
   const balances = Object.keys(tokens)
@@ -129,7 +129,6 @@ export function combineBalances(
           mta.marginableAssets.find(ma => ma.name === name) ||
           mta.nonMarginableAssets.find(ma => ma.name === name);
 
-      // console.log('@@ASSET', asset);
       const mtAssetValueInDAI = asset ?
         // walletBalance.plus(asset.balance).times(
           asset.balance.times(
@@ -141,8 +140,7 @@ export function combineBalances(
 
       const cashBalance = asset && asset.assetKind === AssetKind.marginable ? asset.dai : zero;
 
-      // const totalValueInDAI = asset ?
-      //   walletBalance.plus(asset.balance) : walletBalance;
+      const allowance = allowances[name];
 
       return {
         name,
@@ -150,6 +148,7 @@ export function combineBalances(
         walletBalance,
         mtAssetValueInDAI,
         cashBalance,
+        allowance
       };
     });
 
@@ -186,9 +185,10 @@ export function combineBalances(
 export function createCombinedBalances(
   etherBalance$$: Observable<BigNumber>,
   balances$$: Observable<Balances>,
+  allowances$: Observable<Allowances>,
   mta$: Observable<MTAccount>): Observable<CombinedBalances> {
-  return combineLatest(etherBalance$$, balances$$, mta$).pipe(
-    map(([etherBalance, balances, mta]) =>
-      combineBalances(etherBalance, balances, mta))
+  return combineLatest(etherBalance$$, balances$$, allowances$, mta$).pipe(
+    map(([etherBalance, balances, allowances, mta]) =>
+      combineBalances(etherBalance, balances, allowances, mta))
   );
 }

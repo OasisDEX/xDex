@@ -26,8 +26,8 @@ import { CombinedBalances } from './balances';
 
 export interface AssetsOverviewActionProps  {
   wrapUnwrapForm$: (formKind: WrapUnwrapFormKind) => Observable<WrapUnwrapFormState>;
-  approve: (token: string) => Observable<TxState>;
-  disapprove: (token: string) => Observable<TxState>;
+  approveWallet: (token: string) => Observable<TxState>;
+  disapproveWallet: (token: string) => Observable<TxState>;
 }
 
 export type AssetsOverviewExtraProps =
@@ -122,8 +122,8 @@ export class AssetsOverviewViewInternal
                         disabled={combinedBalance.allowanceChangeInProgress}
                         inProgress={combinedBalance.allowanceChangeInProgress}
                         onClick={() => combinedBalance.allowance ?
-                          this.props.disapprove(combinedBalance.name) :
-                          this.props.approve(combinedBalance.name)
+                          this.props.disapproveWallet(combinedBalance.name) :
+                          this.props.approveWallet(combinedBalance.name)
                         }
                 />
             </td>

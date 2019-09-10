@@ -23,6 +23,8 @@ import * as styles from './mtBalancesView.scss';
 export interface MTBalancesCreateMTFundFormProps extends CreateMTAllocateForm$Props {
   createMTFundForm$: (actionKind: UserActionKind, token: string) => Observable<MTTransferFormState>;
   approveMTProxy: (args: {token: string; proxyAddress: string}) => Observable<TxState>;
+  approveWallet: (token: string) => Observable<TxState>;
+  disapproveWallet: (token: string) => Observable<TxState>;
 }
 
 export type MTBalancesOwnProps =
@@ -35,6 +37,8 @@ export class MTBalancesView
     const open = this.props.open;
     const createMTFundForm$ = this.props.createMTFundForm$;
     const approveMTProxy = this.props.approveMTProxy;
+    const approveWallet = this.props.approveWallet;
+    const disapproveWallet = this.props.disapproveWallet;
     const createMTAllocateForm$ = this.props.createMTAllocateForm$;
     return (
       <Panel className={styles.balancesPanel}>
@@ -46,6 +50,8 @@ export class MTBalancesView
                 ...combinedBalances,
                 open,
                 createMTFundForm$,
+                approveWallet,
+                disapproveWallet,
                 approveMTProxy,
                 createMTAllocateForm$,
               } }
@@ -66,6 +72,7 @@ export class MTBalancesViewInternal extends React.Component<CombinedBalances & M
         <tr>
           <th style={{ width: '15%' }}>Symbol</th>
           <th style={{ width: '17%' }}>Asset</th>
+          <th style={{ width: '20%' }} className={styles.center}>Unlock on Wallet</th>
           <th style={{ width: '20%' }} className={styles.center}>Unlock on Proxy</th>
           <th style={{ width: '15%' }} className={styles.amount}>Wallet</th>
           <th style={{ width: '15%' }} className={styles.center}>Transfer</th>
@@ -90,6 +97,15 @@ export class MTBalancesViewInternal extends React.Component<CombinedBalances & M
                 value={tokens[combinedBalance.name].name} />
               </div>
             </td>
+            <td>
+              <Slider blocked={!combinedBalance.allowance}
+                      disabled={
+                        combinedBalance.allowance
+                      }
+                      onClick={this.approveWallet(combinedBalance)}
+                      data-test-id="toggle-leverage-allowance"
+              />
+            </td>
             <td className={styles.center}>
               {combinedBalance.asset &&
                 <Slider blocked={!combinedBalance.asset.allowance}
@@ -97,7 +113,7 @@ export class MTBalancesViewInternal extends React.Component<CombinedBalances & M
                         this.props.mta.state !== MTAccountState.setup ||
                         combinedBalance.asset.allowance
                       }
-                      onClick={this.approve(combinedBalance)}
+                      onClick={this.approveMTProxy(combinedBalance)}
                       data-test-id="toggle-leverage-allowance"
                 />
               }
@@ -168,7 +184,7 @@ export class MTBalancesViewInternal extends React.Component<CombinedBalances & M
     this.props.open(MTFundFormViewRxTx);
   }
 
-  private approve(combinedBalance: CombinedBalance): () => void {
+  private approveMTProxy(combinedBalance: CombinedBalance): () => void {
     return () => {
       if (this.props.mta.state === MTAccountState.notSetup) {
         return;
@@ -177,6 +193,12 @@ export class MTBalancesViewInternal extends React.Component<CombinedBalances & M
         token: combinedBalance.name,
         proxyAddress: this.props.mta.proxy.address as string
       });
+    };
+  }
+
+  private approveWallet(combinedBalance: CombinedBalance): () => void {
+    return () => {
+      this.props.approveWallet(combinedBalance.name);
     };
   }
 
