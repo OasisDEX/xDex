@@ -135,12 +135,12 @@ export interface MakeLinearOffersData {
 }
 
 function q18(value: number): string {
-  return value * 10 ** 4 + '0'.repeat(14);
+  return String(value * 10 ** 4) + '0'.repeat(14);
 }
 
 export const makeLinearOffers: TransactionDef<MakeLinearOffersData> = {
   call: ({ proxyAddress }: MakeLinearOffersData, _context: NetworkConfig) =>
-    web3.eth.contract(dsProxy as any).at(proxyAddress!).execute['address,bytes'],
+    web3.eth.contract(dsProxy as any).at(proxyAddress).execute['address,bytes'],
   prepareArgs: (
     { baseToken, quoteToken, midPrice, delta, baseAmount, count }: MakeLinearOffersData,
     context: NetworkConfig
@@ -170,7 +170,7 @@ export interface CancelAllOffersData {
 
 export const cancelAllOffers: TransactionDef<CancelAllOffersData> = {
   call: ({ proxyAddress }: CancelAllOffersData, _context: NetworkConfig) =>
-    web3.eth.contract(dsProxy as any).at(proxyAddress!).execute['address,bytes'],
+    web3.eth.contract(dsProxy as any).at(proxyAddress).execute['address,bytes'],
   prepareArgs: (
     { baseToken, quoteToken }: CancelAllOffersData,
     context: NetworkConfig
