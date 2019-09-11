@@ -22,7 +22,7 @@ import {
   MTHistoryEvent
 } from './mtAccount';
 import { calculateMTAccount, } from './mtCalculate';
-import { createRawMTHistory } from './mtHistory';
+import { createRawMTHistoryFromCache } from './mtHistory';
 import { getCashCore, getMarginableCore, getNonMarginableCore } from './mtTestUtils';
 
 export function aggregateMTAccountState(
@@ -150,7 +150,8 @@ export function createMta$(
         }
         const proxy = web3.eth.contract(dsProxy as any).at(proxyAddress);
         return combineLatest(
-          marginableNames.map(token => createRawMTHistory(proxy, context, token))
+          // marginableNames.map(token => createRawMTHistory(proxy, context, token))
+          marginableNames.map(token => createRawMTHistoryFromCache(proxy, context, token))
         );
       }),
       startWith(marginableNames.map(() => [] as MTHistoryEvent[])),
