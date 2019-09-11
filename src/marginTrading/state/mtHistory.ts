@@ -231,8 +231,6 @@ export function createRawMTHistoryFromCache(
     }
   `;
 
-  console.log('$$$PROXY', proxy);
-
   const variables = {
     // devMode: config.devMode,
     token,

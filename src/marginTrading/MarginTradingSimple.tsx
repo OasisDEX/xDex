@@ -42,6 +42,22 @@ const Content = (props: any | { parentMatch: string }) => {
         </Panel>
       </FlexLayoutRow>
       <FlexLayoutRow>
+        <Panel className={styles.priceChartPanel} footerBordered={true}>
+          <theAppContext.Consumer>
+            { ({ PriceChartWithLoadingTxRx }) =>
+              <PriceChartWithLoadingTxRx />
+            }
+          </theAppContext.Consumer>
+        </Panel>
+        <Panel className={styles.allTradesPanel} footerBordered={true}>
+          <theAppContext.Consumer>
+            { ({ AllTradesTxRx }) =>
+              <AllTradesTxRx />
+            }
+          </theAppContext.Consumer>
+        </Panel>
+      </FlexLayoutRow>
+      <FlexLayoutRow>
         <Panel style={{ marginRight: '24px', flexGrow: 1 }}>
           <theAppContext.Consumer>
             { ({ MTSimpleOrderPanelRxTx }) => <MTSimpleOrderPanelRxTx /> }

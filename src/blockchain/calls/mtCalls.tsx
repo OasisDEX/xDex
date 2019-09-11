@@ -95,12 +95,7 @@ function mtBalancePostprocess(result: BigNumber[], { tokens }: MTBalanceData) : 
 export const mtBalance = {
   call: (_data: MTBalanceData, context: NetworkConfig) => context.proxyActions.contract.balance,
   prepareArgs: ({ proxyAddress, tokens }: MTBalanceData, context: NetworkConfig) => {
-    console.log(
-      'mtBalance',
-      context.tokens.DAI.address,
-      tokens,
-      tokens.map(token => context.ilks[token])
-    );
+    console.log('mtBalance proxy', proxyAddress);
     return [
       proxyAddress,
       tokens.map(token => context.ilks[token] || token), // || token is temporary just for DAI
