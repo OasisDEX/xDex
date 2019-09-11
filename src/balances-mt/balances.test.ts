@@ -1,5 +1,5 @@
 import { BigNumber } from 'bignumber.js';
-import {Allowances} from '../balances-nomt/balances';
+import { Allowances } from '../balances-nomt/balances';
 
 import { setupFakeWeb3ForTesting } from '../blockchain/web3';
 setupFakeWeb3ForTesting();

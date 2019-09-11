@@ -100,7 +100,7 @@ export function realPurchasingPowerMarginable(
       sellOffers.length,
       collRatio.toString()
     );
-    
+
     const [bought, cashLeft, offersLeft] = eat(cash, sellOffers);
     sellOffers = offersLeft;
     amount = amount.plus(bought);

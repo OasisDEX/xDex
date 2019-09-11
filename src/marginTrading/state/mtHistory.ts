@@ -1,6 +1,6 @@
 import apolloBoost, { gql } from 'apollo-boost';
 import { BigNumber } from 'bignumber.js';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 import { fromPromise } from 'rxjs/internal/observable/fromPromise';
 import { map } from 'rxjs/operators';
 

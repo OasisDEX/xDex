@@ -21,98 +21,98 @@ import { findMarginableAsset, MTAccountState } from '../state/mtAccount';
 import { Message, MessageKind, MTSimpleFormState, ViewKind } from './mtOrderForm';
 import * as styles from './mtOrderFormView.scss';
 
-const DevInfos = ({ value }: { value: MTSimpleFormState }) => {
-  //  assetKind: AssetKind.marginable;
-  // urnBalance: BigNumber;
-  // debt: BigNumber;
-  // referencePrice: BigNumber;
-  // minCollRatio: BigNumber;
-  // safeCollRatio: BigNumber;
-  // fee: BigNumber;
-
-  let balance = null;
-  let debt = null;
-  let cash = null;
-  let referencePrice = null;
-  let leverage = null;
-  let urnBalance = null;
-
-  if (value.mta && value.mta.state === MTAccountState.setup) {
-    const ma = findMarginableAsset(value.baseToken, value.mta);
-    balance = ma!.balance;
-    debt = ma!.debt;
-    cash = ma!.dai;
-    urnBalance = ma!.urnBalance;
-    referencePrice = ma!.referencePrice;
-    leverage = balance.times(referencePrice).div(balance.times(referencePrice).minus(debt));
-  }
-  return (<div style={{
-    position: 'fixed',
-    top: '1em',
-    right: '1em',
-    background: 'rgba(20,20,20, 0.6)',
-    padding: '5px',
-    zIndex: 1000
-  }}>
-      <h3>Internals:</h3>
-      progress:
-      {value.progress}
-      <br/>
-      total:
-      {value.total && value.total.toString()}
-      <br/>
-      price:
-      {value.price && value.price.toString()}
-      <br/>
-      DAI:
-      {cash && cash.toString()}
-      <br/>
-      realPurchasingPower:
-      {value.realPurchasingPower && value.realPurchasingPower.toString()}
-      <br/>
-      collRatio:
-      {value.collRatio && value.collRatio.toFormat(2)}
-      <br/>
-      collRatioPost:
-      {value.collRatioPost && value.collRatioPost.toFormat(2)}
-      <br/>
-      liquidationPrice:
-      {value.liquidationPrice && value.liquidationPrice.toFormat(2)}
-      <br/>
-      liquidationPricePost:
-      {value.liquidationPricePost && value.liquidationPricePost.toFormat(2)}
-      <br/>
-      MA:
-      <br/>
-      <React.Fragment>
-        Balance:
-        {balance && balance.toString()}
-        <br/>
-        Debt:
-        {debt && debt.toString()}
-        <br/>
-        urnBalance:
-        {urnBalance && urnBalance.toString()}
-        <br/>
-        referencePrice:
-        {referencePrice && referencePrice.toString()}
-        <br/>
-        LEVERAGE:
-        {leverage && leverage.toString()}
-        <br/>
-      </React.Fragment> : null
-
-      <br/>
-      Plan:
-      {value.plan &&
-      <pre>{JSON.stringify(value.plan, null, 4)}</pre>}
-      <br/>
-      Messages:
-      {value.messages &&
-      <pre>{JSON.stringify(value.messages, null, 4)}</pre>}
-    </div>
-  );
-};
+// const DevInfos = ({ value }: { value: MTSimpleFormState }) => {
+//   //  assetKind: AssetKind.marginable;
+//   // urnBalance: BigNumber;
+//   // debt: BigNumber;
+//   // referencePrice: BigNumber;
+//   // minCollRatio: BigNumber;
+//   // safeCollRatio: BigNumber;
+//   // fee: BigNumber;
+//
+//   let balance = null;
+//   let debt = null;
+//   let cash = null;
+//   let referencePrice = null;
+//   let leverage = null;
+//   let urnBalance = null;
+//
+//   if (value.mta && value.mta.state === MTAccountState.setup) {
+//     const ma = findMarginableAsset(value.baseToken, value.mta);
+//     balance = ma!.balance;
+//     debt = ma!.debt;
+//     cash = ma!.dai;
+//     urnBalance = ma!.urnBalance;
+//     referencePrice = ma!.referencePrice;
+//     leverage = balance.times(referencePrice).div(balance.times(referencePrice).minus(debt));
+//   }
+//   return (<div style={{
+//     position: 'fixed',
+//     top: '1em',
+//     right: '1em',
+//     background: 'rgba(20,20,20, 0.6)',
+//     padding: '5px',
+//     zIndex: 1000
+//   }}>
+//       <h3>Internals:</h3>
+//       progress:
+//       {value.progress}
+//       <br/>
+//       total:
+//       {value.total && value.total.toString()}
+//       <br/>
+//       price:
+//       {value.price && value.price.toString()}
+//       <br/>
+//       DAI:
+//       {cash && cash.toString()}
+//       <br/>
+//       realPurchasingPower:
+//       {value.realPurchasingPower && value.realPurchasingPower.toString()}
+//       <br/>
+//       collRatio:
+//       {value.collRatio && value.collRatio.toFormat(2)}
+//       <br/>
+//       collRatioPost:
+//       {value.collRatioPost && value.collRatioPost.toFormat(2)}
+//       <br/>
+//       liquidationPrice:
+//       {value.liquidationPrice && value.liquidationPrice.toFormat(2)}
+//       <br/>
+//       liquidationPricePost:
+//       {value.liquidationPricePost && value.liquidationPricePost.toFormat(2)}
+//       <br/>
+//       MA:
+//       <br/>
+//       <React.Fragment>
+//         Balance:
+//         {balance && balance.toString()}
+//         <br/>
+//         Debt:
+//         {debt && debt.toString()}
+//         <br/>
+//         urnBalance:
+//         {urnBalance && urnBalance.toString()}
+//         <br/>
+//         referencePrice:
+//         {referencePrice && referencePrice.toString()}
+//         <br/>
+//         LEVERAGE:
+//         {leverage && leverage.toString()}
+//         <br/>
+//       </React.Fragment> : null
+//
+//       <br/>
+//       Plan:
+//       {value.plan &&
+//       <pre>{JSON.stringify(value.plan, null, 4)}</pre>}
+//       <br/>
+//       Messages:
+//       {value.messages &&
+//       <pre>{JSON.stringify(value.messages, null, 4)}</pre>}
+//     </div>
+//   );
+// };
 
 export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
 

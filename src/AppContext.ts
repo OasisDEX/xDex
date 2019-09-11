@@ -24,7 +24,6 @@ import {
   AssetsOverviewActionProps,
   AssetsOverviewExtraProps,
 } from './balances-nomt/AssetOverviewView';
-import { createAllowances$ } from './balances-nomt/balances';
 // import {
 //   Balances,
 //   CombinedBalances,
@@ -159,7 +158,7 @@ export function setupAppContext() {
   const mtBalances$ = balancesMT.createCombinedBalances(
     etherBalance$,
     balances$,
-    createAllowances$(context$, initializedAccount$, onEveryBlock$),
+    balancesNoMT.createAllowances$(context$, initializedAccount$, onEveryBlock$),
     mta$
   );
 

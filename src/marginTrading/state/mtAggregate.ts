@@ -14,6 +14,7 @@ import { web3 } from '../../blockchain/web3';
 
 import { ReadCalls, ReadCalls$ } from '../../blockchain/calls/calls';
 
+import { isEqual } from 'lodash';
 import {
   MTAccount,
   MTAccountNotSetup,
@@ -24,7 +25,6 @@ import {
 import { calculateMTAccount, } from './mtCalculate';
 import { createRawMTHistoryFromCache } from './mtHistory';
 import { getCashCore, getMarginableCore, getNonMarginableCore } from './mtTestUtils';
-import { isEqual } from 'lodash';
 
 export function aggregateMTAccountState(
   proxy: any,
