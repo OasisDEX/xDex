@@ -92,7 +92,15 @@ export function realPurchasingPowerMarginable(
   let isSafe = debt.gt(zero) ? collRatio.gt(ma.safeCollRatio) : true;
 
   cash = availableDebt;
-  while (isSafe && cash.gt(zero) && sellOffers.length > 0) {
+  while (isSafe && cash.gt(one) && sellOffers.length > 0) {
+    console.log(
+      purchasingPower.toString(),
+      isSafe,
+      cash.toString(),
+      sellOffers.length,
+      collRatio.toString()
+    );
+    
     const [bought, cashLeft, offersLeft] = eat(cash, sellOffers);
     sellOffers = offersLeft;
     amount = amount.plus(bought);
