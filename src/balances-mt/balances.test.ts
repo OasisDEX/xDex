@@ -21,15 +21,19 @@ const defaultMta = getMTAccount({
 
 const defaultBalances: Balances = {
   DAI: new BigNumber(0),
-  MKR: new BigNumber(0),
-  DGX: new BigNumber(0),
+  ZRX: new BigNumber(0),
+  REP: new BigNumber(0),
+  BAT: new BigNumber(0),
+  DGD: new BigNumber(0),
   WETH: new BigNumber(0),
 };
 
 const defaultAllowances: Allowances = {
   DAI: true,
-  MKR: true,
-  DGX: true,
+  ZRX: true,
+  REP: true,
+  BAT: true,
+  DGD: true,
   WETH: true,
 };
 

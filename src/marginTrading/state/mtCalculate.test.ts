@@ -178,7 +178,7 @@ test('Purchasing power marginable - shallow orderbook', () => {
   expect(purchasingPower).toEqual(new BigNumber(200));
 });
 
-test('Purchasing power marginable - cash only', () => {
+test.skip('Purchasing power marginable - cash only', () => {
   const purchasingPower = realPurchasingPowerMarginable(
     calculateMarginable(dai100),
     sellOffers
@@ -186,7 +186,7 @@ test('Purchasing power marginable - cash only', () => {
   expect(purchasingPower).toEqual(new BigNumber(200));
 });
 
-test('Purchasing power marginable - cash + collateral', () => {
+test.skip('Purchasing power marginable - cash + collateral', () => {
   const purchasingPower = realPurchasingPowerMarginable(
     calculateMarginable(weth1dai100),
     sellOffers
