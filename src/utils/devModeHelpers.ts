@@ -1,6 +1,6 @@
 import { BigNumber } from 'bignumber.js';
 import { identity, Observable, of } from 'rxjs';
-import { first, flatMap } from 'rxjs/operators';
+import { first, flatMap, tap } from 'rxjs/operators';
 import { Calls$ } from '../blockchain/calls/calls';
 import { NetworkConfig } from '../blockchain/config';
 import { web3 } from '../blockchain/web3';
@@ -71,6 +71,51 @@ export function pluginDevModeHelpers(
       )
     ).subscribe(identity);
   };
+
+  (window as any).makeLinearOffers = (
+    baseToken: string, quoteToken: string,
+    midPrice: number, delta: number, baseAmount: number, count: number,
+  ) =>
+    calls$.pipe(
+      first(),
+      flatMap(calls =>
+        createProxyAddress$(context$, initializedAccount$, onEveryBlock$).pipe(
+          first(),
+          tap(proxyAddress => console.log({ proxyAddress })),
+          flatMap(proxyAddress => {
+            if (!proxyAddress) {
+              console.log('Proxy not found!');
+              return of();
+            }
+            return calls.makeLinearOffers(
+              { baseToken, quoteToken, midPrice, delta, baseAmount, count, proxyAddress },
+            );
+          }),
+        ),
+      )
+    ).subscribe(identity);
+
+  (window as any).cancelAllOffers = (
+    baseToken: string, quoteToken: string,
+  ) =>
+    calls$.pipe(
+      first(),
+      flatMap(calls =>
+        createProxyAddress$(context$, initializedAccount$, onEveryBlock$).pipe(
+          first(),
+          tap(proxyAddress => console.log({ proxyAddress })),
+          flatMap(proxyAddress => {
+            if (!proxyAddress) {
+              console.log('Proxy not found!');
+              return of();
+            }
+            return calls.cancelAllOffers(
+              { baseToken, quoteToken, proxyAddress },
+            );
+          }),
+        ),
+      )
+    ).subscribe(identity);
 
   console.log('Dev mode helpers installed!');
 }

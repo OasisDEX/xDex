@@ -13,6 +13,7 @@ import * as eth from './abi/ds-eth-token.abi.json';
 import * as dsProxyFactory from './abi/ds-proxy-factory.abi.json';
 import * as dsValue from './abi/ds-value.abi.json';
 import * as erc20 from './abi/erc20.abi.json';
+import * as liquidityProvider from './abi/liquidity-provider.abi.json';
 import * as otc from './abi/matching-market.abi.json';
 import * as mcdCat from './abi/mcd-cat.abi.json';
 import * as mcdFlipper from './abi/mcd-flipper.abi.json';
@@ -267,7 +268,10 @@ const protoMain = {
     apiUrl: 'http://api.etherscan.io/api',
     apiKey: '34JVYM6RPM3J1SK8QXQFRNSHD9XG4UHXVU',
   },
-  taxProxyRegistries: ['0xaa63c8683647ef91b3fdab4b4989ee9588da297b']
+  taxProxyRegistries: ['0xaa63c8683647ef91b3fdab4b4989ee9588da297b'],
+  get liquidityProvider() {
+    return load(liquidityProvider, '');
+  },
 };
 
 export type NetworkConfig = typeof protoMain;
@@ -292,7 +296,8 @@ const kovan: NetworkConfig = {
   get tokens() {
     return asMap('token', [
       loadToken('WETH', eth, '0xd0a1e359811322d97991e03f863a0c30c2cf029c'),
-      loadToken('DAI', erc20, '0xc4375b7de8af5a38a93548eb8453a498222c4ff2'), // NOT MCD_DAI
+      // loadToken('DAI', erc20, '0xc4375b7de8af5a38a93548eb8453a498222c4ff2'), // NOT MCD_DAI
+      loadToken('DAI', erc20, '0xb64964e9c0b658aa7b448cdbddfcdccab26cc584'),
       // loadToken('MKR', erc20, '0xaaf64bfcc32d0f15873a02163e7e500671a4ffcd'),
       // loadToken('DGD', erc20, '0x62aeec5fb140bb233b1c5612a8747ca1dc56dc1b'),
       // loadToken('REP', erc20, '0xc7aa227823789e363f29679f23f7e8f6d9904a9b'),
@@ -348,7 +353,10 @@ const kovan: NetworkConfig = {
     apiUrl: 'http://api-kovan.etherscan.io/api',
     apiKey: '34JVYM6RPM3J1SK8QXQFRNSHD9XG4UHXVU',
   },
-  taxProxyRegistries: ['0x64a436ae831c1672ae81f674cab8b6775df3475c']
+  taxProxyRegistries: ['0x64a436ae831c1672ae81f674cab8b6775df3475c'],
+  get liquidityProvider() {
+    return load(liquidityProvider, '0x7fb88dae8aaa2904bce126694ed50942e14bb22e');
+  },
 };
 
 const localnet: NetworkConfig =   {
@@ -426,7 +434,10 @@ const localnet: NetworkConfig =   {
     apiUrl: 'http://api-kovan.etherscan.io/api',
     apiKey: '34JVYM6RPM3J1SK8QXQFRNSHD9XG4UHXVU',
   },
-  taxProxyRegistries: []
+  taxProxyRegistries: [],
+  get liquidityProvider() {
+    return load(liquidityProvider, '0xfD3B084F594Eaf6bF32bF41B7bA2f74779129a7d');
+  },
 };
 
 export const networks = asMap('id', [main, kovan, localnet]);
