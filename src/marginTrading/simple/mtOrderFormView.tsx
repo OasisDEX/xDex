@@ -7,11 +7,7 @@ import * as formStyles from '../../exchange/offerMake/OfferMakeForm.scss';
 import { OfferType } from '../../exchange/orderbook/orderbook';
 import { BigNumberInput } from '../../utils/bigNumberInput/BigNumberInput';
 import { FormChangeKind } from '../../utils/form';
-import {
-  formatAmount,
-  formatPrecision,
-  formatPrice
-} from '../../utils/formatters/format';
+import { formatAmount, formatPrecision, formatPrice } from '../../utils/formatters/format';
 import { FormatPercent, Money } from '../../utils/formatters/Formatters';
 import { Button, ButtonGroup } from '../../utils/forms/Buttons';
 import { ErrorMessage } from '../../utils/forms/ErrorMessage';
@@ -58,63 +54,63 @@ const DevInfos = ({ value }: { value: MTSimpleFormState }) => {
     padding: '5px',
     zIndex: 1000
   }}>
-    <h3>Internals:</h3>
-    progress:
-    {value.progress}
-    <br/>
-    total:
-    {value.total && value.total.toString()}
-    <br/>
-    price:
-    {value.price && value.price.toString()}
-    <br/>
-    DAI:
-    {cash && cash.toString()}
-    <br/>
-    realPurchasingPower:
-    {value.realPurchasingPower && value.realPurchasingPower.toString()}
-    <br/>
-    collRatio:
-    {value.collRatio && value.collRatio.toFormat(2)}
-    <br/>
-    collRatioPost:
-    {value.collRatioPost && value.collRatioPost.toFormat(2)}
-    <br/>
-    liquidationPrice:
-    {value.liquidationPrice && value.liquidationPrice.toFormat(2)}
-    <br/>
-    liquidationPricePost:
-    {value.liquidationPricePost && value.liquidationPricePost.toFormat(2)}
-    <br/>
-    MA:
-    <br/>
-        <React.Fragment>
-          Balance:
-          {balance && balance.toString()}
-          <br/>
-          Debt:
-          {debt && debt.toString()}
-          <br/>
-          urnBalance:
-          {urnBalance && urnBalance.toString()}
-          <br/>
-          referencePrice:
-          {referencePrice && referencePrice.toString()}
-          <br/>
-          LEVERAGE:
-          {leverage && leverage.toString()}
-          <br/>
-        </React.Fragment> : null
+      <h3>Internals:</h3>
+      progress:
+      {value.progress}
+      <br/>
+      total:
+      {value.total && value.total.toString()}
+      <br/>
+      price:
+      {value.price && value.price.toString()}
+      <br/>
+      DAI:
+      {cash && cash.toString()}
+      <br/>
+      realPurchasingPower:
+      {value.realPurchasingPower && value.realPurchasingPower.toString()}
+      <br/>
+      collRatio:
+      {value.collRatio && value.collRatio.toFormat(2)}
+      <br/>
+      collRatioPost:
+      {value.collRatioPost && value.collRatioPost.toFormat(2)}
+      <br/>
+      liquidationPrice:
+      {value.liquidationPrice && value.liquidationPrice.toFormat(2)}
+      <br/>
+      liquidationPricePost:
+      {value.liquidationPricePost && value.liquidationPricePost.toFormat(2)}
+      <br/>
+      MA:
+      <br/>
+      <React.Fragment>
+        Balance:
+        {balance && balance.toString()}
+        <br/>
+        Debt:
+        {debt && debt.toString()}
+        <br/>
+        urnBalance:
+        {urnBalance && urnBalance.toString()}
+        <br/>
+        referencePrice:
+        {referencePrice && referencePrice.toString()}
+        <br/>
+        LEVERAGE:
+        {leverage && leverage.toString()}
+        <br/>
+      </React.Fragment> : null
 
-    <br/>
-    Plan:
-    {value.plan &&
-    <pre>{JSON.stringify(value.plan, null, 4)}</pre>}
-    <br/>
-    Messages:
-    {value.messages &&
-    <pre>{JSON.stringify(value.messages, null, 4)}</pre>}
-  </div>
+      <br/>
+      Plan:
+      {value.plan &&
+      <pre>{JSON.stringify(value.plan, null, 4)}</pre>}
+      <br/>
+      Messages:
+      {value.messages &&
+      <pre>{JSON.stringify(value.messages, null, 4)}</pre>}
+    </div>
   );
 };
 
@@ -230,14 +226,17 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
           {/*{ this.orderType() }*/}
           {/*{ this.balanceButtons() }*/}
           {/*{ this.purchasingPower() }*/}
-          {this.purchasingPower2()}
-          {this.accountBalance()}
-          {this.leverage()}
-          {/*{ this.collateralizationRatio() }*/}
-          {this.liquidationPrice()}
-          {this.price2()}
-          {this.slippageLimit()}
-          {this.interestRate()}
+          <div className={styles.summaryBox}>
+            {this.purchasingPower2()}
+            {this.accountBalance()}
+            {/*{this.leverage()}*/}
+            {/*{ this.collateralizationRatio() }*/}
+            {this.liquidationPrice()}
+            {this.price2()}
+            {this.slippageLimit()}
+            {/*{this.interestRate()}*/}
+          </div>
+          {this.feesBox()}
           <Hr color="dark" className={styles.hrMargin}/>
           {this.amount()}
           {/*{ this.price() }*/}
@@ -257,21 +256,21 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
       </PanelHeader>
       <Hr color="dark" className={styles.hrSmallMargin}/>
       <PanelBody>
-          <div className={formStyles.pickerOrderType}>
-            <Radio
-              dataTestId="fillOrKill"
-              name="orderType"
-              value="direct"
-              defaultChecked={true}
-            >
-              Average price fill or kill order type
-            </Radio>
-            <Muted className={formStyles.pickerDescription}>
-              The order is executed in its entirety such that the average fill price is
-              the limit price or better, otherwise it is canceled
-            </Muted>
-            { this.slippageLimitForm() }
-          </div>
+        <div className={formStyles.pickerOrderType}>
+          <Radio
+            dataTestId="fillOrKill"
+            name="orderType"
+            value="direct"
+            defaultChecked={true}
+          >
+            Average price fill or kill order type
+          </Radio>
+          <Muted className={formStyles.pickerDescription}>
+            The order is executed in its entirety such that the average fill price is
+            the limit price or better, otherwise it is canceled
+          </Muted>
+          { this.slippageLimitForm() }
+        </div>
       </PanelBody>
       <PanelFooter className={styles.settingsFooter}>
         <Button
@@ -400,16 +399,16 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
     return (
       <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
         <div className={styles.orderSummaryLabel}>
-          Liquidation price
+          Liqu. price
         </div>
         <div className={classnames(styles.orderSummaryValue, styles.orderSummaryValuePositive)}>
           {
             this.props.liquidationPrice && !this.props.liquidationPrice.isNaN() ?
-            <Money
-              value={this.props.liquidationPrice}
-              token="USD"
-              fallback="-"
-            /> : <span>-</span>
+              <Money
+                value={this.props.liquidationPrice}
+                token="USD"
+                fallback="-"
+              /> : <span>-</span>
           }
           {
             this.props.liquidationPricePost &&
@@ -528,20 +527,58 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
     );
   }
 
-  private interestRate() {
+  // private interestRate() {
+  //   return (
+  //     <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
+  //       <div className={styles.orderSummaryLabel}>
+  //         Interest rate (APR)
+  //       </div>
+  //       <div className={styles.orderSummaryValue}>
+  //         {
+  //           this.props.apr && <FormatPercent
+  //             value={this.props.apr}
+  //             fallback="-"
+  //             multiply={false}
+  //           />
+  //         }
+  //       </div>
+  //     </div>
+  //   );
+  // }
+
+  private feesBox() {
     return (
-      <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
-        <div className={styles.orderSummaryLabel}>
-          Interest rate (APR)
+      <div className={styles.InfoRow}>
+        <div className={styles.InfoBox}>
+          <div className={styles.InfoRowLabel}>Leverage</div>
+          <div>
+            {
+              (this.props.leverage && !this.props.leverage.isNaN()) ?
+                <React.Fragment>{ formatPrecision(this.props.leverage, 1) }x</React.Fragment>
+                : <span>-</span>
+            }
+            {this.props.leveragePost && <React.Fragment>
+              <span className={styles.transitionArrow}/>
+              {formatPrecision(this.props.leveragePost, 1)}x
+            </React.Fragment>
+            }
+          </div>
         </div>
-        <div className={styles.orderSummaryValue}>
-          {
-            this.props.apr && <FormatPercent
-              value={this.props.apr}
-              fallback="-"
-              multiply={false}
-            />
-          }
+        <div className={styles.InfoBox}>
+          <div className={styles.InfoRowLabel}>Liqu. Fee</div>
+          <div>15 %</div>
+        </div>
+        <div className={styles.InfoBox}>
+          <div className={styles.InfoRowLabel}>Interest Rate</div>
+          <div>
+            {
+              this.props.apr && <FormatPercent
+                value={this.props.apr}
+                fallback="-"
+                multiply={false}
+              />
+            }
+          </div>
         </div>
       </div>
     );
@@ -572,28 +609,16 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
   // }
 
   private purchasingPower2() {
-    const baseTokenAsset = this.props.mta &&
-      this.props.mta.state === MTAccountState.setup && (
-        this.props.mta.marginableAssets.find(a => a.name === this.props.baseToken) ||
-        this.props.mta.nonMarginableAssets.find(a => a.name === this.props.baseToken)
-      );
-
-    // if (this.props.mta) {
-    //   console.log('this.props.mta.state', this.props.mta);
-    //   console.log('this.props.mta.state', this.props.mta.state);
-    // }
     return <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
       <div className={styles.orderSummaryLabel}>
         Purchasing power
       </div>
       <div className={styles.orderSummaryValue}>
         {
-          baseTokenAsset &&
-          <Money
-            value={this.props.realPurchasingPower}
-            token={this.props.quoteToken}
-            fallback="-"
-          />
+          this.props.realPurchasingPower &&
+          <>
+            {formatPrecision(this.props.realPurchasingPower, 2)} {this.props.quoteToken}
+          </>
         }
       </div>
     </div>;
@@ -601,42 +626,38 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
 
   private accountBalance() {
     const baseTokenAsset = findMarginableAsset(this.props.baseToken, this.props.mta);
-    return <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
-      <div className={styles.orderSummaryLabel}>
-        Account Balance
+    const balancePrecision = baseTokenAsset ? formatPrecision(baseTokenAsset.balance, 2) : '-';
+    return (
+      <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
+        <div className={styles.orderSummaryLabel}>
+          Balance
+        </div>
+        <div className={styles.orderSummaryValue}>
+          {balancePrecision} {this.props.baseToken}
+        </div>
       </div>
-      <div className={styles.orderSummaryValue}>
-        {
-          baseTokenAsset &&
-          <Money
-            value={baseTokenAsset.balance}
-            token={this.props.baseToken}
-            fallback="-"
-          />
-        }
-      </div>
-    </div>;
+    );
   }
 
-  private leverage() {
-    return <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
-      <div className={styles.orderSummaryLabel}>
-        Current Leverage
-      </div>
-      <div className={styles.orderSummaryValue}>
-        {
-          (this.props.leverage && !this.props.leverage.isNaN()) ?
-          <React.Fragment>{ formatPrecision(this.props.leverage, 1) }x</React.Fragment>
-            : <span>-</span>
-        }
-        {this.props.leveragePost && <React.Fragment>
-          <span className={styles.transitionArrow}/>
-          {formatPrecision(this.props.leveragePost, 1)}x
-        </React.Fragment>
-        }
-      </div>
-    </div>;
-  }
+  // private leverage() {
+  //   return <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
+  //     <div className={styles.orderSummaryLabel}>
+  //       Current Leverage
+  //     </div>
+  //     <div className={styles.orderSummaryValue}>
+  //       {
+  //         (this.props.leverage && !this.props.leverage.isNaN()) ?
+  //           <React.Fragment>{ formatPrecision(this.props.leverage, 1) }x</React.Fragment>
+  //           : <span>-</span>
+  //       }
+  //       {this.props.leveragePost && <React.Fragment>
+  //         <span className={styles.transitionArrow}/>
+  //         {formatPrecision(this.props.leveragePost, 1)}x
+  //       </React.Fragment>
+  //       }
+  //     </div>
+  //   </div>;
+  // }
 
   private amount() {
     return (
