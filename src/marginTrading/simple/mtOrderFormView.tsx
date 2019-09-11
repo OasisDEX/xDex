@@ -246,7 +246,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
           {this.proceedButton()}
         </form>
       </PanelBody>
-      {this.props && <DevInfos value={this.props as MTSimpleFormState}/>}
+      {/*{this.props && <DevInfos value={this.props as MTSimpleFormState}/>}*/}
     </>
   )
 

@@ -9,7 +9,7 @@ import {
   first,
   last,
   map,
-  scan, switchMap
+  scan, shareReplay, switchMap
 } from 'rxjs/operators';
 import { Allowances } from '../balances-nomt/balances';
 
@@ -189,6 +189,7 @@ export function createCombinedBalances(
   mta$: Observable<MTAccount>): Observable<CombinedBalances> {
   return combineLatest(etherBalance$$, balances$$, allowances$, mta$).pipe(
     map(([etherBalance, balances, allowances, mta]) =>
-      combineBalances(etherBalance, balances, allowances, mta))
+      combineBalances(etherBalance, balances, allowances, mta)),
+    shareReplay(1)
   );
 }

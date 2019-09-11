@@ -308,7 +308,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
         <InputGroupAddon border="right">Asset</InputGroupAddon>
         <Select value={this.props.ilk} onChange={this.ilkChange} style={{ width: '100%' }}>
           <option hidden={true} />
-          { (marginableAssets || []).map(asset => <option key="asset.name">{asset.name}</option>)}
+          { (marginableAssets || []).map(asset => <option key={asset.name}>{asset.name}</option>)}
         </Select>
       </InputGroup>
     );

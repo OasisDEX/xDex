@@ -97,6 +97,7 @@ export function createDustLimits$(context$: Observable<NetworkConfig>): Observab
     switchMap(([context]) =>
       forkJoin(
         Object.keys(tokens).filter(name => name !== 'ETH').map((token: string) => {
+          console.log('token', token);
           return bindNodeCallback(context.otc.contract.getMinSell as Dust)(
            context.tokens[token].address
           ).pipe(

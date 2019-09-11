@@ -759,14 +759,14 @@ function prepareSubmit(
 
 function isReadyToProceed(state: MTSimpleFormState): MTSimpleFormState {
 
-  console.log(
-    'readyToProceed',
-    state.messages.length,
-    state.plan,
-    state.gasEstimationStatus,
-    state.messages
-  );
-
+  // console.log(
+  //   'readyToProceed',
+  //   state.messages.length,
+  //   state.plan,
+  //   state.gasEstimationStatus,
+  //   state.messages
+  // );
+  //
   if (
     state.messages.length === 0 &&
     state.plan && !isImpossible(state.plan) && state.plan.length !== 0 &&

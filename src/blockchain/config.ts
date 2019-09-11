@@ -1,12 +1,35 @@
 import { fromPairs, memoize, zip } from 'lodash';
 
 import { TradingPair } from '../exchange/tradingPair/tradingPair';
+import batCircleSvg from '../icons/coins/bat-circle.svg';
+import batColorSvg from '../icons/coins/bat-color.svg';
+import batSvg from '../icons/coins/bat.svg';
 import daiCircleSvg from '../icons/coins/dai-circle.svg';
 import daiColorSvg from '../icons/coins/dai-color.svg';
+// import daiInverseSvg from '../icons/coins/dai-inverse.svg';
 import daiSvg from '../icons/coins/dai.svg';
+import dgdCircleSvg from '../icons/coins/dgd-circle.svg';
+import dgdColorSvg from '../icons/coins/dgd-color.svg';
+import dgdSvg from '../icons/coins/dgd.svg';
 import ethCircleSvg from '../icons/coins/eth-circle.svg';
+// import ethColorInverseSvg from '../icons/coins/eth-color-inverse.svg';
 import ethColorSvg from '../icons/coins/eth-color.svg';
+// import ethInverseSvg from '../icons/coins/eth-inverse.svg';
 import ethSvg from '../icons/coins/eth.svg';
+// import mkrInverseSvg from '../icons/coins/mkr-inverse.svg';
+// import mkrSvg from '../icons/coins/mkr.svg';
+import repCircleSvg from '../icons/coins/rep-circle.svg';
+import repColorSvg from '../icons/coins/rep-color.svg';
+import repSvg from '../icons/coins/rep.svg';
+// import usdcCircleSvg from '../icons/coins/usdc-circle.svg';
+// import usdcColorSvg from '../icons/coins/usdc-color.svg';
+// import usdcSvg from '../icons/coins/usdc.svg';
+// import wbtcCircleSvg from '../icons/coins/wbtc-circle.svg';
+// import wbtcColorSvg from '../icons/coins/wbtc-color.svg';
+// import wbtcSvg from '../icons/coins/wbtc.svg';
+import zrxCircleSvg from '../icons/coins/zrx-circle.svg';
+import zrxColorSvg from '../icons/coins/zrx-color.svg';
+import zrxSvg from '../icons/coins/zrx.svg';
 
 import { SvgImageSimple } from '../utils/icons/utils';
 import * as eth from './abi/ds-eth-token.abi.json';
@@ -25,13 +48,14 @@ import { web3 } from './web3';
 
 export const tradingPairs: TradingPair[] = [
   { base: 'WETH', quote: 'DAI' },
-  // ...process.env.REACT_APP_OASIS_DEX_ENABLED !== '1' ? [] : [
+  ...process.env.REACT_APP_OASIS_DEX_ENABLED !== '1' ? [] : [
     // { base: 'MKR', quote: 'DAI' },
     // { base: 'MKR', quote: 'WETH' },
-    // { base: 'DGD', quote: 'DAI' },
-    // { base: 'REP', quote: 'DAI' },
-    // { base: 'ZRX', quote: 'DAI' }
-  // ]
+    { base: 'DGD', quote: 'DAI' },
+    { base: 'REP', quote: 'DAI' },
+    { base: 'ZRX', quote: 'DAI' },
+    { base: 'BAT', quote: 'DAI' }
+  ]
 ];
 
 function asMap<D>(key: string, data: D[]): { [key: string]: D } {
@@ -87,7 +111,7 @@ export const tokens = asMap('symbol', [
     iconCircle: SvgImageSimple(daiCircleSvg),
     iconColor: SvgImageSimple(daiColorSvg),
   },
-  // ...process.env.REACT_APP_OASIS_DEX_ENABLED !== '1' ? [] : [
+  ...process.env.REACT_APP_OASIS_DEX_ENABLED !== '1' ? [] : [
     // {
     //   symbol: 'MKR',
     //   precision: 18,
@@ -112,58 +136,62 @@ export const tokens = asMap('symbol', [
     //   iconCircle: SvgImageSimple(dgdCircleSvg),
     //   iconColor: SvgImageSimple(dgdColorSvg),
     // },
-    // {
-    //   symbol: 'DGD',
-    //   precision: 9,
-    //   digits: 5,
-    //   digitsInstant: 3,
-    //   safeCollRatio: 1.5,
-    //   maxSell: '1000000000000000',
-    //   name: 'DigixDAO',
-    //   icon: SvgImageSimple(dgdSvg),
-    // // iconInverse: SvgImageSimple(dgdInverseSvg),
-    //   iconCircle: SvgImageSimple(dgdCircleSvg),
-    //   iconColor: SvgImageSimple(dgdColorSvg),
-    // },
-    // {
-    //   symbol: 'REP',
-    //   precision: 18,
-    //   digits: 5,
-    //   digitsInstant: 3,
-    //   safeCollRatio: 1.5,
-    //   maxSell: '1000000000000000',
-    //   name: 'Augur',
-    //   icon: SvgImageSimple(repSvg),
-    // // iconInverse: SvgImageSimple(repInverseSvg),
-    //   iconCircle: SvgImageSimple(repCircleSvg),
-    //   iconColor: SvgImageSimple(repColorSvg),
-    // },
-    // {
-    //   symbol: 'ZRX',
-    //   precision: 18,
-    //   digits: 5,
-    //   digitsInstant: 3,
-    //   safeCollRatio: 1.5,
-    //   maxSell: '1000000000000000',
-    //   name: '0x',
-    //   icon: SvgImageSimple(zrxSvg),
-    // // iconInverse: SvgImageSimple(mkrInverseSvg),
-    //   iconCircle: SvgImageSimple(zrxCircleSvg),
-    //   iconColor: SvgImageSimple(zrxColorSvg),
-    // },
-    // {
-    //   symbol: 'BAT',
-    //   precision: 18,
-    //   digits: 5,
-    //   digitsInstant: 3,
-    //   safeCollRatio: 1.5,
-    //   maxSell: '1000000000000000',
-    //   name: 'Basic Attention Token',
-    //   icon: SvgImageSimple(batSvg),
-    // // iconInverse: SvgImageSimple(batInverseSvg),
-    //   iconCircle: SvgImageSimple(batCircleSvg),
-    //   iconColor: SvgImageSimple(batColorSvg),
-    // },
+    {
+      symbol: 'DGD',
+      precision: 9,
+      digits: 5,
+      digitsInstant: 3,
+      safeCollRatio: 1.5,
+      maxSell: '1000000000000000',
+      name: 'DigixDAO',
+      icon: SvgImageSimple(dgdSvg),
+    // iconInverse: SvgImageSimple(dgdInverseSvg),
+      iconCircle: SvgImageSimple(dgdCircleSvg),
+      iconColor: SvgImageSimple(dgdColorSvg),
+      assetKind: AssetKind.marginable,
+    },
+    {
+      symbol: 'REP',
+      precision: 18,
+      digits: 5,
+      digitsInstant: 3,
+      safeCollRatio: 1.5,
+      maxSell: '1000000000000000',
+      name: 'Augur',
+      icon: SvgImageSimple(repSvg),
+    // iconInverse: SvgImageSimple(repInverseSvg),
+      iconCircle: SvgImageSimple(repCircleSvg),
+      iconColor: SvgImageSimple(repColorSvg),
+      assetKind: AssetKind.marginable,
+    },
+    {
+      symbol: 'ZRX',
+      precision: 18,
+      digits: 5,
+      digitsInstant: 3,
+      safeCollRatio: 1.5,
+      maxSell: '1000000000000000',
+      name: '0x',
+      icon: SvgImageSimple(zrxSvg),
+    // iconInverse: SvgImageSimple(mkrInverseSvg),
+      iconCircle: SvgImageSimple(zrxCircleSvg),
+      iconColor: SvgImageSimple(zrxColorSvg),
+      assetKind: AssetKind.marginable,
+    },
+    {
+      symbol: 'BAT',
+      precision: 18,
+      digits: 5,
+      digitsInstant: 3,
+      safeCollRatio: 1.5,
+      maxSell: '1000000000000000',
+      name: 'Basic Attention Token',
+      icon: SvgImageSimple(batSvg),
+    // iconInverse: SvgImageSimple(batInverseSvg),
+      iconCircle: SvgImageSimple(batCircleSvg),
+      iconColor: SvgImageSimple(batColorSvg),
+      assetKind: AssetKind.marginable,
+    },
   // {
   //   symbol: 'USDC',
   //   precision: 6,
@@ -194,6 +222,7 @@ export const tokens = asMap('symbol', [
   //   assetKind: AssetKind.marginable,
   //   // address: 0x2260fac5e5542a773aa44fbcfedf7c193bc2c599
   // }]
+  ]
 ]);
 
 const load = memoize(
@@ -216,8 +245,10 @@ const protoMain = {
   label: 'Mainnet',
   thresholds: {
     ethdai: 0.02,
-    mkrdai: 0.01,
-    mkreth: 0.01
+    dgddai: 0.02,
+    repdai: 0.02,
+    zrxdai: 0.02,
+    batdai: 0.02,
   },
   safeConfirmations: 0,
   avgBlocksPerDay: 5760 * 1.05,
@@ -284,8 +315,10 @@ const kovan: NetworkConfig = {
   label: 'Kovan',
   thresholds: {
     ethdai: 0.025,
-    mkrdai: 0.015,
-    mkreth: 0.015
+    dgddai: 0.025,
+    repdai: 0.025,
+    zrxdai: 0.025,
+    batdai: 0.025,
   },
   safeConfirmations: 0,
   avgBlocksPerDay: 21600 * 0.55,
@@ -299,15 +332,19 @@ const kovan: NetworkConfig = {
       // loadToken('DAI', erc20, '0xc4375b7de8af5a38a93548eb8453a498222c4ff2'), // NOT MCD_DAI
       loadToken('DAI', erc20, '0xb64964e9c0b658aa7b448cdbddfcdccab26cc584'), // MCD_DAI
       // loadToken('MKR', erc20, '0xaaf64bfcc32d0f15873a02163e7e500671a4ffcd'),
-      // loadToken('DGD', erc20, '0x62aeec5fb140bb233b1c5612a8747ca1dc56dc1b'),
-      // loadToken('REP', erc20, '0xc7aa227823789e363f29679f23f7e8f6d9904a9b'),
-      // loadToken('ZRX', erc20, '0x18392097549390502069c17700d21403ea3c721a'),
-      // loadToken('BAT', erc20, '0x9f8cfb61d3b2af62864408dd703f9c3beb55dff7'),
+      loadToken('DGD', erc20, '0x62aeec5fb140bb233b1c5612a8747ca1dc56dc1b'),
+      loadToken('REP', erc20, '0xc7aa227823789e363f29679f23f7e8f6d9904a9b'),
+      loadToken('ZRX', erc20, '0x18392097549390502069c17700d21403ea3c721a'),
+      loadToken('BAT', erc20, '0x9f8cfb61d3b2af62864408dd703f9c3beb55dff7'),
     ]);
   },
   joins: {
     WETH: '0xc6d2c6ac2155461d41621eac97ca0e42cd8c6805',
-    DAI: '0x922253e8bb9905ae4d37bc9bd512db5c91b5ee6c'
+    DAI: '0x922253e8bb9905ae4d37bc9bd512db5c91b5ee6c',
+    REP: '0x2c205dd1a49b17d24062e72b2fd4585c643359fb',
+    ZRX: '0x3d030db261162992484efad43174fce231b0984c',
+    BAT: '0x9ca955e44ebdd69d070e4a62653b73d82b4e82ba',
+    DGD: '0xc269c2b400f560668ec15d04767607f60be46947',
   } as { [key: string]: string },
   mcd: {
     vat: '0xdf69460542dbdcf2f1e77941f53cfd4113a06183',
@@ -318,6 +355,18 @@ const kovan: NetworkConfig = {
       get WETH() {
         return load(mcdFlipper, '0x02b6c914e29ee4d310e6b8e24340a8a643627d44');
       },
+      get REP() {
+        return load(mcdFlipper, '0x4ef2bede48b106151e75b58ee73c85a4ef444adc');
+      },
+      get ZRX() {
+        return load(mcdFlipper, '0xb08a9c38f184c7e0b7468e6fb3923a1121a23cb0');
+      },
+      get BAT() {
+        return load(mcdFlipper, '0x7b0f4c12003ab881ecc11d9d12f15d3f8fe9fcff');
+      },
+      get DGD() {
+        return load(mcdFlipper, '0x2768a3436d51fd7b6f0ef002b46912e423920721');
+      },
     }
   } as { [key: string]: any },
   spot: '0xb61db7923f841740c96b24baec4805e522bb8594',
@@ -325,7 +374,10 @@ const kovan: NetworkConfig = {
   cdpManager: '0x948b304ac96380887fed6dd29bd65331fd8c8e68', // fill
   ilks: {
     WETH: web3.fromAscii('ETH-A'),
-    // DGX: web3.fromAscii('DGX'),
+    REP: web3.fromAscii('REP-A'),
+    ZRX: web3.fromAscii('ZRX-A'),
+    BAT: web3.fromAscii('BAT-A'),
+    DGD: web3.fromAscii('DGD-A'),
   } as { [key: string]: string },
   get otcSupportMethods() {
     return load(otcSupport, '0x303f2bf24d98325479932881657f45567b3e47a8');
@@ -364,9 +416,11 @@ const localnet: NetworkConfig =   {
   name: 'localnet',
   label: 'Localnet',
   thresholds: {
-    ethdai: 0.05,
-    mkrdai: 0.05,
-    mkreth: 0.05
+    ethdai: 0.025,
+    dgddai: 0.025,
+    repdai: 0.025,
+    zrxdai: 0.025,
+    batdai: 0.025,
   },
   safeConfirmations: 0,
   avgBlocksPerDay: 1000,

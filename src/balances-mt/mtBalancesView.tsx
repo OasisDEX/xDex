@@ -72,7 +72,7 @@ export class MTBalancesViewInternal extends React.Component<CombinedBalances & M
         <tr>
           <th style={{ width: '15%' }}>Symbol</th>
           <th style={{ width: '17%' }}>Asset</th>
-          <th style={{ width: '20%' }} className={styles.center}>Unlock on Wallet</th>
+          <th style={{ width: '20%' }} className={styles.center}>Unlock on OTC</th>
           <th style={{ width: '20%' }} className={styles.center}>Unlock on Proxy</th>
           <th style={{ width: '15%' }} className={styles.amount}>Wallet</th>
           <th style={{ width: '15%' }} className={styles.center}>Transfer</th>
@@ -86,8 +86,10 @@ export class MTBalancesViewInternal extends React.Component<CombinedBalances & M
           <td colSpan={7} className={styles.center}>You have no assets</td>
         </tr> }
         { this.props.balances && this.props.balances.map(combinedBalance => {
-          console.log('combinedBalance', combinedBalance);
-
+          console.log('AAA',
+                      combinedBalance.name,
+                      combinedBalance.asset && combinedBalance.asset.allowance
+          );
           return (
           <tr data-test-id={`${combinedBalance.name}-overview`} key={combinedBalance.name}>
             <td>{combinedBalance.name}</td>
@@ -98,13 +100,15 @@ export class MTBalancesViewInternal extends React.Component<CombinedBalances & M
               </div>
             </td>
             <td>
-              <Slider blocked={!combinedBalance.allowance}
-                      disabled={
-                        combinedBalance.allowance
-                      }
-                      onClick={this.approveWallet(combinedBalance)}
-                      data-test-id="toggle-leverage-allowance"
-              />
+              {combinedBalance.asset &&
+                <Slider blocked={!combinedBalance.allowance}
+                        disabled={
+                          combinedBalance.allowance
+                        }
+                        onClick={this.approveWallet(combinedBalance)}
+                        data-test-id="toggle-leverage-allowance"
+                />
+              }
             </td>
             <td className={styles.center}>
               {combinedBalance.asset &&

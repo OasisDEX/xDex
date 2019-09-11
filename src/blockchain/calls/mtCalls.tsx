@@ -68,7 +68,13 @@ function mtBalancePostprocess(result: BigNumber[], { tokens }: MTBalanceData) : 
   return {
     assets: tokens.map((token, i) => {
       const row = i * BalanceOuts;
-      console.log('dai', amountFromWei(new BigNumber(result[row + 4]), 'DAI'));
+      if (token === 'DAI') {
+        console.log(
+          'allowance:',
+          new BigNumber(result[row + 7]).toString(),
+          new BigNumber(result[row + 7]).gte(MIN_ALLOWANCE)
+        );
+      }
       return {
         walletBalance: amountFromWei(new BigNumber(result[row]), token),
         marginBalance: amountFromWei(new BigNumber(result[row + 1]), token),
@@ -89,9 +95,15 @@ function mtBalancePostprocess(result: BigNumber[], { tokens }: MTBalanceData) : 
 export const mtBalance = {
   call: (_data: MTBalanceData, context: NetworkConfig) => context.proxyActions.contract.balance,
   prepareArgs: ({ proxyAddress, tokens }: MTBalanceData, context: NetworkConfig) => {
+    console.log(
+      'mtBalance',
+      context.tokens.DAI.address,
+      tokens,
+      tokens.map(token => context.ilks[token])
+    );
     return [
       proxyAddress,
-      tokens.map(token => context.ilks[token]),
+      tokens.map(token => context.ilks[token] || token), // || token is temporary just for DAI
       tokens.map(token => context.tokens[token].address),
       context.mcd.vat,
       context.spot,
