@@ -8,7 +8,7 @@ import { MtSimpleOrderFormView } from './mtOrderFormView';
 import * as styles from './mtOrderFormView.scss';
 
 const dimensions = {
-  height: '535px',
+  height: '605px',
   minWidth: '454px',
   width: 'auto',
 };

@@ -1,6 +1,8 @@
+import apolloBoost, { gql } from 'apollo-boost';
 import { BigNumber } from 'bignumber.js';
 import { curry, unnest } from 'ramda';
 import { bindNodeCallback, combineLatest, Observable, of } from 'rxjs';
+import { fromPromise } from 'rxjs/internal/observable/fromPromise';
 import { concatMap, map, reduce, switchMap } from 'rxjs/operators';
 
 import * as proxyActions from '../../blockchain/abi/proxy-actions.abi.json';
@@ -165,7 +167,7 @@ const eventMappers: (token: string) => {[key in MTHistoryEventKind]: (
   ) => ({
     token,
     timestamp: block.timestamp,
-    kind: 'tend',
+    kind: MTHistoryEventKind.tend,
     id: new BigNumber(web3.toDecimal(subBytes(event.args.fax, 4, 32))),
     gem: amountFromWei(
       new BigNumber(web3.toDecimal(subBytes(event.args.fax, 36, 32))), token
@@ -200,7 +202,70 @@ const eventMappers: (token: string) => {[key in MTHistoryEventKind]: (
   } as MTHistoryEvent),
 });
 
-export type RawMTHistoryEvent = Exclude<MTHistoryEvent, 'dAmount' | 'dDAIAmount'>;
+export type RawMTHistoryEvent = Exclude<MTHistoryEvent, 'dAmount' | 'dDAIAmount' >;
+
+export function createRawMTHistoryFromCache(
+  proxy: any,
+  context: NetworkConfig,
+  token: string
+): Observable<RawMTHistoryEvent[]> {
+  const client = new apolloBoost({
+    uri: context.oasisDataService.url,
+  });
+
+  // todo: remove hardcoded ETH ilk value when ProxyActions contract changed to handle ilks properly
+  const q = gql`
+    query allLeveragedEvents($token: String, $proxy: String) {
+      allLeveragedEvents(
+      filter: {
+      or: [{ilk: {equalTo: $token }}, {ilk: {equalTo: "ETH" }}],
+      address: {equalTo: $proxy}
+      }
+      ) {
+        nodes {
+          type
+          ilk
+          amount
+          payAmount
+          dgem
+          ddai
+          timestamp
+        }
+      }
+    }
+  `;
+
+  console.log('$$$PROXY', proxy);
+
+  const variables = {
+    // devMode: config.devMode,
+    token,
+    proxy: proxy.address
+  };
+
+  return fromPromise(client.query({ variables, query: q })).pipe(
+    map((result: any) =>
+      result.data.allLeveragedEvents.nodes.map(({
+        type,
+        ilk,
+        amount,
+        payAmount,
+        dgem,
+        ddai,
+        timestamp
+      }: any) => ({
+        ilk,
+        timestamp,
+        amount: new BigNumber(amount),
+        payAmount: new BigNumber(payAmount),
+        dgem:  new BigNumber(dgem),
+        ddai:  new BigNumber(ddai),
+        kind: type,
+        token: ilk
+      })),
+    ),
+  );
+}
 
 export function createRawMTHistory(
   proxy: any,

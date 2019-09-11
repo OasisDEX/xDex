@@ -4,7 +4,8 @@
 {
   "extends": "./tsconfig.compiler",
   "compilerOptions": {
-    "types": ["jest"]
+    "types": ["jest"],
+    "lib": ["dom", "dom.iterable", "esnext"]
   },
   "include": [
     "*.d.ts",

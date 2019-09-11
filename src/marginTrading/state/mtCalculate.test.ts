@@ -6,6 +6,20 @@ setupFakeWeb3ForTesting();
 import { zero } from '../../utils/zero';
 import { CashAssetCore, MarginableAssetCore, MTAccount } from './mtAccount';
 import {
+  calculateMarginable,
+  calculateMTHistoryEvents,
+  realPurchasingPowerMarginable
+} from './mtCalculate';
+import {
+  dai100,
+  rawHistoryBuy,
+  rawHistoryBuySell,
+  sellOffers,
+  sellOffersShort,
+  weth1dai100,
+  weth2
+} from './mtCalculateFixtures';
+import {
   getCashCore,
   getMarginableCore,
   getMTAccount,
@@ -146,4 +160,54 @@ test('cash, weth, dgx and mkr, no debt', () => {
     .toEqual(cash.balance.plus(weth.balanceInCash).plus(dgx.balanceInCash));
 
   expect(mta.totalDebt).toEqual(zero);
+});
+
+test('Purchasing power marginable', () => {
+  const purchasingPower = realPurchasingPowerMarginable(
+    calculateMarginable(weth2),
+    sellOffers
+  );
+  expect(purchasingPower).toEqual(new BigNumber(300));
+});
+
+test('Purchasing power marginable - shallow orderbook', () => {
+  const purchasingPower = realPurchasingPowerMarginable(
+    calculateMarginable(weth2),
+    sellOffersShort
+  );
+  expect(purchasingPower).toEqual(new BigNumber(200));
+});
+
+test('Purchasing power marginable - cash only', () => {
+  const purchasingPower = realPurchasingPowerMarginable(
+    calculateMarginable(dai100),
+    sellOffers
+  );
+  expect(purchasingPower).toEqual(new BigNumber(200));
+});
+
+test('Purchasing power marginable - cash + collateral', () => {
+  const purchasingPower = realPurchasingPowerMarginable(
+    calculateMarginable(weth1dai100),
+    sellOffers
+  );
+  expect(purchasingPower).toEqual(new BigNumber(400));
+});
+
+test('Events history - BuyLev', () => {
+
+  const history = calculateMTHistoryEvents(rawHistoryBuy, weth2);
+
+  expect(history[2].debtDelta).toEqual(new BigNumber('100'));
+  expect(history[2].dDAIAmount).toEqual(new BigNumber('300'));
+  expect(history[2].dAmount).toEqual(new BigNumber('1'));
+});
+
+test('Events history - SellLev', () => {
+
+  const history = calculateMTHistoryEvents(rawHistoryBuySell, weth2);
+
+  expect(history[3].debtDelta).toEqual(new BigNumber('-100'));
+  expect(history[3].dDAIAmount).toEqual(new BigNumber('250'));
+  expect(history[3].dAmount).toEqual(new BigNumber('1'));
 });
