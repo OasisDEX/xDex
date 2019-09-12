@@ -68,41 +68,74 @@ export function realPurchasingPowerNonMarginable(
   return cashAvailable.minus(cashLeft);
 }
 
+// export function realPurchasingPowerMarginable2(
+//   ma: MarginableAsset,
+//   sellOffers: Offer[]
+// ): BigNumber {
+//   Object.assign(window, { ma });
+//   let amount = ma.balance; // TODO: rename totalAmount -> currentAmount
+//   const referencePrice = ma.referencePrice;
+//   let debt = ma.debt;
+//   let purchasingPower = zero;
+//   let collRatio = amount.times(ma.referencePrice).div(debt);
+//   let availableDebt = amount.times(referencePrice).div(ma.safeCollRatio).minus(debt);
+//   let cash = ma.dai;
+//
+//   if (cash.gt(zero)) {
+//     const [bought, cashLeft, offersLeft] = eat(cash, sellOffers);
+//     sellOffers = offersLeft;
+//     amount = amount.plus(bought);
+//     purchasingPower = purchasingPower.plus(cash).minus(cashLeft);
+//     availableDebt = amount.times(referencePrice).div(ma.safeCollRatio).minus(debt);
+//   }
+//
+//   let isSafe = debt.gt(zero) ? collRatio.gt(ma.safeCollRatio) : true;
+//
+//   cash = availableDebt;
+//   while (isSafe && cash.gt(one) && sellOffers.length > 0) {
+//     console.log(
+//       purchasingPower.toString(),
+//       isSafe,
+//       cash.toString(),
+//       sellOffers.length,
+//       collRatio.toString()
+//     );
+//
+//     const [bought, cashLeft, offersLeft] = eat(cash, sellOffers);
+//     sellOffers = offersLeft;
+//     amount = amount.plus(bought);
+//     purchasingPower = purchasingPower.plus(cash).minus(cashLeft);
+//
+//     // safety condition:
+//     // amount * referencePrice / (debt + availableDebt) >= safeCollRatio
+//     // ergo:
+//     // availableDebt = amount * referencePrice / safeCollRatio - debt
+//
+//     debt = debt.plus(cash.minus(cashLeft));
+//     availableDebt = amount.times(referencePrice).div(ma.safeCollRatio).minus(debt);
+//     collRatio = amount.times(referencePrice).div(debt);
+//     cash = availableDebt;
+//
+//     isSafe = debt.gt(zero) ? collRatio.gt(ma.safeCollRatio) : true;
+//   }
+//
+//   return purchasingPower;
+// }
+
 export function realPurchasingPowerMarginable(
   ma: MarginableAsset,
-  sellOffers: Offer[]
+  offers: Offer[]
 ): BigNumber {
-  Object.assign(window, { ma });
   let amount = ma.balance; // TODO: rename totalAmount -> currentAmount
-  const referencePrice = ma.referencePrice;
   let debt = ma.debt;
   let purchasingPower = zero;
-  let collRatio = amount.times(ma.referencePrice).div(debt);
-  let availableDebt = amount.times(referencePrice).div(ma.safeCollRatio).minus(debt);
   let cash = ma.dai;
+  let first = true;
 
-  if (cash.gt(zero)) {
-    const [bought, cashLeft, offersLeft] = eat(cash, sellOffers);
-    sellOffers = offersLeft;
-    amount = amount.plus(bought);
-    purchasingPower = purchasingPower.plus(cash).minus(cashLeft);
-    availableDebt = amount.times(referencePrice).div(ma.safeCollRatio).minus(debt);
-  }
-
-  let isSafe = debt.gt(zero) ? collRatio.gt(ma.safeCollRatio) : true;
-
-  cash = availableDebt;
-  while (isSafe && cash.gt(one) && sellOffers.length > 0) {
-    console.log(
-      purchasingPower.toString(),
-      isSafe,
-      cash.toString(),
-      sellOffers.length,
-      collRatio.toString()
-    );
-
-    const [bought, cashLeft, offersLeft] = eat(cash, sellOffers);
-    sellOffers = offersLeft;
+  while ((cash.gt(zero) || first) && offers.length > 0) {
+    first = false;
+    const [bought, cashLeft, offersLeft] = eat(cash, offers);
+    offers = offersLeft;
     amount = amount.plus(bought);
     purchasingPower = purchasingPower.plus(cash).minus(cashLeft);
 
@@ -111,14 +144,11 @@ export function realPurchasingPowerMarginable(
     // ergo:
     // availableDebt = amount * referencePrice / safeCollRatio - debt
 
-    debt = debt.plus(cash.minus(cashLeft));
-    availableDebt = amount.times(referencePrice).div(ma.safeCollRatio).minus(debt);
-    collRatio = amount.times(referencePrice).div(debt);
+    const availableDebt = amount.times(ma.referencePrice).div(ma.safeCollRatio).minus(debt);
+
+    debt = debt.plus(availableDebt);
     cash = availableDebt;
-
-    isSafe = debt.gt(zero) ? collRatio.gt(ma.safeCollRatio) : true;
   }
-
   return purchasingPower;
 }
 
