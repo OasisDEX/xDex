@@ -206,7 +206,12 @@ export function calculateMTHistoryEvents(
     debt = cash.lt(zero) ? cash.times(minusOne) : zero;
 
     if (h.kind === MTHistoryEventKind.fundDai) {
-      event = { ...event, debtDelta: h.amount.times(minusOne) };
+      const debtDelta = prevDebt.gt(h.amount) ? h.amount :
+        prevDebt.gt(zero) ? prevDebt.minus(debt) : zero;
+
+      if (debtDelta.gt(zero)) {
+        event = { ...event, debtDelta };
+      }
     } else {
       const debtDelta = prevDebt.minus(debt).times(minusOne);
       if (!debtDelta.isEqualTo(zero)) {

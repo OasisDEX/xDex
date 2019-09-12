@@ -94,6 +94,7 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
                     DAIsign = '+';
                   }
                   if (dDAIAmount.isEqualTo(zero)) { DAIsign = ''; }
+                  if (dAmount.isEqualTo(zero)) { sign = ''; }
 
                   let displayName = '';
                   switch (e.kind) {
