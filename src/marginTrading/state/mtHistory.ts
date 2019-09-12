@@ -209,12 +209,11 @@ export function createRawMTHistoryFromCache(
     uri: context.oasisDataService.url,
   });
 
-  // todo: remove hardcoded ETH ilk value when ProxyActions contract changed to handle ilks properly
   const q = gql`
     query allLeveragedEvents($token: String, $proxy: String) {
       allLeveragedEvents(
       filter: {
-      or: [{ilk: {equalTo: $token }}, {ilk: {equalTo: "ETH" }}],
+      ilk: {equalTo: $token },
       address: {equalTo: $proxy}
       }
       ) {
@@ -233,7 +232,7 @@ export function createRawMTHistoryFromCache(
 
   const variables = {
     // devMode: config.devMode,
-    token,
+    token: context.ilks[token],
     proxy: proxy.address
   };
 
