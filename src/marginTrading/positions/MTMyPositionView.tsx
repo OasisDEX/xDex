@@ -12,6 +12,9 @@ export class MTMyPositionView extends
 {
   public render() {
     const equity = this.props.balance.times(this.props.referencePrice).minus(this.props.debt);
+    const leverage = this.props.leverage && !this.props.leverage.isNaN()
+      ? this.props.leverage :
+        this.props.balance.gt(zero) ? one : zero;
     return (
       <div>
         <div className={styles.MTPositionPanel}>
@@ -21,12 +24,7 @@ export class MTMyPositionView extends
               Type:
             </div>
             <div className={styles.summaryValue}>
-              {
-                this.props.leverage && !this.props.leverage.isNaN() &&
-                this.props.leverage.gt(one) ?
-                <React.Fragment>Long - { formatPrecision(this.props.leverage, 1) }x</React.Fragment>
-                  : <span>-</span>
-              }
+              <>Long - { formatPrecision(leverage, 1) }x</>
             </div>
           </div>
           <div className={styles.summaryRow}>
@@ -80,9 +78,9 @@ export class MTMyPositionView extends
               {
                 this.props.liquidationPrice && !this.props.liquidationPrice.isNaN()
                 && this.props.liquidationPrice.gt(zero) ?
-                <React.Fragment>
+                <>
                   {formatPrecision(this.props.liquidationPrice, 2)} USD
-                </React.Fragment>
+                </>
                 : <span>-</span>
               }
             </div>

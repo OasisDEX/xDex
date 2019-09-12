@@ -17,6 +17,7 @@ import { SettingsIcon } from '../../utils/icons/Icons';
 import { Hr } from '../../utils/layout/LayoutHelpers';
 import { PanelBody, PanelFooter, PanelHeader } from '../../utils/panel/Panel';
 import { Muted } from '../../utils/text/Text';
+import { minusOne, zero } from '../../utils/zero';
 import { findMarginableAsset, MTAccountState } from '../state/mtAccount';
 import { Message, MessageKind, MTSimpleFormState, ViewKind } from './mtOrderForm';
 import * as styles from './mtOrderFormView.scss';
@@ -396,37 +397,38 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
   // }
 
   private liquidationPrice() {
+    const liquidationPrice = this.props.liquidationPrice && !this.props.liquidationPrice.isNaN() ?
+      this.props.liquidationPrice : zero;
+
+    const liquidationPricePost = this.props.liquidationPricePost
+    && !this.props.liquidationPricePost.isNaN() ? this.props.liquidationPricePost : zero;
+
     return (
       <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
         <div className={styles.orderSummaryLabel}>
           Liqu. price
         </div>
         <div className={classnames(styles.orderSummaryValue, styles.orderSummaryValuePositive)}>
-          {
-            this.props.liquidationPrice && !this.props.liquidationPrice.isNaN() ?
-              <Money
-                value={this.props.liquidationPrice}
-                token="USD"
-                fallback="-"
-              /> : <span>-</span>
-          }
+          <Money
+            value={liquidationPrice}
+            token="USD"
+            fallback="-"
+          />
           {
             this.props.liquidationPricePost &&
             <>
               <span className={styles.transitionArrow} />
-              { !this.props.liquidationPricePost.isNaN() ?
-                <Money
-                  value={this.props.liquidationPricePost}
-                  token="USD"
-                  fallback="-"
-                  className={
-                    classnames({
-                      [styles.orderSummaryValuePositive]: this.props.isSafePost,
-                      [styles.orderSummaryValueNegative]: !this.props.isSafePost,
-                    })
-                  }
-                /> : <span>-</span>
-              }
+              <Money
+                value={liquidationPricePost}
+                token="USD"
+                fallback="-"
+                className={
+                  classnames({
+                    [styles.orderSummaryValuePositive]: this.props.isSafePost,
+                    [styles.orderSummaryValueNegative]: !this.props.isSafePost,
+                  })
+                }
+              />
             </>
           }
         </div>
@@ -549,14 +551,17 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
   // }
 
   private feesBox() {
+    const leverage = this.props.leverage && !this.props.leverage.isNaN() ?
+      this.props.leverage :
+         this.props.leveragePost && !this.props.leveragePost.isNaN() ? zero : minusOne;
     return (
       <div className={styles.InfoRow}>
         <div className={styles.InfoBox}>
           <div className={styles.InfoRowLabel}>Leverage</div>
           <div>
             {
-              (this.props.leverage && !this.props.leverage.isNaN()) ?
-                <>{ formatPrecision(this.props.leverage, 1) }x</>
+              leverage.gte(zero) ?
+                <>{ formatPrecision(leverage, 1) }x</>
                 : <span>-</span>
             }
             { this.props.leveragePost &&
