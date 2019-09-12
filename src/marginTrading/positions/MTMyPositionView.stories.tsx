@@ -25,6 +25,12 @@ const ethMarginableAsset = calculateMarginable(getMarginableCore({
   // maxSafeLeverage: new BigNumber(2),
 }));
 
+const stats = {
+  purchasingPower: new BigNumber(300),
+  pnl: new BigNumber(3),
+
+};
+
 stories.add('CDP 1', () => (
-  <MTMyPositionView {...ethMarginableAsset} />
+  <MTMyPositionView {...ethMarginableAsset} {...stats} />
 ));

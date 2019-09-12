@@ -13,3 +13,16 @@
     border: 1px solid $grey-darken-darkest;
   }
 }
+
+$historyPanelsHeight: 342px;
+$twoColumnsPanelWidth: 454px;
+
+.priceChartPanel,
+.allTradesPanel {
+  width: $twoColumnsPanelWidth;
+  height: $historyPanelsHeight;
+
+  @include media-breakpoint-down(lg) {
+    width: 100%;
+  }
+}

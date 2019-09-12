@@ -125,7 +125,6 @@ export const etherPriceUsd$: Observable<BigNumber> = concat(
   ),
   onEveryBlock$.pipe(
     switchMap(() => {
-      console.log('ajax');
       return ajax({
         url: 'https://api.coinmarketcap.com/v1/ticker/ethereum/',
         method: 'GET',

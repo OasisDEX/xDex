@@ -447,7 +447,7 @@ export function createMTAllocateForm$(
     switchMap(curry(estimateGasPrice)(theCalls$, readCalls$)),
     scan(freezeGasEstimation),
     map(isReadyToProceed),
-    tap(s => s.plan && console.log('plan', JSON.stringify(s.plan))),
+    // tap(s => s.plan && console.log('plan', JSON.stringify(s.plan))),
     tap(s => s.gasEstimation && console.log(
       `gas estimation: ${s.gasEstimation && s.gasEstimation.toString()} gas`,
       `${s.gasEstimationUsd && s.gasEstimationUsd.toString()} USD `,

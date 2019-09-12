@@ -20,7 +20,9 @@ export enum TxMetaKind {
   drawMTAccount = 'drawMTAccount',
   buyMTAccount = 'buyMTAccount',
   sellMTAccount = 'sellMTAccount',
-  reallocateMTAccount = 'reallocateMTAccount'
+  reallocateMTAccount = 'reallocateMTAccount',
+  makeLinearOffers = 'makeLinearOffers',
+  cancelAllOffers = 'cancelAllOffers'
 }
 
 export type TxMeta = {

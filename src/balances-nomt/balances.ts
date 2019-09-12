@@ -39,7 +39,6 @@ export function balance$(
   token: string,
   account: string,
 ): Observable<BigNumber> {
-  console.log('tokennn', token, context.tokens[token]);
   return bindNodeCallback(context.tokens[token].contract.balanceOf as BalanceOf)(
     account
   ).pipe(
@@ -98,6 +97,7 @@ export function createDustLimits$(context$: Observable<NetworkConfig>): Observab
     switchMap(([context]) =>
       forkJoin(
         Object.keys(tokens).filter(name => name !== 'ETH').map((token: string) => {
+          console.log('token', token);
           return bindNodeCallback(context.otc.contract.getMinSell as Dust)(
            context.tokens[token].address
           ).pipe(

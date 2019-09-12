@@ -14,6 +14,7 @@ import { web3 } from '../../blockchain/web3';
 
 import { ReadCalls, ReadCalls$ } from '../../blockchain/calls/calls';
 
+import { isEqual } from 'lodash';
 import {
   MTAccount,
   MTAccountNotSetup,
@@ -43,8 +44,10 @@ export function aggregateMTAccountState(
   //   .filter((t: any) => t.assetKind === AssetKind.marginable)
   //   .map(t => t.symbol);
 
-  // const tokenNames = [...assetNames, 'DAI'];
-  const tokenNames = assetNames;
+  const tokenNames = [...assetNames, 'DAI'];
+  // const tokenNames = assetNames;
+
+  // console.log('tokenNames', tokenNames);
 
   return calls.mtBalance({ tokens: tokenNames, proxyAddress: proxy.address }).pipe(
     map((balanceResult) => {
@@ -64,12 +67,6 @@ export function aggregateMTAccountState(
       const nonMarginables = [...tokenNames.entries()]
         .filter(([_i, token]) => tokens[token].assetKind === AssetKind.nonMarginable)
         .map(([i, token]) => {
-          // console.log(
-          //   token,
-          //   result.assets[i].urnBalance.toString(),
-          //   result.assets[i].walletBalance.toString(),
-          //   result.assets[i].marginBalance.toString()
-          // );
           return getNonMarginableCore({
             name: token,
             assetKind: AssetKind.nonMarginable,
@@ -161,17 +158,13 @@ export function createMta$(
   return combineLatest(context$, calls$, proxyAddress$).pipe(
     switchMap(([_context, calls, proxyAddress]) => {
 
-      // const pipLike = web3.eth.contract(dsvalue as any).at(_context.prices.WETH);
-      // bindNodeCallback(pipLike.read.call)()
-      //   .subscribe(r => console.log('result', r));
-
       if (proxyAddress === undefined) {
         return of(notSetup);
       }
       const proxy = web3.eth.contract(dsProxy as any).at(proxyAddress);
       return combineLatest(mtRawHistory$, onEveryBlock$).pipe(
         switchMap(([rawHistory]) => aggregateMTAccountState(proxy, calls, rawHistory)),
-        // distinctUntilChanged()
+        distinctUntilChanged(isEqual)
       );
     }),
     shareReplay(1)

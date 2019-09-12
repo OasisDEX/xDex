@@ -156,7 +156,7 @@ export const makeLinearOffers: TransactionDef<MakeLinearOffersData> = {
       String(count),
     ),
   ],
-  kind: TxMetaKind.offerMake,
+  kind: TxMetaKind.makeLinearOffers,
   description: ({ count, midPrice, baseToken, quoteToken }: MakeLinearOffersData) => <>
     Create {count} offer pairs for trading {baseToken}/{quoteToken} around price {midPrice}
   </>,
@@ -182,7 +182,7 @@ export const cancelAllOffers: TransactionDef<CancelAllOffersData> = {
       context.tokens[quoteToken].address,
     ),
   ],
-  kind: TxMetaKind.cancel,
+  kind: TxMetaKind.cancelAllOffers,
   description: ({ baseToken, quoteToken }: CancelAllOffersData) => <>
     Cancel all your offers of {baseToken}/{quoteToken} !!!
   </>,

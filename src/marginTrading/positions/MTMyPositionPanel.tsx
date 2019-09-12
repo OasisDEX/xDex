@@ -21,11 +21,16 @@ import { CreateMTFundForm$, MTTransferFormState } from '../transfer/mtTransferFo
 import { MtTransferFormView } from '../transfer/mtTransferFormView';
 import { MTMyPositionView } from './MTMyPositionView';
 
+import { Observable } from 'rxjs/index';
+import { TxState } from '../../blockchain/transactions';
 import dottedMenuSvg from './dotted-menu.svg';
 
 type MTMyPositionPanelProps = LoadableWithTradingPair<MTSimpleFormState> &
   ModalOpenerProps &
-  { createMTFundForm$: CreateMTFundForm$ };
+  {
+    createMTFundForm$: CreateMTFundForm$,
+    approveMTProxy: (args: {token: string; proxyAddress: string}) => Observable<TxState>;
+  };
 
 export class MTMyPositionPanel extends React.Component<MTMyPositionPanelProps>
 {
@@ -60,13 +65,13 @@ export class MTMyPositionPanel extends React.Component<MTMyPositionPanelProps>
         purchasingPower: this.props.value.realPurchasingPower,
         pnl: this.props.value.pnl
       };
+
       return (
         <div>
           <PanelHeader bordered={true}>
             <span>My Position</span>
 
             <div className={styles.dropdownMenu} style={{ marginLeft: 'auto', display: 'flex' }}>
-
               <Button
                 className={styles.dropdownButton}
                 data-test-id="myposition-actions-list"
@@ -75,26 +80,37 @@ export class MTMyPositionPanel extends React.Component<MTMyPositionPanelProps>
               </Button>
                 <div className={styles.dropdownList}>
                   <div>
-                  <button className={styles.transferBtn}
-                          disabled={!ma.availableActions.includes(UserActionKind.draw)}
-                          onClick={() => this.transfer(UserActionKind.draw, baseToken)}
-                  >
-                    Draw
-                  </button>
-                    <br/>
-                  < button className={styles.transferBtn}
-                           disabled={!ma.availableActions.includes(UserActionKind.fund)}
-                           onClick={() => this.transfer(UserActionKind.fund, baseToken)}
-                  >
-                    Fund
-                  </button>
-                    <br/>
-                  < button className={styles.transferBtn}
-                           disabled={!ma.availableActions.includes(UserActionKind.fund)}
-                           onClick={() => this.transfer(UserActionKind.fund, mta.cash.name)}
-                  >
-                    Payback
-                  </button>
+                  <Button
+                    size="md"
+                    block={true}
+                    disabled={!ma.availableActions.includes(UserActionKind.draw)}
+                    onClick={() => this.transfer(UserActionKind.draw, baseToken)}
+                  >Draw</Button>
+                  <br/>
+                  <Button
+                    size="md"
+                    block={true}
+                    disabled={ma.allowance}
+                    onClick={() =>
+                        this.props.approveMTProxy(
+                        { token: baseToken, proxyAddress: mta.proxy.address }
+                      )
+                    }
+                  >Allowance</Button>
+                  <br/>
+                  <Button
+                    size="md"
+                    block={true}
+                    disabled={!ma.availableActions.includes(UserActionKind.fund)}
+                    onClick={() => this.transfer(UserActionKind.fund, baseToken)}
+                  >Fund</Button>
+                  <br/>
+                  <Button
+                    size="md"
+                    block={true}
+                    disabled={!ma.availableActions.includes(UserActionKind.fund)}
+                    onClick={() => this.transfer(UserActionKind.fund, mta.cash.name)}
+                  >Payback</Button>
                 </div>
               </div>
             </div>

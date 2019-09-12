@@ -68,33 +68,74 @@ export function realPurchasingPowerNonMarginable(
   return cashAvailable.minus(cashLeft);
 }
 
+// export function realPurchasingPowerMarginable2(
+//   ma: MarginableAsset,
+//   sellOffers: Offer[]
+// ): BigNumber {
+//   Object.assign(window, { ma });
+//   let amount = ma.balance; // TODO: rename totalAmount -> currentAmount
+//   const referencePrice = ma.referencePrice;
+//   let debt = ma.debt;
+//   let purchasingPower = zero;
+//   let collRatio = amount.times(ma.referencePrice).div(debt);
+//   let availableDebt = amount.times(referencePrice).div(ma.safeCollRatio).minus(debt);
+//   let cash = ma.dai;
+//
+//   if (cash.gt(zero)) {
+//     const [bought, cashLeft, offersLeft] = eat(cash, sellOffers);
+//     sellOffers = offersLeft;
+//     amount = amount.plus(bought);
+//     purchasingPower = purchasingPower.plus(cash).minus(cashLeft);
+//     availableDebt = amount.times(referencePrice).div(ma.safeCollRatio).minus(debt);
+//   }
+//
+//   let isSafe = debt.gt(zero) ? collRatio.gt(ma.safeCollRatio) : true;
+//
+//   cash = availableDebt;
+//   while (isSafe && cash.gt(one) && sellOffers.length > 0) {
+//     console.log(
+//       purchasingPower.toString(),
+//       isSafe,
+//       cash.toString(),
+//       sellOffers.length,
+//       collRatio.toString()
+//     );
+//
+//     const [bought, cashLeft, offersLeft] = eat(cash, sellOffers);
+//     sellOffers = offersLeft;
+//     amount = amount.plus(bought);
+//     purchasingPower = purchasingPower.plus(cash).minus(cashLeft);
+//
+//     // safety condition:
+//     // amount * referencePrice / (debt + availableDebt) >= safeCollRatio
+//     // ergo:
+//     // availableDebt = amount * referencePrice / safeCollRatio - debt
+//
+//     debt = debt.plus(cash.minus(cashLeft));
+//     availableDebt = amount.times(referencePrice).div(ma.safeCollRatio).minus(debt);
+//     collRatio = amount.times(referencePrice).div(debt);
+//     cash = availableDebt;
+//
+//     isSafe = debt.gt(zero) ? collRatio.gt(ma.safeCollRatio) : true;
+//   }
+//
+//   return purchasingPower;
+// }
+
 export function realPurchasingPowerMarginable(
   ma: MarginableAsset,
-  sellOffers: Offer[]
+  offers: Offer[]
 ): BigNumber {
-  Object.assign(window, { ma });
   let amount = ma.balance; // TODO: rename totalAmount -> currentAmount
-  const referencePrice = ma.referencePrice;
   let debt = ma.debt;
   let purchasingPower = zero;
-  let collRatio = amount.times(ma.referencePrice).div(debt);
-  let availableDebt = amount.times(referencePrice).div(ma.safeCollRatio).minus(debt);
   let cash = ma.dai;
+  let first = true;
 
-  if (cash.gt(zero)) {
-    const [bought, cashLeft, offersLeft] = eat(cash, sellOffers);
-    sellOffers = offersLeft;
-    amount = amount.plus(bought);
-    purchasingPower = purchasingPower.plus(cash).minus(cashLeft);
-    availableDebt = amount.times(referencePrice).div(ma.safeCollRatio).minus(debt);
-  }
-
-  let isSafe = debt.gt(zero) ? collRatio.gt(ma.safeCollRatio) : true;
-
-  cash = availableDebt;
-  while (isSafe && cash.gt(zero) && sellOffers.length > 0) {
-    const [bought, cashLeft, offersLeft] = eat(cash, sellOffers);
-    sellOffers = offersLeft;
+  while ((cash.gt(zero) || first) && offers.length > 0) {
+    first = false;
+    const [bought, cashLeft, offersLeft] = eat(cash, offers);
+    offers = offersLeft;
     amount = amount.plus(bought);
     purchasingPower = purchasingPower.plus(cash).minus(cashLeft);
 
@@ -103,14 +144,11 @@ export function realPurchasingPowerMarginable(
     // ergo:
     // availableDebt = amount * referencePrice / safeCollRatio - debt
 
-    debt = debt.plus(cash.minus(cashLeft));
-    availableDebt = amount.times(referencePrice).div(ma.safeCollRatio).minus(debt);
-    collRatio = amount.times(referencePrice).div(debt);
+    const availableDebt = amount.times(ma.referencePrice).div(ma.safeCollRatio).minus(debt);
+
+    debt = debt.plus(availableDebt);
     cash = availableDebt;
-
-    isSafe = debt.gt(zero) ? collRatio.gt(ma.safeCollRatio) : true;
   }
-
   return purchasingPower;
 }
 
@@ -129,46 +167,51 @@ export function calculateMTHistoryEvents(
   const events = rawHistory.map(h => {
     let event = { ...h, dAmount: zero, dDAIAmount: zero };
     if (h.kind === MTHistoryEventKind.adjust) {
-      event = { ...h, dAmount: h.dgem, dDAIAmount: h.ddai };
+      event = { ...h, token: ma.name, dAmount: h.dgem, dDAIAmount: h.ddai };
     }
     if (h.kind === MTHistoryEventKind.fundDai) {
       cash = cash.plus(h.amount);
       equityCash = equityCash.plus(h.amount);
-      event = { ...h, dDAIAmount: h.amount };
+      event = { ...h, token: ma.name, dDAIAmount: h.amount };
     }
     if (h.kind === MTHistoryEventKind.fundGem) {
       balance = balance.plus(h.amount);
       equity = equity.plus(h.amount);
-      event = { ...h, dAmount: h.amount };
+      event = { ...h, token: ma.name, dAmount: h.amount };
     }
     if (h.kind === MTHistoryEventKind.drawGem) {
       balance = balance.minus(h.amount);
       equity = equity.minus(h.amount);
-      event = { ...h, dAmount: h.amount };
+      event = { ...h, token: ma.name, dAmount: h.amount };
     }
     if (h.kind === MTHistoryEventKind.drawDai) {
       cash = cash.minus(h.amount);
       equityCash = equityCash.minus(h.amount);
-      event = { ...h, dDAIAmount: h.amount };
+      event = { ...h, token: ma.name, dDAIAmount: h.amount };
     }
     if (h.kind === MTHistoryEventKind.buyLev) {
       const priceDai = h.payAmount.div(h.amount);
       balance = balance.plus(h.amount);
       cash = cash.minus(h.payAmount);
-      event = { ...h, priceDai, dAmount: h.amount, dDAIAmount: h.payAmount };
+      event = { ...h, priceDai, token: ma.name, dAmount: h.amount, dDAIAmount: h.payAmount };
     }
     if (h.kind === MTHistoryEventKind.sellLev) {
       const priceDai = h.payAmount.div(h.amount);
       balance = balance.minus(h.amount);
       cash = cash.plus(h.payAmount);
-      event = { ...h, priceDai, dAmount: h.amount, dDAIAmount: h.payAmount };
+      event = { ...h, priceDai, token: ma.name, dAmount: h.amount, dDAIAmount: h.payAmount };
     }
 
     const prevDebt = debt;
     debt = cash.lt(zero) ? cash.times(minusOne) : zero;
 
     if (h.kind === MTHistoryEventKind.fundDai) {
-      event = { ...event, debtDelta: h.amount.times(minusOne) };
+      const debtDelta = prevDebt.gt(h.amount) ? h.amount :
+        prevDebt.gt(zero) ? prevDebt.minus(debt) : zero;
+
+      if (debtDelta.gt(zero)) {
+        event = { ...event, debtDelta };
+      }
     } else {
       const debtDelta = prevDebt.minus(debt).times(minusOne);
       if (!debtDelta.isEqualTo(zero)) {

@@ -121,6 +121,7 @@ export interface MTSimpleFormState extends HasGasEstimation {
   leveragePost?: BigNumber;
   liquidationPrice?: BigNumber;
   liquidationPricePost?: BigNumber;
+  balancePost?: BigNumber;
   apr?: BigNumber;
   isSafePost?: boolean;
   slippageLimit?: BigNumber;
@@ -378,14 +379,15 @@ function addPurchasingPower(state: MTSimpleFormState) {
 
 function addPriceTotal(state: MTSimpleFormState) {
   if (!state.amount) {
-    if (state.orderbook) {
-      return {
-        ...state,
-        price: state.orderbook.sell[0].price,
-        total: new BigNumber(0)
-      };
-    }
-    return state;
+    const orderbook = state.orderbook;
+    return {
+      ...state,
+      price: orderbook && (
+        state.kind === OfferType.buy && orderbook.sell.length > 0 && orderbook.sell[0].price ||
+        state.kind === OfferType.sell && orderbook.buy.length > 0 && orderbook.buy[0].price
+      ) || undefined,
+      total: new BigNumber(0)
+    };
   }
 
   if (!state.orderbook) {
@@ -457,6 +459,7 @@ type PlanInfo = [
     collRatioPost?: BigNumber,
     liquidationPricePost?: BigNumber,
     leveragePost?: BigNumber,
+    balancePost?: BigNumber,
     isSafePost?: boolean
   }
 ];
@@ -470,8 +473,6 @@ function getBuyPlan(
   realPurchasingPower: BigNumber,
 ): PlanInfo {
 
-  console.log('buy plan amount', amount);
-  console.log('buy plan realPurchasingPower', realPurchasingPower);
   const request = prepareBuyAllocationRequest(
     mta,
     sellOffers,
@@ -488,6 +489,7 @@ function getBuyPlan(
         collRatioPost: undefined,
         liquidationPricePost: undefined,
         leveragePost: undefined,
+        balancePost: undefined,
         isSafePost: undefined
       }
     ];
@@ -514,28 +516,18 @@ function getBuyPlan(
       debt: asset.debt.plus(delta)
     } as MarginableAssetCore,
   );
-
-  console.log('amount', amount.toString());
-  console.log('price', price.toString());
-  console.log('realPurchasingPower', realPurchasingPower.toString());
-  console.log('asset debt', asset.debt.toString());
-  console.log('request.targetDaiBalance', request.targetDaiBalance.toString());
-  console.log('delta', delta.toString());
-  console.log('postTradeAsset', postTradeAsset);
-  console.log('postTradeAsset balance', postTradeAsset.balance.toString());
-  console.log('postTradeAsset debt', postTradeAsset.debt.toString());
-  console.log('postTradeAsset ref price', postTradeAsset.referencePrice.toString());
   const collRatioPost = postTradeAsset.currentCollRatio;
   const liquidationPricePost = postTradeAsset.liquidationPrice;
   const isSafePost = postTradeAsset.safe;
   const leveragePost = postTradeAsset.leverage;
+  const balancePost = postTradeAsset.balance;
 
   return [
     request.createPlan([{
       ...request.assets.find(ai => ai.name === baseToken),
       delta
     } as Required<EditableDebt>]),
-    { collRatioPost, liquidationPricePost, isSafePost, leveragePost }
+    { collRatioPost, liquidationPricePost, isSafePost, leveragePost, balancePost }
   ];
 }
 
@@ -563,6 +555,7 @@ function getSellPlan(
         collRatioPost: undefined,
         liquidationPricePost: undefined,
         leveragePost: undefined,
+        balancePost: undefined,
         isSafePost: undefined
       }
     ];
@@ -584,13 +577,14 @@ function getSellPlan(
   const liquidationPricePost = postTradeAsset.liquidationPrice;
   const isSafePost = postTradeAsset.safe;
   const leveragePost = postTradeAsset.leverage;
+  const balancePost = postTradeAsset.balance;
 
   return [
     request.createPlan([{
       ...request.assets.find(ai => ai.name === baseToken),
       delta
     } as Required<EditableDebt>]),
-    { collRatioPost, liquidationPricePost, leveragePost, isSafePost }
+    { collRatioPost, liquidationPricePost, leveragePost, isSafePost, balancePost }
   ];
 }
 
@@ -758,14 +752,14 @@ function prepareSubmit(
 
 function isReadyToProceed(state: MTSimpleFormState): MTSimpleFormState {
 
-  console.log(
-    'readyToProceed',
-    state.messages.length,
-    state.plan,
-    state.gasEstimationStatus,
-    state.messages
-  );
-
+  // console.log(
+  //   'readyToProceed',
+  //   state.messages.length,
+  //   state.plan,
+  //   state.gasEstimationStatus,
+  //   state.messages
+  // );
+  //
   if (
     state.messages.length === 0 &&
     state.plan && !isImpossible(state.plan) && state.plan.length !== 0 &&

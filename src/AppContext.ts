@@ -60,7 +60,7 @@ import {
   memoizeTradingPair,
 } from './exchange/tradingPair/tradingPair';
 
-import { transactions$ } from './blockchain/transactions';
+import { transactions$, TxState } from './blockchain/transactions';
 import {
   createAllTrades$,
   createTradesBrowser$,
@@ -155,12 +155,20 @@ export function setupAppContext() {
     withModal(
       connect<MTSetupFormState, ModalOpenerProps>(MTSetupButton, mtSetupForm$));
 
-  const mtBalances$ = balancesMT.createCombinedBalances(etherBalance$, balances$, mta$);
+  const mtBalances$ = balancesMT.createCombinedBalances(
+    etherBalance$,
+    balances$,
+    balancesNoMT.createAllowances$(context$, initializedAccount$, onEveryBlock$),
+    mta$
+  );
 
   const createMTFundForm$: CreateMTFundForm$ =
     curry(createMTTransferForm$)(mta$, gasPrice$, etherPriceUsd$, balances$, calls$, readCalls$);
 
   const approveMTProxy = createMTProxyApprove(calls$);
+
+  const approveWallet = balancesNoMT.createWalletApprove(calls$, gasPrice$);
+  const disapproveWallet = balancesNoMT.createWalletDisapprove(calls$, gasPrice$);
 
   const theCreateMTAllocateForm$: CreateMTAllocateForm$ =
     curry(createMTAllocateForm$)(gasPrice$, etherPriceUsd$, calls$, readCalls$);
@@ -173,7 +181,12 @@ export function setupAppContext() {
           loadablifyLight(mtBalances$)
         )
       ),
-      { createMTFundForm$, approveMTProxy, createMTAllocateForm$: theCreateMTAllocateForm$ }
+      {
+        createMTFundForm$,
+        approveMTProxy,
+        approveWallet, disapproveWallet,
+        createMTAllocateForm$: theCreateMTAllocateForm$
+      }
     );
 
   const NetworkTxRx = connect(Network, context$);
@@ -195,9 +208,6 @@ export function setupAppContext() {
   const wrapUnwrapForm$ =
     curry(createWrapUnwrapForm$)(gasPrice$, etherPriceUsd$, etherBalance$, wethBalance$, calls$);
 
-  const approve = balancesNoMT.createWalletApprove(calls$, gasPrice$);
-  const disapprove = balancesNoMT.createWalletDisapprove(calls$, gasPrice$);
-
   const AssetOverviewViewRxTx =
     inject(
       withModal<AssetsOverviewActionProps, AssetsOverviewExtraProps>(
@@ -206,7 +216,7 @@ export function setupAppContext() {
           authorizablify(() => loadablifyLight(combinedBalances$))
         )
       ),
-      { approve, disapprove, wrapUnwrapForm$ }
+      { approveWallet, disapproveWallet, wrapUnwrapForm$ }
     );
 
   const loadOrderbook = memoizeTradingPair(curry(loadOrderbook$)(context$, onEveryBlock$));
@@ -225,7 +235,7 @@ export function setupAppContext() {
   );
 
   const { MTSimpleOrderPanelRxTx, MTMyPositionPanelRxTx, MTSimpleOrderbookPanelTxRx } =
-    mtSimpleOrderForm(mta$, currentOrderbook$, createMTFundForm$);
+    mtSimpleOrderForm(mta$, currentOrderbook$, createMTFundForm$, approveMTProxy);
 
   const MTAccountDetailsRxTx = connect(MtAccountDetailsView, mta$);
 
@@ -409,7 +419,8 @@ function mtSimpleOrderForm(
   mta$: Observable<MTAccount>,
   orderbook$: Observable<Orderbook>,
   // orderbookWithTradingPair$: Observable<LoadableWithTradingPair<Orderbook>>,
-  createMTFundForm$: CreateMTFundForm$
+  createMTFundForm$: CreateMTFundForm$,
+  approveMTProxy: (args: {token: string; proxyAddress: string}) => Observable<TxState>
 ) {
   const mtOrderForm$ = currentTradingPair$.pipe(
     switchMap(tradingPair =>
@@ -446,7 +457,7 @@ function mtSimpleOrderForm(
       // @ts-ignore
       connect(
         // @ts-ignore
-        inject(MTMyPositionPanel, { createMTFundForm$ }),
+        inject(MTMyPositionPanel, { createMTFundForm$, approveMTProxy }),
         mtOrderFormLoadable$
       )
     );

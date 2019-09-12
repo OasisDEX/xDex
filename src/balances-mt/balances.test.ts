@@ -1,4 +1,5 @@
 import { BigNumber } from 'bignumber.js';
+import { Allowances } from '../balances-nomt/balances';
 
 import { setupFakeWeb3ForTesting } from '../blockchain/web3';
 setupFakeWeb3ForTesting();
@@ -18,12 +19,23 @@ const defaultMta = getMTAccount({
   cash: defaultCash,
 });
 
-const defaultBalances = {
+const defaultBalances: Balances = {
   DAI: new BigNumber(0),
-  MKR: new BigNumber(0),
-  DGX: new BigNumber(0),
+  ZRX: new BigNumber(0),
+  REP: new BigNumber(0),
+  BAT: new BigNumber(0),
+  DGD: new BigNumber(0),
   WETH: new BigNumber(0),
-} as Balances;
+};
+
+const defaultAllowances: Allowances = {
+  DAI: true,
+  ZRX: true,
+  REP: true,
+  BAT: true,
+  DGD: true,
+  WETH: true,
+};
 
 interface TokenAssertion {
   name: string;
@@ -181,7 +193,7 @@ function assertToken(cb: CombinedBalances, ta: TokenAssertion) {
 
 // ---------------- zeros -----------------------
 test('zeros balances and mta', () => {
-  const cb = combineBalances(new BigNumber(0), defaultBalances, defaultMta);
+  const cb = combineBalances(new BigNumber(0), defaultBalances, defaultAllowances, defaultMta);
 
   assertTokens(cb, []);
 });
@@ -192,7 +204,7 @@ test('balances with DAI and empty mta', () => {
     ...defaultBalances,
     DAI: new BigNumber(2),
   } as Balances;
-  const cb = combineBalances(new BigNumber(0), balance, defaultMta);
+  const cb = combineBalances(new BigNumber(0), balance, defaultAllowances, defaultMta);
 
   assertTokens(cb, [{
     name: 'DAI',
@@ -208,7 +220,7 @@ test('balances with DAI and WETH and empty mta', () => {
     DAI: new BigNumber(2),
     WETH: new BigNumber(5),
   } as Balances;
-  const cb = combineBalances(new BigNumber(0), balance, defaultMta);
+  const cb = combineBalances(new BigNumber(0), balance, defaultAllowances, defaultMta);
 
   assertTokens(cb, [{
     name: 'DAI',
@@ -230,7 +242,7 @@ test('balances with empty balances and mta with DAI cash', () => {
       balance: new BigNumber(4)
     }),
   });
-  const cb = combineBalances(new BigNumber(0), defaultBalances, mta);
+  const cb = combineBalances(new BigNumber(0), defaultBalances, defaultAllowances, mta);
   assertTokens(cb, [{
     name: 'DAI',
     walletBalance: new BigNumber(0),
@@ -253,7 +265,7 @@ test('balances with DAI and WETH and mta with DAI cash', () => {
     }),
   });
 
-  const cb = combineBalances(new BigNumber(0), balance, mta);
+  const cb = combineBalances(new BigNumber(0), balance, defaultAllowances, mta);
   assertTokens(cb, [{
     name: 'DAI',
     walletBalance: new BigNumber(2),
@@ -281,7 +293,7 @@ test('balances with DAI and WETH and mta with WETH marginable asset', () => {
       referencePrice: new BigNumber(10),
     })]
   });
-  const cb = combineBalances(new BigNumber(0), balance, mta);
+  const cb = combineBalances(new BigNumber(0), balance, defaultAllowances, mta);
   assertTokens(cb, [{
     name: 'DAI',
     walletBalance: new BigNumber(2),
@@ -314,7 +326,7 @@ test('balances with DAI and WETH and mta with DAI cash and ETH marginable asset'
     ]
   });
 
-  const cb = combineBalances(new BigNumber(0), balance, mta);
+  const cb = combineBalances(new BigNumber(0), balance, defaultAllowances, mta);
   assertTokens(cb, [{
     name: 'ETH',
     walletBalance: new BigNumber(0),
@@ -344,7 +356,7 @@ test('balances with WETH and ETH and mta with DAI cash', () => {
     }),
   });
 
-  const cb = combineBalances(new BigNumber(421), balance, mta);
+  const cb = combineBalances(new BigNumber(421), balance, defaultAllowances, mta);
   assertTokens(cb, [{
     name: 'DAI',
     walletBalance: new BigNumber(0),
