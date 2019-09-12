@@ -86,10 +86,6 @@ export class MTBalancesViewInternal extends React.Component<CombinedBalances & M
           <td colSpan={7} className={styles.center}>You have no assets</td>
         </tr> }
         { this.props.balances && this.props.balances.map(combinedBalance => {
-          console.log('AAA',
-                      combinedBalance.name,
-                      combinedBalance.asset && combinedBalance.asset.allowance
-          );
           return (
           <tr data-test-id={`${combinedBalance.name}-overview`} key={combinedBalance.name}>
             <td>{combinedBalance.name}</td>

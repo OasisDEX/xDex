@@ -68,13 +68,12 @@ function mtBalancePostprocess(result: BigNumber[], { tokens }: MTBalanceData) : 
   return {
     assets: tokens.map((token, i) => {
       const row = i * BalanceOuts;
-      if (token === 'DAI') {
-        console.log(
-          'allowance:',
-          new BigNumber(result[row + 7]).toString(),
-          new BigNumber(result[row + 7]).gte(MIN_ALLOWANCE)
-        );
-      }
+      console.log(
+        'dai', token,
+        amountFromWei(new BigNumber(result[row]), token).toString(),
+        amountFromWei(new BigNumber(result[row + 1]), token).toString(),
+        amountFromWei(new BigNumber(result[row + 4]), 'DAI').toString(),
+      );
       return {
         walletBalance: amountFromWei(new BigNumber(result[row]), token),
         marginBalance: amountFromWei(new BigNumber(result[row + 1]), token),
@@ -150,17 +149,17 @@ function argsOfPerformOperations(
   }
 
   console.log('plan', JSON.stringify(plan));
-  console.log('args', JSON.stringify(
-    [
-      context.proxyActions.address,
-      kinds, ilks, tokens, adapters, amounts,
-      maxTotals, dgems, ddais,
-      [
-        context.cdpManager, context.mcd.vat, context.otc.address,
-        context.tokens.DAI.address, context.joins.DAI,
-      ],
-    ]
-  ));
+  // console.log('args', JSON.stringify(
+  //   [
+  //     context.proxyActions.address,
+  //     kinds, ilks, tokens, adapters, amounts,
+  //     maxTotals, dgems, ddais,
+  //     [
+  //       context.cdpManager, context.mcd.vat, context.otc.address,
+  //       context.tokens.DAI.address, context.joins.DAI,
+  //     ],
+  //   ]
+  // ));
 
   return [
     context.proxyActions.address,
