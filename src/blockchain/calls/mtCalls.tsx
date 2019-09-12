@@ -98,7 +98,9 @@ export const mtBalance = {
     console.log('mtBalance proxy', proxyAddress);
     return [
       proxyAddress,
-      tokens.map(token => context.ilks[token] || token), // || token is temporary just for DAI
+      tokens.map(token =>
+        token !== 'DAI' ? web3.fromAscii(context.ilks[token]) : token // DAI is temporary
+      ),
       tokens.map(token => context.tokens[token].address),
       context.mcd.vat,
       context.spot,
@@ -130,10 +132,10 @@ function argsOfPerformOperations(
 
   for (const [i, o] of plan.entries()) {
     kinds[i] = web3.toHex(o.kind);
-    // names[i] =
+    // names[i] = web3.fromAscii(
     //   context.ilks[o.kind === OperationKind.fundDai || o.kind === OperationKind.drawDai ?
-    //   o.ilk : o.name];
-    ilks[i] = context.ilks[o.name];
+    //   o.ilk : o.name]);
+    ilks[i] = web3.fromAscii(context.ilks[o.name]);
     if (o.kind === OperationKind.fundDai || o.kind === OperationKind.drawDai) {
       tokens[i] = context.tokens.DAI.address;
       adapters[i] = context.joins.DAI;

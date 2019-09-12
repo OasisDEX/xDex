@@ -373,11 +373,11 @@ const kovan: NetworkConfig = {
   jug: '0x269b2ca90b8f5d8e0a78ec9e1ea43ec41f7d1477',
   cdpManager: '0x948b304ac96380887fed6dd29bd65331fd8c8e68', // fill
   ilks: {
-    WETH: web3.fromAscii('ETH-A'),
-    REP: web3.fromAscii('REP-A'),
-    ZRX: web3.fromAscii('ZRX-A'),
-    BAT: web3.fromAscii('BAT-A'),
-    DGD: web3.fromAscii('DGD-A'),
+    WETH: 'ETH-A',
+    REP: 'REP-A',
+    ZRX: 'ZRX-A',
+    BAT: 'BAT-A',
+    DGD: 'DGD-A',
   } as { [key: string]: string },
   get otcSupportMethods() {
     return load(otcSupport, '0x303f2bf24d98325479932881657f45567b3e47a8');
@@ -459,8 +459,8 @@ const localnet: NetworkConfig =   {
   jug: '0x3A6Ea44c1386F6745Fa20d7cAD939a22553579B0',
   cdpManager: '0xC71022a713dA95bD4C926faf180FffBAfEf4bcA6',
   ilks: {
-    WETH: web3.fromAscii('ETH'),
-    // DGX: web3.fromAscii('DGX'),
+    WETH: 'ETH',
+    // DGX: 'DGX',
   } as { [key: string]: string },
   get otcSupportMethods() {
     return load(otcSupport, '0x5de139DbBFd47dd1D2cD906348Fd1887135B2804');

@@ -41,25 +41,25 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
           <Table className={styles.table}>
               <thead>
               <tr>
-                <th style={{ width: '125px' }} >
+                <th>
                   Type
                 </th>
-                <th style={{ width: '125px' }} >
+                <th>
                   <span className={styles.headerDark}>Price</span> DAI
                 </th>
-                <th style={{ width: '125px' }} >
+                <th>
                   <span className={styles.headerDark}>Amount</span> WETH
                 </th>
-                <th style={{ width: '125px' }} >
+                <th>
                   <span className={styles.headerDark}>Total</span> DAI
                 </th>
-                <th style={{ width: '125px' }} >
+                <th>
                   <span className={styles.headerDark}>Debt</span> DAI
                 </th>
-                <th style={{ width: '125px' }} >
+                <th>
                   <span className={styles.headerDark}>Liq. Price</span> USD
                 </th>
-                <th style={{ width: '190px' }} >
+                <th>
                   Time
                 </th>
               </tr>
