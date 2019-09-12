@@ -395,7 +395,7 @@ const kovan: NetworkConfig = {
     return load(proxyRegistry, '0xa42bbce61c51aaab9f6f5b9df809d38ec164908a'); // fill
   },
   get proxyActions() {
-    return load(proxyActions, '0xac0090f273bbaaf5822ee86ddec69ceecb2c0f97'); // fill
+    return load(proxyActions, '0x7e3b720ebdea1ebaeeb1b91c76770450bfdf5bb6'); // fill
   },
   oasisDataService: {
     url: 'https://kovan-cache.eth2dai.com/api/v1'
