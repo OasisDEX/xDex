@@ -1,8 +1,10 @@
 import * as React from 'react';
+import { theAppContext } from '../../AppContext';
 import { Hr } from '../../utils/layout/LayoutHelpers';
 import { LoadableWithTradingPair } from '../../utils/loadable';
 import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
 import { PanelHeader } from '../../utils/panel/Panel';
+import { MTAccountState } from '../state/mtAccount';
 import { MTSimpleFormState } from './mtOrderForm';
 import { MtSimpleOrderFormView } from './mtOrderFormView';
 import * as styles from './mtOrderFormView.scss';
@@ -31,6 +33,36 @@ export class MTSimpleOrderPanel
         </div>
       );
     }
+
+    if (
+      this.props.status === 'loaded'
+      && this.props.value
+      && this.props.value.mta
+      && this.props.value.mta.state === MTAccountState.notSetup
+    ) {
+      return  (
+      <div style={{ ...dimensions }}>
+        <theAppContext.Consumer>
+          { ({ MTSetupButtonRxTx,
+          }) =>
+            <div>
+                <MTSetupButtonRxTx/>
+            </div>
+          }
+        </theAppContext.Consumer>
+      </div>
+      );
+    }
+
+    // if (
+    //   this.props.status === 'loaded'
+    //   && this.props.value
+    //   && this.props.value.mta
+    //   && this.props.value.mta.state === MTAccountState.setup
+    //   && !findMarginableAsset(this.props.tradingPair.base,  this.props.value.mta)!.allowance) {
+    //
+    //   console.log('NO ALLOWANCE');
+    // }
 
     if (this.props.status === 'loaded') {
       const formState = this.props.value as MTSimpleFormState;

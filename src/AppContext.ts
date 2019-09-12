@@ -60,7 +60,7 @@ import {
   memoizeTradingPair,
 } from './exchange/tradingPair/tradingPair';
 
-import { transactions$ } from './blockchain/transactions';
+import { transactions$, TxState } from './blockchain/transactions';
 import {
   createAllTrades$,
   createTradesBrowser$,
@@ -235,7 +235,7 @@ export function setupAppContext() {
   );
 
   const { MTSimpleOrderPanelRxTx, MTMyPositionPanelRxTx, MTSimpleOrderbookPanelTxRx } =
-    mtSimpleOrderForm(mta$, currentOrderbook$, createMTFundForm$);
+    mtSimpleOrderForm(mta$, currentOrderbook$, createMTFundForm$, approveMTProxy);
 
   const MTAccountDetailsRxTx = connect(MtAccountDetailsView, mta$);
 
@@ -419,7 +419,8 @@ function mtSimpleOrderForm(
   mta$: Observable<MTAccount>,
   orderbook$: Observable<Orderbook>,
   // orderbookWithTradingPair$: Observable<LoadableWithTradingPair<Orderbook>>,
-  createMTFundForm$: CreateMTFundForm$
+  createMTFundForm$: CreateMTFundForm$,
+  approveMTProxy: (args: {token: string; proxyAddress: string}) => Observable<TxState>
 ) {
   const mtOrderForm$ = currentTradingPair$.pipe(
     switchMap(tradingPair =>
@@ -456,7 +457,7 @@ function mtSimpleOrderForm(
       // @ts-ignore
       connect(
         // @ts-ignore
-        inject(MTMyPositionPanel, { createMTFundForm$ }),
+        inject(MTMyPositionPanel, { createMTFundForm$, approveMTProxy }),
         mtOrderFormLoadable$
       )
     );

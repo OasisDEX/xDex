@@ -84,7 +84,7 @@ import * as styles from './mtOrderFormView.scss';
 //       <br/>
 //       MA:
 //       <br/>
-//       <React.Fragment>
+//       <>
 //         Balance:
 //         {balance && balance.toString()}
 //         <br/>
@@ -100,7 +100,7 @@ import * as styles from './mtOrderFormView.scss';
 //         LEVERAGE:
 //         {leverage && leverage.toString()}
 //         <br/>
-//       </React.Fragment> : null
+//       </> : null
 //
 //       <br/>
 //       Plan:
@@ -375,7 +375,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
   //         }
   //         {
   //           this.props.collRatioPost &&
-  //           <React.Fragment>
+  //           <>
   //             <span className={styles.transitionArrow} />
   //             <FormatPercent
   //               value={this.props.collRatioPost}
@@ -388,7 +388,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
   //                 })
   //               }
   //             />
-  //           </React.Fragment>
+  //           </>
   //         }
   //       </div>
   //     </div>
@@ -412,20 +412,22 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
           }
           {
             this.props.liquidationPricePost &&
-            <React.Fragment>
+            <>
               <span className={styles.transitionArrow} />
-              <Money
-                value={this.props.liquidationPricePost}
-                token="USD"
-                fallback="-"
-                className={
-                  classnames({
-                    [styles.orderSummaryValuePositive]: this.props.isSafePost,
-                    [styles.orderSummaryValueNegative]: !this.props.isSafePost,
-                  })
-                }
-              />
-            </React.Fragment>
+              { !this.props.liquidationPricePost.isNaN() ?
+                <Money
+                  value={this.props.liquidationPricePost}
+                  token="USD"
+                  fallback="-"
+                  className={
+                    classnames({
+                      [styles.orderSummaryValuePositive]: this.props.isSafePost,
+                      [styles.orderSummaryValueNegative]: !this.props.isSafePost,
+                    })
+                  }
+                /> : <span>-</span>
+              }
+            </>
           }
         </div>
       </div>
@@ -443,13 +445,13 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
         </div>
         <div className={styles.orderSummaryValue}>
           {
-            this.props.priceImpact && <React.Fragment>
+            this.props.priceImpact && <>
               <FormatPercent
                 value={this.props.priceImpact}
                 fallback="-"
                 multiply={true}
               /> Impact &nbsp;&nbsp;&nbsp;&nbsp;
-            </React.Fragment>
+            </>
           }
           <Money
             value={price}
@@ -554,13 +556,18 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
           <div>
             {
               (this.props.leverage && !this.props.leverage.isNaN()) ?
-                <React.Fragment>{ formatPrecision(this.props.leverage, 1) }x</React.Fragment>
+                <>{ formatPrecision(this.props.leverage, 1) }x</>
                 : <span>-</span>
             }
-            {this.props.leveragePost && <React.Fragment>
+            { this.props.leveragePost &&
+            <>
               <span className={styles.transitionArrow}/>
-              {formatPrecision(this.props.leveragePost, 1)}x
-            </React.Fragment>
+              { !this.props.leveragePost.isNaN() ?
+                <>
+                  {formatPrecision(this.props.leveragePost, 1)}x
+                </> : <span>-</span>
+              }
+            </>
             }
           </div>
         </div>
@@ -626,14 +633,32 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
 
   private accountBalance() {
     const baseTokenAsset = findMarginableAsset(this.props.baseToken, this.props.mta);
-    const balancePrecision = baseTokenAsset ? formatPrecision(baseTokenAsset.balance, 2) : '-';
     return (
       <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
         <div className={styles.orderSummaryLabel}>
           Balance
         </div>
         <div className={styles.orderSummaryValue}>
-          {balancePrecision} {this.props.baseToken}
+          { baseTokenAsset && !baseTokenAsset.balance.isNaN() ?
+            <Money
+              value={baseTokenAsset.balance}
+              token={this.props.baseToken}
+              fallback="-"
+            /> : <span>-</span>
+          }
+          {
+            this.props.balancePost &&
+            <>
+              <span className={styles.transitionArrow} />
+              { !this.props.balancePost.isNaN() ?
+                <Money
+                  value={this.props.balancePost}
+                  token={this.props.baseToken}
+                  fallback="-"
+                /> : <span>-</span>
+              }
+            </>
+          }
         </div>
       </div>
     );
@@ -647,13 +672,13 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
   //     <div className={styles.orderSummaryValue}>
   //       {
   //         (this.props.leverage && !this.props.leverage.isNaN()) ?
-  //           <React.Fragment>{ formatPrecision(this.props.leverage, 1) }x</React.Fragment>
+  //           <>{ formatPrecision(this.props.leverage, 1) }x</>
   //           : <span>-</span>
   //       }
-  //       {this.props.leveragePost && <React.Fragment>
+  //       {this.props.leveragePost && <>
   //         <span className={styles.transitionArrow}/>
   //         {formatPrecision(this.props.leveragePost, 1)}x
-  //       </React.Fragment>
+  //       </>
   //       }
   //     </div>
   //   </div>;

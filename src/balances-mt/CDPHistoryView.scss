@@ -12,13 +12,13 @@
   padding: 8px 8px 8px 8px;
   font-size: 14px;
   line-height: 15px;
+  text-align: right;
 }
 
 .table th {
   font-size: 12px;
   line-height: 15px;
   text-transform: none;
-  text-align: left;
 }
 
 .headerDark {
@@ -32,3 +32,6 @@
   overflow-y: auto;
 }
 
+.table td.cellLeftAligned, .table th.cellLeftAligned {
+  text-align: left;
+}

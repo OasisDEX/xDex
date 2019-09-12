@@ -1,13 +1,16 @@
 import * as React from 'react';
 import * as ReactModal from 'react-modal';
 
+import classnames from 'classnames';
 import { MarginableAsset, MTHistoryEventKind } from '../marginTrading/state/mtAccount';
 import { formatDateTime } from '../utils/formatters/format';
+import { FormatAmount } from '../utils/formatters/Formatters';
 import { Button } from '../utils/forms/Buttons';
 import { ModalProps } from '../utils/modal';
 import { Panel, PanelFooter, PanelHeader } from '../utils/panel/Panel';
 import { Table } from '../utils/table/Table';
 import { InfoLabel } from '../utils/text/Text';
+import { zero } from '../utils/zero';
 import * as styles from './CDPHistoryView.scss';
 
 export class CDPHistoryViewModal extends React.Component<MarginableAsset & ModalProps> {
@@ -41,7 +44,7 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
           <Table className={styles.table}>
               <thead>
               <tr>
-                <th>
+                <th className={styles.cellLeftAligned}>
                   Type
                 </th>
                 <th>
@@ -60,78 +63,84 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
                   <span className={styles.headerDark}>Liq. Price</span> USD
                 </th>
                 <th>
-                  Time
+                  TIME
                 </th>
               </tr>
               </thead>
               <tbody>
-              { this.props.history.filter(h => h.kind !== MTHistoryEventKind.adjust).map((e, i) => {
-                let sign = '';
-                let DAIsign = '';
-                if (
+              { this.props.history.filter(h => h.kind !== MTHistoryEventKind.adjust)
+                .reverse().map((e, i) => {
+                  let sign = '';
+                  let DAIsign = '';
+                  const dAmount = e.dAmount && !e.dAmount.isNaN() ? e.dAmount : zero;
+                  const dDAIAmount = e.dDAIAmount && !e.dDAIAmount.isNaN() ? e.dDAIAmount : zero;
+                  const debtDelta = e.debtDelta && !e.debtDelta.isNaN() ? e.debtDelta : zero;
+                  const liquidationPriceDelta =
+                    e.liquidationPriceDelta && !e.liquidationPriceDelta.isNaN() ?
+                      e.liquidationPriceDelta : zero;
+
+                  if (
                   e.kind === MTHistoryEventKind.fundGem ||
                   e.kind === MTHistoryEventKind.drawDai ||
                   e.kind === MTHistoryEventKind.buyLev) {
-                  sign = '+';
-                  DAIsign = '-';
-                }
-                if (
+                    sign = '+';
+                    DAIsign = '-';
+                  }
+                  if (
                   e.kind === MTHistoryEventKind.drawGem ||
                   e.kind === MTHistoryEventKind.fundDai ||
                   e.kind === MTHistoryEventKind.sellLev) {
-                  sign = '-';
-                  DAIsign = '+';
-                }
+                    sign = '-';
+                    DAIsign = '+';
+                  }
+                  if (dDAIAmount.isEqualTo(zero)) { DAIsign = ''; }
 
-                let displayName = '';
-                switch (e.kind) {
-                  case MTHistoryEventKind.drawDai:
-                  case MTHistoryEventKind.drawGem:
-                    displayName = 'Withdraw';
-                    break;
-                  case MTHistoryEventKind.fundDai:
-                  case MTHistoryEventKind.fundGem:
-                    displayName = 'Deposit';
-                    break;
-                  case MTHistoryEventKind.buyLev:
-                    displayName = 'Buy';
-                    break;
-                  case MTHistoryEventKind.sellLev:
-                    displayName = 'Sell';
-                    break;
-                }
-                return (
+                  let displayName = '';
+                  switch (e.kind) {
+                    case MTHistoryEventKind.drawDai:
+                    case MTHistoryEventKind.drawGem:
+                      displayName = 'Withdraw';
+                      break;
+                    case MTHistoryEventKind.fundDai:
+                    case MTHistoryEventKind.fundGem:
+                      displayName = 'Deposit';
+                      break;
+                    case MTHistoryEventKind.buyLev:
+                      displayName = 'Buy';
+                      break;
+                    case MTHistoryEventKind.sellLev:
+                      displayName = 'Sell';
+                      break;
+                  }
+
+                  return (
                   <tr key={i}>
-                    <td className={styles.eventName}>{displayName}</td>
+                    <td className={
+                      classnames(styles.eventName, styles.cellLeftAligned)
+                    }>{displayName}</td>
                     <td>{
                       e.priceDai && !e.priceDai.isNaN() ? e.priceDai.toFixed(2)
                         : <span>-</span>
                     }</td>
                     <td>
-                      {
-                        e.dAmount && !e.dAmount.isNaN() ?
-                          <React.Fragment>{sign} {e.dAmount.toString()}</React.Fragment>
-                          : <span>0.0</span>
-                      }
+                      <>
+                        {sign} <FormatAmount value={dAmount} token={e.token} />
+                      </>
                     </td>
                     <td>
-                      {
-                        e.dDAIAmount && !e.dDAIAmount.isNaN() ?
-                          <React.Fragment>{DAIsign} {e.dDAIAmount.toString()}</React.Fragment>
-                          : <span>0.0</span>
-                      }
+                      <>
+                        {DAIsign} <FormatAmount value={dDAIAmount} token="DAI" />
+                      </>
                     </td>
                     <td>
-                      { e.debtDelta && !e.debtDelta.isNaN() ?
-                        <React.Fragment>{e.debtDelta.toString()}</React.Fragment>
-                        :  <span>0.0</span>
-                      }
+                      <>
+                        <FormatAmount value={debtDelta} token="DAI" />
+                      </>
                     </td>
-                <td>
-                      { e.liquidationPriceDelta && !e.liquidationPriceDelta.isNaN() ?
-                        <React.Fragment>{e.liquidationPriceDelta.toFixed(1)}</React.Fragment>
-                        :  <span>-</span>
-                      }
+                    <td>
+                      <>
+                        <FormatAmount value={liquidationPriceDelta} token="USD" />
+                      </>
                     </td>
                     <td>
                       <InfoLabel>
@@ -139,8 +148,8 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
                       </InfoLabel>
                     </td>
                   </tr>
-                );
-              }
+                  );
+                }
               )}
               </tbody>
           </Table>

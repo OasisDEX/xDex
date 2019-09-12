@@ -121,6 +121,7 @@ export interface MTSimpleFormState extends HasGasEstimation {
   leveragePost?: BigNumber;
   liquidationPrice?: BigNumber;
   liquidationPricePost?: BigNumber;
+  balancePost?: BigNumber;
   apr?: BigNumber;
   isSafePost?: boolean;
   slippageLimit?: BigNumber;
@@ -458,6 +459,7 @@ type PlanInfo = [
     collRatioPost?: BigNumber,
     liquidationPricePost?: BigNumber,
     leveragePost?: BigNumber,
+    balancePost?: BigNumber,
     isSafePost?: boolean
   }
 ];
@@ -471,8 +473,6 @@ function getBuyPlan(
   realPurchasingPower: BigNumber,
 ): PlanInfo {
 
-  console.log('buy plan amount', amount);
-  console.log('buy plan realPurchasingPower', realPurchasingPower);
   const request = prepareBuyAllocationRequest(
     mta,
     sellOffers,
@@ -489,6 +489,7 @@ function getBuyPlan(
         collRatioPost: undefined,
         liquidationPricePost: undefined,
         leveragePost: undefined,
+        balancePost: undefined,
         isSafePost: undefined
       }
     ];
@@ -515,28 +516,18 @@ function getBuyPlan(
       debt: asset.debt.plus(delta)
     } as MarginableAssetCore,
   );
-
-  console.log('amount', amount.toString());
-  console.log('price', price.toString());
-  console.log('realPurchasingPower', realPurchasingPower.toString());
-  console.log('asset debt', asset.debt.toString());
-  console.log('request.targetDaiBalance', request.targetDaiBalance.toString());
-  console.log('delta', delta.toString());
-  console.log('postTradeAsset', postTradeAsset);
-  console.log('postTradeAsset balance', postTradeAsset.balance.toString());
-  console.log('postTradeAsset debt', postTradeAsset.debt.toString());
-  console.log('postTradeAsset ref price', postTradeAsset.referencePrice.toString());
   const collRatioPost = postTradeAsset.currentCollRatio;
   const liquidationPricePost = postTradeAsset.liquidationPrice;
   const isSafePost = postTradeAsset.safe;
   const leveragePost = postTradeAsset.leverage;
+  const balancePost = postTradeAsset.balance;
 
   return [
     request.createPlan([{
       ...request.assets.find(ai => ai.name === baseToken),
       delta
     } as Required<EditableDebt>]),
-    { collRatioPost, liquidationPricePost, isSafePost, leveragePost }
+    { collRatioPost, liquidationPricePost, isSafePost, leveragePost, balancePost }
   ];
 }
 
@@ -564,6 +555,7 @@ function getSellPlan(
         collRatioPost: undefined,
         liquidationPricePost: undefined,
         leveragePost: undefined,
+        balancePost: undefined,
         isSafePost: undefined
       }
     ];
@@ -585,13 +577,14 @@ function getSellPlan(
   const liquidationPricePost = postTradeAsset.liquidationPrice;
   const isSafePost = postTradeAsset.safe;
   const leveragePost = postTradeAsset.leverage;
+  const balancePost = postTradeAsset.balance;
 
   return [
     request.createPlan([{
       ...request.assets.find(ai => ai.name === baseToken),
       delta
     } as Required<EditableDebt>]),
-    { collRatioPost, liquidationPricePost, leveragePost, isSafePost }
+    { collRatioPost, liquidationPricePost, leveragePost, isSafePost, balancePost }
   ];
 }
 

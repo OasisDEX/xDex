@@ -5,3 +5,4 @@ export const eventName: string;
 export const table: string;
 export const headerDark: string;
 export const contentWithScroll: string;
+export const cellLeftAligned: string;

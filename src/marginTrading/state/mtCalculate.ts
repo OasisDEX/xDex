@@ -167,39 +167,39 @@ export function calculateMTHistoryEvents(
   const events = rawHistory.map(h => {
     let event = { ...h, dAmount: zero, dDAIAmount: zero };
     if (h.kind === MTHistoryEventKind.adjust) {
-      event = { ...h, dAmount: h.dgem, dDAIAmount: h.ddai };
+      event = { ...h, token: ma.name, dAmount: h.dgem, dDAIAmount: h.ddai };
     }
     if (h.kind === MTHistoryEventKind.fundDai) {
       cash = cash.plus(h.amount);
       equityCash = equityCash.plus(h.amount);
-      event = { ...h, dDAIAmount: h.amount };
+      event = { ...h, token: ma.name, dDAIAmount: h.amount };
     }
     if (h.kind === MTHistoryEventKind.fundGem) {
       balance = balance.plus(h.amount);
       equity = equity.plus(h.amount);
-      event = { ...h, dAmount: h.amount };
+      event = { ...h, token: ma.name, dAmount: h.amount };
     }
     if (h.kind === MTHistoryEventKind.drawGem) {
       balance = balance.minus(h.amount);
       equity = equity.minus(h.amount);
-      event = { ...h, dAmount: h.amount };
+      event = { ...h, token: ma.name, dAmount: h.amount };
     }
     if (h.kind === MTHistoryEventKind.drawDai) {
       cash = cash.minus(h.amount);
       equityCash = equityCash.minus(h.amount);
-      event = { ...h, dDAIAmount: h.amount };
+      event = { ...h, token: ma.name, dDAIAmount: h.amount };
     }
     if (h.kind === MTHistoryEventKind.buyLev) {
       const priceDai = h.payAmount.div(h.amount);
       balance = balance.plus(h.amount);
       cash = cash.minus(h.payAmount);
-      event = { ...h, priceDai, dAmount: h.amount, dDAIAmount: h.payAmount };
+      event = { ...h, priceDai, token: ma.name, dAmount: h.amount, dDAIAmount: h.payAmount };
     }
     if (h.kind === MTHistoryEventKind.sellLev) {
       const priceDai = h.payAmount.div(h.amount);
       balance = balance.minus(h.amount);
       cash = cash.plus(h.payAmount);
-      event = { ...h, priceDai, dAmount: h.amount, dDAIAmount: h.payAmount };
+      event = { ...h, priceDai, token: ma.name, dAmount: h.amount, dDAIAmount: h.payAmount };
     }
 
     const prevDebt = debt;
