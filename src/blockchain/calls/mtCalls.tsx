@@ -136,13 +136,14 @@ function argsOfPerformOperations(
     //   o.ilk : o.name]);
     ilks[i] = web3.fromAscii(context.ilks[o.name]);
     if (o.kind === OperationKind.fundDai || o.kind === OperationKind.drawDai) {
+      amounts[i] = toWei('DAI', (o as any).amount);
       tokens[i] = context.tokens.DAI.address;
       adapters[i] = context.joins.DAI;
     } else {
+      amounts[i] = toWei(o.name, (o as any).amount);
       tokens[i] = context.tokens[o.name].address;
       adapters[i] = context.joins[o.name];
     }
-    amounts[i] = toWei(o.name, (o as any).amount);
     maxTotals[i] = toWei(o.name, (o as any).maxTotal);
     dgems[i] = toWei(o.name, (o as any).dgem);
     ddais[i] = toWei(o.name, (o as any).ddai);
