@@ -9,17 +9,10 @@ import { calculateMTAccount } from '../marginTrading/state/mtCalculate';
 import {
   getCashCore,
   getMarginableCore,
-  getNotSetupMTAccount
 } from '../marginTrading/state/mtTestUtils';
 import { unpack } from '../utils/testHelpers';
 import { zero } from '../utils/zero';
 import { createMTSummary$ } from './mtSummary';
-
-test('not setup mta', () => {
-  const mta = getNotSetupMTAccount();
-  const summary = createMTSummary$(of(mta));
-  expect(unpack(summary).state).toEqual(MTAccountState.notSetup);
-});
 
 const ethMarginableAsset = getMarginableCore({
   name: 'ETH',

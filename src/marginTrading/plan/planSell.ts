@@ -4,7 +4,7 @@ import { AssetKind, tokens } from '../../blockchain/config';
 import { Offer } from '../../exchange/orderbook/orderbook';
 import {
   findAsset, MarginableAssetCore,
-  MTAccountSetup,
+  MTAccount,
   Operation,
   OperationKind
 } from '../state/mtAccount';
@@ -22,7 +22,7 @@ import { calculateMarginable } from '../state/mtCalculate';
 import { deltaToOps, getTotal, Operations, orderDeltas } from './planUtils';
 
 export function prepareSellAllocationRequest(
-  mta: MTAccountSetup,
+  mta: MTAccount,
   buyOffers: Offer[],
   baseToken: string,
   amount: BigNumber,

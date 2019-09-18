@@ -4,7 +4,7 @@ import { zero } from '../../utils/zero';
 import {
   CashAssetCore,
   MarginableAssetCore,
-  MTAccountSetup,
+  MTAccount,
   NonMarginableAssetCore
 } from '../state/mtAccount';
 import {
@@ -62,7 +62,7 @@ export const dgx100 = {
   balance: new BigNumber('100')
 };
 
-export const mtaOnlyWeth: MTAccountSetup =
+export const mtaOnlyWeth: MTAccount =
   getMTAccount({ cash, marginableAssets: [wethEmpty] });
 
 export const sell1: Offer = {

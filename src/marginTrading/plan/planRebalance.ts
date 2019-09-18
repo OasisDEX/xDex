@@ -1,7 +1,7 @@
 import { flatten } from 'lodash';
 
 import {
-  MTAccountSetup,
+  MTAccount,
   Operation} from '../state/mtAccount';
 
 import { Observable } from 'rxjs';
@@ -12,7 +12,7 @@ import { EditableDebt } from '../allocate/mtOrderAllocateDebtForm';
 import { deltaToOps, orderDeltas } from './planUtils';
 
 export function prepareReAllocationRequest(
-  mta: MTAccountSetup,
+  mta: MTAccount,
 ): AllocationRequestPilot {
   const cashBalance = mta.cash.balance;
   const totalDebt = mta.totalDebt;

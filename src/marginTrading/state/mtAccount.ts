@@ -182,12 +182,8 @@ export enum MTAccountState {
   notSetup = 'notSetup',
 }
 
-export interface MTAccountNotSetup {
-  state: MTAccountState.notSetup;
-}
-
-export interface MTAccountSetup {
-  state: MTAccountState.setup;
+export interface MTAccount {
+  state: MTAccountState.setup | MTAccountState.notSetup;
   cash: CashAsset;
   marginableAssets: MarginableAsset[];
   nonMarginableAssets: NonMarginableAsset[];
@@ -197,8 +193,6 @@ export interface MTAccountSetup {
   totalAvailableDebt: BigNumber;
   proxy: any;
 }
-
-export type MTAccount =  MTAccountNotSetup | MTAccountSetup;
 
 export function createMTProxyApprove(calls$: Calls$) {
   return (args: {token: string; proxyAddress: string}): Observable<TxState> => {
@@ -216,7 +210,7 @@ export function createMTProxyApprove(calls$: Calls$) {
 export function findAsset(
   name: string, mta?: MTAccount
 ): MarginableAsset | NonMarginableAsset | CashAsset | undefined {
-  if (!mta || mta.state !== MTAccountState.setup) {
+  if (!mta) {
     return undefined;
   }
 
@@ -231,7 +225,7 @@ export function findAsset(
 export function findMarginableAsset(
   name: string, mta?: MTAccount
 ): MarginableAsset | undefined {
-  if (!mta || mta.state !== MTAccountState.setup) {
+  if (!mta) {
     return undefined;
   }
 
@@ -241,7 +235,7 @@ export function findMarginableAsset(
 export function findNonMarginableAsset(
   name: string, mta?: MTAccount
 ): NonMarginableAsset | undefined {
-  if (!mta || mta.state !== MTAccountState.setup) {
+  if (!mta) {
     return undefined;
   }
 

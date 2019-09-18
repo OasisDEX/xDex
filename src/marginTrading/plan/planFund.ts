@@ -5,7 +5,7 @@ import { impossible } from '../../utils/impossible';
 import { minusOne, zero } from '../../utils/zero';
 import { EditableDebt } from '../allocate/mtOrderAllocateDebtForm';
 import {
-  findAsset, MTAccountSetup,
+  findAsset, MTAccount,
   Operation,
   OperationKind
 } from '../state/mtAccount';
@@ -15,7 +15,7 @@ import { deltaToOps, Operations, orderDeltas } from './planUtils';
 //   ilk: string | undefined,
 //   amount: BigNumber,
 //   token: string,
-//   mta: MTAccountSetup,
+//   mta: MTAccount,
 // ): AllocationRequestPilot {
 //
 //   const cashBalance = mta.cash.balance;
@@ -55,7 +55,7 @@ import { deltaToOps, Operations, orderDeltas } from './planUtils';
 // }
 
 export function planFund(
-  mta: MTAccountSetup,
+  mta: MTAccount,
   token: string,
   amount: BigNumber,
   debts: Array<Required<EditableDebt>>,
@@ -85,7 +85,7 @@ export function planFund(
 }
 
 export function planFundDai(
-  mta: MTAccountSetup,
+  mta: MTAccount,
   token: string,
   amount: BigNumber,
   debts: Array<Required<EditableDebt>>,

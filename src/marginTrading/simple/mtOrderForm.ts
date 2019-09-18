@@ -47,7 +47,6 @@ import {
   MarginableAsset,
   MarginableAssetCore,
   MTAccount,
-  MTAccountSetup,
   MTAccountState,
   NonMarginableAsset,
   Operation
@@ -465,7 +464,7 @@ type PlanInfo = [
 ];
 
 function getBuyPlan(
-  mta: MTAccountSetup,
+  mta: MTAccount,
   sellOffers: Offer[],
   baseToken: string,
   amount: BigNumber,
@@ -532,7 +531,7 @@ function getBuyPlan(
 }
 
 function getSellPlan(
-  mta: MTAccountSetup,
+  mta: MTAccount,
   buyOffers: Offer[],
   baseToken: string,
   amount: BigNumber,
