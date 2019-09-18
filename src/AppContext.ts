@@ -19,24 +19,10 @@ import {
 } from './balances-mt/mtBalancesView';
 import { createMTSummary$ } from './balances-mt/mtSummary';
 import { MtSummaryView } from './balances-mt/mtSummaryView';
-import {
-  AssetOverviewView,
-  AssetsOverviewActionProps,
-  AssetsOverviewExtraProps,
-} from './balances-nomt/AssetOverviewView';
-// import {
-//   Balances,
-//   CombinedBalances,
-//   createBalances$,
-//   createCombinedBalances$,
-//   createDustLimits$, createProxyAllowances$,
-//   createWalletApprove,
-//   createWalletDisapprove,
-//   createWethBalances$,
-// } from './balances/balances';
+import { createTaxExport$ } from './balances-mt/taxExporter';
+import { TaxExporterView } from './balances-mt/TaxExporterView';
+import { WalletView } from './balances-mt/WalletView';
 import * as balancesNoMT from './balances-nomt/balances';
-import { createTaxExport$ } from './balances-nomt/taxExporter';
-import { TaxExporterView } from './balances-nomt/TaxExporterView';
 import { calls$, readCalls$ } from './blockchain/calls/calls';
 import {
   account$,
@@ -189,6 +175,20 @@ export function setupAppContext() {
       }
     );
 
+  const WalletViewRxTx =
+    inject(
+      // @ts-ignore
+      withModal(
+        // @ts-ignore
+        connect(
+          // @ts-ignore
+          WalletView, loadablifyLight(mtBalances$))
+      ),
+      {
+        approveWallet, disapproveWallet,
+      }
+    );
+
   const NetworkTxRx = connect(Network, context$);
   const TheFooterTxRx = connect(TheFooter, createFooter$(context$));
 
@@ -208,16 +208,16 @@ export function setupAppContext() {
   const wrapUnwrapForm$ =
     curry(createWrapUnwrapForm$)(gasPrice$, etherPriceUsd$, etherBalance$, wethBalance$, calls$);
 
-  const AssetOverviewViewRxTx =
-    inject(
-      withModal<AssetsOverviewActionProps, AssetsOverviewExtraProps>(
-        connect<Authorizable<Loadable<balancesNoMT.CombinedBalances>>, AssetsOverviewExtraProps>(
-          AssetOverviewView,
-          authorizablify(() => loadablifyLight(combinedBalances$))
-        )
-      ),
-      { approveWallet, disapproveWallet, wrapUnwrapForm$ }
-    );
+  // const AssetOverviewViewRxTx =
+  //   inject(
+  //     withModal<AssetsOverviewActionProps, AssetsOverviewExtraProps>(
+  //       connect<Authorizable<Loadable<balancesNoMT.CombinedBalances>>, AssetsOverviewExtraProps>(
+  //         AssetOverviewView,
+  //         authorizablify(() => loadablifyLight(combinedBalances$))
+  //       )
+  //     ),
+  //     { approveWallet, disapproveWallet, wrapUnwrapForm$ }
+  //   );
 
   const loadOrderbook = memoizeTradingPair(curry(loadOrderbook$)(context$, onEveryBlock$));
   const currentOrderbook$ = currentTradingPair$.pipe(
@@ -393,7 +393,7 @@ export function setupAppContext() {
 
   return {
     AllTradesTxRx,
-    AssetOverviewViewRxTx,
+    // AssetOverviewViewRxTx,
     MyTradesTxRx,
     OfferMakePanelTxRx,
     OrderbookPanelTxRx,
@@ -409,6 +409,7 @@ export function setupAppContext() {
     MTSimpleOrderbookPanelTxRx,
     MTAccountDetailsRxTx,
     MTBalancesViewRxTx,
+    WalletViewRxTx,
     MTSetupButtonRxTx,
     MtSummaryViewRxTx,
     ReallocateViewRxTx,

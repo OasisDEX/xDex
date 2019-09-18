@@ -72,7 +72,6 @@ export class MTBalancesViewInternal extends React.Component<CombinedBalances & M
         <tr>
           <th style={{ width: '15%' }}>Symbol</th>
           <th style={{ width: '17%' }}>Asset</th>
-          <th style={{ width: '20%' }} className={styles.center}>Unlock on OTC</th>
           <th style={{ width: '20%' }} className={styles.center}>Unlock on Proxy</th>
           <th style={{ width: '15%' }} className={styles.amount}>Wallet</th>
           <th style={{ width: '15%' }} className={styles.center}>Transfer</th>
@@ -94,17 +93,6 @@ export class MTBalancesViewInternal extends React.Component<CombinedBalances & M
                 {tokens[combinedBalance.name].icon} <Currency
                 value={tokens[combinedBalance.name].name} />
               </div>
-            </td>
-            <td>
-              {combinedBalance.asset &&
-                <Slider blocked={!combinedBalance.allowance}
-                        disabled={
-                          combinedBalance.allowance
-                        }
-                        onClick={this.approveWallet(combinedBalance)}
-                        data-test-id="toggle-leverage-allowance"
-                />
-              }
             </td>
             <td className={styles.center}>
               {combinedBalance.asset &&
