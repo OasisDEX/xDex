@@ -48,7 +48,8 @@ export enum FormChangeKind {
   progress = 'progress',
   etherBalanceChange = 'etherBalanceChange',
   slippageLimitChange = 'slippageLimitChange',
-  viewChange = 'viewChange'
+  viewChange = 'viewChange',
+  accountChange = 'accountChange',
 }
 
 export enum OfferMatchType {
@@ -166,6 +167,11 @@ export interface  SlippageLimitChange {
   value: BigNumber;
 }
 
+export interface  AccountChange {
+  kind: FormChangeKind.accountChange;
+  value: string;
+}
+
 export function progressChange(progress?: ProgressStage): ProgressChange {
   return { progress, kind: FormChangeKind.progress };
 }
@@ -265,6 +271,14 @@ export function toUserChange(user$: Observable<User>) {
       user,
       kind: FormChangeKind.userChange
     } as UserChange))
+  );
+}
+export function toAccountChange(account$: Observable<string|undefined>) {
+  return account$.pipe(
+    map(value => ({
+      value,
+      kind: FormChangeKind.accountChange
+    } as AccountChange))
   );
 }
 

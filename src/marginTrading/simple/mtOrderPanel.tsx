@@ -34,38 +34,9 @@ export class MTSimpleOrderPanel
       );
     }
 
-    if (
-      this.props.status === 'loaded'
-      && this.props.value
-      && this.props.value.mta
-      && this.props.value.mta.state === MTAccountState.notSetup
-    ) {
-      return  (
-      <div style={{ ...dimensions }}>
-        <theAppContext.Consumer>
-          { ({ MTSetupButtonRxTx,
-          }) =>
-            <div>
-                <MTSetupButtonRxTx/>
-            </div>
-          }
-        </theAppContext.Consumer>
-      </div>
-      );
-    }
-
-    // if (
-    //   this.props.status === 'loaded'
-    //   && this.props.value
-    //   && this.props.value.mta
-    //   && this.props.value.mta.state === MTAccountState.setup
-    //   && !findMarginableAsset(this.props.tradingPair.base,  this.props.value.mta)!.allowance) {
-    //
-    //   console.log('NO ALLOWANCE');
-    // }
-
     if (this.props.status === 'loaded') {
       const formState = this.props.value as MTSimpleFormState;
+
       return (<MtSimpleOrderFormView {...{ ...this.props, ...formState }} />);
     }
 

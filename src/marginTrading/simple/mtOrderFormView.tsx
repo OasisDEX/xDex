@@ -21,6 +21,7 @@ import { minusOne, zero } from '../../utils/zero';
 import { findMarginableAsset, MTAccountState } from '../state/mtAccount';
 import { Message, MessageKind, MTSimpleFormState, ViewKind } from './mtOrderForm';
 import * as styles from './mtOrderFormView.scss';
+import {theAppContext} from '../../AppContext';
 
 // const DevInfos = ({ value }: { value: MTSimpleFormState }) => {
 //   //  assetKind: AssetKind.marginable;
@@ -115,6 +116,12 @@ import * as styles from './mtOrderFormView.scss';
 //   );
 // };
 
+const dimensions = {
+  height: '605px',
+  minWidth: '454px',
+  width: 'auto',
+};
+
 export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
 
   private amountInput?: HTMLElement;
@@ -194,15 +201,42 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
   }
 
   public render() {
-    return (
-      <div className={styles.InstantOrderPanel}>
-        {
-          this.props.view === ViewKind.instantTradeForm
-            ? this.instantOrderForm()
-            : this.advancedSettings()
-        }
-      </div>
-    );
+    console.log('this.props', this.props);
+
+    const isMTASetup = this.props.mta && this.props.mta.state === MTAccountState.notSetup;
+
+    // ) {
+    //   return  (
+    //   <div style={{ ...dimensions }}>
+    //     <theAppContext.Consumer>
+    //       { ({ MTSetupButtonRxTx,
+    //       }) =>
+    //         <div>
+    //             <MTSetupButtonRxTx/>
+    //         </div>
+    //       }
+    //     </theAppContext.Consumer>
+    //   </div>
+    //   );
+    // }
+
+    if (!this.props.account) {
+      return (<div style={{ ...dimensions }}>Account not connected</div>);
+    }
+
+    if (isMTASetup) {
+      return (<div style={{ ...dimensions }}>
+        No Proxy
+      </div>);
+    }
+
+    return (<div>
+      {
+        this.props.view === ViewKind.instantTradeForm
+          ? this.instantOrderForm()
+          : this.advancedSettings()
+      }
+    </div>);
   }
 
   private switchToSettings = () => {
@@ -553,7 +587,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
   private feesBox() {
     const leverage = this.props.leverage && !this.props.leverage.isNaN() ?
       this.props.leverage :
-         this.props.leveragePost && !this.props.leveragePost.isNaN() ? zero : minusOne;
+      this.props.leveragePost && !this.props.leveragePost.isNaN() ? zero : minusOne;
     return (
       <div className={styles.InfoRow}>
         <div className={styles.InfoBox}>

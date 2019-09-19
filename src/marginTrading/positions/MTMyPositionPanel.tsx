@@ -5,7 +5,7 @@ import { inject } from '../../utils/inject';
 
 import { Button } from '../../utils/forms/Buttons';
 import { SvgImage } from '../../utils/icons/utils';
-import { LoadableWithTradingPair } from '../../utils/loadable';
+import { Loadable, LoadableWithTradingPair } from '../../utils/loadable';
 import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
 import { ModalOpenerProps, ModalProps } from '../../utils/modal';
 import { PanelBody, PanelHeader } from '../../utils/panel/Panel';
@@ -13,7 +13,7 @@ import { CreateMTAllocateForm$Props } from '../allocate/mtOrderAllocateDebtFormV
 import { MTSimpleFormState } from '../simple/mtOrderForm';
 import {
   findMarginableAsset,
-  MarginableAsset,
+  MarginableAsset, MTAccount,
   MTAccountState,
   UserActionKind
 } from '../state/mtAccount';
@@ -22,103 +22,52 @@ import { MtTransferFormView } from '../transfer/mtTransferFormView';
 import { MTMyPositionView } from './MTMyPositionView';
 
 import { Observable } from 'rxjs/index';
+import { theAppContext } from '../../AppContext';
 import { TxState } from '../../blockchain/transactions';
 import dottedMenuSvg from './dotted-menu.svg';
 
-type MTMyPositionPanelProps = LoadableWithTradingPair<MTSimpleFormState> &
-  ModalOpenerProps &
-  {
-    createMTFundForm$: CreateMTFundForm$,
-    approveMTProxy: (args: {token: string; proxyAddress: string}) => Observable<TxState>;
-  };
 
-export class MTMyPositionPanel extends React.Component<MTMyPositionPanelProps>
+interface MTMyPositionPanelInternalProps {
+  account: string | undefined;
+  mta: MTAccount;
+  ma: MarginableAsset;
+  createMTFundForm$: CreateMTFundForm$;
+  approveMTProxy: (args: { token: string; proxyAddress: string }) => Observable<TxState>;
+  close?: () => void;
+}
+
+export class MTMyPositionPanel
+  extends React.Component<Loadable<MTMyPositionPanelInternalProps> & ModalOpenerProps>
 {
   public render() {
-    if (this.props.tradingPair.quote !== 'DAI') {
-      return (
-        <div>
-          <PanelHeader>Create position</PanelHeader>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            height: '357px',
-            textAlign: 'center'
-          }}>Choose DAI<br/> to see a position</div>
-        </div>
-      );
+    if (this.props.value && !this.props.value.account) {
+      return (<div>Account not connected</div>);
     }
 
-    if (this.props.status === 'loaded' && this.props.value) {
+    if (this.props.status === 'loaded' && this.props.value && this.props.value.mta) {
 
-      const baseToken = this.props.value.baseToken;
-
-      const mta = this.props.value.mta;
-
-      if (!mta || mta.state !== MTAccountState.setup) {
-        return <div>Not ready!</div>;
+      const mtaState = this.props.value.mta.state;
+      if (mtaState !== MTAccountState.setup) {
+        return <div>
+          <theAppContext.Consumer>
+            { ({ MTSetupButtonRxTx,
+               }) =>
+              <div>
+                <MTSetupButtonRxTx/>
+              </div>
+            }
+          </theAppContext.Consumer>
+        </div>;
       }
 
-      const ma: MarginableAsset = findMarginableAsset(baseToken, mta)!;
-      const positionStats = {
-        purchasingPower: this.props.value.realPurchasingPower,
-        pnl: this.props.value.pnl
-      };
+      if (!this.props.value.ma.allowance) {
+        return <div>
+          Allowance not set
+        </div>;
+      }
 
       return (
-        <div>
-          <PanelHeader bordered={true}>
-            <span>My Position</span>
-
-            <div className={styles.dropdownMenu} style={{ marginLeft: 'auto', display: 'flex' }}>
-              <Button
-                className={styles.dropdownButton}
-                data-test-id="myposition-actions-list"
-              >
-                <SvgImage image={dottedMenuSvg}/>
-              </Button>
-                <div className={styles.dropdownList}>
-                  <div>
-                  <Button
-                    size="md"
-                    block={true}
-                    disabled={!ma.availableActions.includes(UserActionKind.draw)}
-                    onClick={() => this.transfer(UserActionKind.draw, baseToken)}
-                  >Draw</Button>
-                  <br/>
-                  <Button
-                    size="md"
-                    block={true}
-                    disabled={ma.allowance}
-                    onClick={() =>
-                        this.props.approveMTProxy(
-                        { token: baseToken, proxyAddress: mta.proxy.address }
-                      )
-                    }
-                  >Allowance</Button>
-                  <br/>
-                  <Button
-                    size="md"
-                    block={true}
-                    disabled={!ma.availableActions.includes(UserActionKind.fund)}
-                    onClick={() => this.transfer(UserActionKind.fund, baseToken)}
-                  >Fund</Button>
-                  <br/>
-                  <Button
-                    size="md"
-                    block={true}
-                    disabled={!ma.availableActions.includes(UserActionKind.fund)}
-                    onClick={() => this.transfer(UserActionKind.fund, mta.cash.name)}
-                  >Payback</Button>
-                </div>
-              </div>
-            </div>
-          </PanelHeader>
-          <PanelBody>
-            {<MTMyPositionView {...ma } {...positionStats} />}
-          </PanelBody>
-        </div>
+        <MTMyPositionPanelInternal {...this.props.value} {...{ open: this.props.open }} />
       );
     }
 
@@ -127,7 +76,70 @@ export class MTMyPositionPanel extends React.Component<MTMyPositionPanelProps>
       <LoadingIndicator />
     </div>;
   }
+}
 
+export class MTMyPositionPanelInternal
+  extends React.Component<MTMyPositionPanelInternalProps & ModalOpenerProps>
+{
+  public render() {
+
+    const { ma, mta } = this.props;
+    return (
+      <div>
+        <PanelHeader bordered={true}>
+          <span>My Position</span>
+
+          { this.props.close && <div onClick={this.props.close}>Close</div> }
+          <div className={styles.dropdownMenu} style={{ marginLeft: 'auto', display: 'flex' }}>
+            <Button
+              className={styles.dropdownButton}
+              data-test-id="myposition-actions-list"
+            >
+              <SvgImage image={dottedMenuSvg}/>
+            </Button>
+            <div className={styles.dropdownList}>
+              <div>
+                <Button
+                  size="md"
+                  block={true}
+                  disabled={!ma.availableActions.includes(UserActionKind.draw)}
+                  onClick={() => this.transfer(UserActionKind.draw, ma.name)}
+                >Draw</Button>
+                <br/>
+                <Button
+                  size="md"
+                  block={true}
+                  disabled={ma.allowance}
+                  onClick={() =>
+                    this.props.approveMTProxy(
+                      { token: ma.name, proxyAddress: mta.proxy.address }
+                    )
+                  }
+                >Allowance</Button>
+                <br/>
+                <Button
+                  size="md"
+                  block={true}
+                  disabled={!ma.availableActions.includes(UserActionKind.fund)}
+                  onClick={() => this.transfer(UserActionKind.fund, ma.name)}
+                >Fund</Button>
+                <br/>
+                <Button
+                  size="md"
+                  block={true}
+                  disabled={!ma.availableActions.includes(UserActionKind.fund)}
+                  onClick={() => this.transfer(UserActionKind.fund, mta.cash.name)}
+                >Payback</Button>
+              </div>
+            </div>
+          </div>
+        </PanelHeader>
+        <PanelBody>
+          {<MTMyPositionView {...ma } {...{ pnl: ma.pnl }} />}
+        </PanelBody>
+      </div>
+    );
+  }
   private transfer (actionKind: UserActionKind, token: string) {
     const fundForm$ = this.props.createMTFundForm$(actionKind, token);
     const MTFundFormViewRxTx =

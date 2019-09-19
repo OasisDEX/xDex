@@ -9,6 +9,7 @@ import { Offer, OfferType, Orderbook } from '../../exchange/orderbook/orderbook'
 import { TradingPair } from '../../exchange/tradingPair/tradingPair';
 import { combineAndMerge } from '../../utils/combineAndMerge';
 import {
+  AccountChange,
   AmountFieldChange,
   doGasEstimation,
   DustLimitChange,
@@ -26,7 +27,7 @@ import {
   ProgressChange,
   ProgressStage,
   SetMaxChange,
-  SlippageLimitChange,
+  SlippageLimitChange, toAccountChange,
   toDustLimitChange$,
   toEtherPriceUSDChange,
   toGasPriceChange,
@@ -129,6 +130,7 @@ export interface MTSimpleFormState extends HasGasEstimation {
   submit: (state: MTSimpleFormState) => void;
   change: (change: ManualChange) => void;
   view: ViewKind;
+  account?: string;
 }
 
 export type ManualChange =
@@ -139,12 +141,15 @@ export type ManualChange =
   SlippageLimitChange |
   ViewChange;
 
+
+
 export type EnvironmentChange =
   GasPriceChange |
   EtherPriceUSDChange |
   OrderbookChange |
   DustLimitChange |
-  MTAccountChange;
+  MTAccountChange |
+  AccountChange;
 
 export type MTFormChange =
   ManualChange |
@@ -250,6 +255,11 @@ function applyChange(state: MTSimpleFormState, change: MTFormChange): MTSimpleFo
       return {
         ...state,
         slippageLimit: change.value
+      };
+    case FormChangeKind.accountChange:
+      return {
+        ...state,
+        account: change.value
       };
   }
 }
@@ -793,15 +803,19 @@ export function createMTSimpleOrderForm$(
   calls$: Calls$,
   readCalls$: ReadCalls$,
   dustLimits$: Observable<DustLimits>,
+  account$: Observable<string|undefined>
 ): Observable<MTSimpleFormState> {
 
   const manualChange$ = new Subject<ManualChange>();
 
-  const environmentChange$ = combineAndMerge(
-    toGasPriceChange(gasPrice$),
-    toEtherPriceUSDChange(etherPriceUSD$),
-    toOrderbookChange$(orderbook$),
-    toDustLimitChange$(dustLimits$, tradingPair.base, tradingPair.quote),
+  const environmentChange$ = merge(
+    combineAndMerge(
+      toGasPriceChange(gasPrice$),
+      toEtherPriceUSDChange(etherPriceUSD$),
+      toOrderbookChange$(orderbook$),
+      toDustLimitChange$(dustLimits$, tradingPair.base, tradingPair.quote),
+      toAccountChange(account$),
+    ),
     toMTAccountChange(mta$)
   );
 

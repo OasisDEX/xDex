@@ -1,10 +1,18 @@
 import * as React from 'react';
 
-import { Observable } from 'rxjs';
-import { tokens } from '../blockchain/config';
+import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
+import { map } from 'rxjs/internal/operators';
+import {AssetKind, tokens} from '../blockchain/config';
 import { TxState } from '../blockchain/transactions';
-import { CreateMTAllocateForm$Props } from '../marginTrading/allocate/mtOrderAllocateDebtFormView';
-import { findAsset, MTAccountState, UserActionKind } from '../marginTrading/state/mtAccount';
+import {
+  CreateMTAllocateForm$, CreateMTAllocateForm$Props
+} from '../marginTrading/allocate/mtOrderAllocateDebtFormView';
+import {
+  MTMyPositionPanel, MTMyPositionPanelInternal
+} from '../marginTrading/positions/MTMyPositionPanel';
+import {
+  findAsset, MarginableAsset, MTAccountState, UserActionKind
+} from '../marginTrading/state/mtAccount';
 import { MTTransferFormState } from '../marginTrading/transfer/mtTransferForm';
 import { MtTransferFormView } from '../marginTrading/transfer/mtTransferFormView';
 import { connect } from '../utils/connect';
@@ -20,40 +28,45 @@ import { Currency } from '../utils/text/Text';
 import { CombinedBalance, CombinedBalances } from './balances';
 import * as styles from './mtBalancesView.scss';
 
-export interface MTBalancesCreateMTFundFormProps extends CreateMTAllocateForm$Props {
-  createMTFundForm$: (actionKind: UserActionKind, token: string) => Observable<MTTransferFormState>;
-  approveMTProxy: (args: {token: string; proxyAddress: string}) => Observable<TxState>;
-  approveWallet: (token: string) => Observable<TxState>;
-  disapproveWallet: (token: string) => Observable<TxState>;
-}
+export type MTBalancesProps = CombinedBalances & {
+  ma?: MarginableAsset;
+  selectMa: (ma?: MarginableAsset) => void;
+};
 
-export type MTBalancesOwnProps =
-  ModalOpenerProps & MTBalancesCreateMTFundFormProps;
+export type MTBalancesOwnProps = ModalOpenerProps &
+  {
+    createMTFundForm$:
+      (actionKind: UserActionKind, token: string) => Observable<MTTransferFormState>,
+    approveMTProxy: (args: {token: string; proxyAddress: string}) => Observable<TxState>,
+    createMTAllocateForm$: CreateMTAllocateForm$,
+  };
 
 export class MTBalancesView
-  extends React.Component<Loadable<CombinedBalances> & MTBalancesOwnProps>
+  extends React.Component<Loadable<MTBalancesProps> & MTBalancesOwnProps>
 {
   public render() {
-    const open = this.props.open;
-    const createMTFundForm$ = this.props.createMTFundForm$;
-    const approveMTProxy = this.props.approveMTProxy;
-    const approveWallet = this.props.approveWallet;
-    const disapproveWallet = this.props.disapproveWallet;
-    const createMTAllocateForm$ = this.props.createMTAllocateForm$;
+    const { status, value, error, ...props } = this.props;
     return (
       <Panel className={styles.balancesPanel}>
         <PanelHeader>Asset overview</PanelHeader>
         <WithLoadingIndicator loadable={this.props}>
           {(combinedBalances) => (
+            combinedBalances.ma ?
+            <MTMyPositionPanelInternal
+              {...{
+                open: props.open,
+                close: () => combinedBalances.selectMa(undefined),
+                createMTFundForm$: props.createMTFundForm$,
+                approveMTProxy: props.approveMTProxy,
+                account: 'TODO',
+                ma: combinedBalances.ma,
+                mta: combinedBalances.mta
+              }}
+            /> :
             <MTBalancesViewInternal
               { ...{
                 ...combinedBalances,
-                open,
-                createMTFundForm$,
-                approveWallet,
-                disapproveWallet,
-                approveMTProxy,
-                createMTAllocateForm$,
+                ...props
               } }
             />
           )}
@@ -63,7 +76,21 @@ export class MTBalancesView
   }
 }
 
-export class MTBalancesViewInternal extends React.Component<CombinedBalances & MTBalancesOwnProps> {
+export function createBalancesView$(mtBalances$: Observable<CombinedBalances>) {
+  const ma$: Subject<MarginableAsset | undefined> =
+    new BehaviorSubject<MarginableAsset | undefined>(undefined);
+
+  return combineLatest(ma$, mtBalances$).pipe(
+    map(([ma, balances]) => ({
+      ...balances,
+      ma,
+      selectMa: ma$.next.bind(ma$)
+    }))
+  );
+}
+
+export class MTBalancesViewInternal
+  extends React.Component<MTBalancesProps & MTBalancesOwnProps> {
 
   public render() {
     return (
@@ -84,76 +111,82 @@ export class MTBalancesViewInternal extends React.Component<CombinedBalances & M
         { (!this.props.balances || this.props.balances.length === 0) && <tr>
           <td colSpan={7} className={styles.center}>You have no assets</td>
         </tr> }
-        { this.props.balances && this.props.balances.map(combinedBalance => {
-          return (
-          <tr data-test-id={`${combinedBalance.name}-overview`} key={combinedBalance.name}>
-            <td>{combinedBalance.name}</td>
-            <td>
-              <div className={styles.centeredAsset}>
-                {tokens[combinedBalance.name].icon} <Currency
-                value={tokens[combinedBalance.name].name} />
-              </div>
-            </td>
-            <td className={styles.center}>
-              {combinedBalance.asset &&
-                <Slider blocked={!combinedBalance.asset.allowance}
-                      disabled={
-                        this.props.mta.state !== MTAccountState.setup ||
-                        combinedBalance.asset.allowance
-                      }
-                      onClick={this.approveMTProxy(combinedBalance)}
-                      data-test-id="toggle-leverage-allowance"
-                />
-              }
-            </td>
-            <td data-test-id={`${combinedBalance.name}-balance`} className={styles.amount}>
-              <FormatAmount value={combinedBalance.walletBalance} token={combinedBalance.name} />
-            </td>
-            <td className={styles.center}>
-              { combinedBalance.asset &&
-                <div>
-                  <button className={`${styles.transferBtn} ${styles.transferBtnLeft}`}
-                          disabled={!this.isActionEnabled(
-                            combinedBalance.name,
-                            UserActionKind.draw)}
-                          onClick={() => this.transfer(
-                            UserActionKind.draw,
-                            combinedBalance.name)}
-                  >
-                    <Arrow/>
-                  </button>
-                  < button className={styles.transferBtn}
-                           disabled={!this.isActionEnabled(
-                             combinedBalance.name,
-                             UserActionKind.fund)}
-                           onClick={() => this.transfer(
-                             UserActionKind.fund,
-                             combinedBalance.name)}
-                  >
-                    <Arrow />
-                  </button>
+        { this.props.balances && this.props.balances
+          .filter(b => b.asset && b.asset.assetKind === AssetKind.marginable)
+          .map(combinedBalance => {
+            return (
+            <tr
+              onClick={ () => this.props.selectMa(combinedBalance.asset as MarginableAsset)}
+              data-test-id={`${combinedBalance.name}-overview`}
+              key={combinedBalance.name}
+            >
+              <td>{combinedBalance.name}</td>
+              <td>
+                <div className={styles.centeredAsset}>
+                  {tokens[combinedBalance.name].icon} <Currency
+                  value={tokens[combinedBalance.name].name} />
                 </div>
-              }
-            </td>
-            <td className={styles.amount}>
-              {combinedBalance.asset && combinedBalance.name !== 'DAI' &&
-               <FormatAmount
-                 value={combinedBalance.asset.balance}
-                 token={combinedBalance.name}
-               />
-              }
-            </td>
-            <td className={styles.amount}>
-              {combinedBalance.name !== 'ETH' && combinedBalance.name !== 'DAI' &&
-                <FormatAmount value={combinedBalance.mtAssetValueInDAI} token="DAI"/>
-              }
-            </td>
-            <td className={styles.amount}>
-                <FormatAmount value={combinedBalance.cashBalance} token="DAI"/>
-            </td>
-          </tr>
-          );
-        })}
+              </td>
+              <td className={styles.center}>
+                {combinedBalance.asset &&
+                  <Slider blocked={!combinedBalance.asset.allowance}
+                        disabled={
+                          this.props.mta.state !== MTAccountState.setup ||
+                          combinedBalance.asset.allowance
+                        }
+                        onClick={this.approveMTProxy(combinedBalance)}
+                        data-test-id="toggle-leverage-allowance"
+                  />
+                }
+              </td>
+              <td data-test-id={`${combinedBalance.name}-balance`} className={styles.amount}>
+                <FormatAmount value={combinedBalance.walletBalance} token={combinedBalance.name} />
+              </td>
+              <td className={styles.center}>
+                { combinedBalance.asset &&
+                  <div>
+                    <button className={`${styles.transferBtn} ${styles.transferBtnLeft}`}
+                            disabled={!this.isActionEnabled(
+                              combinedBalance.name,
+                              UserActionKind.draw)}
+                            onClick={() => this.transfer(
+                              UserActionKind.draw,
+                              combinedBalance.name)}
+                    >
+                      <Arrow/>
+                    </button>
+                    < button className={styles.transferBtn}
+                             disabled={!this.isActionEnabled(
+                               combinedBalance.name,
+                               UserActionKind.fund)}
+                             onClick={() => this.transfer(
+                               UserActionKind.fund,
+                               combinedBalance.name)}
+                    >
+                      <Arrow />
+                    </button>
+                  </div>
+                }
+              </td>
+              <td className={styles.amount}>
+                {combinedBalance.asset && combinedBalance.name !== 'DAI' &&
+                 <FormatAmount
+                   value={combinedBalance.asset.balance}
+                   token={combinedBalance.name}
+                 />
+                }
+              </td>
+              <td className={styles.amount}>
+                {combinedBalance.name !== 'ETH' && combinedBalance.name !== 'DAI' &&
+                  <FormatAmount value={combinedBalance.mtAssetValueInDAI} token="DAI"/>
+                }
+              </td>
+              <td className={styles.amount}>
+                  <FormatAmount value={combinedBalance.cashBalance} token="DAI"/>
+              </td>
+            </tr>
+            );
+          })}
         </tbody>
       </Table>
     );
@@ -181,12 +214,6 @@ export class MTBalancesViewInternal extends React.Component<CombinedBalances & M
         token: combinedBalance.name,
         proxyAddress: this.props.mta.proxy.address as string
       });
-    };
-  }
-
-  private approveWallet(combinedBalance: CombinedBalance): () => void {
-    return () => {
-      this.props.approveWallet(combinedBalance.name);
     };
   }
 

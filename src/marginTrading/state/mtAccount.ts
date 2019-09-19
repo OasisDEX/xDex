@@ -160,6 +160,7 @@ export interface MarginableAsset extends MarginableAssetCore {
   safe?: boolean;
   liquidationInProgress: boolean;
   history: MarginableAssetHistory;
+  pnl?: BigNumber;
 }
 
 export interface NonMarginableAssetCore extends Core {

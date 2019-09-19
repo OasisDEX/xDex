@@ -15,7 +15,7 @@ import {
 import * as balancesMT from './balances-mt/balances';
 import { MtAccountDetailsView } from './balances-mt/mtAccountDetailsView';
 import {
-  MTBalancesCreateMTFundFormProps, MTBalancesOwnProps, MTBalancesView
+  createBalancesView$, MTBalancesView
 } from './balances-mt/mtBalancesView';
 import { createMTSummary$ } from './balances-mt/mtSummary';
 import { MtSummaryView } from './balances-mt/mtSummaryView';
@@ -112,7 +112,9 @@ import { createMTSetupForm$, MTSetupFormState } from './marginTrading/setup/mtSe
 import { MTSetupButton } from './marginTrading/setup/mtSetupFormView';
 import { createMTSimpleOrderForm$ } from './marginTrading/simple/mtOrderForm';
 import { MTSimpleOrderPanel } from './marginTrading/simple/mtOrderPanel';
-import { createMTProxyApprove, MTAccount } from './marginTrading/state/mtAccount';
+import {
+  createMTProxyApprove, findMarginableAsset, MTAccount
+} from './marginTrading/state/mtAccount';
 import { createMta$ } from './marginTrading/state/mtAggregate';
 import { CreateMTFundForm$, createMTTransferForm$ } from './marginTrading/transfer/mtTransferForm';
 import { createTransactionNotifier$ } from './transactionNotifier/transactionNotifier';
@@ -161,17 +163,18 @@ export function setupAppContext() {
 
   const MTBalancesViewRxTx =
     inject(
-      withModal<MTBalancesCreateMTFundFormProps, MTBalancesOwnProps>(
-        connect<Loadable<balancesMT.CombinedBalances>, MTBalancesOwnProps>(
+      // @ts-ignore
+      withModal(
+        // @ts-ignore
+        connect(
+          // @ts-ignore
           MTBalancesView,
-          loadablifyLight(mtBalances$)
+          loadablifyLight(createBalancesView$(mtBalances$))
         )
       ),
       {
         createMTFundForm$,
         approveMTProxy,
-        approveWallet, disapproveWallet,
-        createMTAllocateForm$: theCreateMTAllocateForm$
       }
     );
 
@@ -434,6 +437,7 @@ function mtSimpleOrderForm(
         calls$,
         readCalls$,
         balancesMT.dustLimits$,
+        account$,
       )
     ),
     shareReplay(1)
@@ -441,12 +445,13 @@ function mtSimpleOrderForm(
 
   const mtOrderFormLoadable$ = currentTradingPair$.pipe(
     switchMap(tradingPair =>
-                loadablifyLight(mtOrderForm$).pipe(
-                  map(mtOrderFormLoadablified => ({
-                    tradingPair,
-                    ...mtOrderFormLoadablified
-                  }))
-                )
+      loadablifyLight(mtOrderForm$).pipe(
+        map(mtOrderFormLoadablified => ({
+          tradingPair,
+          ...mtOrderFormLoadablified
+        })
+        )
+      )
     )
   );
 
@@ -458,8 +463,26 @@ function mtSimpleOrderForm(
       // @ts-ignore
       connect(
         // @ts-ignore
-        inject(MTMyPositionPanel, { createMTFundForm$, approveMTProxy }),
-        mtOrderFormLoadable$
+        MTMyPositionPanel,
+        mtOrderFormLoadable$.pipe(
+          map((state) =>
+            state.status === 'loaded' && state.value ?
+            {
+              status: state.status,
+              value: {
+                createMTFundForm$,
+                approveMTProxy,
+                account: state.value.account,
+                mta: state.value.mta,
+                ma: findMarginableAsset(state.tradingPair.base, state.value.mta)
+              }
+            } : {
+              value: state.value,
+              status: state.status,
+              error: state.error,
+            }
+          )
+        )
       )
     );
 
@@ -477,9 +500,9 @@ function mtSimpleOrderForm(
 
   const depthChartWithLoading$ = createDepthChartWithLoading$(
     mtOrderForm$
-    .pipe(
-      map(f => ({ ...f, matchType: OfferMatchType.direct }))
-    ),
+      .pipe(
+        map(f => ({ ...f, matchType: OfferMatchType.direct }))
+      ),
     orderbook$,
     kindChange
   );
