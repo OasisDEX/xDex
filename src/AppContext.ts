@@ -161,6 +161,12 @@ export function setupAppContext() {
   const theCreateMTAllocateForm$: CreateMTAllocateForm$ =
     curry(createMTAllocateForm$)(gasPrice$, etherPriceUsd$, calls$, readCalls$);
 
+  const wethBalance$ =
+    balancesNoMT.createWethBalances$(context$, initializedAccount$, onEveryBlock$);
+
+  const wrapUnwrapForm$ =
+    curry(createWrapUnwrapForm$)(gasPrice$, etherPriceUsd$, etherBalance$, wethBalance$, calls$);
+
   const MTBalancesViewRxTx =
     inject(
       // @ts-ignore
@@ -188,7 +194,7 @@ export function setupAppContext() {
           WalletView, loadablifyLight(mtBalances$))
       ),
       {
-        approveWallet, disapproveWallet,
+        approveWallet, disapproveWallet, wrapUnwrapForm$
       }
     );
 
@@ -204,23 +210,6 @@ export function setupAppContext() {
   const balancesWithEth$ = combineLatest(balances$, etherBalance$).pipe(
     map(([balances, etherBalance]) => ({ ...balances, ETH: etherBalance })),
   );
-
-  const wethBalance$ =
-    balancesNoMT.createWethBalances$(context$, initializedAccount$, onEveryBlock$);
-
-  const wrapUnwrapForm$ =
-    curry(createWrapUnwrapForm$)(gasPrice$, etherPriceUsd$, etherBalance$, wethBalance$, calls$);
-
-  // const AssetOverviewViewRxTx =
-  //   inject(
-  //     withModal<AssetsOverviewActionProps, AssetsOverviewExtraProps>(
-  //       connect<Authorizable<Loadable<balancesNoMT.CombinedBalances>>, AssetsOverviewExtraProps>(
-  //         AssetOverviewView,
-  //         authorizablify(() => loadablifyLight(combinedBalances$))
-  //       )
-  //     ),
-  //     { approveWallet, disapproveWallet, wrapUnwrapForm$ }
-  //   );
 
   const loadOrderbook = memoizeTradingPair(curry(loadOrderbook$)(context$, onEveryBlock$));
   const currentOrderbook$ = currentTradingPair$.pipe(
