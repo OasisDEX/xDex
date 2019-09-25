@@ -460,7 +460,11 @@ const localnet: NetworkConfig =   {
   cdpManager: '0xC71022a713dA95bD4C926faf180FffBAfEf4bcA6',
   ilks: {
     WETH: 'ETH',
-    // DGX: 'DGX',
+    DAI: 'DAI',
+    DGD: 'DGD',
+    REP: 'REP',
+    ZRX: 'ZRX',
+    BAT: 'BAT',
   } as { [key: string]: string },
   get otcSupportMethods() {
     return load(otcSupport, '0x5de139DbBFd47dd1D2cD906348Fd1887135B2804');
