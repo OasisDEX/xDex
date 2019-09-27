@@ -1,11 +1,14 @@
 import { BigNumber } from 'bignumber.js';
-import { bindNodeCallback, combineLatest, Observable, of } from 'rxjs';
+import { bindNodeCallback, combineLatest, forkJoin, Observable, of } from 'rxjs';
 import {
+  concatAll,
   distinctUntilChanged,
   exhaustMap,
   map,
   mergeMap,
-  shareReplay, startWith,
+  reduce,
+  shareReplay,
+  startWith,
   switchMap,
 } from 'rxjs/operators';
 import * as dsProxy from '../../blockchain/abi/ds-proxy.abi.json';
@@ -23,10 +26,13 @@ import {
   MTHistoryEvent
 } from './mtAccount';
 import { calculateMTAccount, } from './mtCalculate';
-import { createRawMTHistoryFromCache } from './mtHistory';
+import {
+  createRawMTHistoryFromCache, createRawMTLiquidationHistoryFromCache, RawMTLiquidationHistoryEvent
+} from './mtHistory';
 import { getCashCore, getMarginableCore, getNonMarginableCore } from './mtTestUtils';
 
 export function aggregateMTAccountState(
+  context: NetworkConfig,
   proxy: any,
   calls: ReadCalls,
   rawHistories: MTHistoryEvent[][] | undefined
@@ -50,7 +56,23 @@ export function aggregateMTAccountState(
   // console.log('tokenNames', tokenNames);
 
   return calls.mtBalance({ tokens: tokenNames, proxyAddress: proxy.address }).pipe(
-    map((balanceResult) => {
+    switchMap(balancesResult =>
+      combineLatest(
+        of(balancesResult),
+        forkJoin(assetNames.map((token, i) =>
+          ((balancesResult.assets[i].urn === nullAddress) ?
+            of([]) :
+            createRawMTLiquidationHistoryFromCache(context, balancesResult.assets[i].urn)
+          ).pipe(
+            map(history => ({ [token]: history })),
+          )
+        )).pipe(
+          concatAll(),
+          reduce<{ [key: string]: RawMTLiquidationHistoryEvent[] }>((a, e) => ({ ...a, ...e }), {}),
+        ),
+      )
+    ),
+    map(([balanceResult, rawLiquidationHistory]) => {
       const marginables = [...tokenNames.entries()]
         .filter(([_i, token]) => tokens[token].assetKind === AssetKind.marginable)
         .map(([i, token]) => {
@@ -60,7 +82,8 @@ export function aggregateMTAccountState(
             balance: balanceResult.assets[i].urnBalance,
             ...balanceResult.assets[i],
             safeCollRatio: new BigNumber(tokens[token].safeCollRatio as number),
-            rawHistory: (rawHistories ? rawHistories[i] : [])
+            rawHistory: (rawHistories ? rawHistories[i] : []),
+            rawLiquidationHistory: rawLiquidationHistory[token],
           });
         });
 
@@ -156,14 +179,14 @@ export function createMta$(
     );
 
   return combineLatest(context$, calls$, proxyAddress$).pipe(
-    switchMap(([_context, calls, proxyAddress]) => {
+    switchMap(([context, calls, proxyAddress]) => {
 
       if (proxyAddress === undefined) {
         return of(notSetup);
       }
       const proxy = web3.eth.contract(dsProxy as any).at(proxyAddress);
       return combineLatest(mtRawHistory$, onEveryBlock$).pipe(
-        switchMap(([rawHistory]) => aggregateMTAccountState(proxy, calls, rawHistory)),
+        switchMap(([rawHistory]) => aggregateMTAccountState(context, proxy, calls, rawHistory)),
         distinctUntilChanged(isEqual)
       );
     }),

@@ -55,14 +55,24 @@ export interface MTBalanceResult {
     referencePrice: BigNumber;
     minCollRatio: BigNumber;
     allowance: boolean;
-    fee: BigNumber
+    fee: BigNumber;
+    urn: string;
   }>;
 }
 
-const BalanceOuts = 9;
+const BalanceOuts = 10;
 const secondsPerYear = 60 * 60 * 24 * 365;
 
 BigNumber.config({ POW_PRECISION: 50 });
+
+function normalizeAddress(address: string): string | null {
+  const m = address.match(/^(0x)([0-9a-zA-Z]*)$/);
+  if (!m) {
+    return m;
+  }
+  const [, prefix , value] = m;
+  return `${prefix}${'0'.repeat(40 - value.length)}${value}`;
+}
 
 function mtBalancePostprocess(result: BigNumber[], { tokens }: MTBalanceData) : MTBalanceResult {
   return {
@@ -85,7 +95,8 @@ function mtBalancePostprocess(result: BigNumber[], { tokens }: MTBalanceData) : 
         allowance: new BigNumber(result[row + 7]).gte(MIN_ALLOWANCE),
         fee: new BigNumber(result[row + 8])
           .div(new BigNumber(10).pow(27))
-          .pow(secondsPerYear).minus(one)
+          .pow(secondsPerYear).minus(one),
+        urn: normalizeAddress(web3.toHex(result[row + 9]))!,
       };
     })
   };
