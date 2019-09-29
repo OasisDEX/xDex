@@ -1,136 +1,180 @@
 import { BigNumber } from 'bignumber.js';
 import * as React from 'react';
+import { Observable } from 'rxjs/index';
 import { CDPHistoryView } from '../../balances-mt/CDPHistoryView';
+import { TxState } from '../../blockchain/transactions';
+import { connect } from '../../utils/connect';
 import { formatPercent, formatPrecision } from '../../utils/formatters/format';
 import { Money } from '../../utils/formatters/Formatters';
+import { Button } from '../../utils/forms/Buttons';
+import { inject } from '../../utils/inject';
+import { ModalOpenerProps, ModalProps } from '../../utils/modal';
 import { one, zero } from '../../utils/zero';
-import { MarginableAsset } from '../state/mtAccount';
+import { CreateMTAllocateForm$Props } from '../allocate/mtOrderAllocateDebtFormView';
+import { MarginableAsset, MTAccount, UserActionKind } from '../state/mtAccount';
+import { CreateMTFundForm$, MTTransferFormState } from '../transfer/mtTransferForm';
+import { MtTransferFormView } from '../transfer/mtTransferFormView';
 import * as styles from './MTMyPositionView.scss';
 
+interface MTMyPositionViewProps {
+  ma: MarginableAsset;
+  createMTFundForm$: CreateMTFundForm$;
+  close?: () => void;
+}
+
 export class MTMyPositionView extends
-  React.Component<MarginableAsset & {purchasingPower?: BigNumber, pnl?: BigNumber}>
+  React.Component<MTMyPositionViewProps & ModalOpenerProps>
 {
   public render() {
-    const equity = this.props.balance.times(this.props.referencePrice).minus(this.props.debt);
-    const leverage = this.props.leverage && !this.props.leverage.isNaN()
-      ? this.props.leverage :
-        this.props.balance.gt(zero) ? one : zero;
+    const equity = this.props.ma.balance
+      .times(this.props.ma.referencePrice).minus(this.props.ma.debt);
+    const leverage = this.props.ma.leverage && !this.props.ma.leverage.isNaN()
+      ? this.props.ma.leverage :
+      this.props.ma.balance.gt(zero) ? one : zero;
     return (
       <div>
         <div className={styles.MTPositionPanel}>
-        <div className={styles.MTPositionColumn}>
-          <div className={styles.summaryRow}>
-            <div className={styles.summaryLabel}>
-              Type:
+          <div className={styles.MTPositionColumnNarrow}>
+            <div className={styles.statsBox}>
+              <div className={styles.summaryValue}>
+                <>Long - { formatPrecision(leverage, 1) }x</>
+                <div className={styles.summaryLabel}>Leverage</div>
+              </div>
             </div>
-            <div className={styles.summaryValue}>
-              <>Long - { formatPrecision(leverage, 1) }x</>
-            </div>
-          </div>
-          <div className={styles.summaryRow}>
-            <div className={styles.summaryLabel}>
-               PnL:
-            </div>
-            <div className={styles.summaryValue}>
-              { this.props.pnl && (!this.props.pnl.isNaN()) &&
-                this.props.pnl.gt(zero) ?
-                formatPercent(this.props.pnl) : <span>-</span>
-              }
+            <div className={styles.statsBox}>
+              <div className={styles.summaryValue}>
+                <>-</>
+                <div className={styles.summaryLabel}>PnL</div>
+              </div>
             </div>
           </div>
-          <div className={styles.summaryRow}>
-            <div className={styles.summaryLabel}>
-               Coll. Ratio
+          <div className={styles.MTPositionColumn}>
+            <div className={styles.summaryRow}>
+              <div className={styles.summaryLabel}>
+                Liqu. Price
+              </div>
+              <div className={styles.summaryValue}>
+                {
+                  this.props.ma.liquidationPrice && !this.props.ma.liquidationPrice.isNaN()
+                  && this.props.ma.liquidationPrice.gt(zero) ?
+                    <>
+                      {formatPrecision(this.props.ma.liquidationPrice, 2)} USD
+                    </>
+                    : <span>-</span>
+                }
+              </div>
             </div>
-            <div className={styles.summaryValue}>
-              { this.props.currentCollRatio && !this.props.currentCollRatio.isNaN() ?
-                formatPercent(this.props.currentCollRatio.times(100)) : <span>-</span>
-              }
+            <div className={styles.summaryRow}>
+              <div className={styles.summaryLabel}>
+                Liqu. Fee
+              </div>
+              <div className={styles.summaryValue}>
+                15%
+                {/*{*/}
+                {/*this.props.liquidationFee && !this.props.liquidationFee.isNaN() ?*/}
+                {/*<>*/}
+                {/*{formatPrecision(this.props.liquidationPrice, 2)} USD*/}
+                {/*</>*/}
+                {/*: <span>-</span>*/}
+                {/*}*/}
+              </div>
             </div>
+            <div className={styles.summaryRow}>
+              <div className={styles.summaryLabel}>
+                Dai debt
+              </div>
+              <div className={styles.summaryValue}>
+                {
+                  this.props.ma.debt && !this.props.ma.debt.isNaN() ?
+                    <Money
+                      value={this.props.ma.debt}
+                      token="DAI"
+                      fallback="-"
+                    /> : <span>-</span>
+                }
+              </div>
+            </div>
+            <div className={styles.summaryRow}>
+              <div className={styles.summaryLabel}>
+                Interest Rate
+              </div>
+              <div className={styles.summaryValue}>
+                15.5%
+              </div>
+            </div>
+          </div>
+          <div className={styles.MTPositionColumn}>
+            <div className={styles.summaryRow}>
+              <div className={styles.summaryLabel}>
+                Your Balance
+              </div>
+              <div className={styles.summaryValue}>
+                {
+                  this.props.ma.balance && !this.props.ma.balance.isNaN() ?
+                    <Money
+                      value={this.props.ma.balance}
+                      token={this.props.ma.name}
+                      fallback="-"
+                    /> : <span>-</span>
+                }
+              </div>
+            </div>
+            <div className={styles.summaryRow}>
+              <div className={styles.summaryLabel}>
+                Equity
+              </div>
+              <div className={styles.summaryValue}>
+                {
+                  equity && !equity.isNaN() ?
+                    <Money value={equity} token="DAI" /> : <span>-</span>
+                }
+              </div>
+            </div>
+            <div className={styles.summaryRow}>
+              <div className={styles.summaryLabel}>
+                Average Price
+              </div>
+              <div className={styles.summaryValue}>
+                { this.props.ma.referencePrice &&
+                <Money value={this.props.ma.referencePrice} token="DAI" />
+                }
+              </div>
+            </div>
+          </div>
+          <div className={styles.MTPositionColumnNarrow}>
+            <Button
+              size="lg"
+              className={styles.actionButton}
+              disabled={!this.props.ma.availableActions.includes(UserActionKind.fund)}
+              onClick={() => this.transfer(UserActionKind.fund, this.props.ma.name)}
+            >
+              Deposit
+            </Button>
+            <Button
+              size="lg"
+              className={styles.actionButton}
+              onClick={() => this.transfer(UserActionKind.draw, this.props.ma.name)}
+            >
+              Withdraw
+            </Button>
           </div>
         </div>
-        <div className={styles.MTPositionColumn}>
-          <div className={styles.summaryRow}>
-            <div className={styles.summaryLabel}>
-              Purchasing Power
-            </div>
-            <div className={styles.summaryValue}>
-              { this.props.purchasingPower ?
-                <Money value={this.props.purchasingPower} token="DAI"/> :  <span>-</span>
-              }
-            </div>
-          </div>
-          <div className={styles.summaryRow}>
-            <div className={styles.summaryLabel}>
-              Average Price
-            </div>
-            <div className={styles.summaryValue}>
-              { this.props.referencePrice &&
-                <Money value={this.props.referencePrice} token="DAI" />
-              }
-            </div>
-          </div>
-          <div className={styles.summaryRow}>
-            <div className={styles.summaryLabel}>
-              Liq. Price
-            </div>
-            <div className={styles.summaryValue}>
-              {
-                this.props.liquidationPrice && !this.props.liquidationPrice.isNaN()
-                && this.props.liquidationPrice.gt(zero) ?
-                <>
-                  {formatPrecision(this.props.liquidationPrice, 2)} USD
-                </>
-                : <span>-</span>
-              }
-            </div>
-          </div>
-        </div>
-        <div className={styles.MTPositionColumn}>
-          <div className={styles.summaryRow}>
-            <div className={styles.summaryLabel}>
-              Equity
-            </div>
-            <div className={styles.summaryValue}>
-              {
-                equity && !equity.isNaN() ?
-                <Money value={equity} token="DAI" /> : <span>-</span>
-              }
-            </div>
-          </div>
-          <div className={styles.summaryRow}>
-            <div className={styles.summaryLabel}>
-              Amount
-            </div>
-            <div className={styles.summaryValue}>
-              {
-                this.props.balance && !this.props.balance.isNaN() ?
-                  <Money
-                    value={this.props.balance}
-                    token={this.props.name}
-                    fallback="-"
-                  /> : <span>-</span>
-              }
-            </div>
-          </div>
-          <div className={styles.summaryRow}>
-            <div className={styles.summaryLabel}>
-              Dai debt
-            </div>
-            <div className={styles.summaryValue}>
-              {
-                this.props.debt && !this.props.debt.isNaN() ?
-                  <Money
-                    value={this.props.debt}
-                    token="DAI"
-                    fallback="-"
-                  /> : <span>-</span>
-              }
-            </div>
-          </div>
-        </div>
-      </div>
-      <CDPHistoryView {...this.props}/>
-    </div>);
+        <CDPHistoryView {...this.props.ma}/>
+      </div>);
+  }
+
+  private transfer (actionKind: UserActionKind, token: string) {
+    const fundForm$ = this.props.createMTFundForm$(actionKind, token);
+    const MTFundFormViewRxTx =
+      connect<MTTransferFormState, ModalProps>(
+        inject(
+          MtTransferFormView,
+          // cast is safe as CreateMTAllocateForm$Props
+          // is not used inside MtTransferFormView!
+          (this.props as any) as (CreateMTAllocateForm$Props & ModalOpenerProps),
+        ),
+        fundForm$
+      );
+    this.props.open(MTFundFormViewRxTx);
   }
 }

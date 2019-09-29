@@ -227,7 +227,7 @@ export function setupAppContext() {
   );
 
   const { MTSimpleOrderPanelRxTx, MTMyPositionPanelRxTx, MTSimpleOrderbookPanelTxRx } =
-    mtSimpleOrderForm(mta$, currentOrderbook$, createMTFundForm$, approveMTProxy);
+    mtSimpleOrderForm(mta$, currentOrderbook$, createMTFundForm$, approveMTProxy, approveWallet);
 
   const MTAccountDetailsRxTx = connect(MtAccountDetailsView, mta$);
 
@@ -413,7 +413,8 @@ function mtSimpleOrderForm(
   orderbook$: Observable<Orderbook>,
   // orderbookWithTradingPair$: Observable<LoadableWithTradingPair<Orderbook>>,
   createMTFundForm$: CreateMTFundForm$,
-  approveMTProxy: (args: {token: string; proxyAddress: string}) => Observable<TxState>
+  approveMTProxy: (args: {token: string; proxyAddress: string}) => Observable<TxState>,
+  approveWallet: (token: string) => Observable<TxState>
 ) {
   const mtOrderForm$ = currentTradingPair$.pipe(
     switchMap(tradingPair =>

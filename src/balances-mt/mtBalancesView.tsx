@@ -48,7 +48,7 @@ export class MTBalancesView
     const { status, value, error, ...props } = this.props;
     return (
       <Panel className={styles.balancesPanel}>
-        <PanelHeader>Asset overview</PanelHeader>
+        <PanelHeader>Leverage Account</PanelHeader>
         <WithLoadingIndicator loadable={this.props}>
           {(combinedBalances) => (
             combinedBalances.ma ?
@@ -97,14 +97,12 @@ export class MTBalancesViewInternal
       <Table className={styles.table} align="left">
         <thead>
         <tr>
-          <th style={{ width: '15%' }}>Symbol</th>
-          <th style={{ width: '17%' }}>Asset</th>
-          <th style={{ width: '20%' }} className={styles.center}>Unlock on Proxy</th>
-          <th style={{ width: '15%' }} className={styles.amount}>Wallet</th>
-          <th style={{ width: '15%' }} className={styles.center}>Transfer</th>
-          <th style={{ width: '15%' }} className={styles.amount}>Margin Account</th>
-          <th style={{ width: '15%' }} className={styles.amount}>Value (DAI)</th>
-          <th style={{ width: '15%' }} className={styles.amount}>Cash (DAI)</th>
+          <th>Asset</th>
+          <th className={styles.amount}>Interest Rate</th>
+          <th className={styles.amount}>Market Price</th>
+          <th className={styles.amount}>Liqu. Price</th>
+          <th className={styles.amount}>PnL</th>
+          <th className={styles.amount}>Your Balance</th>
         </tr>
         </thead>
         <tbody>
@@ -120,70 +118,88 @@ export class MTBalancesViewInternal
               data-test-id={`${combinedBalance.name}-overview`}
               key={combinedBalance.name}
             >
-              <td>{combinedBalance.name}</td>
               <td>
                 <div className={styles.centeredAsset}>
-                  {tokens[combinedBalance.name].icon} <Currency
+                <div style={{ width: '24px', height: '24px', marginRight: '12px' }}>
+                  {tokens[combinedBalance.name].iconColor}
+                </div>
+                  <Currency
                   value={tokens[combinedBalance.name].name} />
                 </div>
               </td>
-              <td className={styles.center}>
-                {combinedBalance.asset &&
-                  <Slider blocked={!combinedBalance.asset.allowance}
-                        disabled={
-                          this.props.mta.state !== MTAccountState.setup ||
-                          combinedBalance.asset.allowance
-                        }
-                        onClick={this.approveMTProxy(combinedBalance)}
-                        data-test-id="toggle-leverage-allowance"
-                  />
-                }
-              </td>
-              <td data-test-id={`${combinedBalance.name}-balance`} className={styles.amount}>
-                <FormatAmount value={combinedBalance.walletBalance} token={combinedBalance.name} />
-              </td>
-              <td className={styles.center}>
-                { combinedBalance.asset &&
-                  <div>
-                    <button className={`${styles.transferBtn} ${styles.transferBtnLeft}`}
-                            disabled={!this.isActionEnabled(
-                              combinedBalance.name,
-                              UserActionKind.draw)}
-                            onClick={() => this.transfer(
-                              UserActionKind.draw,
-                              combinedBalance.name)}
-                    >
-                      <Arrow/>
-                    </button>
-                    < button className={styles.transferBtn}
-                             disabled={!this.isActionEnabled(
-                               combinedBalance.name,
-                               UserActionKind.fund)}
-                             onClick={() => this.transfer(
-                               UserActionKind.fund,
-                               combinedBalance.name)}
-                    >
-                      <Arrow />
-                    </button>
-                  </div>
-                }
+              <td className={styles.amount}>
+                15%
               </td>
               <td className={styles.amount}>
-                {combinedBalance.asset && combinedBalance.name !== 'DAI' &&
-                 <FormatAmount
-                   value={combinedBalance.asset.balance}
-                   token={combinedBalance.name}
-                 />
-                }
+                $333.44
               </td>
               <td className={styles.amount}>
-                {combinedBalance.name !== 'ETH' && combinedBalance.name !== 'DAI' &&
-                  <FormatAmount value={combinedBalance.mtAssetValueInDAI} token="DAI"/>
-                }
+                -
               </td>
               <td className={styles.amount}>
-                  <FormatAmount value={combinedBalance.cashBalance} token="DAI"/>
+                -
               </td>
+              <td className={styles.amount}>
+               0.000
+              </td>
+
+              {/*<td className={styles.center}>*/}
+                {/*{combinedBalance.asset &&*/}
+                  {/*<Slider blocked={!combinedBalance.asset.allowance}*/}
+                        {/*disabled={*/}
+                          {/*this.props.mta.state !== MTAccountState.setup ||*/}
+                          {/*combinedBalance.asset.allowance*/}
+                        {/*}*/}
+                        {/*onClick={this.approveMTProxy(combinedBalance)}*/}
+                        {/*data-test-id="toggle-leverage-allowance"*/}
+                  {/*/>*/}
+                {/*}*/}
+              {/*</td>*/}
+              {/*<td data-test-id={`${combinedBalance.name}-balance`} className={styles.amount}>*/}
+                {/*<FormatAmount value={combinedBalance.walletBalance} token={combinedBalance.name} />*/}
+              {/*</td>*/}
+              {/*<td className={styles.center}>*/}
+                {/*{ combinedBalance.asset &&*/}
+                  {/*<div>*/}
+                    {/*<button className={`${styles.transferBtn} ${styles.transferBtnLeft}`}*/}
+                            {/*disabled={!this.isActionEnabled(*/}
+                              {/*combinedBalance.name,*/}
+                              {/*UserActionKind.draw)}*/}
+                            {/*onClick={() => this.transfer(*/}
+                              {/*UserActionKind.draw,*/}
+                              {/*combinedBalance.name)}*/}
+                    {/*>*/}
+                      {/*<Arrow/>*/}
+                    {/*</button>*/}
+                    {/*< button className={styles.transferBtn}*/}
+                             {/*disabled={!this.isActionEnabled(*/}
+                               {/*combinedBalance.name,*/}
+                               {/*UserActionKind.fund)}*/}
+                             {/*onClick={() => this.transfer(*/}
+                               {/*UserActionKind.fund,*/}
+                               {/*combinedBalance.name)}*/}
+                    {/*>*/}
+                      {/*<Arrow />*/}
+                    {/*</button>*/}
+                  {/*</div>*/}
+                {/*}*/}
+              {/*</td>*/}
+              {/*<td className={styles.amount}>*/}
+                {/*{combinedBalance.asset && combinedBalance.name !== 'DAI' &&*/}
+                 {/*<FormatAmount*/}
+                   {/*value={combinedBalance.asset.balance}*/}
+                   {/*token={combinedBalance.name}*/}
+                 {/*/>*/}
+                {/*}*/}
+              {/*</td>*/}
+              {/*<td className={styles.amount}>*/}
+                {/*{combinedBalance.name !== 'ETH' && combinedBalance.name !== 'DAI' &&*/}
+                  {/*<FormatAmount value={combinedBalance.mtAssetValueInDAI} token="DAI"/>*/}
+                {/*}*/}
+              {/*</td>*/}
+              {/*<td className={styles.amount}>*/}
+                  {/*<FormatAmount value={combinedBalance.cashBalance} token="DAI"/>*/}
+              {/*</td>*/}
             </tr>
             );
           })}

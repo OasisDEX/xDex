@@ -126,7 +126,6 @@ export interface MTSimpleFormState extends HasGasEstimation {
   isSafePost?: boolean;
   slippageLimit?: BigNumber;
   priceImpact?: BigNumber;
-  pnl?: BigNumber;
   submit: (state: MTSimpleFormState) => void;
   change: (change: ManualChange) => void;
   view: ViewKind;
@@ -373,7 +372,6 @@ function addPurchasingPower(state: MTSimpleFormState) {
 
   return {
     ...state,
-    pnl: new BigNumber(0),
     realPurchasingPower: baseAsset.assetKind === AssetKind.marginable ?
       realPurchasingPowerMarginable(
         baseAsset,

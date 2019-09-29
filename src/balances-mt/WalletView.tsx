@@ -1,34 +1,25 @@
 import * as React from 'react';
-
 import { Observable } from 'rxjs';
 import { tokens } from '../blockchain/config';
 import { TxState } from '../blockchain/transactions';
-import {connect} from '../utils/connect';
-// import {
-// CreateMTAllocateForm$Props
-// } from '../marginTrading/allocate/mtOrderAllocateDebtFormView';
-// import {
-// findAsset, MTAccountState, UserActionKind
-// } from '../marginTrading/state/mtAccount';
-// import { MTTransferFormState } from '../marginTrading/transfer/mtTransferForm';
-// import { MtTransferFormView } from '../marginTrading/transfer/mtTransferFormView';
-// import { connect } from '../utils/connect';
-import { FormatAmount } from '../utils/formatters/Formatters';
-import {Button} from '../utils/forms/Buttons';
-import { Slider } from '../utils/forms/Slider';
-import {inject} from '../utils/inject';
-// import { inject } from '../utils/inject';
-import {Loadable, loadablifyLight} from '../utils/loadable';
+import dottedMenuSvg from '../marginTrading/positions/dotted-menu.svg';
+import { connect } from '../utils/connect';
+import { FormatAmount, Money } from '../utils/formatters/Formatters';
+import { Button } from '../utils/forms/Buttons';
+import { SvgImage } from '../utils/icons/utils';
+import { inject } from '../utils/inject';
+import { Loadable, loadablifyLight } from '../utils/loadable';
 import { WithLoadingIndicator } from '../utils/loadingIndicator/LoadingIndicator';
 import { ModalOpenerProps, ModalProps, } from '../utils/modal';
 import { Panel, PanelHeader } from '../utils/panel/Panel';
 import { Table } from '../utils/table/Table';
 import { Currency } from '../utils/text/Text';
-import {zero} from '../utils/zero';
+import { zero } from '../utils/zero';
 import { WrapUnwrapFormKind, WrapUnwrapFormState } from '../wrapUnwrap/wrapUnwrapForm';
-import {WrapUnwrapFormView} from '../wrapUnwrap/WrapUnwrapFormView';
+import { WrapUnwrapFormView } from '../wrapUnwrap/WrapUnwrapFormView';
 import { CombinedBalance, CombinedBalances } from './balances';
 import * as styles from './mtBalancesView.scss';
+import {formatPrecision} from "../utils/formatters/format";
 
 export type WalletViewProps = ModalOpenerProps & {
   wrapUnwrapForm$: (formKind: WrapUnwrapFormKind) => Observable<WrapUnwrapFormState>;
@@ -56,17 +47,44 @@ export class WalletView
   }
 }
 
+class AssetDropdownMenu extends React.Component<{ disapproveWallet: () => void; }> {
+  public render() {
+    return (
+      <div
+        className={styles.dropdownMenu}
+        style={{ display: 'flex' }}
+      >
+        <Button
+          className={styles.dropdownButton}
+          data-test-id="myposition-actions-list"
+        >
+          <SvgImage image={dottedMenuSvg}/>
+        </Button>
+        <div className={styles.dropdownList}>
+          <div>
+            <Button
+              size="md"
+              block={true}
+              onClick={() => this.props.disapproveWallet()}
+            >Disable</Button>
+            <br/>
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
+
 export class WalletViewInternal extends React.Component<CombinedBalances & WalletViewProps> {
   public render() {
     return (
       <Table className={styles.table} align="left">
         <thead>
         <tr>
-          <th style={{ width: '15%' }}>Symbol</th>
-          <th style={{ width: '17%' }}>Asset</th>
-          <th style={{ width: '20%' }}>Action</th>
-          <th style={{ width: '20%' }} className={styles.center}>Unlock</th>
-          <th style={{ width: '15%' }} className={styles.amount}>Wallet</th>
+          <th>Asset</th>
+          <th className={styles.amount}>Your Balance</th>
+          <th className={styles.amount}>Total Value</th>
+          <th className={styles.amount}>Actions</th>
         </tr>
         </thead>
         <tbody>
@@ -75,57 +93,63 @@ export class WalletViewInternal extends React.Component<CombinedBalances & Walle
         </tr> }
         { this.props.balances && this.props.balances.map(combinedBalance => {
           return (
-          <tr data-test-id={`${combinedBalance.name}-overview`} key={combinedBalance.name}>
-            <td>{combinedBalance.name}</td>
-            <td>
-              <div className={styles.centeredAsset}>
-                {tokens[combinedBalance.name].icon} <Currency
-                value={tokens[combinedBalance.name].name} />
-              </div>
-            </td>
-            <td>
-              {combinedBalance.name === 'ETH' &&
-              <Button
-                data-test-id="open-wrap-form"
-                color="grey"
-                size="sm"
-                // className={styles.wrapUnwrapBtn}
-                block={true}
-                onClick={() => this.wrap()}
-                disabled={combinedBalance.walletBalance.eq(zero)}
-              >
-                Wrap
-              </Button>}
-
-              { combinedBalance.name === 'WETH' &&
-              <Button
+            <tr data-test-id={`${combinedBalance.name}-overview`} key={combinedBalance.name}>
+              <td>
+                <div className={styles.centeredAsset}>
+                  <div style={{ width: '24px', height: '24px', marginRight: '12px' }}>
+                    {tokens[combinedBalance.name].iconColor}
+                  </div>
+                  <Currency
+                    value={tokens[combinedBalance.name].name} />
+                </div>
+              </td>
+              <td data-test-id={`${combinedBalance.name}-balance`} className={styles.amount}>
+                <Money value={combinedBalance.walletBalance} token={combinedBalance.name} />
+              </td>
+              <td className={styles.amount}>
+                $ {formatPrecision(combinedBalance.mtAssetValueInDAI, 2)}
+              </td>
+              <td className={styles.amount} style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                {combinedBalance.name === 'ETH' &&
+                <Button
+                  data-test-id="open-wrap-form"
+                  className={styles.actionButton}
+                  size="lg"
+                  onClick={() => this.wrap()}
+                  disabled={combinedBalance.walletBalance.eq(zero)}
+                >
+                  Wrap
+                </Button>}
+                { combinedBalance.name === 'WETH' &&
+                <Button
                   data-test-id="open-unwrap-form"
-                  color="grey"
-                  size="sm"
-                  // className={styles.wrapUnwrapBtn}
-                  block={true}
+                  className={styles.actionButton}
+                  size="lg"
                   onClick={() => this.unwrap()}
                   disabled={combinedBalance.walletBalance.eq(zero)}
-              >
+                >
                   Unwrap
-              </Button>
-              }
-            </td>
-            <td>
-              {combinedBalance.asset &&
-                <Slider blocked={!combinedBalance.allowance}
-                        disabled={
-                          combinedBalance.allowance
-                        }
-                        onClick={this.approveWallet(combinedBalance)}
-                        data-test-id="toggle-leverage-allowance"
-                />
-              }
-            </td>
-            <td data-test-id={`${combinedBalance.name}-balance`} className={styles.amount}>
-              <FormatAmount value={combinedBalance.walletBalance} token={combinedBalance.name} />
-            </td>
-          </tr>
+                </Button>
+                }
+                {
+                  combinedBalance && combinedBalance.allowance ?
+                    <AssetDropdownMenu {...{
+                      disapproveWallet: this.disapproveWallet(combinedBalance)
+                    }}
+                    />
+                    : <>
+                      {
+                        combinedBalance.name !== 'ETH' &&
+                        <Button
+                          className={styles.actionButton}
+                          size="lg"
+                          onClick={this.approveWallet(combinedBalance)}
+                        >Enable</Button>
+                      }
+                      </>
+                }
+              </td>
+            </tr>
           );
         })}
         </tbody>
@@ -136,6 +160,11 @@ export class WalletViewInternal extends React.Component<CombinedBalances & Walle
   private approveWallet(combinedBalance: CombinedBalance): () => void {
     return () => {
       this.props.approveWallet(combinedBalance.name);
+    };
+  }
+  private disapproveWallet(combinedBalance: CombinedBalance): () => void {
+    return () => {
+      this.props.disapproveWallet(combinedBalance.name);
     };
   }
 
