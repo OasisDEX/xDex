@@ -281,7 +281,8 @@ export function calculateMarginable(
     availableBalance,
     safe,
     liquidationInProgress,
-    history
+    history,
+    rawLiquidationHistory: ma.rawLiquidationHistory,
   };
 }
 

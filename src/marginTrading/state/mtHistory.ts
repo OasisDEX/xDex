@@ -1,7 +1,6 @@
 import apolloBoost, { gql } from 'apollo-boost';
 import { BigNumber } from 'bignumber.js';
-import { Observable } from 'rxjs';
-import { fromPromise } from 'rxjs/internal/observable/fromPromise';
+import { from, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { NetworkConfig } from '../../blockchain/config';
@@ -198,7 +197,67 @@ import { MTHistoryEvent } from './mtAccount';
 //   } as MTHistoryEvent),
 // });
 
+export interface RawMTLiquidationHistoryEvent {
+  type: string;
+  auctionId: number;
+  lot: BigNumber;
+  bid: BigNumber;
+  tab: BigNumber;
+  timestamp: number;
+}
+
 export type RawMTHistoryEvent = Exclude<MTHistoryEvent, 'dAmount' | 'dDAIAmount' >;
+
+export function createRawMTLiquidationHistoryFromCache(
+  context: NetworkConfig,
+  urn: string,
+): Observable<RawMTLiquidationHistoryEvent[]> {
+  const client = new apolloBoost({
+    uri: context.oasisDataService.url,
+  });
+
+  const q = gql`
+    query allLeveragedLiquidationEvents($urn: String) {
+      allLeveragedLiquidationEvents(filter: {
+        urn: {equalTo: $urn}
+      }) {
+        nodes {
+          type
+          auctionId
+          lot
+          bid
+          tab
+          timestamp
+        }
+      }
+    }
+  `;
+
+  const variables = {
+    // devMode: config.devMode,
+    urn,
+  };
+
+  return from(client.query({ variables, query: q })).pipe(
+    map((result: any) =>
+      result.data.allLeveragedLiquidationEvents.nodes.map(({
+        type,
+        auctionId,
+        lot,
+        bid,
+        tab,
+        timestamp,
+      }: any) => ({
+        type,
+        auctionId,
+        timestamp,
+        lot: new BigNumber(lot),
+        bid: new BigNumber(bid),
+        tab: new BigNumber(tab),
+      })),
+    ),
+  );
+}
 
 export function createRawMTHistoryFromCache(
   proxy: any,
@@ -236,7 +295,7 @@ export function createRawMTHistoryFromCache(
     proxy: proxy.address
   };
 
-  return fromPromise(client.query({ variables, query: q })).pipe(
+  return from(client.query({ variables, query: q })).pipe(
     map((result: any) =>
       result.data.allLeveragedEvents.nodes.map(({
         type,

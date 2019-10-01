@@ -1,6 +1,7 @@
 import { BigNumber } from 'bignumber.js';
 import * as React from 'react';
 import { CDPHistoryView } from '../../balances-mt/CDPHistoryView';
+import { CDPLiquidationHistoryView } from '../../balances-mt/CDPLiquidationHistoryView';
 import { formatPercent, formatPrecision } from '../../utils/formatters/format';
 import { Money } from '../../utils/formatters/Formatters';
 import { one, zero } from '../../utils/zero';
@@ -131,6 +132,7 @@ export class MTMyPositionView extends
         </div>
       </div>
       <CDPHistoryView {...this.props}/>
+      <CDPLiquidationHistoryView {...this.props}/>
     </div>);
   }
 }
