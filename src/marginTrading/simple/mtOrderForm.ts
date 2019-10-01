@@ -39,7 +39,7 @@ import { minusOne, zero } from '../../utils/zero';
 import { EditableDebt } from '../allocate/mtOrderAllocateDebtForm';
 import { prepareBuyAllocationRequest } from '../plan/planBuy';
 import { prepareSellAllocationRequest } from '../plan/planSell';
-import { getPriceImpact, getTotal } from '../plan/planUtils';
+import { eat, getPriceImpact, getTotal } from '../plan/planUtils';
 import {
   findAsset,
   findMarginableAsset,
@@ -114,6 +114,7 @@ export interface MTSimpleFormState extends HasGasEstimation {
   dustLimitBase?: BigNumber;
   mta?: MTAccount;
   realPurchasingPower?: BigNumber;
+  realPurchasingPowerPost?: BigNumber;
   plan?: Operation[] | Impossible;
   collRatio?: BigNumber;
   collRatioPost?: BigNumber;
@@ -268,7 +269,7 @@ function validate(state: MTSimpleFormState): MTSimpleFormState {
     baseAsset && quoteAsset && state.realPurchasingPower
   ) {
     const [spendAmount, spendAssetAvailBalance, spendAssetName, spendField, spendDustLimit,
-        receiveAmount, receiveAssetName, receiveField] =
+      receiveAmount, receiveAssetName, receiveField] =
       state.kind === OfferType.sell ?
       [state.amount, baseAsset.balance, baseAsset.name, 'amount', state.dustLimitBase,
         state.total, quoteAsset.name, 'total'] :
@@ -362,18 +363,37 @@ function addPurchasingPower(state: MTSimpleFormState) {
     return state;
   }
 
-  return {
-    ...state,
-    pnl: new BigNumber(0),
-    realPurchasingPower: baseAsset.assetKind === AssetKind.marginable ?
+  const realPurchasingPower = baseAsset.assetKind === AssetKind.marginable ?
+    realPurchasingPowerMarginable(
+      baseAsset,
+      state.orderbook.sell)
+    :
+    realPurchasingPowerNonMarginable(
+      state.mta.cash.balance,
+      state.orderbook.sell
+    );
+
+  let realPurchasingPowerPost;
+  if (state.amount && state.price) {
+    const cashAvailable = state.amount.times(state.price);
+    const [, , offers] = eat(cashAvailable, state.orderbook.sell);
+
+    realPurchasingPowerPost = baseAsset.assetKind === AssetKind.marginable ?
       realPurchasingPowerMarginable(
         baseAsset,
-        state.orderbook.sell)
-        :
-        realPurchasingPowerNonMarginable(
-          state.mta.cash.balance,
-          state.orderbook.sell
-        )
+        offers)
+      :
+      realPurchasingPowerNonMarginable(
+        state.mta.cash.balance,
+        offers
+      );
+  }
+
+  return {
+    ...state,
+    realPurchasingPower,
+    realPurchasingPowerPost,
+    pnl: new BigNumber(0),
   };
 }
 
@@ -462,7 +482,7 @@ type PlanInfo = [
     balancePost?: BigNumber,
     isSafePost?: boolean
   }
-];
+  ];
 
 function getBuyPlan(
   mta: MTAccountSetup,
@@ -509,13 +529,13 @@ function getBuyPlan(
   // );
 
   const delta = BigNumber.min(request.targetDaiBalance, zero).times(minusOne);
-
   const postTradeAsset = calculateMarginable(
     {
       ...asset,
       debt: asset.debt.plus(delta)
     } as MarginableAssetCore,
   );
+  console.log('getBuyPlan post trade asset', postTradeAsset);
   const collRatioPost = postTradeAsset.currentCollRatio;
   const liquidationPricePost = postTradeAsset.liquidationPrice;
   const isSafePost = postTradeAsset.safe;
@@ -684,7 +704,7 @@ function prepareSubmit(
 ): [
   (state: MTSimpleFormState) => void,
   () => void, Observable<ProgressChange | FormResetChange>
-] {
+  ] {
 
   const progressChange$ = new Subject<ProgressChange | FormResetChange>();
   const cancel$ = new Subject<void>();
@@ -732,14 +752,14 @@ function prepareSubmit(
             total,
             gas: Math.trunc(gasEstimation * 1.2),
           }).pipe(
-              transactionToX<ProgressChange | FormResetChange>(
-                progressChange(ProgressStage.waitingForApproval),
-                progressChange(ProgressStage.waitingForConfirmation),
-                progressChange(undefined), // (ProgressStage.fiasco),
-                () => of(formResetChange) // (ProgressStage.done)
-              ),
-              takeUntil(cancel$)
-            );
+            transactionToX<ProgressChange | FormResetChange>(
+              progressChange(ProgressStage.waitingForApproval),
+              progressChange(ProgressStage.waitingForConfirmation),
+              progressChange(undefined), // (ProgressStage.fiasco),
+              () => of(formResetChange) // (ProgressStage.done)
+            ),
+            takeUntil(cancel$)
+          );
         }),
       ),
     );
@@ -826,13 +846,13 @@ export function createMTSimpleOrderForm$(
   ).pipe(
     scan(applyChange, initialState),
     map(addUserConfig),
-    map(addPurchasingPower),
     map(addApr),
     map(addPriceTotal),
     map(addPriceImpact),
     map(validate),
     map(addPreTradeInfo),
     map(addPlan),
+    map(addPurchasingPower),
     switchMap(curry(estimateGasPrice)(calls$, readCalls$)),
     scan(freezeGasEstimation),
     map(isReadyToProceed),
