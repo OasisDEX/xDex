@@ -43,7 +43,7 @@ test('mta with empty assets', () => {
   // total assets => 0
   // lev = undefined => -
   const mta = calculateMTAccount(
-    null,
+    {},
     daiCashAsset,
     [{
       ...ethMarginableAsset,
@@ -65,7 +65,7 @@ test('mta with empty assets', () => {
 
 test('8k debt, 30k total assets', () => {
   const mta = calculateMTAccount(
-    null,
+    {},
     daiCashAsset,
     [ethMarginableAsset, dgxMarginableAsset],
     []
@@ -82,7 +82,7 @@ test('8k debt, 30k total assets', () => {
 
 test('0 debt, 30k total assets', () => {
   const mta = calculateMTAccount(
-    null,
+    {},
     daiCashAsset,
     [{
       ...ethMarginableAsset,
