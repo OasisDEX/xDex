@@ -4,6 +4,7 @@ import { Observable } from 'rxjs/index';
 import { CDPHistoryView } from '../../balances-mt/CDPHistoryView';
 import { TxState } from '../../blockchain/transactions';
 import { connect } from '../../utils/connect';
+import { CDPLiquidationHistoryView } from '../../balances-mt/CDPLiquidationHistoryView';
 import { formatPercent, formatPrecision } from '../../utils/formatters/format';
 import { Money } from '../../utils/formatters/Formatters';
 import { Button } from '../../utils/forms/Buttons';
@@ -159,7 +160,8 @@ export class MTMyPositionView extends
             </Button>
           </div>
         </div>
-        <CDPHistoryView {...this.props.ma}/>
+        <CDPHistoryView {...this.props}/>
+        <CDPLiquidationHistoryView {...this.props}/>
       </div>);
   }
 

@@ -7,7 +7,7 @@ import {
 import { Calls$ } from '../../blockchain/calls/calls';
 import { AssetKind } from '../../blockchain/config';
 import { TxState } from '../../blockchain/transactions';
-import { RawMTHistoryEvent } from './mtHistory';
+import { RawMTHistoryEvent, RawMTLiquidationHistoryEvent } from './mtHistory';
 
 export enum OperationKind {
   fundGem = 'fundGem',
@@ -61,6 +61,7 @@ export interface Core {
   marginBalance: BigNumber;
   allowance: boolean;
   rawHistory: RawMTHistoryEvent[];
+  rawLiquidationHistory: RawMTLiquidationHistoryEvent[];
 }
 
 export interface CashAssetCore extends Core {
@@ -141,6 +142,7 @@ export interface MarginableAssetCore extends Core {
   minCollRatio: BigNumber;
   safeCollRatio: BigNumber;
   fee: BigNumber;
+  urn: string;
 }
 
 export interface MarginableAsset extends MarginableAssetCore {
