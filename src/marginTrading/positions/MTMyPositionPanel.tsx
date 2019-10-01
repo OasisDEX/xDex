@@ -24,8 +24,10 @@ import { MTMyPositionView } from './MTMyPositionView';
 import { Observable } from 'rxjs/index';
 import { theAppContext } from '../../AppContext';
 import { TxState } from '../../blockchain/transactions';
+import { LoggedOut } from '../../utils/loadingIndicator/LoggedOut';
+import backArrowSvg from './back-arrow.svg';
+import checkSvg from './check.svg';
 import dottedMenuSvg from './dotted-menu.svg';
-
 
 interface MTMyPositionPanelInternalProps {
   account: string | undefined;
@@ -40,35 +42,91 @@ export class MTMyPositionPanel
   extends React.Component<Loadable<MTMyPositionPanelInternalProps> & ModalOpenerProps>
 {
   public render() {
-    if (this.props.value && !this.props.value.account) {
-      return (<div>Account not connected</div>);
-    }
 
-    if (this.props.status === 'loaded' && this.props.value && this.props.value.mta) {
-
-      const mtaState = this.props.value.mta.state;
-      if (mtaState !== MTAccountState.setup) {
-        return <div>
-          <theAppContext.Consumer>
-            { ({ MTSetupButtonRxTx,
-               }) =>
-              <div>
-                <MTSetupButtonRxTx/>
+    if (this.props.value) {
+      const panelTitle = this.props.value.ma && this.props.value.ma.name ?
+        `${this.props.value.ma.name} Position` : 'My Position';
+      if (this.props.value && !this.props.value.account) {
+        return (
+          <div>
+            <PanelHeader>{panelTitle}</PanelHeader>
+            {
+              this.props.value.ma && this.props.value.ma.name &&
+              <div style={{ padding: '150px 30px' }}>
+                <LoggedOut view={`${this.props.value.ma.name} Position`}/>
               </div>
             }
-          </theAppContext.Consumer>
-        </div>;
+          </div>
+        );
       }
 
-      if (!this.props.value.ma.allowance) {
-        return <div>
-          Allowance not set
-        </div>;
-      }
+      if (this.props.status === 'loaded' && this.props.value.mta) {
+        const { ma, mta } = this.props.value;
+        const mtaState = mta.state;
+        const name = ma.name;
+        if (mtaState !== MTAccountState.setup || !this.props.value.ma.allowance) {
+          return (
+            <div>
+              <PanelHeader bordered={true}>Deploy Proxy and Enable {name}</PanelHeader>
+              <div className={styles.setupSection}>
+                <div className={styles.setupBox}>
+                  <div className={styles.setupTitle}>Deploy Proxy</div>
+                  <div className={styles.setupDescription}>
+                    Proxies are used in Oasis to bundle multiple transactions into one,
+                    saving transaction time and gas costs. This only has to be done once.
+                  </div>
+                  { mtaState !== MTAccountState.setup ?
+                    <theAppContext.Consumer>
+                     { ({ MTSetupButtonRxTx,
+                     }) =>
+                       <div>
+                           <MTSetupButtonRxTx/>
+                       </div>
+                     }
+                    </theAppContext.Consumer>
+                    // <Button size="lg">Deploy Proxy</Button>
+                    :
+                    <Button
+                      size="lg"
+                      disabled={true}
+                      className={styles.buttonCheck}
+                    >
+                      <SvgImage image={checkSvg}/>
+                    </Button>
+                  }
+                </div>
+                <div className={styles.setupBox}>
+                  <div className={styles.setupTitle}>Enable {name}</div>
+                  <div className={styles.setupDescription}>
+                    This permission allows Oasis smart contracts to interact with your {name}.
+                    This has to be done for each asset type.
+                  </div>
+                  <Button
+                    size="lg"
+                    onClick={() =>
+                      this.props.value!.approveMTProxy(
+                        {
+                          token: ma.name,
+                          proxyAddress: mta.proxy.address
+                        }
+                      )}
+                  >Enable {name}</Button>
+                </div>
+              </div>
+            </div>
+          );
+        }
 
-      return (
-        <MTMyPositionPanelInternal {...this.props.value} {...{ open: this.props.open }} />
-      );
+        if (!this.props.value.ma.allowance) {
+          return <div>
+            Allowance not set
+          </div>;
+        }
+
+        return (
+          <MTMyPositionPanelInternal {...this.props.value} {...{ open: this.props.open }} />
+        );
+      }
     }
 
     return <div>
@@ -87,9 +145,13 @@ export class MTMyPositionPanelInternal
     return (
       <div>
         <PanelHeader bordered={true}>
+          { this.props.close &&
+            <div
+              className={styles.backButton}
+              onClick={this.props.close}
+            ><SvgImage image={backArrowSvg}/></div>
+          }
           <span>My Position</span>
-
-          { this.props.close && <div onClick={this.props.close}>Close</div> }
           <div className={styles.dropdownMenu} style={{ marginLeft: 'auto', display: 'flex' }}>
             <Button
               className={styles.dropdownButton}
@@ -135,7 +197,12 @@ export class MTMyPositionPanelInternal
           </div>
         </PanelHeader>
         <PanelBody>
-          {<MTMyPositionView {...ma } {...{ pnl: ma.pnl }} />}
+          {<MTMyPositionView {...{
+            ma,
+            open: this.props.open,
+            createMTFundForm$: this.props.createMTFundForm$,
+            approveMTProxy: this.props.approveMTProxy,
+          }} />}
         </PanelBody>
       </div>
     );

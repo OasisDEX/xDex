@@ -21,7 +21,7 @@ import { minusOne, zero } from '../../utils/zero';
 import { findMarginableAsset, MTAccountState } from '../state/mtAccount';
 import { Message, MessageKind, MTSimpleFormState, ViewKind } from './mtOrderForm';
 import * as styles from './mtOrderFormView.scss';
-import {theAppContext} from '../../AppContext';
+import { LoggedOut } from '../../utils/loadingIndicator/LoggedOut';
 
 // const DevInfos = ({ value }: { value: MTSimpleFormState }) => {
 //   //  assetKind: AssetKind.marginable;
@@ -201,10 +201,6 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
   }
 
   public render() {
-    console.log('this.props', this.props);
-
-    const isMTASetup = this.props.mta && this.props.mta.state === MTAccountState.notSetup;
-
     // ) {
     //   return  (
     //   <div style={{ ...dimensions }}>
@@ -219,16 +215,6 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
     //   </div>
     //   );
     // }
-
-    if (!this.props.account) {
-      return (<div style={{ ...dimensions }}>Account not connected</div>);
-    }
-
-    if (isMTASetup) {
-      return (<div style={{ ...dimensions }}>
-        No Proxy
-      </div>);
-    }
 
     return (<div>
       {
@@ -247,42 +233,61 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
     this.props.change({ kind: FormChangeKind.viewChange, value: ViewKind.instantTradeForm });
   }
 
-  private instantOrderForm = () => (
-    <>
-      <PanelHeader>
-        Instant Order
-        {this.headerButtons()}
-      </PanelHeader>
-      <Hr color="dark" className={styles.hrSmallMargin}/>
-      <PanelBody>
-        <form
-          onSubmit={this.handleProceed}
-        >
-          {/*{ this.orderType() }*/}
-          {/*{ this.balanceButtons() }*/}
-          {/*{ this.purchasingPower() }*/}
-          <div className={styles.summaryBox}>
-            {this.purchasingPower2()}
-            {this.accountBalance()}
-            {/*{this.leverage()}*/}
-            {/*{ this.collateralizationRatio() }*/}
-            {this.liquidationPrice()}
-            {this.price2()}
-            {this.slippageLimit()}
-            {/*{this.interestRate()}*/}
-          </div>
-          {this.feesBox()}
-          <Hr color="dark" className={styles.hrMargin}/>
-          {this.amount()}
-          {/*{ this.price() }*/}
-          {this.total()}
-          {/*{ this.gasCost() }*/}
-          {this.proceedButton()}
-        </form>
-      </PanelBody>
-      {/*{this.props && <DevInfos value={this.props as MTSimpleFormState}/>}*/}
-    </>
-  )
+  private renderAccountInfo = () => {
+    const accountNotConnected = !this.props.account;
+    const accountNotSetup = this.props.mta && this.props.mta.state === MTAccountState.notSetup;
+
+    if (accountNotConnected) {
+      return <div className={styles.notSetupBorder}><LoggedOut view="Balances"/></div>;
+    }
+
+    if (accountNotSetup) {
+      return <div className={styles.notSetupBorder}>
+        <Muted>
+          Deploy your Proxy and enable {this.props.baseToken}
+        </Muted>
+      </div>;
+    }
+
+    return (<div className={styles.summaryBox}>
+      {this.purchasingPower2()}
+      {this.accountBalance()}
+      {/*{this.leverage()}*/}
+      {/*{ this.collateralizationRatio() }*/}
+      {this.liquidationPrice()}
+      {this.price2()}
+      {this.slippageLimit()}
+      {/*{this.interestRate()}*/}
+    </div>);
+  }
+  private instantOrderForm = () => {
+    return (
+      <>
+        <PanelHeader>
+          Instant Order
+          {this.headerButtons()}
+        </PanelHeader>
+        <Hr color="dark" className={styles.hrSmallMargin}/>
+        <PanelBody>
+          <form
+            onSubmit={this.handleProceed}
+          >
+            {/*{ this.orderType() }*/}
+            {/*{ this.balanceButtons() }*/}
+            {/*{ this.purchasingPower() }*/}
+            {this.renderAccountInfo()}
+            {this.feesBox()}
+            <Hr color="dark" className={styles.hrMargin}/>
+            {this.amount()}
+            {/*{ this.price() }*/}
+            {this.total()}
+            {/*{ this.gasCost() }*/}
+            {this.proceedButton()}
+          </form>
+        </PanelBody>
+        {/*{this.props && <DevInfos value={this.props as MTSimpleFormState}/>}*/}
+      </>
+    )}
 
   private advancedSettings = () => (
     <>
@@ -618,11 +623,11 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
           <div className={styles.InfoRowLabel}>Interest Rate</div>
           <div>
             {
-              this.props.apr && <FormatPercent
+              ! this.props.apr ? <FormatPercent
                 value={this.props.apr}
                 fallback="-"
                 multiply={false}
-              />
+              /> : <span>-</span>
             }
           </div>
         </div>

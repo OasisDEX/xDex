@@ -64,7 +64,9 @@ export function getMTAccount(props: {
   nonMarginableAssets?: Array<Partial<NonMarginableAssetCore>>;
 } = {}): MTAccount {
   return calculateMTAccount(
-    undefined,
+    {
+      address: ''
+    },
     props.cash ? getCashCore(props.cash) : getCashCore(),
     props.marginableAssets ? props.marginableAssets.map(getMarginableCore) : [],
     props.nonMarginableAssets ? props.nonMarginableAssets.map(getNonMarginableCore) : []

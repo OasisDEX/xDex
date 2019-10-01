@@ -32,3 +32,4 @@ export const InfoBox: string;
 export const infoBox: string;
 export const InfoRowLabel: string;
 export const infoRowLabel: string;
+export const notSetupBorder: string;

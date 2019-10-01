@@ -17,7 +17,7 @@ export class MTSetupButton extends React.Component<MTSetupFormState & ModalOpene
   public render() {
     return (
       <div style={{ marginBottom: '1em' }}>
-        <Button size="lg" color="white"
+        <Button size="lg"
                 disabled={
                   this.props.mtaState === MTAccountState.setup ||
                   this.props.stage !== FormStage.idle

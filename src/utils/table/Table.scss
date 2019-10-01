@@ -20,7 +20,10 @@
   }
 
   thead {
-    @extend .trHighlighted;
+    th, td {
+      border-top: 1px solid $grey-dark;
+      border-bottom: 1px solid $grey-dark;
+    }
   }
 
   th {
@@ -39,7 +42,6 @@
   th, td {
     padding: 8px 28px 8px 0;
   }
-
 
   td.numerical {
     @include ellipsis;
