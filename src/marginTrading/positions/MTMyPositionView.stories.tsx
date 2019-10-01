@@ -57,15 +57,15 @@ stories.add('Not connected', () => (
   />
 ));
 
-stories.add('Not setup', () => (
-  <MTMyPositionPanel
-    value={{
-      ...defaultBalancesProps,
-      account: '0x123',
-      mta: { state: MTAccountState.notSetup } as MTAccount,
-      ma: ethMarginableAsset,
-    }}
-    status="loaded"
-    open={ () => null }
-  />
-));
+// stories.add('Not setup', () => (
+//   <MTMyPositionPanel
+//     value={{
+//       ...defaultBalancesProps,
+//       account: '0x123',
+//       mta: { state: MTAccountState.notSetup } as MTAccount,
+//       ma: ethMarginableAsset,
+//     }}
+//     status="loaded"
+//     open={ () => null }
+//   />
+// ));

@@ -19,7 +19,7 @@ function createEvent(e: {
   id?: BigNumber,
 }): MTHistoryEvent {
   const timestamp = e.date ? new Date(e.date).valueOf() / 1000 : 1545297643;
-  const token = e.token ? e.token : 'DGX';
+  const token = e.token ? e.token : 'ZRX';
   const id = e.id ? e.id : new BigNumber(3);
   if (e.kind === MTHistoryEventKind.deal) {
     return {
@@ -46,7 +46,7 @@ function getParams(rawHistory: MTHistoryEvent[]) {
     ...calculateMarginable(
       getMarginableCore({
         rawHistory,
-        name: 'DGX',
+        name: 'ZRX',
       }),
     ),
     close: () => null,
