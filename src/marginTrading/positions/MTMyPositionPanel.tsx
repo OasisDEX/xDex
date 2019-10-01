@@ -5,14 +5,12 @@ import { inject } from '../../utils/inject';
 
 import { Button } from '../../utils/forms/Buttons';
 import { SvgImage } from '../../utils/icons/utils';
-import { Loadable, LoadableWithTradingPair } from '../../utils/loadable';
+import { Loadable } from '../../utils/loadable';
 import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
 import { ModalOpenerProps, ModalProps } from '../../utils/modal';
 import { PanelBody, PanelHeader } from '../../utils/panel/Panel';
 import { CreateMTAllocateForm$Props } from '../allocate/mtOrderAllocateDebtFormView';
-import { MTSimpleFormState } from '../simple/mtOrderForm';
 import {
-  findMarginableAsset,
   MarginableAsset, MTAccount,
   MTAccountState,
   UserActionKind
@@ -21,7 +19,7 @@ import { CreateMTFundForm$, MTTransferFormState } from '../transfer/mtTransferFo
 import { MtTransferFormView } from '../transfer/mtTransferFormView';
 import { MTMyPositionView } from './MTMyPositionView';
 
-import { Observable } from 'rxjs/index';
+import { Observable } from 'rxjs';
 import { theAppContext } from '../../AppContext';
 import { TxState } from '../../blockchain/transactions';
 import { LoggedOut } from '../../utils/loadingIndicator/LoggedOut';

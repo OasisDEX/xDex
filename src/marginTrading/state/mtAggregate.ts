@@ -13,7 +13,7 @@ import {
 } from 'rxjs/operators';
 import * as dsProxy from '../../blockchain/abi/ds-proxy.abi.json';
 import { AssetKind, NetworkConfig, tokens } from '../../blockchain/config';
-import {nullAddress} from '../../blockchain/utils';
+import { nullAddress } from '../../blockchain/utils';
 import { web3 } from '../../blockchain/web3';
 
 import { ReadCalls, ReadCalls$ } from '../../blockchain/calls/calls';
@@ -21,7 +21,6 @@ import { ReadCalls, ReadCalls$ } from '../../blockchain/calls/calls';
 import { isEqual } from 'lodash';
 import {
   MTAccount,
-  MTAccountState,
   MTHistoryEvent
 } from './mtAccount';
 import { calculateMTAccount, } from './mtCalculate';

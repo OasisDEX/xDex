@@ -15,13 +15,13 @@ import { InputGroup, InputGroupAddon, lessThanOrEqual } from '../../utils/forms/
 import { Radio } from '../../utils/forms/Radio';
 import { SettingsIcon } from '../../utils/icons/Icons';
 import { Hr } from '../../utils/layout/LayoutHelpers';
+import { LoggedOut } from '../../utils/loadingIndicator/LoggedOut';
 import { PanelBody, PanelFooter, PanelHeader } from '../../utils/panel/Panel';
 import { Muted } from '../../utils/text/Text';
 import { minusOne, zero } from '../../utils/zero';
 import { findMarginableAsset, MTAccountState } from '../state/mtAccount';
 import { Message, MessageKind, MTSimpleFormState, ViewKind } from './mtOrderForm';
 import * as styles from './mtOrderFormView.scss';
-import { LoggedOut } from '../../utils/loadingIndicator/LoggedOut';
 
 // const DevInfos = ({ value }: { value: MTSimpleFormState }) => {
 //   //  assetKind: AssetKind.marginable;
@@ -116,11 +116,11 @@ import { LoggedOut } from '../../utils/loadingIndicator/LoggedOut';
 //   );
 // };
 
-const dimensions = {
-  height: '605px',
-  minWidth: '454px',
-  width: 'auto',
-};
+// const dimensions = {
+//   height: '605px',
+//   minWidth: '454px',
+//   width: 'auto',
+// };
 
 export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
 
@@ -260,6 +260,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
       {/*{this.interestRate()}*/}
     </div>);
   }
+
   private instantOrderForm = () => {
     return (
       <>
@@ -287,7 +288,8 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
         </PanelBody>
         {/*{this.props && <DevInfos value={this.props as MTSimpleFormState}/>}*/}
       </>
-    )}
+    );
+  }
 
   private advancedSettings = () => (
     <>

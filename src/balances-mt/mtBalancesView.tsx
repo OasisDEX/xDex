@@ -2,30 +2,25 @@ import * as React from 'react';
 
 import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
 import { map } from 'rxjs/internal/operators';
-import {AssetKind, tokens} from '../blockchain/config';
+import { AssetKind, tokens } from '../blockchain/config';
 import { TxState } from '../blockchain/transactions';
 import {
-  CreateMTAllocateForm$, CreateMTAllocateForm$Props
+  CreateMTAllocateForm$
 } from '../marginTrading/allocate/mtOrderAllocateDebtFormView';
 import {
-  MTMyPositionPanel, MTMyPositionPanelInternal
+  MTMyPositionPanelInternal
 } from '../marginTrading/positions/MTMyPositionPanel';
 import {
-  findAsset, MarginableAsset, MTAccountState, UserActionKind
+  MarginableAsset, UserActionKind
 } from '../marginTrading/state/mtAccount';
 import { MTTransferFormState } from '../marginTrading/transfer/mtTransferForm';
-import { MtTransferFormView } from '../marginTrading/transfer/mtTransferFormView';
-import { connect } from '../utils/connect';
-import { FormatAmount } from '../utils/formatters/Formatters';
-import { Slider } from '../utils/forms/Slider';
-import { inject } from '../utils/inject';
 import { Loadable } from '../utils/loadable';
 import { WithLoadingIndicator } from '../utils/loadingIndicator/LoadingIndicator';
-import { ModalOpenerProps, ModalProps, } from '../utils/modal';
+import { ModalOpenerProps } from '../utils/modal';
 import { Panel, PanelHeader } from '../utils/panel/Panel';
 import { Table } from '../utils/table/Table';
 import { Currency } from '../utils/text/Text';
-import { CombinedBalance, CombinedBalances } from './balances';
+import { CombinedBalances } from './balances';
 import * as styles from './mtBalancesView.scss';
 
 export type MTBalancesProps = CombinedBalances & {
@@ -156,7 +151,10 @@ export class MTBalancesViewInternal
                 {/*}*/}
               {/*</td>*/}
               {/*<td data-test-id={`${combinedBalance.name}-balance`} className={styles.amount}>*/}
-                {/*<FormatAmount value={combinedBalance.walletBalance} token={combinedBalance.name} />*/}
+              {/*  <FormatAmount*/}
+              {/*    value={combinedBalance.walletBalance}*/}
+              {/*    token={combinedBalance.name}*/}
+              {/*  />*/}
               {/*</td>*/}
               {/*<td className={styles.center}>*/}
                 {/*{ combinedBalance.asset &&*/}
@@ -208,51 +206,57 @@ export class MTBalancesViewInternal
     );
   }
 
-  private transfer (actionKind: UserActionKind, token: string) {
-    const fundForm$ = this.props.createMTFundForm$(actionKind, token);
-    const MTFundFormViewRxTx =
-      connect<MTTransferFormState, ModalProps>(
-        inject(MtTransferFormView, this.props as (CreateMTAllocateForm$Props & ModalOpenerProps)),
-        fundForm$);
-    // const MTFundFormViewRxTx = withModal<ModalProps, ModalOpenerProps>(
-    //   connect<MTTransferFormState, ModalProps & ModalOpenerProps>(
-    //     inject(MtTransferFormView, this.props as CreateMTAllocateForm$Props),
-    //     fundForm$));
-    this.props.open(MTFundFormViewRxTx);
-  }
+  // private transfer (actionKind: UserActionKind, token: string) {
+  //   const fundForm$ = this.props.createMTFundForm$(actionKind, token);
+  //   const MTFundFormViewRxTx =
+  //     connect<MTTransferFormState, ModalProps>(
+  //       inject(MtTransferFormView,
+  //              this.props as (CreateMTAllocateForm$Props & ModalOpenerProps)
+  //       ),
+  //       fundForm$);
+  //   // const MTFundFormViewRxTx = withModal<ModalProps, ModalOpenerProps>(
+  //   //   connect<MTTransferFormState, ModalProps & ModalOpenerProps>(
+  //   //     inject(MtTransferFormView, this.props as CreateMTAllocateForm$Props),
+  //   //     fundForm$));
+  //   this.props.open(MTFundFormViewRxTx);
+  // }
 
-  private approveMTProxy(combinedBalance: CombinedBalance): () => void {
-    return () => {
-      if (this.props.mta.state === MTAccountState.notSetup) {
-        return;
-      }
-      this.props.approveMTProxy({
-        token: combinedBalance.name,
-        proxyAddress: this.props.mta.proxy.address as string
-      });
-    };
-  }
+  // private approveMTProxy(combinedBalance: CombinedBalance): () => void {
+  //   return () => {
+  //     if (this.props.mta.state === MTAccountState.notSetup) {
+  //       return;
+  //     }
+  //     this.props.approveMTProxy({
+  //       token: combinedBalance.name,
+  //       proxyAddress: this.props.mta.proxy.address as string
+  //     });
+  //   };
+  // }
 
-  private isActionEnabled(token: string, action: UserActionKind): boolean {
-    if (!this.props.mta || this.props.mta.state !== MTAccountState.setup) {
-      return false;
-    }
-
-    const asset = findAsset(token, this.props.mta);
-    return asset !== undefined &&
-      asset.availableActions.includes(action);
-  }
+  // private isActionEnabled(token: string, action: UserActionKind): boolean {
+  //   if (!this.props.mta || this.props.mta.state !== MTAccountState.setup) {
+  //     return false;
+  //   }
+  //
+  //   const asset = findAsset(token, this.props.mta);
+  //   return asset !== undefined &&
+  //     asset.availableActions.includes(action);
+  // }
 }
 
-class Arrow extends React.PureComponent {
-  public render() {
-    // tslint:disable:max-line-length
-    return (
-      <svg width="20px" height="20px" viewBox="0 0 20 20" version="1.1">
-        <g stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
-          <polygon fill="#FFFFFF" fillRule="nonzero" points="11.51 9 4.5 9 4.5 11 11.51 11 11.51 14 15.5 10 11.51 6" />
-        </g>
-      </svg>
-    );
-  }
-}
+// class Arrow extends React.PureComponent {
+//   public render() {
+//     // tslint:disable:max-line-length
+//     return (
+//       <svg width="20px" height="20px" viewBox="0 0 20 20" version="1.1">
+//         <g stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
+//          <polygon
+//            fill="#FFFFFF"
+//            fillRule="nonzero"
+//            points="11.51 9 4.5 9 4.5 11 11.51 11 11.51 14 15.5 10 11.51 6"
+//          />
+//         </g>
+//       </svg>
+//     );
+//   }
+// }

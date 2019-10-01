@@ -20,7 +20,6 @@ import {
   CashAsset,
   MarginableAsset,
   MTAccount,
-  MTAccountState,
   NonMarginableAsset,
 } from '../marginTrading/state/mtAccount';
 import { one, zero } from '../utils/zero';

@@ -5,7 +5,6 @@ import {
   CashAssetCore,
   MarginableAssetCore,
   MTAccount,
-  MTAccountState,
   NonMarginableAssetCore
 } from './mtAccount';
 import { calculateMTAccount } from './mtCalculate';

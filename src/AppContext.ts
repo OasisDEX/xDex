@@ -119,7 +119,6 @@ import { createMta$ } from './marginTrading/state/mtAggregate';
 import { CreateMTFundForm$, createMTTransferForm$ } from './marginTrading/transfer/mtTransferForm';
 import { createTransactionNotifier$ } from './transactionNotifier/transactionNotifier';
 import { TransactionNotifierView } from './transactionNotifier/TransactionNotifierView';
-import { Authorizable, authorizablify } from './utils/authorizable';
 import { connect } from './utils/connect';
 import { pluginDevModeHelpers } from './utils/devModeHelpers';
 import { OfferMatchType } from './utils/form';
@@ -201,12 +200,12 @@ export function setupAppContext() {
   const NetworkTxRx = connect(Network, context$);
   const TheFooterTxRx = connect(TheFooter, createFooter$(context$));
 
-  const combinedBalances$ = balancesNoMT.createCombinedBalances$(
-    context$, initializedAccount$, etherBalance$,
-    balances$, onEveryBlock$, etherPriceUsd$, transactions$
-  ).pipe(
-    shareReplay(1)
-  );
+  // const combinedBalances$ = balancesNoMT.createCombinedBalances$(
+  //   context$, initializedAccount$, etherBalance$,
+  //   balances$, onEveryBlock$, etherPriceUsd$, transactions$
+  // ).pipe(
+  //   shareReplay(1)
+  // );
   const balancesWithEth$ = combineLatest(balances$, etherBalance$).pipe(
     map(([balances, etherBalance]) => ({ ...balances, ETH: etherBalance })),
   );
@@ -227,7 +226,7 @@ export function setupAppContext() {
   );
 
   const { MTSimpleOrderPanelRxTx, MTMyPositionPanelRxTx, MTSimpleOrderbookPanelTxRx } =
-    mtSimpleOrderForm(mta$, currentOrderbook$, createMTFundForm$, approveMTProxy, approveWallet);
+    mtSimpleOrderForm(mta$, currentOrderbook$, createMTFundForm$, approveMTProxy);
 
   const MTAccountDetailsRxTx = connect(MtAccountDetailsView, mta$);
 
@@ -414,7 +413,7 @@ function mtSimpleOrderForm(
   // orderbookWithTradingPair$: Observable<LoadableWithTradingPair<Orderbook>>,
   createMTFundForm$: CreateMTFundForm$,
   approveMTProxy: (args: {token: string; proxyAddress: string}) => Observable<TxState>,
-  approveWallet: (token: string) => Observable<TxState>
+  // approveWallet: (token: string) => Observable<TxState>
 ) {
   const mtOrderForm$ = currentTradingPair$.pipe(
     switchMap(tradingPair =>

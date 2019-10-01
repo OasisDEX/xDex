@@ -5,10 +5,10 @@ import * as React from 'react';
 import { of } from 'rxjs/index';
 import { TxState } from '../blockchain/transactions';
 import { wethEmpty } from '../marginTrading/plan/planFixtures';
-import { CashAsset, MarginableAsset, MTAccount, NonMarginableAsset } from '../marginTrading/state/mtAccount';
+import { MTAccount } from '../marginTrading/state/mtAccount';
 import { getMTAccount } from '../marginTrading/state/mtTestUtils';
 import { Panel } from '../utils/panel/Panel';
-import { WrapUnwrapFormKind, WrapUnwrapFormState } from '../wrapUnwrap/wrapUnwrapForm';
+import { WrapUnwrapFormState } from '../wrapUnwrap/wrapUnwrapForm';
 import { CombinedBalance, CombinedBalances } from './balances';
 import { WalletViewInternal } from './WalletView';
 
@@ -60,9 +60,9 @@ stories.add('My Wallet - Assets', () => (
     {...walletViewParams}
     {... {
       open: () => null,
-      wrapUnwrapForm$: (formKind: WrapUnwrapFormKind) => of({} as WrapUnwrapFormState),
-      approveWallet: (token: string) => of({} as TxState),
-      disapproveWallet: (token: string) => of({} as TxState),
+      wrapUnwrapForm$: () => of({} as WrapUnwrapFormState),
+      approveWallet: () => of({} as TxState),
+      disapproveWallet: () => of({} as TxState),
     }}
   />
 ));

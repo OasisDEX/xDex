@@ -1,10 +1,8 @@
 import * as React from 'react';
-import { theAppContext } from '../../AppContext';
 import { Hr } from '../../utils/layout/LayoutHelpers';
 import { LoadableWithTradingPair } from '../../utils/loadable';
 import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
 import { PanelHeader } from '../../utils/panel/Panel';
-import { MTAccountState } from '../state/mtAccount';
 import { MTSimpleFormState } from './mtOrderForm';
 import { MtSimpleOrderFormView } from './mtOrderFormView';
 import * as styles from './mtOrderFormView.scss';

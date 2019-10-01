@@ -141,8 +141,6 @@ export type ManualChange =
   SlippageLimitChange |
   ViewChange;
 
-
-
 export type EnvironmentChange =
   GasPriceChange |
   EtherPriceUSDChange |

@@ -4,7 +4,8 @@ import { tokens } from '../blockchain/config';
 import { TxState } from '../blockchain/transactions';
 import dottedMenuSvg from '../marginTrading/positions/dotted-menu.svg';
 import { connect } from '../utils/connect';
-import { FormatAmount, Money } from '../utils/formatters/Formatters';
+import { formatPrecision } from '../utils/formatters/format';
+import { Money } from '../utils/formatters/Formatters';
 import { Button } from '../utils/forms/Buttons';
 import { SvgImage } from '../utils/icons/utils';
 import { inject } from '../utils/inject';
@@ -19,7 +20,6 @@ import { WrapUnwrapFormKind, WrapUnwrapFormState } from '../wrapUnwrap/wrapUnwra
 import { WrapUnwrapFormView } from '../wrapUnwrap/WrapUnwrapFormView';
 import { CombinedBalance, CombinedBalances } from './balances';
 import * as styles from './mtBalancesView.scss';
-import {formatPrecision} from "../utils/formatters/format";
 
 export type WalletViewProps = ModalOpenerProps & {
   wrapUnwrapForm$: (formKind: WrapUnwrapFormKind) => Observable<WrapUnwrapFormState>;
