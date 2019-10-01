@@ -10,6 +10,7 @@ export class BalancesView extends React.Component<{}> {
         <theAppContext.Consumer>
           { ({ MTSetupButtonRxTx,
                MTBalancesViewRxTx,
+               TaxExporterTxRx
           }) =>
             <div>
               <div style={{ display: 'flex', flexDirection: 'row-reverse' }}>
@@ -18,6 +19,10 @@ export class BalancesView extends React.Component<{}> {
               <FlexLayoutRow>
                 <MTBalancesViewRxTx />
               </FlexLayoutRow>
+              {process.env.REACT_APP_TAX_EXPORTER_ENABLED === '1' &&
+                <FlexLayoutRow>
+                    <TaxExporterTxRx/>
+                </FlexLayoutRow>}
             </div>
           }
         </theAppContext.Consumer>
