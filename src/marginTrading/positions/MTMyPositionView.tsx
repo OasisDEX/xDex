@@ -160,8 +160,8 @@ export class MTMyPositionView extends
             </Button>
           </div>
         </div>
-        <CDPHistoryView {...this.props}/>
-        <CDPLiquidationHistoryView {...this.props}/>
+        <CDPHistoryView {...this.props.ma} />
+        <CDPLiquidationHistoryView {...this.props.ma} />
       </div>);
   }
 
