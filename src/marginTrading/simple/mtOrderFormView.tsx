@@ -632,6 +632,18 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
             {formatPrecision(this.props.realPurchasingPower, 2)} {this.props.quoteToken}
           </>
         }
+        { this.props.realPurchasingPowerPost &&
+          <>
+              <span className={styles.transitionArrow} />
+              { !this.props.realPurchasingPowerPost.isNaN() ?
+                <>
+                  {formatPrecision(this.props.realPurchasingPowerPost, 2)}
+                  {this.props.quoteToken}
+                </>
+                : <span>-</span>
+              }
+            </>
+        }
       </div>
     </div>;
   }
