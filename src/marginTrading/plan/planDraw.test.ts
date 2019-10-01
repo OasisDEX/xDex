@@ -4,7 +4,7 @@ import { setupFakeWeb3ForTesting } from '../../blockchain/web3';
 setupFakeWeb3ForTesting();
 
 import { impossible } from '../../utils/impossible';
-import { MTAccountSetup, OperationKind } from '../state/mtAccount';
+import { MTAccount, OperationKind } from '../state/mtAccount';
 import { getMTAccount } from '../state/mtTestUtils';
 import { planDraw, planDrawDai } from './planDraw';
 import { dgx100, wethEmpty } from './planFixtures';
@@ -13,7 +13,7 @@ describe('plan draw', () => {
   describe('cash', () => {
     test('no cash, no asset', () => {
 
-      const mta: MTAccountSetup = getMTAccount({ marginableAssets: [wethEmpty] });
+      const mta: MTAccount = getMTAccount({ marginableAssets: [wethEmpty] });
 
       const plan = planDrawDai(
         mta,
@@ -28,7 +28,7 @@ describe('plan draw', () => {
   describe('marginable', () => {
     test('not enough asset', () => {
 
-      const mta: MTAccountSetup = getMTAccount({ marginableAssets: [wethEmpty] });
+      const mta: MTAccount = getMTAccount({ marginableAssets: [wethEmpty] });
 
       const plan = planDraw(
         mta,
@@ -41,7 +41,7 @@ describe('plan draw', () => {
 
     test('not enough asset', () => {
 
-      const mta: MTAccountSetup = getMTAccount({ marginableAssets: [dgx100] });
+      const mta: MTAccount = getMTAccount({ marginableAssets: [dgx100] });
 
       const plan = planDraw(
         mta,
@@ -55,7 +55,7 @@ describe('plan draw', () => {
 
     test('enough asset', () => {
 
-      const mta: MTAccountSetup = getMTAccount({ marginableAssets: [dgx100] });
+      const mta: MTAccount = getMTAccount({ marginableAssets: [dgx100] });
 
       const plan = planDraw(
         mta,

@@ -1,6 +1,7 @@
 import { BigNumber } from 'bignumber.js';
 
 import { findLastIndex } from 'lodash';
+import { nullAddress } from '../../blockchain/utils';
 import { Offer } from '../../exchange/orderbook/orderbook';
 import { minusOne, one, zero } from '../../utils/zero';
 import { eat } from '../plan/planUtils';
@@ -9,7 +10,7 @@ import {
   CashAssetCore,
   Core, MarginableAsset,
   MarginableAssetCore,
-  MTAccountSetup,
+  MTAccount,
   MTAccountState, MTHistoryEvent,
   MTHistoryEventKind,
   NonMarginableAsset,
@@ -307,7 +308,7 @@ export function calculateMTAccount(
   cashCore: CashAssetCore,
   masCore: MarginableAssetCore[],
   nmasCore: NonMarginableAssetCore[]
-): MTAccountSetup {
+): MTAccount {
 
   const totalDebt = masCore.reduce((debt, ma) => debt.plus(ma.debt), zero);
 
@@ -333,7 +334,7 @@ export function calculateMTAccount(
     totalAssetValue,
     totalDebt,
     totalAvailableDebt,
-    state: MTAccountState.setup,
+    state: proxy.address === nullAddress ? MTAccountState.notSetup : MTAccountState.setup,
     cash: calculateCash(cashCore),
   };
 }

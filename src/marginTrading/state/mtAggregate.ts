@@ -13,6 +13,7 @@ import {
 } from 'rxjs/operators';
 import * as dsProxy from '../../blockchain/abi/ds-proxy.abi.json';
 import { AssetKind, NetworkConfig, tokens } from '../../blockchain/config';
+import { nullAddress } from '../../blockchain/utils';
 import { web3 } from '../../blockchain/web3';
 
 import { ReadCalls, ReadCalls$ } from '../../blockchain/calls/calls';
@@ -20,9 +21,6 @@ import { ReadCalls, ReadCalls$ } from '../../blockchain/calls/calls';
 import { isEqual } from 'lodash';
 import {
   MTAccount,
-  MTAccountNotSetup,
-  MTAccountSetup,
-  MTAccountState,
   MTHistoryEvent
 } from './mtAccount';
 import { calculateMTAccount, } from './mtCalculate';
@@ -36,7 +34,7 @@ export function aggregateMTAccountState(
   proxy: any,
   calls: ReadCalls,
   rawHistories: MTHistoryEvent[][] | undefined
-): Observable<MTAccountSetup> {
+): Observable<MTAccount> {
 
   const assetNames: string[] = Object.values(tokens)
     .filter((t: any) =>
@@ -115,10 +113,6 @@ export function aggregateMTAccountState(
   );
 }
 
-const notSetup: MTAccountNotSetup = { state: MTAccountState.notSetup };
-
-const nullAddress = '0x0000000000000000000000000000000000000000';
-
 export function createProxyAddress$(
   context$: Observable<NetworkConfig>,
   initializedAccount$: Observable<string>,
@@ -182,8 +176,9 @@ export function createMta$(
     switchMap(([context, calls, proxyAddress]) => {
 
       if (proxyAddress === undefined) {
-        return of(notSetup);
+        proxyAddress = nullAddress;
       }
+
       const proxy = web3.eth.contract(dsProxy as any).at(proxyAddress);
       return combineLatest(mtRawHistory$, onEveryBlock$).pipe(
         switchMap(([rawHistory]) => aggregateMTAccountState(context, proxy, calls, rawHistory)),

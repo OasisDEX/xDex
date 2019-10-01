@@ -9,17 +9,10 @@ import { calculateMTAccount } from '../marginTrading/state/mtCalculate';
 import {
   getCashCore,
   getMarginableCore,
-  getNotSetupMTAccount
 } from '../marginTrading/state/mtTestUtils';
 import { unpack } from '../utils/testHelpers';
 import { zero } from '../utils/zero';
 import { createMTSummary$ } from './mtSummary';
-
-test('not setup mta', () => {
-  const mta = getNotSetupMTAccount();
-  const summary = createMTSummary$(of(mta));
-  expect(unpack(summary).state).toEqual(MTAccountState.notSetup);
-});
 
 const ethMarginableAsset = getMarginableCore({
   name: 'ETH',
@@ -50,7 +43,7 @@ test('mta with empty assets', () => {
   // total assets => 0
   // lev = undefined => -
   const mta = calculateMTAccount(
-    null,
+    {},
     daiCashAsset,
     [{
       ...ethMarginableAsset,
@@ -72,7 +65,7 @@ test('mta with empty assets', () => {
 
 test('8k debt, 30k total assets', () => {
   const mta = calculateMTAccount(
-    null,
+    {},
     daiCashAsset,
     [ethMarginableAsset, dgxMarginableAsset],
     []
@@ -89,7 +82,7 @@ test('8k debt, 30k total assets', () => {
 
 test('0 debt, 30k total assets', () => {
   const mta = calculateMTAccount(
-    null,
+    {},
     daiCashAsset,
     [{
       ...ethMarginableAsset,

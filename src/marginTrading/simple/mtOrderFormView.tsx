@@ -15,6 +15,7 @@ import { InputGroup, InputGroupAddon, lessThanOrEqual } from '../../utils/forms/
 import { Radio } from '../../utils/forms/Radio';
 import { SettingsIcon } from '../../utils/icons/Icons';
 import { Hr } from '../../utils/layout/LayoutHelpers';
+import { LoggedOut } from '../../utils/loadingIndicator/LoggedOut';
 import { PanelBody, PanelFooter, PanelHeader } from '../../utils/panel/Panel';
 import { Muted } from '../../utils/text/Text';
 import { minusOne, zero } from '../../utils/zero';
@@ -115,6 +116,12 @@ import * as styles from './mtOrderFormView.scss';
 //   );
 // };
 
+// const dimensions = {
+//   height: '605px',
+//   minWidth: '454px',
+//   width: 'auto',
+// };
+
 export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
 
   private amountInput?: HTMLElement;
@@ -194,15 +201,28 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
   }
 
   public render() {
-    return (
-      <div className={styles.InstantOrderPanel}>
-        {
-          this.props.view === ViewKind.instantTradeForm
-            ? this.instantOrderForm()
-            : this.advancedSettings()
-        }
-      </div>
-    );
+    // ) {
+    //   return  (
+    //   <div style={{ ...dimensions }}>
+    //     <theAppContext.Consumer>
+    //       { ({ MTSetupButtonRxTx,
+    //       }) =>
+    //         <div>
+    //             <MTSetupButtonRxTx/>
+    //         </div>
+    //       }
+    //     </theAppContext.Consumer>
+    //   </div>
+    //   );
+    // }
+
+    return (<div>
+      {
+        this.props.view === ViewKind.instantTradeForm
+          ? this.instantOrderForm()
+          : this.advancedSettings()
+      }
+    </div>);
   }
 
   private switchToSettings = () => {
@@ -213,42 +233,63 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
     this.props.change({ kind: FormChangeKind.viewChange, value: ViewKind.instantTradeForm });
   }
 
-  private instantOrderForm = () => (
-    <>
-      <PanelHeader>
-        Instant Order
-        {this.headerButtons()}
-      </PanelHeader>
-      <Hr color="dark" className={styles.hrSmallMargin}/>
-      <PanelBody>
-        <form
-          onSubmit={this.handleProceed}
-        >
-          {/*{ this.orderType() }*/}
-          {/*{ this.balanceButtons() }*/}
-          {/*{ this.purchasingPower() }*/}
-          <div className={styles.summaryBox}>
-            {this.purchasingPower2()}
-            {this.accountBalance()}
-            {/*{this.leverage()}*/}
-            {/*{ this.collateralizationRatio() }*/}
-            {this.liquidationPrice()}
-            {this.price2()}
-            {this.slippageLimit()}
-            {/*{this.interestRate()}*/}
-          </div>
-          {this.feesBox()}
-          <Hr color="dark" className={styles.hrMargin}/>
-          {this.amount()}
-          {/*{ this.price() }*/}
-          {this.total()}
-          {/*{ this.gasCost() }*/}
-          {this.proceedButton()}
-        </form>
-      </PanelBody>
-      {/*{this.props && <DevInfos value={this.props as MTSimpleFormState}/>}*/}
-    </>
-  )
+  private renderAccountInfo = () => {
+    const accountNotConnected = !this.props.account;
+    const accountNotSetup = this.props.mta && this.props.mta.state === MTAccountState.notSetup;
+
+    if (accountNotConnected) {
+      return <div className={styles.notSetupBorder}><LoggedOut view="Balances"/></div>;
+    }
+
+    if (accountNotSetup) {
+      return <div className={styles.notSetupBorder}>
+        <Muted>
+          Deploy your Proxy and enable {this.props.baseToken}
+        </Muted>
+      </div>;
+    }
+
+    return (<div className={styles.summaryBox}>
+      {this.purchasingPower2()}
+      {this.accountBalance()}
+      {/*{this.leverage()}*/}
+      {/*{ this.collateralizationRatio() }*/}
+      {this.liquidationPrice()}
+      {this.price2()}
+      {this.slippageLimit()}
+      {/*{this.interestRate()}*/}
+    </div>);
+  }
+
+  private instantOrderForm = () => {
+    return (
+      <>
+        <PanelHeader>
+          Instant Order
+          {this.headerButtons()}
+        </PanelHeader>
+        <Hr color="dark" className={styles.hrSmallMargin}/>
+        <PanelBody>
+          <form
+            onSubmit={this.handleProceed}
+          >
+            {/*{ this.orderType() }*/}
+            {/*{ this.balanceButtons() }*/}
+            {/*{ this.purchasingPower() }*/}
+            {this.renderAccountInfo()}
+            {this.feesBox()}
+            <Hr color="dark" className={styles.hrMargin}/>
+            {this.amount()}
+            {/*{ this.price() }*/}
+            {this.total()}
+            {/*{ this.gasCost() }*/}
+            {this.proceedButton()}
+          </form>
+        </PanelBody>
+        {/*{this.props && <DevInfos value={this.props as MTSimpleFormState}/>}*/}
+      </>
+    );
+  }
 
   private advancedSettings = () => (
     <>
@@ -553,7 +594,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
   private feesBox() {
     const leverage = this.props.leverage && !this.props.leverage.isNaN() ?
       this.props.leverage :
-         this.props.leveragePost && !this.props.leveragePost.isNaN() ? zero : minusOne;
+      this.props.leveragePost && !this.props.leveragePost.isNaN() ? zero : minusOne;
     return (
       <div className={styles.InfoRow}>
         <div className={styles.InfoBox}>
@@ -584,11 +625,11 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
           <div className={styles.InfoRowLabel}>Interest Rate</div>
           <div>
             {
-              this.props.apr && <FormatPercent
+              ! this.props.apr ? <FormatPercent
                 value={this.props.apr}
                 fallback="-"
                 multiply={false}
-              />
+              /> : <span>-</span>
             }
           </div>
         </div>

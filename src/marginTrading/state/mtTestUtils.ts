@@ -4,8 +4,7 @@ import { AssetKind } from '../../blockchain/config';
 import {
   CashAssetCore,
   MarginableAssetCore,
-  MTAccount, MTAccountSetup,
-  MTAccountState,
+  MTAccount,
   NonMarginableAssetCore
 } from './mtAccount';
 import { calculateMTAccount } from './mtCalculate';
@@ -61,19 +60,15 @@ export function getNonMarginableCore(
   };
 }
 
-export function getNotSetupMTAccount(): MTAccount {
-  return {
-    state: MTAccountState.notSetup,
-  };
-}
-
 export function getMTAccount(props: {
   cash?: Partial<CashAssetCore>;
   marginableAssets?: Array<Partial<MarginableAssetCore>>;
   nonMarginableAssets?: Array<Partial<NonMarginableAssetCore>>;
-} = {}): MTAccountSetup {
+} = {}): MTAccount {
   return calculateMTAccount(
-    undefined,
+    {
+      address: ''
+    },
     props.cash ? getCashCore(props.cash) : getCashCore(),
     props.marginableAssets ? props.marginableAssets.map(getMarginableCore) : [],
     props.nonMarginableAssets ? props.nonMarginableAssets.map(getNonMarginableCore) : []

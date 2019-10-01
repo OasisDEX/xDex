@@ -7,21 +7,26 @@
 }
 
 .MTPositionColumn {
-  width: 33%;
+  width: 32%;
   padding: 20px;
   flex-shrink: 0;
   flex-grow: 0;
-  border-left: 1px solid #393942;
+}
 
-  &:first-child {
-    border-left: 0;
-  }
+.MTPositionColumnNarrow {
+  display: flex;
+  height: 100%;
+  width: 18%;
+  padding: 20px;
+  flex-shrink: 0;
+  flex-grow: 0;
+  flex-direction: column;
 }
 
 .summaryRow {
   display: flex;
   width: 100%;
-  margin-bottom: 15px;
+  margin-bottom: 18px;
 }
 
 .summaryLabel {
@@ -33,4 +38,25 @@
   color: #fff;
   flex-grow: 1;
   text-align: right;
+}
+
+.statsBox {
+  border: 1px solid #383842;
+  border-radius: 4px;
+  padding: 6px 10px;
+  margin: 0 0 16px 0;
+
+  .summaryValue {
+    text-align: center;
+  }
+
+  .summaryLabel {
+    margin-top: 5px;
+  }
+}
+
+.actionButton {
+  flex-grow: 1;
+  flex-shrink: 0;
+  margin-bottom: 12px;
 }

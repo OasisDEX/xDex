@@ -15,28 +15,14 @@ import {
 import * as balancesMT from './balances-mt/balances';
 import { MtAccountDetailsView } from './balances-mt/mtAccountDetailsView';
 import {
-  MTBalancesCreateMTFundFormProps, MTBalancesOwnProps, MTBalancesView
+  createBalancesView$, MTBalancesView
 } from './balances-mt/mtBalancesView';
 import { createMTSummary$ } from './balances-mt/mtSummary';
 import { MtSummaryView } from './balances-mt/mtSummaryView';
-import {
-  AssetOverviewView,
-  AssetsOverviewActionProps,
-  AssetsOverviewExtraProps,
-} from './balances-nomt/AssetOverviewView';
-// import {
-//   Balances,
-//   CombinedBalances,
-//   createBalances$,
-//   createCombinedBalances$,
-//   createDustLimits$, createProxyAllowances$,
-//   createWalletApprove,
-//   createWalletDisapprove,
-//   createWethBalances$,
-// } from './balances/balances';
+import { createTaxExport$ } from './balances-mt/taxExporter';
+import { TaxExporterView } from './balances-mt/TaxExporterView';
+import { WalletView } from './balances-mt/WalletView';
 import * as balancesNoMT from './balances-nomt/balances';
-import { createTaxExport$ } from './balances-nomt/taxExporter';
-import { TaxExporterView } from './balances-nomt/TaxExporterView';
 import { calls$, readCalls$ } from './blockchain/calls/calls';
 import {
   account$,
@@ -126,12 +112,13 @@ import { createMTSetupForm$, MTSetupFormState } from './marginTrading/setup/mtSe
 import { MTSetupButton } from './marginTrading/setup/mtSetupFormView';
 import { createMTSimpleOrderForm$ } from './marginTrading/simple/mtOrderForm';
 import { MTSimpleOrderPanel } from './marginTrading/simple/mtOrderPanel';
-import { createMTProxyApprove, MTAccount } from './marginTrading/state/mtAccount';
+import {
+  createMTProxyApprove, findMarginableAsset, MTAccount
+} from './marginTrading/state/mtAccount';
 import { createMta$ } from './marginTrading/state/mtAggregate';
 import { CreateMTFundForm$, createMTTransferForm$ } from './marginTrading/transfer/mtTransferForm';
 import { createTransactionNotifier$ } from './transactionNotifier/transactionNotifier';
 import { TransactionNotifierView } from './transactionNotifier/TransactionNotifierView';
-import { Authorizable, authorizablify } from './utils/authorizable';
 import { connect } from './utils/connect';
 import { pluginDevModeHelpers } from './utils/devModeHelpers';
 import { OfferMatchType } from './utils/form';
@@ -173,51 +160,55 @@ export function setupAppContext() {
   const theCreateMTAllocateForm$: CreateMTAllocateForm$ =
     curry(createMTAllocateForm$)(gasPrice$, etherPriceUsd$, calls$, readCalls$);
 
-  const MTBalancesViewRxTx =
-    inject(
-      withModal<MTBalancesCreateMTFundFormProps, MTBalancesOwnProps>(
-        connect<Loadable<balancesMT.CombinedBalances>, MTBalancesOwnProps>(
-          MTBalancesView,
-          loadablifyLight(mtBalances$)
-        )
-      ),
-      {
-        createMTFundForm$,
-        approveMTProxy,
-        approveWallet, disapproveWallet,
-        createMTAllocateForm$: theCreateMTAllocateForm$
-      }
-    );
-
-  const NetworkTxRx = connect(Network, context$);
-  const TheFooterTxRx = connect(TheFooter, createFooter$(context$));
-
-  const combinedBalances$ = balancesNoMT.createCombinedBalances$(
-    context$, initializedAccount$, etherBalance$,
-    balances$, onEveryBlock$, etherPriceUsd$, transactions$
-  ).pipe(
-    shareReplay(1)
-  );
-  const balancesWithEth$ = combineLatest(balances$, etherBalance$).pipe(
-    map(([balances, etherBalance]) => ({ ...balances, ETH: etherBalance })),
-  );
-
   const wethBalance$ =
     balancesNoMT.createWethBalances$(context$, initializedAccount$, onEveryBlock$);
 
   const wrapUnwrapForm$ =
     curry(createWrapUnwrapForm$)(gasPrice$, etherPriceUsd$, etherBalance$, wethBalance$, calls$);
 
-  const AssetOverviewViewRxTx =
+  const MTBalancesViewRxTx =
     inject(
-      withModal<AssetsOverviewActionProps, AssetsOverviewExtraProps>(
-        connect<Authorizable<Loadable<balancesNoMT.CombinedBalances>>, AssetsOverviewExtraProps>(
-          AssetOverviewView,
-          authorizablify(() => loadablifyLight(combinedBalances$))
+      // @ts-ignore
+      withModal(
+        // @ts-ignore
+        connect(
+          // @ts-ignore
+          MTBalancesView,
+          loadablifyLight(createBalancesView$(mtBalances$))
         )
       ),
-      { approveWallet, disapproveWallet, wrapUnwrapForm$ }
+      {
+        createMTFundForm$,
+        approveMTProxy,
+      }
     );
+
+  const WalletViewRxTx =
+    inject(
+      // @ts-ignore
+      withModal(
+        // @ts-ignore
+        connect(
+          // @ts-ignore
+          WalletView, loadablifyLight(mtBalances$))
+      ),
+      {
+        approveWallet, disapproveWallet, wrapUnwrapForm$
+      }
+    );
+
+  const NetworkTxRx = connect(Network, context$);
+  const TheFooterTxRx = connect(TheFooter, createFooter$(context$));
+
+  // const combinedBalances$ = balancesNoMT.createCombinedBalances$(
+  //   context$, initializedAccount$, etherBalance$,
+  //   balances$, onEveryBlock$, etherPriceUsd$, transactions$
+  // ).pipe(
+  //   shareReplay(1)
+  // );
+  const balancesWithEth$ = combineLatest(balances$, etherBalance$).pipe(
+    map(([balances, etherBalance]) => ({ ...balances, ETH: etherBalance })),
+  );
 
   const loadOrderbook = memoizeTradingPair(curry(loadOrderbook$)(context$, onEveryBlock$));
   const currentOrderbook$ = currentTradingPair$.pipe(
@@ -393,7 +384,7 @@ export function setupAppContext() {
 
   return {
     AllTradesTxRx,
-    AssetOverviewViewRxTx,
+    // AssetOverviewViewRxTx,
     MyTradesTxRx,
     OfferMakePanelTxRx,
     OrderbookPanelTxRx,
@@ -409,6 +400,7 @@ export function setupAppContext() {
     MTSimpleOrderbookPanelTxRx,
     MTAccountDetailsRxTx,
     MTBalancesViewRxTx,
+    WalletViewRxTx,
     MTSetupButtonRxTx,
     MtSummaryViewRxTx,
     ReallocateViewRxTx,
@@ -420,7 +412,8 @@ function mtSimpleOrderForm(
   orderbook$: Observable<Orderbook>,
   // orderbookWithTradingPair$: Observable<LoadableWithTradingPair<Orderbook>>,
   createMTFundForm$: CreateMTFundForm$,
-  approveMTProxy: (args: {token: string; proxyAddress: string}) => Observable<TxState>
+  approveMTProxy: (args: {token: string; proxyAddress: string}) => Observable<TxState>,
+  // approveWallet: (token: string) => Observable<TxState>
 ) {
   const mtOrderForm$ = currentTradingPair$.pipe(
     switchMap(tradingPair =>
@@ -433,6 +426,7 @@ function mtSimpleOrderForm(
         calls$,
         readCalls$,
         balancesMT.dustLimits$,
+        account$,
       )
     ),
     shareReplay(1)
@@ -440,12 +434,13 @@ function mtSimpleOrderForm(
 
   const mtOrderFormLoadable$ = currentTradingPair$.pipe(
     switchMap(tradingPair =>
-                loadablifyLight(mtOrderForm$).pipe(
-                  map(mtOrderFormLoadablified => ({
-                    tradingPair,
-                    ...mtOrderFormLoadablified
-                  }))
-                )
+      loadablifyLight(mtOrderForm$).pipe(
+        map(mtOrderFormLoadablified => ({
+          tradingPair,
+          ...mtOrderFormLoadablified
+        })
+        )
+      )
     )
   );
 
@@ -457,8 +452,26 @@ function mtSimpleOrderForm(
       // @ts-ignore
       connect(
         // @ts-ignore
-        inject(MTMyPositionPanel, { createMTFundForm$, approveMTProxy }),
-        mtOrderFormLoadable$
+        MTMyPositionPanel,
+        mtOrderFormLoadable$.pipe(
+          map((state) =>
+            state.status === 'loaded' && state.value ?
+            {
+              status: state.status,
+              value: {
+                createMTFundForm$,
+                approveMTProxy,
+                account: state.value.account,
+                mta: state.value.mta,
+                ma: findMarginableAsset(state.tradingPair.base, state.value.mta)
+              }
+            } : {
+              value: state.value,
+              status: state.status,
+              error: state.error,
+            }
+          )
+        )
       )
     );
 
@@ -476,9 +489,9 @@ function mtSimpleOrderForm(
 
   const depthChartWithLoading$ = createDepthChartWithLoading$(
     mtOrderForm$
-    .pipe(
-      map(f => ({ ...f, matchType: OfferMatchType.direct }))
-    ),
+      .pipe(
+        map(f => ({ ...f, matchType: OfferMatchType.direct }))
+      ),
     orderbook$,
     kindChange
   );

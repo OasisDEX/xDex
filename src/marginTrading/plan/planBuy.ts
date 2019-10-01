@@ -4,7 +4,7 @@ import { flatten } from 'lodash';
 import { AssetKind } from '../../blockchain/config';
 import { Offer } from '../../exchange/orderbook/orderbook';
 import {
-  findAsset, findMarginableAsset, MarginableAsset, MarginableAssetCore, MTAccountSetup,
+  findAsset, findMarginableAsset, MarginableAsset, MarginableAssetCore, MTAccount,
   Operation,
   OperationKind
 } from '../state/mtAccount';
@@ -20,7 +20,7 @@ import { calculateMarginable } from '../state/mtCalculate';
 import { deltaToOps, getTotal, Operations, orderDeltas } from './planUtils';
 
 export function prepareBuyAllocationRequest(
-  mta: MTAccountSetup,
+  mta: MTAccount,
   sellOffers: Offer[],
   baseToken: string,
   amount: BigNumber,

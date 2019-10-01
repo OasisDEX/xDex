@@ -13,3 +13,5 @@ export function amountToWei(amount: BigNumber, token: string): BigNumber {
 
 export const padLeft = (string: string, chars: number, sign?: string) =>
   Array(chars - string.length + 1).join(sign ? sign : '0') + string;
+
+export const nullAddress = '0x0000000000000000000000000000000000000000';

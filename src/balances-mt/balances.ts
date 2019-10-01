@@ -20,7 +20,6 @@ import {
   CashAsset,
   MarginableAsset,
   MTAccount,
-  MTAccountState,
   NonMarginableAsset,
 } from '../marginTrading/state/mtAccount';
 import { one, zero } from '../utils/zero';
@@ -122,8 +121,7 @@ export function combineBalances(
     .map(name => {
       const walletBalance = name === 'ETH' ? etherBalance : walletBalances[name];
 
-      const asset = mta.state !== MTAccountState.setup ?
-        undefined :
+      const asset =
         mta.cash.name === name ?
           mta.cash :
           mta.marginableAssets.find(ma => ma.name === name) ||

@@ -20,7 +20,7 @@ import {
 
 const defParams = {
   mta$: calculateMTAccount(
-    undefined,
+    {},
     getCashCore({
       name: 'DAI',
       balance: new BigNumber(0),

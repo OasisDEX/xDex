@@ -8,9 +8,27 @@
 .table {
   th {
     text-transform: unset;
+
+    &:first-child {
+      padding-left: 20px;
+    }
+  }
+
+  td {
+    border-bottom: 1px solid #393942;
+
+    &:first-child {
+      padding-left: 15px;
+    }
+
+    &:last-child {
+      padding-left: 30px;
+    }
   }
 
   th, td {
+    font-size: 15px;
+    font-weight: 400;
     padding-top: 12px;
     padding-bottom: 12px;
   }
@@ -23,24 +41,24 @@
     text-align: right;
   }
 
-  // align tokens icons so they look like they
-  // aligned to left with column name "Asset"
-  td:nth-child(2) {
-    padding-left: 8px;
-  }
-
-  // those columns contains tall elements,
-  // so they must have smaller padding
-  // to have row height about 32px
-  td:nth-child(2),
-  td:nth-child(3) {
-    padding-top: 2px;
-    padding-bottom: 2px;
-  }
-  td:nth-child(5) {
-    padding-top: 5px;
-    padding-bottom: 2px;
-  }
+  //// align tokens icons so they look like they
+  //// aligned to left with column name "Asset"
+  //td:nth-child(2) {
+  //  padding-left: 8px;
+  //}
+  //
+  //// those columns contains tall elements,
+  //// so they must have smaller padding
+  //// to have row height about 32px
+  //td:nth-child(2),
+  //td:nth-child(3) {
+  //  padding-top: 2px;
+  //  padding-bottom: 2px;
+  //}
+  //td:nth-child(5) {
+  //  padding-top: 5px;
+  //  padding-bottom: 2px;
+  //}
 }
 
 .centeredAsset {
@@ -84,6 +102,7 @@
 .dropdownButton {
   border: 0;
   padding: 10px 0.833em 10px 50px;
+  margin-left: 10px;
 }
 
 .dropdownList {
@@ -92,11 +111,12 @@
   display: none;
   position: absolute;
   right: 0;
-  top: 30px;
+  top: 28px;
   background: #35353E;
   box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
   border-radius: 8px;
   padding: 12px 20px;
+  z-index: 3;
 }
 
 .dropdownMenu {
@@ -106,4 +126,51 @@
       display: block;
     }
   }
+}
+
+.setupSection {
+  display: flex;
+  overflow: hidden;
+}
+
+.setupBox {
+  flex: 1;
+  border: 1px solid $grey-dark;
+  border-radius: 4px;
+  padding: 24px;
+  margin: 40px 12px;
+}
+
+.setupTitle {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.setupDescription {
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 24px;
+  letter-spacing: 0.2px;
+  color: $grey-lightest;
+  margin-bottom: 24px;
+}
+
+button.actionButton {
+  height: 30px;
+  font-size: 14px;
+  font-weight: 400;
+  text-transform: none;
+  margin-left: 10px;
+  padding: 6px 20px;
+}
+
+.backButton {
+  position: relative;
+  top: 4px;
+  margin-right: 15px;
+}
+
+.buttonCheck {
+  min-width: 115px;
 }

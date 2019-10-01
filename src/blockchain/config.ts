@@ -460,6 +460,7 @@ const localnet: NetworkConfig =   {
   cdpManager: '0xC71022a713dA95bD4C926faf180FffBAfEf4bcA6',
   ilks: {
     WETH: 'ETH',
+    DAI: 'DAI',
     DGD: 'DGD',
     REP: 'REP',
     ZRX: 'ZRX',

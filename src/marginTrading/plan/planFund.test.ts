@@ -3,7 +3,7 @@ import { BigNumber } from 'bignumber.js';
 import { setupFakeWeb3ForTesting } from '../../blockchain/web3';
 setupFakeWeb3ForTesting();
 
-import { MTAccountSetup, OperationKind } from '../state/mtAccount';
+import { MTAccount, OperationKind } from '../state/mtAccount';
 import { getMTAccount } from '../state/mtTestUtils';
 import { dgx100, wethEmpty } from './planFixtures';
 import { planFund, planFundDai } from './planFund';
@@ -35,7 +35,7 @@ describe('plan fund', () => {
     //     debt: new BigNumber('50')
     //   };
     //
-    //   const mta: MTAccountSetup = getMTAccount({ marginableAssets: [dgxWithDebt] });
+    //   const mta: MTAccount = getMTAccount({ marginableAssets: [dgxWithDebt] });
     //
     //   const plan = planFund(mta, 'DAI', new BigNumber('25'));
     //
@@ -52,7 +52,7 @@ describe('plan fund', () => {
     //     debt: new BigNumber('50')
     //   };
     //
-    //   const mta: MTAccountSetup = getMTAccount({ marginableAssets: [dgxWithDebt] });
+    //   const mta: MTAccount = getMTAccount({ marginableAssets: [dgxWithDebt] });
     //
     //   const plan = planFund(mta, 'DAI', new BigNumber('125'));
     //
@@ -75,7 +75,7 @@ describe('plan fund', () => {
     //     debt: new BigNumber('200')
     //   };
     //
-    //   const mta: MTAccountSetup
+    //   const mta: MTAccount
     // = getMTAccount({ marginableAssets: [wethWithDebt, dgxWithDebt] });
     //
     //   const plan = planFund(mta, 'DAI', new BigNumber('250'));
@@ -90,7 +90,7 @@ describe('plan fund', () => {
   describe('marginable', () => {
     test('empty weth', () => {
 
-      const mta: MTAccountSetup = getMTAccount({ marginableAssets: [wethEmpty] });
+      const mta: MTAccount = getMTAccount({ marginableAssets: [wethEmpty] });
 
       const plan = planFund(mta, 'WETH', new BigNumber('25'), []);
 
