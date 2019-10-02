@@ -164,35 +164,35 @@ export class MTMyPositionPanelInternal
             >
               <SvgImage image={dottedMenuSvg}/>
             </Button>
-            <div className={styles.dropdownList}>
-              <div>
-                <Button
-                  size="md"
-                  block={true}
-                  disabled={!ma.availableActions.includes(UserActionKind.draw)}
-                  onClick={() => this.transfer(UserActionKind.draw, 'DAI', ma.name)}
-                >WITHDRAW DAI</Button>
-                <br/>
-                <Button
-                  size="md"
-                  block={true}
-                  disabled={!ma.availableActions.includes(UserActionKind.fund)}
-                  onClick={() => this.transfer(UserActionKind.fund, 'DAI', ma.name)}
-                >DEPOSIT DAI</Button>
-                <br/>
-                <Button
-                  size="md"
-                  block={true}
-                  disabled={ma.allowance}
-                  onClick={() =>
-                    this.props.approveMTProxy(
-                      { token: ma.name, proxyAddress: mta.proxy.address }
-                    )
-                  }
-                >Allowance</Button>
-                <br/>
-              </div>
-            </div>
+            {/*<div className={styles.dropdownList}>*/}
+              {/*<div>*/}
+                {/*<Button*/}
+                  {/*size="md"*/}
+                  {/*block={true}*/}
+                  {/*disabled={!ma.availableActions.includes(UserActionKind.draw)}*/}
+                  {/*onClick={() => this.transfer(UserActionKind.draw, 'DAI', ma.name)}*/}
+                {/*>WITHDRAW DAI</Button>*/}
+                {/*<br/>*/}
+                {/*<Button*/}
+                  {/*size="md"*/}
+                  {/*block={true}*/}
+                  {/*disabled={!ma.availableActions.includes(UserActionKind.fund)}*/}
+                  {/*onClick={() => this.transfer(UserActionKind.fund, 'DAI', ma.name)}*/}
+                {/*>DEPOSIT DAI</Button>*/}
+                {/*<br/>*/}
+                {/*<Button*/}
+                  {/*size="md"*/}
+                  {/*block={true}*/}
+                  {/*disabled={ma.allowance}*/}
+                  {/*onClick={() =>*/}
+                    {/*this.props.approveMTProxy(*/}
+                      {/*{ token: ma.name, proxyAddress: mta.proxy.address }*/}
+                    {/*)*/}
+                  {/*}*/}
+                {/*>Allowance</Button>*/}
+                {/*<br/>*/}
+              {/*</div>*/}
+            {/*</div>*/}
           </div>
         </PanelHeader>
         <PanelBody>

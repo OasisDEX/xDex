@@ -111,6 +111,8 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
     const ilkAsset = (this.props.ilk ?
       this.getAsset(this.props.ilk) : this.getAsset(this.props.token)) as MarginableAsset;
 
+    console.log('SUMMARY ilkasset', ilkAsset);
+    console.log('SUMMARY asset', asset);
 
     const isSafePost = true; // todo
 

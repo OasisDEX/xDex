@@ -322,9 +322,14 @@ function checkIfIsReadyToProceed(state: MTTransferFormState) {
 }
 function addPurchasingPower(state: MTTransferFormState) {
 
+  const token = state.token === 'DAI' ? state.ilk : state.token;
+  if (!token) {
+    return state;
+  }
+
   const baseAsset =
-    findMarginableAsset(state.token, state.mta) ||
-    findNonMarginableAsset(state.token, state.mta);
+    findMarginableAsset(token, state.mta) ||
+    findNonMarginableAsset(token, state.mta);
 
   if (!state.mta
     || state.mta.state !== MTAccountState.setup

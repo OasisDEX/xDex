@@ -131,19 +131,36 @@ export class MTMyPositionView extends
           </div>
           <div className={styles.MTPositionColumnNarrow}>
             <Button
-              size="lg"
+              size="md"
               className={styles.actionButton}
               disabled={!this.props.ma.availableActions.includes(UserActionKind.fund)}
-              onClick={() => this.transfer(UserActionKind.fund, this.props.ma.name)}
+              onClick={() => this.transfer(UserActionKind.fund, this.props.ma.name, undefined)}
             >
               Deposit
             </Button>
             <Button
-              size="lg"
+              size="md"
               className={styles.actionButton}
-              onClick={() => this.transfer(UserActionKind.draw, this.props.ma.name)}
+              onClick={() => this.transfer(UserActionKind.draw, this.props.ma.name, undefined)}
             >
               Withdraw
+            </Button>
+
+
+            <Button
+              size="md"
+              className={styles.actionButton}
+              disabled={!this.props.ma.availableActions.includes(UserActionKind.fund)}
+              onClick={() => this.transfer(UserActionKind.fund, 'DAI', this.props.ma.name, )}
+            >
+              Deposit DAI
+            </Button>
+            <Button
+              size="md"
+              className={styles.actionButton}
+              onClick={() => this.transfer(UserActionKind.draw, 'DAI', this.props.ma.name)}
+            >
+              Withdraw DAI
             </Button>
           </div>
         </div>
@@ -152,8 +169,8 @@ export class MTMyPositionView extends
       </div>);
   }
 
-  private transfer (actionKind: UserActionKind, token: string) {
-    const fundForm$ = this.props.createMTFundForm$(actionKind, token, undefined);
+  private transfer (actionKind: UserActionKind, token: string, ilk: string | undefined) {
+    const fundForm$ = this.props.createMTFundForm$(actionKind, token, ilk);
     const MTFundFormViewRxTx =
       connect<MTTransferFormState, ModalProps>(
         inject(
