@@ -425,39 +425,39 @@ const localnet: NetworkConfig =   {
   safeConfirmations: 0,
   avgBlocksPerDay: 1000,
   startingBlock: 1,
-  get otc() { return load(otc, '0x4e5F802405B29fFae4AE2a7dA1d9cEEB53904D55'); },
-  // get saiTub() { return load(saiTub, '0x3546C7E3753C0e1D15878EC1C6dC65573864Dab7'); },
-  get ethPip() { return load(dsValue, '0x1B2c0f9b05f2ec9f77DeA9CdaEB04c396da5027B'); },
+  get otc() { return load(otc, '0x177b74CB6679C145Bb428Cc3E16F4a3d3ED905a3'); },
+  // get saiTub() { return load(saiTub, ''); },
+  get ethPip() { return load(dsValue, '0x8b8B359c33c13b818713570583C8bce2b030AD9A'); },
   get tokens() {
     return asMap('token', [
-      loadToken('WETH', eth, '0x28085CEfA9103d3a55Fb5AfCcf07eD2038d31cD4'),
-      loadToken('DAI', erc20, '0xff500C51399A282f4563F2713fFCBe9e53cfb6Fa'),
-      loadToken('DGD', erc20, '0x2f42E9A9BA1A8BfE0a46a7b116aD5b0D16d2B105'),
-      // loadToken('MKR', erc20, '0xe80C262f63df9376d2ce9eDd373832EDc9FCA46E'),
-      loadToken('REP', erc20, '0x30ed29c4C4bA30ECCcDd0c0D153E454BFCb0A4Dd'),
-      // loadToken('OMG', erc20, '0xe80C262f63df9376d2ce9eDd373832EDc9FCA46E'),
-      loadToken('ZRX', erc20, '0xE2ecCEEc6dEB8c7AFF9787E46FEA7078b89ab159'),
-      loadToken('BAT', erc20, '0x2f8e256F2f9301d1992CDCCD85A513954C9dDB71'),
+      loadToken('WETH', eth, '0x200938Bf7fF25EcF2eB7BC08e18b0892ED34c846'),
+      loadToken('DAI', erc20, '0xafAA69DE13bd8766D9d47c9205439B9B06e533C6'),
+      loadToken('DGD', erc20, '0x76c37E57A1438E2a0ac7Fec8a552CDD569b2CAfB'),
+      // loadToken('MKR', erc20, '0x3a21aB4539e11f0C06b583796F3F0FD274eFC369'),
+      loadToken('REP', erc20, '0xE8d4C2Ab5782c697f06f17610cC03068180d0FaC'),
+      // loadToken('OMG', erc20, ''),
+      loadToken('ZRX', erc20, '0x2c60CF08c07C212e21e6E2ee4626c478BACe092a'),
+      loadToken('BAT', erc20, '0xd80110E3C107Eb206B556871cFe2532eC7D05E47'),
     ]);
   },
   joins: {
-    WETH: '0xfEE6cFC4Dee7702733430cE539a704233D7501B5',
-    DAI: '0x587635C60eC92BA1AE5db1e1DD7839FED9d23700',
+    WETH: '0x2B6D0E2703bCA807bF4f4ab6B542F665d2af3F9C',
+    DAI: '0x5DFA1cCcE9A29efB2d49AB82f10cB5F1bF8e5013',
   } as { [key: string]: string },
   mcd: {
-    vat: '0x174805bDBE92fBb6eC91D602BE4DDaF7F7E51EA6',
+    vat: '0xBD96b03c371380FB916a6789BDa6AFf170E65c5f',
     get cat() {
-      return load(mcdCat, '0xcF24768107824459Be154a9FBb9639785e0Ae462');
+      return load(mcdCat, '0x4a81317A82Fc95f5180B827Ed3EBAe838Ad6BD1B');
     },
     flip: {
       get WETH() {
-        return load(mcdFlipper, '0x30E57a1F60186444e4244828b42BBDC43F63C12B');
+        return load(mcdFlipper, '0x76fdFbdBaF5Ef599FBD6565e998D20A0C838d950');
       },
     }
   } as { [key: string]: any },
-  spot: '0xAb14DdBdD66Bd9143c3E3d94E4Ce27Babc2b66eB',
-  jug: '0x3A6Ea44c1386F6745Fa20d7cAD939a22553579B0',
-  cdpManager: '0xC71022a713dA95bD4C926faf180FffBAfEf4bcA6',
+  spot: '0x42B7E35e4A2DE972F5Cf17417ED49aff869D7a40',
+  jug: '0x5D8A44E8BE914e6C3bCADb46581502592Ac41a94',
+  cdpManager: '0xAFe25DF80A6Ce0890d1742767Fd6424bF845F39d',
   ilks: {
     WETH: 'ETH',
     DAI: 'DAI',
@@ -467,22 +467,22 @@ const localnet: NetworkConfig =   {
     BAT: 'BAT',
   } as { [key: string]: string },
   get otcSupportMethods() {
-    return load(otcSupport, '0x5de139DbBFd47dd1D2cD906348Fd1887135B2804');
+    return load(otcSupport, '0xee9F9B08E2eBc68e88c0e207A09EbaaeF4e5d94E');
   },
   get instantProxyRegistry() {
-    return load(proxyRegistry, '0x22b6C41D0b18193B20B182D8d5854fEFb744cC6A');
+    return load(proxyRegistry, '0x4C59F867abb03235372438Ff8F3685fcc7b3F1d6');
   },
   get instantProxyFactory() {
-    return load(dsProxyFactory, '0x9c27f7553f12e0178c1D767265dFBD27CAEcec68');
+    return load(dsProxyFactory, '0xF52071224Fe0Ecd1E9776815CCc151fa4B79a16c');
   },
   get instantProxyCreationAndExecute() {
-    return load(proxyCreationAndExecute, '0x947308140e877E8EeBcCED93B522407A24278c6A');
+    return load(proxyCreationAndExecute, '0x39E338aDC718b67585AC4bE1A69Db0EE6C186487');
   },
   get marginProxyRegistry() {
-    return load(proxyRegistry, '0x3A32AA343fBA264411EF47B00B195165738E4E6b');
+    return load(proxyRegistry, '0xaCEB44ca50eFaAb2787aD124d03e9116ec599817');
   },
   get proxyActions() {
-    return load(proxyActions, '0xb92c5af7231f9d448AC99A688BA290C580c707bA');
+    return load(proxyActions, '0xb39C3560062a2BA5CEFee7c7CDCd0f0e8fa8e17e');
   },
   oasisDataService: {
     url: 'http://localhost:3001/v1'
@@ -494,7 +494,7 @@ const localnet: NetworkConfig =   {
   },
   taxProxyRegistries: [],
   get liquidityProvider() {
-    return load(liquidityProvider, '0xfD3B084F594Eaf6bF32bF41B7bA2f74779129a7d');
+    return load(liquidityProvider, '0x64442CACa1f24014e734c057c38e455b106278E0');
   },
 };
 
