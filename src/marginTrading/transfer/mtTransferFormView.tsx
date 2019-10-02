@@ -2,16 +2,18 @@ import { BigNumber } from 'bignumber.js';
 import * as React from 'react';
 import * as ReactModal from 'react-modal';
 
+import classnames from 'classnames';
 import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
 import { tokens } from '../../blockchain/config';
 import { BigNumberInput } from '../../utils/bigNumberInput/BigNumberInput';
 import { FormChangeKind, ProgressStage } from '../../utils/form';
-import { formatAmount } from '../../utils/formatters/format';
+import { formatAmount, formatPrecision } from '../../utils/formatters/format';
 import { Button } from '../../utils/forms/Buttons';
 import { ErrorMessage } from '../../utils/forms/ErrorMessage';
 import { InputGroup, InputGroupAddon } from '../../utils/forms/InputGroup';
 import { Select } from '../../utils/forms/Select';
 import { GasCost } from '../../utils/gasCost/GasCost';
+import { SvgImage } from '../../utils/icons/utils';
 import { BorderBox, Hr } from '../../utils/layout/LayoutHelpers';
 import { ModalOpenerProps, ModalProps } from '../../utils/modal';
 import { Panel, PanelBody, PanelFooter, PanelHeader } from '../../utils/panel/Panel';
@@ -27,10 +29,13 @@ import {
   NonMarginableAsset,
   UserActionKind,
 } from '../state/mtAccount';
+import closeIconSvg from './close-icon.svg';
 import {
   Message, MessageKind, MTTransferFormState, TransferFormChangeKind
 } from './mtTransferForm';
 import * as styles from './mtTransferFormView.scss';
+import {Money} from "../../utils/formatters/Formatters";
+import {zero} from "../../utils/zero";
 
 type MTFundFormProps =
   MTTransferFormState & ModalProps & ModalOpenerProps & CreateMTAllocateForm$Props;
@@ -42,6 +47,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
   }
 
   public render() {
+
     return (
       <ReactModal
         ariaHideApp={false}
@@ -50,8 +56,13 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
         overlayClassName={styles.modalOverlay}
         closeTimeoutMS={250}
       >
-        <Panel style={{ width: '360px', height: '411px' }} className={styles.modalChild}>
-          <PanelHeader bordered={true}>{this.header(this.props.progress)}</PanelHeader>
+        <Panel style={{ width: '550px', height: '580px' }} className={styles.modalChild}>
+          <PanelHeader bordered={true} className={styles.headerWithIcon}>
+            {this.header(this.props.progress)}
+            <div onClick={this.close} className={styles.closeButton} >
+              <SvgImage image={closeIconSvg}/>
+            </div>
+            </PanelHeader>
           <PanelBody paddingTop={true} style={{ height: '287px' }}>
             {this.AccountSummary()}
             <Hr color="dark" className={styles.hrBigMargin} />
@@ -97,67 +108,202 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
 
   private AccountSummary = () => {
     const asset = this.getAsset(this.props.token);
-    const ilkAsset = this.props.ilk && this.getAsset(this.props.ilk) as MarginableAsset;
+    const ilkAsset = (this.props.ilk ?
+      this.getAsset(this.props.ilk) : this.getAsset(this.props.token)) as MarginableAsset;
 
+
+    const isSafePost = true; // todo
+
+    const liquidationPrice = this.props.liquidationPrice && !this.props.liquidationPrice.isNaN() ?
+      this.props.liquidationPrice : zero;
+
+    const liquidationPricePost = this.props.liquidationPricePost
+    && !this.props.liquidationPricePost.isNaN() ? this.props.liquidationPricePost : zero;
     return(
-      <table className={styles.balanceTable}>
-        <tbody>
-        <tr>
-          <td><Muted>Wallet</Muted></td>
-          <td>{asset && formatAmount(asset.walletBalance, asset.name)} {this.props.token}</td>
-        </tr>
-        <tr>
-          <td><Muted>Margin account</Muted></td>
-          <td>{
-            this.props.token !== 'DAI' ?
-            asset && formatAmount(asset.balance, this.props.token) :
-            ilkAsset && formatAmount(ilkAsset.dai, this.props.token)
-          } {this.props.token}</td>
-        </tr>
-        {/*{ asset && asset.assetKind === AssetKind.marginable &&*/}
+      <>
+        <div className={styles.summaryBox}>
+          <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
+            <div className={styles.orderSummaryLabel}>
+              Purch. power
+            </div>
+            <div className={styles.orderSummaryValue}>
+              {
+                this.props.realPurchasingPower &&
+                <>
+                  {formatPrecision(this.props.realPurchasingPower, 2)} {this.props.token}
+                </>
+              }
+              { this.props.realPurchasingPowerPost &&
+                <>
+                    <span className={styles.transitionArrow} />
+                    { !this.props.realPurchasingPowerPost.isNaN() ?
+                      <>
+                        {formatPrecision(this.props.realPurchasingPowerPost, 2)}
+                         {this.props.token}
+                      </>
+                      : <span>-</span>
+                    }
+                  </>
+              }
+            </div>
+          </div>
+          <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
+            <div className={styles.orderSummaryLabel}>
+              Balance
+            </div>
+            <div className={styles.orderSummaryValue}>
+              { ilkAsset && !ilkAsset.balance.isNaN() ?
+                <Money
+                  value={ilkAsset.balance}
+                  token={this.props.token}
+                  fallback="-"
+                /> : <span>-</span>
+              }
+              {
+                this.props.balancePost &&
+                <>
+                  <span className={styles.transitionArrow} />
+                  { !this.props.balancePost.isNaN() ?
+                    <Money
+                      value={this.props.balancePost}
+                      token={this.props.token}
+                      fallback="-"
+                    /> : <span>-</span>
+                  }
+                </>
+              }
+            </div>
+          </div>
+          <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
+            <div className={styles.orderSummaryLabel}>
+              Liqu. Price
+            </div>
+            <div className={styles.orderSummaryValue}>
+              <Money
+                value={liquidationPrice}
+                token="USD"
+                fallback="-"
+              />
+              {
+                this.props.liquidationPricePost &&
+                this.props.liquidationPrice &&
+                !this.props.liquidationPrice.isEqualTo(this.props.liquidationPricePost) &&
+                <>
+                  <span className={styles.transitionArrow} />
+                  <Money
+                    value={liquidationPricePost}
+                    token="USD"
+                    fallback="-"
+                    className={
+                      classnames({
+                        [styles.orderSummaryValuePositive]: isSafePost,
+                        [styles.orderSummaryValueNegative]: isSafePost,
+                      })
+                    }
+                  />
+                </>
+              }
+            </div>
+          </div>
+          <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
+            <div className={styles.orderSummaryLabel}>
+              Dai Debt
+            </div>
+            <div className={styles.orderSummaryValue}>
+              0.00
+            </div>
+          </div>
+        </div>
+
+        <div className={styles.InfoRow}>
+          <div className={styles.InfoBox}>
+            <div className={styles.InfoRowLabel}>Leverage</div>
+            <div>
+              <span>-</span>
+            </div>
+          </div>
+          <div className={styles.InfoBox}>
+            <div className={styles.InfoRowLabel}>Liqu. Fee</div>
+            <span>-</span>
+
+          </div>
+          <div className={styles.InfoBox}>
+            <div className={styles.InfoRowLabel}>Interest Rate</div>
+            <div>
+              <span>-</span>
+
+            </div>
+          </div>
+        </div>
+
+        <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
+            <div className={styles.orderSummaryLabel}>
+              Wallet Balance
+            </div>
+            <div className={styles.orderSummaryValue}>
+              {asset && formatAmount(asset.walletBalance, asset.name)} {this.props.token}
+            </div>
+          </div>
+
+        {/*<table className={styles.balanceTable}>*/}
+          {/*<tbody>*/}
           {/*<tr>*/}
-            {/*<td><Muted>Available amount</Muted></td>*/}
-            {/*<td><Money value={asset.availableBalance} token={this.props.token} /></td>*/}
+            {/*<td><Muted>Wallet</Muted></td>*/}
+            {/*<td>{asset && formatAmount(asset.walletBalance, asset.name)} {this.props.token}</td>*/}
           {/*</tr>*/}
-        {/*}*/}
-        {/*{asset &&*/}
-        {/*(asset.assetKind === AssetKind.marginable ||*/}
-          {/*asset.assetKind === AssetKind.nonMarginable) &&*/}
           {/*<tr>*/}
-            {/*<td><Muted>Purchasing power</Muted></td>*/}
-            {/*<td>{formatAmount(zero, 'DAI')} DAI*/}
-            {/*</td>*/}
+            {/*<td><Muted>Margin account</Muted></td>*/}
+            {/*<td>{*/}
+              {/*this.props.token !== 'DAI' ?*/}
+                {/*asset && formatAmount(asset.balance, this.props.token) :*/}
+                {/*ilkAsset && formatAmount(ilkAsset.dai, this.props.token)*/}
+            {/*} {this.props.token}</td>*/}
           {/*</tr>*/}
-        {/*}*/}
-        </tbody>
-      </table>
+          {/*/!*{ asset && asset.assetKind === AssetKind.marginable &&*!/*/}
+          {/*/!*<tr>*!/*/}
+          {/*/!*<td><Muted>Available amount</Muted></td>*!/*/}
+          {/*/!*<td><Money value={asset.availableBalance} token={this.props.token} /></td>*!/*/}
+          {/*/!*</tr>*!/*/}
+          {/*/!*}*!/*/}
+          {/*/!*{asset &&*!/*/}
+          {/*/!*(asset.assetKind === AssetKind.marginable ||*!/*/}
+          {/*/!*asset.assetKind === AssetKind.nonMarginable) &&*!/*/}
+          {/*/!*<tr>*!/*/}
+          {/*/!*<td><Muted>Purchasing power</Muted></td>*!/*/}
+          {/*/!*<td>{formatAmount(zero, 'DAI')} DAI*!/*/}
+          {/*/!*</td>*!/*/}
+          {/*/!*</tr>*!/*/}
+          {/*/!*}*!/*/}
+          {/*</tbody>*/}
+        {/*</table>*/}
+      </>
     );
   }
 
   private Form() {
     return (
       <div>
-        {this.props.token === 'DAI' ? this.TargetGroup() : null}
+        {/*{this.props.token === 'DAI' ? this.TargetGroup() : null}*/}
         {this.AmountGroup(false)}
         { !!this.props.messages &&
-          <ErrorMessage
-            messages={this.props.messages.map(msg => this.messageContent(msg))}
-          />
+        <ErrorMessage
+          messages={this.props.messages.map(msg => this.messageContent(msg))}
+        />
         }
 
-        <table className={styles.balanceTable}>
-          <tbody>
-            <tr>
-              <td><Muted>Gas cost</Muted></td>
-              <td>
-                <GasCost gasEstimationStatus={this.props.gasEstimationStatus}
-                         gasEstimationUsd={this.props.gasEstimationUsd}
-                         gasEstimationEth={this.props.gasEstimationEth}
-                />
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        {/*<table className={styles.balanceTable}>*/}
+          {/*<tbody>*/}
+          {/*<tr>*/}
+            {/*<td><Muted>Gas cost</Muted></td>*/}
+            {/*<td>*/}
+              {/*<GasCost gasEstimationStatus={this.props.gasEstimationStatus}*/}
+                       {/*gasEstimationUsd={this.props.gasEstimationUsd}*/}
+                       {/*gasEstimationEth={this.props.gasEstimationEth}*/}
+              {/*/>*/}
+            {/*</td>*/}
+          {/*</tr>*/}
+          {/*</tbody>*/}
+        {/*</table>*/}
       </div>
     );
   }
@@ -247,8 +393,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
     const proceedName = this.props.actionKind === UserActionKind.fund ? 'Deposit' : 'Withdraw';
     return (
       <PanelFooter className={styles.buttons}>
-      <Button size="md" className={styles.button} onClick={this.close} >Close</Button>
-      {deposit &&
+        {deposit &&
         <Button size="md"
                 className={styles.button}
                 disabled={!depositEnabled}
@@ -256,24 +401,24 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
         >
           {proceedName}
         </Button>
-      }
-      {retry  &&
+        }
+        {retry  &&
         <Button size="md"
                 className={styles.button}
                 onClick={() => this.transfer()}
         >
           Retry
         </Button>
-      }
-      {depositAgain &&
+        }
+        {depositAgain &&
         <Button size="md"
                 className={styles.button}
                 onClick={() => this.props.reset()}
         >
           {proceedName} again
         </Button>
-      }
-    </PanelFooter>);
+        }
+      </PanelFooter>);
   }
 
   private AmountGroup(disabled: boolean) {

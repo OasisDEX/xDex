@@ -79,6 +79,14 @@ export class MTMyPositionView extends
             </div>
             <div className={styles.summaryRow}>
               <div className={styles.summaryLabel}>
+                Interest Rate
+              </div>
+              <div className={styles.summaryValue}>
+                15.5%
+              </div>
+            </div>
+            <div className={styles.summaryRow}>
+              <div className={styles.summaryLabel}>
                 Dai debt
               </div>
               <div className={styles.summaryValue}>
@@ -90,14 +98,6 @@ export class MTMyPositionView extends
                       fallback="-"
                     /> : <span>-</span>
                 }
-              </div>
-            </div>
-            <div className={styles.summaryRow}>
-              <div className={styles.summaryLabel}>
-                Interest Rate
-              </div>
-              <div className={styles.summaryValue}>
-                15.5%
               </div>
             </div>
           </div>
@@ -128,16 +128,6 @@ export class MTMyPositionView extends
                 }
               </div>
             </div>
-            <div className={styles.summaryRow}>
-              <div className={styles.summaryLabel}>
-                Average Price
-              </div>
-              <div className={styles.summaryValue}>
-                { this.props.ma.referencePrice &&
-                <Money value={this.props.ma.referencePrice} token="DAI" />
-                }
-              </div>
-            </div>
           </div>
           <div className={styles.MTPositionColumnNarrow}>
             <Button
@@ -163,14 +153,14 @@ export class MTMyPositionView extends
   }
 
   private transfer (actionKind: UserActionKind, token: string) {
-    const fundForm$ = this.props.createMTFundForm$(actionKind, token);
+    const fundForm$ = this.props.createMTFundForm$(actionKind, token, undefined);
     const MTFundFormViewRxTx =
       connect<MTTransferFormState, ModalProps>(
         inject(
           MtTransferFormView,
           // cast is safe as CreateMTAllocateForm$Props
           // is not used inside MtTransferFormView!
-          (this.props as any) as (CreateMTAllocateForm$Props & ModalOpenerProps),
+          (this.props as any) as (CreateMTAllocateForm$Props & ModalOpenerProps)
         ),
         fundForm$
       );

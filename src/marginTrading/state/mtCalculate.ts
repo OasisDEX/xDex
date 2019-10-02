@@ -4,7 +4,7 @@ import { findLastIndex } from 'lodash';
 import { nullAddress } from '../../blockchain/utils';
 import { Offer } from '../../exchange/orderbook/orderbook';
 import { minusOne, one, zero } from '../../utils/zero';
-import { eat } from '../plan/planUtils';
+import { buy } from '../plan/planUtils';
 import {
   CashAsset,
   CashAssetCore,
@@ -65,7 +65,7 @@ export function realPurchasingPowerNonMarginable(
   cashAvailable: BigNumber,
   sellOffers: Offer[]
 ) {
-  const [, cashLeft] = eat(cashAvailable, sellOffers);
+  const [, cashLeft] = buy(cashAvailable, sellOffers);
   return cashAvailable.minus(cashLeft);
 }
 
@@ -83,7 +83,7 @@ export function realPurchasingPowerNonMarginable(
 //   let cash = ma.dai;
 //
 //   if (cash.gt(zero)) {
-//     const [bought, cashLeft, offersLeft] = eat(cash, sellOffers);
+//     const [bought, cashLeft, offersLeft] = buy(cash, sellOffers);
 //     sellOffers = offersLeft;
 //     amount = amount.plus(bought);
 //     purchasingPower = purchasingPower.plus(cash).minus(cashLeft);
@@ -102,7 +102,7 @@ export function realPurchasingPowerNonMarginable(
 //       collRatio.toString()
 //     );
 //
-//     const [bought, cashLeft, offersLeft] = eat(cash, sellOffers);
+//     const [bought, cashLeft, offersLeft] = buy(cash, sellOffers);
 //     sellOffers = offersLeft;
 //     amount = amount.plus(bought);
 //     purchasingPower = purchasingPower.plus(cash).minus(cashLeft);
@@ -133,9 +133,9 @@ export function realPurchasingPowerMarginable(
   let cash = ma.dai;
   let first = true;
 
-  while ((cash.gt(zero) || first) && offers.length > 0) {
+  while ((cash.gt(0.01) || first) && offers.length > 0) {
     first = false;
-    const [bought, cashLeft, offersLeft] = eat(cash, offers);
+    const [bought, cashLeft, offersLeft] = buy(cash, offers);
     offers = offersLeft;
     amount = amount.plus(bought);
     purchasingPower = purchasingPower.plus(cash).minus(cashLeft);
@@ -249,6 +249,7 @@ export function calculateMarginable(
   const availableDebt = BigNumber.max(zero, maxDebt.minus(ma.debt));
 
   const cash = balanceInCash.plus(ma.dai);
+
   const liquidationPrice = ma.minCollRatio.times(ma.debt).div(ma.balance);
 
   const history = calculateMTHistoryEvents(ma.rawHistory, ma);

@@ -16,3 +16,4 @@ export const setupDescription: string;
 export const actionButton: string;
 export const backButton: string;
 export const buttonCheck: string;
+export const referencePriceField: string;

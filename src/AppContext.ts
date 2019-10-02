@@ -14,9 +14,7 @@ import {
 
 import * as balancesMT from './balances-mt/balances';
 import { MtAccountDetailsView } from './balances-mt/mtAccountDetailsView';
-import {
-  createBalancesView$, MTBalancesView
-} from './balances-mt/mtBalancesView';
+import { createBalancesView$, MTBalancesView } from './balances-mt/mtBalancesView';
 import { createMTSummary$ } from './balances-mt/mtSummary';
 import { MtSummaryView } from './balances-mt/mtSummaryView';
 import { createTaxExport$ } from './balances-mt/taxExporter';
@@ -126,6 +124,7 @@ import { inject } from './utils/inject';
 import { Loadable, LoadableWithTradingPair, loadablifyLight, } from './utils/loadable';
 import { ModalOpenerProps, withModal } from './utils/modal';
 import { createWrapUnwrapForm$ } from './wrapUnwrap/wrapUnwrapForm';
+import BigNumber from "bignumber.js";
 
 export function setupAppContext() {
 
@@ -149,8 +148,28 @@ export function setupAppContext() {
     mta$
   );
 
+  const loadOrderbook = memoizeTradingPair(curry(loadOrderbook$)(context$, onEveryBlock$));
+  const currentOrderbook$ = currentTradingPair$.pipe(
+    switchMap(pair => loadOrderbook(pair))
+  );
+
+  const orderbookMidpointPrice$ = currentOrderbook$.pipe(
+    map(ob => {
+      if (ob && ob.buy.length > 0 && ob.sell.length > 0) {
+        return (ob.buy[0].price.plus(ob.sell[0].price)).div(2);
+      }
+      return undefined;
+    })
+  );
+
+  // const currentOrderBookWithTradingPair$ = loadablifyPlusTradingPair(
+  //   currentTradingPair$,
+  //   loadOrderbook
+  // );
+
   const createMTFundForm$: CreateMTFundForm$ =
-    curry(createMTTransferForm$)(mta$, gasPrice$, etherPriceUsd$, balances$, calls$, readCalls$);
+    curry(createMTTransferForm$)(mta$, gasPrice$, etherPriceUsd$, balances$,
+                                 currentOrderbook$, calls$, readCalls$);
 
   const approveMTProxy = createMTProxyApprove(calls$);
 
@@ -210,14 +229,8 @@ export function setupAppContext() {
     map(([balances, etherBalance]) => ({ ...balances, ETH: etherBalance })),
   );
 
-  const loadOrderbook = memoizeTradingPair(curry(loadOrderbook$)(context$, onEveryBlock$));
-  const currentOrderbook$ = currentTradingPair$.pipe(
-    switchMap(pair => loadOrderbook(pair))
-  );
-  // const currentOrderBookWithTradingPair$ = loadablifyPlusTradingPair(
-  //   currentTradingPair$,
-  //   loadOrderbook
-  // );
+  const approve = balancesNoMT.createWalletApprove(calls$, gasPrice$);
+  const disapprove = balancesNoMT.createWalletDisapprove(calls$, gasPrice$);
 
   const marketDetails$ = createMarketDetails$(
     memoizeTradingPair(curry(loadPriceDaysAgo)(0, context$, onEveryBlock$)),
