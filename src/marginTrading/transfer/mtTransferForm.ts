@@ -29,7 +29,6 @@ import { description, impossible, Impossible, isImpossible } from '../../utils/i
 import { firstOfOrTrue } from '../../utils/operators';
 import { planDraw, planDrawDai } from '../plan/planDraw';
 import { planFund, planFundDai } from '../plan/planFund';
-import { MTSimpleFormState } from '../simple/mtOrderForm';
 import {
   findAsset, findMarginableAsset, findNonMarginableAsset, MarginableAsset, MarginableAssetCore,
   MTAccount, MTAccountState,

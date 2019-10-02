@@ -22,7 +22,6 @@ import {
   KindChange,
   MTAccountChange,
   OrderbookChange,
-  PriceFieldChange,
   progressChange,
   ProgressChange,
   ProgressStage,
@@ -35,6 +34,7 @@ import {
   toOrderbookChange$, TotalFieldChange,
   transactionToX
 } from '../../utils/form';
+import { formatPriceDown, formatPriceUp } from '../../utils/formatters/format';
 import { description, Impossible, isImpossible } from '../../utils/impossible';
 import { minusOne, zero } from '../../utils/zero';
 import { EditableDebt } from '../allocate/mtOrderAllocateDebtForm';
@@ -57,7 +57,6 @@ import {
   realPurchasingPowerMarginable,
   realPurchasingPowerNonMarginable
 } from '../state/mtCalculate';
-import {formatAmount, formatPriceDown, formatPriceUp} from "../../utils/formatters/format";
 
 export enum MessageKind {
   insufficientAmount = 'insufficientAmount',
@@ -412,7 +411,7 @@ function addAmount(total: BigNumber | undefined, state: MTSimpleFormState): MTSi
     state.kind === OfferType.buy ? state.orderbook.sell : state.orderbook.buy
   );
 
-  if(left.gt(zero)) {
+  if (left.gt(zero)) {
     const messages: Message[] =
       [
         ...state.messages,

@@ -8,6 +8,7 @@ import { tokens } from '../../blockchain/config';
 import { BigNumberInput } from '../../utils/bigNumberInput/BigNumberInput';
 import { FormChangeKind, ProgressStage } from '../../utils/form';
 import { formatAmount, formatPrecision } from '../../utils/formatters/format';
+import { Money } from '../../utils/formatters/Formatters';
 import { Button } from '../../utils/forms/Buttons';
 import { ErrorMessage } from '../../utils/forms/ErrorMessage';
 import { InputGroup, InputGroupAddon } from '../../utils/forms/InputGroup';
@@ -19,6 +20,7 @@ import { ModalOpenerProps, ModalProps } from '../../utils/modal';
 import { Panel, PanelBody, PanelFooter, PanelHeader } from '../../utils/panel/Panel';
 import { Muted } from '../../utils/text/Text';
 import { TransactionStateDescription } from '../../utils/text/TransactionStateDescription';
+import { zero } from '../../utils/zero';
 import {
   CreateMTAllocateForm$Props} from '../allocate/mtOrderAllocateDebtFormView';
 import {
@@ -34,8 +36,6 @@ import {
   Message, MessageKind, MTTransferFormState, TransferFormChangeKind
 } from './mtTransferForm';
 import * as styles from './mtTransferFormView.scss';
-import {Money} from "../../utils/formatters/Formatters";
-import {zero} from "../../utils/zero";
 
 type MTFundFormProps =
   MTTransferFormState & ModalProps & ModalOpenerProps & CreateMTAllocateForm$Props;
@@ -110,9 +110,6 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
     const asset = this.getAsset(this.props.token);
     const ilkAsset = (this.props.ilk ?
       this.getAsset(this.props.ilk) : this.getAsset(this.props.token)) as MarginableAsset;
-
-    console.log('SUMMARY ilkasset', ilkAsset);
-    console.log('SUMMARY asset', asset);
 
     const isSafePost = true; // todo
 

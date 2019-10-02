@@ -5,13 +5,12 @@ import { inject } from '../../utils/inject';
 
 import { Button } from '../../utils/forms/Buttons';
 import { SvgImage } from '../../utils/icons/utils';
-import { Loadable, LoadableWithTradingPair } from '../../utils/loadable';
+import { Loadable } from '../../utils/loadable';
 import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
 import { ModalOpenerProps, ModalProps } from '../../utils/modal';
 import { PanelBody, PanelHeader } from '../../utils/panel/Panel';
 import { CreateMTAllocateForm$Props } from '../allocate/mtOrderAllocateDebtFormView';
 import {
-  findMarginableAsset,
   MarginableAsset, MTAccount,
   MTAccountState,
   UserActionKind

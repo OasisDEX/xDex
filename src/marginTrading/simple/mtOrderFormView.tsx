@@ -17,9 +17,9 @@ import { SettingsIcon } from '../../utils/icons/Icons';
 import { Hr } from '../../utils/layout/LayoutHelpers';
 import { LoggedOut } from '../../utils/loadingIndicator/LoggedOut';
 import { PanelBody, PanelFooter, PanelHeader } from '../../utils/panel/Panel';
-import {Currency, Muted} from '../../utils/text/Text';
+import { Currency, Muted } from '../../utils/text/Text';
 import { minusOne, zero } from '../../utils/zero';
-import {findAsset, findMarginableAsset, MTAccountState} from '../state/mtAccount';
+import { findAsset, findMarginableAsset, MTAccountState } from '../state/mtAccount';
 import { Message, MessageKind, MTSimpleFormState, ViewKind } from './mtOrderForm';
 import * as styles from './mtOrderFormView.scss';
 
@@ -661,7 +661,6 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
   //     </span>
   //   </BorderBox>;
   // }
-
 
   private purchasingPower2() {
     return (
