@@ -1,22 +1,17 @@
 import * as React from 'react';
 import * as styles from '../../balances-mt/mtBalancesView.scss';
-import { connect } from '../../utils/connect';
-import { inject } from '../../utils/inject';
 
 import { Button } from '../../utils/forms/Buttons';
 import { SvgImage } from '../../utils/icons/utils';
 import { Loadable } from '../../utils/loadable';
 import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
-import { ModalOpenerProps, ModalProps } from '../../utils/modal';
+import { ModalOpenerProps } from '../../utils/modal';
 import { PanelBody, PanelHeader } from '../../utils/panel/Panel';
-import { CreateMTAllocateForm$Props } from '../allocate/mtOrderAllocateDebtFormView';
 import {
   MarginableAsset, MTAccount,
-  MTAccountState,
-  UserActionKind
+  MTAccountState
 } from '../state/mtAccount';
-import { CreateMTFundForm$, MTTransferFormState } from '../transfer/mtTransferForm';
-import { MtTransferFormView } from '../transfer/mtTransferFormView';
+import { CreateMTFundForm$ } from '../transfer/mtTransferForm';
 import { MTMyPositionView } from './MTMyPositionView';
 
 import { Observable } from 'rxjs/index';
@@ -139,7 +134,7 @@ export class MTMyPositionPanelInternal
 {
   public render() {
 
-    const { ma, mta } = this.props;
+    const { ma } = this.props;
 
     return (
       <div>
@@ -205,18 +200,18 @@ export class MTMyPositionPanelInternal
       </div>
     );
   }
-  private transfer (actionKind: UserActionKind, token: string, ilk: string) {
-    const fundForm$ = this.props.createMTFundForm$(actionKind, token, ilk);
-    const MTFundFormViewRxTx =
-      connect<MTTransferFormState, ModalProps>(
-        inject(
-          MtTransferFormView,
-          // cast is safe as CreateMTAllocateForm$Props
-          // is not used inside MtTransferFormView!
-          (this.props as any) as (CreateMTAllocateForm$Props & ModalOpenerProps)
-        ),
-        fundForm$
-      );
-    this.props.open(MTFundFormViewRxTx);
-  }
+  // private transfer (actionKind: UserActionKind, token: string, ilk: string) {
+  //   const fundForm$ = this.props.createMTFundForm$(actionKind, token, ilk);
+  //   const MTFundFormViewRxTx =
+  //     connect<MTTransferFormState, ModalProps>(
+  //       inject(
+  //         MtTransferFormView,
+  //         // cast is safe as CreateMTAllocateForm$Props
+  //         // is not used inside MtTransferFormView!
+  //         (this.props as any) as (CreateMTAllocateForm$Props & ModalOpenerProps)
+  //       ),
+  //       fundForm$
+  //     );
+  //   this.props.open(MTFundFormViewRxTx);
+  // }
 }

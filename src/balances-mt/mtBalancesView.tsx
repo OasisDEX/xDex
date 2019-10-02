@@ -123,10 +123,10 @@ export class MTBalancesViewInternal
                 </div>
               </td>
               <td className={styles.amount}>
-                15%
+                -
               </td>
               <td className={styles.amount}>
-                $333.44
+                -
               </td>
               <td className={styles.amount}>
                 -

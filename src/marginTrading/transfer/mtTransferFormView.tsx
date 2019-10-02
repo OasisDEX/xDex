@@ -12,7 +12,6 @@ import { Money } from '../../utils/formatters/Formatters';
 import { Button } from '../../utils/forms/Buttons';
 import { ErrorMessage } from '../../utils/forms/ErrorMessage';
 import { InputGroup, InputGroupAddon } from '../../utils/forms/InputGroup';
-import { Select } from '../../utils/forms/Select';
 import { GasCost } from '../../utils/gasCost/GasCost';
 import { SvgImage } from '../../utils/icons/utils';
 import { BorderBox, Hr } from '../../utils/layout/LayoutHelpers';
@@ -33,7 +32,7 @@ import {
 } from '../state/mtAccount';
 import closeIconSvg from './close-icon.svg';
 import {
-  Message, MessageKind, MTTransferFormState, TransferFormChangeKind
+  Message, MessageKind, MTTransferFormState
 } from './mtTransferForm';
 import * as styles from './mtTransferFormView.scss';
 
@@ -89,13 +88,13 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
     });
   }
 
-  private ilkChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value;
-    this.props.change({
-      value,
-      kind: TransferFormChangeKind.ilkFieldChange,
-    });
-  }
+  // private ilkChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  //   const value = e.target.value;
+  //   this.props.change({
+  //     value,
+  //     kind: TransferFormChangeKind.ilkFieldChange,
+  //   });
+  // }
 
   private close = () => {
     this.props.cancel();
@@ -248,7 +247,9 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
           {/*<tbody>*/}
           {/*<tr>*/}
             {/*<td><Muted>Wallet</Muted></td>*/}
-            {/*<td>{asset && formatAmount(asset.walletBalance, asset.name)} {this.props.token}</td>*/}
+            {/*<td>*/}
+              {/*{asset && formatAmount(asset.walletBalance, asset.name)} {this.props.token}*/}
+              {/*</td>*/}
           {/*</tr>*/}
           {/*<tr>*/}
             {/*<td><Muted>Margin account</Muted></td>*/}
@@ -444,19 +445,21 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
     );
   }
 
-  private TargetGroup() {
-    const marginableAssets = this.props.mta &&
-      this.props.mta.state === MTAccountState.setup && this.props.mta.marginableAssets;
-    return (
-      <InputGroup sizer="md" style={{ marginBottom: '1em' }}>
-        <InputGroupAddon border="right">Asset</InputGroupAddon>
-        <Select value={this.props.ilk} onChange={this.ilkChange} style={{ width: '100%' }}>
-          <option hidden={true} />
-          { (marginableAssets || []).map(asset => <option key={asset.name}>{asset.name}</option>)}
-        </Select>
-      </InputGroup>
-    );
-  }
+  // private TargetGroup() {
+  //   const marginableAssets = this.props.mta &&
+  //     this.props.mta.state === MTAccountState.setup && this.props.mta.marginableAssets;
+  //   return (
+  //     <InputGroup sizer="md" style={{ marginBottom: '1em' }}>
+  //       <InputGroupAddon border="right">Asset</InputGroupAddon>
+  //       <Select value={this.props.ilk} onChange={this.ilkChange} style={{ width: '100%' }}>
+  //         <option hidden={true} />
+  //         { (marginableAssets || []).map(
+  //           asset => <option key={asset.name}>{asset.name}</option>
+  //         )}
+  //       </Select>
+  //     </InputGroup>
+  //   );
+  // }
 
   private messageContent(msg: Message) {
     switch (msg.kind) {
