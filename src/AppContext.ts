@@ -124,7 +124,6 @@ import { inject } from './utils/inject';
 import { Loadable, LoadableWithTradingPair, loadablifyLight, } from './utils/loadable';
 import { ModalOpenerProps, withModal } from './utils/modal';
 import { createWrapUnwrapForm$ } from './wrapUnwrap/wrapUnwrapForm';
-import BigNumber from "bignumber.js";
 
 export function setupAppContext() {
 
@@ -153,14 +152,14 @@ export function setupAppContext() {
     switchMap(pair => loadOrderbook(pair))
   );
 
-  const orderbookMidpointPrice$ = currentOrderbook$.pipe(
-    map(ob => {
-      if (ob && ob.buy.length > 0 && ob.sell.length > 0) {
-        return (ob.buy[0].price.plus(ob.sell[0].price)).div(2);
-      }
-      return undefined;
-    })
-  );
+  // const orderbookMidpointPrice$ = currentOrderbook$.pipe(
+  //   map(ob => {
+  //     if (ob && ob.buy.length > 0 && ob.sell.length > 0) {
+  //       return (ob.buy[0].price.plus(ob.sell[0].price)).div(2);
+  //     }
+  //     return undefined;
+  //   })
+  // );
 
   // const currentOrderBookWithTradingPair$ = loadablifyPlusTradingPair(
   //   currentTradingPair$,
@@ -229,8 +228,8 @@ export function setupAppContext() {
     map(([balances, etherBalance]) => ({ ...balances, ETH: etherBalance })),
   );
 
-  const approve = balancesNoMT.createWalletApprove(calls$, gasPrice$);
-  const disapprove = balancesNoMT.createWalletDisapprove(calls$, gasPrice$);
+  // const approve = balancesNoMT.createWalletApprove(calls$, gasPrice$);
+  // const disapprove = balancesNoMT.createWalletDisapprove(calls$, gasPrice$);
 
   const marketDetails$ = createMarketDetails$(
     memoizeTradingPair(curry(loadPriceDaysAgo)(0, context$, onEveryBlock$)),

@@ -151,7 +151,7 @@ export class MTMyPositionView extends
               size="md"
               className={styles.actionButton}
               disabled={!this.props.ma.availableActions.includes(UserActionKind.fund)}
-              onClick={() => this.transfer(UserActionKind.fund, 'DAI', this.props.ma.name,)}
+              onClick={() => this.transfer(UserActionKind.fund, 'DAI', this.props.ma.name)}
             >
               Deposit DAI
             </Button>

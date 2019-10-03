@@ -17,9 +17,9 @@ import { SettingsIcon } from '../../utils/icons/Icons';
 import { Hr } from '../../utils/layout/LayoutHelpers';
 import { LoggedOut } from '../../utils/loadingIndicator/LoggedOut';
 import { PanelBody, PanelFooter, PanelHeader } from '../../utils/panel/Panel';
-import { Currency, Muted } from '../../utils/text/Text';
+import { Muted } from '../../utils/text/Text';
 import { minusOne, zero } from '../../utils/zero';
-import { findAsset, findMarginableAsset, MTAccountState } from '../state/mtAccount';
+import { findMarginableAsset, MTAccountState } from '../state/mtAccount';
 import { Message, MessageKind, MTSimpleFormState, ViewKind } from './mtOrderForm';
 import * as styles from './mtOrderFormView.scss';
 
@@ -349,42 +349,42 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
     );
   }
 
-  private balanceButtons() {
-    const baseTokenAsset = findAsset(this.props.baseToken, this.props.mta);
-    const quoteTokenAsset = findAsset(this.props.quoteToken, this.props.mta);
-    return (
-      <div className={classnames(styles.flexContainer, styles.marginBottom)}>
-        <Button
-          type="button"
-          onClick={this.handleSetMax}
-          size="lg"
-          block={true}
-          disabled={this.props.kind === 'buy'}
-          className={styles.balanceBtn}
-        >
-          <span style={{ lineHeight: 1 }}>
-                    { baseTokenAsset &&
-                    formatAmount(baseTokenAsset.balance, this.props.baseToken)
-                    } <Currency value={this.props.baseToken} />
-                  </span>
-        </Button>
-        <Button
-          type="button"
-          onClick={this.handleSetMax}
-          size="lg"
-          block={true}
-          disabled={this.props.kind === 'sell'}
-          className={styles.balanceBtn}
-        >
-          <span style={{ lineHeight: 1 }}>
-                    { quoteTokenAsset &&
-                    formatAmount(quoteTokenAsset.balance, this.props.quoteToken)
-                    } <Currency value={this.props.quoteToken} />
-                  </span>
-        </Button>
-      </div>
-    );
-  }
+  // private balanceButtons() {
+  //   const baseTokenAsset = findAsset(this.props.baseToken, this.props.mta);
+  //   const quoteTokenAsset = findAsset(this.props.quoteToken, this.props.mta);
+  //   return (
+  //     <div className={classnames(styles.flexContainer, styles.marginBottom)}>
+  //       <Button
+  //         type="button"
+  //         onClick={this.handleSetMax}
+  //         size="lg"
+  //         block={true}
+  //         disabled={this.props.kind === 'buy'}
+  //         className={styles.balanceBtn}
+  //       >
+  //         <span style={{ lineHeight: 1 }}>
+  //                   { baseTokenAsset &&
+  //                   formatAmount(baseTokenAsset.balance, this.props.baseToken)
+  //                   } <Currency value={this.props.baseToken} />
+  //                 </span>
+  //       </Button>
+  //       <Button
+  //         type="button"
+  //         onClick={this.handleSetMax}
+  //         size="lg"
+  //         block={true}
+  //         disabled={this.props.kind === 'sell'}
+  //         className={styles.balanceBtn}
+  //       >
+  //         <span style={{ lineHeight: 1 }}>
+  //                   { quoteTokenAsset &&
+  //                   formatAmount(quoteTokenAsset.balance, this.props.quoteToken)
+  //                   } <Currency value={this.props.quoteToken} />
+  //                 </span>
+  //       </Button>
+  //     </div>
+  //   );
+  // }
 
   // private orderType() {
   //   return (

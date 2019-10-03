@@ -405,8 +405,7 @@ function addAmount(total: BigNumber | undefined, state: MTSimpleFormState): MTSi
       amount: undefined
     };
   }
-
-  const [amount, left, _] = buy(
+  const [amount, left] = buy(
     total,
     state.kind === OfferType.buy ? state.orderbook.sell : state.orderbook.buy
   );

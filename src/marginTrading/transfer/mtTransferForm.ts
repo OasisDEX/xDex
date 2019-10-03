@@ -13,7 +13,8 @@ import {
   BalancesChange, doGasEstimation, EtherPriceUSDChange,
   FormChangeKind, GasEstimationStatus,
   GasPriceChange, HasGasEstimation,
-  MTAccountChange, MTAccountStateChange, OrderbookChange, progressChange, ProgressChange, ProgressStage,
+  MTAccountChange, MTAccountStateChange, OrderbookChange,
+  progressChange, ProgressChange, ProgressStage,
   toBalancesChange, toEtherPriceUSDChange,
   toGasPriceChange, TokenChange,
   toMTAccountChange, toOrderbookChange$, transactionToX,
@@ -393,7 +394,8 @@ function addPostInfo(state: MTTransferFormState) {
       state.orderbook.sell);
   }
 
-  return { ...state, realPurchasingPowerPost, liquidationPrice, liquidationPricePost, balancePost: baseAssetPost.balance };
+  return { ...state, realPurchasingPowerPost,
+    liquidationPrice, liquidationPricePost, balancePost: baseAssetPost.balance };
 }
 
 export function createMTTransferForm$(
