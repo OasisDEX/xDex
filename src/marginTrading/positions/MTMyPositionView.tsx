@@ -2,7 +2,7 @@ import * as React from 'react';
 import { CDPHistoryView } from '../../balances-mt/CDPHistoryView';
 import { CDPLiquidationHistoryView } from '../../balances-mt/CDPLiquidationHistoryView';
 import { connect } from '../../utils/connect';
-import { formatPrecision } from '../../utils/formatters/format';
+import {formatPercent, formatPrecision} from '../../utils/formatters/format';
 import { Money } from '../../utils/formatters/Formatters';
 import { Button } from '../../utils/forms/Buttons';
 import { inject } from '../../utils/inject';
@@ -67,7 +67,8 @@ export class MTMyPositionView extends
                 Liqu. Fee
               </div>
               <div className={styles.summaryValue}>
-                15%
+                -
+                {/*15%*/}
                 {/*{*/}
                 {/*this.props.liquidationFee && !this.props.liquidationFee.isNaN() ?*/}
                 {/*<>*/}
@@ -82,7 +83,7 @@ export class MTMyPositionView extends
                 Interest Rate
               </div>
               <div className={styles.summaryValue}>
-                15.5%
+                {formatPercent(this.props.ma.fee, { precision: 2 })}
               </div>
             </div>
             <div className={styles.summaryRow}>

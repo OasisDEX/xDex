@@ -1,3 +1,4 @@
+import {assertEnumType} from 'graphql';
 import * as React from 'react';
 
 import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
@@ -14,6 +15,7 @@ import {
   MarginableAsset, UserActionKind
 } from '../marginTrading/state/mtAccount';
 import { MTTransferFormState } from '../marginTrading/transfer/mtTransferForm';
+import {formatAmount, formatPercent} from '../utils/formatters/format';
 import { Loadable } from '../utils/loadable';
 import { WithLoadingIndicator } from '../utils/loadingIndicator/LoadingIndicator';
 import { ModalOpenerProps } from '../utils/modal';
@@ -41,6 +43,7 @@ export class MTBalancesView
 {
   public render() {
     const { status, value, error, ...props } = this.props;
+    console.log('balances view', JSON.stringify(props));
     return (
       <Panel className={styles.balancesPanel}>
         <PanelHeader>Leverage Account</PanelHeader>
@@ -93,7 +96,7 @@ export class MTBalancesViewInternal
         <thead>
         <tr>
           <th>Asset</th>
-          <th className={styles.amount}>Interest Rate</th>
+          <th className={styles.amount}>Interest Rate (per s!)</th>
           <th className={styles.amount}>Market Price</th>
           <th className={styles.amount}>Liqu. Price</th>
           <th className={styles.amount}>PnL</th>
@@ -107,9 +110,10 @@ export class MTBalancesViewInternal
         { this.props.balances && this.props.balances
           .filter(b => b.asset && b.asset.assetKind === AssetKind.marginable)
           .map(combinedBalance => {
+            const asset: MarginableAsset = combinedBalance.asset! as MarginableAsset;
             return (
             <tr
-              onClick={ () => this.props.selectMa(combinedBalance.asset as MarginableAsset)}
+              onClick={ () => this.props.selectMa(asset)}
               data-test-id={`${combinedBalance.name}-overview`}
               key={combinedBalance.name}
             >
@@ -123,19 +127,21 @@ export class MTBalancesViewInternal
                 </div>
               </td>
               <td className={styles.amount}>
-                15%
+                {formatPercent(asset.fee, { precision: 2 })}
               </td>
               <td className={styles.amount}>
-                $333.44
+                {formatAmount(asset.referencePrice, 'DAI')}
               </td>
               <td className={styles.amount}>
-                -
+                {!asset.liquidationPrice.isNaN() &&
+                formatAmount(asset.liquidationPrice, 'DAI') ||
+                '-'}
               </td>
               <td className={styles.amount}>
-                -
+                {asset.pnl && formatPercent(asset.pnl) || '-'}
               </td>
               <td className={styles.amount}>
-               0.000
+                {formatAmount(asset.balance, asset.name)}
               </td>
 
               {/*<td className={styles.center}>*/}
