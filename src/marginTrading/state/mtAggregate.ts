@@ -13,6 +13,7 @@ import {
 } from 'rxjs/operators';
 import * as dsProxy from '../../blockchain/abi/ds-proxy.abi.json';
 import { AssetKind, NetworkConfig, tokens } from '../../blockchain/config';
+import {every5Seconds$} from '../../blockchain/network';
 import { nullAddress } from '../../blockchain/utils';
 import { web3 } from '../../blockchain/web3';
 
@@ -49,18 +50,16 @@ export function aggregateMTAccountState(
   //   .map(t => t.symbol);
 
   const tokenNames = [...assetNames, 'DAI'];
-  // const tokenNames = assetNames;
-
-  // console.log('tokenNames', tokenNames);
 
   return calls.mtBalance({ tokens: tokenNames, proxyAddress: proxy.address }).pipe(
     switchMap(balancesResult =>
       combineLatest(
         of(balancesResult),
         forkJoin(assetNames.map((token, i) =>
-          ((balancesResult.assets[i].urn === nullAddress) ?
-            of([]) :
-            createRawMTLiquidationHistoryFromCache(context, balancesResult.assets[i].urn)
+          (of([])
+            // (balancesResult.assets[i].urn === nullAddress) ?
+            // of([]) :
+            // createRawMTLiquidationHistoryFromCache(context, balancesResult.assets[i].urn)
           ).pipe(
             map(history => ({ [token]: history })),
           )
@@ -157,7 +156,7 @@ export function createMta$(
 
   // let's fetch history temporarily in a separate pipeline
   const mtRawHistory$: Observable<MTHistoryEvent[][] | undefined> =
-    combineLatest(context$, proxyAddress$, onEveryBlock$).pipe(
+    combineLatest(context$, proxyAddress$, onEveryBlock$, every5Seconds$).pipe(
       exhaustMap(([context, proxyAddress]) => {
         if (!proxyAddress) {
           return of(undefined);

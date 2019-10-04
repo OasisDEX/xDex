@@ -119,120 +119,120 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
     && !this.props.liquidationPricePost.isNaN() ? this.props.liquidationPricePost : zero;
     return(
       <>
-        <div className={styles.summaryBox}>
-          <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
-            <div className={styles.orderSummaryLabel}>
-              Purch. power
-            </div>
-            <div className={styles.orderSummaryValue}>
-              {
-                this.props.realPurchasingPower &&
-                <>
-                  {formatPrecision(this.props.realPurchasingPower, 2)} {this.props.token}
-                </>
-              }
-              { this.props.realPurchasingPowerPost &&
-                <>
-                    <span className={styles.transitionArrow} />
-                    { !this.props.realPurchasingPowerPost.isNaN() ?
-                      <>
-                        {formatPrecision(this.props.realPurchasingPowerPost, 2)}
-                         {this.props.token}
-                      </>
-                      : <span>-</span>
-                    }
-                  </>
-              }
-            </div>
-          </div>
-          <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
-            <div className={styles.orderSummaryLabel}>
-              Balance
-            </div>
-            <div className={styles.orderSummaryValue}>
-              { ilkAsset && !ilkAsset.balance.isNaN() ?
-                <Money
-                  value={ilkAsset.balance}
-                  token={this.props.token}
-                  fallback="-"
-                /> : <span>-</span>
-              }
-              {
-                this.props.balancePost &&
-                <>
-                  <span className={styles.transitionArrow} />
-                  { !this.props.balancePost.isNaN() ?
-                    <Money
-                      value={this.props.balancePost}
-                      token={this.props.token}
-                      fallback="-"
-                    /> : <span>-</span>
-                  }
-                </>
-              }
-            </div>
-          </div>
-          <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
-            <div className={styles.orderSummaryLabel}>
-              Liqu. Price
-            </div>
-            <div className={styles.orderSummaryValue}>
-              <Money
-                value={liquidationPrice}
-                token="USD"
-                fallback="-"
-              />
-              {
-                this.props.liquidationPricePost &&
-                this.props.liquidationPrice &&
-                !this.props.liquidationPrice.isEqualTo(this.props.liquidationPricePost) &&
-                <>
-                  <span className={styles.transitionArrow} />
-                  <Money
-                    value={liquidationPricePost}
-                    token="USD"
-                    fallback="-"
-                    className={
-                      classnames({
-                        [styles.orderSummaryValuePositive]: isSafePost,
-                        [styles.orderSummaryValueNegative]: isSafePost,
-                      })
-                    }
-                  />
-                </>
-              }
-            </div>
-          </div>
-          <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
-            <div className={styles.orderSummaryLabel}>
-              Dai Debt
-            </div>
-            <div className={styles.orderSummaryValue}>
-              0.00
-            </div>
-          </div>
-        </div>
+        {/*<div className={styles.summaryBox}>*/}
+        {/*  <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>*/}
+        {/*    <div className={styles.orderSummaryLabel}>*/}
+        {/*      Purch. power*/}
+        {/*    </div>*/}
+        {/*    <div className={styles.orderSummaryValue}>*/}
+        {/*      {*/}
+        {/*        this.props.realPurchasingPower &&*/}
+        {/*        <>*/}
+        {/*          {formatPrecision(this.props.realPurchasingPower, 2)} {this.props.token}*/}
+        {/*        </>*/}
+        {/*      }*/}
+        {/*      { this.props.realPurchasingPowerPost &&*/}
+        {/*        <>*/}
+        {/*            <span className={styles.transitionArrow} />*/}
+        {/*            { !this.props.realPurchasingPowerPost.isNaN() ?*/}
+        {/*              <>*/}
+        {/*                {formatPrecision(this.props.realPurchasingPowerPost, 2)}*/}
+        {/*                 {this.props.token}*/}
+        {/*              </>*/}
+        {/*              : <span>-</span>*/}
+        {/*            }*/}
+        {/*          </>*/}
+        {/*      }*/}
+        {/*    </div>*/}
+        {/*  </div>*/}
+        {/*  <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>*/}
+        {/*    <div className={styles.orderSummaryLabel}>*/}
+        {/*      Balance*/}
+        {/*    </div>*/}
+        {/*    <div className={styles.orderSummaryValue}>*/}
+        {/*      { ilkAsset && !ilkAsset.balance.isNaN() ?*/}
+        {/*        <Money*/}
+        {/*          value={ilkAsset.balance}*/}
+        {/*          token={this.props.token}*/}
+        {/*          fallback="-"*/}
+        {/*        /> : <span>-</span>*/}
+        {/*      }*/}
+        {/*      {*/}
+        {/*        this.props.balancePost &&*/}
+        {/*        <>*/}
+        {/*          <span className={styles.transitionArrow} />*/}
+        {/*          { !this.props.balancePost.isNaN() ?*/}
+        {/*            <Money*/}
+        {/*              value={this.props.balancePost}*/}
+        {/*              token={this.props.token}*/}
+        {/*              fallback="-"*/}
+        {/*            /> : <span>-</span>*/}
+        {/*          }*/}
+        {/*        </>*/}
+        {/*      }*/}
+        {/*    </div>*/}
+        {/*  </div>*/}
+        {/*  <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>*/}
+        {/*    <div className={styles.orderSummaryLabel}>*/}
+        {/*      Liqu. Price*/}
+        {/*    </div>*/}
+        {/*    <div className={styles.orderSummaryValue}>*/}
+        {/*      <Money*/}
+        {/*        value={liquidationPrice}*/}
+        {/*        token="USD"*/}
+        {/*        fallback="-"*/}
+        {/*      />*/}
+        {/*      {*/}
+        {/*        this.props.liquidationPricePost &&*/}
+        {/*        this.props.liquidationPrice &&*/}
+        {/*        !this.props.liquidationPrice.isEqualTo(this.props.liquidationPricePost) &&*/}
+        {/*        <>*/}
+        {/*          <span className={styles.transitionArrow} />*/}
+        {/*          <Money*/}
+        {/*            value={liquidationPricePost}*/}
+        {/*            token="USD"*/}
+        {/*            fallback="-"*/}
+        {/*            className={*/}
+        {/*              classnames({*/}
+        {/*                [styles.orderSummaryValuePositive]: isSafePost,*/}
+        {/*                [styles.orderSummaryValueNegative]: isSafePost,*/}
+        {/*              })*/}
+        {/*            }*/}
+        {/*          />*/}
+        {/*        </>*/}
+        {/*      }*/}
+        {/*    </div>*/}
+        {/*  </div>*/}
+        {/*  <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>*/}
+        {/*    <div className={styles.orderSummaryLabel}>*/}
+        {/*      Dai Debt*/}
+        {/*    </div>*/}
+        {/*    <div className={styles.orderSummaryValue}>*/}
+        {/*      0.00*/}
+        {/*    </div>*/}
+        {/*  </div>*/}
+        {/*</div>*/}
 
-        <div className={styles.InfoRow}>
-          <div className={styles.InfoBox}>
-            <div className={styles.InfoRowLabel}>Leverage</div>
-            <div>
-              <span>-</span>
-            </div>
-          </div>
-          <div className={styles.InfoBox}>
-            <div className={styles.InfoRowLabel}>Liqu. Fee</div>
-            <span>-</span>
+        {/*<div className={styles.InfoRow}>*/}
+        {/*  <div className={styles.InfoBox}>*/}
+        {/*    <div className={styles.InfoRowLabel}>Leverage</div>*/}
+        {/*    <div>*/}
+        {/*      <span>-</span>*/}
+        {/*    </div>*/}
+        {/*  </div>*/}
+        {/*  <div className={styles.InfoBox}>*/}
+        {/*    <div className={styles.InfoRowLabel}>Liqu. Fee</div>*/}
+        {/*    <span>-</span>*/}
 
-          </div>
-          <div className={styles.InfoBox}>
-            <div className={styles.InfoRowLabel}>Interest Rate</div>
-            <div>
-              <span>-</span>
+        {/*  </div>*/}
+        {/*  <div className={styles.InfoBox}>*/}
+        {/*    <div className={styles.InfoRowLabel}>Interest Rate</div>*/}
+        {/*    <div>*/}
+        {/*      <span>-</span>*/}
 
-            </div>
-          </div>
-        </div>
+        {/*    </div>*/}
+        {/*  </div>*/}
+        {/*</div>*/}
 
         <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
             <div className={styles.orderSummaryLabel}>
