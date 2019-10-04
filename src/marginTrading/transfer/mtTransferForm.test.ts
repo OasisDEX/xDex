@@ -18,6 +18,10 @@
 //   createMTTransferForm$, MessageKind, MTTransferFormState, TransferFormChangeKind
 // } from './mtTransferForm';
 //
+
+test.skip('fake', () => {
+});
+
 // const defParams = {
 //   mta$: calculateMTAccount(
 //     {},
