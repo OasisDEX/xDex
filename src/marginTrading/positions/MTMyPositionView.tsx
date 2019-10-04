@@ -2,7 +2,7 @@ import * as React from 'react';
 import { CDPHistoryView } from '../../balances-mt/CDPHistoryView';
 import { CDPLiquidationHistoryView } from '../../balances-mt/CDPLiquidationHistoryView';
 import { connect } from '../../utils/connect';
-import {formatPercent, formatPrecision} from '../../utils/formatters/format';
+import { formatPercent, formatPrecision } from '../../utils/formatters/format';
 import { Money } from '../../utils/formatters/Formatters';
 import { Button } from '../../utils/forms/Buttons';
 import { inject } from '../../utils/inject';

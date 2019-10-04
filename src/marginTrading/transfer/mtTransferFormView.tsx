@@ -7,8 +7,7 @@ import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
 import { tokens } from '../../blockchain/config';
 import { BigNumberInput } from '../../utils/bigNumberInput/BigNumberInput';
 import { FormChangeKind, ProgressStage } from '../../utils/form';
-import { formatAmount, formatPrecision } from '../../utils/formatters/format';
-import { Money } from '../../utils/formatters/Formatters';
+import { formatAmount } from '../../utils/formatters/format';
 import { Button } from '../../utils/forms/Buttons';
 import { ErrorMessage } from '../../utils/forms/ErrorMessage';
 import { InputGroup, InputGroupAddon } from '../../utils/forms/InputGroup';
@@ -19,7 +18,6 @@ import { ModalOpenerProps, ModalProps } from '../../utils/modal';
 import { Panel, PanelBody, PanelFooter, PanelHeader } from '../../utils/panel/Panel';
 import { Muted } from '../../utils/text/Text';
 import { TransactionStateDescription } from '../../utils/text/TransactionStateDescription';
-import { zero } from '../../utils/zero';
 import {
   CreateMTAllocateForm$Props} from '../allocate/mtOrderAllocateDebtFormView';
 import {
@@ -107,16 +105,17 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
 
   private AccountSummary = () => {
     const asset = this.getAsset(this.props.token);
-    const ilkAsset = (this.props.ilk ?
-      this.getAsset(this.props.ilk) : this.getAsset(this.props.token)) as MarginableAsset;
-
-    const isSafePost = true; // todo
-
-    const liquidationPrice = this.props.liquidationPrice && !this.props.liquidationPrice.isNaN() ?
-      this.props.liquidationPrice : zero;
-
-    const liquidationPricePost = this.props.liquidationPricePost
-    && !this.props.liquidationPricePost.isNaN() ? this.props.liquidationPricePost : zero;
+    // const ilkAsset = (this.props.ilk ?
+    //   this.getAsset(this.props.ilk) : this.getAsset(this.props.token)) as MarginableAsset;
+    //
+    // const isSafePost = true; // todo
+    //
+    // const liquidationPrice =
+    //   this.props.liquidationPrice && !this.props.liquidationPrice.isNaN() ?
+    //     this.props.liquidationPrice : zero;
+    //
+    // const liquidationPricePost = this.props.liquidationPricePost
+    // && !this.props.liquidationPricePost.isNaN() ? this.props.liquidationPricePost : zero;
     return(
       <>
         {/*<div className={styles.summaryBox}>*/}

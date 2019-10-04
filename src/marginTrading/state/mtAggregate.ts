@@ -13,7 +13,7 @@ import {
 } from 'rxjs/operators';
 import * as dsProxy from '../../blockchain/abi/ds-proxy.abi.json';
 import { AssetKind, NetworkConfig, tokens } from '../../blockchain/config';
-import {every5Seconds$} from '../../blockchain/network';
+import { every5Seconds$ } from '../../blockchain/network';
 import { nullAddress } from '../../blockchain/utils';
 import { web3 } from '../../blockchain/web3';
 
@@ -26,12 +26,12 @@ import {
 } from './mtAccount';
 import { calculateMTAccount, } from './mtCalculate';
 import {
-  createRawMTHistoryFromCache, createRawMTLiquidationHistoryFromCache, RawMTLiquidationHistoryEvent
+  createRawMTHistoryFromCache, RawMTLiquidationHistoryEvent
 } from './mtHistory';
 import { getCashCore, getMarginableCore, getNonMarginableCore } from './mtTestUtils';
 
 export function aggregateMTAccountState(
-  context: NetworkConfig,
+  _context: NetworkConfig,
   proxy: any,
   calls: ReadCalls,
   rawHistories: MTHistoryEvent[][] | undefined
@@ -55,7 +55,7 @@ export function aggregateMTAccountState(
     switchMap(balancesResult =>
       combineLatest(
         of(balancesResult),
-        forkJoin(assetNames.map((token, i) =>
+        forkJoin(assetNames.map((token, _i) =>
           (of([])
             // (balancesResult.assets[i].urn === nullAddress) ?
             // of([]) :

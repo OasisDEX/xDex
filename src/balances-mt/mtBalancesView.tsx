@@ -1,4 +1,3 @@
-import {assertEnumType} from 'graphql';
 import * as React from 'react';
 
 import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
@@ -15,7 +14,7 @@ import {
   MarginableAsset, UserActionKind
 } from '../marginTrading/state/mtAccount';
 import { MTTransferFormState } from '../marginTrading/transfer/mtTransferForm';
-import {formatAmount, formatPercent} from '../utils/formatters/format';
+import { formatAmount, formatPercent } from '../utils/formatters/format';
 import { Loadable } from '../utils/loadable';
 import { WithLoadingIndicator } from '../utils/loadingIndicator/LoadingIndicator';
 import { ModalOpenerProps } from '../utils/modal';

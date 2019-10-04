@@ -373,21 +373,27 @@ function addPurchasingPower(state: MTSimpleFormState) {
       state.orderbook.sell
     );
 
-  let realPurchasingPowerPost;
-  if (state.amount && state.price) {
-    const cashAvailable = state.amount.times(state.price);
-    const [, , offers] = buy(cashAvailable, state.orderbook.sell);
+  const realPurchasingPowerPost =
+    state.messages.length === 0 &&
+    state.total &&
+    realPurchasingPower.minus(state.total);
 
-    realPurchasingPowerPost = baseAsset.assetKind === AssetKind.marginable ?
-      realPurchasingPowerMarginable(
-        baseAsset,
-        offers)
-      :
-      realPurchasingPowerNonMarginable(
-        state.mta.cash.balance,
-        offers
-      );
-  }
+  // TODO: seems to be wrong...
+  // let realPurchasingPowerPost;
+  // if (state.amount && state.price) {
+  //   const cashAvailable = state.amount.times(state.price);
+  //   const [, , offers] = buy(cashAvailable, state.orderbook.sell);
+  //
+  //   realPurchasingPowerPost = baseAsset.assetKind === AssetKind.marginable ?
+  //     realPurchasingPowerMarginable(
+  //       baseAsset,
+  //       offers)
+  //     :
+  //     realPurchasingPowerNonMarginable(
+  //       state.mta.cash.balance,
+  //       offers
+  //     );
+  // }
 
   return {
     ...state,
@@ -594,6 +600,7 @@ function getBuyPlan(
   const postTradeAsset = calculateMarginable(
     {
       ...asset,
+      urnBalance: asset.urnBalance.plus(amount),
       debt: asset.debt.plus(delta)
     } as MarginableAssetCore,
   );
@@ -688,7 +695,6 @@ function addPlan(state: MTSimpleFormState): MTSimpleFormState {
       plan: undefined,
     };
   }
-  console.log('ot', OfferType.buy);
 
   const [plan, postTradeInfo] = state.kind === OfferType.buy ?
     getBuyPlan(

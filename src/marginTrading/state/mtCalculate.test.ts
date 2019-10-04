@@ -183,7 +183,7 @@ test('Purchasing power marginable - cash only', () => {
     calculateMarginable(dai100),
     sellOffers
   );
-  expect(purchasingPower).toEqual(new BigNumber(200));
+  expect(purchasingPower.toFixed(0)).toEqual(new BigNumber(200).toFixed());
 });
 
 test('Purchasing power marginable - cash + collateral', () => {
@@ -191,7 +191,7 @@ test('Purchasing power marginable - cash + collateral', () => {
     calculateMarginable(weth1dai100),
     sellOffers
   );
-  expect(purchasingPower).toEqual(new BigNumber(400));
+  expect(purchasingPower.toFixed(0)).toEqual(new BigNumber(400).toFixed());
 });
 
 test('Events history - BuyLev', () => {

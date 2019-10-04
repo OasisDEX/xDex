@@ -4,7 +4,6 @@ import * as React from 'react';
 import { Operation, OperationKind } from '../../marginTrading/state/mtAccount';
 import { Money } from '../../utils/formatters/Formatters';
 import { Currency } from '../../utils/text/Text';
-import {one, zero} from '../../utils/zero';
 import { NetworkConfig } from '../config';
 import { MIN_ALLOWANCE } from '../network';
 import { amountFromWei, amountToWei } from '../utils';
@@ -61,7 +60,7 @@ export interface MTBalanceResult {
 }
 
 const BalanceOuts = 10;
-const secondsPerYear = 60 * 60 * 24 * 365;
+// const secondsPerYear = 60 * 60 * 24 * 365;
 
 BigNumber.config({ POW_PRECISION: 50 });
 
