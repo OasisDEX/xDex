@@ -1,5 +1,6 @@
 @import "../../utils/Mixins";
 @import "../../utils/Variables";
+@import "../../utils/Form";
 
 @include modal();
 
@@ -65,3 +66,98 @@
   padding: 0 20px;
 }
 
+.summaryBox {
+  border: 1px solid #383842;
+  padding: 15px 12px 0 12px;
+}
+
+
+.summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.transitionArrow {
+  display: inline-block;
+  height: 8px;
+  width: 16px;
+  margin: 0 12px;
+  background: url("./icon_arrow_right.svg") no-repeat center;
+}
+
+.summaryBox {
+  border: 1px solid #383842;
+  padding: 15px 12px 0 12px;
+}
+
+.orderSummaryRow {
+  @include formRow;
+}
+
+.orderSummaryRowDark {
+  .orderSummaryLabel {
+    @include formLabelDark;
+  }
+}
+
+.orderSummaryLabel {
+  text-align: left;
+  flex-grow: 2;
+}
+
+.orderSummaryValue {
+  text-align: right;
+}
+
+.orderSummaryValuePositive {
+  color: #36EFBA;
+}
+
+.orderSummaryValueNegative {
+  color: #FF6951;
+}
+
+.InfoRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #383842;
+  font-size: 15px;
+  line-height: 18px;
+  margin-bottom: 28px;
+}
+
+.InfoBox {
+  flex-grow:1;
+  flex-shrink: 1;
+  text-align: center;
+  box-sizing: border-box;
+  border-radius: 2px;
+  padding: 10px;
+  border-left: 1px solid #383842;
+}
+
+.InfoRowLabel {
+  @include formLabelDark;
+
+  margin-bottom: 5px;
+}
+
+.notSetupBorder {
+  text-align: center;
+  border: 1px dashed rgba(88, 88, 95, 0.4);
+  border-radius: 2px;
+  padding: 30px 0;
+  margin-bottom: 15px;
+}
+
+.headerWithIcon {
+  justify-content: space-between;
+}
+
+.closeButton {
+  cursor: pointer;
+  position: relative;
+  top: 5px;
+}

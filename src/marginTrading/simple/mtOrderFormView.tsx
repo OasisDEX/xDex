@@ -135,10 +135,10 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
     });
   }
 
-  public handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  public handleTotalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/,/g, '');
     this.props.change({
-      kind: FormChangeKind.priceFieldChange,
+      kind: FormChangeKind.totalFieldChange,
       value: value === '' ? undefined : new BigNumber(value)
     });
   }
@@ -257,6 +257,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
       {this.liquidationPrice()}
       {this.price2()}
       {this.slippageLimit()}
+      {/*{this.balanceButtons()}*/}
       {/*{this.interestRate()}*/}
     </div>);
   }
@@ -269,7 +270,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
           {this.headerButtons()}
         </PanelHeader>
         <Hr color="dark" className={styles.hrSmallMargin}/>
-        <PanelBody>
+        <PanelBody style={{ minWidth: '455px' }}>
           <form
             onSubmit={this.handleProceed}
           >
@@ -361,7 +362,6 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
   //         disabled={this.props.kind === 'buy'}
   //         className={styles.balanceBtn}
   //       >
-  //         { this.props.baseToken && <BalanceIcon token={this.props.baseToken} />}
   //         <span style={{ lineHeight: 1 }}>
   //                   { baseTokenAsset &&
   //                   formatAmount(baseTokenAsset.balance, this.props.baseToken)
@@ -376,7 +376,6 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
   //         disabled={this.props.kind === 'sell'}
   //         className={styles.balanceBtn}
   //       >
-  //         { this.props.quoteToken && <BalanceIcon token={this.props.quoteToken} />}
   //         <span style={{ lineHeight: 1 }}>
   //                   { quoteTokenAsset &&
   //                   formatAmount(quoteTokenAsset.balance, this.props.quoteToken)
@@ -457,6 +456,8 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
           />
           {
             this.props.liquidationPricePost &&
+            this.props.liquidationPrice &&
+            !this.props.liquidationPrice.isEqualTo(this.props.liquidationPricePost) &&
             <>
               <span className={styles.transitionArrow} />
               <Money
@@ -662,36 +663,46 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
   // }
 
   private purchasingPower2() {
-    return <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
-      <div className={styles.orderSummaryLabel}>
-        Purchasing power
-      </div>
-      <div className={styles.orderSummaryValue}>
-        {
-          this.props.realPurchasingPower &&
-          <>
-            {formatPrecision(this.props.realPurchasingPower, 2)} {this.props.quoteToken}
-          </>
-        }
-        { this.props.realPurchasingPowerPost &&
-          <>
-              <span className={styles.transitionArrow} />
-              { !this.props.realPurchasingPowerPost.isNaN() ?
-                <>
-                  {formatPrecision(this.props.realPurchasingPowerPost, 2)}
-                  {this.props.quoteToken}
-                </>
-                : <span>-</span>
-              }
+    return (
+      this.props.kind === OfferType.buy ?
+      <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
+        <div className={styles.orderSummaryLabel}>
+          Purch. power
+        </div>
+        <div className={styles.orderSummaryValue}>
+          {
+            this.props.realPurchasingPower &&
+            <>
+              {formatPrecision(this.props.realPurchasingPower, 2)}
             </>
-        }
+          }
+          { this.props.realPurchasingPowerPost &&
+            <>
+                <span className={styles.transitionArrow} />
+                { !this.props.realPurchasingPowerPost.isNaN() ?
+                  <>
+                    {formatPrecision(this.props.realPurchasingPowerPost, 2)}
+                  </>
+                  : <span>-</span>
+                }
+            </>
+          }
+          <>
+          {
+            (this.props.realPurchasingPower || this.props.realPurchasingPowerPost) &&
+            <> { this.props.quoteToken } </>
+          }</>
+        </div>
       </div>
-    </div>;
+        : null
+    );
   }
 
   private accountBalance() {
     const baseTokenAsset = findMarginableAsset(this.props.baseToken, this.props.mta);
+
     return (
+      <>
       <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
         <div className={styles.orderSummaryLabel}>
           Balance
@@ -719,6 +730,40 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
           }
         </div>
       </div>
+      <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
+        <div className={styles.orderSummaryLabel}>
+          DAI Balance
+        </div>
+        <div className={styles.orderSummaryValue}>
+          { baseTokenAsset && baseTokenAsset.debt.gt(zero) ?
+            <Money
+              value={baseTokenAsset.debt.times(minusOne)}
+              token={this.props.quoteToken}
+              fallback="-"
+            /> : baseTokenAsset && baseTokenAsset.dai ?
+              <Money
+              value={baseTokenAsset.dai}
+              token={this.props.quoteToken}
+              fallback="-"
+            /> : <span>-</span>
+
+          }
+          {
+            this.props.daiBalancePost &&
+            <>
+              <span className={styles.transitionArrow} />
+              { !this.props.daiBalancePost.isNaN() ?
+                <Money
+                  value={this.props.daiBalancePost}
+                  token={this.props.baseToken}
+                  fallback="-"
+                /> : <span>-</span>
+              }
+            </>
+          }
+        </div>
+      </div>
+        </>
     );
   }
 
@@ -791,16 +836,16 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
               decimalLimit: 5,
               prefix: ''
             })}
-            onChange={this.handlePriceChange}
+            onChange={this.handleTotalChange}
             value={
-              (this.props.price || null) &&
+              (this.props.total || null) &&
               formatPrice(this.props.total as BigNumber, this.props.quoteToken)
             }
             guide={true}
             placeholderChar={' '}
             className={styles.input}
             // disabled={this.props.stage === FormStage.waitingForAllocation}
-            disabled={ true }
+            // disabled={ true }
           />
           <InputGroupAddon className={styles.inputCurrencyAddon} onClick={ this.handlePriceFocus }>
             {this.props.quoteToken}
@@ -891,7 +936,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
   //           decimalLimit: 5,
   //           prefix: ''
   //         })}
-  //         onChange={this.handlePriceChange}
+  //         onChange={this.handleTotalChange}
   //         value={
   //           (this.props.price || null) &&
   //           formatPrice(this.props.price as BigNumber, this.props.quoteToken)

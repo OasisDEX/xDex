@@ -13,26 +13,33 @@ import {
   BalancesChange, doGasEstimation, EtherPriceUSDChange,
   FormChangeKind, GasEstimationStatus,
   GasPriceChange, HasGasEstimation,
-  MTAccountChange, MTAccountStateChange, progressChange, ProgressChange, ProgressStage,
+  MTAccountChange, MTAccountStateChange, OrderbookChange,
+  progressChange, ProgressChange, ProgressStage,
   toBalancesChange, toEtherPriceUSDChange,
   toGasPriceChange, TokenChange,
-  toMTAccountChange, transactionToX,
+  toMTAccountChange, toOrderbookChange$, transactionToX,
 } from '../../utils/form';
 
 import { curry } from 'ramda';
 import { Balances } from '../../balances-nomt/balances';
 import { Calls, Calls$, ReadCalls, ReadCalls$ } from '../../blockchain/calls/calls';
 import { AssetKind } from '../../blockchain/config';
+import { Orderbook } from '../../exchange/orderbook/orderbook';
 import { combineAndMerge } from '../../utils/combineAndMerge';
 import { description, impossible, Impossible, isImpossible } from '../../utils/impossible';
 import { firstOfOrTrue } from '../../utils/operators';
 import { planDraw, planDrawDai } from '../plan/planDraw';
 import { planFund, planFundDai } from '../plan/planFund';
 import {
-  findAsset,
+  findAsset, findMarginableAsset, findNonMarginableAsset, MarginableAsset, MarginableAssetCore,
   MTAccount, MTAccountState,
   Operation, UserActionKind
 } from '../state/mtAccount';
+import {
+  calculateMarginable,
+  realPurchasingPowerMarginable,
+  realPurchasingPowerNonMarginable
+} from '../state/mtCalculate';
 
 export enum MessageKind {
   insufficientAmount = 'insufficientAmount',
@@ -59,8 +66,14 @@ export interface MTTransferFormState extends HasGasEstimation {
   balances?: Balances;
   messages: Message[];
   amount?: BigNumber;
+  orderbook?: Orderbook;
   ilk?: string;
   token: string;
+  realPurchasingPower?: BigNumber;
+  realPurchasingPowerPost?: BigNumber;
+  liquidationPrice?: BigNumber;
+  liquidationPricePost?: BigNumber;
+  balancePost?: BigNumber;
   plan?: Operation[] | Impossible;
   progress?: ProgressStage;
   change: (change: ManualChange) => void;
@@ -70,7 +83,8 @@ export interface MTTransferFormState extends HasGasEstimation {
 }
 
 export type CreateMTFundForm$ =
-  (actionKind: UserActionKind, token: string) => Observable<MTTransferFormState>;
+  (actionKind: UserActionKind, token: string, ilk: string | undefined)
+    => Observable<MTTransferFormState>;
 
 export enum TransferFormChangeKind {
   ilkFieldChange = 'ilkFieldChange',
@@ -82,7 +96,7 @@ export interface IlkFieldChange {
 }
 
 type EnvironmentChange =
-  MTAccountChange | MTAccountStateChange |
+  MTAccountChange | MTAccountStateChange | OrderbookChange |
   GasPriceChange | EtherPriceUSDChange | BalancesChange;
 
 // TODO: why not: ManualChange | EnvironmentChange | StageChange?
@@ -97,6 +111,9 @@ function applyChange(state: MTTransferFormState, change: MTSetupFormChange): MTT
       return { ...state,
         gasPrice: change.value,
         gasEstimationStatus: GasEstimationStatus.unset };
+    case FormChangeKind.orderbookChange:
+      return { ...state,
+        orderbook: change.orderbook };
     case FormChangeKind.etherPriceUSDChange:
       return { ...state,
         etherPriceUsd: change.value,
@@ -182,8 +199,6 @@ function estimateGasPrice(
     if (!plan || isImpossible(plan)) {
       return undefined;
     }
-
-    // console.log('plan', plan);
 
     const call = state.actionKind === UserActionKind.draw ?
       calls.mtDrawEstimateGas : calls.mtFundEstimateGas;
@@ -291,7 +306,6 @@ function validate(state: MTTransferFormState) {
 }
 
 function checkIfIsReadyToProceed(state: MTTransferFormState) {
-
   if (
     state.mta !== undefined &&
     state.mta.state === MTAccountState.setup &&
@@ -306,16 +320,95 @@ function checkIfIsReadyToProceed(state: MTTransferFormState) {
 
   return { ...state, readyToProceed: false };
 }
+function addPurchasingPower(state: MTTransferFormState) {
+
+  const token = state.token === 'DAI' ? state.ilk : state.token;
+  if (!token) {
+    return state;
+  }
+
+  const baseAsset =
+    findMarginableAsset(token, state.mta) ||
+    findNonMarginableAsset(token, state.mta);
+
+  if (!state.mta
+    || state.mta.state !== MTAccountState.setup
+    || !state.orderbook
+    || !baseAsset
+  ) {
+    return state;
+  }
+
+  return {
+    ...state,
+    realPurchasingPower: baseAsset.assetKind === AssetKind.marginable ?
+      realPurchasingPowerMarginable(
+        baseAsset,
+        state.orderbook.sell)
+        :
+        realPurchasingPowerNonMarginable(
+          state.mta.cash.balance,
+          state.orderbook.sell
+        )
+  };
+}
+
+function addPostInfo(state: MTTransferFormState) {
+
+  const baseAsset = findMarginableAsset(state.token, state.mta);
+  if (!baseAsset || !state.amount) {
+    return {
+      ...state,
+      balancePost: undefined,
+      realPurchasingPowerPost: undefined,
+    };
+  }
+
+  const liquidationPrice = baseAsset.liquidationPrice;
+
+  console.log('BASE ASSET - before assign ', baseAsset);
+  const baseAssetPost: MarginableAsset = Object.assign({}, baseAsset);
+  let realPurchasingPowerPost;
+
+  if (state.token === 'DAI') {
+    baseAssetPost.cash = state.actionKind === UserActionKind.fund ?
+      baseAssetPost.cash.plus(state.amount) : baseAssetPost.cash.minus(state.amount);
+  } else {
+    baseAssetPost.balance = state.actionKind === UserActionKind.fund ?
+      baseAssetPost.balance.plus(state.amount) : baseAssetPost.balance.minus(state.amount);
+  }
+
+  const postTransferAsset = calculateMarginable(
+    {
+      ...baseAssetPost,
+    } as MarginableAssetCore,
+  );
+
+  const liquidationPricePost = postTransferAsset.liquidationPrice;
+
+  console.log('postTransferAsset', postTransferAsset);
+
+  if (state.orderbook) {
+    realPurchasingPowerPost = realPurchasingPowerMarginable(
+      baseAssetPost,
+      state.orderbook.sell);
+  }
+
+  return { ...state, realPurchasingPowerPost,
+    liquidationPrice, liquidationPricePost, balancePost: baseAssetPost.balance };
+}
 
 export function createMTTransferForm$(
   mta$: Observable<MTAccount>,
   gasPrice$: Observable<BigNumber>,
   etherPriceUSD$: Observable<BigNumber>,
   balances$: Observable<Balances>,
+  orderbook$: Observable<Orderbook>,
   calls$: Calls$,
   readCalls$: ReadCalls$,
   actionKind: UserActionKind.fund | UserActionKind.draw,
-  token: string
+  token: string,
+  ilk: string,
 ): Observable<MTTransferFormState> {
 
   const manualChange$ = new Subject<ManualChange>();
@@ -324,6 +417,7 @@ export function createMTTransferForm$(
   const environmentChange$ = combineAndMerge(
     toGasPriceChange(gasPrice$),
     toEtherPriceUSDChange(etherPriceUSD$),
+    toOrderbookChange$(orderbook$),
     toMTAccountChange(mta$),
     toBalancesChange(balances$),
   );
@@ -338,6 +432,7 @@ export function createMTTransferForm$(
     change,
     cancel,
     token,
+    ilk,
     reset: () => resetChange$.next(progressChange(undefined)),
     messages: [],
     gasEstimationStatus: GasEstimationStatus.unset,
@@ -353,6 +448,8 @@ export function createMTTransferForm$(
     scan(applyChange, initialState),
     map(validate),
     map(updatePlan),
+    map(addPurchasingPower),
+    map(addPostInfo),
     switchMap(curry(estimateGasPrice)(calls$, readCalls$)),
     map(checkIfIsReadyToProceed),
     firstOfOrTrue(s => s.gasEstimationStatus === GasEstimationStatus.calculating),

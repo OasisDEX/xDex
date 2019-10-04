@@ -120,6 +120,7 @@
 }
 
 .dropdownMenu {
+  display: flex;
   position: relative;
   &:hover {
     .dropdownList {
@@ -173,4 +174,13 @@ button.actionButton {
 
 .buttonCheck {
   min-width: 115px;
+}
+
+.referencePriceField {
+  margin-left: auto;
+  float: right;
+  border: 1px solid #58585F;
+  border-radius: 2px;
+  padding: 0 8px;
+  height: 28px;
 }

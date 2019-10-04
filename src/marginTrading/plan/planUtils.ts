@@ -66,7 +66,7 @@ export function getPriceImpact(amount: BigNumber, orders: Offer[]):
   return priceImpact;
 }
 
-export function eat(
+export function buy(
   cash: BigNumber, offers: Offer[]
 ): [BigNumber, BigNumber, Offer[]] {
 
@@ -93,6 +93,35 @@ export function eat(
   }
 
   return [totalBought, cashLeft, offers.slice(i)];
+}
+
+export function sell(
+  cash: BigNumber, offers: Offer[]
+): [BigNumber, BigNumber, Offer[]] {
+
+  let totalSold = zero;
+  let cashLeftToBeEarned = cash;
+
+  let i = 0;
+
+  for (const offer of offers) {
+    i += 1;
+    const earned = BigNumber.min(cashLeftToBeEarned, offer.quoteAmount);
+    const sold = earned.div(offer.price);
+    totalSold = totalSold.plus(sold);
+    cashLeftToBeEarned = cashLeftToBeEarned.minus(earned);
+    if (cashLeftToBeEarned.isEqualTo(zero)) {
+      const quoteAmount = offer.quoteAmount.minus(earned);
+      const baseAmount = offer.baseAmount.minus(sold);
+      return [totalSold, cashLeftToBeEarned,
+        [{ ...offer, quoteAmount, baseAmount, price: quoteAmount.div(baseAmount) },
+          ...offers.slice(i)
+        ]
+      ];
+    }
+  }
+
+  return [totalSold, cashLeftToBeEarned, offers.slice(i)];
 }
 
 export function deltaToOps({ name, delta }: DebtDelta): Operation[] {

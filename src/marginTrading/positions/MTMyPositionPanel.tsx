@@ -1,27 +1,23 @@
 import * as React from 'react';
 import * as styles from '../../balances-mt/mtBalancesView.scss';
-import { connect } from '../../utils/connect';
-import { inject } from '../../utils/inject';
 
 import { Button } from '../../utils/forms/Buttons';
 import { SvgImage } from '../../utils/icons/utils';
 import { Loadable } from '../../utils/loadable';
 import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
-import { ModalOpenerProps, ModalProps } from '../../utils/modal';
+import { ModalOpenerProps } from '../../utils/modal';
 import { PanelBody, PanelHeader } from '../../utils/panel/Panel';
-import { CreateMTAllocateForm$Props } from '../allocate/mtOrderAllocateDebtFormView';
 import {
   MarginableAsset, MTAccount,
-  MTAccountState,
-  UserActionKind
+  MTAccountState
 } from '../state/mtAccount';
-import { CreateMTFundForm$, MTTransferFormState } from '../transfer/mtTransferForm';
-import { MtTransferFormView } from '../transfer/mtTransferFormView';
+import { CreateMTFundForm$ } from '../transfer/mtTransferForm';
 import { MTMyPositionView } from './MTMyPositionView';
 
-import { Observable } from 'rxjs';
+import { Observable } from 'rxjs/index';
 import { theAppContext } from '../../AppContext';
 import { TxState } from '../../blockchain/transactions';
+import { Money } from '../../utils/formatters/Formatters';
 import { LoggedOut } from '../../utils/loadingIndicator/LoggedOut';
 import backArrowSvg from './back-arrow.svg';
 import checkSvg from './check.svg';
@@ -82,7 +78,6 @@ export class MTMyPositionPanel
                        </div>
                      }
                     </theAppContext.Consumer>
-                    // <Button size="lg">Deploy Proxy</Button>
                     :
                     <Button
                       size="lg"
@@ -139,7 +134,8 @@ export class MTMyPositionPanelInternal
 {
   public render() {
 
-    const { ma, mta } = this.props;
+    const { ma } = this.props;
+
     return (
       <div>
         <PanelHeader bordered={true}>
@@ -150,48 +146,47 @@ export class MTMyPositionPanelInternal
             ><SvgImage image={backArrowSvg}/></div>
           }
           <span>My Position</span>
-          <div className={styles.dropdownMenu} style={{ marginLeft: 'auto', display: 'flex' }}>
+          <div className={styles.referencePriceField}>
+            { this.props.ma.referencePrice &&
+                <Money value={this.props.ma.referencePrice} token="USD" />
+                }
+                </div>
+          <div className={styles.dropdownMenu} >
             <Button
               className={styles.dropdownButton}
               data-test-id="myposition-actions-list"
             >
               <SvgImage image={dottedMenuSvg}/>
             </Button>
-            <div className={styles.dropdownList}>
-              <div>
-                <Button
-                  size="md"
-                  block={true}
-                  disabled={!ma.availableActions.includes(UserActionKind.draw)}
-                  onClick={() => this.transfer(UserActionKind.draw, ma.name)}
-                >Draw</Button>
-                <br/>
-                <Button
-                  size="md"
-                  block={true}
-                  disabled={ma.allowance}
-                  onClick={() =>
-                    this.props.approveMTProxy(
-                      { token: ma.name, proxyAddress: mta.proxy.address }
-                    )
-                  }
-                >Allowance</Button>
-                <br/>
-                <Button
-                  size="md"
-                  block={true}
-                  disabled={!ma.availableActions.includes(UserActionKind.fund)}
-                  onClick={() => this.transfer(UserActionKind.fund, ma.name)}
-                >Fund</Button>
-                <br/>
-                <Button
-                  size="md"
-                  block={true}
-                  disabled={!ma.availableActions.includes(UserActionKind.fund)}
-                  onClick={() => this.transfer(UserActionKind.fund, mta.cash.name)}
-                >Payback</Button>
-              </div>
-            </div>
+            {/*<div className={styles.dropdownList}>*/}
+              {/*<div>*/}
+                {/*<Button*/}
+                  {/*size="md"*/}
+                  {/*block={true}*/}
+                  {/*disabled={!ma.availableActions.includes(UserActionKind.draw)}*/}
+                  {/*onClick={() => this.transfer(UserActionKind.draw, 'DAI', ma.name)}*/}
+                {/*>WITHDRAW DAI</Button>*/}
+                {/*<br/>*/}
+                {/*<Button*/}
+                  {/*size="md"*/}
+                  {/*block={true}*/}
+                  {/*disabled={!ma.availableActions.includes(UserActionKind.fund)}*/}
+                  {/*onClick={() => this.transfer(UserActionKind.fund, 'DAI', ma.name)}*/}
+                {/*>DEPOSIT DAI</Button>*/}
+                {/*<br/>*/}
+                {/*<Button*/}
+                  {/*size="md"*/}
+                  {/*block={true}*/}
+                  {/*disabled={ma.allowance}*/}
+                  {/*onClick={() =>*/}
+                    {/*this.props.approveMTProxy(*/}
+                      {/*{ token: ma.name, proxyAddress: mta.proxy.address }*/}
+                    {/*)*/}
+                  {/*}*/}
+                {/*>Allowance</Button>*/}
+                {/*<br/>*/}
+              {/*</div>*/}
+            {/*</div>*/}
           </div>
         </PanelHeader>
         <PanelBody>
@@ -205,18 +200,18 @@ export class MTMyPositionPanelInternal
       </div>
     );
   }
-  private transfer (actionKind: UserActionKind, token: string) {
-    const fundForm$ = this.props.createMTFundForm$(actionKind, token);
-    const MTFundFormViewRxTx =
-      connect<MTTransferFormState, ModalProps>(
-        inject(
-          MtTransferFormView,
-          // cast is safe as CreateMTAllocateForm$Props
-          // is not used inside MtTransferFormView!
-          (this.props as any) as (CreateMTAllocateForm$Props & ModalOpenerProps),
-        ),
-        fundForm$
-      );
-    this.props.open(MTFundFormViewRxTx);
-  }
+  // private transfer (actionKind: UserActionKind, token: string, ilk: string) {
+  //   const fundForm$ = this.props.createMTFundForm$(actionKind, token, ilk);
+  //   const MTFundFormViewRxTx =
+  //     connect<MTTransferFormState, ModalProps>(
+  //       inject(
+  //         MtTransferFormView,
+  //         // cast is safe as CreateMTAllocateForm$Props
+  //         // is not used inside MtTransferFormView!
+  //         (this.props as any) as (CreateMTAllocateForm$Props & ModalOpenerProps)
+  //       ),
+  //       fundForm$
+  //     );
+  //   this.props.open(MTFundFormViewRxTx);
+  // }
 }

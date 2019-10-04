@@ -2,7 +2,7 @@ import * as React from 'react';
 import { CDPHistoryView } from '../../balances-mt/CDPHistoryView';
 import { CDPLiquidationHistoryView } from '../../balances-mt/CDPLiquidationHistoryView';
 import { connect } from '../../utils/connect';
-import { formatPrecision } from '../../utils/formatters/format';
+import { formatPercent, formatPrecision } from '../../utils/formatters/format';
 import { Money } from '../../utils/formatters/Formatters';
 import { Button } from '../../utils/forms/Buttons';
 import { inject } from '../../utils/inject';
@@ -67,7 +67,8 @@ export class MTMyPositionView extends
                 Liqu. Fee
               </div>
               <div className={styles.summaryValue}>
-                15%
+                -
+                {/*15%*/}
                 {/*{*/}
                 {/*this.props.liquidationFee && !this.props.liquidationFee.isNaN() ?*/}
                 {/*<>*/}
@@ -75,6 +76,14 @@ export class MTMyPositionView extends
                 {/*</>*/}
                 {/*: <span>-</span>*/}
                 {/*}*/}
+              </div>
+            </div>
+            <div className={styles.summaryRow}>
+              <div className={styles.summaryLabel}>
+                Interest Rate
+              </div>
+              <div className={styles.summaryValue}>
+                {formatPercent(this.props.ma.fee, { precision: 2 })}
               </div>
             </div>
             <div className={styles.summaryRow}>
@@ -90,14 +99,6 @@ export class MTMyPositionView extends
                       fallback="-"
                     /> : <span>-</span>
                 }
-              </div>
-            </div>
-            <div className={styles.summaryRow}>
-              <div className={styles.summaryLabel}>
-                Interest Rate
-              </div>
-              <div className={styles.summaryValue}>
-                15.5%
               </div>
             </div>
           </div>
@@ -128,32 +129,38 @@ export class MTMyPositionView extends
                 }
               </div>
             </div>
-            <div className={styles.summaryRow}>
-              <div className={styles.summaryLabel}>
-                Average Price
-              </div>
-              <div className={styles.summaryValue}>
-                { this.props.ma.referencePrice &&
-                <Money value={this.props.ma.referencePrice} token="DAI" />
-                }
-              </div>
-            </div>
           </div>
           <div className={styles.MTPositionColumnNarrow}>
             <Button
-              size="lg"
+              size="md"
               className={styles.actionButton}
               disabled={!this.props.ma.availableActions.includes(UserActionKind.fund)}
-              onClick={() => this.transfer(UserActionKind.fund, this.props.ma.name)}
+              onClick={() => this.transfer(UserActionKind.fund, this.props.ma.name, undefined)}
             >
               Deposit
             </Button>
             <Button
-              size="lg"
+              size="md"
               className={styles.actionButton}
-              onClick={() => this.transfer(UserActionKind.draw, this.props.ma.name)}
+              onClick={() => this.transfer(UserActionKind.draw, this.props.ma.name, undefined)}
             >
               Withdraw
+            </Button>
+
+            <Button
+              size="md"
+              className={styles.actionButton}
+              disabled={!this.props.ma.availableActions.includes(UserActionKind.fund)}
+              onClick={() => this.transfer(UserActionKind.fund, 'DAI', this.props.ma.name)}
+            >
+              Deposit DAI
+            </Button>
+            <Button
+              size="md"
+              className={styles.actionButton}
+              onClick={() => this.transfer(UserActionKind.draw, 'DAI', this.props.ma.name)}
+            >
+              Withdraw DAI
             </Button>
           </div>
         </div>
@@ -162,15 +169,15 @@ export class MTMyPositionView extends
       </div>);
   }
 
-  private transfer (actionKind: UserActionKind, token: string) {
-    const fundForm$ = this.props.createMTFundForm$(actionKind, token);
+  private transfer (actionKind: UserActionKind, token: string, ilk: string | undefined) {
+    const fundForm$ = this.props.createMTFundForm$(actionKind, token, ilk);
     const MTFundFormViewRxTx =
       connect<MTTransferFormState, ModalProps>(
         inject(
           MtTransferFormView,
           // cast is safe as CreateMTAllocateForm$Props
           // is not used inside MtTransferFormView!
-          (this.props as any) as (CreateMTAllocateForm$Props & ModalOpenerProps),
+          (this.props as any) as (CreateMTAllocateForm$Props & ModalOpenerProps)
         ),
         fundForm$
       );
