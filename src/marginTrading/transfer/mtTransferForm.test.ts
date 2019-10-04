@@ -20,6 +20,7 @@
 //
 
 test.skip('fake', () => {
+  console.log();
 });
 
 // const defParams = {
