@@ -1,6 +1,29 @@
 [{
   "constant": false,
   "inputs": [{
+    "name": "ocm",
+    "type": "address"
+  }, {
+    "name": "ilk",
+    "type": "bytes32"
+  }, {
+    "name": "vat",
+    "type": "address"
+  }, {
+    "name": "end",
+    "type": "address"
+  }, {
+    "name": "join",
+    "type": "address"
+  }],
+  "name": "freeCollateral",
+  "outputs": [],
+  "payable": false,
+  "stateMutability": "nonpayable",
+  "type": "function"
+}, {
+  "constant": false,
+  "inputs": [{
     "name": "contracts",
     "type": "address[7]"
   }, {
@@ -66,6 +89,9 @@
   "outputs": [{
     "name": "data",
     "type": "uint256[]"
+  }, {
+    "name": "live",
+    "type": "uint256"
   }],
   "payable": false,
   "stateMutability": "view",
@@ -109,6 +135,20 @@
     "type": "address"
   }],
   "name": "fundDai",
+  "outputs": [],
+  "payable": false,
+  "stateMutability": "nonpayable",
+  "type": "function"
+}, {
+  "constant": false,
+  "inputs": [{
+    "name": "addr",
+    "type": "address"
+  }, {
+    "name": "operationsData",
+    "type": "bytes[]"
+  }],
+  "name": "performOperations2",
   "outputs": [],
   "payable": false,
   "stateMutability": "nonpayable",

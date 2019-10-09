@@ -73,7 +73,7 @@ function normalizeAddress(address: string): string | null {
   return `${prefix}${'0'.repeat(40 - value.length)}${value}`;
 }
 
-function mtBalancePostprocess(result: BigNumber[], { tokens }: MTBalanceData) : MTBalanceResult {
+function mtBalancePostprocess([result]: [BigNumber[]], { tokens }: MTBalanceData): MTBalanceResult {
   return {
     assets: tokens.map((token, i) => {
       const row = i * BalanceOuts;

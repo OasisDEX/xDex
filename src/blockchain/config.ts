@@ -330,7 +330,7 @@ const kovan: NetworkConfig = {
     return asMap('token', [
       loadToken('WETH', eth, '0xd0a1e359811322d97991e03f863a0c30c2cf029c'),
       // loadToken('DAI', erc20, '0xc4375b7de8af5a38a93548eb8453a498222c4ff2'), // NOT MCD_DAI
-      loadToken('DAI', erc20, '0xb64964e9c0b658aa7b448cdbddfcdccab26cc584'), // MCD_DAI
+      loadToken('DAI', erc20, '0x1f9beaf12d8db1e50ea8a5ed53fb970462386aa0'), // MCD_DAI
       // loadToken('MKR', erc20, '0xaaf64bfcc32d0f15873a02163e7e500671a4ffcd'),
       loadToken('DGD', erc20, '0x62aeec5fb140bb233b1c5612a8747ca1dc56dc1b'),
       loadToken('REP', erc20, '0xc7aa227823789e363f29679f23f7e8f6d9904a9b'),
@@ -339,39 +339,39 @@ const kovan: NetworkConfig = {
     ]);
   },
   joins: {
-    WETH: '0xc6d2c6ac2155461d41621eac97ca0e42cd8c6805',
-    DAI: '0x922253e8bb9905ae4d37bc9bd512db5c91b5ee6c',
-    REP: '0x2c205dd1a49b17d24062e72b2fd4585c643359fb',
-    ZRX: '0x3d030db261162992484efad43174fce231b0984c',
-    BAT: '0x9ca955e44ebdd69d070e4a62653b73d82b4e82ba',
-    DGD: '0xc269c2b400f560668ec15d04767607f60be46947',
+    WETH: '0xc3abba566bb62c09b7f94704d8dfd9800935d3f9',
+    DAI: '0x61af28390d0b3e806bbaf09104317cb5d26e215d',
+    REP: '0xebbd300bb527f1d50abd937f8ca11d7fd0e5b68b',
+    ZRX: '0x79f15b0da982a99b7bcf602c8f384c56f0b0e8cd',
+    BAT: '0xf8e9b4c3e17c1a2d55767d44fb91feed798bb7e8',
+    DGD: '0x92a3b1c0882e6e17aa41c5116e01b0b9cf117cf2',
   } as { [key: string]: string },
   mcd: {
-    vat: '0xdf69460542dbdcf2f1e77941f53cfd4113a06183',
+    vat: '0x6e6073260e1a77dfaf57d0b92c44265122da8028',
     get cat() {
-      return load(mcdCat, '0xb30432fc29e1479240e9f107c1e333b962998f06');
+      return load(mcdCat, '0xdd9eff17f24f42adef1b240fc5dafba2aa6dcefd');
     },
     flip: {
       get WETH() {
-        return load(mcdFlipper, '0x02b6c914e29ee4d310e6b8e24340a8a643627d44');
+        return load(mcdFlipper, '0x494d6664a6b305f1f6dbded879f01e5dc1ea8b55');
       },
       get REP() {
-        return load(mcdFlipper, '0x4ef2bede48b106151e75b58ee73c85a4ef444adc');
+        return load(mcdFlipper, '0x096f6bb4ad63d9c2787bb2be77a5a7ea74a35826');
       },
       get ZRX() {
-        return load(mcdFlipper, '0xb08a9c38f184c7e0b7468e6fb3923a1121a23cb0');
+        return load(mcdFlipper, '0x2f5979b27cdc809a85300e1902827c2bd2dcc155');
       },
       get BAT() {
-        return load(mcdFlipper, '0x7b0f4c12003ab881ecc11d9d12f15d3f8fe9fcff');
+        return load(mcdFlipper, '0x6c5812f6db86aebdc54a0fcbf3bfd29884feb2f9');
       },
       get DGD() {
-        return load(mcdFlipper, '0x2768a3436d51fd7b6f0ef002b46912e423920721');
+        return load(mcdFlipper, '0x6ee776b367191fad854df97ef267462053af283d');
       },
     }
   } as { [key: string]: any },
-  spot: '0xb61db7923f841740c96b24baec4805e522bb8594',
-  jug: '0x269b2ca90b8f5d8e0a78ec9e1ea43ec41f7d1477',
-  cdpManager: '0x948b304ac96380887fed6dd29bd65331fd8c8e68', // fill
+  spot: '0xf5cdfce5a0b85ff06654ef35f4448e74c523c5ac',
+  jug: '0x3793181ebbc1a72cc08ba90087d21c7862783fa5',
+  cdpManager: '0x81f0cb2030d173502a371dda849acd3966983817', // fill
   ilks: {
     WETH: 'ETH-A',
     REP: 'REP-A',
@@ -395,7 +395,7 @@ const kovan: NetworkConfig = {
     return load(proxyRegistry, '0xa42bbce61c51aaab9f6f5b9df809d38ec164908a'); // fill
   },
   get proxyActions() {
-    return load(proxyActions, '0x7e3b720ebdea1ebaeeb1b91c76770450bfdf5bb6'); // fill
+    return load(proxyActions, '0xd2263bd09f46632ccd43a99ba911f8067bed9b19'); // fill
   },
   oasisDataService: {
     url: 'https://kovan-cache.eth2dai.com/api/v1'
