@@ -29,6 +29,7 @@ export enum FormChangeKind {
   kindChange = 'kind',
   priceFieldChange = 'price',
   amountFieldChange = 'amount',
+  totalFieldChange = 'total',
   setMaxChange = 'setMax',
   gasPriceChange = 'gasPrice',
   etherPriceUSDChange = 'etherPriceUSDChange',
@@ -75,6 +76,11 @@ export interface PriceFieldChange {
 
 export interface AmountFieldChange {
   kind: FormChangeKind.amountFieldChange;
+  value?: BigNumber;
+}
+
+export interface TotalFieldChange {
+  kind: FormChangeKind.totalFieldChange;
   value?: BigNumber;
 }
 

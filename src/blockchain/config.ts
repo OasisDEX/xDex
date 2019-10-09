@@ -426,16 +426,14 @@ const localnet: NetworkConfig =   {
   avgBlocksPerDay: 1000,
   startingBlock: 1,
   get otc() { return load(otc, '0x177b74CB6679C145Bb428Cc3E16F4a3d3ED905a3'); },
-  // get saiTub() { return load(saiTub, ''); },
+  // get saiTub() { return load(saiTub, '0x3546C7E3753C0e1D15878EC1C6dC65573864Dab7'); },
   get ethPip() { return load(dsValue, '0x8b8B359c33c13b818713570583C8bce2b030AD9A'); },
   get tokens() {
     return asMap('token', [
       loadToken('WETH', eth, '0x200938Bf7fF25EcF2eB7BC08e18b0892ED34c846'),
       loadToken('DAI', erc20, '0xafAA69DE13bd8766D9d47c9205439B9B06e533C6'),
       loadToken('DGD', erc20, '0x76c37E57A1438E2a0ac7Fec8a552CDD569b2CAfB'),
-      // loadToken('MKR', erc20, '0x3a21aB4539e11f0C06b583796F3F0FD274eFC369'),
       loadToken('REP', erc20, '0xE8d4C2Ab5782c697f06f17610cC03068180d0FaC'),
-      // loadToken('OMG', erc20, ''),
       loadToken('ZRX', erc20, '0x2c60CF08c07C212e21e6E2ee4626c478BACe092a'),
       loadToken('BAT', erc20, '0xd80110E3C107Eb206B556871cFe2532eC7D05E47'),
     ]);
