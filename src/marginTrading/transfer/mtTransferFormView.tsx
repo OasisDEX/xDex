@@ -53,7 +53,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
         overlayClassName={styles.modalOverlay}
         closeTimeoutMS={250}
       >
-        <Panel style={{ width: '550px', height: '580px' }} className={styles.modalChild}>
+        <Panel style={{ width: '550px', height: '380px' }} className={styles.modalChild}>
           <PanelHeader bordered={true} className={styles.headerWithIcon}>
             {this.header(this.props.progress)}
             <div onClick={this.close} className={styles.closeButton} >
