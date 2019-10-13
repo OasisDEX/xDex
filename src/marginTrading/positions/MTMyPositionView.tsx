@@ -11,7 +11,13 @@ import { inject } from '../../utils/inject';
 import { ModalOpenerProps, ModalProps } from '../../utils/modal';
 import { one, zero } from '../../utils/zero';
 import { CreateMTAllocateForm$Props } from '../allocate/mtOrderAllocateDebtFormView';
-import {findAsset, MarginableAsset, MTAccount, MTAccountState, UserActionKind} from '../state/mtAccount';
+import {
+  findAsset,
+  MarginableAsset,
+  MTAccount,
+  MTAccountState,
+  UserActionKind
+} from '../state/mtAccount';
 import { CreateMTFundForm$, MTTransferFormState } from '../transfer/mtTransferForm';
 import { MtTransferFormView } from '../transfer/mtTransferFormView';
 import * as styles from './MTMyPositionView.scss';

@@ -8,7 +8,6 @@ import { calculateMarginable } from '../state/mtCalculate';
 import { getMarginableCore } from '../state/mtTestUtils';
 import { MTTransferFormState } from '../transfer/mtTransferForm';
 import { MTMyPositionPanel } from './MTMyPositionPanel';
-import { MTMyPositionView } from './MTMyPositionView';
 
 const stories = storiesOf('Leverage Trading/My Position Panel', module)
  .addDecorator(story => (
