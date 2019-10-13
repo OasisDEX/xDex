@@ -8,7 +8,6 @@ import { calculateMarginable } from '../state/mtCalculate';
 import { getMarginableCore } from '../state/mtTestUtils';
 import { MTTransferFormState } from '../transfer/mtTransferForm';
 import { MTMyPositionPanel } from './MTMyPositionPanel';
-import { MTMyPositionView } from './MTMyPositionView';
 
 const stories = storiesOf('Leverage Trading/My Position Panel', module)
  .addDecorator(story => (
@@ -28,15 +27,15 @@ const ethMarginableAsset = calculateMarginable(getMarginableCore({
   safeCollRatio: new BigNumber(1.9),
 }));
 
-stories.add('CDP 1', () => (
-  <MTMyPositionView
-    {...{
-      ma:ethMarginableAsset,
-      createMTFundForm$: () => of({} as MTTransferFormState),
-      open: () => null,
-    }
-  } />
-));
+// stories.add('CDP 1', () => (
+//   <MTMyPositionView
+//     {...{
+//       ma:ethMarginableAsset,
+//       createMTFundForm$: () => of({} as MTTransferFormState),
+//       open: () => null,
+//     }
+//   } />
+// ));
 
 const defaultBalancesProps = {
   createMTFundForm$: () => of({} as MTTransferFormState),
