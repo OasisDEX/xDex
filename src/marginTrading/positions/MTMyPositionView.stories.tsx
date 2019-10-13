@@ -28,15 +28,15 @@ const ethMarginableAsset = calculateMarginable(getMarginableCore({
   safeCollRatio: new BigNumber(1.9),
 }));
 
-stories.add('CDP 1', () => (
-  <MTMyPositionView
-    {...{
-      ma:ethMarginableAsset,
-      createMTFundForm$: () => of({} as MTTransferFormState),
-      open: () => null,
-    }
-  } />
-));
+// stories.add('CDP 1', () => (
+//   <MTMyPositionView
+//     {...{
+//       ma:ethMarginableAsset,
+//       createMTFundForm$: () => of({} as MTTransferFormState),
+//       open: () => null,
+//     }
+//   } />
+// ));
 
 const defaultBalancesProps = {
   createMTFundForm$: () => of({} as MTTransferFormState),

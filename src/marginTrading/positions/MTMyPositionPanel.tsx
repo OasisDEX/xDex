@@ -134,7 +134,7 @@ export class MTMyPositionPanelInternal
 {
   public render() {
 
-    const { ma } = this.props;
+    const { ma, mta } = this.props;
 
     return (
       <div>
@@ -191,6 +191,7 @@ export class MTMyPositionPanelInternal
         </PanelHeader>
         <PanelBody>
           {<MTMyPositionView {...{
+            mta,
             ma,
             open: this.props.open,
             createMTFundForm$: this.props.createMTFundForm$,

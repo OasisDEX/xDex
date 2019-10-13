@@ -1,6 +1,8 @@
 import * as React from 'react';
+import { Observable } from 'rxjs/index';
 import { CDPHistoryView } from '../../balances-mt/CDPHistoryView';
 import { CDPLiquidationHistoryView } from '../../balances-mt/CDPLiquidationHistoryView';
+import { TxState } from '../../blockchain/transactions';
 import { connect } from '../../utils/connect';
 import { formatPercent, formatPrecision } from '../../utils/formatters/format';
 import { Money } from '../../utils/formatters/Formatters';
@@ -9,14 +11,16 @@ import { inject } from '../../utils/inject';
 import { ModalOpenerProps, ModalProps } from '../../utils/modal';
 import { one, zero } from '../../utils/zero';
 import { CreateMTAllocateForm$Props } from '../allocate/mtOrderAllocateDebtFormView';
-import { MarginableAsset, UserActionKind } from '../state/mtAccount';
+import {findAsset, MarginableAsset, MTAccount, MTAccountState, UserActionKind} from '../state/mtAccount';
 import { CreateMTFundForm$, MTTransferFormState } from '../transfer/mtTransferForm';
 import { MtTransferFormView } from '../transfer/mtTransferFormView';
 import * as styles from './MTMyPositionView.scss';
 
 interface MTMyPositionViewProps {
+  mta: MTAccount;
   ma: MarginableAsset;
   createMTFundForm$: CreateMTFundForm$;
+  approveMTProxy: (args: {token: string; proxyAddress: string}) => Observable<TxState>;
   close?: () => void;
 }
 
@@ -29,6 +33,8 @@ export class MTMyPositionView extends
     const leverage = this.props.ma.leverage && !this.props.ma.leverage.isNaN()
       ? this.props.ma.leverage :
       this.props.ma.balance.gt(zero) ? one : zero;
+
+    const dai = findAsset('DAI', this.props.mta);
     return (
       <div>
         <div className={styles.MTPositionPanel}>
@@ -147,26 +153,50 @@ export class MTMyPositionView extends
               Withdraw
             </Button>
 
-            <Button
-              size="md"
-              className={styles.actionButton}
-              disabled={!this.props.ma.availableActions.includes(UserActionKind.fund)}
-              onClick={() => this.transfer(UserActionKind.fund, 'DAI', this.props.ma.name)}
-            >
-              Deposit DAI
-            </Button>
-            <Button
-              size="md"
-              className={styles.actionButton}
-              onClick={() => this.transfer(UserActionKind.draw, 'DAI', this.props.ma.name)}
-            >
-              Withdraw DAI
-            </Button>
-          </div>
+            { dai && dai.allowance ? <>
+                <Button
+                  size="md"
+                  className={styles.actionButton}
+                  disabled={!this.props.ma.availableActions.includes(UserActionKind.fund)}
+                  onClick={() => this.transfer(UserActionKind.fund, 'DAI', this.props.ma.name)}
+                >
+                  Deposit DAI
+                </Button>
+                <Button
+                  size="md"
+                  className={styles.actionButton}
+                  onClick={() => this.transfer(UserActionKind.draw, 'DAI', this.props.ma.name)}
+                >
+                  Withdraw DAI
+                </Button>
+              </>
+              : <>
+              <Button
+                  size="md"
+                  className={styles.actionButton}
+                  onClick={ this.approveMTProxy('DAI')}
+                >
+                  Enable DAI
+                </Button>
+            </>
+            }
+            </div>
         </div>
         <CDPHistoryView {...this.props.ma} />
         <CDPLiquidationHistoryView {...this.props.ma} />
       </div>);
+  }
+
+  private approveMTProxy(token: string) {
+    return () => {
+      if (this.props.mta.state === MTAccountState.notSetup) {
+        return;
+      }
+      this.props.approveMTProxy({
+        token,
+        proxyAddress: this.props.mta.proxy.address as string
+      });
+    };
   }
 
   private transfer (actionKind: UserActionKind, token: string, ilk: string | undefined) {
