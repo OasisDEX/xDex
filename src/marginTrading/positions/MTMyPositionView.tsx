@@ -9,7 +9,7 @@ import { Money } from '../../utils/formatters/Formatters';
 import { Button } from '../../utils/forms/Buttons';
 import { inject } from '../../utils/inject';
 import { ModalOpenerProps, ModalProps } from '../../utils/modal';
-import { one, zero } from '../../utils/zero';
+import {minusOne, one, zero} from '../../utils/zero';
 import { CreateMTAllocateForm$Props } from '../allocate/mtOrderAllocateDebtFormView';
 import {
   findAsset,
@@ -34,13 +34,11 @@ export class MTMyPositionView extends
   React.Component<MTMyPositionViewProps & ModalOpenerProps>
 {
   public render() {
-    const equity = this.props.ma.balance
-      .times(this.props.ma.referencePrice).minus(this.props.ma.debt);
     const leverage = this.props.ma.leverage && !this.props.ma.leverage.isNaN()
       ? this.props.ma.leverage :
       this.props.ma.balance.gt(zero) ? one : zero;
-
     const dai = findAsset('DAI', this.props.mta);
+    const asset = this.props.ma;
     return (
       <div>
         <div className={styles.MTPositionPanel}>
@@ -98,21 +96,6 @@ export class MTMyPositionView extends
                 {formatPercent(this.props.ma.fee, { precision: 2 })}
               </div>
             </div>
-            <div className={styles.summaryRow}>
-              <div className={styles.summaryLabel}>
-                Dai debt
-              </div>
-              <div className={styles.summaryValue}>
-                {
-                  this.props.ma.debt && !this.props.ma.debt.isNaN() ?
-                    <Money
-                      value={this.props.ma.debt}
-                      token="DAI"
-                      fallback="-"
-                    /> : <span>-</span>
-                }
-              </div>
-            </div>
           </div>
           <div className={styles.MTPositionColumn}>
             <div className={styles.summaryRow}>
@@ -132,12 +115,20 @@ export class MTMyPositionView extends
             </div>
             <div className={styles.summaryRow}>
               <div className={styles.summaryLabel}>
-                Equity
+                DAI Balance
               </div>
               <div className={styles.summaryValue}>
-                {
-                  equity && !equity.isNaN() ?
-                    <Money value={equity} token="DAI" /> : <span>-</span>
+                { asset && asset.debt.gt(zero) ?
+                  <Money
+                    value={asset.debt.times(minusOne)}
+                    token="DAI"
+                    fallback="-"
+                  /> : asset && asset.dai ?
+                    <Money
+                    value={asset.dai}
+                    token="DAI"
+                    fallback="-"
+                  /> : <span>-</span>
                 }
               </div>
             </div>
