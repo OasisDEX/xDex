@@ -72,9 +72,7 @@ export function buy(
 
   let totalBought = zero;
   let cashLeft = cash;
-
   let i = 0;
-
   for (const offer of offers) {
     i += 1;
     const paid = BigNumber.min(cashLeft, offer.quoteAmount);
@@ -84,11 +82,14 @@ export function buy(
     if (cashLeft.isEqualTo(zero)) {
       const quoteAmount = offer.quoteAmount.minus(paid);
       const baseAmount = offer.baseAmount.minus(bought);
-      return [totalBought, cashLeft,
-        [{ ...offer, quoteAmount, baseAmount, price: quoteAmount.div(baseAmount) },
-          ...offers.slice(i)
-        ]
-      ];
+
+      const offersLeft = [];
+      if (quoteAmount.gt(zero) && baseAmount.gt(zero)) {
+        offersLeft.push({ ...offer, quoteAmount, baseAmount });
+      }
+      offersLeft.push(...offers.slice(i));
+
+      return [totalBought, cashLeft, offersLeft];
     }
   }
 

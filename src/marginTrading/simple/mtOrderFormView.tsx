@@ -626,8 +626,8 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
           <div className={styles.InfoRowLabel}>Interest Rate</div>
           <div>
             {
-              ! this.props.apr ? <FormatPercent
-                value={this.props.apr}
+              ! this.props.fee ? <FormatPercent
+                value={this.props.fee}
                 fallback="-"
                 multiply={false}
               /> : <span>-</span>
@@ -746,7 +746,6 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
               token={this.props.quoteToken}
               fallback="-"
             /> : <span>-</span>
-
           }
           {
             this.props.daiBalancePost &&
@@ -755,7 +754,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
               { !this.props.daiBalancePost.isNaN() ?
                 <Money
                   value={this.props.daiBalancePost}
-                  token={this.props.baseToken}
+                  token={this.props.quoteToken}
                   fallback="-"
                 /> : <span>-</span>
               }

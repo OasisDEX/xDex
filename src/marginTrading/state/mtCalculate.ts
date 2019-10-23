@@ -127,7 +127,7 @@ export function realPurchasingPowerMarginable(
   ma: MarginableAsset,
   offers: Offer[]
 ): BigNumber {
-  let amount = ma.balance; // TODO: rename totalAmount -> currentAmount
+  let amount = ma.balance;
   let debt = ma.debt;
   let purchasingPower = zero;
   let cash = ma.dai;
@@ -144,9 +144,7 @@ export function realPurchasingPowerMarginable(
     // amount * referencePrice / (debt + availableDebt) >= safeCollRatio
     // ergo:
     // availableDebt = amount * referencePrice / safeCollRatio - debt
-
     const availableDebt = amount.times(ma.referencePrice).div(ma.safeCollRatio).minus(debt);
-
     debt = debt.plus(availableDebt);
     cash = availableDebt;
   }
