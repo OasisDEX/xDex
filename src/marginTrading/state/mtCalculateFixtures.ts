@@ -11,10 +11,10 @@ import { RawMTHistoryEvent } from './mtHistory';
 
 export const weth2: MarginableAssetCore = getMarginableCore({
   name: 'WETH',
-  referencePrice: new BigNumber('200'),
+  referencePrice: new BigNumber('300'),
   minCollRatio: new BigNumber('1.5'),
   safeCollRatio: new BigNumber('2'),
-  balance: new BigNumber('2')
+  balance: new BigNumber('1')
 });
 
 export const weth1dai100: MarginableAssetCore = getMarginableCore({
@@ -39,10 +39,10 @@ export const sell1: Offer = {
   offerId: new BigNumber('1'),
   baseAmount: new BigNumber('1'),
   baseToken: 'WETH',
-  quoteAmount: new BigNumber('200'),
+  quoteAmount: new BigNumber('300'),
   quoteToken: 'DAI',
-  price: new BigNumber('200'),
-  ownerId: 'koko',
+  price: new BigNumber('300'),
+  ownerId: '1',
   timestamp: new Date(),
   type: OfferType.sell
 };
@@ -50,15 +50,15 @@ export const sell1: Offer = {
 export const sell2: Offer = {
   ...sell1,
   baseAmount: new BigNumber('1'),
-  quoteAmount: new BigNumber('200'),
-  price: new BigNumber('200')
+  quoteAmount: new BigNumber('302'),
+  price: new BigNumber('302')
 };
 
 export const sell3: Offer = {
   ...sell1,
-  baseAmount: new BigNumber('1'),
-  quoteAmount: new BigNumber('200'),
-  price: new BigNumber('200')
+  baseAmount: new BigNumber('3'),
+  quoteAmount: new BigNumber('915'),
+  price: new BigNumber('305')
 };
 
 export const sellOffers = [sell1, sell2, sell3];
