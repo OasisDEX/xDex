@@ -1,15 +1,16 @@
+import classnames from 'classnames';
 import * as React from 'react';
 import { Observable } from 'rxjs/index';
 import { CDPHistoryView } from '../../balances-mt/CDPHistoryView';
 import { CDPLiquidationHistoryView } from '../../balances-mt/CDPLiquidationHistoryView';
 import { TxState } from '../../blockchain/transactions';
 import { connect } from '../../utils/connect';
-import { formatPercent, formatPrecision } from '../../utils/formatters/format';
-import { Money } from '../../utils/formatters/Formatters';
+import { formatPrecision } from '../../utils/formatters/format';
+import { FormatPercent, Money } from '../../utils/formatters/Formatters';
 import { Button } from '../../utils/forms/Buttons';
 import { inject } from '../../utils/inject';
 import { ModalOpenerProps, ModalProps } from '../../utils/modal';
-import {minusOne, one, zero} from '../../utils/zero';
+import { minusOne, one, zero } from '../../utils/zero';
 import { CreateMTAllocateForm$Props } from '../allocate/mtOrderAllocateDebtFormView';
 import {
   findAsset,
@@ -39,6 +40,9 @@ export class MTMyPositionView extends
       this.props.ma.balance.gt(zero) ? one : zero;
     const dai = findAsset('DAI', this.props.mta);
     const asset = this.props.ma;
+    const liquidationPrice = this.props.ma.liquidationPrice
+    && !this.props.ma.liquidationPrice.isNaN() ?
+      this.props.ma.liquidationPrice : zero;
     return (
       <div>
         <div className={styles.MTPositionPanel}>
@@ -63,12 +67,18 @@ export class MTMyPositionView extends
               </div>
               <div className={styles.summaryValue}>
                 {
-                  this.props.ma.liquidationPrice && !this.props.ma.liquidationPrice.isNaN()
-                  && this.props.ma.liquidationPrice.gt(zero) ?
-                    <>
-                      {formatPrecision(this.props.ma.liquidationPrice, 2)} USD
-                    </>
-                    : <span>-</span>
+                  liquidationPrice.gt(zero) ?
+                    <Money
+                      value={liquidationPrice}
+                      token="USD"
+                      fallback="-"
+                      className={
+                        classnames({
+                          [styles.summaryValuePositive]: asset && asset.safe,
+                          [styles.summaryValueNegative]: asset && !asset.safe,
+                        })
+                      }
+                    /> : <span>-</span>
                 }
               </div>
             </div>
@@ -77,8 +87,7 @@ export class MTMyPositionView extends
                 Liqu. Fee
               </div>
               <div className={styles.summaryValue}>
-                -
-                {/*15%*/}
+                15%
                 {/*{*/}
                 {/*this.props.liquidationFee && !this.props.liquidationFee.isNaN() ?*/}
                 {/*<>*/}
@@ -93,7 +102,11 @@ export class MTMyPositionView extends
                 Interest Rate
               </div>
               <div className={styles.summaryValue}>
-                {formatPercent(this.props.ma.fee, { precision: 2 })}
+                <FormatPercent
+                  value={this.props.ma.fee}
+                  fallback="-"
+                  multiply={false}
+                />
               </div>
             </div>
           </div>
@@ -125,10 +138,10 @@ export class MTMyPositionView extends
                     fallback="-"
                   /> : asset && asset.dai ?
                     <Money
-                    value={asset.dai}
-                    token="DAI"
-                    fallback="-"
-                  /> : <span>-</span>
+                      value={asset.dai}
+                      token="DAI"
+                      fallback="-"
+                    /> : <span>-</span>
                 }
               </div>
             </div>
@@ -168,16 +181,16 @@ export class MTMyPositionView extends
                 </Button>
               </>
               : <>
-              <Button
+                <Button
                   size="md"
                   className={styles.actionButton}
                   onClick={ this.approveMTProxy('DAI')}
                 >
                   Enable DAI
                 </Button>
-            </>
+              </>
             }
-            </div>
+          </div>
         </div>
         <CDPHistoryView {...this.props.ma} />
         <CDPLiquidationHistoryView {...this.props.ma} />

@@ -274,4 +274,3 @@ test('buy with leverage - cash only', () => {
   expect(unpack(controller).leveragePost).toEqual(new BigNumber(1.5));
   console.log('CONTROLLER post purch pow', unpack(controller).realPurchasingPowerPost.toString());
 });
-

@@ -37,6 +37,7 @@ import {
 } from '../../utils/form';
 import { formatPriceDown, formatPriceUp } from '../../utils/formatters/format';
 import { description, Impossible, isImpossible } from '../../utils/impossible';
+import { firstOfOrTrue } from '../../utils/operators';
 import { minusOne, zero } from '../../utils/zero';
 import { buy, getPriceImpact, getTotal } from '../plan/planUtils';
 import {
@@ -75,7 +76,7 @@ export type Message = {
   priority: number;
   token: string;
 } | {
-  kind: MessageKind.dustAmount ;
+  kind: MessageKind.dustAmount;
   field: string;
   priority: number;
   token: string;
@@ -580,8 +581,11 @@ function addPlan(state: MTSimpleFormState): MTSimpleFormState {
   const postTradeAsset = calculateMarginable(
     {
       ...asset,
-      balance: asset.balance.plus(state.amount),
-      debt: asset.debt.plus(debtDelta)
+      balance: state.kind === OfferType.buy ?
+        asset.balance.plus(state.amount) : asset.balance.minus(state.amount),
+      debt: asset.debt.plus(debtDelta),
+      dai: state.kind === OfferType.buy ?
+        BigNumber.max(asset.dai.minus(state.total), zero) : state.total.plus(debtDelta)
     } as MarginableAssetCore,
   );
 
@@ -860,7 +864,8 @@ export function createMTSimpleOrderForm$(
     switchMap(curry(estimateGasPrice)(calls$, readCalls$)),
     scan(freezeGasEstimation),
     map(isReadyToProceed),
-    shareReplay(1)
+    firstOfOrTrue(s => s.gasEstimationStatus === GasEstimationStatus.calculating),
+    shareReplay(1),
     // tap(state => state.plan && console.log('plan:', JSON.stringify(state.plan))),
     // ),
     // catchError(e => {

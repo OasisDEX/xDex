@@ -7,5 +7,7 @@ export const mtPositionColumnNarrow: string;
 export const summaryRow: string;
 export const summaryLabel: string;
 export const summaryValue: string;
+export const summaryValuePositive: string;
+export const summaryValueNegative: string;
 export const statsBox: string;
 export const actionButton: string;
