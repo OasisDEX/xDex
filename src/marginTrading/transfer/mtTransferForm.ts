@@ -28,17 +28,18 @@ import { Orderbook } from '../../exchange/orderbook/orderbook';
 import { combineAndMerge } from '../../utils/combineAndMerge';
 import { description, impossible, Impossible, isImpossible } from '../../utils/impossible';
 import { firstOfOrTrue } from '../../utils/operators';
+import { minusOne, zero } from '../../utils/zero';
+import { WrapUnwrapFormState } from '../../wrapUnwrap/wrapUnwrapForm';
 import { planDraw, planDrawDai } from '../plan/planDraw';
 import { planFund, planFundDai } from '../plan/planFund';
 import {
-  findAsset, findMarginableAsset, findNonMarginableAsset, MarginableAsset, MarginableAssetCore,
+  findAsset, findMarginableAsset, MarginableAsset,
   MTAccount, MTAccountState,
   Operation, UserActionKind
 } from '../state/mtAccount';
 import {
   calculateMarginable,
   realPurchasingPowerMarginable,
-  realPurchasingPowerNonMarginable
 } from '../state/mtCalculate';
 
 export enum MessageKind {
@@ -73,7 +74,12 @@ export interface MTTransferFormState extends HasGasEstimation {
   realPurchasingPowerPost?: BigNumber;
   liquidationPrice?: BigNumber;
   liquidationPricePost?: BigNumber;
+  leveragePost?: BigNumber;
+  leveragePostPost?: BigNumber;
+  daiBalance?: BigNumber;
+  daiBalancePost?: BigNumber;
   balancePost?: BigNumber;
+  isSafePost?: boolean;
   plan?: Operation[] | Impossible;
   progress?: ProgressStage;
   change: (change: ManualChange) => void;
@@ -143,22 +149,44 @@ function applyChange(state: MTTransferFormState, change: MTSetupFormChange): MTT
 }
 
 function updatePlan(state: MTTransferFormState): MTTransferFormState {
+  const baseToken = state.token === 'DAI' && state.ilk || state.token;
+  const asset = findMarginableAsset(baseToken, state.mta);
+
+  if (!state.mta
+    || state.mta.state !== MTAccountState.setup
+    || !state.orderbook
+    || !asset || asset.assetKind !== AssetKind.marginable
+  ) {
+    return state;
+  }
+
+  const liquidationPrice = asset.liquidationPrice;
+  const realPurchasingPower = realPurchasingPowerMarginable(
+    asset,
+    state.orderbook.sell);
+  const daiBalance = asset.debt.gt(zero) ?
+    asset.debt.times(minusOne) : asset.dai;
 
   if (
-    state.mta === undefined ||
-    state.mta.state === MTAccountState.notSetup ||
     state.amount === undefined ||
     state.messages.length !== 0 ||
     state.token === 'DAI' && state.ilk === undefined
   ) {
     return {
       ...state,
+      liquidationPrice,
+      realPurchasingPower,
+      daiBalance,
+      liquidationPricePost: undefined,
+      leveragePost: undefined,
+      balancePost: undefined,
+      daiBalancePost: undefined,
+      realPurchasingPowerPost: undefined,
       plan: impossible('state not ready') };
   }
 
   const createPlan = state.actionKind === UserActionKind.fund ?
-    state.token === 'DAI' ? planFundDai : planFund
-    :
+    state.token === 'DAI' ? planFundDai : planFund :
     state.token === 'DAI' ? planDrawDai : planDraw;
 
   const plan = createPlan(
@@ -178,7 +206,67 @@ function updatePlan(state: MTTransferFormState): MTTransferFormState {
     ] :
       state.messages;
 
-  return { ...state, messages, plan };
+  if (isImpossible(plan)) {
+    return {
+      ...state,
+      plan,
+      messages,
+      realPurchasingPower,
+      daiBalance,
+      liquidationPrice,
+      liquidationPricePost: undefined,
+      leveragePost: undefined,
+      balancePost: undefined,
+      daiBalancePost: undefined,
+      realPurchasingPowerPost: undefined,
+    };
+  }
+  let newAsset: MarginableAsset;
+  if (state.token === 'DAI') {
+    newAsset = {
+      ...asset,
+      debt: state.actionKind === UserActionKind.fund ?
+        BigNumber.max(zero, asset.debt.minus(state.amount)) :
+        BigNumber.max(asset.debt.minus(state.amount), zero),
+      dai: state.actionKind === UserActionKind.fund ?
+        asset.dai.plus(BigNumber.max(zero, state.amount.minus(asset.debt))) :
+        BigNumber.max(asset.dai.minus(state.amount), zero)
+    };
+  } else {
+    newAsset = {
+      ...asset,
+      balance: (state.actionKind === UserActionKind.fund) ?
+        asset.balance.plus(state.amount) : asset.balance.minus(state.amount),
+    };
+  }
+
+  const postTradeAsset = calculateMarginable(
+    newAsset
+  );
+
+  const isSafePost = postTradeAsset.safe;
+  const liquidationPricePost = postTradeAsset.liquidationPrice;
+  const leveragePost = postTradeAsset.leverage;
+  const balancePost = postTradeAsset.balance;
+  const daiBalancePost = postTradeAsset.debt.gt(zero) ?
+    postTradeAsset.debt.times(minusOne) : postTradeAsset.dai;
+  const realPurchasingPowerPost = realPurchasingPowerMarginable(
+      postTradeAsset,
+      state.orderbook.sell);
+
+  return { ...state,
+    messages,
+    liquidationPrice,
+    liquidationPricePost,
+    leveragePost,
+    balancePost,
+    daiBalance,
+    daiBalancePost,
+    realPurchasingPower,
+    realPurchasingPowerPost,
+    isSafePost,
+    plan
+  };
 }
 
 function estimateGasPrice(
@@ -240,19 +328,19 @@ function prepareTransfer(calls$: Calls$)
 
           const call =
             actionKind === UserActionKind.draw ?
-            calls.mtDraw :
-            calls.mtFund;
+              calls.mtDraw :
+              calls.mtFund;
 
           return call({ proxy, plan, token, amount, })
-          .pipe(
-            transactionToX(
-              progressChange(ProgressStage.waitingForApproval),
-              progressChange(ProgressStage.waitingForConfirmation),
-              progressChange(ProgressStage.fiasco),
-              () => of(progressChange(ProgressStage.done))
-            ),
-            takeUntil(cancel$)
-          );
+            .pipe(
+              transactionToX(
+                progressChange(ProgressStage.waitingForApproval),
+                progressChange(ProgressStage.waitingForConfirmation),
+                progressChange(ProgressStage.fiasco),
+                () => of(progressChange(ProgressStage.done))
+              ),
+              takeUntil(cancel$)
+            );
         }),
       ),
     );
@@ -320,82 +408,18 @@ function checkIfIsReadyToProceed(state: MTTransferFormState) {
 
   return { ...state, readyToProceed: false };
 }
-function addPurchasingPower(state: MTTransferFormState) {
 
-  const token = state.token === 'DAI' ? state.ilk : state.token;
-  if (!token) {
-    return state;
-  }
-
-  const baseAsset =
-    findMarginableAsset(token, state.mta) ||
-    findNonMarginableAsset(token, state.mta);
-
-  if (!state.mta
-    || state.mta.state !== MTAccountState.setup
-    || !state.orderbook
-    || !baseAsset
-  ) {
-    return state;
-  }
-
-  return {
-    ...state,
-    realPurchasingPower: baseAsset.assetKind === AssetKind.marginable ?
-      realPurchasingPowerMarginable(
-        baseAsset,
-        state.orderbook.sell)
-        :
-        realPurchasingPowerNonMarginable(
-          state.mta.cash.balance,
-          state.orderbook.sell
-        )
-  };
-}
-
-function addPostInfo(state: MTTransferFormState) {
-
-  const baseAsset = findMarginableAsset(state.token, state.mta);
-  if (!baseAsset || !state.amount) {
+function freezeIfInProgress(
+  previous: WrapUnwrapFormState,
+  state: WrapUnwrapFormState
+): WrapUnwrapFormState {
+  if (state.progress) {
     return {
-      ...state,
-      balancePost: undefined,
-      realPurchasingPowerPost: undefined,
+      ...previous,
+      progress: state.progress,
     };
   }
-
-  const liquidationPrice = baseAsset.liquidationPrice;
-
-  console.log('BASE ASSET - before assign ', baseAsset);
-  const baseAssetPost: MarginableAsset = Object.assign({}, baseAsset);
-  let realPurchasingPowerPost;
-
-  if (state.token === 'DAI') {
-    baseAssetPost.cash = state.actionKind === UserActionKind.fund ?
-      baseAssetPost.cash.plus(state.amount) : baseAssetPost.cash.minus(state.amount);
-  } else {
-    baseAssetPost.balance = state.actionKind === UserActionKind.fund ?
-      baseAssetPost.balance.plus(state.amount) : baseAssetPost.balance.minus(state.amount);
-  }
-
-  const postTransferAsset = calculateMarginable(
-    {
-      ...baseAssetPost,
-    } as MarginableAssetCore,
-  );
-
-  const liquidationPricePost = postTransferAsset.liquidationPrice;
-
-  console.log('postTransferAsset', postTransferAsset);
-
-  if (state.orderbook) {
-    realPurchasingPowerPost = realPurchasingPowerMarginable(
-      baseAssetPost,
-      state.orderbook.sell);
-  }
-
-  return { ...state, realPurchasingPowerPost,
-    liquidationPrice, liquidationPricePost, balancePost: baseAssetPost.balance };
+  return state;
 }
 
 export function createMTTransferForm$(
@@ -448,10 +472,9 @@ export function createMTTransferForm$(
     scan(applyChange, initialState),
     map(validate),
     map(updatePlan),
-    map(addPurchasingPower),
-    map(addPostInfo),
     switchMap(curry(estimateGasPrice)(calls$, readCalls$)),
     map(checkIfIsReadyToProceed),
+    scan(freezeIfInProgress),
     firstOfOrTrue(s => s.gasEstimationStatus === GasEstimationStatus.calculating),
   );
 }
