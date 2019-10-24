@@ -12,6 +12,7 @@ import {
   switchMap,
 } from 'rxjs/operators';
 import * as dsProxy from '../../blockchain/abi/ds-proxy.abi.json';
+import { MTBalanceResult } from '../../blockchain/calls/mtCalls';
 import { AssetKind, NetworkConfig, tokens } from '../../blockchain/config';
 import { every5Seconds$ } from '../../blockchain/network';
 import { nullAddress } from '../../blockchain/utils';
@@ -26,15 +27,43 @@ import {
 } from './mtAccount';
 import { calculateMTAccount, } from './mtCalculate';
 import {
-  createRawMTHistoryFromCache, RawMTLiquidationHistoryEvent
+  createRawMTHistoryFromCache,
+  createRawMTLiquidationHistoryFromCache$,
+  RawMTHistoryEvent,
 } from './mtHistory';
 import { getCashCore, getMarginableCore, getNonMarginableCore } from './mtTestUtils';
 
+function rawMTLiquidationHistories$(
+  context: NetworkConfig, results: MTBalanceResult
+): Observable<{ [index: string]: RawMTHistoryEvent[]}> {
+  return forkJoin(Object.entries(results).map(([token, result]) => {
+    (result.urn === nullAddress) ? of([]) :
+    createRawMTLiquidationHistoryFromCache$(context, result.urn).pipe(
+      map(history => ({ [token]: history })),
+    );
+  })).pipe(
+    concatAll(),
+    reduce((a, e) => ({ ...a, ...e }), {}),
+  );
+}
+
+function rawMTHistories$(
+  context: NetworkConfig, proxy: string, assets: string[]
+): Observable<{ [index: string]: RawMTHistoryEvent[]}> {
+  return forkJoin(assets.map(token =>
+    createRawMTHistoryFromCache(proxy, context, token).pipe(
+      map(history => ({ [token]: history })),
+    )
+  )).pipe(
+    concatAll(),
+    reduce((a, e) => ({ ...a, ...e }), {}),
+  );
+}
+
 export function aggregateMTAccountState(
-  _context: NetworkConfig,
+  context: NetworkConfig,
   proxy: any,
   calls: ReadCalls,
-  rawHistories: MTHistoryEvent[][] | undefined
 ): Observable<MTAccount> {
 
   const assetNames: string[] = Object.values(tokens)
@@ -55,50 +84,25 @@ export function aggregateMTAccountState(
     switchMap(balancesResult =>
       combineLatest(
         of(balancesResult),
-        forkJoin(assetNames.map((token, _i) =>
-          (of([])
-            // (balancesResult.assets[i].urn === nullAddress) ?
-            // of([]) :
-            // createRawMTLiquidationHistoryFromCache(context, balancesResult.assets[i].urn)
-          ).pipe(
-            map(history => ({ [token]: history })),
-          )
-        )).pipe(
-          concatAll(),
-          reduce<{ [key: string]: RawMTLiquidationHistoryEvent[] }>((a, e) => ({ ...a, ...e }), {}),
-        ),
+        rawMTLiquidationHistories$(context, balancesResult),
+        rawMTHistories$(context, proxy.address, assetNames),
       )
     ),
-    map(([balanceResult, rawLiquidationHistory]) => {
+    map(([balanceResult, rawLiquidationHistories, rawHistories]) => {
       const marginables = [...tokenNames.entries()]
         .filter(([_i, token]) => tokens[token].assetKind === AssetKind.marginable)
         .map(([i, token]) => {
           return getMarginableCore({
             name: token,
             assetKind: AssetKind.marginable,
-            balance: balanceResult.assets[i].urnBalance,
-            ...balanceResult.assets[i],
+            balance: balanceResult[token].urnBalance,
+            ...balanceResult[token],
             safeCollRatio: new BigNumber(tokens[token].safeCollRatio as number),
-            rawHistory: (rawHistories ? rawHistories[i] : []),
-            rawLiquidationHistory: rawLiquidationHistory[token],
+            rawHistory: [...rawHistories[token], ...rawLiquidationHistories[token]],
           });
         });
 
-      const nonMarginables = [...tokenNames.entries()]
-        .filter(([_i, token]) => tokens[token].assetKind === AssetKind.nonMarginable)
-        .map(([i, token]) => {
-          return getNonMarginableCore({
-            name: token,
-            assetKind: AssetKind.nonMarginable,
-            balance: balanceResult.assets[i].marginBalance,
-            walletBalance: balanceResult.assets[i].walletBalance,
-            marginBalance: balanceResult.assets[i].marginBalance,
-            referencePrice: balanceResult.assets[i].referencePrice,
-            allowance: balanceResult.assets[i].allowance,
-          });
-        });
-
-      const cashResult = balanceResult.assets[balanceResult.assets.length - 1];
+      const cashResult = balanceResult.DAI;
 
       const cash = getCashCore({
         balance: cashResult.marginBalance,
@@ -107,7 +111,7 @@ export function aggregateMTAccountState(
         walletBalance: cashResult.walletBalance
       });
 
-      return calculateMTAccount(proxy, cash, marginables, nonMarginables);
+      return calculateMTAccount(proxy, cash, marginables, []);
     })
   );
 }
@@ -150,27 +154,6 @@ export function createMta$(
 
   const proxyAddress$ = createProxyAddress$(context$, initializedAccount$, onEveryBlock$);
 
-  const marginableNames: string[] = Object.values(tokens)
-    .filter((t: any) => t.assetKind === AssetKind.marginable)
-    .map(t => t.symbol);
-
-  // let's fetch history temporarily in a separate pipeline
-  const mtRawHistory$: Observable<MTHistoryEvent[][] | undefined> =
-    combineLatest(context$, proxyAddress$, onEveryBlock$, every5Seconds$).pipe(
-      exhaustMap(([context, proxyAddress]) => {
-        if (!proxyAddress) {
-          return of(undefined);
-        }
-        const proxy = web3.eth.contract(dsProxy as any).at(proxyAddress);
-        return combineLatest(
-          // marginableNames.map(token => createRawMTHistory(proxy, context, token))
-          marginableNames.map(token => createRawMTHistoryFromCache(proxy, context, token))
-        );
-      }),
-      startWith(marginableNames.map(() => [] as MTHistoryEvent[])),
-      shareReplay(1)
-    );
-
   return combineLatest(context$, calls$, proxyAddress$).pipe(
     switchMap(([context, calls, proxyAddress]) => {
 
@@ -179,11 +162,9 @@ export function createMta$(
       }
 
       const proxy = web3.eth.contract(dsProxy as any).at(proxyAddress);
-      return combineLatest(mtRawHistory$, onEveryBlock$).pipe(
-        switchMap(([rawHistory]) => aggregateMTAccountState(context, proxy, calls, rawHistory)),
-        distinctUntilChanged(isEqual)
-      );
+      return aggregateMTAccountState(context, proxy, calls);
     }),
+    distinctUntilChanged(isEqual),
     shareReplay(1)
   );
 }

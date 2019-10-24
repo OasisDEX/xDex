@@ -45,7 +45,7 @@ export interface MTBalanceData {
 }
 
 export interface MTBalanceResult {
-  assets: Array<{
+  [index:string]: {
     walletBalance: BigNumber;
     marginBalance: BigNumber;
     urnBalance: BigNumber;
@@ -56,7 +56,7 @@ export interface MTBalanceResult {
     allowance: boolean;
     fee: BigNumber;
     urn: string;
-  }>;
+  };
 }
 
 const BalanceOuts = 10;
@@ -74,27 +74,28 @@ function normalizeAddress(address: string): string | null {
 }
 
 function mtBalancePostprocess([result]: [BigNumber[]], { tokens }: MTBalanceData): MTBalanceResult {
-  return {
-    assets: tokens.map((token, i) => {
-      const row = i * BalanceOuts;
-      return {
-        walletBalance: amountFromWei(new BigNumber(result[row]), token),
-        marginBalance: amountFromWei(new BigNumber(result[row + 1]), token),
-        urnBalance: amountFromWei(new BigNumber(result[row + 2]), token),
-        debt: amountFromWei(new BigNumber(result[row + 3]), 'DAI'),
-        dai: amountFromWei(new BigNumber(result[row + 4]), 'DAI'),
-        referencePrice: amountFromWei(new BigNumber(result[row + 5]), 'DAI'),
-        minCollRatio: amountFromWei(new BigNumber(result[row + 6]), 'ETH'),
-        allowance: new BigNumber(result[row + 7]).gte(MIN_ALLOWANCE),
-        fee: new BigNumber(result[row + 8])
-          .div(new BigNumber(10).pow(27))
-          // .pow(secondsPerYear)
-          // .minus(one)
-        ,
-        urn: normalizeAddress(web3.toHex(result[row + 9]))!,
-      };
-    })
-  };
+  const balanceResult: MTBalanceResult = {};
+  tokens.every((token: string, i) => {
+    const row = i * BalanceOuts;
+    balanceResult[token] = {
+      walletBalance: amountFromWei(new BigNumber(result[row]), token),
+      marginBalance: amountFromWei(new BigNumber(result[row + 1]), token),
+      urnBalance: amountFromWei(new BigNumber(result[row + 2]), token),
+      debt: amountFromWei(new BigNumber(result[row + 3]), 'DAI'),
+      dai: amountFromWei(new BigNumber(result[row + 4]), 'DAI'),
+      referencePrice: amountFromWei(new BigNumber(result[row + 5]), 'DAI'),
+      minCollRatio: amountFromWei(new BigNumber(result[row + 6]), 'ETH'),
+      allowance: new BigNumber(result[row + 7]).gte(MIN_ALLOWANCE),
+      fee: new BigNumber(result[row + 8])
+        .div(new BigNumber(10).pow(27))
+        // .pow(secondsPerYear)
+        // .minus(one)
+      ,
+      urn: normalizeAddress(web3.toHex(result[row + 9]))!,
+    };
+    return true;
+  });
+  return balanceResult;
 }
 
 export const mtBalance = {
