@@ -105,10 +105,6 @@ describe('planBuy', () => {
     expect(plan).toEqual(
       [
         {
-          ddai: new BigNumber('100'),
-          kind: OperationKind.adjust,
-          name: 'DGX',
-        }, {
           kind: OperationKind.buyRecursively,
           amount: new BigNumber('10'),
           maxTotal: new BigNumber('2000'),

@@ -2,7 +2,7 @@ import { BigNumber } from 'bignumber.js';
 import { flatten } from 'lodash';
 import { AssetKind } from '../../blockchain/config';
 import { impossible } from '../../utils/impossible';
-import { minusOne, zero } from '../../utils/zero';
+import { zero } from '../../utils/zero';
 import { EditableDebt } from '../allocate/mtOrderAllocateDebtForm';
 import {
   findAsset, MTAccount, Operation,
@@ -75,7 +75,6 @@ export function planDraw(
   }
 
   const drawOps: Operation[] = [
-    { name: asset.name, dgem: minusOne.times(amount), kind: OperationKind.adjust },
     { amount, name: asset.name, kind: OperationKind.drawGem },
   ];
 
