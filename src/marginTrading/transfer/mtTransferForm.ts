@@ -282,8 +282,6 @@ function estimateGasPrice(
     const proxy = state.mta.proxy;
     const plan = state.plan;
 
-    console.log('plan', JSON.stringify(plan));
-
     if (!plan || isImpossible(plan)) {
       return undefined;
     }
