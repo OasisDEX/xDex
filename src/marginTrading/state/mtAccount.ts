@@ -14,7 +14,6 @@ export enum OperationKind {
   fundDai = 'fundDai',
   drawGem = 'drawGem',
   drawDai = 'drawDai',
-  adjust = 'adjust',
   buyRecursively = 'buyLev',
   sellRecursively = 'sellLev',
 }
@@ -35,11 +34,6 @@ export type Operation = {
   kind: OperationKind.drawDai;
   name: string;
   amount: BigNumber;
-} | {
-  kind: OperationKind.adjust;
-  name: string;
-  dgem?: BigNumber;
-  ddai?: BigNumber;
 } | {
   kind: OperationKind.buyRecursively | OperationKind.sellRecursively;
   name: string;

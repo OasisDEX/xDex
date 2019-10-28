@@ -3,7 +3,7 @@ import { Offer } from '../../exchange/orderbook/orderbook';
 import { Impossible, impossible } from '../../utils/impossible';
 import { zero } from '../../utils/zero';
 import { DebtDelta } from '../allocate/allocate';
-import { Operation, OperationKind } from '../state/mtAccount';
+import { Operation } from '../state/mtAccount';
 
 export type Operations = Operation[] | Impossible;
 
@@ -125,8 +125,8 @@ export function sell(
   return [totalSold, cashLeftToBeEarned, offers.slice(i)];
 }
 
-export function deltaToOps({ name, delta }: DebtDelta): Operation[] {
-  return delta.isEqualTo(zero) ? [] : [{ name, kind: OperationKind.adjust, ddai: delta }];
+export function deltaToOps(_delta: DebtDelta): Operation[] {
+  return [];
 }
 
 export function orderDeltas(deltas: DebtDelta[]): DebtDelta[] {
