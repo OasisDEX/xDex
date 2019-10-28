@@ -167,7 +167,7 @@ test('Purchasing power marginable', () => {
     calculateMarginable(weth2),
     sellOffers
   );
-  expect(purchasingPower).toEqual(new BigNumber(1518));
+  expect(purchasingPower).toEqual(new BigNumber(299.981689453125));
 });
 
 test('Purchasing power marginable - shallow orderbook', () => {
@@ -175,7 +175,7 @@ test('Purchasing power marginable - shallow orderbook', () => {
     calculateMarginable(weth2),
     sellOffersShort
   );
-  expect(purchasingPower).toEqual(new BigNumber(301));
+  expect(purchasingPower).toEqual(new BigNumber(299.981689453125));
 });
 
 test('Purchasing power marginable - cash only', () => {
@@ -191,7 +191,7 @@ test('Purchasing power marginable - cash + collateral', () => {
     calculateMarginable(weth1dai100),
     sellOffers
   );
-  expect(purchasingPower.toFixed(0)).toEqual(new BigNumber(299).toFixed());
+  expect(purchasingPower.toFixed(0)).toEqual(new BigNumber(300).toFixed());
 });
 
 test('Events history - BuyLev', () => {

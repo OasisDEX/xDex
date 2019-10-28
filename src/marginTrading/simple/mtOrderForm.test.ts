@@ -14,7 +14,7 @@ import { createMTSimpleOrderForm$, MessageKind, MTSimpleOrderFormParams } from '
 setupFakeWeb3ForTesting();
 
 function snapshotify(object: any): any {
-  return omit(object, 'change');
+  return omit(object, ['change', 'timestamp']);
 }
 
 const tradingPair = { base: 'WETH', quote: 'DAI' };
@@ -163,7 +163,7 @@ test('buy with leverage - match exactly one order', () => {
   change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(1) });
 
   expect(unpack(controller).readyToProceed).toEqual(true);
-  expect(unpack(controller).realPurchasingPowerPost).toEqual(new BigNumber(2.2));
+  expect(unpack(controller).realPurchasingPowerPost).toEqual(new BigNumber(0.984375));
 });
 
 test('buy with leverage - match more than one order', () => {
@@ -272,5 +272,4 @@ test('buy with leverage - cash only', () => {
 
   change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(15) });
   expect(unpack(controller).leveragePost).toEqual(new BigNumber(1.5));
-  console.log('CONTROLLER post purch pow', unpack(controller).realPurchasingPowerPost.toString());
 });

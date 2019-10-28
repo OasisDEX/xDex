@@ -70,7 +70,7 @@ function priceAmountToOffer({ price, amount }: { price: number, amount: number }
     quoteToken: '',
     price: new BigNumber(price),
     ownerId: '',
-    timestamp: new Date(),
+    timestamp: new Date('2019-10-01 00:00:00Z'),
     type: OfferType.buy
   };
 }
