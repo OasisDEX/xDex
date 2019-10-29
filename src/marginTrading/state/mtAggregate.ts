@@ -1,6 +1,7 @@
 import { BigNumber } from 'bignumber.js';
 import { bindNodeCallback, combineLatest, forkJoin, Observable, of } from 'rxjs';
 import {
+  catchError,
   concatAll,
   distinctUntilChanged,
   exhaustMap,
@@ -8,13 +9,11 @@ import {
   mergeMap,
   reduce,
   shareReplay,
-  startWith,
-  switchMap,
+  switchMap, tap,
 } from 'rxjs/operators';
 import * as dsProxy from '../../blockchain/abi/ds-proxy.abi.json';
 import { MTBalanceResult } from '../../blockchain/calls/mtCalls';
 import { AssetKind, NetworkConfig, tokens } from '../../blockchain/config';
-import { every5Seconds$ } from '../../blockchain/network';
 import { nullAddress } from '../../blockchain/utils';
 import { web3 } from '../../blockchain/web3';
 
@@ -23,7 +22,6 @@ import { ReadCalls, ReadCalls$ } from '../../blockchain/calls/calls';
 import { isEqual } from 'lodash';
 import {
   MTAccount,
-  MTHistoryEvent
 } from './mtAccount';
 import { calculateMTAccount, } from './mtCalculate';
 import {
@@ -31,31 +29,51 @@ import {
   createRawMTLiquidationHistoryFromCache$,
   RawMTHistoryEvent,
 } from './mtHistory';
-import { getCashCore, getMarginableCore, getNonMarginableCore } from './mtTestUtils';
+import { getCashCore, getMarginableCore } from './mtTestUtils';
+
+interface MTHistories {
+  [index: string]: RawMTHistoryEvent[];
+}
 
 function rawMTLiquidationHistories$(
   context: NetworkConfig, results: MTBalanceResult
-): Observable<{ [index: string]: RawMTHistoryEvent[]}> {
+): Observable<MTHistories> {
   return forkJoin(Object.entries(results).map(([token, result]) => {
-    (result.urn === nullAddress) ? of([]) :
-    createRawMTLiquidationHistoryFromCache$(context, result.urn).pipe(
-      map(history => ({ [token]: history })),
-    );
+    return (result.urn === nullAddress) ?
+      of({ [token]: [] }) :
+      createRawMTLiquidationHistoryFromCache$(context, result.urn, token).pipe(
+        map(history => ({ [token]: history })),
+      );
   })).pipe(
     concatAll(),
+    catchError(error => {
+      console.log('error', error);
+      return of(Object.keys(results).reduce((r, t) => {
+        r[t] = [];
+        return r;
+      },                         {} as MTHistories));
+    }
+    ),
     reduce((a, e) => ({ ...a, ...e }), {}),
   );
 }
 
 function rawMTHistories$(
   context: NetworkConfig, proxy: string, assets: string[]
-): Observable<{ [index: string]: RawMTHistoryEvent[]}> {
+): Observable<MTHistories> {
   return forkJoin(assets.map(token =>
     createRawMTHistoryFromCache(proxy, context, token).pipe(
       map(history => ({ [token]: history })),
     )
   )).pipe(
     concatAll(),
+    catchError(error => {
+      return of(assets.reduce((r, t) => {
+        r[t] = [];
+        return r;
+      },                      {} as MTHistories));
+    }
+    ),
     reduce((a, e) => ({ ...a, ...e }), {}),
   );
 }
@@ -98,7 +116,10 @@ export function aggregateMTAccountState(
             balance: balanceResult[token].urnBalance,
             ...balanceResult[token],
             safeCollRatio: new BigNumber(tokens[token].safeCollRatio as number),
-            rawHistory: [...rawHistories[token], ...rawLiquidationHistories[token]],
+            rawHistory: [
+              ...rawHistories[token],
+              ...rawLiquidationHistories[token]
+            ].sort((h1, h2) => h1.timestamp - h2.timestamp ),
           });
         });
 

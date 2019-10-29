@@ -1,7 +1,7 @@
 import apolloBoost, { gql } from 'apollo-boost';
 import { BigNumber } from 'bignumber.js';
-import { from, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import {from, Observable, throwError} from 'rxjs';
+import {catchError, map, tap} from 'rxjs/operators';
 
 import { NetworkConfig } from '../../blockchain/config';
 import { MTHistoryEvent } from './mtAccount';
@@ -11,6 +11,7 @@ export type RawMTHistoryEvent = Exclude<MTHistoryEvent, 'dAmount' | 'dDAIAmount'
 export function createRawMTLiquidationHistoryFromCache$(
   context: NetworkConfig,
   urn: string,
+  token: string
 ): Observable<RawMTHistoryEvent[]> {
   const client = new apolloBoost({
     uri: context.oasisDataService.url,
@@ -39,6 +40,7 @@ export function createRawMTLiquidationHistoryFromCache$(
   };
 
   return from(client.query({ variables, query: q })).pipe(
+    tap(r => console.log('liquidation results:', urn, r)),
     map((result: any) =>
       result.data.allLeveragedLiquidationEvents.nodes.map(({
         type,
@@ -49,21 +51,28 @@ export function createRawMTLiquidationHistoryFromCache$(
         timestamp,
       }: any) => ({
         timestamp,
+        token,
         kind: type,
         id: auctionId,
         ...(lot ? { lot: new BigNumber(lot) } : undefined),
-        ...(bid ? { lot: new BigNumber(bid) } : undefined),
-        ...(tab ? { lot: new BigNumber(tab) } : undefined),
+        ...(bid ? { bid: new BigNumber(bid) } : undefined),
+        ...(tab ? { tab: new BigNumber(tab) } : undefined),
       })),
     ),
+    catchError(error => {
+      console.log(error);
+      return throwError(error);
+    }),
+    tap(r => console.log('liquidation results:', urn, r))
   );
 }
 
 export function createRawMTHistoryFromCache(
-  proxy: any,
+  proxy: string,
   context: NetworkConfig,
   token: string
 ): Observable<RawMTHistoryEvent[]> {
+
   const client = new apolloBoost({
     uri: context.oasisDataService.url,
   });
@@ -91,8 +100,8 @@ export function createRawMTHistoryFromCache(
 
   const variables = {
     // devMode: config.devMode,
+    proxy,
     token: context.ilks[token],
-    proxy: proxy.address
   };
 
   return from(client.query({ variables, query: q })).pipe(
@@ -116,5 +125,6 @@ export function createRawMTHistoryFromCache(
         token: ilk
       })),
     ),
+    // tap(x => console.log(token, context.ilks[token], x))
   );
 }
