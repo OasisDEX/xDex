@@ -2,7 +2,6 @@ import classnames from 'classnames';
 import * as React from 'react';
 import { Observable } from 'rxjs/index';
 import { CDPHistoryView } from '../../balances-mt/CDPHistoryView';
-import { CDPLiquidationHistoryView } from '../../balances-mt/CDPLiquidationHistoryView';
 import { TxState } from '../../blockchain/transactions';
 import { connect } from '../../utils/connect';
 import { formatPrecision } from '../../utils/formatters/format';
@@ -193,7 +192,6 @@ export class MTMyPositionView extends
           </div>
         </div>
         <CDPHistoryView {...this.props.ma} />
-        <CDPLiquidationHistoryView {...this.props.ma} />
       </div>);
   }
 

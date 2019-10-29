@@ -70,6 +70,40 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
               <tbody>
               { this.props.history.filter(h => h.kind !== MTHistoryEventKind.adjust)
                 .reverse().map((e, i) => {
+
+                  const liquidationEvents = [
+                    MTHistoryEventKind.bite,
+                    MTHistoryEventKind.kick,
+                    MTHistoryEventKind.dent,
+                    MTHistoryEventKind.tend,
+                    MTHistoryEventKind.deal,
+                  ];
+
+                  console.log(e.kind, e);
+                  if (liquidationEvents.indexOf(e.kind) >= 0) {
+                    const { lot, bid, tab } = e as any;
+                    return <tr key={i}>
+                      <td className={classnames(styles.eventName, styles.cellLeftAligned)}>
+                        {e.kind}
+                      </td>
+                      <td colSpan={5}>
+                        {lot && <>
+                            lot: <FormatAmount value={lot} token={e.token} fallback={''} />;
+                        </>}
+                        {bid && <>
+                            bid: <FormatAmount value={bid} token={'DAI'} fallback={''} />;
+                        </>}
+                        {tab && <>
+                            tab: <FormatAmount value={tab} token={'DAI'} fallback={''} />;
+                        </>}
+                      </td>
+                      <td>
+                        <InfoLabel>
+                          { formatDateTime(new Date(e.timestamp), true) }
+                        </InfoLabel>
+                      </td>
+                    </tr>;
+                  }
                   let sign = '';
                   let DAIsign = '';
                   const dAmount = e.dAmount && !e.dAmount.isNaN() ? e.dAmount : zero;
