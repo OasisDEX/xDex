@@ -9,7 +9,7 @@ import {
   mergeMap,
   reduce,
   shareReplay,
-  switchMap, tap,
+  switchMap,
 } from 'rxjs/operators';
 import * as dsProxy from '../../blockchain/abi/ds-proxy.abi.json';
 import { MTBalanceResult } from '../../blockchain/calls/mtCalls';
@@ -51,7 +51,8 @@ function rawMTLiquidationHistories$(
       return of(Object.keys(results).reduce((r, t) => {
         r[t] = [];
         return r;
-      },                         {} as MTHistories));
+      },
+                                            {} as MTHistories));
     }
     ),
     reduce((a, e) => ({ ...a, ...e }), {}),
@@ -68,10 +69,12 @@ function rawMTHistories$(
   )).pipe(
     concatAll(),
     catchError(error => {
+      console.log('error', error);
       return of(assets.reduce((r, t) => {
         r[t] = [];
         return r;
-      },                      {} as MTHistories));
+      },
+                              {} as MTHistories));
     }
     ),
     reduce((a, e) => ({ ...a, ...e }), {}),
@@ -109,7 +112,7 @@ export function aggregateMTAccountState(
     map(([balanceResult, rawLiquidationHistories, rawHistories]) => {
       const marginables = [...tokenNames.entries()]
         .filter(([_i, token]) => tokens[token].assetKind === AssetKind.marginable)
-        .map(([i, token]) => {
+        .map(([, token]) => {
           return getMarginableCore({
             name: token,
             assetKind: AssetKind.marginable,
@@ -119,7 +122,7 @@ export function aggregateMTAccountState(
             rawHistory: [
               ...rawHistories[token],
               ...rawLiquidationHistories[token]
-            ].sort((h1, h2) => h1.timestamp - h2.timestamp ),
+            ].sort((h1, h2) => h1.timestamp - h2.timestamp),
           });
         });
 
