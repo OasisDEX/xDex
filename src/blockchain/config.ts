@@ -286,7 +286,7 @@ const protoMain = {
     return load(proxyCreationAndExecute, '0x793ebbe21607e4f04788f89c7a9b97320773ec59');
   },
   get marginProxyRegistry() {
-    return load(proxyRegistry, '');
+    return load(proxyRegistry, '0x4678f0a6958e4d2bc4f1baf7bc52e8f3564f3fe4');
   },
   get proxyActions() {
     return load(proxyActions, '');
@@ -392,10 +392,10 @@ const kovan: NetworkConfig = {
     return load(proxyCreationAndExecute, '0xee419971e63734fed782cfe49110b1544ae8a773');
   },
   get marginProxyRegistry() {
-    return load(proxyRegistry, '0xa42bbce61c51aaab9f6f5b9df809d38ec164908a'); // fill
+    return load(proxyRegistry, '0x64a436ae831c1672ae81f674cab8b6775df3475c');
   },
   get proxyActions() {
-    return load(proxyActions, '0xd2263bd09f46632ccd43a99ba911f8067bed9b19'); // fill
+    return load(proxyActions, '0xd2263bd09f46632ccd43a99ba911f8067bed9b19');
   },
   oasisDataService: {
     url: 'https://kovan-cache.eth2dai.com/api/v1'
@@ -477,7 +477,7 @@ const localnet: NetworkConfig =   {
     return load(proxyCreationAndExecute, '0x39E338aDC718b67585AC4bE1A69Db0EE6C186487');
   },
   get marginProxyRegistry() {
-    return load(proxyRegistry, '0xaCEB44ca50eFaAb2787aD124d03e9116ec599817');
+    return load(proxyRegistry, '0x4C59F867abb03235372438Ff8F3685fcc7b3F1d6');
   },
   get proxyActions() {
     return load(proxyActions, '0xb39C3560062a2BA5CEFee7c7CDCd0f0e8fa8e17e');
