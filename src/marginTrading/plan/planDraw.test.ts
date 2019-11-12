@@ -64,7 +64,6 @@ describe('plan draw', () => {
         []);
 
       expect(plan).toEqual([
-        { kind: OperationKind.adjust, name: 'DGX', dgem: new BigNumber('-90') },
         { kind: OperationKind.drawGem, amount: new BigNumber('90'), name: 'DGX' }
       ]);
     });

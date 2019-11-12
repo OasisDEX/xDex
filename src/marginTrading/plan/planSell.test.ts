@@ -5,7 +5,6 @@ setupFakeWeb3ForTesting();
 
 import { impossible } from '../../utils/impossible';
 import { zero } from '../../utils/zero';
-import { OperationKind } from '../state/mtAccount';
 import { getMTAccount } from '../state/mtTestUtils';
 import { cash, sellOffers, weth100 } from './planFixtures';
 import { planSell, prepareSellAllocationRequest } from './planSell';
@@ -179,11 +178,6 @@ describe('planSell', () => {
         maxTotal: new BigNumber('200'),
         name: 'WETH'
       },
-      {
-        ddai: new BigNumber('100'),
-        kind: OperationKind.adjust,
-        name: 'WETH'
-      }
     ]);
   });
 

@@ -125,58 +125,51 @@ function argsOfPerformOperations(
   { plan }: { plan: Operation[] },
   context: NetworkConfig,
 ) {
-  const kinds: string[] = [];
-  const ilks: string[] = [];
-  const tokens: string[] = [];
-  const adapters: string[] = [];
-  const amounts: Array<string | undefined> = [];
-  const maxTotals: Array<string | undefined> = [];
-  const dgems: Array<string | undefined> = [];
-  const ddais: Array<string | undefined> = [];
-
-  for (const [i, o] of plan.entries()) {
-    kinds[i] = web3.toHex(o.kind);
-    // names[i] = web3.fromAscii(
-    //   context.ilks[o.kind === OperationKind.fundDai || o.kind === OperationKind.drawDai ?
-    //   o.ilk : o.name]);
-    ilks[i] = web3.fromAscii(context.ilks[o.name]);
-    if (o.kind === OperationKind.fundDai || o.kind === OperationKind.drawDai) {
-      amounts[i] = toWei('DAI', (o as any).amount);
-      tokens[i] = context.tokens.DAI.address;
-      adapters[i] = context.joins.DAI;
-    } else {
-      amounts[i] = toWei(o.name, (o as any).amount);
-      tokens[i] = context.tokens[o.name].address;
-      adapters[i] = context.joins[o.name];
-    }
-    maxTotals[i] = toWei(o.name, (o as any).maxTotal);
-    dgems[i] = toWei(o.name, (o as any).dgem);
-    ddais[i] = toWei(o.name, (o as any).ddai);
+  if (plan.length !== 1) {
+    throw new Error('plan must contain a single operation');
   }
 
-  console.log('plan', JSON.stringify(plan));
-  // console.log('args', JSON.stringify(
-  //   [
-  //     context.proxyActions.address,
-  //     kinds, ilks, tokens, adapters, amounts,
-  //     maxTotals, dgems, ddais,
-  //     [
-  //       context.cdpManager, context.mcd.vat, context.otc.address,
-  //       context.tokens.DAI.address, context.joins.DAI,
-  //     ],
-  //   ]
-  // ));
+  const fundArgs = (op: Operation, token: string) => [
+    context.cdpManager, web3.fromAscii(context.ilks[op.name]),
+    toWei(token, (op as any).amount),
+    context.tokens[token].address, context.joins[token], context.mcd.vat,
+  ];
+  const drawArgs = (op: Operation, token: string) => [
+    context.cdpManager, web3.fromAscii(context.ilks[op.name]),
+    toWei(token, (op as any).amount),
+    context.joins[token], context.mcd.vat,
+  ];
+  const buySellArgs = (op: Operation) => [
+    [
+      context.tokens[op.name].address, context.joins[op.name],
+      context.tokens.DAI.address, context.joins.DAI,
+      context.cdpManager, context.otc.address, context.mcd.vat,
+    ],
+    web3.fromAscii(context.ilks[op.name]),
+    toWei(op.name, (op as any).amount), toWei('DAI', (op as any).maxTotal),
+  ];
 
+  const types = {
+    [OperationKind.fundGem]: () =>
+      context.proxyActions.contract.fundGem.getData(...fundArgs(plan[0], plan[0].name)),
+    [OperationKind.fundDai]: () =>
+      context.proxyActions.contract.fundDai.getData(...fundArgs(plan[0], 'DAI')),
+    [OperationKind.drawGem]: () =>
+      context.proxyActions.contract.drawGem.getData(...drawArgs(plan[0], plan[0].name)),
+    [OperationKind.drawDai]: () =>
+      context.proxyActions.contract.drawDai.getData(...drawArgs(plan[0], 'DAI')),
+    [OperationKind.buyRecursively]: () =>
+      context.proxyActions.contract.buyLev.getData(...buySellArgs(plan[0])),
+    [OperationKind.sellRecursively]: () =>
+      context.proxyActions.contract.sellLev.getData(...buySellArgs(plan[0]))
+  };
+
+  if (!types[plan[0].kind]) {
+    throw new Error(`unknown operation: ${plan[0].kind}`);
+  }
   return [
     context.proxyActions.address,
-    context.proxyActions.contract.performOperations.getData(
-      kinds, ilks, tokens, adapters, amounts,
-      maxTotals, dgems, ddais,
-      [
-        context.cdpManager, context.mcd.vat, context.otc.address,
-        context.tokens.DAI.address, context.joins.DAI,
-      ],
-    )
+    types[plan[0].kind](),
   ];
 }
 
