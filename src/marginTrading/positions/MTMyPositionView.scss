@@ -61,3 +61,51 @@
   margin-bottom: 12px;
   font-size: 13px;
 }
+
+.message {
+  display: flex;
+  border-radius: 4px;
+  padding: 20px;
+  margin: 25px 20px;
+  font-size: 14px;
+  line-height: 22px;
+
+  div {
+    margin: 0 20px 0 0;
+    align-self: center;
+  }
+
+  span {
+    align-self: center;
+    flex-grow: 1;
+  }
+
+  .redeemButton {
+    align-self: center;
+    margin-left: 35px;
+    align-content: right;
+    flex-grow: 0;
+  }
+}
+
+.infoMessage {
+  @extend .message;
+
+  color: #828288;
+  border: 1px solid #3F3F47;
+}
+
+.warningMessage {
+  @extend .message;
+
+
+  color: rgba(255, 82, 82, 0.8);
+  border: 1px solid rgba(255, 82, 82, 0.2);
+
+}
+
+.redeemButton {
+  &:disabled {
+    color: #58585F !important;
+  }
+}

@@ -11,7 +11,7 @@ import {
   Core, MarginableAsset,
   MarginableAssetCore,
   MTAccount,
-  MTAccountState, MTHistoryEvent,
+  MTAccountState, mtBitable, MTHistoryEvent,
   MTHistoryEventKind,
   NonMarginableAsset,
   NonMarginableAssetCore,
@@ -236,6 +236,11 @@ export function calculateMTHistoryEvents(
 export function calculateMarginable(
   ma: MarginableAssetCore,
 ): MarginableAsset {
+
+  console.log(' MA before calc ref price', ma.referencePrice.toString());
+  console.log(' MA before calc balance', ma.balance.toString());
+  console.log(' MA before calc debt', ma.debt.toString());
+  console.log(' MA before calc dai', ma.dai.toString());
   const availableActions = marginableAvailableActions(ma);
   const balanceInCash = ma.balance.times(ma.referencePrice);
   const lockedBalance = BigNumber.min(
@@ -268,6 +273,28 @@ export function calculateMarginable(
   const leverage = ma.balance.times(ma.referencePrice)
     .div(ma.balance.times(ma.referencePrice).minus(ma.debt));
 
+  let bitable = mtBitable.no;
+  if (ma.nextPrice.lte(liquidationPrice)) {
+    bitable = mtBitable.imminent;
+  }
+
+  console.log('REF PRICE', ma.referencePrice);
+  console.log('liquidationPrice PRICE', liquidationPrice);
+  if (ma.referencePrice.lte(liquidationPrice)) {
+    bitable = mtBitable.yes;
+  }
+  console.log('MA DEBT, MA BALANCE', ma.debt.toString(), ma.balance.toString());
+  console.log('LIQ PRICE, REF PRICE, NEXT PRICE',
+              liquidationPrice.toString(), ma.referencePrice.toString(), ma.nextPrice.toString());
+  const runningAuctions = 2;
+
+  let amountBeingLiquidated = zero;
+  ma.rawHistory.forEach(h => {
+    if (h.kind === MTHistoryEventKind.bite) {
+      amountBeingLiquidated = amountBeingLiquidated.plus(h.lot);
+    }
+  });
+
   return {
     ...ma,
     availableActions,
@@ -284,6 +311,9 @@ export function calculateMarginable(
     safe,
     liquidationInProgress,
     history,
+    bitable,
+    runningAuctions,
+    amountBeingLiquidated,
   };
 }
 

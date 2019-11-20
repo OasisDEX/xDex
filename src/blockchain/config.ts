@@ -477,7 +477,7 @@ const localnet: NetworkConfig =   {
     return load(proxyCreationAndExecute, '0x39E338aDC718b67585AC4bE1A69Db0EE6C186487');
   },
   get marginProxyRegistry() {
-    return load(proxyRegistry, '0xaCEB44ca50eFaAb2787aD124d03e9116ec599817');
+    return load(proxyRegistry, '0x4C59F867abb03235372438Ff8F3685fcc7b3F1d6');
   },
   get proxyActions() {
     return load(proxyActions, '0xb39C3560062a2BA5CEFee7c7CDCd0f0e8fa8e17e');

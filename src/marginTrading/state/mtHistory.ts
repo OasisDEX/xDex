@@ -1,7 +1,7 @@
 import apolloBoost, { gql } from 'apollo-boost';
 import { BigNumber } from 'bignumber.js';
-import {from, Observable, throwError} from 'rxjs';
-import {catchError, map, tap} from 'rxjs/operators';
+import { from, Observable, throwError } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
 
 import { NetworkConfig } from '../../blockchain/config';
 import { MTHistoryEvent } from './mtAccount';

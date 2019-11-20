@@ -88,6 +88,12 @@ export enum MTHistoryEventKind {
   deal = 'Deal',
 }
 
+export enum mtBitable {
+  yes = 'yes',
+  no = 'no',
+  imminent = 'imminent',
+}
+
 export type MTHistoryEvent = {
   priceDai?: BigNumber;
   liquidationPrice?: BigNumber;
@@ -168,6 +174,9 @@ export interface MarginableAssetCore extends Core {
   safeCollRatio: BigNumber;
   fee: BigNumber;
   urn: string;
+  nextPrice: BigNumber;
+  zzz: Date;
+  redeemable: BigNumber;
 }
 
 export interface MarginableAsset extends MarginableAssetCore {
@@ -188,6 +197,9 @@ export interface MarginableAsset extends MarginableAssetCore {
   liquidationInProgress: boolean;
   history: MarginableAssetHistory;
   pnl?: BigNumber;
+  bitable: mtBitable.no | mtBitable.imminent | mtBitable.yes;
+  runningAuctions: number;
+  amountBeingLiquidated: BigNumber;
 }
 
 export interface NonMarginableAssetCore extends Core {
