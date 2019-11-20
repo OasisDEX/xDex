@@ -86,6 +86,7 @@ export enum MTHistoryEventKind {
   tend = 'Tend',
   dent = 'Dent',
   deal = 'Deal',
+  redeem = 'Redeem',
 }
 
 export enum mtBitable {
@@ -146,7 +147,11 @@ export type MTLiquidationEvent = {
   bid: BigNumber;
 } | {
   kind: MTHistoryEventKind.deal;
-});
+} | {
+  kind: MTHistoryEventKind.redeem;
+  amount: BigNumber;
+}
+);
 
 // export type MTLiquidationEvent = {
 //   timestamp: number;

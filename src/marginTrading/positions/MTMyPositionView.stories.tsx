@@ -4,13 +4,13 @@ import * as moment from 'moment';
 import * as React from 'react';
 import { of } from 'rxjs/index';
 import { TxState } from '../../blockchain/transactions';
-import {MTAccount, MTAccountState, MTHistoryEventKind} from '../state/mtAccount';
+import { MTAccount, MTAccountState, MTHistoryEventKind } from '../state/mtAccount';
 import { calculateMarginable } from '../state/mtCalculate';
+import { RawMTHistoryEvent } from '../state/mtHistory';
 import { getMarginableCore, getMTAccount } from '../state/mtTestUtils';
 import { MTTransferFormState } from '../transfer/mtTransferForm';
 import { MTMyPositionPanel } from './MTMyPositionPanel';
 import { MTMyPositionView } from './MTMyPositionView';
-import {RawMTHistoryEvent} from "../state/mtHistory";
 
 const stories = storiesOf('Leverage Trading/My Position Panel', module)
   .addDecorator(story => (
@@ -28,8 +28,6 @@ const assetCore = {
   minCollRatio: new BigNumber(1.5),
   safeCollRatio: new BigNumber(2),
 };
-
-
 
 const liquidationHistory: RawMTHistoryEvent[] = [
   {
@@ -70,6 +68,13 @@ const liquidationHistory: RawMTHistoryEvent[] = [
     id: new BigNumber(1),
     timestamp: 1573141040,
     token: 'WETH'
+  } as RawMTHistoryEvent,
+  {
+    kind: MTHistoryEventKind.redeem,
+    id: new BigNumber(1),
+    timestamp: 1573141040,
+    token: 'WETH',
+    amount: new BigNumber(1.23)
   } as RawMTHistoryEvent,
 ];
 
@@ -120,7 +125,6 @@ const ethMarginableAsset3 = calculateMarginable(getMarginableCore({
   nextPrice: new BigNumber(130),
   rawHistory: liquidationHistory
 }));
-
 
 const mta3: MTAccount = getMTAccount({ marginableAssets: [ethMarginableAsset3] });
 

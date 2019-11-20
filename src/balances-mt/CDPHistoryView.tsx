@@ -77,11 +77,12 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
                     MTHistoryEventKind.dent,
                     MTHistoryEventKind.tend,
                     MTHistoryEventKind.deal,
+                    MTHistoryEventKind.redeem,
                   ];
 
                   console.log(e.kind, e);
                   if (liquidationEvents.indexOf(e.kind) >= 0) {
-                    const { lot, bid, tab } = e as any;
+                    const { lot, bid, tab, amount } = e as any;
                     return <tr key={i}>
                       <td className={classnames(styles.eventName, styles.cellLeftAligned)}>
                         {e.kind}
@@ -95,6 +96,9 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
                         </>}
                         {tab && <>
                             tab: <FormatAmount value={tab} token={'DAI'} fallback={''} />;
+                        </>}
+                        {amount && <>
+                            amount: <FormatAmount value={amount} token={e.token} fallback={''} />;
                         </>}
                       </td>
                       <td>
