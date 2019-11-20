@@ -14,7 +14,7 @@ import {
 import * as dsProxy from '../../blockchain/abi/ds-proxy.abi.json';
 import { AssetKind, NetworkConfig, tokens } from '../../blockchain/config';
 import { every5Seconds$ } from '../../blockchain/network';
-import { nullAddress } from '../../blockchain/utils';
+import { amountFromWei, nullAddress } from '../../blockchain/utils';
 import { web3 } from '../../blockchain/web3';
 
 import { ReadCalls, ReadCalls$ } from '../../blockchain/calls/calls';
@@ -31,7 +31,7 @@ import {
 import { getCashCore, getMarginableCore, getNonMarginableCore } from './mtTestUtils';
 
 export function aggregateMTAccountState(
-  _context: NetworkConfig,
+  context: NetworkConfig,
   proxy: any,
   calls: ReadCalls,
   rawHistories: MTHistoryEvent[][] | undefined
@@ -67,9 +67,20 @@ export function aggregateMTAccountState(
           concatAll(),
           reduce<{ [key: string]: RawMTLiquidationHistoryEvent[] }>((a, e) => ({ ...a, ...e }), {}),
         ),
+        forkJoin(assetNames.map((token) =>
+          readOsm(context, token).pipe(
+            map(osm => ({ [token]: osm })),
+          )
+        )).pipe(
+          concatAll(),
+          reduce<{ [key: string]: { current: BigNumber|undefined, next: BigNumber|undefined} }>(
+            (a, e) => ({ ...a, ...e }),
+            {},
+          ),
+        ),
       )
     ),
-    map(([balanceResult, rawLiquidationHistory]) => {
+    map(([balanceResult, rawLiquidationHistory, osmPrices]) => {
       const marginables = [...tokenNames.entries()]
         .filter(([_i, token]) => tokens[token].assetKind === AssetKind.marginable)
         .map(([i, token]) => {
@@ -81,6 +92,8 @@ export function aggregateMTAccountState(
             safeCollRatio: new BigNumber(tokens[token].safeCollRatio as number),
             rawHistory: (rawHistories ? rawHistories[i] : []),
             rawLiquidationHistory: rawLiquidationHistory[token],
+            osmPriceCurrent: (osmPrices as any)[token].current,
+            osmPriceNext: (osmPrices as any)[token].next,
           });
         });
 
@@ -185,5 +198,35 @@ export function createMta$(
       );
     }),
     shareReplay(1)
+  );
+}
+
+function readOsm(context: NetworkConfig, token: string):
+Observable<{current: number|undefined, next: number|undefined}> {
+  const hilo = (uint256: string): [BigNumber, BigNumber] => {
+    const match = uint256.match(/^0x(\w+)$/);
+    if (!match) {
+      throw new Error(`invalid uint256: ${uint256}`);
+    }
+    return (match[0].length <= 32) ?
+    [new BigNumber(0), new BigNumber(uint256)] :
+    [
+      new BigNumber(`0x${match[0].substr(0, match[0].length - 32)}`),
+      new BigNumber(`0x${match[0].substr(match[0].length - 32, 32)}`)
+    ];
+  };
+  const slotCurrent = 3;
+  const slotNext = 4;
+  return combineLatest(
+    bindNodeCallback(web3.eth.getStorageAt)(context.osms[token], slotCurrent),
+    bindNodeCallback(web3.eth.getStorageAt)(context.osms[token], slotNext),
+  ).pipe(
+    map(([cur, nxt]: [string, string]) => {
+      const [current, next] = [hilo(cur), hilo(nxt)];
+      return {
+        current: current[0].isZero() ? undefined : amountFromWei(current[1], token),
+        next: next[0].isZero() ? undefined : amountFromWei(next[1], token),
+      };
+    })
   );
 }
