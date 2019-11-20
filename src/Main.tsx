@@ -3,6 +3,8 @@ import * as React from 'react';
 import { Redirect, Route, Router, Switch } from 'react-router';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
+import * as mixpanel from 'mixpanel-browser';
+import { default as MediaQuery }from 'react-responsive';
 import { map } from 'rxjs/operators';
 import { setupAppContext, theAppContext } from './AppContext';
 import { BalancesView } from './balances-mt/BalancesView';
@@ -11,10 +13,20 @@ import { ExchangeViewTxRx } from './exchange/ExchangeView';
 import { HeaderTxRx } from './header/Header';
 import * as styles from './index.scss';
 import { InstantExchange } from './instant/InstantViewPanel';
+import { Banner } from './landingPage/Banner';
 import { MarginTradingSimpleTxRx } from './marginTrading/MarginTradingSimple';
 import { connect } from './utils/connect';
 
-const browserHistoryInstance = createBrowserHistory();
+const browserHistoryInstance = createBrowserHistory({
+  basename: process.env.REACT_APP_SUBDIR ? process.env.REACT_APP_SUBDIR : '/'
+});
+
+browserHistoryInstance.listen(location => {
+  mixpanel.track('Pageview', {
+    product: 'oasis-trade',
+    id: location.pathname
+  });
+});
 
 export class Main extends React.Component {
   public render() {
@@ -35,6 +47,30 @@ export class MainContent extends React.Component<RouterProps> {
   public render() {
     return (
       <routerContext.Provider value={{ rootUrl: this.props.match.url }}>
+        <Banner buttonLabel={
+          //tslint:disable
+          <a href="https://blog.makerdao.com/what-to-expect-with-the-launch-of-multi-collateral-dai/"
+             target="_blank"
+             rel="noreferrer noopener">
+            <MediaQuery maxWidth={824}>
+              {
+                (match: boolean) => match
+                  ? 'Blog'
+                  : 'Blog Post'
+              }
+            </MediaQuery></a>}
+                content={
+                  <span>
+                    {/*tslint:disable*/}
+                    With the launch of Multi-Collateral Dai, we have renamed Single-Collateral DAI
+                    to SAI. Your balances haven't changed.
+                    <br/>
+                    <strong>Check the blog post for more information.</strong>
+                  </span>
+                }
+                continue={
+                  () => false
+                }/>
         <div className={styles.container}>
           <theAppContext.Consumer>
             {({ TransactionNotifierTxRx }) =>

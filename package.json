@@ -1,6 +1,6 @@
 {
-  "name": "Eth2Dai",
-  "version": "2.4.2",
+  "name": "Oasis-Market",
+  "version": "1.0.0",
   "private": true,
   "license": "AGPL-3.0-or-later",
   "scripts": {
@@ -17,7 +17,6 @@
     "deploy:dev": "ENV=dev yarn build && surge --project ./build --domain http://xdex-dev.surge.sh/",
     "deploy:stage": "yarn build && surge --project ./build --domain http://xdex-staging.surge.sh/",
     "deploy:prod": "sh ./deploy-prod.sh",
-    "deploy:beta": "rm -rf ./build && yarn build && echo 'beta.eth2dai.com' > ./build/CNAME && surge ./build -d https://beta.eth2dai.com",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
     "cypress:run": "rm -rf cypress/screenshots/* && cypress run",
@@ -27,6 +26,7 @@
     "storybook:screenshots": "storybook-chrome-screenshot -p 9001 --inject-files ./.storybook/disable-animations.js"
   },
   "dependencies": {
+    "@types/mixpanel-browser": "^2.23.1",
     "@types/ramda": "^0.25.38",
     "@types/react-responsive": "^3.0.2",
     "@types/react-tooltip": "^3.9.2",
@@ -42,12 +42,14 @@
     "graphql-request": "^1.8.2",
     "lodash": "^4.17.10",
     "mathjs": "^5.2.0",
+    "mixpanel-browser": "^2.29.1",
     "moment": "^2.22.2",
     "normalize.css": "^8.0.1",
     "object-assign": "4.1.1",
     "promise": "8.0.1",
     "raf": "3.4.0",
     "ramda": "^0.25.0",
+    "raven-js": "^3.27.2",
     "react": "^16.3.2",
     "react-apollo": "^3.0.1",
     "react-css-modules": "^4.7.3",
@@ -90,6 +92,7 @@
     "@types/lodash": "^4.14.109",
     "@types/mathjs": "^4.4.1",
     "@types/node": "^10.1.2",
+    "@types/raven": "^2.5.3",
     "@types/react": "^16.3.14",
     "@types/react-custom-scrollbars": "^4.0.5",
     "@types/react-dom": "^16.0.5",

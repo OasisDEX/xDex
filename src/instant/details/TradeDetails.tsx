@@ -4,7 +4,6 @@ import * as React from 'react';
 
 import { Approximate } from '../../utils/Approximate';
 import { GasEstimationStatus } from '../../utils/form';
-import { formatAmount } from '../../utils/formatters/format';
 import { FormatPercent, Money } from '../../utils/formatters/Formatters';
 import { ProgressIcon } from '../../utils/icons/Icons';
 import { TradeData } from './TradeData';
@@ -13,7 +12,7 @@ import * as styles from './TradeDetails.scss';
 // tslint:disable
 const priceImpactTooltip = {
   id: 'price-impact',
-  text: 'The difference between the best current price on the Eth2Dai order book and the estimated price of your order.'
+  text: 'The difference between the best current price on the Oasis Trade order book and the estimated price of your order.'
 };
 const slippageLimitTooltip = {
   id: 'slippage-limit',
@@ -52,7 +51,7 @@ export class TradeDetails extends React.Component<TradeDetailsProps> {
                    data-test-id="trade-price"
                    value={
                      <Approximate>
-                       {formatAmount(price, 'USD')} {quotation || ''}
+                       {price.valueOf()} {quotation || ''}
                      </Approximate>
                    }
                    style={{ marginBottom: '2px' }}
@@ -70,8 +69,8 @@ export class TradeDetails extends React.Component<TradeDetailsProps> {
         <TradeData label="Gas cost"
                    data-test-id="trade-gas-cost"
                    value={
-                     gasEstimationStatus === GasEstimationStatus.error ?
-                       'error' :
+                     gasEstimationStatus === GasEstimationStatus.error ? 'error' :
+                     gasEstimationStatus === GasEstimationStatus.unknown ? 'N/A' :
                        gasEstimationUsd
                          ? (
                            <Approximate data-vis-reg-hide={true}>

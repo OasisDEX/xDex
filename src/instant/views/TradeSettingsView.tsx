@@ -6,7 +6,6 @@ import warningSvg from '../../icons/warning.svg';
 import { BigNumberInput } from '../../utils/bigNumberInput/BigNumberInput';
 import { formatPrice } from '../../utils/formatters/format';
 import { lessThanOrEqual } from '../../utils/forms/InputGroup';
-import { BackIcon } from '../../utils/icons/Icons';
 import { SvgImage } from '../../utils/icons/utils';
 import { TopLeftCorner } from '../../utils/panel/TopRightCorner';
 import { TradeDetails } from '../details/TradeDetails';
@@ -24,8 +23,11 @@ export class TradeSettingsView extends React.Component<InstantFormState> {
     return (
       <InstantFormWrapper heading="Advanced Settings">
         <TopLeftCorner>
-          <BackIcon
+          <ButtonIcon
+            color="secondaryOutlined"
+            className={classnames(instantStyles.cornerIcon, instantStyles.backIcon)}
             onClick={this._hideTradeSettings}
+            image={backSvg}
             data-test-id="back"
           />
         </TopLeftCorner>
@@ -49,7 +51,7 @@ export class TradeSettingsView extends React.Component<InstantFormState> {
                 prefix: ''
               })}
               pipe={
-                lessThanOrEqual(100)
+                lessThanOrEqual(new BigNumber(100))
               }
               guide={true}
               placeholder={slippageLimitInPercentage}

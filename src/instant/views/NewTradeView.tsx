@@ -1,10 +1,11 @@
 import { BigNumber } from 'bignumber.js';
 import classnames from 'classnames';
+import * as mixpanel from 'mixpanel-browser';
 import * as React from 'react';
 import { etherscan, EtherscanConfig } from '../../blockchain/etherscan';
 import swapArrowsSvg from '../../icons/swap-arrows.svg';
-import { formatAmount } from '../../utils/formatters/format';
-import { AccountIcon, SettingsIcon } from '../../utils/icons/Icons';
+import { formatAmountInstant } from '../../utils/formatters/format';
+import { ButtonIcon } from '../../utils/icons/Icons';
 import { SvgImage } from '../../utils/icons/utils';
 import { TopLeftCorner, TopRightCorner } from '../../utils/panel/TopRightCorner';
 import { TradeDetails } from '../details/TradeDetails';
@@ -44,7 +45,7 @@ function error(msg: Message | undefined) {
     case MessageKind.insufficientAmount:
       return (
         <>
-          You don't have {formatAmount(msg.amount, msg.token)} {msg.token.toUpperCase()} in your wallet
+          You don't have {formatAmountInstant(msg.amount, msg.token)} {msg.token.toUpperCase()} in your wallet
         </>);
     case MessageKind.dustAmount:
       return (
@@ -61,7 +62,7 @@ function error(msg: Message | undefined) {
     case MessageKind.orderbookTotalExceeded:
       return (
         <>
-          No orders available to {msg.side} {formatAmount(msg.amount, msg.token)} {msg.token.toUpperCase()}
+          No orders available to {msg.side} {formatAmountInstant(msg.amount, msg.token)} {msg.token.toUpperCase()}
         </>
       );
     case MessageKind.notConnected:
@@ -121,14 +122,17 @@ export class NewTradeView extends React.Component<InstantFormState> {
                           btnDataTestId="initiate-trade"
       >
         <TopRightCorner>
-          <SettingsIcon
+          <ButtonIcon
+            color="secondaryOutlined"
+            className={classnames(styles.cornerIcon, styles.settingsIcon)}
             disabled={!price}
             onClick={this.showTradeSettings}
             data-test-id="trade-settings"
           />
         </TopRightCorner>
         <TopLeftCorner>
-          <AccountIcon
+          <ButtonIcon
+            color="secondaryOutlined"
             disabled={!(user && user.account)}
             data-test-id="account-settings"
             onClick={this.showAccountSettings}
@@ -222,6 +226,12 @@ export class NewTradeView extends React.Component<InstantFormState> {
         view: ViewKind.priceImpactWarning
       });
     } else {
+      mixpanel.track('btn-click', {
+        id: 'initiate-trade',
+        product: 'oasis-trade',
+        page: 'Instant',
+        section: 'order-details'
+      });
       this.props.submit(this.props);
       this.props.change({
         kind: InstantFormChangeKind.viewChange,

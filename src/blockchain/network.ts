@@ -1,6 +1,7 @@
 // tslint:disable:no-console
 import { BigNumber } from 'bignumber.js';
-import { bindNodeCallback, combineLatest, concat, interval, Observable } from 'rxjs';
+import { bindNodeCallback, combineLatest, concat, forkJoin, interval, Observable, of } from 'rxjs';
+import { takeWhileInclusive } from 'rxjs-take-while-inclusive';
 import { ajax } from 'rxjs/ajax';
 import {
   catchError,
@@ -8,7 +9,9 @@ import {
   distinctUntilChanged,
   filter,
   first,
+  last,
   map,
+  mergeMap,
   retryWhen,
   shareReplay,
   skip,
@@ -16,7 +19,10 @@ import {
   switchMap,
 } from 'rxjs/operators';
 
-import { NetworkConfig, networks } from './config';
+import * as mixpanel from 'mixpanel-browser';
+import { mixpanelIdentify } from '../analytics';
+import * as dsValue from './abi/ds-value.abi.json';
+import { getToken, NetworkConfig, networks, tradingTokens } from './config';
 import { amountFromWei } from './utils';
 import { web3 } from './web3';
 
@@ -51,6 +57,20 @@ export const context$: Observable<NetworkConfig> = networkId$.pipe(
   map((id: string) => networks[id]),
   shareReplay(1)
 );
+
+combineLatest(account$, context$).pipe(
+  mergeMap(([account, network]) => {
+    return of([account, network.name]);
+  })
+).subscribe(([account, network]) => {
+  mixpanelIdentify(account!, { wallet: 'metamask' });
+  mixpanel.track('account-change', {
+    account,
+    network,
+    product: 'oasis-trade',
+    wallet: 'metamask'
+  });
+});
 
 export const onEveryBlock$ = combineLatest(every5Seconds$, context$).pipe(
   switchMap(() => bindNodeCallback(web3.eth.getBlockNumber)()),
@@ -104,7 +124,7 @@ export function allowance$(token: string, guy?: string): Observable<boolean> {
         account, guy ? guy : context.otc.address)
     ),
     map((x: BigNumber) => x.gte(MIN_ALLOWANCE)),
-   );
+  );
 }
 
 export type GasPrice$ = Observable<BigNumber>;
@@ -116,6 +136,41 @@ export const gasPrice$: GasPrice$ = onEveryBlock$.pipe(
   shareReplay(1),
 );
 
+export interface Ticker {
+  [label: string]: BigNumber;
+}
+
+// TODO: This should be unified with fetching price for ETH.
+// Either this logic should contain only fetching from 3rd party endpoint
+// or we wait until all of the tokens have PIP deployed.
+export const tokenPricesInUSD$: Observable<Ticker> = onEveryBlock$.pipe(
+  switchMap(
+    () =>
+      forkJoin(
+        tradingTokens.map(
+          (token) =>
+            ajax({
+              url: `https://api.coinpaprika.com/v1/tickers/${getToken(token).ticker}/`,
+              method: 'GET',
+              headers: {
+                Accept: 'application/json',
+              },
+            }).pipe(
+              map(({ response }) => ({
+                [token]: new BigNumber(response.quotes.USD.price)
+              })),
+              catchError((error) => {
+                console.debug(`Error fetching price data: ${error}`);
+                return of({});
+              }),
+            )
+          )
+      )
+  ),
+  map((prices) => prices.reduce((a, e) => ({ ...a, ...e }))),
+  shareReplay(1)
+);
+
 export const etherPriceUsd$: Observable<BigNumber> = concat(
   context$.pipe(
     filter(context => !!context),
@@ -124,21 +179,27 @@ export const etherPriceUsd$: Observable<BigNumber> = concat(
     map((value: string) => new BigNumber(value).div(new BigNumber(10).pow(18))),
   ),
   onEveryBlock$.pipe(
-    switchMap(() => {
-      return ajax({
-        url: 'https://api.coinmarketcap.com/v1/ticker/ethereum/',
-        method: 'GET',
-        headers: {
-          Accept: 'application/json',
-        },
-      });
-    }),
-    map(({ response }) => new BigNumber(response[0].price_usd)),
-    retryWhen(errors => errors.pipe(
-      delayWhen(() => onEveryBlock$.pipe(skip(1)))
-    )),
+    switchMap(() => ajax({
+      url: 'https://api.coinpaprika.com/v1/tickers/eth-ethereum/',
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+      },
+    })),
+    map(({ response }) => new BigNumber(response.quotes.USD.price)),
+    retryWhen(errors => errors.pipe(delayWhen(() => onEveryBlock$.pipe(skip(1))))),
   ),
 ).pipe(
   distinctUntilChanged((x: BigNumber, y: BigNumber) => x.eq(y)),
   shareReplay(1),
 );
+
+export function waitUntil<T>(
+  value: Observable<T>, condition: (v: T) => boolean, maxRetries = 5, generator$ = onEveryBlock$,
+): Observable<T> {
+  return generator$.pipe(
+    switchMap(() => value),
+    takeWhileInclusive((v, i) => i < maxRetries && !condition(v)),
+    last(),
+  );
+}

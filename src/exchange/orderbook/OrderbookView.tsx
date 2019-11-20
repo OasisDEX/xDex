@@ -6,8 +6,9 @@ import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import { combineLatest, Observable } from 'rxjs';
 import { distinctUntilKeyChanged, map, startWith } from 'rxjs/operators';
 
+import * as mixpanel from 'mixpanel-browser';
 import { FormChangeKind, PickOfferChange } from '../../utils/form';
-import { FormatAmount, FormatPriceOrder } from '../../utils/formatters/Formatters';
+import { FormatAmount, FormatPercent, FormatPriceOrder } from '../../utils/formatters/Formatters';
 import { Button } from '../../utils/forms/Buttons';
 import { SvgImage } from '../../utils/icons/utils';
 import { Loadable, LoadableStatus, loadablifyLight } from '../../utils/loadable';
@@ -121,16 +122,22 @@ export class OrderbookView extends React.Component<Props> {
           <div style={{ marginLeft: 'auto', display: 'flex' }}>
             <MediaQuery maxWidth={992}>
               {(matches) => {
-                let isDisabled = false;
 
                 if (matches) {
-                  isDisabled = true;
+                  return <></>;
                 }
 
                 return <Button
-                  disabled={isDisabled}
                   className={styles.switchBtn}
-                  onClick={this.changeChartListView}
+                  onClick={() => {
+                    mixpanel.track('btn-click', {
+                      id: 'change-orderbook-view',
+                      product: 'oasis-trade',
+                      page: 'Market',
+                      section: 'orderbook',
+                    });
+                    this.changeChartListView();
+                  }}
                   data-test-id="orderbook-type-list"
                 >
                   <SvgImage image={depthChartSvg}/>
@@ -142,12 +149,12 @@ export class OrderbookView extends React.Component<Props> {
         <Table align="right" className={styles.orderbookTable}>
           <thead>
           <tr>
-            <th>
+            <th data-test-id="price-col">
               <InfoLabel>Price </InfoLabel>
               <Currency theme="semi-bold"
                         value={this.props.tradingPair && this.props.tradingPair.quote}/>
             </th>
-            <th>
+            <th data-test-id="amount-col">
               <InfoLabel>Amount </InfoLabel>
               <Currency theme="semi-bold"
                         value={this.props.tradingPair && this.props.tradingPair.base}/>
@@ -173,8 +180,16 @@ export class OrderbookView extends React.Component<Props> {
                 });
               };
             };
+
+            const { base, quote } = orderbook.tradingPair;
             return (
               <>
+                {/*
+                  This line exists only so that in e2e
+                  we wait the order book for a given pair
+                  to be loaded before we assert anything else.
+                */}
+                <span data-test-id={`${base}-${quote}-orderbook`}/>
                 <Scrollbar ref={el => this.scrollbar = el || undefined} onScroll={this.scrolled}>
                   <Table align="right" className={styles.orderbookTable}>
                     <TransitionGroup
@@ -197,7 +212,7 @@ export class OrderbookView extends React.Component<Props> {
 
                       {/* better don't remove me! */}
                       <CSSTransition key="0" classNames="order" timeout={1000}>
-                        <RowHighlighted>
+                        <RowHighlighted className={styles.spreadRow}>
                           <td ref={el => this.centerRow = el || undefined}>
                             {orderbook.spread
                               ? <FormatAmount value={orderbook.spread}
@@ -205,7 +220,13 @@ export class OrderbookView extends React.Component<Props> {
                               />
                               : '-'}
                           </td>
-                          <td/>
+                          <td>
+                            {orderbook.spreadPercentage && <FormatPercent
+                                value = {orderbook.spreadPercentage}
+                                precision = {2}
+                                multiply={ true }
+                            />}
+                          </td>
                           <td>
                             <Muted>{this.props.tradingPair.quote} Spread</Muted>
                           </td>

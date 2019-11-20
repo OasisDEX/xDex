@@ -8,8 +8,9 @@ import {
   first,
   flatMap,
   map,
+  mergeMap,
   shareReplay,
-  switchMap
+  switchMap,
 } from 'rxjs/operators';
 
 import * as balancesMT from './balances-mt/balances';
@@ -30,20 +31,23 @@ import {
   etherPriceUsd$,
   gasPrice$,
   initializedAccount$,
-  onEveryBlock$
+  onEveryBlock$,
+  tokenPricesInUSD$
 } from './blockchain/network';
 import { user$ } from './blockchain/user';
-import {
-  loadOrderbook$,
-  Orderbook
-} from './exchange/orderbook/orderbook';
+import { loadOrderbook$, Offer, Orderbook } from './exchange/orderbook/orderbook';
 import {
   createTradingPair$,
   currentTradingPair$,
   loadablifyPlusTradingPair,
   memoizeTradingPair,
+  TradingPair,
 } from './exchange/tradingPair/tradingPair';
 
+import { BigNumber } from 'bignumber.js';
+import * as mixpanel from 'mixpanel-browser';
+import { TxMetaKind } from './blockchain/calls/txMeta';
+import { tradingPairs } from './blockchain/config';
 import { transactions$, TxState } from './blockchain/transactions';
 import {
   createAllTrades$,
@@ -100,6 +104,18 @@ import { createFormController$ as createInstantFormController$ } from './instant
 import { InstantViewPanel } from './instant/InstantViewPanel';
 import { createMTAllocateForm$ } from './marginTrading/allocate/mtOrderAllocateDebtForm';
 import {
+  createExchangeMigration$,
+  createMigrationOps$,
+  ExchangeMigrationState
+} from './migration/migration';
+import {
+  createMigrationForm$,
+  MigrationFormKind,
+  MigrationFormState
+} from './migration/migrationForm';
+import { MigrationButton } from './migration/MigrationFormView';
+
+import {
   CreateMTAllocateForm$,
   CreateMTAllocateForm$Props
 } from './marginTrading/allocate/mtOrderAllocateDebtFormView';
@@ -133,6 +149,14 @@ export function setupAppContext() {
     shareReplay(1)
   );
 
+  const proxyAddress$ = onEveryBlock$.pipe(
+    switchMap(() =>
+                calls$.pipe(
+                  flatMap(calls => calls.proxyAddress())
+                )),
+    distinctUntilChanged(isEqual)
+  );
+
   const mta$ = createMta$(context$, initializedAccount$, onEveryBlock$, readCalls$);
 
   const mtSetupForm$ = createMTSetupForm$(mta$, calls$, gasPrice$, etherPriceUsd$);
@@ -146,6 +170,29 @@ export function setupAppContext() {
     balancesNoMT.createAllowances$(context$, initializedAccount$, onEveryBlock$),
     mta$
   );
+
+  const combinedBalances$ = createCombinedBalances$(
+    context$, initializedAccount$, etherBalance$,
+    balances$, onEveryBlock$, tokenPricesInUSD$, etherPriceUsd$, transactions$
+  ).pipe(
+    shareReplay(1)
+  );
+  const balancesWithEth$ = combineLatest(balances$, etherBalance$).pipe(
+    map(([balances, etherBalance]) => ({ ...balances, ETH: etherBalance })),
+  );
+
+  const wethBalance$ = createTokenBalances$(context$, initializedAccount$, onEveryBlock$, 'WETH');
+  const saiBalance$ = createTokenBalances$(context$, initializedAccount$, onEveryBlock$, 'SAI');
+  const daiBalance$ = createTokenBalances$(context$, initializedAccount$, onEveryBlock$, 'DAI');
+
+  const wrapUnwrapForm$ =
+    curry(createWrapUnwrapForm$)(
+      gasPrice$,
+      etherPriceUsd$,
+      etherBalance$,
+      wethBalance$,
+      calls$
+    );
 
   const loadOrderbook = memoizeTradingPair(curry(loadOrderbook$)(context$, onEveryBlock$));
   const currentOrderbook$ = currentTradingPair$.pipe(
@@ -312,7 +359,7 @@ export function setupAppContext() {
   const myTradesKind$ = createMyTradesKind$();
   const myOpenTrades$ = loadablifyPlusTradingPair(
     currentTradingPair$,
-    memoizeTradingPair(curry(createMyOpenTrades$)(loadOrderbook, account$, transactions$))
+    memoizeTradingPair(curry(createMyOpenTrades$)(currentOrderbook$, account$, transactions$))
   );
 
   const myClosedTrades$ = loadablifyPlusTradingPair(
@@ -348,13 +395,24 @@ export function setupAppContext() {
     createTransactionNotifier$(transactions$, interval(5 * 1000), context$);
   const TransactionNotifierTxRx = connect(TransactionNotifierView, transactionNotifier$);
 
-  const proxyAddress$ = onEveryBlock$.pipe(
-    switchMap(() =>
-      calls$.pipe(
-        flatMap(calls => calls.proxyAddress())
-      )),
-    distinctUntilChanged(isEqual)
-  );
+  const transactionsLog: string[] = [];
+  combineLatest(transactionNotifier$, context$).pipe(
+    mergeMap(([transactionsNotifier, network]) => {
+      return of([transactionsNotifier.transactions, network.name]);
+    })
+  ).subscribe(([transactions, network]) => {
+    (transactions as TxState[]).forEach(tx => {
+      const tx_identify = `${tx.account}${tx.networkId}${tx.status}${tx.txNo}`;
+      if (!(transactionsLog.includes(tx_identify))) {
+        transactionsLog.push(tx_identify);
+        mixpanel.track('notification', {
+          network,
+          product: 'oasis-trade',
+          status: tx.status
+        });
+      }
+    });
+  });
 
   const instant$ = createInstantFormController$(
     {
@@ -384,6 +442,112 @@ export function setupAppContext() {
   const TaxExporterTxRx = inject(TaxExporterView, {
     export: () => createTaxExport$(context$, initializedAccount$)
   });
+
+  const aggregatedOpenOrders$ = (token: 'SAI' | 'DAI') => createMyOpenTrades$(
+    combineLatest(...tradingPairs
+      .filter(pair => pair.quote === token)
+      .map(pair => loadOrderbook(pair))
+    )
+      .pipe(
+        map((orderbooks) => {
+          const aggregatedOrderbook = {
+            buy: [] as Offer[],
+            sell: [] as Offer[],
+            blockNumber: 0,
+          };
+
+          return orderbooks.reduce(
+            (aggregate, currentOrderbook) => {
+              aggregate.buy = [...aggregate.buy, ...currentOrderbook.buy];
+              aggregate.sell = [...aggregate.sell, ...currentOrderbook.sell];
+              // the blockNumber is the same for all of them
+              aggregate.blockNumber = currentOrderbook.blockNumber;
+              return aggregate;
+            },
+            aggregatedOrderbook
+          );
+        })),
+    account$,
+    transactions$.pipe(
+      map((transactions: TxState[]) => transactions
+        .filter(tx => tx.meta.kind === TxMetaKind.cancel)),
+    ),
+    {} as TradingPair
+  );
+
+  const sai2DAIOps$ = curry(createMigrationOps$)(
+    'SAI',
+    createProxyAllowances$(
+      context$,
+      initializedAccount$,
+      proxyAddress$,
+      onEveryBlock$
+    ),
+    proxyAddress$,
+  );
+
+  const dai2SAIOps$ = curry(createMigrationOps$)(
+    'DAI',
+    createProxyAllowances$(
+      context$,
+      initializedAccount$,
+      proxyAddress$,
+      onEveryBlock$
+    ),
+    proxyAddress$,
+  );
+
+  const sai2DAIMigration$ = (amount: BigNumber) => createExchangeMigration$(
+    proxyAddress$,
+    calls$,
+    sai2DAIOps$(amount),
+  );
+
+  const dai2SAIMigration$ = (amount: BigNumber) => createExchangeMigration$(
+    proxyAddress$,
+    calls$,
+    dai2SAIOps$(amount),
+  );
+
+  const sai2DAIMigrationForm$ = createMigrationForm$(
+    context$,
+    saiBalance$,
+    MigrationFormKind.sai2dai,
+    sai2DAIMigration$,
+    calls$,
+    aggregatedOpenOrders$('SAI')
+  );
+
+  const dai2SAIMigrationForm$ = createMigrationForm$(
+    context$,
+    daiBalance$,
+    MigrationFormKind.dai2sai,
+    dai2SAIMigration$,
+    calls$,
+    aggregatedOpenOrders$('DAI')
+  );
+
+  const SAI2DAIMigrationTxRx =
+    inject<{ migration$: Observable<ExchangeMigrationState> }, any>(
+      withModal(
+        connect<Loadable<MigrationFormState>, any>(
+          MigrationButton,
+          loadablifyLight<MigrationFormState>(sai2DAIMigrationForm$)
+        )
+      ),
+      { migration$: sai2DAIMigrationForm$ }
+    );
+
+  const DAI2SAIMigrationTxRx =
+    inject<{ migration$: Observable<ExchangeMigrationState> }, any>(
+      withModal(
+        connect<Loadable<MigrationFormState>, any>(
+          MigrationButton,
+          loadablifyLight<MigrationFormState>(dai2SAIMigrationForm$)
+        )
+      ),
+      { migration$: dai2SAIMigrationForm$ }
+    );
 
   const ReallocateViewRxTx =  inject(
     withModal<CreateMTAllocateForm$Props, ModalOpenerProps>(
@@ -416,6 +580,8 @@ export function setupAppContext() {
     MTSetupButtonRxTx,
     MtSummaryViewRxTx,
     ReallocateViewRxTx,
+    SAI2DAIMigrationTxRx,
+    DAI2SAIMigrationTxRx,
   };
 }
 
@@ -622,9 +788,10 @@ function offerMake(
 
   const OrderbookPanelTxRx = connect(
     inject<OrderbookPanelProps, SubViewsProps>(
-      OrderbookPanel,
-      { DepthChartWithLoadingTxRx, OrderbookViewTxRx }),
-    orderbookPanel$);
+      OrderbookPanel, { DepthChartWithLoadingTxRx, OrderbookViewTxRx }
+    ),
+    orderbookPanel$
+  );
 
   return {
     OfferMakePanelTxRx,
