@@ -3,6 +3,8 @@ import classnames from 'classnames';
 import * as mixpanel from 'mixpanel-browser';
 import * as React from 'react';
 import { etherscan, EtherscanConfig } from '../../blockchain/etherscan';
+import accountSvg from '../../icons/account.svg';
+import cogWheelSvg from '../../icons/cog-wheel.svg';
 import swapArrowsSvg from '../../icons/swap-arrows.svg';
 import { formatAmountInstant } from '../../utils/formatters/format';
 import { ButtonIcon } from '../../utils/icons/Icons';
@@ -127,6 +129,7 @@ export class NewTradeView extends React.Component<InstantFormState> {
             className={classnames(styles.cornerIcon, styles.settingsIcon)}
             disabled={!price}
             onClick={this.showTradeSettings}
+            image={cogWheelSvg}
             data-test-id="trade-settings"
           />
         </TopRightCorner>
@@ -135,6 +138,7 @@ export class NewTradeView extends React.Component<InstantFormState> {
             color="secondaryOutlined"
             disabled={!(user && user.account)}
             data-test-id="account-settings"
+            image={accountSvg}
             onClick={this.showAccountSettings}
           />
         </TopLeftCorner>

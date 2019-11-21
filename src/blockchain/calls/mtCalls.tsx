@@ -105,7 +105,7 @@ export const mtBalance = {
       tokens.map(token =>
         token !== 'DAI' ? web3.fromAscii(context.ilks[token]) : token // DAI is temporary
       ),
-      tradingTokens.map(token => context.tokens[token].address),
+      tokens.map(token => context.tokens[token].address),
       context.mcd.vat,
       context.spot,
       context.jug,

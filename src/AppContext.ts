@@ -632,23 +632,25 @@ function mtSimpleOrderForm(
         MTMyPositionPanel,
         mtOrderFormLoadable$.pipe(
           map((state) =>
-            state.status === 'loaded' && state.value ?
-            {
-              status: state.status,
-              value: {
-                createMTFundForm$,
-                approveMTProxy,
-                account: state.value.account,
-                mta: state.value.mta,
-                ma: findMarginableAsset(state.tradingPair.base, state.value.mta)
-              }
-            } : {
-              value: state.value,
-              status: state.status,
-              error: state.error,
-            }
+                // @ts-ignore
+                state.status === 'loaded' && state.value
+                  ? {
+                    status: state.status,
+                    value: {
+                      createMTFundForm$,
+                      approveMTProxy,
+                      account: state.value.account,
+                      mta: state.value.mta,
+                      ma: findMarginableAsset(state.tradingPair.base, state.value.mta)
+                    }
+                  }
+                  : {
+                    value: state.value,
+                    status: state.status,
+                    error: state.error,
+                  }
           )
-        )
+        ),
       )
     );
 
@@ -660,10 +662,10 @@ function mtSimpleOrderForm(
   const orderbookForView$ = createOrderbookForView(
     orderbook$,
     of({
-         change: () => {
-           return;
-         }
-       }),
+      change: () => {
+        return;
+      }
+    }),
     kindChange,
   );
   const OrderbookViewTxRx = connect(OrderbookView, orderbookForView$);

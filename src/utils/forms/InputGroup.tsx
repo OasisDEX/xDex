@@ -38,7 +38,3 @@ export const InputGroupAddon = ({ children, className, border, ...props }:
     {children}
   </div>
 );
-
-export const lessThanOrEqual = (max: number) => {
-  return (value: number) => value <= max ? value : false;
-};

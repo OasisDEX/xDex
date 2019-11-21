@@ -5,13 +5,13 @@ import * as ReactDOM from 'react-dom';
 import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
 import * as formStyles from '../../exchange/offerMake/OfferMakeForm.scss';
 import { OfferType } from '../../exchange/orderbook/orderbook';
-import { BigNumberInput } from '../../utils/bigNumberInput/BigNumberInput';
+import { BigNumberInput, lessThanOrEqual } from '../../utils/bigNumberInput/BigNumberInput';
 import { FormChangeKind } from '../../utils/form';
 import { formatAmount, formatPrecision, formatPrice } from '../../utils/formatters/format';
 import { FormatPercent, Money } from '../../utils/formatters/Formatters';
 import { Button, ButtonGroup } from '../../utils/forms/Buttons';
 import { ErrorMessage } from '../../utils/forms/ErrorMessage';
-import { InputGroup, InputGroupAddon, lessThanOrEqual } from '../../utils/forms/InputGroup';
+import { InputGroup, InputGroupAddon } from '../../utils/forms/InputGroup';
 import { Radio } from '../../utils/forms/Radio';
 import { SettingsIcon } from '../../utils/icons/Icons';
 import { Hr } from '../../utils/layout/LayoutHelpers';
@@ -337,12 +337,12 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
           <Button
             className={styles.btn}
             onClick={() => this.handleKindChange(OfferType.buy)}
-            color={this.props.kind === 'buy' ? 'green' : 'grey'}
+            color={this.props.kind === 'buy' ? 'primary' : 'secondary'}
           >Buy</Button>
           <Button
             className={styles.btn}
             onClick={() => this.handleKindChange(OfferType.sell)}
-            color={this.props.kind === 'sell' ? 'red' : 'grey'}
+            color={this.props.kind === 'sell' ? 'danger' : 'secondary'}
           >Sell</Button>
         </ButtonGroup>
       </>
@@ -555,7 +555,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
               prefix: ''
             })}
             pipe={
-              lessThanOrEqual(100)
+              lessThanOrEqual(new BigNumber(100))
             }
             onChange={this.handleSlippageLimitChange}
             value={ slippageLimit }
@@ -878,7 +878,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
         className={styles.confirmButton}
         type="submit"
         value="submit"
-        color={ this.props.kind === OfferType.buy ? 'green' : 'red' }
+        color={ this.props.kind === OfferType.buy ? 'primary' : 'danger' }
         disabled={ !this.props.readyToProceed || !!this.props.progress }
       >
         {label}

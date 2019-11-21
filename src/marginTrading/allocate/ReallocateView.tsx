@@ -16,12 +16,13 @@ export class ReallocateView extends React.Component<
   public render() {
     return (
       <div style={{ marginBottom: '1em', marginRight: '1em' }}>
-        <Button size="lg" color="white"
-          onClick={() => this.rebalance()}
-          disabled={
-            this.props.status === 'loaded' &&
-            this.props.value!.state !== MTAccountState.setup}
-            style={{ fontSize: '15px' }}>
+        <Button size="lg"
+                color="primary"
+                onClick={() => this.rebalance()}
+                disabled={
+                  this.props.status === 'loaded' &&
+                  this.props.value!.state !== MTAccountState.setup}
+                style={{ fontSize: '15px' }}>
           Rebalance
         </Button>
       </div>
