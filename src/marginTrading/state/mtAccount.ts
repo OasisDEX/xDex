@@ -103,6 +103,7 @@ export type MTHistoryEvent = {
   ddai?: BigNumber;
   dgem?: BigNumber;
   amount?: BigNumber;
+  redeemable?: BigNumber;
   dAmount: BigNumber;
   dDAIAmount: BigNumber;
 } & (MTMarginEvent | MTLiquidationEvent);

@@ -185,45 +185,56 @@ export class MTMyPositionView extends
                 </Button>
               </>
               : <>
-              <Button
+                <Button
                   size="md"
                   className={styles.actionButton}
                   onClick={ this.approveMTProxy('DAI')}
                 >
                   Enable DAI
                 </Button>
-            </>
+              </>
             }
-            </div>
+          </div>
         </div>
         <div>
           {
             this.props.ma.bitable === 'imminent' &&
             <div className={styles.warningMessage}>
               <SvgImage image={warningIconSvg}/>
-            <span>
+              <span>
               The {this.props.ma.name} price ({this.props.ma.nextPrice.toString()} USD)
               is approaching your Liquidation Price and your position will soon be liquidated.
-              You&nbsp;may rescue your Position by paying off Dai debt or deposit
-             {this.props.ma.name} in the next {liquidationTimeDelta} minutes.</span>
+              You&nbsp;may rescue your Position by paying off Dai debt or deposit&nbsp;
+                {this.props.ma.name} in the next {liquidationTimeDelta} minutes.</span>
             </div>
           }
           {
             this.props.ma.bitable === 'yes' &&
             <div className={styles.warningMessage}>
               <SvgImage image={warningIconSvg}/>
-            <span>
+              <span>
               {this.props.ma.amountBeingLiquidated.toString()}
-              &nbsp;of total {this.props.ma.balance.toString()} {this.props.ma.name}
-              &nbsp;is being liquidated from your position.
-              Redeem your left {this.props.ma.name} collateral after an auction has been finished.
+                &nbsp;of total {this.props.ma.balance.toString()} {this.props.ma.name}
+                &nbsp;is being liquidated from your position.&nbsp;
+                { this.props.ma.redeemable.gt(zero) &&
+                // tslint:disable
+                <><br />You can redeem <Money
+                    value={this.props.ma.redeemable}
+                    token={this.props.ma.name}
+                    fallback="-"
+                  /> collateral.
+                </>
+                // tslint:enable
+                }
             </span>
 
-              <Button
-                size="md"
-                disabled={this.props.ma.redeemable.eq(zero)}
-                className={styles.redeemButton}
-              >Redeem</Button>
+              {this.props.ma.redeemable.gt(zero) &&
+                <Button
+                  size="md"
+                  disabled={this.props.ma.redeemable.eq(zero)}
+                  className={styles.redeemButton}
+                >Redeem</Button>
+              }
             </div>
           }
           {

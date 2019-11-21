@@ -69,13 +69,6 @@ const liquidationHistory: RawMTHistoryEvent[] = [
     timestamp: 1573141040,
     token: 'WETH'
   } as RawMTHistoryEvent,
-  {
-    kind: MTHistoryEventKind.redeem,
-    id: new BigNumber(1),
-    timestamp: 1573141040,
-    token: 'WETH',
-    amount: new BigNumber(1.23)
-  } as RawMTHistoryEvent,
 ];
 
 const ethMarginableAsset = calculateMarginable(getMarginableCore({
@@ -140,11 +133,19 @@ stories.add('CDP 1 - liquidation ongoing', () => (
     } />
 ));
 
+liquidationHistory.push({
+  kind: MTHistoryEventKind.redeem,
+  id: new BigNumber(1),
+  timestamp: 1573141040,
+  token: 'WETH',
+  amount: new BigNumber(0.8)
+} as RawMTHistoryEvent);
+
 const ethMarginableAsset4 = calculateMarginable(getMarginableCore({
   ...assetCore,
   referencePrice: new BigNumber(130),
   nextPrice: new BigNumber(130),
-  redeemable: new BigNumber(1.23),
+  redeemable: new BigNumber(0.8),
   rawHistory: liquidationHistory
 }));
 
@@ -166,7 +167,7 @@ const ethMarginableAsset5 = calculateMarginable(getMarginableCore({
   ...assetCore,
   referencePrice: new BigNumber(250),
   nextPrice: new BigNumber(250),
-  redeemable: new BigNumber(1.23),
+  redeemable: new BigNumber(0.8),
   rawHistory: liquidationHistory
 }));
 
