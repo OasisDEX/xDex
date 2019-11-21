@@ -2,12 +2,12 @@ import { storiesOf } from '@storybook/react';
 import { BigNumber } from 'bignumber.js';
 import * as React from 'react';
 import { of } from 'rxjs';
+import { CombinedBalance } from '../balances-nomt/balances';
 import { TxState } from '../blockchain/transactions';
 import { Panel, PanelHeader } from '../utils/panel/Panel';
 import { zero } from '../utils/zero';
 import { WrapUnwrapFormState } from '../wrapUnwrap/wrapUnwrapForm';
 import { AssetsOverviewViewInternal } from './AssetOverviewView';
-import { CombinedBalance } from './balances';
 
 const stories = storiesOf('Balances/Balances', module)
   .addDecorator(story => (

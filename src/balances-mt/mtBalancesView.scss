@@ -83,15 +83,6 @@
   &:hover.disabled {
     cursor: default;
   }
-
-  @include button((
-          color: $font-color-base,
-          bg: $grey-darkest,
-          border-color: $grey-light,
-          color-hover: $font-color-base,
-          border-color-hover: lighten($grey-darkest, 5%),
-          bg-hover: lighten($grey-light, 5%)
-  ));
 }
 
 .transferBtnLeft {
@@ -136,7 +127,7 @@
 
 .setupBox {
   flex: 1;
-  border: 1px solid $grey-dark;
+  border: 1px solid $element-border;
   border-radius: 4px;
   padding: 24px;
   margin: 40px 12px;
@@ -179,7 +170,7 @@ button.actionButton {
 .referencePriceField {
   margin-left: auto;
   float: right;
-  border: 1px solid #58585F;
+  border: 1px solid $element-border;
   border-radius: 2px;
   padding: 0 8px;
   height: 28px;

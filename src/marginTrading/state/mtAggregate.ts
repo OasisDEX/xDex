@@ -12,7 +12,11 @@ import {
   switchMap,
 } from 'rxjs/operators';
 import * as dsProxy from '../../blockchain/abi/ds-proxy.abi.json';
-import { AssetKind, NetworkConfig, tokens } from '../../blockchain/config';
+import {
+  AssetKind, getToken,
+  NetworkConfig,
+  tradingTokens
+} from '../../blockchain/config';
 import { every5Seconds$ } from '../../blockchain/network';
 import { nullAddress } from '../../blockchain/utils';
 import { web3 } from '../../blockchain/web3';
@@ -37,7 +41,7 @@ export function aggregateMTAccountState(
   rawHistories: MTHistoryEvent[][] | undefined
 ): Observable<MTAccount> {
 
-  const assetNames: string[] = Object.values(tokens)
+  const assetNames: string[] = tradingTokens
     .filter((t: any) =>
       t.assetKind === AssetKind.marginable ||
       t.assetKind === AssetKind.nonMarginable // ||
@@ -71,7 +75,7 @@ export function aggregateMTAccountState(
     ),
     map(([balanceResult, rawLiquidationHistory]) => {
       const marginables = [...tokenNames.entries()]
-        .filter(([_i, token]) => tokens[token].assetKind === AssetKind.marginable)
+        .filter(([_i, token]) => getToken(token).assetKind === AssetKind.marginable)
         .map(([i, token]) => {
           return getMarginableCore({
             name: token,
@@ -150,7 +154,7 @@ export function createMta$(
 
   const proxyAddress$ = createProxyAddress$(context$, initializedAccount$, onEveryBlock$);
 
-  const marginableNames: string[] = Object.values(tokens)
+  const marginableNames: string[] = tradingTokens
     .filter((t: any) => t.assetKind === AssetKind.marginable)
     .map(t => t.symbol);
 

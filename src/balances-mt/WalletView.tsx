@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Observable } from 'rxjs';
-import { tokens } from '../blockchain/config';
+import { getToken } from '../blockchain/config';
 import { TxState } from '../blockchain/transactions';
 import dottedMenuSvg from '../marginTrading/positions/dotted-menu.svg';
 import { connect } from '../utils/connect';
@@ -97,10 +97,10 @@ export class WalletViewInternal extends React.Component<CombinedBalances & Walle
               <td>
                 <div className={styles.centeredAsset}>
                   <div style={{ width: '24px', height: '24px', marginRight: '12px' }}>
-                    {tokens[combinedBalance.name].iconColor}
+                    {getToken(combinedBalance.name).iconColor}
                   </div>
                   <Currency
-                    value={tokens[combinedBalance.name].name} />
+                    value={getToken(combinedBalance.name).name} />
                 </div>
               </td>
               <td data-test-id={`${combinedBalance.name}-balance`} className={styles.amount}>

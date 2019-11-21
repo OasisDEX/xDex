@@ -4,7 +4,7 @@
 @include modal();
 
 .daiColor {
-  color: $daiColor;
+  color: $vivid-orange;
 }
 
 .errorColor {
@@ -31,7 +31,7 @@
 }
 
 .dictName {
-  @include fontMontserratSemibold;
+  @include fontSemiBold;
 }
 
 .dictDescription {
@@ -39,7 +39,7 @@
 }
 
 .dictDescriptionMainFont {
-  @include fontLatoBold;
+  @include fontBold;
   font-size: 15px;
 }
 
@@ -49,7 +49,7 @@
 }
 
 .input {
-  @include fontLatoBold;
+  @include fontBold;
   font-size: 15px;
 
   padding-left: 0.5em;
@@ -72,7 +72,7 @@
 }
 
 .button {
-  @include fontMontserratSemibold;
+  @include fontBold;
   font-size: 14px;
 }
 

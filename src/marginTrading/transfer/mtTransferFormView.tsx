@@ -4,7 +4,7 @@ import * as ReactModal from 'react-modal';
 
 import classnames from 'classnames';
 import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
-import { tokens } from '../../blockchain/config';
+import { getToken } from '../../blockchain/config';
 import { BigNumberInput } from '../../utils/bigNumberInput/BigNumberInput';
 import { FormChangeKind, ProgressStage } from '../../utils/form';
 import { formatAmount } from '../../utils/formatters/format';
@@ -73,7 +73,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
 
   private header(progress?: ProgressStage) {
     return !progress ?
-      `${tokens[this.props.token].name} ${this.props.actionKind === UserActionKind.fund ?
+      `${getToken(this.props.token).name} ${this.props.actionKind === UserActionKind.fund ?
         'deposit' : 'withdraw' }` :
       'Finalize transaction';
   }
@@ -313,7 +313,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
       <BorderBox className={styles.checklistBox}>
         <div className={styles.checklistLine} >
           <span className={styles.checklistTitle}>
-            {tokens[this.props.token].name} deposit
+            {getToken(this.props.token).name} deposit
           </span>
           <div className={styles.checklistSummary}>
             <TransactionStateDescription progress={this.props.progress}/>

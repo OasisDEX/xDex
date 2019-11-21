@@ -10,7 +10,7 @@
 
   @include media-breakpoint-down(md-lg){
     flex-direction: column;
-    border: 1px solid $grey-darken-darkest;
+    border: 1px solid $element-border;
   }
 }
 

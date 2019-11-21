@@ -1,6 +1,6 @@
 import { BigNumber } from 'bignumber.js';
 
-import { AssetKind, tokens } from '../../blockchain/config';
+import { AssetKind, getToken } from '../../blockchain/config';
 import { Offer } from '../../exchange/orderbook/orderbook';
 import {
   findAsset, MarginableAssetCore,
@@ -129,7 +129,7 @@ export function planSell(
     },
     ...flatten(
       orderDeltas(debts.map(d => {
-        if (tokens[name].assetKind === AssetKind.marginable && d.name === name) {
+        if (getToken(name).assetKind === AssetKind.marginable && d.name === name) {
           return { ...d, delta: BigNumber.min(d.debt, maxTotal).plus(d.delta) };
         }
         return d;

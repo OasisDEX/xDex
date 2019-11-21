@@ -14,7 +14,7 @@ import {
 import { CreateMTFundForm$ } from '../transfer/mtTransferForm';
 import { MTMyPositionView } from './MTMyPositionView';
 
-import { Observable } from 'rxjs/index';
+import { Observable } from 'rxjs';
 import { theAppContext } from '../../AppContext';
 import { TxState } from '../../blockchain/transactions';
 import { Money } from '../../utils/formatters/Formatters';

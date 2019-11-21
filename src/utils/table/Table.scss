@@ -19,10 +19,7 @@
   }
 
   thead {
-    th, td {
-      border-top: 1px solid $grey-dark;
-      border-bottom: 1px solid $grey-dark;
-    }
+    @extend .trHighlighted;
   }
 
   th {

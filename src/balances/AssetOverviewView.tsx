@@ -4,6 +4,7 @@ import { Observable } from 'rxjs/internal/Observable';
 
 import * as mixpanel from 'mixpanel-browser';
 import { theAppContext } from '../AppContext';
+import { CombinedBalances } from '../balances-nomt/balances';
 import { getToken } from '../blockchain/config';
 import { TxState } from '../blockchain/transactions';
 import { Authorizable } from '../utils/authorizable';
@@ -24,7 +25,6 @@ import { zero } from '../utils/zero';
 import { WrapUnwrapFormKind, WrapUnwrapFormState } from '../wrapUnwrap/wrapUnwrapForm';
 import { WrapUnwrapFormView } from '../wrapUnwrap/WrapUnwrapFormView';
 import * as styles from './AssetOverviewView.scss';
-import { CombinedBalances } from './balances';
 
 export interface AssetsOverviewActionProps  {
   wrapUnwrapForm$: (formKind: WrapUnwrapFormKind) => Observable<WrapUnwrapFormState>;

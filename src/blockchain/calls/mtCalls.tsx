@@ -4,7 +4,7 @@ import * as React from 'react';
 import { Operation, OperationKind } from '../../marginTrading/state/mtAccount';
 import { Money } from '../../utils/formatters/Formatters';
 import { Currency } from '../../utils/text/Text';
-import { NetworkConfig } from '../config';
+import { NetworkConfig, tradingTokens } from '../config';
 import { MIN_ALLOWANCE } from '../network';
 import { amountFromWei, amountToWei } from '../utils';
 import { web3 } from '../web3';
@@ -105,7 +105,7 @@ export const mtBalance = {
       tokens.map(token =>
         token !== 'DAI' ? web3.fromAscii(context.ilks[token]) : token // DAI is temporary
       ),
-      tokens.map(token => context.tokens[token].address),
+      tradingTokens.map(token => context.tokens[token].address),
       context.mcd.vat,
       context.spot,
       context.jug,

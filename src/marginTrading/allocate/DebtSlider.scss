@@ -7,12 +7,12 @@
 
 .trackBg {
   @include track;
-  stroke: #58585F;
+  stroke: $grey-light;
 }
 
 .trackOriginal {
   @include track;
-  stroke: $daiColor;
+  stroke: $vivid-orange;
 }
 
 .trackAvailable {
@@ -34,8 +34,8 @@
 }
 
 .handler {
-  fill: #fff;
-  stroke: #000;
+  fill: $white;
+  stroke: black;
   stroke-opacity: 0.25;
   stroke-width: 1;
   //stroke-linecap: round;

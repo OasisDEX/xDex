@@ -31,8 +31,7 @@ import {
   etherPriceUsd$,
   gasPrice$,
   initializedAccount$,
-  onEveryBlock$,
-  tokenPricesInUSD$
+  onEveryBlock$
 } from './blockchain/network';
 import { user$ } from './blockchain/user';
 import { loadOrderbook$, Offer, Orderbook } from './exchange/orderbook/orderbook';
@@ -171,19 +170,26 @@ export function setupAppContext() {
     mta$
   );
 
-  const combinedBalances$ = createCombinedBalances$(
-    context$, initializedAccount$, etherBalance$,
-    balances$, onEveryBlock$, tokenPricesInUSD$, etherPriceUsd$, transactions$
-  ).pipe(
-    shareReplay(1)
-  );
-  const balancesWithEth$ = combineLatest(balances$, etherBalance$).pipe(
-    map(([balances, etherBalance]) => ({ ...balances, ETH: etherBalance })),
+  const wethBalance$ = balancesNoMT.createTokenBalances$(
+    context$,
+    initializedAccount$,
+    onEveryBlock$,
+    'WETH'
   );
 
-  const wethBalance$ = createTokenBalances$(context$, initializedAccount$, onEveryBlock$, 'WETH');
-  const saiBalance$ = createTokenBalances$(context$, initializedAccount$, onEveryBlock$, 'SAI');
-  const daiBalance$ = createTokenBalances$(context$, initializedAccount$, onEveryBlock$, 'DAI');
+  const saiBalance$ = balancesNoMT.createTokenBalances$(
+    context$,
+    initializedAccount$,
+    onEveryBlock$,
+    'SAI'
+  );
+
+  const daiBalance$ = balancesNoMT.createTokenBalances$(
+    context$,
+    initializedAccount$,
+    onEveryBlock$,
+    'DAI'
+  );
 
   const wrapUnwrapForm$ =
     curry(createWrapUnwrapForm$)(
@@ -224,12 +230,6 @@ export function setupAppContext() {
 
   const theCreateMTAllocateForm$: CreateMTAllocateForm$ =
     curry(createMTAllocateForm$)(gasPrice$, etherPriceUsd$, calls$, readCalls$);
-
-  const wethBalance$ =
-    balancesNoMT.createWethBalances$(context$, initializedAccount$, onEveryBlock$);
-
-  const wrapUnwrapForm$ =
-    curry(createWrapUnwrapForm$)(gasPrice$, etherPriceUsd$, etherBalance$, wethBalance$, calls$);
 
   const MTBalancesViewRxTx =
     inject(
@@ -477,7 +477,7 @@ export function setupAppContext() {
 
   const sai2DAIOps$ = curry(createMigrationOps$)(
     'SAI',
-    createProxyAllowances$(
+    balancesNoMT.createProxyAllowances$(
       context$,
       initializedAccount$,
       proxyAddress$,
@@ -488,7 +488,7 @@ export function setupAppContext() {
 
   const dai2SAIOps$ = curry(createMigrationOps$)(
     'DAI',
-    createProxyAllowances$(
+    balancesNoMT.createProxyAllowances$(
       context$,
       initializedAccount$,
       proxyAddress$,
@@ -549,13 +549,13 @@ export function setupAppContext() {
       { migration$: dai2SAIMigrationForm$ }
     );
 
-  const ReallocateViewRxTx =  inject(
+  const ReallocateViewRxTx = inject(
     withModal<CreateMTAllocateForm$Props, ModalOpenerProps>(
       connect<Loadable<MTAccount>, ModalOpenerProps & CreateMTAllocateForm$Props>(
         ReallocateView, loadablifyLight(mta$)
       )
     ),
-    { createMTAllocateForm$:  theCreateMTAllocateForm$ }
+    { createMTAllocateForm$: theCreateMTAllocateForm$ }
   );
 
   return {
@@ -590,35 +590,34 @@ function mtSimpleOrderForm(
   orderbook$: Observable<Orderbook>,
   // orderbookWithTradingPair$: Observable<LoadableWithTradingPair<Orderbook>>,
   createMTFundForm$: CreateMTFundForm$,
-  approveMTProxy: (args: {token: string; proxyAddress: string}) => Observable<TxState>,
+  approveMTProxy: (args: { token: string; proxyAddress: string }) => Observable<TxState>,
   // approveWallet: (token: string) => Observable<TxState>
 ) {
   const mtOrderForm$ = currentTradingPair$.pipe(
     switchMap(tradingPair =>
-      createMTSimpleOrderForm$(
-        tradingPair,
-        gasPrice$,
-        etherPriceUsd$,
-        orderbook$,
-        mta$,
-        calls$,
-        readCalls$,
-        balancesMT.dustLimits$,
-        account$,
-      )
+                createMTSimpleOrderForm$(
+                  tradingPair,
+                  gasPrice$,
+                  etherPriceUsd$,
+                  orderbook$,
+                  mta$,
+                  calls$,
+                  readCalls$,
+                  balancesMT.dustLimits$,
+                  account$,
+                )
     ),
     shareReplay(1)
   );
 
   const mtOrderFormLoadable$ = currentTradingPair$.pipe(
     switchMap(tradingPair =>
-      loadablifyLight(mtOrderForm$).pipe(
-        map(mtOrderFormLoadablified => ({
-          tradingPair,
-          ...mtOrderFormLoadablified
-        })
-        )
-      )
+                loadablifyLight(mtOrderForm$).pipe(
+                  map(mtOrderFormLoadablified => ({
+                    tradingPair,
+                    ...mtOrderFormLoadablified
+                  }))
+                )
     )
   );
 
@@ -660,7 +659,11 @@ function mtSimpleOrderForm(
 
   const orderbookForView$ = createOrderbookForView(
     orderbook$,
-    of({ change: () => { return; } }),
+    of({
+         change: () => {
+           return;
+         }
+       }),
     kindChange,
   );
   const OrderbookViewTxRx = connect(OrderbookView, orderbookForView$);

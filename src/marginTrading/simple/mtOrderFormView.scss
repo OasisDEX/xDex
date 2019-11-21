@@ -43,7 +43,7 @@ $historyPanelsHeight: 605px;
 .balanceBtn {
   align-items: center;
   display: flex;
-  @include fontLatoBold;
+  @include fontBold;
   justify-content: center;
   letter-spacing: 0.4px;
   width: 150px;
@@ -125,12 +125,12 @@ $historyPanelsHeight: 605px;
 
 // style purchasing power box
 .purchasingPowerTitle {
-  @include fontMontserratSemibold;
+  @include fontSemiBold;
   font-size: 15px;
 }
 
 .purchasingPowerAmount {
-  @include fontLatoBold;
+  @include fontBold;
 }
 
 // style order type box

@@ -4,7 +4,7 @@ import { Allowances } from '../balances-nomt/balances';
 import { setupFakeWeb3ForTesting } from '../blockchain/web3';
 setupFakeWeb3ForTesting();
 
-import { tokens } from '../blockchain/config';
+import { tradingTokens } from '../blockchain/config';
 import { getCashCore, getMarginableCore, getMTAccount } from '../marginTrading/state/mtTestUtils';
 import { Balances, combineBalances, CombinedBalances } from './balances';
 
@@ -168,7 +168,7 @@ function assertTokens(cb: CombinedBalances,
   );
   // all tokens not given in tokensAssertion should have values:
   // wallet 0, margin (asset.balance) 0 or undefined, totalIndDAI 0
-  Object.keys(tokens)
+  tradingTokens
     .filter(token => tokensAssertions.findIndex(ta => ta.name === token) < 0)
     .forEach(name  =>
       assertToken(cb, { name,
