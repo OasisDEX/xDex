@@ -16,5 +16,7 @@ export const setupBox: string;
 export const setupTitle: string;
 export const setupDescription: string;
 export const backButton: string;
+export const setupBtn: string;
 export const buttonCheck: string;
 export const referencePriceField: string;
+export const callForAction: string;

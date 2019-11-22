@@ -10,11 +10,9 @@ $mdLgBreakpoint: 640px;
   border: 1px solid $element-border;
   border-radius: $border-radius;
   width: 100%;
-  max-width: 24.25rem;
-  height: 20.25rem;
+  height: 100%;
   font-size: 15px;
   line-height: 1.5rem;
-  margin: 0 1.5rem;
   padding: 2rem 1.5rem;
 
   &:first-child {
@@ -23,23 +21,6 @@ $mdLgBreakpoint: 640px;
 
   &:last-child {
     margin-right: 0;
-  }
-
-  @include media-breakpoint-down($header-media-breakpoint) {
-    height: 21.5rem;
-    padding: 1rem 1.5rem;
-  }
-
-  @include media-breakpoint-down($mdLgBreakpoint) {
-    height: 16.5rem;
-    font-size: 13px;
-    padding: 1rem;
-
-    margin: 0;
-  }
-
-  @include media-breakpoint-down(400px) {
-    height: 18rem;
   }
 }
 

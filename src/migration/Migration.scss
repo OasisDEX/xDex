@@ -3,6 +3,8 @@
 @import "../utils/Variables";
 @import "../header/Header";
 
+$mdLgBreakpoint: 640px;
+
 @include modal();
 
 .loadingIndicator {
@@ -143,32 +145,32 @@
     text-align: center;
     padding-right: 0;
 
-    @include media-breakpoint-down(md){
+    @include media-breakpoint-down(md) {
       text-align: left;
       width: 35px;
     }
   }
 
   .price {
-    @include media-breakpoint-down(sm){
+    @include media-breakpoint-down(sm) {
       width: 40px;
     }
   }
 
   .amount {
-    @include media-breakpoint-down(md){
+    @include media-breakpoint-down(md) {
       text-align: right;
     }
   }
 
   .total {
-    @include media-breakpoint-down(md){
+    @include media-breakpoint-down(md) {
       text-align: right;
     }
   }
 
   .action {
-    @include media-breakpoint-down(md){
+    @include media-breakpoint-down(md) {
       text-align: center;
     }
   }
@@ -177,7 +179,7 @@
 
 .amountInput {
   &Addon {
-    @include media-breakpoint-down(lg){
+    @include media-breakpoint-down(lg) {
       padding: .5rem;
     }
   }
@@ -189,7 +191,7 @@
   &Group {
     margin-bottom: .5rem;
 
-    @include media-breakpoint-down(md){
+    @include media-breakpoint-down(md) {
       margin-bottom: 0;
     }
   }
@@ -243,5 +245,27 @@
 
   button {
     max-width: 100px;
+  }
+}
+
+.callForAction {
+  margin: 0 1.5rem;
+  max-width: 24.25rem;
+  height: 20.25rem;
+
+  @include media-breakpoint-down($header-media-breakpoint) {
+    height: 21.5rem;
+    padding: 1rem 1.5rem;
+  }
+
+  @include media-breakpoint-down($mdLgBreakpoint) {
+    height: 16.5rem;
+    font-size: 13px;
+    padding: 1rem;
+    margin: 0;
+  }
+
+  @include media-breakpoint-down(400px) {
+    height: 18rem;
   }
 }

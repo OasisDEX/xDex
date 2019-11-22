@@ -443,6 +443,7 @@ export class MigrationModal extends React.Component<MigrationFormState & ModalPr
                        });
                      }}
                      tid="cfa-cancel-orders"
+                     className={styles.callForAction}
       />
     );
   }
@@ -483,6 +484,7 @@ export class MigrationModal extends React.Component<MigrationFormState & ModalPr
                        });
                      }}
                      tid="cfa-upgrade-balance"
+                     className={styles.callForAction}
       >
         <div className={styles.amountInputGroup}>
           <InputGroup hasError={(messages || []).length > 0}>

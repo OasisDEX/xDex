@@ -70,3 +70,4 @@ export const amountInputTail: string;
 export const amountInputGroup: string;
 export const txRow: string;
 export const modalButtonsPlaceholder: string;
+export const callForAction: string;

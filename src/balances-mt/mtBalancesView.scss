@@ -9,7 +9,7 @@ $header-media-breakpoint: 880px;
 
 .table {
   tr {
-     border-bottom: 1px solid $element-border;
+    border-bottom: 1px solid $element-border;
   }
 
   th {
@@ -104,7 +104,7 @@ $header-media-breakpoint: 880px;
   padding: 8px 0.833em 8px 50px;
   margin-left: 10px;
 
-  :global(.dotted-menu-body){
+  :global(.dotted-menu-body) {
     fill: $desaturated-dark-blue;
   }
 }
@@ -134,6 +134,7 @@ $header-media-breakpoint: 880px;
 .dropdownMenu {
   display: flex;
   position: relative;
+
   &:hover {
     .dropdownList {
       display: block;
@@ -144,6 +145,7 @@ $header-media-breakpoint: 880px;
 .setupSection {
   display: flex;
   overflow: hidden;
+  padding: 0 16px;
 }
 
 .setupBox {
@@ -183,6 +185,14 @@ button.actionButton {
   margin-right: 15px;
 }
 
+.setupBtn {
+  height: 34px;
+  width: 100%;
+  max-width: 170px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
 .buttonCheck {
   min-width: 115px;
 }
@@ -198,4 +208,8 @@ button.actionButton {
   border-radius: 2px;
   padding: 0 8px;
   height: 30px;
+}
+
+.callForAction {
+  height: 200px;
 }
