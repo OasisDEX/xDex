@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
 import { map } from 'rxjs/internal/operators';
-import { AssetKind, tokens } from '../blockchain/config';
+import { AssetKind, getToken } from '../blockchain/config';
 import { TxState } from '../blockchain/transactions';
 import {
   CreateMTAllocateForm$
@@ -119,10 +119,10 @@ export class MTBalancesViewInternal
               <td>
                 <div className={styles.centeredAsset}>
                 <div style={{ width: '24px', height: '24px', marginRight: '12px' }}>
-                  {tokens[combinedBalance.name].iconColor}
+                  {getToken(combinedBalance.name).iconColor}
                 </div>
                   <Currency
-                  value={tokens[combinedBalance.name].name} />
+                  value={getToken(combinedBalance.name).name} />
                 </div>
               </td>
               <td className={styles.amount}>

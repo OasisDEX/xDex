@@ -12,7 +12,11 @@ import {
   switchMap,
 } from 'rxjs/operators';
 import * as dsProxy from '../../blockchain/abi/ds-proxy.abi.json';
-import { AssetKind, NetworkConfig, tokens } from '../../blockchain/config';
+import {
+  AssetKind, getToken,
+  NetworkConfig,
+  tradingTokens
+} from '../../blockchain/config';
 import { every5Seconds$ } from '../../blockchain/network';
 import { amountFromWei, nullAddress } from '../../blockchain/utils';
 import { web3 } from '../../blockchain/web3';
@@ -37,11 +41,12 @@ export function aggregateMTAccountState(
   rawHistories: MTHistoryEvent[][] | undefined
 ): Observable<MTAccount> {
 
-  const assetNames: string[] = Object.values(tokens)
+  const assetNames: string[] = tradingTokens
+    .map((symbol: string) => getToken(symbol))
     .filter((t: any) =>
-      t.assetKind === AssetKind.marginable ||
-      t.assetKind === AssetKind.nonMarginable // ||
-      // t.symbol === 'DAI'
+              t.assetKind === AssetKind.marginable ||
+              t.assetKind === AssetKind.nonMarginable // ||
+            // t.symbol === 'DAI'
     )
     .map(t => t.symbol);
 
@@ -82,14 +87,14 @@ export function aggregateMTAccountState(
     ),
     map(([balanceResult, rawLiquidationHistory, osmPrices]) => {
       const marginables = [...tokenNames.entries()]
-        .filter(([_i, token]) => tokens[token].assetKind === AssetKind.marginable)
+        .filter(([_i, token]) => getToken(token).assetKind === AssetKind.marginable)
         .map(([i, token]) => {
           return getMarginableCore({
             name: token,
             assetKind: AssetKind.marginable,
             balance: balanceResult.assets[i].urnBalance,
             ...balanceResult.assets[i],
-            safeCollRatio: new BigNumber(tokens[token].safeCollRatio as number),
+            safeCollRatio: new BigNumber(getToken(token).safeCollRatio as number),
             rawHistory: (rawHistories ? rawHistories[i] : []),
             rawLiquidationHistory: rawLiquidationHistory[token],
             osmPriceCurrent: (osmPrices as any)[token].current,
@@ -98,7 +103,7 @@ export function aggregateMTAccountState(
         });
 
       const nonMarginables = [...tokenNames.entries()]
-        .filter(([_i, token]) => tokens[token].assetKind === AssetKind.nonMarginable)
+        .filter(([_i, token]) => getToken(token).assetKind === AssetKind.nonMarginable)
         .map(([i, token]) => {
           return getNonMarginableCore({
             name: token,
@@ -141,9 +146,9 @@ export function createProxyAddress$(
             const proxy = web3.eth.contract(dsProxy as any).at(proxyAddress);
             return bindNodeCallback(proxy.owner)().pipe(
               mergeMap((ownerAddress: string) =>
-                ownerAddress === account ?
-                  of(proxyAddress) :
-                  of(undefined)
+                         ownerAddress === account ?
+                           of(proxyAddress) :
+                           of(undefined)
               )
             );
           }),
@@ -163,7 +168,8 @@ export function createMta$(
 
   const proxyAddress$ = createProxyAddress$(context$, initializedAccount$, onEveryBlock$);
 
-  const marginableNames: string[] = Object.values(tokens)
+  const marginableNames: string[] = tradingTokens
+    .map((symbol: string) => getToken(symbol))
     .filter((t: any) => t.assetKind === AssetKind.marginable)
     .map(t => t.symbol);
 

@@ -9,14 +9,14 @@ import {
   last,
   map,
   scan,
-  switchMap
+  switchMap, take
 } from 'rxjs/operators';
 
 import { shareReplay } from 'rxjs/internal/operators';
-import { GasPrice$ } from 'src/blockchain/network';
+import { GasPrice$, Ticker } from 'src/blockchain/network';
 import { Calls$ } from '../blockchain/calls/calls';
 import { TxMetaKind } from '../blockchain/calls/txMeta';
-import { NetworkConfig, tokens } from '../blockchain/config';
+import { NetworkConfig, tradingTokens } from '../blockchain/config';
 import { TxState, TxStatus } from '../blockchain/transactions';
 import { amountFromWei } from '../blockchain/utils';
 
@@ -61,7 +61,7 @@ export function createBalances$(
     switchMap(([context, account]) =>
       !account ? of({}) :
         forkJoin(
-          Object.keys(tokens).filter(name => name !== 'ETH').map((token: string) =>
+          tradingTokens.filter(name => name !== 'ETH').map((token: string) =>
             balance$(context, token, account).pipe(
               map(balance => ({
                 [token]: balance
@@ -74,10 +74,11 @@ export function createBalances$(
   );
 }
 
-export function createWethBalances$(
+export function  createTokenBalances$(
   context$: Observable<NetworkConfig>,
   initializedAccount$: Observable<string>,
   onEveryBlock$: Observable<number>,
+  token: string
 ) {
   return combineLatest(
     context$,
@@ -85,7 +86,7 @@ export function createWethBalances$(
     onEveryBlock$
   ).pipe(
     switchMap(([context, account]) =>
-      balance$(context, 'WETH', account)),
+      balance$(context, token, account)),
     distinctUntilChanged(isEqual)
   );
 }
@@ -96,14 +97,13 @@ export function createDustLimits$(context$: Observable<NetworkConfig>): Observab
   return combineLatest(context$).pipe(
     switchMap(([context]) =>
       forkJoin(
-        Object.keys(tokens).filter(name => name !== 'ETH').map((token: string) => {
-          console.log('token', token);
+        tradingTokens.filter(name => name !== 'ETH').map((token: string) => {
           return bindNodeCallback(context.otc.contract.getMinSell as Dust)(
-           context.tokens[token].address
+            context.tokens[token].address
           ).pipe(
-           map(dustLimit => ({
-             [token]: amountFromWei(dustLimit, token)
-           }))
+            map(dustLimit => ({
+              [token]: amountFromWei(dustLimit, token)
+            }))
           );
         })
       ).pipe(concatAll(), scan((a, e) => ({ ...a, ...e }), {}), last())
@@ -129,15 +129,15 @@ export function createAllowances$(
   return combineLatest(context$, initializedAccount$, onEveryBlock$).pipe(
     switchMap(([context, account]) =>
       forkJoin(
-        Object.keys(tokens)
-        .filter(token => token !== 'ETH')
-        .map((token: string) =>
-              bindNodeCallback(context.tokens[token].contract.allowance as Allowance)(
-                account, context.otc.address
-              ).pipe(
-                map((x: BigNumber) => ({ [token]: x.gte(MIN_ALLOWANCE) }))
-              )
-        )
+        tradingTokens
+          .filter(token => token !== 'ETH')
+          .map((token: string) =>
+            bindNodeCallback(context.tokens[token].contract.allowance as Allowance)(
+              account, context.otc.address
+            ).pipe(
+              map((x: BigNumber) => ({ [token]: x.gte(MIN_ALLOWANCE) }))
+            )
+          )
       ).pipe(concatAll(), scan((a, e) => ({ ...a, ...e }), {}), last())
     ),
     distinctUntilChanged(isEqual)
@@ -147,7 +147,7 @@ export function createAllowances$(
 export function createProxyAllowances$(
   context$: Observable<NetworkConfig>,
   initializedAccount$: Observable<string>,
-  proxyAccount$: Observable<string>,
+  proxyAccount$: Observable<string | undefined>,
   onEveryBlock$: Observable<number>,
 ): Observable<Allowances> {
   return combineLatest(context$, initializedAccount$, proxyAccount$, onEveryBlock$).pipe(
@@ -156,11 +156,14 @@ export function createProxyAllowances$(
         Object.keys(context.tokens)
           .filter(token => token !== 'ETH')
           .map((token: string) =>
-            bindNodeCallback(context.tokens[token].contract.allowance as Allowance)(
-              account, proxy
-            ).pipe(
-              map((x: BigNumber) => ({ [token]: x.gte(MIN_ALLOWANCE) }))
-            )
+            proxy ?
+              bindNodeCallback(context.tokens[token].contract.allowance as Allowance)(
+                account, proxy
+              ).pipe(
+                map((x: BigNumber) => ({ [token]: x.gte(MIN_ALLOWANCE) }))
+              )
+            :
+              of({ [token]: false })
           )
       ).pipe(concatAll(), scan((a, e) => ({ ...a, ...e }), {}), last())
     ),
@@ -195,24 +198,29 @@ function isAllowanceChangeInProgress(token: string, currentBlock: number) {
 }
 
 export function combineBalances(
-  balances: Balances, allowances: Allowances,
+  balances: Balances,
+  allowances: Allowances,
+  tokenPricesUsd: Ticker,
   etherPriceUsd: BigNumber, transactions: TxState[],
   currentBlock: number
 ) {
+  return tradingTokens
+    .filter(name => name !== 'ETH')
+    .map(name => {
+      return {
+        name,
+        balance: balances[name],
+        allowance: allowances[name],
+        allowanceChangeInProgress:
+          !!transactions.find(isAllowanceChangeInProgress(name, currentBlock)),
+        valueInUsd: name === 'WETH'
+          // @ts-ignore
+          ? (etherPriceUsd ? etherPriceUsd.times(balances[name]) : undefined)
+          // @ts-ignore
+          : (tokenPricesUsd[name] ? tokenPricesUsd[name].times(balances[name]) : undefined)
 
-  return Object.keys(tokens)
-  .filter(name => name !== 'ETH')
-  .map(name => {
-    return {
-      name,
-      balance: balances[name],
-      allowance: allowances[name],
-      allowanceChangeInProgress:
-        !!transactions.find(isAllowanceChangeInProgress(name, currentBlock)),
-      valueInUsd: name === 'DAI' ? balances[name] :
-        name === 'WETH' ? etherPriceUsd.times(balances[name]) : undefined,
-    };
-  });
+      };
+    });
 }
 
 export function createCombinedBalances$(
@@ -221,6 +229,7 @@ export function createCombinedBalances$(
   etherBalance$: Observable<BigNumber>,
   balances$: Observable<Balances>,
   onEveryBlock$: Observable<number>,
+  tokenPricesUsd$: Observable<any>, // TODO: this cannot be Observable<Ticker> Investigate why
   etherPriceUsd$: Observable<BigNumber>,
   transactions$: Observable<TxState[]>
 ): Observable<CombinedBalances> {
@@ -230,14 +239,32 @@ export function createCombinedBalances$(
     balances$,
     createAllowances$(context$, initializedAccount$, onEveryBlock$),
     etherPriceUsd$,
-    transactions$, onEveryBlock$
+    tokenPricesUsd$,
+    transactions$,
+    onEveryBlock$
   ).pipe(
-    map(([etherBalance, balances, allowances, etherPriceUsd, transactions, currentBlock]) =>
-      ({
+    map(([
+           etherBalance,
+           balances,
+           allowances,
+           etherPriceUsd,
+           tokenPricesUsd,
+           transactions,
+           currentBlock
+         ]) => {
+      return ({
         etherBalance,
         etherValueInUsd: etherBalance && etherPriceUsd && etherBalance.times(etherPriceUsd),
-        balances: combineBalances(balances, allowances, etherPriceUsd, transactions, currentBlock),
-      })
+        balances: combineBalances(
+            balances,
+            allowances,
+            tokenPricesUsd,
+            etherPriceUsd,
+            transactions,
+            currentBlock
+          ),
+      });
+    }
     )
   );
 }
@@ -266,4 +293,22 @@ export function createWalletDisapprove(calls$: Calls$, gasPrice$: GasPrice$) {
     r.subscribe();
     return r;
   };
+}
+
+export function createSaiSwap(calls$: Calls$, proxyAddress$: Observable<string>) {
+  return (amount: BigNumber) => combineLatest(calls$, proxyAddress$).pipe(
+    take(1),
+    switchMap(([calls, proxyAddress]) => {
+      return calls.swapSaiToDai({ proxyAddress, amount });
+    })
+  ).subscribe();
+}
+
+export function createDaiSwap(calls$: Calls$, proxyAddress$: Observable<string>) {
+  return (amount: BigNumber) => combineLatest(calls$, proxyAddress$).pipe(
+    take(1),
+    switchMap(([calls, proxyAddress]) => {
+      return calls.swapDaiToSai({ proxyAddress, amount });
+    })
+  ).subscribe();
 }

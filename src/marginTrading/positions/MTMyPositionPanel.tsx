@@ -1,5 +1,7 @@
 import * as React from 'react';
 import * as styles from '../../balances-mt/mtBalancesView.scss';
+import tickSvg from '../../icons/tick.svg';
+import { CallForAction } from '../../migration/CallForAction';
 
 import { Button } from '../../utils/forms/Buttons';
 import { SvgImage } from '../../utils/icons/utils';
@@ -14,13 +16,12 @@ import {
 import { CreateMTFundForm$ } from '../transfer/mtTransferForm';
 import { MTMyPositionView } from './MTMyPositionView';
 
-import { Observable } from 'rxjs/index';
+import { Observable } from 'rxjs';
 import { theAppContext } from '../../AppContext';
 import { TxState } from '../../blockchain/transactions';
 import { Money } from '../../utils/formatters/Formatters';
 import { LoggedOut } from '../../utils/loadingIndicator/LoggedOut';
 import backArrowSvg from './back-arrow.svg';
-import checkSvg from './check.svg';
 import dottedMenuSvg from './dotted-menu.svg';
 
 interface MTMyPositionPanelInternalProps {
@@ -33,8 +34,7 @@ interface MTMyPositionPanelInternalProps {
 }
 
 export class MTMyPositionPanel
-  extends React.Component<Loadable<MTMyPositionPanelInternalProps> & ModalOpenerProps>
-{
+  extends React.Component<Loadable<MTMyPositionPanelInternalProps> & ModalOpenerProps> {
   public render() {
 
     if (this.props.value) {
@@ -63,48 +63,53 @@ export class MTMyPositionPanel
             <div>
               <PanelHeader bordered={true}>Deploy Proxy and Enable {name}</PanelHeader>
               <div className={styles.setupSection}>
-                <div className={styles.setupBox}>
-                  <div className={styles.setupTitle}>Deploy Proxy</div>
-                  <div className={styles.setupDescription}>
-                    Proxies are used in Oasis to bundle multiple transactions into one,
-                    saving transaction time and gas costs. This only has to be done once.
-                  </div>
-                  { mtaState !== MTAccountState.setup ?
-                    <theAppContext.Consumer>
-                     { ({ MTSetupButtonRxTx,
-                     }) =>
-                       <div>
-                           <MTSetupButtonRxTx/>
-                       </div>
-                     }
-                    </theAppContext.Consumer>
-                    :
-                    <Button
-                      size="lg"
-                      disabled={true}
-                      className={styles.buttonCheck}
-                    >
-                      <SvgImage image={checkSvg}/>
-                    </Button>
-                  }
-                </div>
-                <div className={styles.setupBox}>
-                  <div className={styles.setupTitle}>Enable {name}</div>
-                  <div className={styles.setupDescription}>
-                    This permission allows Oasis smart contracts to interact with your {name}.
-                    This has to be done for each asset type.
-                  </div>
-                  <Button
-                    size="lg"
-                    onClick={() =>
-                      this.props.value!.approveMTProxy(
-                        {
-                          token: ma.name,
-                          proxyAddress: mta.proxy.address
-                        }
-                      )}
-                  >Enable {name}</Button>
-                </div>
+                <CallForAction title="Deploy Proxy"
+                               description={
+                                 // tslint:disable
+                                 ` Proxies are used in Oasis to bundle multiple transactions into one,
+                                 saving transaction time and gas costs. This only has to be done once.`
+                                 // tslint:enable
+                               }
+                               btn={
+                                 mtaState !== MTAccountState.setup &&
+                                 <theAppContext.Consumer>
+                                   {({
+                                       MTSetupButtonRxTx,
+                                     }) =>
+                                     <div>
+                                       <MTSetupButtonRxTx/>
+                                     </div>
+                                   }
+                                 </theAppContext.Consumer>
+                               }
+                               btnDisabled={mtaState === MTAccountState.setup}
+                               btnLabel={<SvgImage image={tickSvg} data-test-id="step-completed"/>}
+                               className={styles.setupBox}
+                />
+                <CallForAction title={`Enable ${name}`}
+                               description={
+                                 // tslint:disable
+                                 `This permission allows Oasis smart contracts to interact with your {name}.
+                                  This has to be done for each asset type.`
+                                 // tslint:enable
+                               }
+                               btnLabel={
+                                 this.props.value.ma.allowance
+                                   ? <SvgImage image={tickSvg} data-test-id="step-completed"/>
+                                   : `Enable ${name}`
+                               }
+                               btnAction={
+                                 () =>
+                                   this.props.value!.approveMTProxy(
+                                     {
+                                       token: ma.name,
+                                       proxyAddress: mta.proxy.address
+                                     }
+                                   )
+                               }
+                               btnDisabled={this.props.value.ma.allowance}
+                               className={styles.setupBox}
+                />
               </div>
             </div>
           );
@@ -124,14 +129,13 @@ export class MTMyPositionPanel
 
     return <div>
       <PanelHeader>My Position</PanelHeader>
-      <LoadingIndicator />
+      <LoadingIndicator/>
     </div>;
   }
 }
 
 export class MTMyPositionPanelInternal
-  extends React.Component<MTMyPositionPanelInternalProps & ModalOpenerProps>
-{
+  extends React.Component<MTMyPositionPanelInternalProps & ModalOpenerProps> {
   public render() {
 
     const { ma, mta } = this.props;
@@ -139,19 +143,19 @@ export class MTMyPositionPanelInternal
     return (
       <div>
         <PanelHeader bordered={true}>
-          { this.props.close &&
-            <div
-              className={styles.backButton}
-              onClick={this.props.close}
-            ><SvgImage image={backArrowSvg}/></div>
+          {this.props.close &&
+          <div
+            className={styles.backButton}
+            onClick={this.props.close}
+          ><SvgImage image={backArrowSvg}/></div>
           }
           <span>My Position</span>
           <div className={styles.referencePriceField}>
-            { this.props.ma.referencePrice &&
-                <Money value={this.props.ma.referencePrice} token="USD" />
-                }
-                </div>
-          <div className={styles.dropdownMenu} >
+            {this.props.ma.referencePrice &&
+            <Money value={this.props.ma.referencePrice} token="USD"/>
+            }
+          </div>
+          <div className={styles.dropdownMenu}>
             <Button
               className={styles.dropdownButton}
               data-test-id="myposition-actions-list"
@@ -159,33 +163,33 @@ export class MTMyPositionPanelInternal
               <SvgImage image={dottedMenuSvg}/>
             </Button>
             {/*<div className={styles.dropdownList}>*/}
-              {/*<div>*/}
-                {/*<Button*/}
-                  {/*size="md"*/}
-                  {/*block={true}*/}
-                  {/*disabled={!ma.availableActions.includes(UserActionKind.draw)}*/}
-                  {/*onClick={() => this.transfer(UserActionKind.draw, 'DAI', ma.name)}*/}
-                {/*>WITHDRAW DAI</Button>*/}
-                {/*<br/>*/}
-                {/*<Button*/}
-                  {/*size="md"*/}
-                  {/*block={true}*/}
-                  {/*disabled={!ma.availableActions.includes(UserActionKind.fund)}*/}
-                  {/*onClick={() => this.transfer(UserActionKind.fund, 'DAI', ma.name)}*/}
-                {/*>DEPOSIT DAI</Button>*/}
-                {/*<br/>*/}
-                {/*<Button*/}
-                  {/*size="md"*/}
-                  {/*block={true}*/}
-                  {/*disabled={ma.allowance}*/}
-                  {/*onClick={() =>*/}
-                    {/*this.props.approveMTProxy(*/}
-                      {/*{ token: ma.name, proxyAddress: mta.proxy.address }*/}
-                    {/*)*/}
-                  {/*}*/}
-                {/*>Allowance</Button>*/}
-                {/*<br/>*/}
-              {/*</div>*/}
+            {/*<div>*/}
+            {/*<Button*/}
+            {/*size="md"*/}
+            {/*block={true}*/}
+            {/*disabled={!ma.availableActions.includes(UserActionKind.draw)}*/}
+            {/*onClick={() => this.transfer(UserActionKind.draw, 'DAI', ma.name)}*/}
+            {/*>WITHDRAW DAI</Button>*/}
+            {/*<br/>*/}
+            {/*<Button*/}
+            {/*size="md"*/}
+            {/*block={true}*/}
+            {/*disabled={!ma.availableActions.includes(UserActionKind.fund)}*/}
+            {/*onClick={() => this.transfer(UserActionKind.fund, 'DAI', ma.name)}*/}
+            {/*>DEPOSIT DAI</Button>*/}
+            {/*<br/>*/}
+            {/*<Button*/}
+            {/*size="md"*/}
+            {/*block={true}*/}
+            {/*disabled={ma.allowance}*/}
+            {/*onClick={() =>*/}
+            {/*this.props.approveMTProxy(*/}
+            {/*{ token: ma.name, proxyAddress: mta.proxy.address }*/}
+            {/*)*/}
+            {/*}*/}
+            {/*>Allowance</Button>*/}
+            {/*<br/>*/}
+            {/*</div>*/}
             {/*</div>*/}
           </div>
         </PanelHeader>
@@ -201,6 +205,7 @@ export class MTMyPositionPanelInternal
       </div>
     );
   }
+
   // private transfer (actionKind: UserActionKind, token: string, ilk: string) {
   //   const fundForm$ = this.props.createMTFundForm$(actionKind, token, ilk);
   //   const MTFundFormViewRxTx =

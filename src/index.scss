@@ -8,11 +8,18 @@
 }
 
 html {
-  margin-left: calc(100vw - 100%);
+  width: 100vw;
+  overflow-x: hidden;
 }
 
 body {
-  @include fontMontserratMedium;
+  font-family: system-ui,-apple-system,BlinkMacSystemFont,Helvetica Neue,Roboto,Segoe UI,sans-serif;;
+  font-weight: 400;
+
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+
+
   margin: 0;
   padding: 0;
   background-color: $body-bg;
@@ -40,12 +47,11 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background-color: $grey-darkest;
   padding: 20px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #eeeeee;
+  background-color: $very-light-gray-2;
   border-radius: 4px;
 }
 

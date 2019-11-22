@@ -6,7 +6,7 @@ import { first, map, scan, shareReplay, switchMap } from 'rxjs/operators';
 import { Balances, DustLimits } from '../../balances-nomt/balances';
 import { Calls, Calls$ } from '../../blockchain/calls/calls';
 import { OfferMakeData, OfferMakeDirectData } from '../../blockchain/calls/offerMake';
-import { tokens } from '../../blockchain/config';
+import { getToken } from '../../blockchain/config';
 import { User } from '../../blockchain/user';
 import { combineAndMerge } from '../../utils/combineAndMerge';
 import {
@@ -300,7 +300,7 @@ function applyChange(state: OfferFormState,
         state,
         {
           kind: FormChangeKind.amountFieldChange,
-          value: new BigNumber(change.offer.baseAmount.toFixed(tokens[state.baseToken].digits))
+          value: new BigNumber(change.offer.baseAmount.toFixed(getToken(state.baseToken).digits))
         }
       );
       return applyChange(
@@ -308,7 +308,7 @@ function applyChange(state: OfferFormState,
         {
           kind: FormChangeKind.priceFieldChange,
           value: new BigNumber(change.offer.price.toFixed(
-            tokens[state.quoteToken].digits,
+            getToken(state.quoteToken).digits,
             change.offer.type === OfferType.buy ? BigNumber.ROUND_DOWN : BigNumber.ROUND_UP,
           ))
         }
@@ -326,7 +326,9 @@ function applyChange(state: OfferFormState,
         ...state,
         amount: change.value,
         ...change.value && state.price
-          ? { total: change.value.multipliedBy(state.price) }
+          ? {
+            total: change.value.multipliedBy(state.price)
+          }
           : {},
         gasEstimationStatus: GasEstimationStatus.unset
       };
@@ -335,7 +337,9 @@ function applyChange(state: OfferFormState,
         ...state,
         price: change.value,
         ...change.value && state.amount
-          ? { total: change.value.multipliedBy(state.amount) }
+          ? {
+            total:  change.value.multipliedBy(state.amount)
+          }
           : {},
         gasEstimationStatus: GasEstimationStatus.unset
       };
@@ -526,7 +530,7 @@ function validate(state: OfferFormState): OfferFormState {
         amount: dustLimit || new BigNumber(0),
       });
     }
-    if (new BigNumber(tokens[spendToken].maxSell).lt(spendAmount)) {
+    if (new BigNumber(getToken(spendToken).maxSell).lt(spendAmount)) {
       messages.push({
         kind: MessageKind.incredibleAmount,
         field: spendField,
@@ -534,7 +538,7 @@ function validate(state: OfferFormState): OfferFormState {
         token: spendToken,
       });
     }
-    if (new BigNumber(tokens[receiveToken].maxSell).lt(receiveAmount)) {
+    if (new BigNumber(getToken(receiveToken).maxSell).lt(receiveAmount)) {
       messages.push({
         kind: MessageKind.incredibleAmount,
         field: receiveField,
@@ -701,8 +705,8 @@ export function createFormController$(
     kind: OfferType.buy,
     baseToken: tradingPair.base,
     quoteToken: tradingPair.quote,
-    baseTokenDigits: tokens[tradingPair.base].digits,
-    quoteTokenDigits: tokens[tradingPair.quote].digits,
+    baseTokenDigits: getToken(tradingPair.base).digits,
+    quoteTokenDigits: getToken(tradingPair.quote).digits,
     gasEstimationStatus: GasEstimationStatus.unset,
     stage: FormStage.editing,
     price: undefined,
