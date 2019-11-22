@@ -132,7 +132,7 @@ export type MTLiquidationEvent = {
 
   timestamp: number;
   token: string;
-  id: BigNumber;
+  id: number;
 } & ({
   kind: MTHistoryEventKind.bite
   lot: BigNumber;

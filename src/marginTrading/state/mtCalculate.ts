@@ -153,10 +153,10 @@ export function realPurchasingPowerMarginable(
   return purchasingPower;
 }
 
-function findAuctionBite(rawHistory: RawMTHistoryEvent[], auctionId: BigNumber) {
-  return rawHistory.filter(
-    h => h.kind === MTHistoryEventKind.bite && h.id.eq(auctionId)
-  )[0] as MTLiquidationEvent;
+function findAuctionBite(rawHistory: RawMTHistoryEvent[], auctionId: number) {
+  return rawHistory.filter((h: any) => {
+    return h.kind === MTHistoryEventKind.bite && h.id === auctionId;
+  })[0] as MTLiquidationEvent;
 }
 
 export function calculateMTHistoryEvents(

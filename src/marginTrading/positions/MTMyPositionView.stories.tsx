@@ -32,7 +32,7 @@ const assetCore = {
 const liquidationHistory: RawMTHistoryEvent[] = [
   {
     kind: MTHistoryEventKind.bite,
-    id: new BigNumber(1),
+    id: 1,
     lot: new BigNumber(5),
     tab: new BigNumber(1000),
     timestamp: 1573141000,
@@ -40,7 +40,7 @@ const liquidationHistory: RawMTHistoryEvent[] = [
   } as RawMTHistoryEvent,
   {
     kind: MTHistoryEventKind.kick,
-    id: new BigNumber(1),
+    id: 1,
     lot: new BigNumber(5),
     bid: new BigNumber(0),
     tab: new BigNumber(1200),
@@ -49,7 +49,7 @@ const liquidationHistory: RawMTHistoryEvent[] = [
   } as RawMTHistoryEvent,
   {
     kind: MTHistoryEventKind.tend,
-    id: new BigNumber(1),
+    id: 1,
     lot: new BigNumber(5),
     bid: new BigNumber(1200),
     timestamp: 1573141020,
@@ -57,7 +57,7 @@ const liquidationHistory: RawMTHistoryEvent[] = [
   } as RawMTHistoryEvent,
   {
     kind: MTHistoryEventKind.dent,
-    id: new BigNumber(1),
+    id: 1,
     lot: new BigNumber(4.2),
     bid: new BigNumber(1200),
     timestamp: 1573141030,
@@ -65,7 +65,7 @@ const liquidationHistory: RawMTHistoryEvent[] = [
   } as RawMTHistoryEvent,
   {
     kind: MTHistoryEventKind.deal,
-    id: new BigNumber(1),
+    id: 1,
     timestamp: 1573141040,
     token: 'WETH'
   } as RawMTHistoryEvent,
@@ -135,7 +135,7 @@ stories.add('CDP 1 - liquidation ongoing', () => (
 
 liquidationHistory.push({
   kind: MTHistoryEventKind.redeem,
-  id: new BigNumber(1),
+  id: 1,
   timestamp: 1573141040,
   token: 'WETH',
   amount: new BigNumber(0.8)
