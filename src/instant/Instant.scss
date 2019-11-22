@@ -153,52 +153,6 @@
   border-radius: 100%;
 }
 
-.accountIcon {
-  padding: unset;
-  border-color: $element-border;
-
-  :global(.account-icon-background) {
-    fill: transparent;
-  }
-
-  &:hover:not(:disabled){
-    :global(.account-icon-background) {
-      fill: white;
-    }
-  }
-}
-
-.settingsIcon, .backIcon {
-  padding: .25rem;
-}
-
-.settingsIcon, .backIcon, .accountIcon {
-  background: white;
-  border-color: $element-border;
-
-  :global(.cog-wheel-icon), :global(.back-icon),  :global(.account-icon-body) {
-    fill: $info-label-color;
-  }
-
-  &:not(:disabled):hover {
-    border-color: #708390;
-    background-color: white !important;
-
-    :global(.cog-wheel-icon), :global(.back-icon),  :global(.account-icon-body) {
-      fill: #708390;
-    }
-  }
-
-  &:disabled {
-    border-color: #D1DEE6;
-
-    :global(.cog-wheel-icon), :global(.back-icon),  :global(.account-icon-body) {
-      fill: #D1DEE6;
-    }
-  }
-}
-
-
 .input {
   height: 2rem;
 

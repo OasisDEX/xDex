@@ -1,5 +1,9 @@
 @import "../Variables";
 
+$iconColorDefault:  $info-label-color;
+$iconColorOnHover: $dark-grayish-blue;
+$iconColorOnDisabled: $another-light-grayish-blue;
+
 .infoIcon {
   $iconSize: 22px;
 
@@ -81,20 +85,27 @@
 }
 
 @mixin whiteFillGreyBorderIcon($iconContentId) {
-
-  border-color: $grey-light;
+  background: white;
+  border-color: $element-border;
 
   :global(#{$iconContentId}) {
-    fill: $white;
+    fill: $iconColorDefault;
   }
 
-  &:hover:enabled {
-    border-color: $button-border-hover;
+  &:not(:disabled):hover {
+    border-color: $iconColorOnHover;
+    background-color: white !important;
+
+    :global(#{$iconContentId}){
+      fill: $iconColorOnHover;
+    }
   }
 
   &:disabled {
-    :global(#{$iconContentId}) {
-      fill: $grey-light;
+    border-color: $iconColorOnDisabled;
+
+    :global(#{$iconContentId}){
+      fill: $iconColorOnDisabled;
     }
   }
 }
@@ -120,12 +131,21 @@
   padding: .25rem;
 }
 
+.settingsIcon, .backIcon {
+  padding: .25rem;
+}
+
+.accountIcon {
+  padding: unset;
+  border-color: $element-border;
+}
+
 .settingsIcon {
-  @include whiteFillGreyBorderIcon('.cog-wheel-icon')
+  @include whiteFillGreyBorderIcon('.cog-wheel-icon-body')
 }
 
 .backIcon {
-  @include whiteFillGreyBorderIcon('.back-icon')
+  @include whiteFillGreyBorderIcon('.back-icon-body')
 }
 
 .accountIcon {

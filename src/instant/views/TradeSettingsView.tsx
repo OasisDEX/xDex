@@ -6,7 +6,7 @@ import backSvg from '../../icons/back.svg';
 import warningSvg from '../../icons/warning.svg';
 import { BigNumberInput, lessThanOrEqual } from '../../utils/bigNumberInput/BigNumberInput';
 import { formatPrice } from '../../utils/formatters/format';
-import { ButtonIcon } from '../../utils/icons/Icons';
+import { BackIcon, ButtonIcon } from '../../utils/icons/Icons';
 import { SvgImage } from '../../utils/icons/utils';
 import { TopLeftCorner } from '../../utils/panel/TopRightCorner';
 import { TradeDetails } from '../details/TradeDetails';
@@ -24,12 +24,8 @@ export class TradeSettingsView extends React.Component<InstantFormState> {
     return (
       <InstantFormWrapper heading="Advanced Settings">
         <TopLeftCorner>
-          <ButtonIcon
-            color="secondaryOutlined"
-            className={classnames(instantStyles.cornerIcon, instantStyles.backIcon)}
-            onClick={this._hideTradeSettings}
-            image={backSvg}
-            data-test-id="back"
+          <BackIcon onClick={this._hideTradeSettings}
+                    data-test-id="back"
           />
         </TopLeftCorner>
         <TradeDetails {...this.props}/>

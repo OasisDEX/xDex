@@ -7,7 +7,7 @@ import accountSvg from '../../icons/account.svg';
 import cogWheelSvg from '../../icons/cog-wheel.svg';
 import swapArrowsSvg from '../../icons/swap-arrows.svg';
 import { formatAmountInstant } from '../../utils/formatters/format';
-import { ButtonIcon } from '../../utils/icons/Icons';
+import { AccountIcon, BackIcon, ButtonIcon, SettingsIcon } from '../../utils/icons/Icons';
 import { SvgImage } from '../../utils/icons/utils';
 import { TopLeftCorner, TopRightCorner } from '../../utils/panel/TopRightCorner';
 import { TradeDetails } from '../details/TradeDetails';
@@ -124,21 +124,16 @@ export class NewTradeView extends React.Component<InstantFormState> {
                           btnDataTestId="initiate-trade"
       >
         <TopRightCorner>
-          <ButtonIcon
-            color="secondaryOutlined"
-            className={classnames(styles.cornerIcon, styles.settingsIcon)}
+          <SettingsIcon
             disabled={!price}
-            onClick={this.showTradeSettings}
-            image={cogWheelSvg}
             data-test-id="trade-settings"
+            onClick={this.showTradeSettings}
           />
         </TopRightCorner>
         <TopLeftCorner>
-          <ButtonIcon
-            color="secondaryOutlined"
+          <AccountIcon
             disabled={!(user && user.account)}
             data-test-id="account-settings"
-            image={accountSvg}
             onClick={this.showAccountSettings}
           />
         </TopLeftCorner>

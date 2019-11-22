@@ -5,7 +5,7 @@ import accountSvg from '../../icons/account.svg';
 import backSvg from '../../icons/back.svg';
 import warningSvg from '../../icons/warning.svg';
 import { Button } from '../../utils/forms/Buttons';
-import { ButtonIcon, ProgressIcon } from '../../utils/icons/Icons';
+import { BackIcon, ButtonIcon, ProgressIcon } from '../../utils/icons/Icons';
 import { SvgImage } from '../../utils/icons/utils';
 import { TopLeftCorner } from '../../utils/panel/TopRightCorner';
 import { WarningTooltip, WarningTooltipType } from '../../utils/tooltip/Tooltip';
@@ -37,12 +37,7 @@ export class AccountView extends React.Component<InstantFormState> {
     return (
       <InstantFormWrapper heading={'Account Overview'}>
         <TopLeftCorner>
-          <ButtonIcon
-            color="secondaryOutlined"
-            onClick={this.switchToNewTrade}
-            className={classnames(instantStyles.cornerIcon, instantStyles.backIcon)}
-            image={backSvg}
-          />
+          <BackIcon  onClick={this.switchToNewTrade}/>
         </TopLeftCorner>
         <div className={classnames(instantStyles.details, instantStyles.account)}>
           {
