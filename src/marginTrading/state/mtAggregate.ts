@@ -62,15 +62,14 @@ export function aggregateMTAccountState(
                   of(balancesResult),
                   forkJoin(assetNames.map((token, _i) =>
                                             (of([])
-                                              // (balancesResult.assets[i].urn === nullAddress) ?
-                                              // of([]) :
-                                              // createRawMTLiquidationHistoryFromCache(context, balancesResult.assets[i].urn)
                                             ).pipe(
                                               map(history => ({ [token]: history })),
                                             )
                   )).pipe(
                     concatAll(),
-                    reduce<{ [key: string]: RawMTLiquidationHistoryEvent[] }>((a, e) => ({ ...a, ...e }), {}),
+                    reduce<{ [key: string]: RawMTLiquidationHistoryEvent[] }>(
+                      (a, e) => ({ ...a, ...e }), {}
+                    ),
                   ),
                 )
     ),
@@ -79,38 +78,38 @@ export function aggregateMTAccountState(
         .filter(([_i, token]) => getToken(token).assetKind === AssetKind.marginable)
         .map(([i, token]) => {
           return getMarginableCore({
-                                     name: token,
-                                     assetKind: AssetKind.marginable,
-                                     balance: balanceResult.assets[i].urnBalance,
-                                     ...balanceResult.assets[i],
-                                     safeCollRatio: new BigNumber(getToken(token).safeCollRatio as number),
-                                     rawHistory: (rawHistories ? rawHistories[i] : []),
-                                     rawLiquidationHistory: rawLiquidationHistory[token],
-                                   });
+            name: token,
+            assetKind: AssetKind.marginable,
+            balance: balanceResult.assets[i].urnBalance,
+            ...balanceResult.assets[i],
+            safeCollRatio: new BigNumber(getToken(token).safeCollRatio as number),
+            rawHistory: (rawHistories ? rawHistories[i] : []),
+            rawLiquidationHistory: rawLiquidationHistory[token],
+          });
         });
 
       const nonMarginables = [...tokenNames.entries()]
         .filter(([_i, token]) => getToken(token).assetKind === AssetKind.nonMarginable)
         .map(([i, token]) => {
           return getNonMarginableCore({
-                                        name: token,
-                                        assetKind: AssetKind.nonMarginable,
-                                        balance: balanceResult.assets[i].marginBalance,
-                                        walletBalance: balanceResult.assets[i].walletBalance,
-                                        marginBalance: balanceResult.assets[i].marginBalance,
-                                        referencePrice: balanceResult.assets[i].referencePrice,
-                                        allowance: balanceResult.assets[i].allowance,
-                                      });
+            name: token,
+            assetKind: AssetKind.nonMarginable,
+            balance: balanceResult.assets[i].marginBalance,
+            walletBalance: balanceResult.assets[i].walletBalance,
+            marginBalance: balanceResult.assets[i].marginBalance,
+            referencePrice: balanceResult.assets[i].referencePrice,
+            allowance: balanceResult.assets[i].allowance,
+          });
         });
 
       const cashResult = balanceResult.assets[balanceResult.assets.length - 1];
 
       const cash = getCashCore({
-                                 balance: cashResult.marginBalance,
-                                 marginBalance: cashResult.marginBalance,
-                                 allowance: cashResult.allowance,
-                                 walletBalance: cashResult.walletBalance
-                               });
+        balance: cashResult.marginBalance,
+        marginBalance: cashResult.marginBalance,
+        allowance: cashResult.allowance,
+        walletBalance: cashResult.walletBalance
+      });
 
       return calculateMTAccount(proxy, cash, marginables, nonMarginables);
     })
