@@ -14,7 +14,7 @@ import {
 import * as dsProxy from '../../blockchain/abi/ds-proxy.abi.json';
 import { MTBalanceResult } from '../../blockchain/calls/mtCalls';
 import { AssetKind, NetworkConfig, tokens } from '../../blockchain/config';
-import { nullAddress } from '../../blockchain/utils';
+import {amountFromWei, nullAddress} from '../../blockchain/utils';
 import { web3 } from '../../blockchain/web3';
 
 import { ReadCalls, ReadCalls$ } from '../../blockchain/calls/calls';
@@ -131,13 +131,13 @@ export function aggregateMTAccountState(
             balance: balanceResult[token].urnBalance,
             ...balanceResult[token],
             safeCollRatio: new BigNumber(tokens[token].safeCollRatio as number),
-            rawLiquidationHistory: rawLiquidationHistory[token],
+            // rawLiquidationHistories: rawLiquidationHistories[token],
             osmPriceCurrent: (osmPrices as any)[token].current,
             osmPriceNext: (osmPrices as any)[token].next,
             rawHistory: [
               ...rawHistories[token],
               ...rawLiquidationHistories[token]
-            ].sort((h1, h2) => h1.timestamp - h2.timestamp ),
+            ].sort((h1, h2) => h1.timestamp - h2.timestamp),
           });
         });
 
