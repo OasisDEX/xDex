@@ -137,6 +137,8 @@ export interface MarginableAssetCore extends Core {
   safeCollRatio: BigNumber;
   fee: BigNumber;
   urn: string;
+  osmPriceCurrent: BigNumber | undefined;
+  osmPriceNext: BigNumber | undefined;
 }
 
 export interface MarginableAsset extends MarginableAssetCore {

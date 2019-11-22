@@ -39,6 +39,8 @@ export function getMarginableCore(props?: Partial<MarginableAssetCore>): Margina
     rawLiquidationHistory: [],
     fee: new BigNumber(1),
     urn: '',
+    osmPriceCurrent: undefined,
+    osmPriceNext: undefined,
     ...props
   };
 }
