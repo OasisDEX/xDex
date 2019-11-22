@@ -2,7 +2,7 @@ import { BigNumber } from 'bignumber.js';
 import { flatten } from 'lodash';
 import { AssetKind } from '../../blockchain/config';
 import { impossible } from '../../utils/impossible';
-import { minusOne, zero } from '../../utils/zero';
+import { zero } from '../../utils/zero';
 import { EditableDebt } from '../allocate/mtOrderAllocateDebtForm';
 import {
   findAsset, MTAccount,
@@ -75,7 +75,6 @@ export function planFund(
 
   const fundOps: Operation[] = [
     { amount, name: token, kind: OperationKind.fundGem },
-    { name: token, dgem: amount, kind: OperationKind.adjust },
   ];
 
   return [
@@ -107,13 +106,6 @@ export function planFundDai(
 
   const fundOps: Operation[] = [
     { amount, name: token, kind: OperationKind.fundDai },
-    ...asset.debt.gt(zero) && amount.gt(zero) ? [
-      {
-        name: token,
-        ddai: minusOne.times(BigNumber.min(amount, asset.debt)),
-        kind: OperationKind.adjust,
-      } as Operation,
-    ] : [],
   ];
 
   return [

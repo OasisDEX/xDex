@@ -96,7 +96,6 @@ describe('plan fund', () => {
 
       expect(plan).toEqual([
         { amount: new BigNumber('25'), kind: OperationKind.fundGem, name: 'WETH' },
-        { dgem: new BigNumber('25'), kind: OperationKind.adjust, name: 'WETH' }
       ]);
     });
   });

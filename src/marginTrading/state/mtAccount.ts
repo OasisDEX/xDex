@@ -14,7 +14,6 @@ export enum OperationKind {
   fundDai = 'fundDai',
   drawGem = 'drawGem',
   drawDai = 'drawDai',
-  adjust = 'adjust',
   buyRecursively = 'buyLev',
   sellRecursively = 'sellLev',
 }
@@ -35,11 +34,6 @@ export type Operation = {
   kind: OperationKind.drawDai;
   name: string;
   amount: BigNumber;
-} | {
-  kind: OperationKind.adjust;
-  name: string;
-  dgem?: BigNumber;
-  ddai?: BigNumber;
 } | {
   kind: OperationKind.buyRecursively | OperationKind.sellRecursively;
   name: string;
@@ -180,6 +174,8 @@ export interface MarginableAssetCore extends Core {
   safeCollRatio: BigNumber;
   fee: BigNumber;
   urn: string;
+  osmPriceCurrent: BigNumber | undefined;
+  osmPriceNext: BigNumber | undefined;
   nextPrice: BigNumber;
   zzz: Date;
   redeemable: BigNumber;

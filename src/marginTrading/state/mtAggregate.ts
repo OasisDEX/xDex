@@ -78,6 +78,20 @@ function rawMTHistories$(
   );
 }
 
+function osms$(context: NetworkConfig, assets: string[]) {
+  return forkJoin(assets.map((token) =>
+    readOsm(context, token).pipe(
+      map(osm => ({ [token]: osm })),
+    )
+  )).pipe(
+    concatAll(),
+    reduce(
+      (a, e) => ({ ...a, ...e }),
+      {},
+    ),
+  );
+}
+
 export function aggregateMTAccountState(
   context: NetworkConfig,
   proxy: any,
@@ -104,9 +118,10 @@ export function aggregateMTAccountState(
         of(balancesResult),
         rawMTLiquidationHistories$(context, balancesResult),
         rawMTHistories$(context, proxy.address, assetNames),
+        osms$(context, assetNames),
       )
     ),
-    map(([balanceResult, rawLiquidationHistories, rawHistories]) => {
+    map(([balanceResult, rawLiquidationHistories, rawHistories, osmPrices]) => {
       const marginables = [...tokenNames.entries()]
         .filter(([_i, token]) => tokens[token].assetKind === AssetKind.marginable)
         .map(([i, token]) => {
@@ -116,6 +131,9 @@ export function aggregateMTAccountState(
             balance: balanceResult[token].urnBalance,
             ...balanceResult[token],
             safeCollRatio: new BigNumber(tokens[token].safeCollRatio as number),
+            rawLiquidationHistory: rawLiquidationHistory[token],
+            osmPriceCurrent: (osmPrices as any)[token].current,
+            osmPriceNext: (osmPrices as any)[token].next,
             rawHistory: [
               ...rawHistories[token],
               ...rawLiquidationHistories[token]
@@ -187,5 +205,35 @@ export function createMta$(
     }),
     distinctUntilChanged(isEqual),
     shareReplay(1)
+  );
+}
+
+function readOsm(context: NetworkConfig, token: string):
+Observable<{current: number|undefined, next: number|undefined}> {
+  const hilo = (uint256: string): [BigNumber, BigNumber] => {
+    const match = uint256.match(/^0x(\w+)$/);
+    if (!match) {
+      throw new Error(`invalid uint256: ${uint256}`);
+    }
+    return (match[0].length <= 32) ?
+    [new BigNumber(0), new BigNumber(uint256)] :
+    [
+      new BigNumber(`0x${match[0].substr(0, match[0].length - 32)}`),
+      new BigNumber(`0x${match[0].substr(match[0].length - 32, 32)}`)
+    ];
+  };
+  const slotCurrent = 3;
+  const slotNext = 4;
+  return combineLatest(
+    bindNodeCallback(web3.eth.getStorageAt)(context.osms[token], slotCurrent),
+    bindNodeCallback(web3.eth.getStorageAt)(context.osms[token], slotNext),
+  ).pipe(
+    map(([cur, nxt]: [string, string]) => {
+      const [current, next] = [hilo(cur), hilo(nxt)];
+      return {
+        current: current[0].isZero() ? undefined : amountFromWei(current[1], token),
+        next: next[0].isZero() ? undefined : amountFromWei(next[1], token),
+      };
+    })
   );
 }

@@ -1,18 +1,23 @@
 [{
   "constant": false,
   "inputs": [{
+    "internalType": "contract OasisCdpManagerLike",
     "name": "ocm",
     "type": "address"
   }, {
+    "internalType": "bytes32",
     "name": "ilk",
     "type": "bytes32"
   }, {
+    "internalType": "contract VatLike",
     "name": "vat",
     "type": "address"
   }, {
+    "internalType": "contract EndLike",
     "name": "end",
     "type": "address"
   }, {
+    "internalType": "contract GemJoinLike",
     "name": "join",
     "type": "address"
   }],
@@ -24,15 +29,19 @@
 }, {
   "constant": false,
   "inputs": [{
+    "internalType": "address[7]",
     "name": "contracts",
     "type": "address[7]"
   }, {
+    "internalType": "bytes32",
     "name": "ilk",
     "type": "bytes32"
   }, {
+    "internalType": "uint256",
     "name": "amount",
     "type": "uint256"
   }, {
+    "internalType": "uint256",
     "name": "maxPayAmount",
     "type": "uint256"
   }],
@@ -44,15 +53,51 @@
 }, {
   "constant": false,
   "inputs": [{
-    "name": "contracts",
-    "type": "address[7]"
+    "internalType": "contract OasisCdpManagerLike",
+    "name": "ocm",
+    "type": "address"
   }, {
+    "internalType": "bytes32",
     "name": "ilk",
     "type": "bytes32"
   }, {
+    "internalType": "uint256",
     "name": "amount",
     "type": "uint256"
   }, {
+    "internalType": "contract Token",
+    "name": "token",
+    "type": "address"
+  }, {
+    "internalType": "contract GemJoinLike",
+    "name": "adapter",
+    "type": "address"
+  }, {
+    "internalType": "contract VatLike",
+    "name": "vat",
+    "type": "address"
+  }],
+  "name": "fundDai",
+  "outputs": [],
+  "payable": false,
+  "stateMutability": "nonpayable",
+  "type": "function"
+}, {
+  "constant": false,
+  "inputs": [{
+    "internalType": "address[7]",
+    "name": "contracts",
+    "type": "address[7]"
+  }, {
+    "internalType": "bytes32",
+    "name": "ilk",
+    "type": "bytes32"
+  }, {
+    "internalType": "uint256",
+    "name": "amount",
+    "type": "uint256"
+  }, {
+    "internalType": "uint256",
     "name": "minPayAmount",
     "type": "uint256"
   }],
@@ -64,32 +109,41 @@
 }, {
   "constant": true,
   "inputs": [{
+    "internalType": "address",
     "name": "margin",
     "type": "address"
   }, {
+    "internalType": "bytes32[]",
     "name": "ilks",
     "type": "bytes32[]"
   }, {
+    "internalType": "contract Token[]",
     "name": "tokens",
     "type": "address[]"
   }, {
+    "internalType": "contract VatLike",
     "name": "vat",
     "type": "address"
   }, {
+    "internalType": "contract SpotLike",
     "name": "spotter",
     "type": "address"
   }, {
+    "internalType": "contract JugLike",
     "name": "jug",
     "type": "address"
   }, {
+    "internalType": "contract OasisCdpManagerLike",
     "name": "ocm",
     "type": "address"
   }],
   "name": "balance",
   "outputs": [{
+    "internalType": "uint256[]",
     "name": "data",
     "type": "uint256[]"
   }, {
+    "internalType": "uint256",
     "name": "live",
     "type": "uint256"
   }],
@@ -99,52 +153,11 @@
 }, {
   "constant": false,
   "inputs": [{
-    "name": "ocm",
-    "type": "address"
-  }, {
-    "name": "ilk",
-    "type": "bytes32"
-  }, {
-    "name": "amount",
-    "type": "uint256"
-  }, {
-    "name": "adapter",
-    "type": "address"
-  }],
-  "name": "drawGem",
-  "outputs": [],
-  "payable": false,
-  "stateMutability": "nonpayable",
-  "type": "function"
-}, {
-  "constant": false,
-  "inputs": [{
-    "name": "ocm",
-    "type": "address"
-  }, {
-    "name": "ilk",
-    "type": "bytes32"
-  }, {
-    "name": "amount",
-    "type": "uint256"
-  }, {
-    "name": "token",
-    "type": "address"
-  }, {
-    "name": "adapter",
-    "type": "address"
-  }],
-  "name": "fundDai",
-  "outputs": [],
-  "payable": false,
-  "stateMutability": "nonpayable",
-  "type": "function"
-}, {
-  "constant": false,
-  "inputs": [{
+    "internalType": "address",
     "name": "addr",
     "type": "address"
   }, {
+    "internalType": "bytes[]",
     "name": "operationsData",
     "type": "bytes[]"
   }],
@@ -156,19 +169,56 @@
 }, {
   "constant": false,
   "inputs": [{
+    "internalType": "contract OasisCdpManagerLike",
     "name": "ocm",
     "type": "address"
   }, {
+    "internalType": "bytes32",
     "name": "ilk",
     "type": "bytes32"
   }, {
+    "internalType": "uint256",
     "name": "amount",
     "type": "uint256"
   }, {
+    "internalType": "contract GemJoinLike",
+    "name": "adapter",
+    "type": "address"
+  }, {
+    "internalType": "contract VatLike",
+    "name": "vat",
+    "type": "address"
+  }],
+  "name": "drawGem",
+  "outputs": [],
+  "payable": false,
+  "stateMutability": "nonpayable",
+  "type": "function"
+}, {
+  "constant": false,
+  "inputs": [{
+    "internalType": "contract OasisCdpManagerLike",
+    "name": "ocm",
+    "type": "address"
+  }, {
+    "internalType": "bytes32",
+    "name": "ilk",
+    "type": "bytes32"
+  }, {
+    "internalType": "uint256",
+    "name": "amount",
+    "type": "uint256"
+  }, {
+    "internalType": "contract Token",
     "name": "token",
     "type": "address"
   }, {
+    "internalType": "contract GemJoinLike",
     "name": "adapter",
+    "type": "address"
+  }, {
+    "internalType": "contract VatLike",
+    "name": "vat",
     "type": "address"
   }],
   "name": "fundGem",
@@ -179,41 +229,23 @@
 }, {
   "constant": false,
   "inputs": [{
+    "internalType": "contract OasisCdpManagerLike",
     "name": "ocm",
     "type": "address"
   }, {
+    "internalType": "bytes32",
     "name": "ilk",
     "type": "bytes32"
   }, {
-    "name": "dgem",
-    "type": "int256"
-  }, {
-    "name": "ddai",
-    "type": "int256"
-  }, {
-    "name": "vat",
-    "type": "address"
-  }],
-  "name": "adjust",
-  "outputs": [],
-  "payable": false,
-  "stateMutability": "nonpayable",
-  "type": "function"
-}, {
-  "constant": false,
-  "inputs": [{
-    "name": "ocm",
-    "type": "address"
-  }, {
-    "name": "ilk",
-    "type": "bytes32"
-  }, {
+    "internalType": "uint256",
     "name": "amount",
     "type": "uint256"
   }, {
+    "internalType": "contract GemJoinLike",
     "name": "adapter",
     "type": "address"
   }, {
+    "internalType": "contract VatLike",
     "name": "vat",
     "type": "address"
   }],
@@ -225,30 +257,39 @@
 }, {
   "constant": false,
   "inputs": [{
+    "internalType": "bytes8[10]",
     "name": "kinds",
     "type": "bytes8[10]"
   }, {
+    "internalType": "bytes32[10]",
     "name": "ilks",
     "type": "bytes32[10]"
   }, {
+    "internalType": "contract Token[10]",
     "name": "tokens",
     "type": "address[10]"
   }, {
+    "internalType": "contract GemJoinLike[10]",
     "name": "adapters",
     "type": "address[10]"
   }, {
+    "internalType": "uint256[10]",
     "name": "amounts",
     "type": "uint256[10]"
   }, {
+    "internalType": "uint256[10]",
     "name": "totals",
     "type": "uint256[10]"
   }, {
+    "internalType": "int256[10]",
     "name": "dgems",
     "type": "int256[10]"
   }, {
+    "internalType": "int256[10]",
     "name": "ddais",
     "type": "int256[10]"
   }, {
+    "internalType": "address[5]",
     "name": "addresses",
     "type": "address[5]"
   }],
@@ -266,10 +307,12 @@
   "anonymous": false,
   "inputs": [{
     "indexed": true,
+    "internalType": "bytes32",
     "name": "ilk",
     "type": "bytes32"
   }, {
     "indexed": false,
+    "internalType": "uint256",
     "name": "amount",
     "type": "uint256"
   }],
@@ -279,10 +322,12 @@
   "anonymous": false,
   "inputs": [{
     "indexed": true,
+    "internalType": "bytes32",
     "name": "ilk",
     "type": "bytes32"
   }, {
     "indexed": false,
+    "internalType": "uint256",
     "name": "amount",
     "type": "uint256"
   }],
@@ -292,10 +337,12 @@
   "anonymous": false,
   "inputs": [{
     "indexed": true,
+    "internalType": "bytes32",
     "name": "ilk",
     "type": "bytes32"
   }, {
     "indexed": false,
+    "internalType": "uint256",
     "name": "amount",
     "type": "uint256"
   }],
@@ -305,10 +352,12 @@
   "anonymous": false,
   "inputs": [{
     "indexed": true,
+    "internalType": "bytes32",
     "name": "ilk",
     "type": "bytes32"
   }, {
     "indexed": false,
+    "internalType": "uint256",
     "name": "amount",
     "type": "uint256"
   }],
@@ -318,31 +367,17 @@
   "anonymous": false,
   "inputs": [{
     "indexed": true,
+    "internalType": "bytes32",
     "name": "ilk",
     "type": "bytes32"
   }, {
     "indexed": false,
-    "name": "dgem",
-    "type": "int256"
-  }, {
-    "indexed": false,
-    "name": "ddai",
-    "type": "int256"
-  }],
-  "name": "Adjust",
-  "type": "event"
-}, {
-  "anonymous": false,
-  "inputs": [{
-    "indexed": true,
-    "name": "ilk",
-    "type": "bytes32"
-  }, {
-    "indexed": false,
+    "internalType": "uint256",
     "name": "amount",
     "type": "uint256"
   }, {
     "indexed": false,
+    "internalType": "uint256",
     "name": "maxPayAmount",
     "type": "uint256"
   }],
@@ -352,14 +387,17 @@
   "anonymous": false,
   "inputs": [{
     "indexed": true,
+    "internalType": "bytes32",
     "name": "ilk",
     "type": "bytes32"
   }, {
     "indexed": false,
+    "internalType": "uint256",
     "name": "amount",
     "type": "uint256"
   }, {
     "indexed": false,
+    "internalType": "uint256",
     "name": "minPayAmount",
     "type": "uint256"
   }],
