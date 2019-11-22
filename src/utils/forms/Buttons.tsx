@@ -8,6 +8,7 @@ import * as styles from './Buttons.scss';
 export type ButtonProps =
   React.ButtonHTMLAttributes<HTMLButtonElement> &
   {
+    key?: string;
     color?: 'primary'
       | 'secondary'
       | 'danger'

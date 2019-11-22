@@ -91,7 +91,7 @@ export class MigrationButton extends React.Component<MigrationButtonProps & Moda
           const { tid, className, label } = this.props;
 
           return visible ? (
-              <Button size="md"
+              <Button size="sm"
                       className={classnames(styles.redeemBtn, className)}
                       data-test-id={tid}
                       onClick={
