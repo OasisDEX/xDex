@@ -40,6 +40,7 @@ export const dark: string;
 export const mild: string;
 export const light: string;
 export const walletConnection: string;
+export const redeemBtn: string;
 export const connected: string;
 export const activeItem: string;
 export const disconnected: string;

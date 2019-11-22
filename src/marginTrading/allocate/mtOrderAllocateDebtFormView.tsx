@@ -544,7 +544,6 @@ function allocationInput(
   return (
     <InputGroup sizer="sm"
                 className={styles.inputGroup}
-                hasError={!!errorMessage}
                 title={errorMessage}
     >
       <BigNumberInput

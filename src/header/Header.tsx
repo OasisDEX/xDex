@@ -85,7 +85,7 @@ const popup$ = combineLatest(walletStatus$, popup, walletConnectionView$).pipe(
       popup.next(false);
       setTimeout(() => {
         walletConnectionViewManual$.next('');
-      },         500);
+      }, 500);
     },
     isConnected: status === 'connected',
     isConnecting: status === 'connecting',
@@ -120,7 +120,7 @@ class Header extends React.Component<HeaderProps> {
                   <HeaderNavLink to={`${rootUrl}market`} name="Market"/>
                   {process.env.REACT_APP_INSTANT_ENABLED === '1' &&
                   <HeaderNavLink to={`${rootUrl}instant`} name="Instant"/>}
-                  <HeaderNavLink to={`${rootUrl}Leverage`} name="Leverage" />
+                  <HeaderNavLink to={`${rootUrl}Leverage`} name="Leverage"/>
                   {this.props.walletStatus === 'connected' &&
                   <HeaderNavLink to={`${rootUrl}account`} name="Account"/>}
                 </div>
@@ -180,7 +180,10 @@ class WalletConnectionStatus extends React.Component<WalletConnectionStatusProps
                   <theAppContext.Consumer>
                     {({ SAI2DAIMigrationTxRx }) =>
                       // @ts-ignore
-                      <SAI2DAIMigrationTxRx label="Upgrade Sai" tid="update-btn-header"/>
+                      <SAI2DAIMigrationTxRx label="Upgrade Sai"
+                                            tid="update-btn-header"
+                                            className={styles.redeemBtn}
+                      />
                     }
                   </theAppContext.Consumer>
                   <div onClick={open} data-test-id="wallet-status">

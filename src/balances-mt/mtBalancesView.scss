@@ -188,10 +188,14 @@ button.actionButton {
 }
 
 .referencePriceField {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   margin-left: auto;
+  font-size: 14px;
   float: right;
   border: 1px solid $element-border;
   border-radius: 2px;
   padding: 0 8px;
-  height: 28px;
+  height: 30px;
 }
