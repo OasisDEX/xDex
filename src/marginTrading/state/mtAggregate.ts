@@ -13,7 +13,12 @@ import {
 } from 'rxjs/operators';
 import * as dsProxy from '../../blockchain/abi/ds-proxy.abi.json';
 import { MTBalanceResult } from '../../blockchain/calls/mtCalls';
-import { AssetKind, NetworkConfig, tokens } from '../../blockchain/config';
+import {
+  AssetKind,
+  getToken,
+  NetworkConfig,
+  tradingTokens
+} from '../../blockchain/config';
 import { amountFromWei, nullAddress } from '../../blockchain/utils';
 import { web3 } from '../../blockchain/web3';
 
@@ -114,11 +119,12 @@ export function aggregateMTAccountState(
   calls: ReadCalls,
 ): Observable<MTAccount> {
 
-  const assetNames: string[] = Object.values(tokens)
+  const assetNames: string[] = tradingTokens
+    .map((symbol: string) => getToken(symbol))
     .filter((t: any) =>
-      t.assetKind === AssetKind.marginable ||
-      t.assetKind === AssetKind.nonMarginable // ||
-      // t.symbol === 'DAI'
+              t.assetKind === AssetKind.marginable ||
+              t.assetKind === AssetKind.nonMarginable // ||
+            // t.symbol === 'DAI'
     )
     .map(t => t.symbol);
 
@@ -140,7 +146,7 @@ export function aggregateMTAccountState(
     ),
     map(([balanceResult, rawLiquidationHistories, rawHistories, osmPrices]) => {
       const marginables = [...tokenNames.entries()]
-        .filter(([_i, token]) => tokens[token].assetKind === AssetKind.marginable)
+        .filter(([_i, token]) => getToken(token).assetKind === AssetKind.marginable)
         .map(([i, token]) => {
           console.log('i', i);
           return getMarginableCore({
@@ -148,7 +154,7 @@ export function aggregateMTAccountState(
             assetKind: AssetKind.marginable,
             balance: balanceResult[token].urnBalance,
             ...balanceResult[token],
-            safeCollRatio: new BigNumber(tokens[token].safeCollRatio as number),
+            safeCollRatio: new BigNumber(getToken(token).safeCollRatio as number),
             osmPriceNext: (osmPrices as any)[token].next,
             rawHistory: [
               ...rawHistories[token],

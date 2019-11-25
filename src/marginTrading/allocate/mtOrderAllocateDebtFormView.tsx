@@ -6,7 +6,7 @@ import * as ReactModal from 'react-modal';
 import { Observable } from 'rxjs';
 
 import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
-import { tokens } from '../../blockchain/config';
+import { getToken } from '../../blockchain/config';
 import { BigNumberInput } from '../../utils/bigNumberInput/BigNumberInput';
 import { formatAmount } from '../../utils/formatters/format';
 import { FormatAmount, FormatPercent, Money } from '../../utils/formatters/Formatters';
@@ -395,7 +395,7 @@ class MarginableEditable extends React.Component<{
       <div key={debt.name}>
         <Hr color="dark" className={styles.hrMargin} />
         <div className={styles.dict}>
-          { tokens[debt.name].iconColor }
+          { getToken(debt.name).iconColor }
           { debt.name }
           <div className={styles.dictDescription}>
             { allocationInput(
@@ -491,7 +491,7 @@ class Cash extends React.Component<{
     return (
         <div>
           <div className={styles.dict}>
-            { tokens['DAI'].iconColor }
+            { getToken('DAI').iconColor }
             DAI
             <div className={styles.dictDescription}>
               {allocationInput(
@@ -544,7 +544,6 @@ function allocationInput(
   return (
     <InputGroup sizer="sm"
                 className={styles.inputGroup}
-                hasError={!!errorMessage}
                 title={errorMessage}
     >
       <BigNumberInput
@@ -700,7 +699,7 @@ class FinalizeCash extends React.Component<MTAllocateState> {
     const verb = cashDelta.gt(0) ? 'Get' : 'Spend';
     return (
       <div className={styles.dict}>
-        { tokens['DAI'].iconColor }
+        { getToken('DAI').iconColor }
         <span className={styles.dictName}>{verb}</span>
         <Money value={cashDelta.abs()} token="DAI" className={styles.spaceLeft}/>
       </div>
@@ -720,7 +719,7 @@ class FinalizeMarginable extends React.Component<{ debt: EditableDebt }>{
     const particle = effectiveDebt.gt(0) ? 'from' : 'to';
     return (
       <div key={debt.name} className={classnames(styles.dict, styles.finalizeMarginable)}>
-        { tokens[debt.name].iconColor }
+        { getToken(debt.name).iconColor }
         <div>
           <div className={styles.tokenDescriptionLine}>
             <span className={styles.dictName}>
@@ -753,7 +752,7 @@ class FinalizeBuy extends React.Component<OrderAllocateFormProps> {
     return (
       <div>
         <div className={styles.dict}>
-          { tokens['DAI'].iconColor }
+          { getToken('DAI').iconColor }
           <span className={styles.dictName}>Sell</span>
           <Money value={this.props.total} token="DAI" className={styles.spaceLeft}/>
           <span className={classnames(styles.dictName, styles.spaceLeft)}>at</span>
@@ -763,7 +762,7 @@ class FinalizeBuy extends React.Component<OrderAllocateFormProps> {
         </span>
         </div>
         <div className={styles.dict}>
-          { tokens[this.props.baseToken].iconColor }
+          { getToken(this.props.baseToken).iconColor }
           <span className={styles.dictName}>Buy</span>
           <Money value={this.props.amount}
                  token={this.props.baseToken}
@@ -779,7 +778,7 @@ class FinalizeSell extends React.Component<OrderAllocateFormProps> {
     return (
       <div>
         <div className={styles.dict}>
-          { tokens[this.props.baseToken].iconColor }
+          { getToken(this.props.baseToken).iconColor }
           <span className={styles.dictName}>Sell</span>
           <Money value={this.props.amount}
                  token={this.props.baseToken}
@@ -791,7 +790,7 @@ class FinalizeSell extends React.Component<OrderAllocateFormProps> {
         </span>
         </div>
         <div className={styles.dict}>
-          { tokens['DAI'].iconColor }
+          { getToken('DAI').iconColor }
           <span className={styles.dictName}>Buy</span>
           <Money value={this.props.total} token="DAI" className={styles.spaceLeft}/>
         </div>
@@ -805,7 +804,7 @@ class FinalizeFund extends React.Component<TransferAllocateFormProps> {
     return (
       <div>
         <div className={styles.dict}>
-          { tokens[this.props.token].iconColor }
+          { getToken(this.props.token).iconColor }
           <span className={styles.dictName}>Fund</span>
           <Money value={this.props.amount} token={this.props.token} className={styles.spaceLeft}/>
         </div>
@@ -819,7 +818,7 @@ class FinalizeDraw extends React.Component<TransferAllocateFormProps> {
     return (
       <div>
         <div className={styles.dict}>
-          { tokens[this.props.token].iconColor }
+          { getToken(this.props.token).iconColor }
           <span className={styles.dictName}>Draw</span>
           <Money value={this.props.amount} token={this.props.token} className={styles.spaceLeft}/>
         </div>

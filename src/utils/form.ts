@@ -9,6 +9,7 @@ import { Calls, Calls$, ReadCalls, ReadCalls$ } from '../blockchain/calls/calls'
 import { TxState, TxStatus } from '../blockchain/transactions';
 import { User } from '../blockchain/user';
 import { amountFromWei } from '../blockchain/utils';
+import { TradeWithStatus } from '../exchange/myTrades/openTrades';
 import { Offer, OfferType, Orderbook } from '../exchange/orderbook/orderbook';
 import { MTAccount, MTAccountState } from '../marginTrading/state/mtAccount';
 
@@ -51,6 +52,7 @@ export enum FormChangeKind {
   slippageLimitChange = 'slippageLimitChange',
   viewChange = 'viewChange',
   accountChange = 'accountChange',
+  ordersChange = 'ordersChange'
 }
 
 export enum OfferMatchType {
@@ -178,6 +180,11 @@ export interface  AccountChange {
   value: string;
 }
 
+export interface OrdersChange {
+  kind: FormChangeKind.ordersChange;
+  orders: TradeWithStatus[];
+}
+
 export function progressChange(progress?: ProgressStage): ProgressChange {
   return { progress, kind: FormChangeKind.progress };
 }
@@ -285,6 +292,14 @@ export function toAccountChange(account$: Observable<string|undefined>) {
       value,
       kind: FormChangeKind.accountChange
     } as AccountChange))
+  );
+}
+
+export function toOrdersChange(
+  orders$: Observable<TradeWithStatus[]>
+) {
+  return orders$.pipe(
+    map(orders => ({ orders, kind: FormChangeKind.ordersChange }))
   );
 }
 

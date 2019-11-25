@@ -96,15 +96,17 @@ export const Money = (props: FormatAmountProps) => {
   const { className, style, ...otherProps } = props;
   return (<span className={className} style={style}>
     <FormatAmount data-test-id="amount" {...otherProps} />
-    &nbsp;
+    {' '}
     <Currency value={otherProps.token}/>
   </span>);
 };
 
 export const FormatQuoteToken = (props: { token: string }) => {
   const colors: { [key: string]: string } = {
+    SAI: 'darkgrey',
     DAI: '#FFAC13',
     WETH: '#B15DFF',
+    USDC: 'green',
   };
   return <span style={{ color: colors[props.token] }}>{props.token}</span>;
 };

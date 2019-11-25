@@ -1,25 +1,13 @@
+import {
+  checkProxyAllowances,
+  expectAllowanceStatusFor,
+  expectAllowedTokensCount,
+  setAllowanceOf
+} from '../../pages/Allowance';
 import * as Proxy from '../../pages/Proxy';
 import { Tab } from '../../pages/Tab';
 import { WalletConnection } from '../../pages/WalletConnection';
 import { cypressVisitWithWeb3, tid } from '../../utils';
-
-// Unless we need those for something else
-// I guess we can leave the within the test.
-const goToAllowances = () => {
-  cy.get(tid('set-allowances')).click();
-};
-
-const setAllowanceOf = (token: string) => {
-  cy.get(tid(token)).click();
-};
-
-const expectAllowanceStatusFor = (token: string, hasAllowance: 'true' | 'false') => {
-  cy.get(tid(token, tid('status'))).should('have.attr', 'data-test-isallowed', hasAllowance);
-};
-
-const expectAllowedTokensCount = (count: number) => {
-  cy.get(tid('active-allowances')).contains(`${count} Tokens enabled for Trading`);
-};
 
 const enum AllowanceStatus {
   ALLOWED = 'true',
@@ -43,7 +31,7 @@ describe('Proxy Allowance', () => {
 
   it('should set allowance to a single token', () =>   {
     Proxy.hasStatus(Proxy.ProxyStatus.ENABLED);
-    goToAllowances();
+    checkProxyAllowances();
 
     expectAllowanceStatusFor('WETH', AllowanceStatus.DISABLED);
     setAllowanceOf('WETH');
@@ -52,7 +40,7 @@ describe('Proxy Allowance', () => {
 
   it('should set allowance to two token at the same time', () => {
     Proxy.hasStatus(Proxy.ProxyStatus.ENABLED);
-    goToAllowances();
+    checkProxyAllowances();
     expectAllowanceStatusFor('WETH', AllowanceStatus.DISABLED);
     setAllowanceOf('WETH');
 
@@ -65,7 +53,7 @@ describe('Proxy Allowance', () => {
 
   it('should display allowance if one is set', () => {
     Proxy.hasStatus(Proxy.ProxyStatus.ENABLED);
-    goToAllowances();
+    checkProxyAllowances();
 
     expectAllowanceStatusFor('WETH', AllowanceStatus.DISABLED);
     setAllowanceOf('WETH');
@@ -76,14 +64,14 @@ describe('Proxy Allowance', () => {
 
     expectAllowedTokensCount(1);
 
-    goToAllowances();
+    checkProxyAllowances();
 
     expectAllowanceStatusFor('WETH', AllowanceStatus.ALLOWED);
   });
 
   it('should disable already set allowance', () => {
     Proxy.hasStatus(Proxy.ProxyStatus.ENABLED);
-    goToAllowances();
+    checkProxyAllowances();
 
     expectAllowanceStatusFor('WETH', AllowanceStatus.DISABLED);
 
@@ -98,7 +86,7 @@ describe('Proxy Allowance', () => {
 
   it('should go to proxy setting page if proxy is deleted',  () => {
     Proxy.hasStatus(Proxy.ProxyStatus.ENABLED);
-    goToAllowances();
+    checkProxyAllowances();
 
     expectAllowanceStatusFor('WETH', AllowanceStatus.DISABLED);
 

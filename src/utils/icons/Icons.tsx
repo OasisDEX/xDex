@@ -52,6 +52,7 @@ export const SettingsIcon = (props: ButtonProps) => {
   const { className, ...other } = props;
   return (
     <ButtonIcon
+      color="secondaryOutlined"
       className={classnames(styles.settingsIcon, className)}
       image={cogWheelSvg}
       {...other}
@@ -63,7 +64,8 @@ export const BackIcon = (props: ButtonProps) => {
   const { className, ...other } = props;
   return (
     <ButtonIcon
-      className={classnames(styles.settingsIcon, className)}
+      color="secondaryOutlined"
+      className={classnames(styles.backIcon, className)}
       image={backSvg}
       {...other}
     />
@@ -74,6 +76,7 @@ export const AccountIcon = (props: ButtonProps) => {
   const { className, ...other } = props;
   return (
     <ButtonIcon
+      color="secondaryOutlined"
       className={classnames(styles.accountIcon, className)}
       image={accountSvg}
       {...other}

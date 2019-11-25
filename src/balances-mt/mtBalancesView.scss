@@ -1,11 +1,17 @@
 @import "../utils/Variables";
 @import "../utils/forms/Buttons.mixins";
 
+$header-media-breakpoint: 880px;
+
 .balancesPanel {
   width: 100%;
 }
 
 .table {
+  tr {
+    border-bottom: 1px solid $element-border;
+  }
+
   th {
     text-transform: unset;
 
@@ -15,7 +21,6 @@
   }
 
   td {
-    border-bottom: 1px solid #393942;
 
     &:first-child {
       padding-left: 15px;
@@ -83,15 +88,10 @@
   &:hover.disabled {
     cursor: default;
   }
+}
 
-  @include button((
-          color: $font-color-base,
-          bg: $grey-darkest,
-          border-color: $grey-light,
-          color-hover: $font-color-base,
-          border-color-hover: lighten($grey-darkest, 5%),
-          bg-hover: lighten($grey-light, 5%)
-  ));
+.redeemBtn {
+  width: 100%;
 }
 
 .transferBtnLeft {
@@ -101,8 +101,12 @@
 
 .dropdownButton {
   border: 0;
-  padding: 10px 0.833em 10px 50px;
+  padding: 8px 0.833em 8px 50px;
   margin-left: 10px;
+
+  :global(.dotted-menu-body) {
+    fill: $desaturated-dark-blue;
+  }
 }
 
 .dropdownList {
@@ -112,16 +116,25 @@
   position: absolute;
   right: 0;
   top: 28px;
-  background: #35353E;
+  background: $white;
   box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
   border-radius: 8px;
   padding: 12px 20px;
   z-index: 3;
+
+  .actionButton {
+    margin-bottom: 12px;
+  }
+
+  .actionButton:last-child {
+    margin-bottom: 0;
+  }
 }
 
 .dropdownMenu {
   display: flex;
   position: relative;
+
   &:hover {
     .dropdownList {
       display: block;
@@ -132,11 +145,12 @@
 .setupSection {
   display: flex;
   overflow: hidden;
+  padding: 0 16px;
 }
 
 .setupBox {
   flex: 1;
-  border: 1px solid $grey-dark;
+  border: 1px solid $element-border;
   border-radius: 4px;
   padding: 24px;
   margin: 40px 12px;
@@ -158,7 +172,6 @@
 }
 
 button.actionButton {
-  height: 30px;
   font-size: 14px;
   font-weight: 400;
   text-transform: none;
@@ -172,15 +185,31 @@ button.actionButton {
   margin-right: 15px;
 }
 
+.setupBtn {
+  height: 34px;
+  width: 100%;
+  max-width: 170px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
 .buttonCheck {
   min-width: 115px;
 }
 
 .referencePriceField {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   margin-left: auto;
+  font-size: 14px;
   float: right;
-  border: 1px solid #58585F;
+  border: 1px solid $element-border;
   border-radius: 2px;
   padding: 0 8px;
-  height: 28px;
+  height: 30px;
+}
+
+.callForAction {
+  height: 200px;
 }

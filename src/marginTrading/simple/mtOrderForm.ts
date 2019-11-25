@@ -4,7 +4,7 @@ import { merge, Observable, of, Subject } from 'rxjs';
 import { first, map, scan, switchMap, takeUntil } from 'rxjs/operators';
 import { DustLimits } from '../../balances-nomt/balances';
 import { Calls, Calls$, ReadCalls$ } from '../../blockchain/calls/calls';
-import { AssetKind, tokens } from '../../blockchain/config';
+import { AssetKind, getToken } from '../../blockchain/config';
 import { Offer, OfferType, Orderbook } from '../../exchange/orderbook/orderbook';
 import { TradingPair } from '../../exchange/tradingPair/tradingPair';
 import { combineAndMerge } from '../../utils/combineAndMerge';
@@ -293,7 +293,7 @@ function validate(state: MTSimpleFormState): MTSimpleFormState {
         amount: spendDustLimit || new BigNumber(0),
       });
     }
-    if (new BigNumber(tokens[spendAssetName].maxSell).lt(spendAmount)) {
+    if (new BigNumber(getToken(spendAssetName).maxSell).lt(spendAmount)) {
       messages.push({
         kind: MessageKind.incredibleAmount,
         field: spendField,
@@ -301,7 +301,7 @@ function validate(state: MTSimpleFormState): MTSimpleFormState {
         token: spendAssetName,
       });
     }
-    if (new BigNumber(tokens[receiveAssetName].maxSell).lt(receiveAmount)) {
+    if (new BigNumber(getToken(spendAssetName).maxSell).lt(receiveAmount)) {
       messages.push({
         kind: MessageKind.incredibleAmount,
         field: receiveField,

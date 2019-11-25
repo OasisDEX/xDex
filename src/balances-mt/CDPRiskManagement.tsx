@@ -1,7 +1,7 @@
 import classnames from 'classnames';
 import * as React from 'react';
 
-import { tokens } from '../blockchain/config';
+import { getToken } from '../blockchain/config';
 import { MarginableAsset } from '../marginTrading/state/mtAccount';
 import { FormatPercent, Money } from '../utils/formatters/Formatters';
 import { Button } from '../utils/forms/Buttons';
@@ -27,8 +27,8 @@ export class CDPRiskManagement
     return (
       <Panel style={{ width: '100%' }}>
         <PanelHeader bordered={true}>
-          {tokens[this.props.name].iconColor}
-          <Currency value={tokens[this.props.name].name}/>
+          {getToken(this.props.name).iconColor}
+          <Currency value={getToken(this.props.name).name}/>
           <Button
             style={{ marginLeft: 'auto' }}
             disabled={this.props.history.length === 0}

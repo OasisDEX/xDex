@@ -1,15 +1,18 @@
 import { isEqual } from 'lodash';
 import 'normalize.css';
+import * as Raven from 'raven-js';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { combineLatest, Observable, of } from 'rxjs';
 import { distinctUntilChanged, startWith, switchMap, tap } from 'rxjs/internal/operators';
 import { map } from 'rxjs/operators';
+import { mixpanelInit } from './analytics';
 import { networks } from './blockchain/config';
 import { account$, networkId$ } from './blockchain/network';
 import { Web3Status, web3Status$ } from './blockchain/web3';
 import { LoadingState } from './landingPage/LandingPage';
 import { Main } from './Main';
+import { NavigationTxRx } from './Navigation';
 import { connect } from './utils/connect';
 import { UnreachableCaseError } from './utils/UnreachableCaseError';
 
@@ -19,6 +22,8 @@ interface Props {
   tosAccepted?: boolean;
   hasSeenAnnouncement?: boolean;
 }
+
+mixpanelInit();
 
 class App extends React.Component<Props> {
 
@@ -51,7 +56,7 @@ class App extends React.Component<Props> {
         *     nextView={<Main/>}
         *     />
         * */
-        return <Main/>;
+        return <NavigationTxRx><Main/></NavigationTxRx>;
       default:
         throw new UnreachableCaseError(this.props.status);
     }
@@ -83,4 +88,11 @@ const AppTxRx = connect(App, props$);
 
 const root: HTMLElement = document.getElementById('root')!;
 
-ReactDOM.render(<AppTxRx/>, root);
+if (process.env.NODE_ENV === 'production' && process.env.REACT_APP_SENTRY_DNS) {
+  Raven.config(
+    process.env.REACT_APP_SENTRY_DNS
+  ).install();
+  Raven.context(() => ReactDOM.render(<AppTxRx/>, root));
+} else {
+  ReactDOM.render(<AppTxRx/>, root);
+}

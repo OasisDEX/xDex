@@ -2,7 +2,7 @@
 
 .MTPositionPanel {
   display: flex;
-  border-bottom: 1px solid #393942;
+  border-bottom: 1px solid $element-border;
   margin-bottom: 24px;
 }
 
@@ -30,18 +30,18 @@
 }
 
 .summaryLabel {
-  color: $grey-light-mid;
+  color: $dark-grayish-blue;
   flex-grow: 1;
 }
 
 .summaryValue {
-  color: #fff;
+  color: $very-dark-violet;
   flex-grow: 1;
   text-align: right;
 }
 
 .statsBox {
-  border: 1px solid #383842;
+  border: 1px solid $element-border;
   border-radius: 4px;
   padding: 6px 10px;
   margin: 0 0 16px 0;
