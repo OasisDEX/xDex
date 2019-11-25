@@ -13,7 +13,7 @@ import {
 } from 'rxjs/operators';
 import { Allowances } from '../balances-nomt/balances';
 
-import { AssetKind, NetworkConfig, tokens } from '../blockchain/config';
+import { AssetKind, NetworkConfig, tradingTokens } from '../blockchain/config';
 import { account$, context$, onEveryBlock$ } from '../blockchain/network';
 import { amountFromWei } from '../blockchain/utils';
 import {
@@ -62,7 +62,7 @@ export const balances$: Observable<Balances> = combineLatest(
   switchMap(([context, account]) =>
     !account ? of({}) :
       forkJoin(
-        Object.keys(tokens).map((token: string) =>
+        tradingTokens.map((token: string) =>
           balance$(context, token, account).pipe(
             map(balance => ({
               [token]: balance
@@ -83,7 +83,7 @@ type Dust = (token: string, callback: (err: any, r: BigNumber) => any) => any;
 export const dustLimits$: Observable<DustLimits> = combineLatest(context$).pipe(
   switchMap(([context]) =>
     forkJoin(
-      Object.keys(tokens)
+      tradingTokens
       .filter(token => context.tokens[token])
       .map((token: string) => {
         return bindNodeCallback(context.otc.contract.getMinSell as Dust)(
@@ -117,7 +117,7 @@ export function combineBalances(
   etherBalance: BigNumber, walletBalances: Balances, allowances: Allowances, mta: MTAccount
 ): CombinedBalances {
 
-  const balances = Object.keys(tokens)
+  const balances = tradingTokens
     .map(name => {
       const walletBalance = name === 'ETH' ? etherBalance : walletBalances[name];
 

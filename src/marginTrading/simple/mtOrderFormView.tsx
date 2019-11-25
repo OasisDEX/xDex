@@ -5,13 +5,13 @@ import * as ReactDOM from 'react-dom';
 import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
 import * as formStyles from '../../exchange/offerMake/OfferMakeForm.scss';
 import { OfferType } from '../../exchange/orderbook/orderbook';
-import { BigNumberInput } from '../../utils/bigNumberInput/BigNumberInput';
+import { BigNumberInput, lessThanOrEqual } from '../../utils/bigNumberInput/BigNumberInput';
 import { FormChangeKind } from '../../utils/form';
 import { formatAmount, formatPrecision, formatPrice } from '../../utils/formatters/format';
 import { FormatPercent, Money } from '../../utils/formatters/Formatters';
 import { Button, ButtonGroup } from '../../utils/forms/Buttons';
 import { ErrorMessage } from '../../utils/forms/ErrorMessage';
-import { InputGroup, InputGroupAddon, lessThanOrEqual } from '../../utils/forms/InputGroup';
+import { InputGroup, InputGroupAddon } from '../../utils/forms/InputGroup';
 import { Radio } from '../../utils/forms/Radio';
 import { SettingsIcon } from '../../utils/icons/Icons';
 import { Hr } from '../../utils/layout/LayoutHelpers';
@@ -254,7 +254,6 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
           Instant Order
           {this.headerButtons()}
         </PanelHeader>
-        <Hr color="dark" className={styles.hrSmallMargin}/>
         <PanelBody style={{ minWidth: '455px' }}>
           <form
             onSubmit={this.handleProceed}
@@ -320,14 +319,18 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
         />
         <ButtonGroup>
           <Button
+            data-test-id="new-buy-order"
             className={styles.btn}
             onClick={() => this.handleKindChange(OfferType.buy)}
-            color={this.props.kind === 'buy' ? 'green' : 'grey'}
+            color={this.props.kind === OfferType.buy ? 'primary' : 'greyOutlined'}
+            size="sm"
           >Buy</Button>
           <Button
+            data-test-id="new-sell-order"
             className={styles.btn}
             onClick={() => this.handleKindChange(OfferType.sell)}
-            color={this.props.kind === 'sell' ? 'red' : 'grey'}
+            color={this.props.kind === OfferType.sell ? 'danger' : 'greyOutlined'}
+            size="sm"
           >Sell</Button>
         </ButtonGroup>
       </>
@@ -443,9 +446,6 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
       <InputGroup
         sizer="lg"
         style={ { marginTop: '24px' } }
-        hasError={ (this.props.messages || [])
-          .filter((message: Message) => message.field === 'slippageLimit')
-          .length > 0}
       >
         <InputGroupAddon className={formStyles.inputHeader}>
           Slippage limit
@@ -463,7 +463,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
               prefix: ''
             })}
             pipe={
-              lessThanOrEqual(100)
+              lessThanOrEqual(new BigNumber(100))
             }
             onChange={this.handleSlippageLimitChange}
             value={ slippageLimit }
@@ -643,9 +643,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
   private total() {
     return (
       <div>
-        <InputGroup hasError={ (this.props.messages || [])
-          .filter((message: Message) => message.field === 'total')
-          .length > 0}>
+        <InputGroup>
           <InputGroupAddon border="right" className={styles.inputHeader}>Total</InputGroupAddon>
           <BigNumberInput
             ref={ (el: any) =>
@@ -699,7 +697,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
         className={styles.confirmButton}
         type="submit"
         value="submit"
-        color={ this.props.kind === OfferType.buy ? 'green' : 'red' }
+        color={ this.props.kind === OfferType.buy ? 'primary' : 'danger' }
         disabled={ !this.props.readyToProceed || !!this.props.progress }
       >
         {label}
@@ -709,9 +707,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
 
   private amountGroup() {
     return (
-      <InputGroup hasError={ (this.props.messages || [])
-        .filter((message: Message) => message.field === 'amount')
-        .length > 0}>
+      <InputGroup>
         <InputGroupAddon border="right" className={styles.inputHeader}>Amount</InputGroupAddon>
         <BigNumberInput
           ref={ (el: any) =>

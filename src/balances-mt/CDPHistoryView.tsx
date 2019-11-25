@@ -54,6 +54,9 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
                   <span className={styles.headerDark}>Amount</span> {this.props.name}
                 </th>
                 <th>
+                  <span className={styles.headerDark}>Redeem</span> {this.props.name}
+                </th>
+                <th>
                   <span className={styles.headerDark}>Total</span> DAI
                 </th>
                 <th>
@@ -68,87 +71,99 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
               </tr>
               </thead>
               <tbody>
-              { this.props.history.filter(h => h.kind !== MTHistoryEventKind.adjust)
-                .reverse().map((e, i) => {
+              { this.props.history.map((e, i) => {
+                // const liquidationEvents = [
+                //     MTHistoryEventKind.bite,
+                //     MTHistoryEventKind.kick,
+                //     MTHistoryEventKind.dent,
+                //     MTHistoryEventKind.tend,
+                //     MTHistoryEventKind.deal,
+                //     MTHistoryEventKind.redeem,
+                //   ];
 
-                  const liquidationEvents = [
-                    MTHistoryEventKind.bite,
-                    MTHistoryEventKind.kick,
-                    MTHistoryEventKind.dent,
-                    MTHistoryEventKind.tend,
-                    MTHistoryEventKind.deal,
-                  ];
-
-                  console.log(e.kind, e);
-                  if (liquidationEvents.indexOf(e.kind) >= 0) {
-                    const { lot, bid, tab } = e as any;
-                    return <tr key={i}>
-                      <td className={classnames(styles.eventName, styles.cellLeftAligned)}>
-                        {e.kind}
-                      </td>
-                      <td colSpan={5}>
-                        {lot && <>
-                            lot: <FormatAmount value={lot} token={e.token} fallback={''} />;
-                        </>}
-                        {bid && <>
-                            bid: <FormatAmount value={bid} token={'DAI'} fallback={''} />;
-                        </>}
-                        {tab && <>
-                            tab: <FormatAmount value={tab} token={'DAI'} fallback={''} />;
-                        </>}
-                      </td>
-                      <td>
-                        <InfoLabel>
-                          { formatDateTime(new Date(e.timestamp), true) }
-                        </InfoLabel>
-                      </td>
-                    </tr>;
-                  }
-                  let sign = '';
-                  let DAIsign = '';
-                  const dAmount = e.dAmount && !e.dAmount.isNaN() ? e.dAmount : zero;
-                  const dDAIAmount = e.dDAIAmount && !e.dDAIAmount.isNaN() ? e.dDAIAmount : zero;
-                  const debtDelta = e.debtDelta && !e.debtDelta.isNaN() ? e.debtDelta : zero;
-                  const liquidationPriceDelta =
+                // if (liquidationEvents.indexOf(e.kind) >= 0) {
+                //     const { lot, bid, tab, amount } = e as any;
+                //
+                //     // if (e.kind === MTHistoryEventKind.bite) {
+                //     //   e.dAmount = lot.times(-1);
+                //     // }
+                //
+                //     // return <tr key={i}>
+                //     //   <td className={classnames(styles.eventName, styles.cellLeftAligned)}>
+                //     //     {e.kind}
+                //     //   </td>
+                //     //   <td colSpan={5}>
+                //     //     {lot && <>
+                //     //         lot: <FormatAmount value={lot} token={e.token} fallback={''} />;
+                //     //     </>}
+                //     //     {bid && <>
+                //     //         bid: <FormatAmount value={bid} token={'DAI'} fallback={''} />;
+                //     //     </>}
+                //     //     {tab && <>
+                //     //         tab: <FormatAmount value={tab} token={'DAI'} fallback={''} />;
+                //     //     </>}
+                //     //     {amount && <>
+                //     //         amount:
+                // <FormatAmount value={amount} token={e.token} fallback={''} />;
+                //     //     </>}
+                //     //   </td>
+                //     //   <td>
+                //     //     <InfoLabel>
+                //     //       { formatDateTime(new Date(e.timestamp), true) }
+                //     //     </InfoLabel>
+                //     //   </td>
+                //     // </tr>;
+                //   }
+                let sign = '';
+                let DAIsign = '';
+                const dAmount = e.dAmount && !e.dAmount.isNaN() ? e.dAmount : zero;
+                const dDAIAmount = e.dDAIAmount && !e.dDAIAmount.isNaN() ? e.dDAIAmount : zero;
+                const debtDelta = e.debtDelta && !e.debtDelta.isNaN() ? e.debtDelta : zero;
+                const liquidationPriceDelta =
                     e.liquidationPriceDelta && !e.liquidationPriceDelta.isNaN() ?
                       e.liquidationPriceDelta : zero;
 
-                  if (
+                if (
                   e.kind === MTHistoryEventKind.fundGem ||
                   e.kind === MTHistoryEventKind.drawDai ||
-                  e.kind === MTHistoryEventKind.buyLev) {
-                    sign = '+';
-                    DAIsign = '-';
-                  }
-                  if (
+                  e.kind === MTHistoryEventKind.buyLev ||
+                  e.kind === MTHistoryEventKind.redeem
+                  ) {
+                  sign = '+';
+                  DAIsign = '-';
+                }
+                if (
                   e.kind === MTHistoryEventKind.drawGem ||
                   e.kind === MTHistoryEventKind.fundDai ||
-                  e.kind === MTHistoryEventKind.sellLev) {
-                    sign = '-';
-                    DAIsign = '+';
-                  }
-                  if (dDAIAmount.isEqualTo(zero)) { DAIsign = ''; }
-                  if (dAmount.isEqualTo(zero)) { sign = ''; }
+                  e.kind === MTHistoryEventKind.sellLev
+                  ) {
+                  sign = '-';
+                  DAIsign = '+';
+                }
+                if (dDAIAmount.isEqualTo(zero)) { DAIsign = ''; }
+                if (dAmount.isEqualTo(zero)) { sign = ''; }
 
-                  let displayName = '';
-                  switch (e.kind) {
-                    case MTHistoryEventKind.drawDai:
-                    case MTHistoryEventKind.drawGem:
-                      displayName = 'Withdraw';
-                      break;
-                    case MTHistoryEventKind.fundDai:
-                    case MTHistoryEventKind.fundGem:
-                      displayName = 'Deposit';
-                      break;
-                    case MTHistoryEventKind.buyLev:
-                      displayName = 'Buy';
-                      break;
-                    case MTHistoryEventKind.sellLev:
-                      displayName = 'Sell';
-                      break;
-                  }
+                let displayName = '';
+                switch (e.kind) {
+                  case MTHistoryEventKind.drawDai:
+                  case MTHistoryEventKind.drawGem:
+                    displayName = 'Withdraw';
+                    break;
+                  case MTHistoryEventKind.fundDai:
+                  case MTHistoryEventKind.fundGem:
+                    displayName = 'Deposit';
+                    break;
+                  case MTHistoryEventKind.buyLev:
+                    displayName = 'Buy';
+                    break;
+                  case MTHistoryEventKind.sellLev:
+                    displayName = 'Sell';
+                    break;
+                  default:
+                    displayName = e.kind;
+                }
 
-                  return (
+                return (
                   <tr key={i}>
                     <td className={
                       classnames(styles.eventName, styles.cellLeftAligned)
@@ -161,6 +176,14 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
                       <>
                         {sign} <FormatAmount value={dAmount} token={e.token} />
                       </>
+                    </td>
+                    <td>
+                      {
+                        e.redeemable &&
+                        <>
+                          <FormatAmount value={e.redeemable} token={e.token} />
+                        </>
+                      }
                     </td>
                     <td>
                       <>
@@ -183,8 +206,8 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
                       </InfoLabel>
                     </td>
                   </tr>
-                  );
-                }
+                );
+              }
               )}
               </tbody>
           </Table>

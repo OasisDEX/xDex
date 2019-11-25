@@ -1,7 +1,7 @@
 import classnames from 'classnames';
 import * as React from 'react';
 
-import { tokens } from '../blockchain/config';
+import { getToken } from '../blockchain/config';
 import { NonMarginableAsset } from '../marginTrading/state/mtAccount';
 import { Money } from '../utils/formatters/Formatters';
 import { Hr } from '../utils/layout/LayoutHelpers';
@@ -16,9 +16,9 @@ export class NonmarginableManagement
     return (
       <Panel style={{ width: '100%' }}>
         <PanelHeader bordered={true}>
-          {tokens[this.props.name].iconColor}
+          {getToken(this.props.name).iconColor}
           {/*<TokenBgColoredIcon token={this.props.name} style={{ marginRight: '0.75em' }}  />*/}
-          <Currency value={tokens[this.props.name].name}/>
+          <Currency value={getToken(this.props.name).name}/>
         </PanelHeader>
         <div className={styles.panelBody}>
           <div className={styles.flex}>

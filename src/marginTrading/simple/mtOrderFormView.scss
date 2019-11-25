@@ -9,8 +9,8 @@
 }
 
 .btn {
-  height: 28px;
-  width: 72px;
+  font-size: 13px;
+  width: 68px;
 }
 
 // form
@@ -43,7 +43,7 @@ $historyPanelsHeight: 605px;
 .balanceBtn {
   align-items: center;
   display: flex;
-  @include fontLatoBold;
+  @include fontBold;
   justify-content: center;
   letter-spacing: 0.4px;
   width: 150px;
@@ -125,12 +125,12 @@ $historyPanelsHeight: 605px;
 
 // style purchasing power box
 .purchasingPowerTitle {
-  @include fontMontserratSemibold;
+  @include fontSemiBold;
   font-size: 15px;
 }
 
 .purchasingPowerAmount {
-  @include fontLatoBold;
+  @include fontBold;
 }
 
 // style order type box
@@ -153,12 +153,18 @@ $historyPanelsHeight: 605px;
 }
 
 .summaryBox {
-  border: 1px solid #383842;
-  padding: 15px 12px 0 12px;
+  margin-top: 16px;
+  border: 1px solid $element-border;
+  border-bottom: 0;
+  padding: 16px 12px;
 }
 
 .orderSummaryRow {
   @include formRow;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
 }
 
 .orderSummaryRowDark {
@@ -177,11 +183,11 @@ $historyPanelsHeight: 605px;
 }
 
 .orderSummaryValuePositive {
-  color: #36EFBA;
+  color: $green;
 }
 
 .orderSummaryValueNegative {
-  color: #FF6951;
+  color: $orange;
 }
 
 // ---------- horizontal lines spaces
@@ -204,7 +210,7 @@ $historyPanelsHeight: 605px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border: 1px solid #383842;
+  border: 1px solid $element-border;
   font-size: 15px;
   line-height: 18px;
   margin-bottom: 28px;
@@ -217,7 +223,11 @@ $historyPanelsHeight: 605px;
   box-sizing: border-box;
   border-radius: 2px;
   padding: 10px;
-  border-left: 1px solid #383842;
+  border-left: 1px solid $element-border;
+
+  &:first-child {
+    border-left: none;
+  }
 }
 
 .InfoRowLabel {
@@ -231,5 +241,6 @@ $historyPanelsHeight: 605px;
   border: 1px dashed rgba(88, 88, 95, 0.4);
   border-radius: 2px;
   padding: 30px 0;
-  margin-bottom: 15px;
+  margin-top: 16px;
+  margin-bottom: 16px;
 }

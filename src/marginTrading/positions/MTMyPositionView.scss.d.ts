@@ -11,3 +11,7 @@ export const summaryValuePositive: string;
 export const summaryValueNegative: string;
 export const statsBox: string;
 export const actionButton: string;
+export const message: string;
+export const infoMessage: string;
+export const warningMessage: string;
+export const redeemButton: string;

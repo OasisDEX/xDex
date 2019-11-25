@@ -80,6 +80,13 @@ export enum MTHistoryEventKind {
   tend = 'Tend',
   dent = 'Dent',
   deal = 'Deal',
+  redeem = 'Redeem',
+}
+
+export enum mtBitable {
+  yes = 'yes',
+  no = 'no',
+  imminent = 'imminent',
 }
 
 export type MTHistoryEvent = {
@@ -90,6 +97,7 @@ export type MTHistoryEvent = {
   ddai?: BigNumber;
   dgem?: BigNumber;
   amount?: BigNumber;
+  redeemable?: BigNumber;
   dAmount: BigNumber;
   dDAIAmount: BigNumber;
 } & (MTMarginEvent | MTLiquidationEvent);
@@ -118,7 +126,7 @@ export type MTLiquidationEvent = {
 
   timestamp: number;
   token: string;
-  id: BigNumber;
+  id: number;
 } & ({
   kind: MTHistoryEventKind.bite
   lot: BigNumber;
@@ -134,7 +142,11 @@ export type MTLiquidationEvent = {
   bid: BigNumber;
 } | {
   kind: MTHistoryEventKind.deal;
-});
+} | {
+  kind: MTHistoryEventKind.redeem;
+  amount: BigNumber;
+}
+);
 
 // export type MTLiquidationEvent = {
 //   timestamp: number;
@@ -162,6 +174,9 @@ export interface MarginableAssetCore extends Core {
   safeCollRatio: BigNumber;
   fee: BigNumber;
   urn: string;
+  osmPriceNext: BigNumber | undefined;
+  zzz: Date;
+  redeemable: BigNumber;
 }
 
 export interface MarginableAsset extends MarginableAssetCore {
@@ -182,6 +197,9 @@ export interface MarginableAsset extends MarginableAssetCore {
   liquidationInProgress: boolean;
   history: MarginableAssetHistory;
   pnl?: BigNumber;
+  bitable: mtBitable.no | mtBitable.imminent | mtBitable.yes;
+  runningAuctions: number;
+  amountBeingLiquidated: BigNumber;
 }
 
 export interface NonMarginableAssetCore extends Core {

@@ -5,8 +5,8 @@ import { shareReplay } from 'rxjs/internal/operators';
 import { first, map, scan, switchMap, takeUntil } from 'rxjs/operators';
 import { DustLimits } from '../../balances-nomt/balances';
 import { Calls, Calls$, ReadCalls$ } from '../../blockchain/calls/calls';
-import { AssetKind, tokens } from '../../blockchain/config';
-import { OfferType, Orderbook } from '../../exchange/orderbook/orderbook';
+import { AssetKind, getToken } from '../../blockchain/config';
+import { Offer, OfferType, Orderbook } from '../../exchange/orderbook/orderbook';
 import { TradingPair } from '../../exchange/tradingPair/tradingPair';
 import { combineAndMerge } from '../../utils/combineAndMerge';
 import {
@@ -39,6 +39,9 @@ import { formatPriceDown, formatPriceUp } from '../../utils/formatters/format';
 import { description, Impossible, isImpossible } from '../../utils/impossible';
 import { firstOfOrTrue } from '../../utils/operators';
 import { minusOne, zero } from '../../utils/zero';
+import { EditableDebt } from '../allocate/mtOrderAllocateDebtForm';
+import { prepareBuyAllocationRequest } from '../plan/planBuy';
+import { prepareSellAllocationRequest } from '../plan/planSell';
 import { buy, getPriceImpact, getTotal } from '../plan/planUtils';
 import {
   findAsset,
@@ -53,7 +56,7 @@ import {
 } from '../state/mtAccount';
 import {
   calculateMarginable,
-  realPurchasingPowerMarginable,
+  realPurchasingPowerMarginable, realPurchasingPowerNonMarginable,
 } from '../state/mtCalculate';
 import { getBuyPlan, getSellPlan } from './mtOrderPlan';
 
@@ -291,7 +294,7 @@ function validate(state: MTSimpleFormState): MTSimpleFormState {
         amount: spendDustLimit || new BigNumber(0),
       });
     }
-    if (new BigNumber(tokens[spendAssetName].maxSell).lt(spendAmount)) {
+    if (new BigNumber(getToken(spendAssetName).maxSell).lt(spendAmount)) {
       messages.push({
         kind: MessageKind.incredibleAmount,
         field: spendField,
@@ -299,7 +302,7 @@ function validate(state: MTSimpleFormState): MTSimpleFormState {
         token: spendAssetName,
       });
     }
-    if (new BigNumber(tokens[receiveAssetName].maxSell).lt(receiveAmount)) {
+    if (new BigNumber(getToken(spendAssetName).maxSell).lt(receiveAmount)) {
       messages.push({
         kind: MessageKind.incredibleAmount,
         field: receiveField,
@@ -322,58 +325,83 @@ function validate(state: MTSimpleFormState): MTSimpleFormState {
   };
 }
 
-// function addPurchasingPower(state: MTSimpleFormState) {
-//
-//   const baseAsset =
-//     findMarginableAsset(state.baseToken, state.mta) ||
-//     findNonMarginableAsset(state.baseToken, state.mta);
-//
-//   if (!state.mta
-//     || state.mta.state !== MTAccountState.setup
-//     || !state.orderbook
-//     || !baseAsset
-//   ) {
-//     return state;
-//   }
-//
-//   const realPurchasingPower = baseAsset.assetKind === AssetKind.marginable ?
-//     realPurchasingPowerMarginable(
-//       baseAsset,
-//       state.orderbook.sell)
-//     :
-//     realPurchasingPowerNonMarginable(
-//       state.mta.cash.balance,
-//       state.orderbook.sell
-//     );
-//
-//   const realPurchasingPowerPost =
-//     state.messages.length === 0 &&
-//     state.total &&
-//     realPurchasingPower.minus(state.total);
-//
-//   // TODO: seems to be wrong...
-//   // let realPurchasingPowerPost;
-//   // if (state.amount && state.price) {
-//   //   const cashAvailable = state.amount.times(state.price);
-//   //   const [, , offers] = buy(cashAvailable, state.orderbook.sell);
-//   //
-//   //   realPurchasingPowerPost = baseAsset.assetKind === AssetKind.marginable ?
-//   //     realPurchasingPowerMarginable(
-//   //       baseAsset,
-//   //       offers)
-//   //     :
-//   //     realPurchasingPowerNonMarginable(
-//   //       state.mta.cash.balance,
-//   //       offers
-//   //     );
-//   // }
-//
-//   return {
-//     ...state,
-//     realPurchasingPower,
-//     realPurchasingPowerPost,
-//   };
-// }
+function addUserConfig(state: MTSimpleFormState) {
+  return {
+    ...state,
+    slippageLimit: state.slippageLimit || new BigNumber(0.05)
+  };
+}
+
+function addApr(state: MTSimpleFormState) {
+  const baseAsset = findMarginableAsset(state.baseToken, state.mta);
+  // todo: calculate APR from fee
+
+  if (!state.mta
+    || state.mta.state !== MTAccountState.setup
+    || !state.orderbook
+    || !baseAsset
+  ) {
+    return state;
+  }
+
+  return {
+    ...state,
+    apr: baseAsset.fee
+  };
+}
+
+function addPurchasingPower(state: MTSimpleFormState) {
+
+  const baseAsset =
+    findMarginableAsset(state.baseToken, state.mta) ||
+    findNonMarginableAsset(state.baseToken, state.mta);
+
+  if (!state.mta
+    || state.mta.state !== MTAccountState.setup
+    || !state.orderbook
+    || !baseAsset
+  ) {
+    return state;
+  }
+
+  const realPurchasingPower = baseAsset.assetKind === AssetKind.marginable ?
+    realPurchasingPowerMarginable(
+      baseAsset,
+      state.orderbook.sell)
+    :
+    realPurchasingPowerNonMarginable(
+      state.mta.cash.balance,
+      state.orderbook.sell
+    );
+
+  const realPurchasingPowerPost =
+    state.messages.length === 0 &&
+    state.total &&
+    realPurchasingPower.minus(state.total);
+
+  // TODO: seems to be wrong...
+  // let realPurchasingPowerPost;
+  // if (state.amount && state.price) {
+  //   const cashAvailable = state.amount.times(state.price);
+  //   const [, , offers] = buy(cashAvailable, state.orderbook.sell);
+  //
+  //   realPurchasingPowerPost = baseAsset.assetKind === AssetKind.marginable ?
+  //     realPurchasingPowerMarginable(
+  //       baseAsset,
+  //       offers)
+  //     :
+  //     realPurchasingPowerNonMarginable(
+  //       state.mta.cash.balance,
+  //       offers
+  //     );
+  // }
+
+  return {
+    ...state,
+    realPurchasingPower,
+    realPurchasingPowerPost,
+  };
+}
 
 function addAmount(total: BigNumber | undefined, state: MTSimpleFormState): MTSimpleFormState {
 
@@ -485,67 +513,195 @@ function addPrice(state: MTSimpleFormState) {
   };
 }
 
-// function addPriceImpact(state: MTSimpleFormState) {
-//   if (!state.amount || !state.orderbook) {
-//     return state;
-//   }
-//
-//   const priceImpact = getPriceImpact(
-//     state.amount,
-//     state.kind === OfferType.buy ?
-//       state.orderbook.sell :
-//       state.orderbook.buy);
-//
-//   if (isImpossible(priceImpact)) {
-//     return {
-//       ...state,
-//       priceImpact: undefined,
-//     };
-//   }
-//
-//   return {
-//     ...state,
-//     priceImpact
-//   };
-// }
-
-function addPlan(state: MTSimpleFormState): MTSimpleFormState {
-
-  const asset = findMarginableAsset(state.baseToken, state.mta);
-
-  if (!state.mta
-    || state.mta.state !== MTAccountState.setup
-    || !state.orderbook
-    || !asset || asset.assetKind !== AssetKind.marginable
-  ) {
+function addPriceImpact(state: MTSimpleFormState) {
+  if (!state.amount || !state.orderbook) {
     return state;
   }
 
-  const realPurchasingPower = realPurchasingPowerMarginable(
-    asset,
-    state.orderbook.sell);
+  const priceImpact = getPriceImpact(
+    state.amount,
+    state.kind === OfferType.buy ?
+      state.orderbook.sell :
+      state.orderbook.buy);
 
+  if (isImpossible(priceImpact)) {
+    return {
+      ...state,
+      priceImpact: undefined,
+    };
+  }
+
+  return {
+    ...state,
+    priceImpact
+  };
+}
+
+type PlanInfo = [
+  Operation[] | Impossible,
+  {
+    collRatioPost?: BigNumber,
+    liquidationPricePost?: BigNumber,
+    leveragePost?: BigNumber,
+    balancePost?: BigNumber,
+    daiBalancePost?: BigNumber,
+    isSafePost?: boolean
+  }
+  ];
+
+function getBuyPlan(
+  mta: MTAccount,
+  sellOffers: Offer[],
+  baseToken: string,
+  amount: BigNumber,
+  price: BigNumber,
+  realPurchasingPower: BigNumber,
+): PlanInfo {
+
+  const request = prepareBuyAllocationRequest(
+    mta,
+    sellOffers,
+    baseToken,
+    amount,
+    price,
+    realPurchasingPower
+  );
+
+  if (isImpossible(request)) {
+    return [
+      request,
+      {
+        collRatioPost: undefined,
+        liquidationPricePost: undefined,
+        leveragePost: undefined,
+        balancePost: undefined,
+        daiBalancePost: undefined,
+        isSafePost: undefined
+      }
+    ];
+  }
+
+  const asset: MarginableAsset =
+    request.assets.find(ai => ai.name === baseToken) as MarginableAsset;
+
+  // const delta = mta.cash.balance.plus(request.targetDaiBalance);
+  // const delta =
+  //   request.targetDaiBalance.times(minusOne).minus(mta.cash.balance.times(new BigNumber('2')));
+
+  // const delta = BigNumber.max(
+  //   zero,
+  //   mta.cash.balance.minus(request.targetDaiBalance.minus(mta.cash.balance)
+  //     .times(minusOne)).times(minusOne)
+  // );
+
+  const delta = BigNumber.min(request.targetDaiBalance, zero).times(minusOne);
+  const postTradeAsset = calculateMarginable(
+    {
+      ...asset,
+      urnBalance: asset.urnBalance.plus(amount),
+      debt: asset.debt.plus(delta)
+    } as MarginableAssetCore,
+  );
+  const collRatioPost = postTradeAsset.currentCollRatio;
+  const liquidationPricePost = postTradeAsset.liquidationPrice;
+  const isSafePost = postTradeAsset.safe;
+  const leveragePost = postTradeAsset.leverage;
+  const balancePost = postTradeAsset.balance;
+  const daiBalancePost = postTradeAsset.debt.gt(zero) ?
+    postTradeAsset.debt.times(minusOne) : postTradeAsset.dai;
+
+  console.log('post trade debt', postTradeAsset.debt.toString());
+  console.log('post trade dai', postTradeAsset.dai.toString());
+  return [
+    request.createPlan([{
+      ...request.assets.find(ai => ai.name === baseToken),
+      delta
+    } as Required<EditableDebt>]),
+    { collRatioPost, liquidationPricePost, isSafePost, leveragePost, balancePost, daiBalancePost }
+  ];
+}
+
+function getSellPlan(
+  mta: MTAccount,
+  buyOffers: Offer[],
+  baseToken: string,
+  amount: BigNumber,
+  price: BigNumber,
+  total: BigNumber,
+): PlanInfo {
+
+  const request = prepareSellAllocationRequest(
+    mta,
+    buyOffers,
+    baseToken,
+    amount,
+    price,
+  );
+
+  if (isImpossible(request)) {
+    return [
+      request,
+      {
+        collRatioPost: undefined,
+        liquidationPricePost: undefined,
+        leveragePost: undefined,
+        balancePost: undefined,
+        isSafePost: undefined
+      }
+    ];
+  }
+
+  const asset: MarginableAsset =
+    request.assets.find(ai => ai.name === baseToken) as MarginableAsset;
+
+  const delta = BigNumber.min(asset.debt, total).times(minusOne);
+
+  const postTradeAsset = calculateMarginable(
+    {
+      ...asset,
+      debt: asset.debt.plus(delta)
+    } as MarginableAssetCore,
+  );
+
+  const collRatioPost = postTradeAsset.currentCollRatio;
+  const liquidationPricePost = postTradeAsset.liquidationPrice;
+  const isSafePost = postTradeAsset.safe;
+  const leveragePost = postTradeAsset.leverage;
+  const balancePost = postTradeAsset.balance;
+
+  return [
+    request.createPlan([{
+      ...request.assets.find(ai => ai.name === baseToken),
+      delta
+    } as Required<EditableDebt>]),
+    { collRatioPost, liquidationPricePost, leveragePost, isSafePost, balancePost }
+  ];
+}
+
+function addPlan(state: MTSimpleFormState): MTSimpleFormState {
   if (
+    !state.mta || state.mta.state === MTAccountState.notSetup ||
     !state.amount ||
     !state.price ||
     !state.total ||
+    !state.orderbook ||
+    !state.realPurchasingPower ||
     state.messages.length > 0
   ) {
     return {
       ...state,
-      realPurchasingPower,
       plan: undefined,
     };
   }
 
-  const [plan, { debtDelta }] = state.kind === OfferType.buy ?
+  const [plan, postTradeInfo] = state.kind === OfferType.buy ?
     getBuyPlan(
       state.mta,
       state.orderbook.sell,
       state.baseToken,
       state.amount,
       state.price,
-      realPurchasingPower,
+      state.realPurchasingPower,
     ) :
     getSellPlan(
       state.mta,
@@ -569,87 +725,11 @@ function addPlan(state: MTSimpleFormState): MTSimpleFormState {
     ] :
       state.messages;
 
-  if (isImpossible(plan)) {
-    return {
-      ...state,
-      plan,
-      messages,
-      realPurchasingPower,
-    };
-  }
-
-  const postTradeAsset = calculateMarginable(
-    {
-      ...asset,
-      balance: state.kind === OfferType.buy ?
-        asset.balance.plus(state.amount) : asset.balance.minus(state.amount),
-      debt: asset.debt.plus(debtDelta),
-      dai: state.kind === OfferType.buy ?
-        BigNumber.max(asset.dai.minus(state.total), zero) : state.total.plus(debtDelta)
-    } as MarginableAssetCore,
-  );
-
-  const collRatioPost = postTradeAsset.currentCollRatio;
-  const liquidationPricePost = postTradeAsset.liquidationPrice;
-  const isSafePost = postTradeAsset.safe;
-  const leveragePost = postTradeAsset.leverage;
-  const balancePost = postTradeAsset.balance;
-  const daiBalancePost = postTradeAsset.debt.gt(zero) ?
-    postTradeAsset.debt.times(minusOne) : postTradeAsset.dai;
-
-  const bought = buy(state.total, state.orderbook.sell);
-
-  const realPurchasingPowerPost = realPurchasingPowerMarginable(
-      postTradeAsset,
-      bought[2]);
-
-  // const realPurchasingPowerPost =
-  //   state.messages.length === 0 && state.total ?
-  //   realPurchasingPower.minus(state.total) : undefined;
-
-  const priceImpact = getPriceImpact(
-    state.amount,
-    state.kind === OfferType.buy ?
-      state.orderbook.sell :
-      state.orderbook.buy);
-
   return {
     ...state,
+    ...postTradeInfo,
     plan,
     messages,
-    realPurchasingPower,
-    realPurchasingPowerPost,
-    collRatioPost,
-    liquidationPricePost,
-    leveragePost,
-    balancePost,
-    daiBalancePost,
-    isSafePost,
-    priceImpact: isImpossible(priceImpact) ? undefined : priceImpact,
-  };
-}
-
-function addPurchasingPower(state: MTSimpleFormState) {
-
-  const baseAsset =
-    findMarginableAsset(state.baseToken, state.mta) ||
-    findNonMarginableAsset(state.baseToken, state.mta);
-
-  if (!state.mta
-    || state.mta.state !== MTAccountState.setup
-    || !state.orderbook
-    || !baseAsset || baseAsset.assetKind !== AssetKind.marginable
-  ) {
-    return state;
-  }
-
-  const realPurchasingPower = realPurchasingPowerMarginable(
-      baseAsset,
-      state.orderbook.sell);
-
-  return {
-    ...state,
-    realPurchasingPower,
   };
 }
 
@@ -780,46 +860,30 @@ function isReadyToProceed(state: MTSimpleFormState): MTSimpleFormState {
 }
 
 function addPreTradeInfo(state: MTSimpleFormState): MTSimpleFormState {
-
   const ma = findMarginableAsset(state.baseToken, state.mta);
 
   const collRatio = ma && ma.currentCollRatio;
   const liquidationPrice = ma && ma.liquidationPrice;
   const leverage = ma && ma.leverage;
-  const fee = ma && ma.fee;
 
   return {
     ...state,
     collRatio,
     liquidationPrice,
-    leverage,
-    fee,
+    leverage
   };
 }
 
-export interface MTSimpleOrderFormParams {
-  gasPrice$: Observable<BigNumber>;
-  etherPriceUsd$: Observable<BigNumber>;
-  orderbook$: Observable<Orderbook>;
-  mta$: Observable<MTAccount>;
-  calls$: Calls$;
-  readCalls$: ReadCalls$;
-  dustLimits$: Observable<DustLimits>;
-  account$: Observable<string|undefined>;
-}
-
 export function createMTSimpleOrderForm$(
-  {
-    gasPrice$,
-    etherPriceUsd$,
-    orderbook$,
-    mta$,
-    calls$,
-    readCalls$,
-    dustLimits$,
-    account$,
-  }: MTSimpleOrderFormParams,
-  tradingPair: TradingPair
+  tradingPair: TradingPair,
+  gasPrice$: Observable<BigNumber>,
+  etherPriceUSD$: Observable<BigNumber>,
+  orderbook$: Observable<Orderbook>,
+  mta$: Observable<MTAccount>,
+  calls$: Calls$,
+  readCalls$: ReadCalls$,
+  dustLimits$: Observable<DustLimits>,
+  account$: Observable<string|undefined>
 ): Observable<MTSimpleFormState> {
 
   const manualChange$ = new Subject<ManualChange>();
@@ -827,7 +891,7 @@ export function createMTSimpleOrderForm$(
   const environmentChange$ = merge(
     combineAndMerge(
       toGasPriceChange(gasPrice$),
-      toEtherPriceUSDChange(etherPriceUsd$),
+      toEtherPriceUSDChange(etherPriceUSD$),
       toOrderbookChange$(orderbook$),
       toDustLimitChange$(dustLimits$, tradingPair.base, tradingPair.quote),
       toAccountChange(account$),
@@ -845,8 +909,7 @@ export function createMTSimpleOrderForm$(
     gasEstimationStatus: GasEstimationStatus.unset,
     messages: [],
     change: manualChange$.next.bind(manualChange$),
-    view: ViewKind.instantTradeForm,
-    slippageLimit: new BigNumber(0.05),
+    view: ViewKind.instantTradeForm
   };
 
   return merge(
@@ -855,12 +918,14 @@ export function createMTSimpleOrderForm$(
     stageChange$
   ).pipe(
     scan(applyChange, initialState),
+    map(addUserConfig),
+    map(addApr),
     map(addPrice),
-    map(addPreTradeInfo),
+    map(addPriceImpact),
     map(validate),
+    map(addPreTradeInfo),
     map(addPurchasingPower),
     map(addPlan),
-    // map(calculatePostOrder),
     switchMap(curry(estimateGasPrice)(calls$, readCalls$)),
     scan(freezeGasEstimation),
     map(isReadyToProceed),

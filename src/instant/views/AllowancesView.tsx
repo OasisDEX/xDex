@@ -1,11 +1,10 @@
 import * as React from 'react';
-import { tokens } from '../../blockchain/config';
+import { getToken, tradingTokens } from '../../blockchain/config';
 import doneSvg from '../../icons/done.svg';
 import { Button, CloseButton } from '../../utils/forms/Buttons';
 import { SvgImage } from '../../utils/icons/utils';
 import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
 import { TopRightCorner } from '../../utils/panel/TopRightCorner';
-import * as instantStyles from '../Instant.scss';
 import {
   InstantFormChangeKind,
   InstantFormState,
@@ -27,7 +26,7 @@ class AssetAllowance extends React.Component<AssetProps> {
     const { isAllowed, asset, inProgress, onClick } = this.props;
 
     return (
-      <Button color="grey"
+      <Button color="secondaryOutlined"
               disabled={inProgress}
               data-test-id={asset.symbol}
               className={styles.asset}
@@ -57,29 +56,27 @@ export class AllowancesView extends React.Component<InstantFormState> {
     const { allowances, toggleAllowance, manualAllowancesProgress } = this.props;
 
     return (
-      <InstantFormWrapper heading={'Unlock Token for Trading'}>
+      <InstantFormWrapper heading={'Unlock Token'}>
         <TopRightCorner>
           <CloseButton theme="danger"
-                       className={instantStyles.closeButton}
                        data-test-id="close"
                        onClick={this.close}
           />
         </TopRightCorner>
         <div className={styles.assets}>
           {
-            Object.values(tokens)
-              .filter(token => token.symbol !== 'ETH')
+            tradingTokens
+              .filter(token => token !== 'ETH')
               .map(
                 (token: any, index: number) => {
-                  const symbol = token.symbol;
-                  const progress = manualAllowancesProgress && manualAllowancesProgress[symbol];
+                  const progress = manualAllowancesProgress && manualAllowancesProgress[token];
 
-                  return <AssetAllowance isAllowed={(allowances ? allowances[symbol] : false)}
+                  return <AssetAllowance isAllowed={(allowances ? allowances[token] : false)}
                                          inProgress={progress && !progress.done}
                                          key={index}
-                                         asset={token}
+                                         asset={getToken(token)}
                                          onClick={() => {
-                                           toggleAllowance(symbol);
+                                           toggleAllowance(token);
                                          }}
                   />;
                 }

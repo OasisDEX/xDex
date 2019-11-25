@@ -22,6 +22,8 @@ export function getCashCore(props?: Partial<CashAssetCore>): CashAssetCore {
 }
 
 export function getMarginableCore(props?: Partial<MarginableAssetCore>): MarginableAssetCore {
+  const date = new Date();
+  date.setHours(date.getHours() + 1);
   return {
     name: 'WETH',
     balance: new BigNumber(0),
@@ -38,6 +40,9 @@ export function getMarginableCore(props?: Partial<MarginableAssetCore>): Margina
     rawHistory: [],
     fee: new BigNumber(1),
     urn: '',
+    zzz: date,
+    redeemable: new BigNumber(0),
+    osmPriceNext: props && props.referencePrice ? props.referencePrice.minus(10) : new BigNumber(0),
     ...props
   };
 }

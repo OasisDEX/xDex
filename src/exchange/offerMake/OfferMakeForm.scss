@@ -5,7 +5,7 @@
   display: flex;
   justify-content: space-between;
 
-  @include media-breakpoint-down(md){
+  @include media-breakpoint-down(md) {
     flex-direction: column;
   }
 }
@@ -20,55 +20,58 @@
   color: #828288;
 }
 
+.migrationDescription {
+  @extend .noResourcesInfoBox;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 28px;
+  height: 240px;
+
+  .text {
+    text-align: center;
+    line-height: 20px;
+    margin: .5rem auto;
+  }
+}
+
 .btnGroup {
   margin-left: auto;
 }
 
 .btn {
   width: 68px;
+  font-size: 13px;
 
-  @include media-breakpoint-down(sm){
+  @include media-breakpoint-down(sm) {
     width: 64px;
     font-size: 11px;
   }
 }
 
 .balanceBtn {
-  align-items: center;
-  display: flex;
-  @include fontLatoBold;
-  justify-content: center;
-  letter-spacing: 0.4px;
-  width: 150px;
   flex-basis: 150px;
   flex-grow: 1;
+  font-size: 14px;
 
-  &:disabled,
-  &:disabled:hover {
-    background-color: transparent;
-    color: $font-color-base;
-    opacity: 1;
-    font-weight: 700;
+  @include media-breakpoint-down(md) {
+    flex-basis: unset;
+    width: 100%;
   }
 
   &:first-child {
     margin-right: 10px;
+
+    @include media-breakpoint-down(md) {
+      margin-right: 0;
+      margin-bottom: 1rem;
+    }
   }
 
   &:last-child {
     margin-left: 10px;
-  }
 
-  @include media-breakpoint-down(md){
-    max-height:38px;
-    width: 100%;
-
-    &:first-child {
-      margin-right: 0;
-      margin-bottom: 16px;
-    }
-
-    &:last-child {
+    @include media-breakpoint-down(md) {
       margin-left: 0;
     }
   }
@@ -84,7 +87,7 @@
     font-size: 14px;
 
     button {
-      font-size: 11px;
+      font-size: 13px;
     }
   }
 }
@@ -96,6 +99,11 @@
   width: 100%;
 }
 
+.migrateButton {
+  @extend .confirmButton;
+  margin-top: 1.25rem;
+}
+
 // ---------- horizontal lines spaces
 .hrMargin {
   margin-top: 18px;
@@ -104,13 +112,14 @@
 
 // ---------- input group modifiers
 .inputHeader {
+  background: white;
   flex-basis: 94px;
   flex-grow: 2;
   flex-shrink: 0;
   padding: 10px 16px;
   white-space: nowrap;
 
-  @include media-breakpoint-down(sm){
+  @include media-breakpoint-down(sm) {
     padding: 10px;
     flex-basis: 80px;
   }
@@ -118,11 +127,11 @@
 
 .inputTail {
   display: inline-flex;
-  border-left: 1px solid $grey-light;
+  border-left: 1px solid $element-border;
   width: 100%;
 
   &:hover {
-    border-color: $button-border-hover;
+    border-color: $desaturated-dark-blue;
   }
 }
 
@@ -132,7 +141,12 @@
   flex-shrink: 1;
 }
 
+.icon {
+  margin-right: 4px;
+}
+
 .inputCurrencyAddon {
+  background: white;
   flex-basis: 82px;
   flex-grow: 1;
   flex-shrink: 0;
@@ -147,6 +161,7 @@
 }
 
 .inputPercentAddon {
+  background: white;
   flex-basis: 36px;
   flex-grow: 0;
   flex-shrink: 0;
@@ -167,7 +182,7 @@
 }
 
 .directSummary {
-  border: 1px solid $grey-dark;
+  border: 1px solid $element-border;
   border-radius: $border-radius;
 
   display: flex;
@@ -193,7 +208,7 @@
 }
 
 .directSummaryRight {
-  border-left: 1px solid $grey-dark;
+  border-left: 1px solid $element-border;
 
   display: flex;
   flex-direction: column;

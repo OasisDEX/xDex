@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Observable } from 'rxjs';
-import { tokens } from '../blockchain/config';
+import { theAppContext } from '../AppContext';
+import { getToken } from '../blockchain/config';
 import { TxState } from '../blockchain/transactions';
 import dottedMenuSvg from '../marginTrading/positions/dotted-menu.svg';
 import { connect } from '../utils/connect';
@@ -28,8 +29,7 @@ export type WalletViewProps = ModalOpenerProps & {
 };
 
 export class WalletView
-  extends React.Component<Loadable<CombinedBalances> & WalletViewProps>
-{
+  extends React.Component<Loadable<CombinedBalances> & WalletViewProps> {
   public render() {
     const { status, value, error, ...walletViewProps } = this.props;
     return (
@@ -38,7 +38,7 @@ export class WalletView
         <WithLoadingIndicator loadable={this.props}>
           {(combinedBalances) => (
             <WalletViewInternal
-              { ...{ ...combinedBalances, ...walletViewProps } }
+              {...{ ...combinedBalances, ...walletViewProps }}
             />
           )}
         </WithLoadingIndicator>
@@ -47,28 +47,35 @@ export class WalletView
   }
 }
 
-class AssetDropdownMenu extends React.Component<{ disapproveWallet: () => void; }> {
+class AssetDropdownMenu extends React.Component<{
+  asset: string,
+  actions: React.ReactNode[];
+}> {
   public render() {
+    const { asset, actions } = this.props;
     return (
       <div
         className={styles.dropdownMenu}
         style={{ display: 'flex' }}
       >
         <Button
+          size="sm"
+          color="secondaryOutlined"
           className={styles.dropdownButton}
           data-test-id="myposition-actions-list"
         >
           <SvgImage image={dottedMenuSvg}/>
         </Button>
         <div className={styles.dropdownList}>
-          <div>
-            <Button
-              size="md"
-              block={true}
-              onClick={() => this.props.disapproveWallet()}
-            >Disable</Button>
-            <br/>
-          </div>
+          {
+            actions.map((actionBtn, index) =>
+                          <div key={`${asset}-${index}`}
+                               className={styles.actionButton}
+                          >
+                            {actionBtn}
+                          </div>
+            )
+          }
         </div>
       </div>
     );
@@ -88,23 +95,23 @@ export class WalletViewInternal extends React.Component<CombinedBalances & Walle
         </tr>
         </thead>
         <tbody>
-        { (!this.props.balances || this.props.balances.length === 0) && <tr>
+        {(!this.props.balances || this.props.balances.length === 0) && <tr>
           <td colSpan={7} className={styles.center}>You have no assets</td>
-        </tr> }
-        { this.props.balances && this.props.balances.map(combinedBalance => {
+        </tr>}
+        {this.props.balances && this.props.balances.map(combinedBalance => {
           return (
             <tr data-test-id={`${combinedBalance.name}-overview`} key={combinedBalance.name}>
               <td>
                 <div className={styles.centeredAsset}>
                   <div style={{ width: '24px', height: '24px', marginRight: '12px' }}>
-                    {tokens[combinedBalance.name].iconColor}
+                    {getToken(combinedBalance.name).iconColor}
                   </div>
                   <Currency
-                    value={tokens[combinedBalance.name].name} />
+                    value={getToken(combinedBalance.name).name}/>
                 </div>
               </td>
               <td data-test-id={`${combinedBalance.name}-balance`} className={styles.amount}>
-                <Money value={combinedBalance.walletBalance} token={combinedBalance.name} />
+                <Money value={combinedBalance.walletBalance} token={combinedBalance.name}/>
               </td>
               <td className={styles.amount}>
                 $ {formatPrecision(combinedBalance.mtAssetValueInDAI, 2)}
@@ -112,19 +119,21 @@ export class WalletViewInternal extends React.Component<CombinedBalances & Walle
               <td className={styles.amount} style={{ display: 'flex', justifyContent: 'flex-end' }}>
                 {combinedBalance.name === 'ETH' &&
                 <Button
+                  color="secondaryOutlined"
                   data-test-id="open-wrap-form"
                   className={styles.actionButton}
-                  size="lg"
+                  size="sm"
                   onClick={() => this.wrap()}
                   disabled={combinedBalance.walletBalance.eq(zero)}
                 >
                   Wrap
                 </Button>}
-                { combinedBalance.name === 'WETH' &&
+                {combinedBalance.name === 'WETH' &&
                 <Button
+                  color="secondaryOutlined"
                   data-test-id="open-unwrap-form"
                   className={styles.actionButton}
-                  size="lg"
+                  size="sm"
                   onClick={() => this.unwrap()}
                   disabled={combinedBalance.walletBalance.eq(zero)}
                 >
@@ -132,21 +141,11 @@ export class WalletViewInternal extends React.Component<CombinedBalances & Walle
                 </Button>
                 }
                 {
-                  combinedBalance && combinedBalance.allowance ?
-                    <AssetDropdownMenu {...{
-                      disapproveWallet: this.disapproveWallet(combinedBalance)
-                    }}
-                    />
-                    : <>
-                      {
-                        combinedBalance.name !== 'ETH' &&
-                        <Button
-                          className={styles.actionButton}
-                          size="lg"
-                          onClick={this.approveWallet(combinedBalance)}
-                        >Enable</Button>
-                      }
-                      </>
+                  combinedBalance.name !== 'ETH' &&
+                  <AssetDropdownMenu
+                    actions={this.createActionsPerAsset(combinedBalance)}
+                    asset={combinedBalance.name}
+                  />
                 }
               </td>
             </tr>
@@ -157,21 +156,75 @@ export class WalletViewInternal extends React.Component<CombinedBalances & Walle
     );
   }
 
-  private approveWallet(combinedBalance: CombinedBalance): () => void {
-    return () => {
-      this.props.approveWallet(combinedBalance.name);
-    };
-  }
-  private disapproveWallet(combinedBalance: CombinedBalance): () => void {
-    return () => {
-      this.props.disapproveWallet(combinedBalance.name);
-    };
+  private createActionsPerAsset = (combinedBalance: CombinedBalance): (React.ReactNode[]) => {
+    const actions: React.ReactNode[] = [];
+
+    if (combinedBalance
+      && combinedBalance.name !== 'ETH'
+      && combinedBalance.allowance
+    ) {
+      actions.push(
+        <Button
+          key={combinedBalance.name}
+          size="sm"
+          color="secondaryOutlined"
+          block={true}
+          onClick={() => this.props.disapproveWallet(combinedBalance.name)}
+        >
+          Disable
+        </Button>
+      );
+    }
+
+    if (combinedBalance
+      && combinedBalance.name !== 'ETH'
+      && !combinedBalance.allowance) {
+      actions.push(
+        <Button
+          key={combinedBalance.name}
+          size="sm"
+          color="secondaryOutlined"
+          onClick={() => this.props.approveWallet(combinedBalance.name)}
+        >
+          Enable
+        </Button>
+      );
+    }
+
+    if (combinedBalance && combinedBalance.name === 'SAI') {
+      actions.push(
+        <theAppContext.Consumer>
+          {({ SAI2DAIMigrationTxRx }) =>
+            // @ts-ignore
+            <SAI2DAIMigrationTxRx label={'Upgrade Sai'}
+                                  tid="update-btn-account"
+                                  className={styles.redeemBtn}
+            />
+          }
+        </theAppContext.Consumer>
+      );
+    }
+
+    if (combinedBalance && combinedBalance.name === 'DAI') {
+      actions.push(
+        <theAppContext.Consumer>
+          {({ DAI2SAIMigrationTxRx }) =>
+            // @ts-ignore
+            <DAI2SAIMigrationTxRx label={'Swap for Sai'}
+                                  tid="swap-btn-account"
+                                  className={styles.redeemBtn}
+            />
+          }
+        </theAppContext.Consumer>
+      );
+    }
+    return actions;
   }
 
   private openWrapUnwrap(kind: WrapUnwrapFormKind) {
     this.props.open(
       connect(
-        inject<Loadable<WrapUnwrapFormState> & ModalProps, { kind: WrapUnwrapFormKind}>(
+        inject<Loadable<WrapUnwrapFormState> & ModalProps, { kind: WrapUnwrapFormKind }>(
           WrapUnwrapFormView, { kind }
         ),
         loadablifyLight(this.props.wrapUnwrapForm$(kind))

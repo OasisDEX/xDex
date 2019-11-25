@@ -3,9 +3,8 @@ import classnames from 'classnames';
 import * as React from 'react';
 import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
 import warningSvg from '../../icons/warning.svg';
-import { BigNumberInput } from '../../utils/bigNumberInput/BigNumberInput';
+import { BigNumberInput, lessThanOrEqual } from '../../utils/bigNumberInput/BigNumberInput';
 import { formatPrice } from '../../utils/formatters/format';
-import { lessThanOrEqual } from '../../utils/forms/InputGroup';
 import { BackIcon } from '../../utils/icons/Icons';
 import { SvgImage } from '../../utils/icons/utils';
 import { TopLeftCorner } from '../../utils/panel/TopRightCorner';
@@ -24,9 +23,8 @@ export class TradeSettingsView extends React.Component<InstantFormState> {
     return (
       <InstantFormWrapper heading="Advanced Settings">
         <TopLeftCorner>
-          <BackIcon
-            onClick={this._hideTradeSettings}
-            data-test-id="back"
+          <BackIcon onClick={this._hideTradeSettings}
+                    data-test-id="back"
           />
         </TopLeftCorner>
         <TradeDetails {...this.props}/>
@@ -49,7 +47,7 @@ export class TradeSettingsView extends React.Component<InstantFormState> {
                 prefix: ''
               })}
               pipe={
-                lessThanOrEqual(100)
+                lessThanOrEqual(new BigNumber(100))
               }
               guide={true}
               placeholder={slippageLimitInPercentage}
