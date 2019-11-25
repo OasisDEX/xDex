@@ -296,7 +296,7 @@ export function calculateMarginable(
     .div(ma.balance.times(ma.referencePrice).minus(ma.debt));
 
   let bitable = mtBitable.no;
-  if (ma.osmPriceNext!.lte(liquidationPrice)) {
+  if (ma.osmPriceNext && ma.osmPriceNext.lte(liquidationPrice)) {
     bitable = mtBitable.imminent;
   }
 

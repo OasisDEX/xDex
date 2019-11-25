@@ -9,12 +9,12 @@ import {
   mergeMap,
   reduce,
   shareReplay,
-  switchMap, tap,
+  switchMap,
 } from 'rxjs/operators';
 import * as dsProxy from '../../blockchain/abi/ds-proxy.abi.json';
 import { MTBalanceResult } from '../../blockchain/calls/mtCalls';
 import { AssetKind, NetworkConfig, tokens } from '../../blockchain/config';
-import {amountFromWei, nullAddress} from '../../blockchain/utils';
+import { amountFromWei, nullAddress } from '../../blockchain/utils';
 import { web3 } from '../../blockchain/web3';
 
 import { ReadCalls, ReadCalls$ } from '../../blockchain/calls/calls';
@@ -51,7 +51,7 @@ function rawMTLiquidationHistories$(
       return of(Object.keys(results).reduce((r, t) => {
         r[t] = [];
         return r;
-      },                         {} as MTHistories));
+      },                                    {} as MTHistories));
     }
     ),
     reduce((a, e) => ({ ...a, ...e }), {}),
@@ -68,6 +68,7 @@ function rawMTHistories$(
   )).pipe(
     concatAll(),
     catchError(error => {
+      console.log('error', error);
       return of(assets.reduce((r, t) => {
         r[t] = [];
         return r;
@@ -92,20 +93,20 @@ function osms$(context: NetworkConfig, assets: string[]) {
   );
 }
 
-function osmsParams$(context: NetworkConfig, assets: string[]) {
-  return forkJoin(assets.map((token) =>
-    of({}) // todo: call OSM and fetch zzz param
-    // readOsm(context, token).pipe(
-    //   map(osm => ({ [token]: osm })),
-    // )
-  )).pipe(
-    concatAll(),
-    // reduce(
-    //   (a, e) => ({ ...a, ...e }),
-    //   {},
-    // ),
-  );
-}
+// function osmsParams$(context: NetworkConfig, assets: string[]) {
+//   return forkJoin(assets.map((token) =>
+//     of({}) // todo: call OSM and fetch zzz param
+//     // readOsm(context, token).pipe(
+//     //   map(osm => ({ [token]: osm })),
+//     // )
+//   )).pipe(
+//     concatAll(),
+//     // reduce(
+//     //   (a, e) => ({ ...a, ...e }),
+//     //   {},
+//     // ),
+//   );
+// }
 
 export function aggregateMTAccountState(
   context: NetworkConfig,
@@ -134,13 +135,14 @@ export function aggregateMTAccountState(
         rawMTLiquidationHistories$(context, balancesResult),
         rawMTHistories$(context, proxy.address, assetNames),
         osms$(context, assetNames),
-        osmsParams$(context, assetNames),
+        // osmsParams$(context, assetNames),
       )
     ),
     map(([balanceResult, rawLiquidationHistories, rawHistories, osmPrices]) => {
       const marginables = [...tokenNames.entries()]
         .filter(([_i, token]) => tokens[token].assetKind === AssetKind.marginable)
         .map(([i, token]) => {
+          console.log('i', i);
           return getMarginableCore({
             name: token,
             assetKind: AssetKind.marginable,

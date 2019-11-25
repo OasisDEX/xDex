@@ -204,7 +204,8 @@ export class MTMyPositionView extends
             <div className={styles.warningMessage}>
               <SvgImage image={warningIconSvg}/>
               <span>
-              The {this.props.ma.name} price ({this.props.ma.osmPriceNext!.toString()} USD)
+              The {this.props.ma.name} price&nbsp;
+              ({this.props.ma.osmPriceNext && this.props.ma.osmPriceNext.toString()} USD)
               is approaching your Liquidation Price and your position will soon be liquidated.
               You&nbsp;may rescue your Position by paying off Dai debt or deposit&nbsp;
                 {this.props.ma.name} in the next {liquidationTimeDelta} minutes.</span>

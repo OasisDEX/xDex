@@ -75,7 +75,7 @@ function normalizeAddress(address: string): string | null {
 
 function mtBalancePostprocess([result]: [BigNumber[]], { tokens }: MTBalanceData): MTBalanceResult {
   const balanceResult: MTBalanceResult = {};
-  tokens.every((token: string, i) => {
+  tokens.forEach((token: string, i) => {
     const row = i * BalanceOuts;
     balanceResult[token] = {
       walletBalance: amountFromWei(new BigNumber(result[row]), token),

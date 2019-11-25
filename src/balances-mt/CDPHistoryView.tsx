@@ -103,7 +103,8 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
                 //     //         tab: <FormatAmount value={tab} token={'DAI'} fallback={''} />;
                 //     //     </>}
                 //     //     {amount && <>
-                //     //         amount: <FormatAmount value={amount} token={e.token} fallback={''} />;
+                //     //         amount:
+                // <FormatAmount value={amount} token={e.token} fallback={''} />;
                 //     //     </>}
                 //     //   </td>
                 //     //   <td>
