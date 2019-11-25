@@ -36,6 +36,8 @@ export class MTMyPositionView extends
   React.Component<MTMyPositionViewProps & ModalOpenerProps>
 {
   public render() {
+    console.log('MTA', this.props.mta);
+    console.log('MA', this.props.ma);
     const equity = this.props.ma.balance
       .times(this.props.ma.referencePrice).minus(this.props.ma.debt);
     const leverage = this.props.ma.leverage && !this.props.ma.leverage.isNaN()
@@ -202,7 +204,7 @@ export class MTMyPositionView extends
             <div className={styles.warningMessage}>
               <SvgImage image={warningIconSvg}/>
               <span>
-              The {this.props.ma.name} price ({this.props.ma.nextPrice.toString()} USD)
+              The {this.props.ma.name} price ({this.props.ma.osmPriceNext!.toString()} USD)
               is approaching your Liquidation Price and your position will soon be liquidated.
               You&nbsp;may rescue your Position by paying off Dai debt or deposit&nbsp;
                 {this.props.ma.name} in the next {liquidationTimeDelta} minutes.</span>

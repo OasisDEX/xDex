@@ -92,6 +92,21 @@ function osms$(context: NetworkConfig, assets: string[]) {
   );
 }
 
+function osmsParams$(context: NetworkConfig, assets: string[]) {
+  return forkJoin(assets.map((token) =>
+    of({}) // todo: call OSM and fetch zzz param
+    // readOsm(context, token).pipe(
+    //   map(osm => ({ [token]: osm })),
+    // )
+  )).pipe(
+    concatAll(),
+    // reduce(
+    //   (a, e) => ({ ...a, ...e }),
+    //   {},
+    // ),
+  );
+}
+
 export function aggregateMTAccountState(
   context: NetworkConfig,
   proxy: any,
@@ -119,6 +134,7 @@ export function aggregateMTAccountState(
         rawMTLiquidationHistories$(context, balancesResult),
         rawMTHistories$(context, proxy.address, assetNames),
         osms$(context, assetNames),
+        osmsParams$(context, assetNames),
       )
     ),
     map(([balanceResult, rawLiquidationHistories, rawHistories, osmPrices]) => {
@@ -131,8 +147,6 @@ export function aggregateMTAccountState(
             balance: balanceResult[token].urnBalance,
             ...balanceResult[token],
             safeCollRatio: new BigNumber(tokens[token].safeCollRatio as number),
-            // rawLiquidationHistories: rawLiquidationHistories[token],
-            osmPriceCurrent: (osmPrices as any)[token].current,
             osmPriceNext: (osmPrices as any)[token].next,
             rawHistory: [
               ...rawHistories[token],

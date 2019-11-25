@@ -42,9 +42,7 @@ export function getMarginableCore(props?: Partial<MarginableAssetCore>): Margina
     urn: '',
     zzz: date,
     redeemable: new BigNumber(0),
-    nextPrice: props && props.referencePrice ? props.referencePrice.minus(10) : new BigNumber(0),
-    osmPriceCurrent: undefined,
-    osmPriceNext: undefined,
+    osmPriceNext: props && props.referencePrice ? props.referencePrice.minus(10) : new BigNumber(0),
     ...props
   };
 }

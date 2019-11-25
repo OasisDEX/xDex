@@ -214,10 +214,10 @@ export function calculateMTHistoryEvents(
       event = { ...h, token: ma.name, redeemable: bite.lot.minus(h.lot) };
     }
     if (h.kind === MTHistoryEventKind.redeem) {
-      event = { ...h, token: ma.name, redeemable: h.amount.times(-1), };
+      event = { ...h, token: ma.name, redeemable: h.amount.times(minusOne), };
     }
     if (h.kind === MTHistoryEventKind.bite) {
-      event = { ...h, token: ma.name, dAmount: h.lot, };
+      event = { ...h, token: ma.name, dAmount: h.lot.times(minusOne) };
     }
 
     const prevDebt = debt;
@@ -296,7 +296,7 @@ export function calculateMarginable(
     .div(ma.balance.times(ma.referencePrice).minus(ma.debt));
 
   let bitable = mtBitable.no;
-  if (ma.nextPrice.lte(liquidationPrice)) {
+  if (ma.osmPriceNext!.lte(liquidationPrice)) {
     bitable = mtBitable.imminent;
   }
 

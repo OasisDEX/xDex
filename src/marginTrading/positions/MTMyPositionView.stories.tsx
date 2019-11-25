@@ -74,7 +74,7 @@ const liquidationHistory: RawMTHistoryEvent[] = [
 const ethMarginableAsset = calculateMarginable(getMarginableCore({
   ...assetCore,
   referencePrice: new BigNumber(250),
-  nextPrice: new BigNumber(250)
+  osmPriceNext: new BigNumber(250)
 }));
 
 const mta: MTAccount = getMTAccount({ marginableAssets: [ethMarginableAsset] });
@@ -94,7 +94,7 @@ stories.add('CDP 1 - no liquidation', () => (
 const ethMarginableAsset2 = calculateMarginable(getMarginableCore({
   ...assetCore,
   referencePrice: new BigNumber(250),
-  nextPrice: new BigNumber(130),
+  osmPriceNext: new BigNumber(130),
   zzz: moment(new Date()).add(67, 'minutes').toDate(),
 }));
 
@@ -115,7 +115,7 @@ stories.add('CDP 1 - liquidation imminent', () => (
 const ethMarginableAsset3 = calculateMarginable(getMarginableCore({
   ...assetCore,
   referencePrice: new BigNumber(130),
-  nextPrice: new BigNumber(130),
+  osmPriceNext: new BigNumber(130),
   rawHistory: liquidationHistory
 }));
 
@@ -144,7 +144,7 @@ liquidationHistory.push({
 const ethMarginableAsset4 = calculateMarginable(getMarginableCore({
   ...assetCore,
   referencePrice: new BigNumber(130),
-  nextPrice: new BigNumber(130),
+  osmPriceNext: new BigNumber(130),
   redeemable: new BigNumber(0.8),
   rawHistory: liquidationHistory
 }));
@@ -166,7 +166,7 @@ stories.add('CDP 1 - liquidation ongoing with redeem', () => (
 const ethMarginableAsset5 = calculateMarginable(getMarginableCore({
   ...assetCore,
   referencePrice: new BigNumber(250),
-  nextPrice: new BigNumber(250),
+  osmPriceNext: new BigNumber(250),
   redeemable: new BigNumber(0.8),
   rawHistory: liquidationHistory
 }));
