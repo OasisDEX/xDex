@@ -1,12 +1,13 @@
+import * as moment from 'moment';
 import * as React from 'react';
 import { Observable } from 'rxjs/index';
 import { CDPHistoryView } from '../../balances-mt/CDPHistoryView';
-import { CDPLiquidationHistoryView } from '../../balances-mt/CDPLiquidationHistoryView';
 import { TxState } from '../../blockchain/transactions';
 import { connect } from '../../utils/connect';
 import { formatPercent, formatPrecision } from '../../utils/formatters/format';
 import { Money } from '../../utils/formatters/Formatters';
 import { Button } from '../../utils/forms/Buttons';
+import { SvgImage } from '../../utils/icons/utils';
 import { inject } from '../../utils/inject';
 import { ModalOpenerProps, ModalProps } from '../../utils/modal';
 import { one, zero } from '../../utils/zero';
@@ -21,6 +22,7 @@ import {
 import { CreateMTFundForm$, MTTransferFormState } from '../transfer/mtTransferForm';
 import { MtTransferFormView } from '../transfer/mtTransferFormView';
 import * as styles from './MTMyPositionView.scss';
+import warningIconSvg from './warning-icon.svg';
 
 interface MTMyPositionViewProps {
   mta: MTAccount;
@@ -34,6 +36,8 @@ export class MTMyPositionView extends
   React.Component<MTMyPositionViewProps & ModalOpenerProps>
 {
   public render() {
+    console.log('MTA', this.props.mta);
+    console.log('MA', this.props.ma);
     const equity = this.props.ma.balance
       .times(this.props.ma.referencePrice).minus(this.props.ma.debt);
     const leverage = this.props.ma.leverage && !this.props.ma.leverage.isNaN()
@@ -41,6 +45,12 @@ export class MTMyPositionView extends
       this.props.ma.balance.gt(zero) ? one : zero;
 
     const dai = findAsset('DAI', this.props.mta);
+
+    const liquidationTime = moment(this.props.ma.zzz);
+    const duration = moment.duration(liquidationTime.diff(moment(new Date())));
+    const liquidationTimeDelta = this.props.ma.zzz
+      && moment.utc(duration.asMilliseconds()).format('HH:mm');
+
     return (
       <div>
         <div className={styles.MTPositionPanel}>
@@ -177,19 +187,76 @@ export class MTMyPositionView extends
                 </Button>
               </>
               : <>
-              <Button
+                <Button
                   size="md"
                   className={styles.actionButton}
                   onClick={ this.approveMTProxy('DAI')}
                 >
                   Enable DAI
                 </Button>
-            </>
+              </>
             }
+          </div>
+        </div>
+        <div>
+          {
+            this.props.ma.bitable === 'imminent' &&
+            <div className={styles.warningMessage}>
+              <SvgImage image={warningIconSvg}/>
+              <span>
+              The {this.props.ma.name} price&nbsp;
+              ({this.props.ma.osmPriceNext && this.props.ma.osmPriceNext.toString()} USD)
+              is approaching your Liquidation Price and your position will soon be liquidated.
+              You&nbsp;may rescue your Position by paying off Dai debt or deposit&nbsp;
+                {this.props.ma.name} in the next {liquidationTimeDelta} minutes.</span>
             </div>
+          }
+          {
+            this.props.ma.bitable === 'yes' &&
+            <div className={styles.warningMessage}>
+              <SvgImage image={warningIconSvg}/>
+              <span>
+              {this.props.ma.amountBeingLiquidated.toString()}
+                &nbsp;of total {this.props.ma.balance.toString()} {this.props.ma.name}
+                &nbsp;is being liquidated from your position.&nbsp;
+                { this.props.ma.redeemable.gt(zero) &&
+                // tslint:disable
+                <><br />You can redeem <Money
+                    value={this.props.ma.redeemable}
+                    token={this.props.ma.name}
+                    fallback="-"
+                  /> collateral.
+                </>
+                // tslint:enable
+                }
+            </span>
+
+              {this.props.ma.redeemable.gt(zero) &&
+                <Button
+                  size="md"
+                  disabled={this.props.ma.redeemable.eq(zero)}
+                  className={styles.redeemButton}
+                >Redeem</Button>
+              }
+            </div>
+          }
+          {
+            this.props.ma.bitable === 'no' && this.props.ma.redeemable.gt(zero) &&
+            <div className={styles.infoMessage}>
+              <span>
+                Your Position has been liquidated.
+                Please redeem {this.props.ma.redeemable.toString()}
+                &nbsp;{this.props.ma.name} of collateral.
+              </span>
+              <Button
+                size="md"
+                disabled={this.props.ma.redeemable.eq(zero)}
+                className={styles.redeemButton}
+              >Redeem</Button>
+            </div>
+          }
         </div>
         <CDPHistoryView {...this.props.ma} />
-        <CDPLiquidationHistoryView {...this.props.ma} />
       </div>);
   }
 

@@ -7,7 +7,7 @@ import {
 import { Calls$ } from '../../blockchain/calls/calls';
 import { AssetKind } from '../../blockchain/config';
 import { TxState } from '../../blockchain/transactions';
-import { RawMTHistoryEvent, RawMTLiquidationHistoryEvent } from './mtHistory';
+import { RawMTHistoryEvent } from './mtHistory';
 
 export enum OperationKind {
   fundGem = 'fundGem',
@@ -55,7 +55,7 @@ export interface Core {
   marginBalance: BigNumber;
   allowance: boolean;
   rawHistory: RawMTHistoryEvent[];
-  rawLiquidationHistory: RawMTLiquidationHistoryEvent[];
+  // rawLiquidationHistory: RawMTLiquidationHistoryEvent[];
 }
 
 export interface CashAssetCore extends Core {
@@ -80,6 +80,13 @@ export enum MTHistoryEventKind {
   tend = 'Tend',
   dent = 'Dent',
   deal = 'Deal',
+  redeem = 'Redeem',
+}
+
+export enum mtBitable {
+  yes = 'yes',
+  no = 'no',
+  imminent = 'imminent',
 }
 
 export type MTHistoryEvent = {
@@ -90,6 +97,7 @@ export type MTHistoryEvent = {
   ddai?: BigNumber;
   dgem?: BigNumber;
   amount?: BigNumber;
+  redeemable?: BigNumber;
   dAmount: BigNumber;
   dDAIAmount: BigNumber;
 } & (MTMarginEvent | MTLiquidationEvent);
@@ -112,18 +120,47 @@ export type MTMarginEvent = {
 });
 
 export type MTLiquidationEvent = {
+  // `lot` gems for sale
+  // `bid` dai paid
+  // `tab` total dai wanted
+
   timestamp: number;
   token: string;
+  id: number;
 } & ({
-  kind: MTHistoryEventKind.bite | MTHistoryEventKind.kick |
-    MTHistoryEventKind.tend | MTHistoryEventKind.dent;
-  id: BigNumber;
-  gem: BigNumber;
-  dai: BigNumber;
+  kind: MTHistoryEventKind.bite
+  lot: BigNumber;
+  tab: BigNumber;
+} | {
+  kind: MTHistoryEventKind.kick
+  lot: BigNumber;
+  tab: BigNumber;
+  bid: BigNumber;
+} | {
+  kind: MTHistoryEventKind.tend | MTHistoryEventKind.dent;
+  lot: BigNumber;
+  bid: BigNumber;
 } | {
   kind: MTHistoryEventKind.deal;
-  id: BigNumber;
-});
+} | {
+  kind: MTHistoryEventKind.redeem;
+  amount: BigNumber;
+}
+);
+
+// export type MTLiquidationEvent = {
+//   timestamp: number;
+//   token: string;
+// } & ({
+//   kind: MTHistoryEventKind.bite | MTHistoryEventKind.kick |
+//     MTHistoryEventKind.tend | MTHistoryEventKind.dent;
+//   id: BigNumber;
+//   gem: BigNumber;
+//   dai: BigNumber;
+// } | {
+//   kind: MTHistoryEventKind.deal;
+//   id: BigNumber;
+// });
 
 export type MarginableAssetHistory = MTHistoryEvent[];
 
@@ -137,8 +174,9 @@ export interface MarginableAssetCore extends Core {
   safeCollRatio: BigNumber;
   fee: BigNumber;
   urn: string;
-  osmPriceCurrent: BigNumber | undefined;
   osmPriceNext: BigNumber | undefined;
+  zzz: Date;
+  redeemable: BigNumber;
 }
 
 export interface MarginableAsset extends MarginableAssetCore {
@@ -159,6 +197,9 @@ export interface MarginableAsset extends MarginableAssetCore {
   liquidationInProgress: boolean;
   history: MarginableAssetHistory;
   pnl?: BigNumber;
+  bitable: mtBitable.no | mtBitable.imminent | mtBitable.yes;
+  runningAuctions: number;
+  amountBeingLiquidated: BigNumber;
 }
 
 export interface NonMarginableAssetCore extends Core {

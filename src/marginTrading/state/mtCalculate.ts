@@ -11,8 +11,8 @@ import {
   Core, MarginableAsset,
   MarginableAssetCore,
   MTAccount,
-  MTAccountState, MTHistoryEvent,
-  MTHistoryEventKind,
+  MTAccountState, mtBitable, MTHistoryEvent,
+  MTHistoryEventKind, MTLiquidationEvent,
   NonMarginableAsset,
   NonMarginableAssetCore,
   UserActionKind
@@ -153,6 +153,12 @@ export function realPurchasingPowerMarginable(
   return purchasingPower;
 }
 
+function findAuctionBite(rawHistory: RawMTHistoryEvent[], auctionId: number) {
+  return rawHistory.filter((h: any) => {
+    return h.kind === MTHistoryEventKind.bite && h.id === auctionId;
+  })[0] as MTLiquidationEvent;
+}
+
 export function calculateMTHistoryEvents(
   rawHistory: RawMTHistoryEvent[],
   ma: MarginableAssetCore
@@ -202,6 +208,17 @@ export function calculateMTHistoryEvents(
       cash = cash.plus(h.payAmount);
       event = { ...h, priceDai, token: ma.name, dAmount: h.amount, dDAIAmount: h.payAmount };
     }
+    if (h.kind === MTHistoryEventKind.dent) {
+      const bite: MTLiquidationEvent = findAuctionBite(rawHistory, h.id);
+      // @ts-ignore
+      event = { ...h, token: ma.name, redeemable: bite.lot.minus(h.lot) };
+    }
+    if (h.kind === MTHistoryEventKind.redeem) {
+      event = { ...h, token: ma.name, redeemable: h.amount.times(minusOne), };
+    }
+    if (h.kind === MTHistoryEventKind.bite) {
+      event = { ...h, token: ma.name, dAmount: h.lot.times(minusOne) };
+    }
 
     const prevDebt = debt;
     debt = cash.lt(zero) ? cash.times(minusOne) : zero;
@@ -236,6 +253,7 @@ export function calculateMTHistoryEvents(
 export function calculateMarginable(
   ma: MarginableAssetCore,
 ): MarginableAsset {
+
   const availableActions = marginableAvailableActions(ma);
   const balanceInCash = ma.balance.times(ma.referencePrice);
   const lockedBalance = BigNumber.min(
@@ -252,7 +270,16 @@ export function calculateMarginable(
 
   const liquidationPrice = ma.minCollRatio.times(ma.debt).div(ma.balance);
 
-  const history = calculateMTHistoryEvents(ma.rawHistory, ma);
+  const FullHistory = calculateMTHistoryEvents(ma.rawHistory, ma);
+
+  const hiddenEvents = [
+    MTHistoryEventKind.adjust,
+    MTHistoryEventKind.tend,
+    MTHistoryEventKind.deal,
+    MTHistoryEventKind.kick,
+  ];
+
+  const history = FullHistory.filter(h => !hiddenEvents.includes(h.kind)).reverse();
 
   const safe = currentCollRatio !== undefined ?
     currentCollRatio.gte(ma.safeCollRatio) : true;
@@ -267,6 +294,23 @@ export function calculateMarginable(
 
   const leverage = ma.balance.times(ma.referencePrice)
     .div(ma.balance.times(ma.referencePrice).minus(ma.debt));
+
+  let bitable = mtBitable.no;
+  if (ma.osmPriceNext && ma.osmPriceNext.lte(liquidationPrice)) {
+    bitable = mtBitable.imminent;
+  }
+
+  if (ma.referencePrice.lte(liquidationPrice)) {
+    bitable = mtBitable.yes;
+  }
+  const runningAuctions = 2;
+
+  let amountBeingLiquidated = zero;
+  ma.rawHistory.forEach(h => {
+    if (h.kind === MTHistoryEventKind.bite) {
+      amountBeingLiquidated = amountBeingLiquidated.plus(h.lot);
+    }
+  });
 
   return {
     ...ma,
@@ -284,7 +328,9 @@ export function calculateMarginable(
     safe,
     liquidationInProgress,
     history,
-    rawLiquidationHistory: ma.rawLiquidationHistory,
+    bitable,
+    runningAuctions,
+    amountBeingLiquidated,
   };
 }
 
