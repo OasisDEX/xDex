@@ -528,20 +528,6 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
               multiply={true}
             />
           }
-          {
-            slippageLimit && amount && price &&
-            <>
-              <span> / </span>
-              <Money
-                value={
-                  kind === OfferType.buy
-                    ? amount.times(price).times(slippageLimit.plus(1))
-                    : amount.times(price).dividedBy(slippageLimit.plus(1))
-                }
-                token="DAI"
-              />
-            </>
-          }
         </div>
       </div>
     );
