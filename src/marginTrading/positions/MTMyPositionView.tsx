@@ -1,16 +1,17 @@
+import classnames from 'classnames';
 import * as moment from 'moment';
 import * as React from 'react';
 import { Observable } from 'rxjs/index';
 import { CDPHistoryView } from '../../balances-mt/CDPHistoryView';
 import { TxState } from '../../blockchain/transactions';
 import { connect } from '../../utils/connect';
-import { formatPercent, formatPrecision } from '../../utils/formatters/format';
-import { Money } from '../../utils/formatters/Formatters';
+import { formatPrecision } from '../../utils/formatters/format';
+import { FormatPercent, Money } from '../../utils/formatters/Formatters';
 import { Button } from '../../utils/forms/Buttons';
 import { SvgImage } from '../../utils/icons/utils';
 import { inject } from '../../utils/inject';
 import { ModalOpenerProps, ModalProps } from '../../utils/modal';
-import { one, zero } from '../../utils/zero';
+import { minusOne, one, zero } from '../../utils/zero';
 import { CreateMTAllocateForm$Props } from '../allocate/mtOrderAllocateDebtFormView';
 import {
   findAsset,
@@ -36,15 +37,16 @@ export class MTMyPositionView extends
   React.Component<MTMyPositionViewProps & ModalOpenerProps>
 {
   public render() {
-    console.log('MTA', this.props.mta);
-    console.log('MA', this.props.ma);
-    const equity = this.props.ma.balance
-      .times(this.props.ma.referencePrice).minus(this.props.ma.debt);
+    // const equity = this.props.ma.balance
+    //   .times(this.props.ma.referencePrice).minus(this.props.ma.debt);
     const leverage = this.props.ma.leverage && !this.props.ma.leverage.isNaN()
       ? this.props.ma.leverage :
       this.props.ma.balance.gt(zero) ? one : zero;
-
     const dai = findAsset('DAI', this.props.mta);
+    const asset = this.props.ma;
+    const liquidationPrice = this.props.ma.liquidationPrice
+    && !this.props.ma.liquidationPrice.isNaN() ?
+      this.props.ma.liquidationPrice : zero;
 
     const liquidationTime = moment(this.props.ma.zzz);
     const duration = moment.duration(liquidationTime.diff(moment(new Date())));
@@ -75,12 +77,18 @@ export class MTMyPositionView extends
               </div>
               <div className={styles.summaryValue}>
                 {
-                  this.props.ma.liquidationPrice && !this.props.ma.liquidationPrice.isNaN()
-                  && this.props.ma.liquidationPrice.gt(zero) ?
-                    <>
-                      {formatPrecision(this.props.ma.liquidationPrice, 2)} USD
-                    </>
-                    : <span>-</span>
+                  liquidationPrice.gt(zero) ?
+                    <Money
+                      value={liquidationPrice}
+                      token="USD"
+                      fallback="-"
+                      className={
+                        classnames({
+                          [styles.summaryValuePositive]: asset && asset.safe,
+                          [styles.summaryValueNegative]: asset && !asset.safe,
+                        })
+                      }
+                    /> : <span>-</span>
                 }
               </div>
             </div>
@@ -89,7 +97,6 @@ export class MTMyPositionView extends
                 Liqu. Fee
               </div>
               <div className={styles.summaryValue}>
-                -
                 {/*15%*/}
                 {/*{*/}
                 {/*this.props.liquidationFee && !this.props.liquidationFee.isNaN() ?*/}
@@ -105,22 +112,11 @@ export class MTMyPositionView extends
                 Interest Rate
               </div>
               <div className={styles.summaryValue}>
-                {formatPercent(this.props.ma.fee, { precision: 2 })}
-              </div>
-            </div>
-            <div className={styles.summaryRow}>
-              <div className={styles.summaryLabel}>
-                Dai debt
-              </div>
-              <div className={styles.summaryValue}>
-                {
-                  this.props.ma.debt && !this.props.ma.debt.isNaN() ?
-                    <Money
-                      value={this.props.ma.debt}
-                      token="DAI"
-                      fallback="-"
-                    /> : <span>-</span>
-                }
+                <FormatPercent
+                  value={this.props.ma.fee}
+                  fallback="-"
+                  multiply={false}
+                />
               </div>
             </div>
           </div>
@@ -142,12 +138,20 @@ export class MTMyPositionView extends
             </div>
             <div className={styles.summaryRow}>
               <div className={styles.summaryLabel}>
-                Equity
+                DAI Balance
               </div>
               <div className={styles.summaryValue}>
-                {
-                  equity && !equity.isNaN() ?
-                    <Money value={equity} token="DAI" /> : <span>-</span>
+                { asset && asset.debt.gt(zero) ?
+                  <Money
+                    value={asset.debt.times(minusOne)}
+                    token="DAI"
+                    fallback="-"
+                  /> : asset && asset.dai ?
+                    <Money
+                      value={asset.dai}
+                      token="DAI"
+                      fallback="-"
+                    /> : <span>-</span>
                 }
               </div>
             </div>
@@ -197,7 +201,8 @@ export class MTMyPositionView extends
               </>
             }
           </div>
-        </div>
+          </div>
+
         <div>
           {
             this.props.ma.bitable === 'imminent' &&

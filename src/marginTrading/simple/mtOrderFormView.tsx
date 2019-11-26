@@ -201,21 +201,6 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
   }
 
   public render() {
-    // ) {
-    //   return  (
-    //   <div style={{ ...dimensions }}>
-    //     <theAppContext.Consumer>
-    //       { ({ MTSetupButtonRxTx,
-    //       }) =>
-    //         <div>
-    //             <MTSetupButtonRxTx/>
-    //         </div>
-    //       }
-    //     </theAppContext.Consumer>
-    //   </div>
-    //   );
-    // }
-
     return (<div>
       {
         this.props.view === ViewKind.instantTradeForm
@@ -255,7 +240,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
       {/*{this.leverage()}*/}
       {/*{ this.collateralizationRatio() }*/}
       {this.liquidationPrice()}
-      {this.price2()}
+      {this.price()}
       {this.slippageLimit()}
       {/*{this.balanceButtons()}*/}
       {/*{this.interestRate()}*/}
@@ -352,128 +337,53 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
     );
   }
 
-  // private balanceButtons() {
-  //   const baseTokenAsset = findAsset(this.props.baseToken, this.props.mta);
-  //   const quoteTokenAsset = findAsset(this.props.quoteToken, this.props.mta);
-  //   return (
-  //     <div className={classnames(styles.flexContainer, styles.marginBottom)}>
-  //       <Button
-  //         type="button"
-  //         onClick={this.handleSetMax}
-  //         size="lg"
-  //         block={true}
-  //         disabled={this.props.kind === 'buy'}
-  //         className={styles.balanceBtn}
-  //       >
-  //         <span style={{ lineHeight: 1 }}>
-  //                   { baseTokenAsset &&
-  //                   formatAmount(baseTokenAsset.balance, this.props.baseToken)
-  //                   } <Currency value={this.props.baseToken} />
-  //                 </span>
-  //       </Button>
-  //       <Button
-  //         type="button"
-  //         onClick={this.handleSetMax}
-  //         size="lg"
-  //         block={true}
-  //         disabled={this.props.kind === 'sell'}
-  //         className={styles.balanceBtn}
-  //       >
-  //         <span style={{ lineHeight: 1 }}>
-  //                   { quoteTokenAsset &&
-  //                   formatAmount(quoteTokenAsset.balance, this.props.quoteToken)
-  //                   } <Currency value={this.props.quoteToken} />
-  //                 </span>
-  //       </Button>
-  //     </div>
-  //   );
-  // }
-
-  // private orderType() {
-  //   return (
-  //     <BorderBox className={classnames(styles.lg,
-  //                                      styles.orderType,
-  //                                      styles.marginBottom)}
-  //       padding="sm"
-  //     >
-  //       <span>Fill or kill</span>
-  //     </BorderBox>
-  //   );
-  // }
-
-  // private collateralizationRatio() {
-  //   return (
-  //     <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
-  //       <div className={styles.orderSummaryLabel}>
-  //         Collateralization ratio
-  //       </div>
-  //       <div className={styles.orderSummaryValue}>
-  //         {
-  //           this.props.collRatio &&
-  //           <FormatPercent
-  //             value={this.props.collRatio}
-  //             fallback="-"
-  //             multiply={true}
-  //             className={styles.orderSummaryValuePositive}
-  //           />
-  //         }
-  //         {
-  //           this.props.collRatioPost &&
-  //           <>
-  //             <span className={styles.transitionArrow} />
-  //             <FormatPercent
-  //               value={this.props.collRatioPost}
-  //               fallback="-"
-  //               multiply={true}
-  //               className={
-  //                 classnames({
-  //                   [styles.orderSummaryValuePositive]: this.props.isSafePost,
-  //                   [styles.orderSummaryValueNegative]: !this.props.isSafePost,
-  //                 })
-  //               }
-  //             />
-  //           </>
-  //         }
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
   private liquidationPrice() {
     const liquidationPrice = this.props.liquidationPrice && !this.props.liquidationPrice.isNaN() ?
       this.props.liquidationPrice : zero;
-
     const liquidationPricePost = this.props.liquidationPricePost
     && !this.props.liquidationPricePost.isNaN() ? this.props.liquidationPricePost : zero;
 
+    const baseTokenAsset = findMarginableAsset(this.props.baseToken, this.props.mta);
     return (
       <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
         <div className={styles.orderSummaryLabel}>
           Liqu. price
         </div>
         <div className={classnames(styles.orderSummaryValue, styles.orderSummaryValuePositive)}>
-          <Money
-            value={liquidationPrice}
-            token="USD"
-            fallback="-"
-          />
           {
-            this.props.liquidationPricePost &&
-            this.props.liquidationPrice &&
-            !this.props.liquidationPrice.isEqualTo(this.props.liquidationPricePost) &&
-            <>
-              <span className={styles.transitionArrow} />
+            liquidationPrice.gt(zero) ?
               <Money
-                value={liquidationPricePost}
+                value={liquidationPrice}
                 token="USD"
                 fallback="-"
                 className={
                   classnames({
-                    [styles.orderSummaryValuePositive]: this.props.isSafePost,
-                    [styles.orderSummaryValueNegative]: !this.props.isSafePost,
+                    [styles.orderSummaryValuePositive]: baseTokenAsset && baseTokenAsset.safe,
+                    [styles.orderSummaryValueNegative]: baseTokenAsset && !baseTokenAsset.safe,
                   })
                 }
-              />
+              /> : <span>-</span>
+          }
+          {
+            this.props.liquidationPricePost &&
+            !this.props.liquidationPricePost.isNaN() &&
+            !liquidationPrice.isEqualTo(liquidationPricePost) &&
+            <>
+              <span className={styles.transitionArrow} />
+              {
+                liquidationPricePost.gt(zero) ?
+                  <Money
+                    value={liquidationPricePost}
+                    token="USD"
+                    fallback="-"
+                    className={
+                      classnames({
+                        [styles.orderSummaryValuePositive]: this.props.isSafePost,
+                        [styles.orderSummaryValueNegative]: !this.props.isSafePost,
+                      })
+                    }
+                  /> : <span>-</span>
+              }
             </>
           }
         </div>
@@ -481,9 +391,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
     );
   }
 
-  private price2() {
-
-    // console.log('price props', this.props);
+  private price() {
     const price = this.props.price || new BigNumber(0);
     return (
       <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
@@ -576,25 +484,6 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
     );
   }
 
-  // private interestRate() {
-  //   return (
-  //     <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
-  //       <div className={styles.orderSummaryLabel}>
-  //         Interest rate (APR)
-  //       </div>
-  //       <div className={styles.orderSummaryValue}>
-  //         {
-  //           this.props.apr && <FormatPercent
-  //             value={this.props.apr}
-  //             fallback="-"
-  //             multiply={false}
-  //           />
-  //         }
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
   private feesBox() {
     const leverage = this.props.leverage && !this.props.leverage.isNaN() ?
       this.props.leverage :
@@ -629,8 +518,8 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
           <div className={styles.InfoRowLabel}>Interest Rate</div>
           <div>
             {
-              ! this.props.apr ? <FormatPercent
-                value={this.props.apr}
+              this.props.fee ? <FormatPercent
+                value={this.props.fee}
                 fallback="-"
                 multiply={false}
               /> : <span>-</span>
@@ -641,62 +530,38 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
     );
   }
 
-  // private purchasingPower() {
-  //   const baseTokenAsset = this.props.mta &&
-  //     this.props.mta.state === MTAccountState.setup && (
-  //       this.props.mta.marginableAssets.find(a => a.name === this.props.baseToken) ||
-  //       this.props.mta.nonMarginableAssets.find(a => a.name === this.props.baseToken)
-  //     );
-  //   return <BorderBox className={classnames(styles.flexContainer,
-  //                                           styles.lg,
-  //                                           styles.marginBottom)}
-  //     padding="sm"
-  //   >
-  //     <span className={styles.purchasingPowerTitle}>Purchasing power</span>
-  //     <span className={styles.purchasingPowerAmount}>
-  //       { baseTokenAsset &&
-  //       formatAmount(baseTokenAsset.purchasingPower, this.props.quoteToken)
-  //       }
-  //       ({ this.props.realPurchasingPower &&
-  //         formatAmount(this.props.realPurchasingPower, this.props.quoteToken)
-  //       })
-  //       <Currency value={this.props.quoteToken} />
-  //     </span>
-  //   </BorderBox>;
-  // }
-
   private purchasingPower2() {
     return (
       this.props.kind === OfferType.buy ?
-      <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
-        <div className={styles.orderSummaryLabel}>
-          Purch. power
-        </div>
-        <div className={styles.orderSummaryValue}>
-          {
-            this.props.realPurchasingPower &&
+        <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
+          <div className={styles.orderSummaryLabel}>
+            Purch. power
+          </div>
+          <div className={styles.orderSummaryValue}>
+            {
+              this.props.realPurchasingPower &&
+              <>
+                {formatPrecision(this.props.realPurchasingPower, 2)}
+              </>
+            }
+            { this.props.realPurchasingPowerPost &&
             <>
-              {formatPrecision(this.props.realPurchasingPower, 2)}
+              <span className={styles.transitionArrow} />
+              { !this.props.realPurchasingPowerPost.isNaN() ?
+                <>
+                  {formatPrecision(this.props.realPurchasingPowerPost, 2)}
+                </>
+                : <span>-</span>
+              }
             </>
-          }
-          { this.props.realPurchasingPowerPost &&
+            }
             <>
-                <span className={styles.transitionArrow} />
-                { !this.props.realPurchasingPowerPost.isNaN() ?
-                  <>
-                    {formatPrecision(this.props.realPurchasingPowerPost, 2)}
-                  </>
-                  : <span>-</span>
-                }
-            </>
-          }
-          <>
-          {
-            (this.props.realPurchasingPower || this.props.realPurchasingPowerPost) &&
-            <> { this.props.quoteToken } </>
-          }</>
+              {
+                (this.props.realPurchasingPower || this.props.realPurchasingPowerPost) &&
+                <> { this.props.quoteToken } </>
+              }</>
+          </div>
         </div>
-      </div>
         : null
     );
   }
@@ -706,89 +571,68 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
 
     return (
       <>
-      <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
-        <div className={styles.orderSummaryLabel}>
-          Balance
-        </div>
-        <div className={styles.orderSummaryValue}>
-          { baseTokenAsset && !baseTokenAsset.balance.isNaN() ?
-            <Money
-              value={baseTokenAsset.balance}
-              token={this.props.baseToken}
-              fallback="-"
-            /> : <span>-</span>
-          }
-          {
-            this.props.balancePost &&
-            <>
-              <span className={styles.transitionArrow} />
-              { !this.props.balancePost.isNaN() ?
-                <Money
-                  value={this.props.balancePost}
-                  token={this.props.baseToken}
-                  fallback="-"
-                /> : <span>-</span>
-              }
-            </>
-          }
-        </div>
-      </div>
-      <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
-        <div className={styles.orderSummaryLabel}>
-          DAI Balance
-        </div>
-        <div className={styles.orderSummaryValue}>
-          { baseTokenAsset && baseTokenAsset.debt.gt(zero) ?
-            <Money
-              value={baseTokenAsset.debt.times(minusOne)}
-              token={this.props.quoteToken}
-              fallback="-"
-            /> : baseTokenAsset && baseTokenAsset.dai ?
+        <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
+          <div className={styles.orderSummaryLabel}>
+            Balance
+          </div>
+          <div className={styles.orderSummaryValue}>
+            { baseTokenAsset && !baseTokenAsset.balance.isNaN() ?
               <Money
-              value={baseTokenAsset.dai}
-              token={this.props.quoteToken}
-              fallback="-"
-            /> : <span>-</span>
-
-          }
-          {
-            this.props.daiBalancePost &&
-            <>
-              <span className={styles.transitionArrow} />
-              { !this.props.daiBalancePost.isNaN() ?
+                value={baseTokenAsset.balance}
+                token={this.props.baseToken}
+                fallback="-"
+              /> : <span>-</span>
+            }
+            {
+              this.props.balancePost &&
+              <>
+                <span className={styles.transitionArrow} />
+                { !this.props.balancePost.isNaN() ?
+                  <Money
+                    value={this.props.balancePost}
+                    token={this.props.baseToken}
+                    fallback="-"
+                  /> : <span>-</span>
+                }
+              </>
+            }
+          </div>
+        </div>
+        <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
+          <div className={styles.orderSummaryLabel}>
+            DAI Balance
+          </div>
+          <div className={styles.orderSummaryValue}>
+            { baseTokenAsset && baseTokenAsset.debt.gt(zero) ?
+              <Money
+                value={baseTokenAsset.debt.times(minusOne)}
+                token={this.props.quoteToken}
+                fallback="-"
+              /> : baseTokenAsset && baseTokenAsset.dai ?
                 <Money
-                  value={this.props.daiBalancePost}
-                  token={this.props.baseToken}
+                  value={baseTokenAsset.dai}
+                  token={this.props.quoteToken}
                   fallback="-"
                 /> : <span>-</span>
-              }
-            </>
-          }
+            }
+            {
+              this.props.daiBalancePost &&
+              <>
+                <span className={styles.transitionArrow} />
+                { !this.props.daiBalancePost.isNaN() ?
+                  <Money
+                    value={this.props.daiBalancePost}
+                    token={this.props.quoteToken}
+                    fallback="-"
+                  /> : <span>-</span>
+                }
+              </>
+            }
+          </div>
         </div>
-      </div>
-        </>
+      </>
     );
   }
-
-  // private leverage() {
-  //   return <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
-  //     <div className={styles.orderSummaryLabel}>
-  //       Current Leverage
-  //     </div>
-  //     <div className={styles.orderSummaryValue}>
-  //       {
-  //         (this.props.leverage && !this.props.leverage.isNaN()) ?
-  //           <>{ formatPrecision(this.props.leverage, 1) }x</>
-  //           : <span>-</span>
-  //       }
-  //       {this.props.leveragePost && <>
-  //         <span className={styles.transitionArrow}/>
-  //         {formatPrecision(this.props.leveragePost, 1)}x
-  //       </>
-  //       }
-  //     </div>
-  //   </div>;
-  // }
 
   private amount() {
     return (
@@ -798,29 +642,6 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
       </div>
     );
   }
-
-  // private price() {
-  //   return (
-  //     <div>
-  //       { this.priceGroup() }
-  //       <Error field="price" messages={this.props.messages} />
-  //     </div>
-  //   );
-  // }
-
-  // private gasCost() {
-  //   return (
-  //     <div>
-  //       <div className={styles.flexContainer}>
-  //         <span><Muted>Gas cost</Muted></span>
-  //         <span>
-  //               <GasCost {...this.props}/>
-  //             </span>
-  //       </div>
-  //       <Error field="gas" messages={this.props.messages} />
-  //     </div>
-  //   );
-  // }
 
   private total() {
     return (
@@ -919,41 +740,6 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
     );
   }
 
-  // private priceGroup() {
-  //   return (
-  //     <InputGroup hasError={ (this.props.messages || [])
-  //       .filter((message: Message) => message.field === 'price')
-  //       .length > 0}>
-  //       <InputGroupAddon border="right" className={styles.inputHeader}>Price</InputGroupAddon>
-  //       <BigNumberInput
-  //         ref={ (el: any) =>
-  //           this.priceInput = (el && ReactDOM.findDOMNode(el) as HTMLElement) || undefined
-  //         }
-  //         type="text"
-  //         mask={createNumberMask({
-  //           allowDecimal: true,
-  //           decimalLimit: 5,
-  //           prefix: ''
-  //         })}
-  //         onChange={this.handleTotalChange}
-  //         value={
-  //           (this.props.price || null) &&
-  //           formatPrice(this.props.price as BigNumber, this.props.quoteToken)
-  //         }
-  //         guide={true}
-  //         placeholderChar={' '}
-  //         className={styles.input}
-  //         // disabled={this.props.stage === FormStage.waitingForAllocation}
-  //         disabled={ true }
-  //       />
-  //       <InputGroupAddon className={styles.inputCurrencyAddon} onClick={ this.handlePriceFocus }>
-  //         {this.props.quoteToken}
-  //       </InputGroupAddon>
-  //
-  //     </InputGroup>
-  //   );
-  // }
-
 }
 
 const Error = ({ field, messages } : { field: string, messages?: Message[] }) => {
@@ -982,8 +768,3 @@ function messageContent(msg: Message) {
       return `Can't calculate: ${msg.message}. Type smaller amount`;
   }
 }
-
-// const BalanceIcon = ({ token }: { token: string }) => {
-//   const Icon = tokens[token].icon;
-//   return (<Icon />);
-// };

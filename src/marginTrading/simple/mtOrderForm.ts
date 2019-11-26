@@ -1,6 +1,7 @@
 import { BigNumber } from 'bignumber.js';
 import { curry } from 'lodash';
 import { merge, Observable, of, Subject } from 'rxjs';
+import { shareReplay } from 'rxjs/internal/operators';
 import { first, map, scan, switchMap, takeUntil } from 'rxjs/operators';
 import { DustLimits } from '../../balances-nomt/balances';
 import { Calls, Calls$, ReadCalls$ } from '../../blockchain/calls/calls';
@@ -36,6 +37,7 @@ import {
 } from '../../utils/form';
 import { formatPriceDown, formatPriceUp } from '../../utils/formatters/format';
 import { description, Impossible, isImpossible } from '../../utils/impossible';
+import { firstOfOrTrue } from '../../utils/operators';
 import { minusOne, zero } from '../../utils/zero';
 import { EditableDebt } from '../allocate/mtOrderAllocateDebtForm';
 import { prepareBuyAllocationRequest } from '../plan/planBuy';
@@ -54,9 +56,9 @@ import {
 } from '../state/mtAccount';
 import {
   calculateMarginable,
-  realPurchasingPowerMarginable,
-  realPurchasingPowerNonMarginable
+  realPurchasingPowerMarginable, realPurchasingPowerNonMarginable,
 } from '../state/mtCalculate';
+// import { getBuyPlan, getSellPlan } from './mtOrderPlan';
 
 export enum MessageKind {
   insufficientAmount = 'insufficientAmount',
@@ -77,7 +79,7 @@ export type Message = {
   priority: number;
   token: string;
 } | {
-  kind: MessageKind.dustAmount ;
+  kind: MessageKind.dustAmount;
   field: string;
   priority: number;
   token: string;
@@ -124,14 +126,14 @@ export interface MTSimpleFormState extends HasGasEstimation {
   liquidationPricePost?: BigNumber;
   balancePost?: BigNumber;
   daiBalancePost?: BigNumber;
-  apr?: BigNumber;
-  isSafePost?: boolean;
+  fee?: BigNumber;
   slippageLimit?: BigNumber;
   priceImpact?: BigNumber;
   submit: (state: MTSimpleFormState) => void;
   change: (change: ManualChange) => void;
   view: ViewKind;
   account?: string;
+  isSafePost?: boolean;
 }
 
 export type ManualChange =
@@ -223,7 +225,6 @@ function applyChange(state: MTSimpleFormState, change: MTFormChange): MTSimpleFo
     case FormChangeKind.marginTradingAccountChange:
       return { ...state,
         mta: change.mta,
-        // todo: add apr here instead of pipeline
         gasEstimationStatus: GasEstimationStatus.unset };
     case FormChangeKind.dustLimitChange:
       return { ...state,
@@ -459,8 +460,8 @@ function addTotal(amount: BigNumber | undefined, state: MTSimpleFormState): MTSi
   const orderbookTotal = getTotal(
     amount,
     state.kind === OfferType.buy ?
-    state.orderbook.sell :
-    state.orderbook.buy);
+      state.orderbook.sell :
+      state.orderbook.buy);
 
   if (isImpossible(orderbookTotal)) {
     const messages: Message[] =
@@ -506,9 +507,6 @@ function addPrice(state: MTSimpleFormState) {
     return state;
   }
 
-  console.log('price calc total', state.total.toString());
-  console.log('price calc amount', state.amount.toString());
-  console.log('price calc', state.total.div(state.amount).toString());
   return {
     ...state,
     price: state.total.div(state.amount)
@@ -882,16 +880,29 @@ function addPreTradeInfo(state: MTSimpleFormState): MTSimpleFormState {
   };
 }
 
+export interface MTSimpleOrderFormParams {
+  gasPrice$: Observable<BigNumber>;
+  etherPriceUsd$: Observable<BigNumber>;
+  orderbook$: Observable<Orderbook>;
+  mta$: Observable<MTAccount>;
+  calls$: Calls$;
+  readCalls$: ReadCalls$;
+  dustLimits$: Observable<DustLimits>;
+  account$: Observable<string|undefined>;
+}
+
 export function createMTSimpleOrderForm$(
-  tradingPair: TradingPair,
-  gasPrice$: Observable<BigNumber>,
-  etherPriceUSD$: Observable<BigNumber>,
-  orderbook$: Observable<Orderbook>,
-  mta$: Observable<MTAccount>,
-  calls$: Calls$,
-  readCalls$: ReadCalls$,
-  dustLimits$: Observable<DustLimits>,
-  account$: Observable<string|undefined>
+  {
+    gasPrice$,
+    etherPriceUsd$,
+    orderbook$,
+    mta$,
+    calls$,
+    readCalls$,
+    dustLimits$,
+    account$
+  } : MTSimpleOrderFormParams,
+  tradingPair: TradingPair
 ): Observable<MTSimpleFormState> {
 
   const manualChange$ = new Subject<ManualChange>();
@@ -899,7 +910,7 @@ export function createMTSimpleOrderForm$(
   const environmentChange$ = merge(
     combineAndMerge(
       toGasPriceChange(gasPrice$),
-      toEtherPriceUSDChange(etherPriceUSD$),
+      toEtherPriceUSDChange(etherPriceUsd$),
       toOrderbookChange$(orderbook$),
       toDustLimitChange$(dustLimits$, tradingPair.base, tradingPair.quote),
       toAccountChange(account$),
@@ -937,6 +948,8 @@ export function createMTSimpleOrderForm$(
     switchMap(curry(estimateGasPrice)(calls$, readCalls$)),
     scan(freezeGasEstimation),
     map(isReadyToProceed),
+    firstOfOrTrue(s => s.gasEstimationStatus === GasEstimationStatus.calculating),
+    shareReplay(1),
     // tap(state => state.plan && console.log('plan:', JSON.stringify(state.plan))),
     // ),
     // catchError(e => {

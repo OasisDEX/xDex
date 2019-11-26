@@ -147,8 +147,7 @@ export function aggregateMTAccountState(
     map(([balanceResult, rawLiquidationHistories, rawHistories, osmPrices]) => {
       const marginables = [...tokenNames.entries()]
         .filter(([_i, token]) => getToken(token).assetKind === AssetKind.marginable)
-        .map(([i, token]) => {
-          console.log('i', i);
+        .map(([, token]) => {
           return getMarginableCore({
             name: token,
             assetKind: AssetKind.marginable,
