@@ -789,7 +789,8 @@ function prepareSubmit(
       price,
       amount,
       gasEstimation,
-      total
+      total,
+      slippageLimit
     } = state;
 
     if (
@@ -797,6 +798,7 @@ function prepareSubmit(
       !mta.proxy ||
       !amount || !price ||
       !total ||
+      !slippageLimit ||
       !plan || isImpossible(plan) || !gasEstimation
     ) {
       return;
@@ -805,6 +807,10 @@ function prepareSubmit(
     const proxy = mta.proxy;
 
     const formResetChange: FormResetChange = { kind: FormChangeKind.formResetChange };
+
+    const totalWithSlippageIncluded = state.kind === OfferType.buy
+      ? amount.times(price).times(slippageLimit.plus(1))
+      : amount.times(price).dividedBy(slippageLimit.plus(1));
 
     const changes$ = merge(
       cancel$.pipe(
@@ -820,7 +826,7 @@ function prepareSubmit(
             price,
             proxy,
             plan,
-            total,
+            total: totalWithSlippageIncluded,
             gas: Math.trunc(gasEstimation * 1.2),
           }).pipe(
             transactionToX<ProgressChange | FormResetChange>(
