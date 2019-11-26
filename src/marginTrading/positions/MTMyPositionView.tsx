@@ -37,8 +37,8 @@ export class MTMyPositionView extends
   React.Component<MTMyPositionViewProps & ModalOpenerProps>
 {
   public render() {
-    const equity = this.props.ma.balance
-      .times(this.props.ma.referencePrice).minus(this.props.ma.debt);
+    // const equity = this.props.ma.balance
+    //   .times(this.props.ma.referencePrice).minus(this.props.ma.debt);
     const leverage = this.props.ma.leverage && !this.props.ma.leverage.isNaN()
       ? this.props.ma.leverage :
       this.props.ma.balance.gt(zero) ? one : zero;

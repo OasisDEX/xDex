@@ -67,8 +67,9 @@
 }
 
 .summaryBox {
-  border: 1px solid #383842;
-  padding: 15px 12px 0 12px;
+  border: 1px solid $another-light-grayish-blue-3;
+  border-bottom: 0;
+  padding: 15px 12px 2px 12px;
 }
 
 
@@ -84,11 +85,6 @@
   width: 16px;
   margin: 0 12px;
   background: url("./icon_arrow_right.svg") no-repeat center;
-}
-
-.summaryBox {
-  border: 1px solid #383842;
-  padding: 15px 12px 0 12px;
 }
 
 .orderSummaryRow {
@@ -111,18 +107,18 @@
 }
 
 .orderSummaryValuePositive {
-  color: #36EFBA;
+  color: $green;
 }
 
 .orderSummaryValueNegative {
-  color: #FF6951;
+  color: $red;
 }
 
 .InfoRow {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border: 1px solid #383842;
+  border: 1px solid $another-light-grayish-blue-3;
   font-size: 15px;
   line-height: 18px;
   margin-bottom: 28px;
@@ -135,7 +131,11 @@
   box-sizing: border-box;
   border-radius: 2px;
   padding: 10px;
-  border-left: 1px solid #383842;
+  border-left: 1px solid $another-light-grayish-blue-3;
+
+  &:first-child {
+    border-left: none;
+  }
 }
 
 .InfoRowLabel {

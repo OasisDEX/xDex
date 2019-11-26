@@ -58,7 +58,7 @@ import {
   calculateMarginable,
   realPurchasingPowerMarginable, realPurchasingPowerNonMarginable,
 } from '../state/mtCalculate';
-import { getBuyPlan, getSellPlan } from './mtOrderPlan';
+// import { getBuyPlan, getSellPlan } from './mtOrderPlan';
 
 export enum MessageKind {
   insufficientAmount = 'insufficientAmount',
@@ -460,8 +460,8 @@ function addTotal(amount: BigNumber | undefined, state: MTSimpleFormState): MTSi
   const orderbookTotal = getTotal(
     amount,
     state.kind === OfferType.buy ?
-    state.orderbook.sell :
-    state.orderbook.buy);
+      state.orderbook.sell :
+      state.orderbook.buy);
 
   if (isImpossible(orderbookTotal)) {
     const messages: Message[] =
@@ -874,16 +874,29 @@ function addPreTradeInfo(state: MTSimpleFormState): MTSimpleFormState {
   };
 }
 
+export interface MTSimpleOrderFormParams {
+  gasPrice$: Observable<BigNumber>;
+  etherPriceUsd$: Observable<BigNumber>;
+  orderbook$: Observable<Orderbook>;
+  mta$: Observable<MTAccount>;
+  calls$: Calls$;
+  readCalls$: ReadCalls$;
+  dustLimits$: Observable<DustLimits>;
+  account$: Observable<string|undefined>;
+}
+
 export function createMTSimpleOrderForm$(
-  tradingPair: TradingPair,
-  gasPrice$: Observable<BigNumber>,
-  etherPriceUSD$: Observable<BigNumber>,
-  orderbook$: Observable<Orderbook>,
-  mta$: Observable<MTAccount>,
-  calls$: Calls$,
-  readCalls$: ReadCalls$,
-  dustLimits$: Observable<DustLimits>,
-  account$: Observable<string|undefined>
+  {
+    gasPrice$,
+    etherPriceUsd$,
+    orderbook$,
+    mta$,
+    calls$,
+    readCalls$,
+    dustLimits$,
+    account$
+  } : MTSimpleOrderFormParams,
+  tradingPair: TradingPair
 ): Observable<MTSimpleFormState> {
 
   const manualChange$ = new Subject<ManualChange>();
@@ -891,7 +904,7 @@ export function createMTSimpleOrderForm$(
   const environmentChange$ = merge(
     combineAndMerge(
       toGasPriceChange(gasPrice$),
-      toEtherPriceUSDChange(etherPriceUSD$),
+      toEtherPriceUSDChange(etherPriceUsd$),
       toOrderbookChange$(orderbook$),
       toDustLimitChange$(dustLimits$, tradingPair.base, tradingPair.quote),
       toAccountChange(account$),
