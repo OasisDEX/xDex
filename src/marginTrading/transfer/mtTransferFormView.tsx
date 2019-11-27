@@ -8,6 +8,7 @@ import { getToken } from '../../blockchain/config';
 import { BigNumberInput } from '../../utils/bigNumberInput/BigNumberInput';
 import { FormChangeKind, ProgressStage } from '../../utils/form';
 import { formatAmount } from '../../utils/formatters/format';
+import { Money } from '../../utils/formatters/Formatters';
 import { Button } from '../../utils/forms/Buttons';
 import { ErrorMessage } from '../../utils/forms/ErrorMessage';
 import { InputGroup, InputGroupAddon } from '../../utils/forms/InputGroup';
@@ -18,6 +19,7 @@ import { ModalOpenerProps, ModalProps } from '../../utils/modal';
 import { Panel, PanelBody, PanelFooter, PanelHeader } from '../../utils/panel/Panel';
 import { Muted } from '../../utils/text/Text';
 import { TransactionStateDescription } from '../../utils/text/TransactionStateDescription';
+import { zero } from '../../utils/zero';
 import {
   CreateMTAllocateForm$Props} from '../allocate/mtOrderAllocateDebtFormView';
 import {
@@ -52,13 +54,13 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
         overlayClassName={styles.modalOverlay}
         closeTimeoutMS={250}
       >
-        <Panel style={{ width: '550px', height: '380px' }} className={styles.modalChild}>
+        <Panel style={{ width: '550px', height: '580px' }} className={styles.modalChild}>
           <PanelHeader bordered={true} className={styles.headerWithIcon}>
             {this.header(this.props.progress)}
             <div onClick={this.close} className={styles.closeButton} >
               <SvgImage image={closeIconSvg}/>
             </div>
-            </PanelHeader>
+          </PanelHeader>
           <PanelBody paddingTop={true} style={{ height: '287px' }}>
             {this.AccountSummary()}
             <Hr color="dark" className={styles.hrBigMargin} />
@@ -104,175 +106,203 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
 
   private AccountSummary = () => {
     const asset = this.getAsset(this.props.token);
-    // const ilkAsset = (this.props.ilk ?
-    //   this.getAsset(this.props.ilk) : this.getAsset(this.props.token)) as MarginableAsset;
-    //
-    // const isSafePost = true; // todo
-    //
-    // const liquidationPrice =
-    //   this.props.liquidationPrice && !this.props.liquidationPrice.isNaN() ?
-    //     this.props.liquidationPrice : zero;
-    //
-    // const liquidationPricePost = this.props.liquidationPricePost
-    // && !this.props.liquidationPricePost.isNaN() ? this.props.liquidationPricePost : zero;
+    const baseToken = this.props.token === 'DAI' && this.props.ilk || this.props.token;
+    const baseAsset = this.getAsset(baseToken) as MarginableAsset;
+
+    const liquidationPrice =
+      this.props.liquidationPrice && !this.props.liquidationPrice.isNaN() ?
+        this.props.liquidationPrice : zero;
+
+    const liquidationPricePost = this.props.liquidationPricePost
+    && !this.props.liquidationPricePost.isNaN() ? this.props.liquidationPricePost : zero;
     return(
       <>
-        {/*<div className={styles.summaryBox}>*/}
-        {/*  <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>*/}
-        {/*    <div className={styles.orderSummaryLabel}>*/}
-        {/*      Purch. power*/}
-        {/*    </div>*/}
-        {/*    <div className={styles.orderSummaryValue}>*/}
-        {/*      {*/}
-        {/*        this.props.realPurchasingPower &&*/}
-        {/*        <>*/}
-        {/*          {formatPrecision(this.props.realPurchasingPower, 2)} {this.props.token}*/}
-        {/*        </>*/}
-        {/*      }*/}
-        {/*      { this.props.realPurchasingPowerPost &&*/}
-        {/*        <>*/}
-        {/*            <span className={styles.transitionArrow} />*/}
-        {/*            { !this.props.realPurchasingPowerPost.isNaN() ?*/}
-        {/*              <>*/}
-        {/*                {formatPrecision(this.props.realPurchasingPowerPost, 2)}*/}
-        {/*                 {this.props.token}*/}
-        {/*              </>*/}
-        {/*              : <span>-</span>*/}
-        {/*            }*/}
-        {/*          </>*/}
-        {/*      }*/}
-        {/*    </div>*/}
-        {/*  </div>*/}
-        {/*  <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>*/}
-        {/*    <div className={styles.orderSummaryLabel}>*/}
-        {/*      Balance*/}
-        {/*    </div>*/}
-        {/*    <div className={styles.orderSummaryValue}>*/}
-        {/*      { ilkAsset && !ilkAsset.balance.isNaN() ?*/}
-        {/*        <Money*/}
-        {/*          value={ilkAsset.balance}*/}
-        {/*          token={this.props.token}*/}
-        {/*          fallback="-"*/}
-        {/*        /> : <span>-</span>*/}
-        {/*      }*/}
-        {/*      {*/}
-        {/*        this.props.balancePost &&*/}
-        {/*        <>*/}
-        {/*          <span className={styles.transitionArrow} />*/}
-        {/*          { !this.props.balancePost.isNaN() ?*/}
-        {/*            <Money*/}
-        {/*              value={this.props.balancePost}*/}
-        {/*              token={this.props.token}*/}
-        {/*              fallback="-"*/}
-        {/*            /> : <span>-</span>*/}
-        {/*          }*/}
-        {/*        </>*/}
-        {/*      }*/}
-        {/*    </div>*/}
-        {/*  </div>*/}
-        {/*  <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>*/}
-        {/*    <div className={styles.orderSummaryLabel}>*/}
-        {/*      Liqu. Price*/}
-        {/*    </div>*/}
-        {/*    <div className={styles.orderSummaryValue}>*/}
-        {/*      <Money*/}
-        {/*        value={liquidationPrice}*/}
-        {/*        token="USD"*/}
-        {/*        fallback="-"*/}
-        {/*      />*/}
-        {/*      {*/}
-        {/*        this.props.liquidationPricePost &&*/}
-        {/*        this.props.liquidationPrice &&*/}
-        {/*        !this.props.liquidationPrice.isEqualTo(this.props.liquidationPricePost) &&*/}
-        {/*        <>*/}
-        {/*          <span className={styles.transitionArrow} />*/}
-        {/*          <Money*/}
-        {/*            value={liquidationPricePost}*/}
-        {/*            token="USD"*/}
-        {/*            fallback="-"*/}
-        {/*            className={*/}
-        {/*              classnames({*/}
-        {/*                [styles.orderSummaryValuePositive]: isSafePost,*/}
-        {/*                [styles.orderSummaryValueNegative]: isSafePost,*/}
-        {/*              })*/}
-        {/*            }*/}
-        {/*          />*/}
-        {/*        </>*/}
-        {/*      }*/}
-        {/*    </div>*/}
-        {/*  </div>*/}
-        {/*  <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>*/}
-        {/*    <div className={styles.orderSummaryLabel}>*/}
-        {/*      Dai Debt*/}
-        {/*    </div>*/}
-        {/*    <div className={styles.orderSummaryValue}>*/}
-        {/*      0.00*/}
-        {/*    </div>*/}
-        {/*  </div>*/}
-        {/*</div>*/}
-
-        {/*<div className={styles.InfoRow}>*/}
-        {/*  <div className={styles.InfoBox}>*/}
-        {/*    <div className={styles.InfoRowLabel}>Leverage</div>*/}
-        {/*    <div>*/}
-        {/*      <span>-</span>*/}
-        {/*    </div>*/}
-        {/*  </div>*/}
-        {/*  <div className={styles.InfoBox}>*/}
-        {/*    <div className={styles.InfoRowLabel}>Liqu. Fee</div>*/}
-        {/*    <span>-</span>*/}
-
-        {/*  </div>*/}
-        {/*  <div className={styles.InfoBox}>*/}
-        {/*    <div className={styles.InfoRowLabel}>Interest Rate</div>*/}
-        {/*    <div>*/}
-        {/*      <span>-</span>*/}
-
-        {/*    </div>*/}
-        {/*  </div>*/}
-        {/*</div>*/}
-
-        <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
+        <div className={styles.summaryBox}>
+          <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
             <div className={styles.orderSummaryLabel}>
-              Wallet Balance
+              Purch. power
             </div>
             <div className={styles.orderSummaryValue}>
-              {asset && formatAmount(asset.walletBalance, asset.name)} {this.props.token}
+              {
+                this.props.realPurchasingPower &&
+                <Money
+                  value={ this.props.realPurchasingPower}
+                  token={'DAI'}
+                  fallback="-"
+                />
+              }
+              { this.props.realPurchasingPowerPost &&
+              <>
+                <span className={styles.transitionArrow} />
+                { !this.props.realPurchasingPowerPost.isNaN() ?
+                  <Money
+                    value={ this.props.realPurchasingPowerPost}
+                    token={'DAI'}
+                    fallback="-"
+                  />
+                  : <span>-</span>
+                }
+              </>
+              }
             </div>
           </div>
+          <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
+            <div className={styles.orderSummaryLabel}>
+              Balance
+            </div>
+            <div className={styles.orderSummaryValue}>
+              { baseAsset && !baseAsset.balance.isNaN() ?
+                <Money
+                  value={baseAsset.balance}
+                  token={baseToken}
+                  fallback="-"
+                /> : <span>-</span>
+              }
+              {
+                baseAsset && baseAsset.balance && this.props.balancePost &&
+                !this.props.balancePost.isEqualTo(baseAsset.balance) &&
+                <>
+                  <span className={styles.transitionArrow} />
+                  { !this.props.balancePost.isNaN() ?
+                    <Money
+                      value={this.props.balancePost}
+                      token={baseToken}
+                      fallback="-"
+                    /> : <span>-</span>
+                  }
+                </>
+              }
+            </div>
+          </div>
+          <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
+            <div className={styles.orderSummaryLabel}>
+              Liqu. Price
+            </div>
+            <div className={styles.orderSummaryValue}>
+              <Money
+                value={liquidationPrice}
+                token="USD"
+                fallback="-"
+                className={
+                  classnames({
+                    [styles.orderSummaryValuePositive]: baseAsset && baseAsset.safe,
+                    [styles.orderSummaryValueNegative]: baseAsset && !baseAsset.safe
+                  })
+                }
+              />
+              {
+                this.props.liquidationPricePost &&
+                this.props.liquidationPrice &&
+                !this.props.liquidationPrice.isEqualTo(this.props.liquidationPricePost) &&
+                <>
+                  <span className={styles.transitionArrow} />
+                  <Money
+                    value={liquidationPricePost}
+                    token="USD"
+                    fallback="-"
+                    className={
+                      classnames({
+                        [styles.orderSummaryValuePositive]: this.props.isSafePost,
+                        [styles.orderSummaryValueNegative]: !this.props.isSafePost,
+                      })
+                    }
+                  />
+                </>
+              }
+            </div>
+          </div>
+          <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
+            <div className={styles.orderSummaryLabel}>
+              DAI Balance
+            </div>
+            <div className={styles.orderSummaryValue}>
+              { this.props.daiBalance && !this.props.daiBalance.isNaN() &&
+              <Money
+                value={this.props.daiBalance}
+                token={'DAI'}
+                fallback="-"
+              />
+              }
+              {
+                this.props.daiBalancePost && this.props.daiBalance &&
+                !this.props.daiBalance.isEqualTo(this.props.daiBalancePost) &&
+                <>
+                  <span className={styles.transitionArrow} />
+                  { !this.props.daiBalancePost.isNaN() ?
+                    <Money
+                      value={this.props.daiBalancePost}
+                      token={'DAI'}
+                      fallback="-"
+                    /> : <span>-</span>
+                  }
+                </>
+              }
+            </div>
+          </div>
+        </div>
+
+        <div className={styles.InfoRow}>
+          <div className={styles.InfoBox}>
+            <div className={styles.InfoRowLabel}>Leverage</div>
+            <div>
+              <span>-</span>
+            </div>
+          </div>
+          <div className={styles.InfoBox}>
+            <div className={styles.InfoRowLabel}>Liqu. Fee</div>
+            <span>-</span>
+
+          </div>
+          <div className={styles.InfoBox}>
+            <div className={styles.InfoRowLabel}>Interest Rate</div>
+            <div>
+              <span>-</span>
+
+            </div>
+          </div>
+        </div>
+
+        <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
+          <div className={styles.orderSummaryLabel}>
+            Wallet Balance
+          </div>
+          <div className={styles.orderSummaryValue}>
+            {asset && formatAmount(asset.walletBalance, asset.name)} {this.props.token}
+          </div>
+        </div>
 
         {/*<table className={styles.balanceTable}>*/}
-          {/*<tbody>*/}
-          {/*<tr>*/}
-            {/*<td><Muted>Wallet</Muted></td>*/}
-            {/*<td>*/}
-              {/*{asset && formatAmount(asset.walletBalance, asset.name)} {this.props.token}*/}
-              {/*</td>*/}
-          {/*</tr>*/}
-          {/*<tr>*/}
-            {/*<td><Muted>Margin account</Muted></td>*/}
-            {/*<td>{*/}
-              {/*this.props.token !== 'DAI' ?*/}
-                {/*asset && formatAmount(asset.balance, this.props.token) :*/}
-                {/*ilkAsset && formatAmount(ilkAsset.dai, this.props.token)*/}
-            {/*} {this.props.token}</td>*/}
-          {/*</tr>*/}
-          {/*/!*{ asset && asset.assetKind === AssetKind.marginable &&*!/*/}
-          {/*/!*<tr>*!/*/}
-          {/*/!*<td><Muted>Available amount</Muted></td>*!/*/}
-          {/*/!*<td><Money value={asset.availableBalance} token={this.props.token} /></td>*!/*/}
-          {/*/!*</tr>*!/*/}
-          {/*/!*}*!/*/}
-          {/*/!*{asset &&*!/*/}
-          {/*/!*(asset.assetKind === AssetKind.marginable ||*!/*/}
-          {/*/!*asset.assetKind === AssetKind.nonMarginable) &&*!/*/}
-          {/*/!*<tr>*!/*/}
-          {/*/!*<td><Muted>Purchasing power</Muted></td>*!/*/}
-          {/*/!*<td>{formatAmount(zero, 'DAI')} DAI*!/*/}
-          {/*/!*</td>*!/*/}
-          {/*/!*</tr>*!/*/}
-          {/*/!*}*!/*/}
-          {/*</tbody>*/}
+        {/*<tbody>*/}
+        {/*<tr>*/}
+        {/*<td><Muted>Wallet</Muted></td>*/}
+        {/*<td>*/}
+        {/*{asset && formatAmount(asset.walletBalance, asset.name)} {this.props.token}*/}
+        {/*</td>*/}
+        {/*</tr>*/}
+        {/*<tr>*/}
+        {/*<td><Muted>Margin account</Muted></td>*/}
+        {/*<td>{*/}
+        {/*this.props.token !== 'DAI' ?*/}
+        {/*asset && formatAmount(asset.balance, this.props.token) :*/}
+        {/*ilkAsset && formatAmount(ilkAsset.dai, this.props.token)*/}
+        {/*} {this.props.token}</td>*/}
+        {/*</tr>*/}
+        {/*/!*{ asset && asset.assetKind === AssetKind.marginable &&*!/*/}
+        {/*/!*<tr>*!/*/}
+        {/*/!*<td><Muted>Available amount</Muted></td>*!/*/}
+        {/*/!*<td><Money value={asset.availableBalance} token={this.props.token} /></td>*!/*/}
+        {/*/!*</tr>*!/*/}
+        {/*/!*}*!/*/}
+        {/*/!*{asset &&*!/*/}
+        {/*/!*(asset.assetKind === AssetKind.marginable ||*!/*/}
+        {/*/!*asset.assetKind === AssetKind.nonMarginable) &&*!/*/}
+        {/*/!*<tr>*!/*/}
+        {/*/!*<td><Muted>Purchasing power</Muted></td>*!/*/}
+        {/*/!*<td>{formatAmount(zero, 'DAI')} DAI*!/*/}
+        {/*/!*</td>*!/*/}
+        {/*/!*</tr>*!/*/}
+        {/*/!*}*!/*/}
+        {/*</tbody>*/}
         {/*</table>*/}
       </>
     );
@@ -290,17 +320,17 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
         }
 
         {/*<table className={styles.balanceTable}>*/}
-          {/*<tbody>*/}
-          {/*<tr>*/}
-            {/*<td><Muted>Gas cost</Muted></td>*/}
-            {/*<td>*/}
-              {/*<GasCost gasEstimationStatus={this.props.gasEstimationStatus}*/}
-                       {/*gasEstimationUsd={this.props.gasEstimationUsd}*/}
-                       {/*gasEstimationEth={this.props.gasEstimationEth}*/}
-              {/*/>*/}
-            {/*</td>*/}
-          {/*</tr>*/}
-          {/*</tbody>*/}
+        {/*<tbody>*/}
+        {/*<tr>*/}
+        {/*<td><Muted>Gas cost</Muted></td>*/}
+        {/*<td>*/}
+        {/*<GasCost gasEstimationStatus={this.props.gasEstimationStatus}*/}
+        {/*gasEstimationUsd={this.props.gasEstimationUsd}*/}
+        {/*gasEstimationEth={this.props.gasEstimationEth}*/}
+        {/*/>*/}
+        {/*</td>*/}
+        {/*</tr>*/}
+        {/*</tbody>*/}
         {/*</table>*/}
       </div>
     );

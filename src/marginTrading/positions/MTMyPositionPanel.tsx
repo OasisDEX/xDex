@@ -3,7 +3,6 @@ import * as styles from '../../balances/mtBalancesView.scss';
 import tickSvg from '../../icons/tick.svg';
 import { CallForAction } from '../../migration/CallForAction';
 
-import { Button } from '../../utils/forms/Buttons';
 import { SvgImage } from '../../utils/icons/utils';
 import { Loadable } from '../../utils/loadable';
 import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
@@ -22,7 +21,6 @@ import { TxState } from '../../blockchain/transactions';
 import { Money } from '../../utils/formatters/Formatters';
 import { LoggedOut } from '../../utils/loadingIndicator/LoggedOut';
 import backArrowSvg from './back-arrow.svg';
-import dottedMenuSvg from './dotted-menu.svg';
 
 interface MTMyPositionPanelInternalProps {
   account: string | undefined;
@@ -155,43 +153,43 @@ export class MTMyPositionPanelInternal
             <Money value={this.props.ma.referencePrice} token="USD"/>
             }
           </div>
-          <div className={styles.dropdownMenu}>
-            <Button
-              className={styles.dropdownButton}
-              data-test-id="myposition-actions-list"
-            >
-              <SvgImage image={dottedMenuSvg}/>
-            </Button>
-            {/*<div className={styles.dropdownList}>*/}
-            {/*<div>*/}
+          {/*<div className={styles.dropdownMenu}>*/}
             {/*<Button*/}
-            {/*size="md"*/}
-            {/*block={true}*/}
-            {/*disabled={!ma.availableActions.includes(UserActionKind.draw)}*/}
-            {/*onClick={() => this.transfer(UserActionKind.draw, 'DAI', ma.name)}*/}
-            {/*>WITHDRAW DAI</Button>*/}
-            {/*<br/>*/}
-            {/*<Button*/}
-            {/*size="md"*/}
-            {/*block={true}*/}
-            {/*disabled={!ma.availableActions.includes(UserActionKind.fund)}*/}
-            {/*onClick={() => this.transfer(UserActionKind.fund, 'DAI', ma.name)}*/}
-            {/*>DEPOSIT DAI</Button>*/}
-            {/*<br/>*/}
-            {/*<Button*/}
-            {/*size="md"*/}
-            {/*block={true}*/}
-            {/*disabled={ma.allowance}*/}
-            {/*onClick={() =>*/}
-            {/*this.props.approveMTProxy(*/}
-            {/*{ token: ma.name, proxyAddress: mta.proxy.address }*/}
-            {/*)*/}
-            {/*}*/}
-            {/*>Allowance</Button>*/}
-            {/*<br/>*/}
-            {/*</div>*/}
-            {/*</div>*/}
-          </div>
+              {/*className={styles.dropdownButton}*/}
+              {/*data-test-id="myposition-actions-list"*/}
+            {/*>*/}
+              {/*<SvgImage image={dottedMenuSvg}/>*/}
+            {/*</Button>*/}
+            {/*/!*<div className={styles.dropdownList}>*!/*/}
+            {/*/!*<div>*!/*/}
+            {/*/!*<Button*!/*/}
+            {/*/!*size="md"*!/*/}
+            {/*/!*block={true}*!/*/}
+            {/*/!*disabled={!ma.availableActions.includes(UserActionKind.draw)}*!/*/}
+            {/*/!*onClick={() => this.transfer(UserActionKind.draw, 'DAI', ma.name)}*!/*/}
+            {/*/!*>WITHDRAW DAI</Button>*!/*/}
+            {/*/!*<br/>*!/*/}
+            {/*/!*<Button*!/*/}
+            {/*/!*size="md"*!/*/}
+            {/*/!*block={true}*!/*/}
+            {/*/!*disabled={!ma.availableActions.includes(UserActionKind.fund)}*!/*/}
+            {/*/!*onClick={() => this.transfer(UserActionKind.fund, 'DAI', ma.name)}*!/*/}
+            {/*/!*>DEPOSIT DAI</Button>*!/*/}
+            {/*/!*<br/>*!/*/}
+            {/*/!*<Button*!/*/}
+            {/*/!*size="md"*!/*/}
+            {/*/!*block={true}*!/*/}
+            {/*/!*disabled={ma.allowance}*!/*/}
+            {/*/!*onClick={() =>*!/*/}
+            {/*/!*this.props.approveMTProxy(*!/*/}
+            {/*/!*{ token: ma.name, proxyAddress: mta.proxy.address }*!/*/}
+            {/*/!*)*!/*/}
+            {/*/!*}*!/*/}
+            {/*/!*>Allowance</Button>*!/*/}
+            {/*/!*<br/>*!/*/}
+            {/*/!*</div>*!/*/}
+            {/*/!*</div>*!/*/}
+          {/*</div>*/}
         </PanelHeader>
         <PanelBody>
           {<MTMyPositionView {...{

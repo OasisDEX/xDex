@@ -68,9 +68,6 @@ export function prepareBuyAllocationRequest(
   const cashBalance = baseAsset!.dai; // todo: no longer valid!! no cash balance ?
   const totalDebt = assets.reduce((sum, a) => sum.plus(a.debt), zero);
 
-  console.log('prepareBuyAllocationRequest maxtotal', maxTotal.toString());
-  console.log('prepareBuyAllocationRequest total debt', totalDebt.toString());
-  console.log('prepareBuyAllocationRequest cashBalance', cashBalance.toString());
   // const targetDaiBalance = cashBalance.minus(maxTotal).minus(totalDebt); -- old
   const targetDaiBalance = cashBalance.gt(zero) ?
     cashBalance.minus(maxTotal).minus(totalDebt)
@@ -78,8 +75,6 @@ export function prepareBuyAllocationRequest(
 
   const defaultTargetCash = cashBalance; // BigNumber.max(zero, cashBalance.minus(maxTotal));
 
-  console.log('prepareBuyAllocationRequest targetDaiBalance', targetDaiBalance.toString());
-  console.log('prepareBuyAllocationRequest defaultTargetCash', defaultTargetCash.toString());
   const createPlan = (debts: Array<Required<EditableDebt>>): Operations =>
     planBuy(baseToken, amount, maxTotal, debts);
 

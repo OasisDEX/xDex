@@ -598,15 +598,17 @@ function mtSimpleOrderForm(
   const mtOrderForm$ = currentTradingPair$.pipe(
     switchMap(tradingPair =>
                 createMTSimpleOrderForm$(
-                  tradingPair,
-                  gasPrice$,
-                  etherPriceUsd$,
-                  orderbook$,
-                  mta$,
-                  calls$,
-                  readCalls$,
-                  createDustLimits$(context$),
-                  account$,
+                  {
+                    gasPrice$,
+                    etherPriceUsd$,
+                    orderbook$,
+                    mta$,
+                    calls$,
+                    readCalls$,
+                    account$,
+                    dustLimits$: createDustLimits$(context$),
+                  },
+                  tradingPair
                 )
     ),
     shareReplay(1)
