@@ -1,6 +1,6 @@
 import { BigNumber } from 'bignumber.js';
-
 import { findLastIndex } from 'lodash';
+import * as moment from 'moment';
 import { nullAddress } from '../../blockchain/utils';
 import { Offer } from '../../exchange/orderbook/orderbook';
 import { minusOne, one, zero } from '../../utils/zero';
@@ -310,6 +310,10 @@ export function calculateMarginable(
     }
   });
 
+  const lastPriceUpdate = moment.unix(ma.zzz.toNumber());
+  const duration = moment.duration(lastPriceUpdate.add(1, 'hours').diff(moment(new Date())));
+  const nextPriceUpdateDelta = moment.utc(duration.asMilliseconds()).format('HH:mm');
+
   return {
     ...ma,
     availableActions,
@@ -329,6 +333,7 @@ export function calculateMarginable(
     bitable,
     runningAuctions,
     amountBeingLiquidated,
+    nextPriceUpdateDelta,
   };
 }
 

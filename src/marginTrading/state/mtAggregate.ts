@@ -22,7 +22,7 @@ import {
 import { amountFromWei, nullAddress } from '../../blockchain/utils';
 import { web3 } from '../../blockchain/web3';
 
-import { ReadCalls, ReadCalls$ } from '../../blockchain/calls/calls';
+import { ReadCalls, readCalls$, ReadCalls$ } from '../../blockchain/calls/calls';
 
 import { isEqual } from 'lodash';
 import {
@@ -77,7 +77,8 @@ function rawMTHistories$(
       return of(assets.reduce((r, t) => {
         r[t] = [];
         return r;
-      },                      {} as MTHistories));
+      },
+                              {} as MTHistories));
     }
     ),
     reduce((a, e) => ({ ...a, ...e }), {}),
@@ -87,7 +88,8 @@ function rawMTHistories$(
 function osms$(context: NetworkConfig, assets: string[]) {
   return forkJoin(assets.map((token) =>
     readOsm(context, token).pipe(
-      map(osm => ({ [token]: osm })),
+      map(osm => ({ [token]: osm })
+      ),
     )
   )).pipe(
     concatAll(),
@@ -98,20 +100,22 @@ function osms$(context: NetworkConfig, assets: string[]) {
   );
 }
 
-// function osmsParams$(context: NetworkConfig, assets: string[]) {
-//   return forkJoin(assets.map((token) =>
-//     of({}) // todo: call OSM and fetch zzz param
-//     // readOsm(context, token).pipe(
-//     //   map(osm => ({ [token]: osm })),
-//     // )
-//   )).pipe(
-//     concatAll(),
-//     // reduce(
-//     //   (a, e) => ({ ...a, ...e }),
-//     //   {},
-//     // ),
-//   );
-// }
+function osmsParams$(assets: string[]) {
+  return readCalls$.pipe(
+    switchMap(calls => {
+      return forkJoin(assets.map((token) => {
+        return calls.osmParams({ token });
+      })).pipe(
+          concatAll(),
+          reduce(
+            (a, e) => ({ ...a, ...e }),
+            {},
+          )
+        );
+    }
+    )
+  );
+}
 
 export function aggregateMTAccountState(
   context: NetworkConfig,
@@ -122,15 +126,11 @@ export function aggregateMTAccountState(
   const assetNames: string[] = tradingTokens
     .map((symbol: string) => getToken(symbol))
     .filter((t: any) =>
-              t.assetKind === AssetKind.marginable ||
-              t.assetKind === AssetKind.nonMarginable // ||
-            // t.symbol === 'DAI'
+      t.assetKind === AssetKind.marginable ||
+      t.assetKind === AssetKind.nonMarginable // ||
+      // t.symbol === 'DAI'
     )
     .map(t => t.symbol);
-
-  // const marginableAssetNames: string[] = Object.values(tokens)
-  //   .filter((t: any) => t.assetKind === AssetKind.marginable)
-  //   .map(t => t.symbol);
 
   const tokenNames = [...assetNames, 'DAI'];
 
@@ -141,10 +141,10 @@ export function aggregateMTAccountState(
         rawMTLiquidationHistories$(context, balancesResult),
         rawMTHistories$(context, proxy.address, assetNames),
         osms$(context, assetNames),
-        // osmsParams$(context, assetNames),
+        osmsParams$(assetNames),
       )
     ),
-    map(([balanceResult, rawLiquidationHistories, rawHistories, osmPrices]) => {
+    map(([balanceResult, rawLiquidationHistories, rawHistories, osmPrices, osmParams]) => {
       const marginables = [...tokenNames.entries()]
         .filter(([_i, token]) => getToken(token).assetKind === AssetKind.marginable)
         .map(([, token]) => {
@@ -152,9 +152,11 @@ export function aggregateMTAccountState(
             name: token,
             assetKind: AssetKind.marginable,
             balance: balanceResult[token].urnBalance,
+            redeemable: balanceResult[token].marginBalance,
             ...balanceResult[token],
             safeCollRatio: new BigNumber(getToken(token).safeCollRatio as number),
             osmPriceNext: (osmPrices as any)[token].next,
+            zzz: (osmParams as any)[token] as BigNumber,
             rawHistory: [
               ...rawHistories[token],
               ...rawLiquidationHistories[token]
@@ -230,14 +232,14 @@ export function createMta$(
 }
 
 function readOsm(context: NetworkConfig, token: string):
-Observable<{current: number|undefined, next: number|undefined}> {
+  Observable<{current: number|undefined, next: number|undefined}> {
   const hilo = (uint256: string): [BigNumber, BigNumber] => {
     const match = uint256.match(/^0x(\w+)$/);
     if (!match) {
       throw new Error(`invalid uint256: ${uint256}`);
     }
     return (match[0].length <= 32) ?
-    [new BigNumber(0), new BigNumber(uint256)] :
+      [new BigNumber(0), new BigNumber(uint256)] :
     [
       new BigNumber(`0x${match[0].substr(0, match[0].length - 32)}`),
       new BigNumber(`0x${match[0].substr(match[0].length - 32, 32)}`)
@@ -246,8 +248,8 @@ Observable<{current: number|undefined, next: number|undefined}> {
   const slotCurrent = 3;
   const slotNext = 4;
   return combineLatest(
-    bindNodeCallback(web3.eth.getStorageAt)(context.osms[token], slotCurrent),
-    bindNodeCallback(web3.eth.getStorageAt)(context.osms[token], slotNext),
+    bindNodeCallback(web3.eth.getStorageAt)(context.osms[token].address, slotCurrent),
+    bindNodeCallback(web3.eth.getStorageAt)(context.osms[token].address, slotNext),
   ).pipe(
     map(([cur, nxt]: [string, string]) => {
       const [current, next] = [hilo(cur), hilo(nxt)];

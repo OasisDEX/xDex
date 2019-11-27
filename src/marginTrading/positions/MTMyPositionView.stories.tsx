@@ -1,6 +1,5 @@
 import { storiesOf } from '@storybook/react';
 import { BigNumber } from 'bignumber.js';
-import * as moment from 'moment';
 import * as React from 'react';
 import { of } from 'rxjs/index';
 import { TxState } from '../../blockchain/transactions';
@@ -95,7 +94,8 @@ const ethMarginableAsset2 = calculateMarginable(getMarginableCore({
   ...assetCore,
   referencePrice: new BigNumber(250),
   osmPriceNext: new BigNumber(130),
-  zzz: moment(new Date()).add(67, 'minutes').toDate(),
+  // zzz: moment(new Date()).add(67, 'minutes').toDate(),
+  zzz: new BigNumber(1)
 }));
 
 const mta2: MTAccount = getMTAccount({ marginableAssets: [ethMarginableAsset2] });

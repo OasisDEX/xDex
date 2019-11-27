@@ -1,5 +1,4 @@
 import classnames from 'classnames';
-import * as moment from 'moment';
 import * as React from 'react';
 import { Observable } from 'rxjs/index';
 import { CDPHistoryView } from '../../balances-mt/CDPHistoryView';
@@ -47,11 +46,6 @@ export class MTMyPositionView extends
     const liquidationPrice = this.props.ma.liquidationPrice
     && !this.props.ma.liquidationPrice.isNaN() ?
       this.props.ma.liquidationPrice : zero;
-
-    const liquidationTime = moment(this.props.ma.zzz);
-    const duration = moment.duration(liquidationTime.diff(moment(new Date())));
-    const liquidationTimeDelta = this.props.ma.zzz
-      && moment.utc(duration.asMilliseconds()).format('HH:mm');
 
     return (
       <div>
@@ -206,6 +200,7 @@ export class MTMyPositionView extends
         <div>
           {
             this.props.ma.bitable === 'imminent' &&
+            // tslint:disable
             <div className={styles.warningMessage}>
               <SvgImage image={warningIconSvg}/>
               <span>
@@ -213,8 +208,10 @@ export class MTMyPositionView extends
               ({this.props.ma.osmPriceNext && this.props.ma.osmPriceNext.toString()} USD)
               is approaching your Liquidation Price and your position will soon be liquidated.
               You&nbsp;may rescue your Position by paying off Dai debt or deposit&nbsp;
-                {this.props.ma.name} in the next {liquidationTimeDelta} minutes.</span>
+                {this.props.ma.name} in the next {this.props.ma.nextPriceUpdateDelta} minutes.
+              </span>
             </div>
+            // tslint:enable
           }
           {
             this.props.ma.bitable === 'yes' &&

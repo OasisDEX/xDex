@@ -8,7 +8,7 @@ import { OfferType } from '../../exchange/orderbook/orderbook';
 import { BigNumberInput, lessThanOrEqual } from '../../utils/bigNumberInput/BigNumberInput';
 import { FormChangeKind } from '../../utils/form';
 import { formatAmount, formatPrecision, formatPrice } from '../../utils/formatters/format';
-import { FormatPercent, FormatPrice, Money } from '../../utils/formatters/Formatters';
+import { FormatPercent, Money } from '../../utils/formatters/Formatters';
 import { Button, ButtonGroup } from '../../utils/forms/Buttons';
 import { ErrorMessage } from '../../utils/forms/ErrorMessage';
 import { InputGroup, InputGroupAddon } from '../../utils/forms/InputGroup';
@@ -17,7 +17,7 @@ import { SettingsIcon } from '../../utils/icons/Icons';
 import { Hr } from '../../utils/layout/LayoutHelpers';
 import { LoggedOut } from '../../utils/loadingIndicator/LoggedOut';
 import { PanelBody, PanelFooter, PanelHeader } from '../../utils/panel/Panel';
-import { Currency, Muted } from '../../utils/text/Text';
+import { Muted } from '../../utils/text/Text';
 import { minusOne, zero } from '../../utils/zero';
 import { findMarginableAsset, MTAccountState } from '../state/mtAccount';
 import { Message, MessageKind, MTSimpleFormState, ViewKind } from './mtOrderForm';
@@ -418,7 +418,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
   }
 
   private slippageLimit() {
-    const { slippageLimit, kind, amount, price } = this.props;
+    const { slippageLimit } = this.props;
     return (
       <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
         <div className={styles.orderSummaryLabel}>

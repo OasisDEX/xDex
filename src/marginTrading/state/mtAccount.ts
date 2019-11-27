@@ -175,7 +175,7 @@ export interface MarginableAssetCore extends Core {
   fee: BigNumber;
   urn: string;
   osmPriceNext: BigNumber | undefined;
-  zzz: Date;
+  zzz: BigNumber;
   redeemable: BigNumber;
 }
 
@@ -200,6 +200,7 @@ export interface MarginableAsset extends MarginableAssetCore {
   bitable: mtBitable.no | mtBitable.imminent | mtBitable.yes;
   runningAuctions: number;
   amountBeingLiquidated: BigNumber;
+  nextPriceUpdateDelta: string;
 }
 
 export interface NonMarginableAssetCore extends Core {
