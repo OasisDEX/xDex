@@ -5,6 +5,7 @@ import * as ReactDOM from 'react-dom';
 import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
 import * as formStyles from '../../exchange/offerMake/OfferMakeForm.scss';
 import { OfferType } from '../../exchange/orderbook/orderbook';
+import { ApproximateInputValue } from '../../utils/Approximate';
 import { BigNumberInput, lessThanOrEqual } from '../../utils/bigNumberInput/BigNumberInput';
 import { FormChangeKind } from '../../utils/form';
 import { formatAmount, formatPrecision, formatPrice } from '../../utils/formatters/format';
@@ -122,11 +123,17 @@ import * as styles from './mtOrderFormView.scss';
 //   width: 'auto',
 // };
 
+enum Approximate {
+  amount = 'amount',
+  total = 'total'
+}
+
 export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
 
   private amountInput?: HTMLElement;
   private priceInput?: HTMLElement;
   private slippageLimitInput?: HTMLElement;
+  private approximateValueOf: Approximate | undefined  = undefined;
 
   public handleKindChange(kind: OfferType) {
     this.props.change({
@@ -137,6 +144,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
 
   public handleTotalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/,/g, '');
+    this.approximateValueOf = Approximate.amount;
     this.props.change({
       kind: FormChangeKind.totalFieldChange,
       value: value === '' ? undefined : new BigNumber(value)
@@ -145,6 +153,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
 
   public handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/,/g, '');
+    this.approximateValueOf = Approximate.total;
     this.props.change({
       kind: FormChangeKind.amountFieldChange,
       value: value === '' ? undefined : new BigNumber(value)
@@ -648,27 +657,32 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
       <div>
         <InputGroup>
           <InputGroupAddon border="right" className={styles.inputHeader}>Total</InputGroupAddon>
-          <BigNumberInput
-            ref={ (el: any) =>
-              this.priceInput = (el && ReactDOM.findDOMNode(el) as HTMLElement) || undefined
-            }
-            type="text"
-            mask={createNumberMask({
-              allowDecimal: true,
-              decimalLimit: 5,
-              prefix: ''
-            })}
-            onChange={this.handleTotalChange}
-            value={
-              (this.props.total || null) &&
-              formatPrice(this.props.total as BigNumber, this.props.quoteToken)
-            }
-            guide={true}
-            placeholderChar={' '}
-            className={styles.input}
-            // disabled={this.props.stage === FormStage.waitingForAllocation}
-            // disabled={ true }
-          />
+          <ApproximateInputValue shouldApproximate={
+            !!this.props.total
+            && this.approximateValueOf === Approximate.total
+          }>
+            <BigNumberInput
+              ref={ (el: any) =>
+                this.priceInput = (el && ReactDOM.findDOMNode(el) as HTMLElement) || undefined
+              }
+              type="text"
+              mask={createNumberMask({
+                allowDecimal: true,
+                decimalLimit: 5,
+                prefix: ''
+              })}
+              onChange={this.handleTotalChange}
+              value={
+                (this.props.total || null) &&
+                formatPrice(this.props.total as BigNumber, this.props.quoteToken)
+              }
+              guide={true}
+              placeholderChar={' '}
+              className={styles.input}
+              // disabled={this.props.stage === FormStage.waitingForAllocation}
+              // disabled={ true }
+            />
+          </ApproximateInputValue>
           <InputGroupAddon className={styles.inputCurrencyAddon} onClick={ this.handlePriceFocus }>
             {this.props.quoteToken}
           </InputGroupAddon>
@@ -712,26 +726,31 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
     return (
       <InputGroup>
         <InputGroupAddon border="right" className={styles.inputHeader}>Amount</InputGroupAddon>
-        <BigNumberInput
-          ref={ (el: any) =>
-            this.amountInput = (el && ReactDOM.findDOMNode(el) as HTMLElement) || undefined
-          }
-          type="text"
-          mask={createNumberMask({
-            allowDecimal: true,
-            decimalLimit: 5,
-            prefix: ''
-          })}
-          onChange={this.handleAmountChange}
-          value={
-            (this.props.amount || null) &&
-            formatAmount(this.props.amount as BigNumber, this.props.baseToken)
-          }
-          guide={true}
-          placeholderChar={' '}
-          className={styles.input}
-          // disabled={this.props.progress === FormStage.waitingForAllocation}
-        />
+        <ApproximateInputValue shouldApproximate={
+          !!this.props.amount
+          && this.approximateValueOf === Approximate.amount
+        }>
+          <BigNumberInput
+            ref={(el: any) =>
+              this.amountInput = (el && ReactDOM.findDOMNode(el) as HTMLElement) || undefined
+            }
+            type="text"
+            mask={createNumberMask({
+              allowDecimal: true,
+              decimalLimit: 5,
+              prefix: ''
+            })}
+            onChange={this.handleAmountChange}
+            value={
+              (this.props.amount || null) &&
+              formatAmount(this.props.amount as BigNumber, this.props.baseToken)
+            }
+            guide={true}
+            placeholderChar={' '}
+            className={styles.input}
+            // disabled={this.props.progress === FormStage.waitingForAllocation}
+          />
+        </ApproximateInputValue>
         <InputGroupAddon className={styles.inputCurrencyAddon} onClick={ this.handleAmountFocus }>
           {this.props.baseToken}
         </InputGroupAddon>

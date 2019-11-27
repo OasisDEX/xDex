@@ -1,0 +1,21 @@
+@import "../utils/Variables";
+
+.wrapper {
+  display: flex;
+  position: relative;
+  color: $white;
+  width: 100%;
+}
+
+%inputSuffixPrefix {
+  position: absolute;
+  font-weight: 700;
+  top: 50%;
+  transform: translateY(-50%);
+  color: $dark-grayish-blue-2;
+}
+
+.inputApprox {
+  @extend %inputSuffixPrefix;
+  left: 1rem;
+}
