@@ -1,7 +1,7 @@
 import * as moment from 'moment';
 import * as React from 'react';
 import { Observable } from 'rxjs/index';
-import { CDPHistoryView } from '../../balances-mt/CDPHistoryView';
+import { CDPHistoryView } from '../../balances/CDPHistoryView';
 import { TxState } from '../../blockchain/transactions';
 import { connect } from '../../utils/connect';
 import { formatPercent, formatPrecision } from '../../utils/formatters/format';

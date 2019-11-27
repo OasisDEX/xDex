@@ -2,7 +2,7 @@ import { BigNumber } from 'bignumber.js';
 import { curry } from 'lodash';
 import { merge, Observable, of, Subject } from 'rxjs';
 import { first, map, scan, switchMap, takeUntil } from 'rxjs/operators';
-import { DustLimits } from '../../balances-nomt/balances';
+import { DustLimits } from '../../balances/balances';
 import { Calls, Calls$, ReadCalls$ } from '../../blockchain/calls/calls';
 import { AssetKind, getToken } from '../../blockchain/config';
 import { Offer, OfferType, Orderbook } from '../../exchange/orderbook/orderbook';
@@ -44,12 +44,10 @@ import { buy, getPriceImpact, getTotal } from '../plan/planUtils';
 import {
   findAsset,
   findMarginableAsset,
-  findNonMarginableAsset,
   MarginableAsset,
   MarginableAssetCore,
   MTAccount,
   MTAccountState,
-  NonMarginableAsset,
   Operation
 } from '../state/mtAccount';
 import {
@@ -262,18 +260,18 @@ function validate(state: MTSimpleFormState): MTSimpleFormState {
     return state;
   }
   const messages: Message[] = [...state.messages];
-  const baseAsset = findAsset(state.baseToken, state.mta) as MarginableAsset | NonMarginableAsset;
-  const quoteAsset = findAsset(state.quoteToken, state.mta);
+  const baseAsset = findAsset(state.baseToken, state.mta) as MarginableAsset;
+  // const quoteAsset = findAsset(state.quoteToken, state.mta);
   if (
     state.price && state.amount && state.total &&
-    baseAsset && quoteAsset && state.realPurchasingPower
+    baseAsset && state.realPurchasingPower
   ) {
     const [spendAmount, spendAssetAvailBalance, spendAssetName, spendField, spendDustLimit,
       receiveAmount, receiveAssetName, receiveField] =
       state.kind === OfferType.sell ?
       [state.amount, baseAsset.balance, baseAsset.name, 'amount', state.dustLimitBase,
-        state.total, quoteAsset.name, 'total'] :
-      [state.total, state.realPurchasingPower, quoteAsset.name, 'total', state.dustLimitQuote,
+        state.total, state.quoteToken, 'total'] :
+      [state.total, state.realPurchasingPower, state.quoteToken, 'total', state.dustLimitQuote,
         state.amount, baseAsset.name, 'amount'];
 
     if (spendAssetAvailBalance.lt(spendAmount)) {
@@ -351,9 +349,7 @@ function addApr(state: MTSimpleFormState) {
 
 function addPurchasingPower(state: MTSimpleFormState) {
 
-  const baseAsset =
-    findMarginableAsset(state.baseToken, state.mta) ||
-    findNonMarginableAsset(state.baseToken, state.mta);
+  const baseAsset = findMarginableAsset(state.baseToken, state.mta);
 
   if (!state.mta
     || state.mta.state !== MTAccountState.setup
@@ -363,37 +359,12 @@ function addPurchasingPower(state: MTSimpleFormState) {
     return state;
   }
 
-  const realPurchasingPower = baseAsset.assetKind === AssetKind.marginable ?
-    realPurchasingPowerMarginable(
-      baseAsset,
-      state.orderbook.sell)
-    :
-    realPurchasingPowerNonMarginable(
-      state.mta.cash.balance,
-      state.orderbook.sell
-    );
+  const realPurchasingPower = realPurchasingPowerMarginable(baseAsset, state.orderbook.sell);
 
   const realPurchasingPowerPost =
     state.messages.length === 0 &&
     state.total &&
     realPurchasingPower.minus(state.total);
-
-  // TODO: seems to be wrong...
-  // let realPurchasingPowerPost;
-  // if (state.amount && state.price) {
-  //   const cashAvailable = state.amount.times(state.price);
-  //   const [, , offers] = buy(cashAvailable, state.orderbook.sell);
-  //
-  //   realPurchasingPowerPost = baseAsset.assetKind === AssetKind.marginable ?
-  //     realPurchasingPowerMarginable(
-  //       baseAsset,
-  //       offers)
-  //     :
-  //     realPurchasingPowerNonMarginable(
-  //       state.mta.cash.balance,
-  //       offers
-  //     );
-  // }
 
   return {
     ...state,

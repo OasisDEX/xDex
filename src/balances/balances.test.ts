@@ -1,12 +1,11 @@
 import { BigNumber } from 'bignumber.js';
-import { Allowances } from '../balances-nomt/balances';
 
 import { setupFakeWeb3ForTesting } from '../blockchain/web3';
 setupFakeWeb3ForTesting();
 
 import { tradingTokens } from '../blockchain/config';
 import { getCashCore, getMarginableCore, getMTAccount } from '../marginTrading/state/mtTestUtils';
-import { Balances, combineBalances, CombinedBalances } from './balances';
+import { Allowances, Balances, combineBalances, CombinedBalances } from './balances';
 
 const defaultCash = getCashCore({
   name: 'DAI',

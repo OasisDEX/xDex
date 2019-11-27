@@ -23,7 +23,6 @@ import {
   getCashCore,
   getMarginableCore,
   getMTAccount,
-  getNonMarginableCore
 } from './mtTestUtils';
 
 const noCash: CashAssetCore = getCashCore({
@@ -144,12 +143,12 @@ test('cash, weth, dgx and mkr, no debt', () => {
     balance: new BigNumber('100'),
   };
 
-  const mkrAsset = getNonMarginableCore({ name: 'MKR', balance: new BigNumber(50) });
+  // const mkrAsset = getNonMarginableCore({ name: 'MKR', balance: new BigNumber(50) });
 
   const mta: MTAccount = getMTAccount({
     cash,
     marginableAssets: [wethAsset, dgxAsset],
-    nonMarginableAssets: [mkrAsset]
+    // nonMarginableAssets: [mkrAsset]
   });
 
   const weth = mta.marginableAssets[0];

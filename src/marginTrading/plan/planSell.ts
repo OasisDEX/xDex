@@ -3,7 +3,7 @@ import { BigNumber } from 'bignumber.js';
 import { AssetKind, getToken } from '../../blockchain/config';
 import { Offer } from '../../exchange/orderbook/orderbook';
 import {
-  findAsset, MarginableAssetCore,
+  findAsset, findMarginableAsset, MarginableAsset, MarginableAssetCore,
   MTAccount,
   Operation,
   OperationKind
@@ -28,7 +28,7 @@ export function prepareSellAllocationRequest(
   amount: BigNumber,
   price: BigNumber
 ): AllocationRequestPilot | Impossible {
-  const asset = findAsset(baseToken, mta);
+  const asset = findMarginableAsset(baseToken, mta);
 
   if (asset === undefined) {
     return impossible('asset not setup');
@@ -75,7 +75,7 @@ export function prepareSellAllocationRequest(
   })
   );
 
-  const cashBalance = mta.cash.balance;
+  const cashBalance = asset.dai; // mta.cash.balance;
 
   const totalDebt = assets.reduce((sum, a) => sum.plus(a.debt), zero);
   const totalTargetDebt = assets.reduce((sum, a) => sum.plus(a.targetDebt || zero), zero);

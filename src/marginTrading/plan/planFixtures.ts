@@ -5,13 +5,13 @@ import {
   CashAssetCore,
   MarginableAssetCore,
   MTAccount,
-  NonMarginableAssetCore
+  // NonMarginableAssetCore
 } from '../state/mtAccount';
 import {
   getCashCore,
   getMarginableCore,
   getMTAccount,
-  getNonMarginableCore
+  // getNonMarginableCore
 } from '../state/mtTestUtils';
 
 export const noCash: CashAssetCore = getCashCore({
@@ -40,15 +40,15 @@ export const weth100: MarginableAssetCore = getMarginableCore({
   balance: new BigNumber('100')
 });
 
-export const mkrEmpty: NonMarginableAssetCore = getNonMarginableCore({
-  name: 'MKR',
-  referencePrice: new BigNumber('200'),
-});
-
-export const mkr100: NonMarginableAssetCore = getNonMarginableCore({
-  ...mkrEmpty,
-  balance: new BigNumber('100'),
-});
+// export const mkrEmpty: NonMarginableAssetCore = getNonMarginableCore({
+//   name: 'MKR',
+//   referencePrice: new BigNumber('200'),
+// });
+//
+// export const mkr100: NonMarginableAssetCore = getNonMarginableCore({
+//   ...mkrEmpty,
+//   balance: new BigNumber('100'),
+// });
 
 export const dgx: MarginableAssetCore = getMarginableCore({
   name: 'DGX',

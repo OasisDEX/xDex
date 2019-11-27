@@ -12,16 +12,19 @@ import {
   shareReplay,
   switchMap,
 } from 'rxjs/operators';
+import {
+  Balances,
+  createAllowances$,
+  createBalances$, createCombinedBalances, createDustLimits$, createProxyAllowances$,
+  createTokenBalances$,
+  createWalletApprove, createWalletDisapprove
+} from './balances/balances';
 
-import * as balancesMT from './balances-mt/balances';
-import { MtAccountDetailsView } from './balances-mt/mtAccountDetailsView';
-import { createBalancesView$, MTBalancesView } from './balances-mt/mtBalancesView';
-import { createMTSummary$ } from './balances-mt/mtSummary';
-import { MtSummaryView } from './balances-mt/mtSummaryView';
-import { createTaxExport$ } from './balances-mt/taxExporter';
-import { TaxExporterView } from './balances-mt/TaxExporterView';
-import { WalletView } from './balances-mt/WalletView';
-import * as balancesNoMT from './balances-nomt/balances';
+import { MtAccountDetailsView } from './balances/mtAccountDetailsView';
+import { createBalancesView$, MTBalancesView } from './balances/mtBalancesView';
+import { createTaxExport$ } from './balances/taxExporter';
+import { TaxExporterView } from './balances/TaxExporterView';
+import { WalletView } from './balances/WalletView';
 import { calls$, readCalls$ } from './blockchain/calls/calls';
 import {
   account$,
@@ -118,7 +121,6 @@ import {
   CreateMTAllocateForm$,
   CreateMTAllocateForm$Props
 } from './marginTrading/allocate/mtOrderAllocateDebtFormView';
-import { ReallocateView } from './marginTrading/allocate/ReallocateView';
 
 import { MTMyPositionPanel } from './marginTrading/positions/MTMyPositionPanel';
 import { createMTSetupForm$, MTSetupFormState } from './marginTrading/setup/mtSetupForm';
@@ -144,7 +146,7 @@ export function setupAppContext() {
 
   pluginDevModeHelpers(context$, calls$, initializedAccount$, onEveryBlock$);
 
-  const balances$ = balancesNoMT.createBalances$(context$, initializedAccount$, onEveryBlock$).pipe(
+  const balances$ = createBalances$(context$, initializedAccount$, onEveryBlock$).pipe(
     shareReplay(1)
   );
 
@@ -163,28 +165,28 @@ export function setupAppContext() {
     withModal(
       connect<MTSetupFormState, ModalOpenerProps>(MTSetupButton, mtSetupForm$));
 
-  const mtBalances$ = balancesMT.createCombinedBalances(
+  const mtBalances$ = createCombinedBalances(
     etherBalance$,
     balances$,
-    balancesNoMT.createAllowances$(context$, initializedAccount$, onEveryBlock$),
+    createAllowances$(context$, initializedAccount$, onEveryBlock$),
     mta$
   );
 
-  const wethBalance$ = balancesNoMT.createTokenBalances$(
+  const wethBalance$ = createTokenBalances$(
     context$,
     initializedAccount$,
     onEveryBlock$,
     'WETH'
   );
 
-  const saiBalance$ = balancesNoMT.createTokenBalances$(
+  const saiBalance$ = createTokenBalances$(
     context$,
     initializedAccount$,
     onEveryBlock$,
     'SAI'
   );
 
-  const daiBalance$ = balancesNoMT.createTokenBalances$(
+  const daiBalance$ = createTokenBalances$(
     context$,
     initializedAccount$,
     onEveryBlock$,
@@ -225,8 +227,8 @@ export function setupAppContext() {
 
   const approveMTProxy = createMTProxyApprove(calls$);
 
-  const approveWallet = balancesNoMT.createWalletApprove(calls$, gasPrice$);
-  const disapproveWallet = balancesNoMT.createWalletDisapprove(calls$, gasPrice$);
+  const approveWallet = createWalletApprove(calls$, gasPrice$);
+  const disapproveWallet = createWalletDisapprove(calls$, gasPrice$);
 
   const theCreateMTAllocateForm$: CreateMTAllocateForm$ =
     curry(createMTAllocateForm$)(gasPrice$, etherPriceUsd$, calls$, readCalls$);
@@ -289,8 +291,8 @@ export function setupAppContext() {
 
   const MTAccountDetailsRxTx = connect(MtAccountDetailsView, mta$);
 
-  const mtSummary$ = createMTSummary$(mta$);
-  const MtSummaryViewRxTx = connect(MtSummaryView, mtSummary$);
+  // const mtSummary$ = createMTSummary$(mta$);
+  // const MtSummaryViewRxTx = connect(MtSummaryView, mtSummary$);
 
   const tradeHistory = memoizeTradingPair(
     curry(loadAllTrades)(context$, onEveryBlock$)
@@ -425,8 +427,8 @@ export function setupAppContext() {
       user$,
       context$,
       balances$: balancesWithEth$,
-      dustLimits$: balancesNoMT.createDustLimits$(context$),
-      allowances$: balancesNoMT.createProxyAllowances$(
+      dustLimits$: createDustLimits$(context$),
+      allowances$: createProxyAllowances$(
         context$,
         initializedAccount$,
         proxyAddress$.pipe(
@@ -477,7 +479,7 @@ export function setupAppContext() {
 
   const sai2DAIOps$ = curry(createMigrationOps$)(
     'SAI',
-    balancesNoMT.createProxyAllowances$(
+    createProxyAllowances$(
       context$,
       initializedAccount$,
       proxyAddress$,
@@ -488,7 +490,7 @@ export function setupAppContext() {
 
   const dai2SAIOps$ = curry(createMigrationOps$)(
     'DAI',
-    balancesNoMT.createProxyAllowances$(
+    createProxyAllowances$(
       context$,
       initializedAccount$,
       proxyAddress$,
@@ -549,14 +551,14 @@ export function setupAppContext() {
       { migration$: dai2SAIMigrationForm$ }
     );
 
-  const ReallocateViewRxTx = inject(
-    withModal<CreateMTAllocateForm$Props, ModalOpenerProps>(
-      connect<Loadable<MTAccount>, ModalOpenerProps & CreateMTAllocateForm$Props>(
-        ReallocateView, loadablifyLight(mta$)
-      )
-    ),
-    { createMTAllocateForm$: theCreateMTAllocateForm$ }
-  );
+  // const ReallocateViewRxTx = inject(
+  //   withModal<CreateMTAllocateForm$Props, ModalOpenerProps>(
+  //     connect<Loadable<MTAccount>, ModalOpenerProps & CreateMTAllocateForm$Props>(
+  //       ReallocateView, loadablifyLight(mta$)
+  //     )
+  //   ),
+  //   { createMTAllocateForm$: theCreateMTAllocateForm$ }
+  // );
 
   return {
     AllTradesTxRx,
@@ -578,8 +580,8 @@ export function setupAppContext() {
     MTBalancesViewRxTx,
     WalletViewRxTx,
     MTSetupButtonRxTx,
-    MtSummaryViewRxTx,
-    ReallocateViewRxTx,
+    // MtSummaryViewRxTx,
+    // ReallocateViewRxTx,
     SAI2DAIMigrationTxRx,
     DAI2SAIMigrationTxRx,
   };
@@ -603,7 +605,7 @@ function mtSimpleOrderForm(
                   mta$,
                   calls$,
                   readCalls$,
-                  balancesMT.dustLimits$,
+                  createDustLimits$(context$),
                   account$,
                 )
     ),
@@ -753,7 +755,7 @@ function mtSimpleOrderForm(
 
 function offerMake(
   orderbook$: Observable<Orderbook>,
-  balances$: Observable<balancesNoMT.Balances>
+  balances$: Observable<Balances>
 ) {
   const offerMake$: Observable<OfferFormState> = currentTradingPair$.pipe(
     switchMap(tp => createFormController$(
@@ -765,7 +767,7 @@ function offerMake(
         orderbook$,
         balances$,
         user$,
-        dustLimits$: balancesNoMT.createDustLimits$(context$),
+        dustLimits$: createDustLimits$(context$),
       },
       tp)
     ),

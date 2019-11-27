@@ -21,7 +21,7 @@ import {
 } from '../../utils/form';
 
 import { curry } from 'ramda';
-import { Balances } from '../../balances-nomt/balances';
+import { Balances } from '../../balances/balances';
 import { Calls, Calls$, ReadCalls, ReadCalls$ } from '../../blockchain/calls/calls';
 import { AssetKind } from '../../blockchain/config';
 import { Orderbook } from '../../exchange/orderbook/orderbook';
@@ -31,7 +31,7 @@ import { firstOfOrTrue } from '../../utils/operators';
 import { planDraw, planDrawDai } from '../plan/planDraw';
 import { planFund, planFundDai } from '../plan/planFund';
 import {
-  findAsset, findMarginableAsset, findNonMarginableAsset, MarginableAsset, MarginableAssetCore,
+  findAsset, findMarginableAsset, MarginableAsset, MarginableAssetCore,
   MTAccount, MTAccountState,
   Operation, UserActionKind
 } from '../state/mtAccount';
@@ -285,12 +285,12 @@ function validate(state: MTTransferFormState) {
       messages.push({
         kind: MessageKind.insufficientAvailableAmount,
       });
-    } else if (state.actionKind === UserActionKind.draw &&
-      asset && asset.assetKind === AssetKind.nonMarginable &&
-      (asset.balance || new BigNumber(0).lt(state.amount))) {
-      messages.push({
-        kind: MessageKind.insufficientAmount,
-      });
+    // } else if (state.actionKind === UserActionKind.draw &&
+    //   asset && asset.assetKind === AssetKind.nonMarginable &&
+    //   (asset.balance || new BigNumber(0).lt(state.amount))) {
+    //   messages.push({
+    //     kind: MessageKind.insufficientAmount,
+    //   });
     } else if (state.actionKind === UserActionKind.fund &&
       state.balances[state.token].lt(state.amount)) {
       (null || messages).push({
@@ -328,8 +328,7 @@ function addPurchasingPower(state: MTTransferFormState) {
   }
 
   const baseAsset =
-    findMarginableAsset(token, state.mta) ||
-    findNonMarginableAsset(token, state.mta);
+    findMarginableAsset(token, state.mta);
 
   if (!state.mta
     || state.mta.state !== MTAccountState.setup
@@ -341,15 +340,7 @@ function addPurchasingPower(state: MTTransferFormState) {
 
   return {
     ...state,
-    realPurchasingPower: baseAsset.assetKind === AssetKind.marginable ?
-      realPurchasingPowerMarginable(
-        baseAsset,
-        state.orderbook.sell)
-        :
-        realPurchasingPowerNonMarginable(
-          state.mta.cash.balance,
-          state.orderbook.sell
-        )
+    realPurchasingPower: realPurchasingPowerMarginable(baseAsset, state.orderbook.sell)
   };
 }
 

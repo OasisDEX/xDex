@@ -25,7 +25,6 @@ import {
   findAsset,
   MarginableAsset,
   MTAccountState,
-  NonMarginableAsset,
   UserActionKind,
 } from '../state/mtAccount';
 import closeIconSvg from './close-icon.svg';
@@ -99,7 +98,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
     this.props.close();
   }
 
-  private getAsset(token: string): undefined | CashAsset | MarginableAsset | NonMarginableAsset {
+  private getAsset(token: string): undefined | CashAsset | MarginableAsset {
     return findAsset(token, this.props.mta);
   }
 

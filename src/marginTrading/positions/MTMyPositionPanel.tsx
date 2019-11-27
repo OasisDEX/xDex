@@ -1,5 +1,5 @@
 import * as React from 'react';
-import * as styles from '../../balances-mt/mtBalancesView.scss';
+import * as styles from '../../balances/mtBalancesView.scss';
 import tickSvg from '../../icons/tick.svg';
 import { CallForAction } from '../../migration/CallForAction';
 

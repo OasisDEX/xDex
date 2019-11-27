@@ -128,11 +128,7 @@ export function aggregateMTAccountState(
     )
     .map(t => t.symbol);
 
-  // const marginableAssetNames: string[] = Object.values(tokens)
-  //   .filter((t: any) => t.assetKind === AssetKind.marginable)
-  //   .map(t => t.symbol);
-
-  const tokenNames = [...assetNames, 'DAI'];
+  const tokenNames = [...assetNames];
 
   return calls.mtBalance({ tokens: tokenNames, proxyAddress: proxy.address }).pipe(
     switchMap(balancesResult =>
@@ -145,10 +141,9 @@ export function aggregateMTAccountState(
       )
     ),
     map(([balanceResult, rawLiquidationHistories, rawHistories, osmPrices]) => {
-      const marginables = [...tokenNames.entries()]
-        .filter(([_i, token]) => getToken(token).assetKind === AssetKind.marginable)
-        .map(([i, token]) => {
-          console.log('i', i);
+      const marginables = tokenNames
+        .filter(token => getToken(token).assetKind === AssetKind.marginable)
+        .map(token => {
           return getMarginableCore({
             name: token,
             assetKind: AssetKind.marginable,
@@ -163,16 +158,16 @@ export function aggregateMTAccountState(
           });
         });
 
-      const cashResult = balanceResult.DAI;
+      // const cashResult = balanceResult.DAI;
+      //
+      // const cash = getCashCore({
+      //   balance: cashResult.marginBalance,
+      //   marginBalance: cashResult.marginBalance,
+      //   allowance: cashResult.allowance,
+      //   walletBalance: cashResult.walletBalance
+      // });
 
-      const cash = getCashCore({
-        balance: cashResult.marginBalance,
-        marginBalance: cashResult.marginBalance,
-        allowance: cashResult.allowance,
-        walletBalance: cashResult.walletBalance
-      });
-
-      return calculateMTAccount(proxy, cash, marginables, []);
+      return calculateMTAccount(proxy, marginables);
     })
   );
 }
