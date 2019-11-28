@@ -140,6 +140,12 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
                   sign = '-';
                   DAIsign = '+';
                 }
+                if (
+                  e.kind === MTHistoryEventKind.bite
+                ) {
+                  DAIsign = '+';
+                }
+
                 if (dDAIAmount.isEqualTo(zero)) { DAIsign = ''; }
                 if (dAmount.isEqualTo(zero)) { sign = ''; }
 

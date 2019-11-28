@@ -13,7 +13,7 @@ import { MTMyPositionView } from './MTMyPositionView';
 
 const stories = storiesOf('Leverage Trading/My Position Panel', module)
   .addDecorator(story => (
-    <div style={{ width: '932px', background: '#2F2F38' }}>
+    <div style={{ width: '932px', background: '#ffffff' }}>
       {story()}
     </div>)
   );
@@ -28,12 +28,22 @@ const assetCore = {
   safeCollRatio: new BigNumber(2),
 };
 
+const leverageHistory: RawMTHistoryEvent[] = [
+  {
+    kind: MTHistoryEventKind.buyLev,
+    amount: new BigNumber(20),
+    payAmount: new BigNumber(3000),
+    timestamp: 1573140000,
+    token: 'WETH'
+  } as RawMTHistoryEvent,
+];
+
 const liquidationHistory: RawMTHistoryEvent[] = [
   {
     kind: MTHistoryEventKind.bite,
     id: 1,
     lot: new BigNumber(5),
-    tab: new BigNumber(1000),
+    bid: new BigNumber(1000),
     timestamp: 1573141000,
     token: 'WETH'
   } as RawMTHistoryEvent,
@@ -54,26 +64,13 @@ const liquidationHistory: RawMTHistoryEvent[] = [
     timestamp: 1573141020,
     token: 'WETH'
   } as RawMTHistoryEvent,
-  {
-    kind: MTHistoryEventKind.dent,
-    id: 1,
-    lot: new BigNumber(4.2),
-    bid: new BigNumber(1200),
-    timestamp: 1573141030,
-    token: 'WETH'
-  } as RawMTHistoryEvent,
-  {
-    kind: MTHistoryEventKind.deal,
-    id: 1,
-    timestamp: 1573141040,
-    token: 'WETH'
-  } as RawMTHistoryEvent,
 ];
 
 const ethMarginableAsset = calculateMarginable(getMarginableCore({
   ...assetCore,
   referencePrice: new BigNumber(250),
-  osmPriceNext: new BigNumber(250)
+  osmPriceNext: new BigNumber(250),
+  rawHistory: leverageHistory
 }));
 
 const mta: MTAccount = getMTAccount({ marginableAssets: [ethMarginableAsset] });
@@ -95,7 +92,8 @@ const ethMarginableAsset2 = calculateMarginable(getMarginableCore({
   referencePrice: new BigNumber(250),
   osmPriceNext: new BigNumber(130),
   // zzz: moment(new Date()).add(67, 'minutes').toDate(),
-  zzz: new BigNumber(1)
+  zzz: new BigNumber(1),
+  rawHistory: leverageHistory
 }));
 
 const mta2: MTAccount = getMTAccount({ marginableAssets: [ethMarginableAsset2] });
@@ -116,7 +114,7 @@ const ethMarginableAsset3 = calculateMarginable(getMarginableCore({
   ...assetCore,
   referencePrice: new BigNumber(130),
   osmPriceNext: new BigNumber(130),
-  rawHistory: liquidationHistory
+  rawHistory: [...leverageHistory, ...liquidationHistory]
 }));
 
 const mta3: MTAccount = getMTAccount({ marginableAssets: [ethMarginableAsset3] });
@@ -134,24 +132,33 @@ stories.add('CDP 1 - liquidation ongoing', () => (
 ));
 
 liquidationHistory.push({
-  kind: MTHistoryEventKind.redeem,
+  kind: MTHistoryEventKind.dent,
+  id: 1,
+  lot: new BigNumber(4.2),
+  bid: new BigNumber(1200),
+  timestamp: 1573141030,
+  token: 'WETH'
+} as RawMTHistoryEvent
+);
+liquidationHistory.push({
+  kind: MTHistoryEventKind.deal,
   id: 1,
   timestamp: 1573141040,
-  token: 'WETH',
-  amount: new BigNumber(0.8)
-} as RawMTHistoryEvent);
+  token: 'WETH'
+} as RawMTHistoryEvent
+);
 
 const ethMarginableAsset4 = calculateMarginable(getMarginableCore({
   ...assetCore,
   referencePrice: new BigNumber(130),
   osmPriceNext: new BigNumber(130),
   redeemable: new BigNumber(0.8),
-  rawHistory: liquidationHistory
+  rawHistory: [...leverageHistory, ...liquidationHistory]
 }));
 
 const mta4: MTAccount = getMTAccount({ marginableAssets: [ethMarginableAsset4] });
 
-stories.add('CDP 1 - liquidation ongoing with redeem', () => (
+stories.add('CDP 1 - liquidation ongoing 2', () => (
   <MTMyPositionView
     {...{
       mta: mta4,
@@ -168,7 +175,7 @@ const ethMarginableAsset5 = calculateMarginable(getMarginableCore({
   referencePrice: new BigNumber(250),
   osmPriceNext: new BigNumber(250),
   redeemable: new BigNumber(0.8),
-  rawHistory: liquidationHistory
+  rawHistory: [...leverageHistory, ...liquidationHistory]
 }));
 
 const mta5: MTAccount = getMTAccount({ marginableAssets: [ethMarginableAsset5] });
@@ -178,6 +185,36 @@ stories.add('CDP 1 - liquidation ended with redeem', () => (
     {...{
       mta: mta5,
       ma:ethMarginableAsset5,
+      createMTFundForm$: () => of({} as MTTransferFormState),
+      open: () => null,
+      approveMTProxy: (_args: {token: string; proxyAddress: string}) => of({} as TxState)
+    }
+    } />
+));
+
+liquidationHistory.push({
+  kind: MTHistoryEventKind.redeem,
+  id: 1,
+  timestamp: 1573141040,
+  token: 'WETH',
+  amount: new BigNumber(0.8)
+} as RawMTHistoryEvent);
+
+const ethMarginableAsset6 = calculateMarginable(getMarginableCore({
+  ...assetCore,
+  referencePrice: new BigNumber(250),
+  osmPriceNext: new BigNumber(250),
+  redeemable: new BigNumber(0),
+  rawHistory: [...leverageHistory, ...liquidationHistory]
+}));
+
+const mta6: MTAccount = getMTAccount({ marginableAssets: [ethMarginableAsset6] });
+
+stories.add('CDP 1 - liquidation ended. After redeem', () => (
+  <MTMyPositionView
+    {...{
+      mta: mta6,
+      ma:ethMarginableAsset6,
       createMTFundForm$: () => of({} as MTTransferFormState),
       open: () => null,
       approveMTProxy: (_args: {token: string; proxyAddress: string}) => of({} as TxState)
