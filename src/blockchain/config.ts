@@ -35,6 +35,7 @@ import * as liquidityProvider from './abi/liquidity-provider.abi.json';
 import * as otc from './abi/matching-market.abi.json';
 import * as mcdCat from './abi/mcd-cat.abi.json';
 import * as mcdFlipper from './abi/mcd-flipper.abi.json';
+import * as osm from './abi/osm.abi.json';
 import * as otcSupport from './abi/otc-support-methods.abi.json';
 import * as proxyActions from './abi/proxy-actions.abi.json';
 import * as proxyCreationAndExecute from './abi/proxy-creation-and-execute.abi.json';
@@ -282,7 +283,7 @@ const protoMain = {
   jug: '',
   cdpManager: '',
   ilks: {} as { [key: string]: string },
-  osms: {} as { [key: string]: string },
+  osms: {} as { [key: string]: any },
   get otcSupportMethods() {
     return load(otcSupport, '0x9b3f075b12513afe56ca2ed838613b7395f57839');
   },
@@ -399,7 +400,7 @@ const kovan: NetworkConfig = {
     BAT: 'BAT-A',
     DGD: 'DGD-A',
   } as { [key: string]: string },
-  osms: {} as { [key: string]: string },
+  osms: {} as { [key: string]: any },
   get otcSupportMethods() {
     return load(otcSupport, '0x303f2bf24d98325479932881657f45567b3e47a8');
   },
@@ -442,7 +443,7 @@ const kovan: NetworkConfig = {
   },
 };
 
-const localnet: NetworkConfig =   {
+const localnet: NetworkConfig =  {
   id: '420',
   name: '   localnet',
   label: 'Localnet',
@@ -501,12 +502,22 @@ const localnet: NetworkConfig =   {
     BAT: 'BAT',
   } as { [key: string]: string },
   osms: {
-    WETH: '0x7b0EFd60129c077D98fDFE6Fdbaf7265Df78697F',
-    DGD: '0xc2fCc21890cd328109cA229959f40fcCaD94447B',
-    ZRX: '0x357DA4c113A85BD27De51d4521BbA7C96a6f7a9E',
-    REP: '0x36a16Ed65A10918E1283b702d5000D2d0592c792',
-    BAT: '0x296D2971Ec5aA7Bc92CC5DEF463FD755635337Fb',
-  } as { [key: string]: string },
+    get WETH() {
+      return load(osm, '0x7b0EFd60129c077D98fDFE6Fdbaf7265Df78697F');
+    },
+    get DGD() {
+      return load(osm, '0xc2fCc21890cd328109cA229959f40fcCaD94447B');
+    },
+    get ZRX() {
+      return load(osm, '0x357DA4c113A85BD27De51d4521BbA7C96a6f7a9E');
+    },
+    get REP() {
+      return load(osm, '0x36a16Ed65A10918E1283b702d5000D2d0592c792');
+    },
+    get BAT() {
+      return load(osm, '0x296D2971Ec5aA7Bc92CC5DEF463FD755635337Fb');
+    },
+  } as { [key: string]: any },
   get otcSupportMethods() {
     return load(otcSupport, '0xee9F9B08E2eBc68e88c0e207A09EbaaeF4e5d94E');
   },

@@ -255,3 +255,13 @@ export const mtSell = {
       Sell <Money value={amount} token={baseToken}/> for <Money value={total} token={'DAI'}/>
     </React.Fragment>
 };
+
+export const osmParams = {
+  call: (_data: any, context: NetworkConfig) => {
+    return context.osms[_data.token].contract.zzz;
+  },
+  prepareArgs: () => {
+    return [];
+  },
+  postprocess: (results: any, _data: any) => ({ [_data.token]: results }),
+};
