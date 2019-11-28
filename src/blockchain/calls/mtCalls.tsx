@@ -4,13 +4,13 @@ import * as React from 'react';
 import { Operation, OperationKind } from '../../marginTrading/state/mtAccount';
 import { Money } from '../../utils/formatters/Formatters';
 import { Currency } from '../../utils/text/Text';
+import { one } from '../../utils/zero';
 import { NetworkConfig } from '../config';
 import { MIN_ALLOWANCE } from '../network';
 import { amountFromWei, amountToWei } from '../utils';
 import { web3 } from '../web3';
 import { DEFAULT_GAS } from './callsHelpers';
 import { TxMetaKind } from './txMeta';
-import {one} from "../../utils/zero";
 
 export const setupMTProxy = {
   call: (_data: {}, context: NetworkConfig) => context.marginProxyRegistry.contract.build[''],

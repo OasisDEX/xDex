@@ -33,7 +33,7 @@ import { WrapUnwrapFormState } from '../../wrapUnwrap/wrapUnwrapForm';
 import { planDraw, planDrawDai } from '../plan/planDraw';
 import { planFund, planFundDai } from '../plan/planFund';
 import {
-  findAsset, findMarginableAsset, MarginableAsset, MarginableAssetCore,
+  findAsset, findMarginableAsset, MarginableAsset,
   MTAccount, MTAccountState,
   Operation, UserActionKind
 } from '../state/mtAccount';

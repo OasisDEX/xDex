@@ -8,7 +8,7 @@ import { FormChangeKind, GasEstimationStatus, ProgressStage } from '../../utils/
 import { unpack } from '../../utils/testHelpers';
 import { UserActionKind } from '../state/mtAccount';
 import { calculateMTAccount } from '../state/mtCalculate';
-import { getCashCore, getMarginableCore } from '../state/mtTestUtils';
+import { getMarginableCore } from '../state/mtTestUtils';
 import {
   createMTTransferForm$,
   MessageKind,

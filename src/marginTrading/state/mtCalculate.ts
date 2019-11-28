@@ -6,36 +6,14 @@ import { Offer } from '../../exchange/orderbook/orderbook';
 import { minusOne, one, zero } from '../../utils/zero';
 import { buy } from '../plan/planUtils';
 import {
-  CashAsset,
-  CashAssetCore,
-  Core, MarginableAsset,
+  MarginableAsset,
   MarginableAssetCore,
   MTAccount,
   MTAccountState, mtBitable, MTHistoryEvent,
   MTHistoryEventKind, MTLiquidationEvent,
-  // NonMarginableAsset,
-  // NonMarginableAssetCore,
   UserActionKind
 } from './mtAccount';
 import { RawMTHistoryEvent } from './mtHistory';
-
-function assetCoreAvailableActions(asset: Core) {
-  const availableActions: UserActionKind[] = [];
-
-  if (asset.allowance && asset.walletBalance.gt(zero)) {
-    availableActions.push(UserActionKind.fund);
-  }
-
-  if (asset.balance.gt(zero)) {
-    availableActions.push(UserActionKind.draw);
-  }
-
-  return availableActions;
-}
-
-function assetCashAvailableActions(_asset: CashAssetCore) {
-  return [UserActionKind.fund, UserActionKind.draw];
-}
 
 function marginableAvailableActions(asset: MarginableAssetCore) {
   const availableActions: UserActionKind[] = [];
@@ -49,24 +27,6 @@ function marginableAvailableActions(asset: MarginableAssetCore) {
   }
 
   return availableActions;
-}
-
-function calculateCash(cash: CashAssetCore): CashAsset {
-
-  const availableActions = assetCashAvailableActions(cash);
-
-  return {
-    ...cash,
-    availableActions,
-  };
-}
-
-export function realPurchasingPowerNonMarginable(
-  cashAvailable: BigNumber,
-  sellOffers: Offer[]
-) {
-  const [, cashLeft] = buy(cashAvailable, sellOffers);
-  return cashAvailable.minus(cashLeft);
 }
 
 export function realPurchasingPowerMarginable(
@@ -289,27 +249,9 @@ export function calculateMarginable(
   };
 }
 
-// function calculateNonMarginable(
-//   asset: NonMarginableAssetCore,
-//   // totalAvailableCash: BigNumber = zero,
-//   // cash: BigNumber = zero
-// ) : NonMarginableAsset {
-//
-//   const availableActions = assetCoreAvailableActions(asset);
-//   const balanceInCash = asset.balance.times(asset.referencePrice);
-//
-//   return {
-//     ...asset,
-//     availableActions,
-//     balanceInCash,
-//   };
-// }
-
 export function calculateMTAccount(
   proxy: any,
-  // cashCore: CashAssetCore,
   masCore: MarginableAssetCore[],
-  // nmasCore: NonMarginableAssetCore[]
 ): MTAccount {
 
   const totalDebt = masCore.reduce((debt, ma) => debt.plus(ma.debt), zero);
@@ -321,22 +263,16 @@ export function calculateMTAccount(
   const totalAvailableDebt =
     marginableAssets.reduce((debt, ma) => debt.plus(ma.availableDebt), zero);
 
-  // const nonMarginableAssets = nmasCore.map(
-  //   nma => calculateNonMarginable(nma)
-  // );
-
   const totalMAValue = marginableAssets.reduce((t, ma) => t.plus(ma.balanceInCash), zero);
-  // const totalNMAValue = nonMarginableAssets.reduce((t, ma) => t.plus(ma.balanceInCash), zero);
+
   const totalAssetValue = totalMAValue; // .plus(totalNMAValue); // .plus(cashCore.balance);
 
   return {
     proxy,
     marginableAssets,
-    // nonMarginableAssets,
     totalAssetValue,
     totalDebt,
     totalAvailableDebt,
     state: proxy.address === nullAddress ? MTAccountState.notSetup : MTAccountState.setup,
-    // cash: calculateCash(cashCore),
   };
 }

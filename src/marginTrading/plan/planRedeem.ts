@@ -11,7 +11,6 @@ import {
 } from '../state/mtAccount';
 import { deltaToOps, Operations, orderDeltas } from './planUtils';
 
-
 export function planRedeem(
   mta: MTAccount,
   token: string,

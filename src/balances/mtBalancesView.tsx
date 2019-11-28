@@ -109,7 +109,7 @@ export class MTBalancesViewInternal
         {this.props.balances && this.props.balances
           .filter(b => b.asset && b.asset.assetKind === AssetKind.marginable)
           .map(combinedBalance => {
-            const asset: MarginableAsset = combinedBalance.asset! as MarginableAsset;
+            const asset: MarginableAsset = combinedBalance.asset!;
             return (
               <tr
                 onClick={() => this.props.selectMa(asset)}
@@ -118,7 +118,7 @@ export class MTBalancesViewInternal
               >
                 <td>
                   <div className={styles.centeredAsset}>
-                    <div style={{width: '24px', height: '24px', marginRight: '12px'}}>
+                    <div style={{ width: '24px', height: '24px', marginRight: '12px' }}>
                       {getToken(combinedBalance.name).iconColor}
                     </div>
                     <Currency
@@ -126,7 +126,7 @@ export class MTBalancesViewInternal
                   </div>
                 </td>
                 <td className={styles.amount}>
-                  {formatPercent(asset.fee, {precision: 2})}
+                  {formatPercent(asset.fee, { precision: 2 })}
                 </td>
                 <td className={styles.amount}>
                   {formatAmount(asset.referencePrice, 'DAI')}

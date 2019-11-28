@@ -104,7 +104,6 @@ import { createFooter$, TheFooter } from './footer/Footer';
 import { Network } from './header/Network';
 import { createFormController$ as createInstantFormController$ } from './instant/instantForm';
 import { InstantViewPanel } from './instant/InstantViewPanel';
-import { createMTAllocateForm$ } from './marginTrading/allocate/mtOrderAllocateDebtForm';
 import {
   createExchangeMigration$,
   createMigrationOps$,
@@ -116,11 +115,6 @@ import {
   MigrationFormState
 } from './migration/migrationForm';
 import { MigrationButton } from './migration/MigrationFormView';
-
-import {
-  CreateMTAllocateForm$,
-  CreateMTAllocateForm$Props
-} from './marginTrading/allocate/mtOrderAllocateDebtFormView';
 
 import { MTMyPositionPanel } from './marginTrading/positions/MTMyPositionPanel';
 import { createMTSetupForm$, MTSetupFormState } from './marginTrading/setup/mtSetupForm';
@@ -207,20 +201,6 @@ export function setupAppContext() {
     switchMap(pair => loadOrderbook(pair))
   );
 
-  // const orderbookMidpointPrice$ = currentOrderbook$.pipe(
-  //   map(ob => {
-  //     if (ob && ob.buy.length > 0 && ob.sell.length > 0) {
-  //       return (ob.buy[0].price.plus(ob.sell[0].price)).div(2);
-  //     }
-  //     return undefined;
-  //   })
-  // );
-
-  // const currentOrderBookWithTradingPair$ = loadablifyPlusTradingPair(
-  //   currentTradingPair$,
-  //   loadOrderbook
-  // );
-
   const createMTFundForm$: CreateMTFundForm$ =
     curry(createMTTransferForm$)(mta$, gasPrice$, etherPriceUsd$, balances$,
                                  currentOrderbook$, calls$, readCalls$);
@@ -229,9 +209,6 @@ export function setupAppContext() {
 
   const approveWallet = createWalletApprove(calls$, gasPrice$);
   const disapproveWallet = createWalletDisapprove(calls$, gasPrice$);
-
-  const theCreateMTAllocateForm$: CreateMTAllocateForm$ =
-    curry(createMTAllocateForm$)(gasPrice$, etherPriceUsd$, calls$, readCalls$);
 
   const MTBalancesViewRxTx =
     inject(
@@ -267,18 +244,9 @@ export function setupAppContext() {
   const NetworkTxRx = connect(Network, context$);
   const TheFooterTxRx = connect(TheFooter, createFooter$(context$));
 
-  // const combinedBalances$ = balancesNoMT.createCombinedBalances$(
-  //   context$, initializedAccount$, etherBalance$,
-  //   balances$, onEveryBlock$, etherPriceUsd$, transactions$
-  // ).pipe(
-  //   shareReplay(1)
-  // );
   const balancesWithEth$ = combineLatest(balances$, etherBalance$).pipe(
     map(([balances, etherBalance]) => ({ ...balances, ETH: etherBalance })),
   );
-
-  // const approve = balancesNoMT.createWalletApprove(calls$, gasPrice$);
-  // const disapprove = balancesNoMT.createWalletDisapprove(calls$, gasPrice$);
 
   const marketDetails$ = createMarketDetails$(
     memoizeTradingPair(curry(loadPriceDaysAgo)(0, context$, onEveryBlock$)),
@@ -290,9 +258,6 @@ export function setupAppContext() {
     mtSimpleOrderForm(mta$, currentOrderbook$, createMTFundForm$, approveMTProxy);
 
   const MTAccountDetailsRxTx = connect(MtAccountDetailsView, mta$);
-
-  // const mtSummary$ = createMTSummary$(mta$);
-  // const MtSummaryViewRxTx = connect(MtSummaryView, mtSummary$);
 
   const tradeHistory = memoizeTradingPair(
     curry(loadAllTrades)(context$, onEveryBlock$)
@@ -551,18 +516,8 @@ export function setupAppContext() {
       { migration$: dai2SAIMigrationForm$ }
     );
 
-  // const ReallocateViewRxTx = inject(
-  //   withModal<CreateMTAllocateForm$Props, ModalOpenerProps>(
-  //     connect<Loadable<MTAccount>, ModalOpenerProps & CreateMTAllocateForm$Props>(
-  //       ReallocateView, loadablifyLight(mta$)
-  //     )
-  //   ),
-  //   { createMTAllocateForm$: theCreateMTAllocateForm$ }
-  // );
-
   return {
     AllTradesTxRx,
-    // AssetOverviewViewRxTx,
     MyTradesTxRx,
     OfferMakePanelTxRx,
     OrderbookPanelTxRx,
@@ -580,8 +535,6 @@ export function setupAppContext() {
     MTBalancesViewRxTx,
     WalletViewRxTx,
     MTSetupButtonRxTx,
-    // MtSummaryViewRxTx,
-    // ReallocateViewRxTx,
     SAI2DAIMigrationTxRx,
     DAI2SAIMigrationTxRx,
   };
@@ -590,10 +543,8 @@ export function setupAppContext() {
 function mtSimpleOrderForm(
   mta$: Observable<MTAccount>,
   orderbook$: Observable<Orderbook>,
-  // orderbookWithTradingPair$: Observable<LoadableWithTradingPair<Orderbook>>,
   createMTFundForm$: CreateMTFundForm$,
   approveMTProxy: (args: { token: string; proxyAddress: string }) => Observable<TxState>,
-  // approveWallet: (token: string) => Observable<TxState>
 ) {
   const mtOrderForm$ = currentTradingPair$.pipe(
     switchMap(tradingPair =>
@@ -658,9 +609,6 @@ function mtSimpleOrderForm(
       )
     );
 
-  // const pickableOrderbook$
-  //   = createPickableOrderBookFromMTFormState$(orderbookWithTradingPair$, account$, mtOrderForm$);
-
   const [kindChange, orderbookPanel$] = createOrderbookPanel$();
 
   const orderbookForView$ = createOrderbookForView(
@@ -693,67 +641,6 @@ function mtSimpleOrderForm(
 
   return { MTSimpleOrderPanelRxTx, MTMyPositionPanelRxTx, MTSimpleOrderbookPanelTxRx };
 }
-
-// function mtSimpleOrderForm2(
-//   mta$: Observable<MTAccount>,
-//   // theCreateMTAllocateForm$: CreateMTAllocateForm$,
-//   orderbook$: Observable<Orderbook>,
-//   orderbookWithTradingPair$: Observable<LoadableWithTradingPair<Orderbook>>
-// ) {
-//   const mtOrderForm$ = currentTradingPair$.pipe(
-//     switchMap(tradingPair =>
-//                 createMTSimpleOrderForm$(
-//                   tradingPair,
-//                   gasPrice$,
-//                   etherPriceUsd$,
-//                   orderbook$,
-//                   mta$,
-//                   calls$,
-//                   balancesMT.dustLimits$,
-//                 )
-//     ),
-//     shareReplay(1)
-//   );
-//
-//   const mtOrderFormLoadable$ = currentTradingPair$.pipe(
-//     switchMap(tradingPair =>
-//                 loadablifyLight(mtOrderForm$).pipe(
-//                   map(mtOrderFormLoadablified => ({
-//                     tradingPair,
-//                     ...mtOrderFormLoadablified
-//                   }))
-//                 )
-//     )
-//   );
-//
-//   // const MTSimpleOrderPanelRxTx = connect(MTSimpleOrderPanel, currentTradingPair$);
-//   const MTSimpleOrderPanelRxTx = connect(MTSimpleOrderPanel, mtOrderFormLoadable$);
-//   const MTMyPositionPanelRxTx = connect(MTMyPositionPanel, mtOrderFormLoadable$);
-//
-//   const [zoomChange, depthChartWithLoading$] = createDepthChartWithLoading$(
-//     mtOrderForm$
-//     .pipe(
-//       map(f => ({ ...f, matchType: OfferMatchType.direct }))
-//     ),
-//     orderbookWithTradingPair$,
-//     currentTradingPair$
-//   );
-//   const DepthChartWithLoadingTxRx = connect(DepthChartWithLoading, depthChartWithLoading$);
-//
-//   const pickableOrderbook$ = createPickableOrderBookFromMTSimpleFormState$(
-//     orderbookWithTradingPair$, account$, mtOrderForm$
-//   );
-//   const OrderbookViewTxRx = connect(OrderbookView, pickableOrderbook$);
-//
-//   const orderbookPanel$ = createOrderbookPanel$(zoomChange);
-//   const MTSimpleOrderbookPanelTxRx = connect(
-//     inject<OrderbookPanelProps, SubViewsProps>(
-//       OrderbookPanel,
-//       { DepthChartWithLoadingTxRx, OrderbookViewTxRx }),
-//     orderbookPanel$);
-//
-//   return { MTSimpleOrderPanelRxTx, MTMyPositionPanelRxTx, MTSimpleOrderbookPanelTxRx };
-// }
 
 function offerMake(
   orderbook$: Observable<Orderbook>,

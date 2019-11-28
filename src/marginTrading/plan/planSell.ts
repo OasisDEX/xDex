@@ -3,7 +3,7 @@ import { BigNumber } from 'bignumber.js';
 import { AssetKind, getToken } from '../../blockchain/config';
 import { Offer } from '../../exchange/orderbook/orderbook';
 import {
-  findAsset, findMarginableAsset, MarginableAsset, MarginableAssetCore,
+  findMarginableAsset, MarginableAssetCore,
   MTAccount,
   Operation,
   OperationKind

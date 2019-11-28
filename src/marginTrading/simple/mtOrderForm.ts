@@ -5,7 +5,7 @@ import { shareReplay } from 'rxjs/internal/operators';
 import { first, map, scan, switchMap, takeUntil } from 'rxjs/operators';
 import { DustLimits } from '../../balances/balances';
 import { Calls, Calls$, ReadCalls$ } from '../../blockchain/calls/calls';
-import { AssetKind, getToken } from '../../blockchain/config';
+import { getToken } from '../../blockchain/config';
 import { Offer, OfferType, Orderbook } from '../../exchange/orderbook/orderbook';
 import { TradingPair } from '../../exchange/tradingPair/tradingPair';
 import { combineAndMerge } from '../../utils/combineAndMerge';
@@ -54,7 +54,7 @@ import {
 } from '../state/mtAccount';
 import {
   calculateMarginable,
-  realPurchasingPowerMarginable, realPurchasingPowerNonMarginable,
+  realPurchasingPowerMarginable,
 } from '../state/mtCalculate';
 // import { getBuyPlan, getSellPlan } from './mtOrderPlan';
 

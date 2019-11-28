@@ -12,7 +12,6 @@ import {
   switchMap,
 } from 'rxjs/operators';
 import * as dsProxy from '../../blockchain/abi/ds-proxy.abi.json';
-import { MTBalanceResult } from '../../blockchain/calls/mtCalls';
 import {
   AssetKind,
   getToken,
@@ -33,7 +32,7 @@ import {
   createRawMTHistoryFromCache,
   RawMTHistoryEvent,
 } from './mtHistory';
-import { getCashCore, getMarginableCore } from './mtTestUtils';
+import { getMarginableCore } from './mtTestUtils';
 
 interface MTHistories {
   [index: string]: RawMTHistoryEvent[];

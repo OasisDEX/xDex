@@ -18,10 +18,8 @@ import { account$, GasPrice$, MIN_ALLOWANCE } from '../blockchain/network';
 import { TxState } from '../blockchain/transactions';
 import { amountFromWei } from '../blockchain/utils';
 import {
-  CashAsset,
   MarginableAsset,
   MTAccount,
-  // NonMarginableAsset,
 } from '../marginTrading/state/mtAccount';
 import { one, zero } from '../utils/zero';
 
@@ -88,7 +86,7 @@ export function createBalances$(
 export interface CombinedBalance {
   name: string;
   walletBalance: BigNumber;
-  asset?: MarginableAsset; // CashAsset | MarginableAsset | NonMarginableAsset;
+  asset?: MarginableAsset;
   mtAssetValueInDAI: BigNumber;
   cashBalance?: BigNumber;
   allowance: boolean;
@@ -108,10 +106,7 @@ export function combineBalances(
       const walletBalance = name === 'ETH' ? etherBalance : walletBalances[name];
 
       const asset =
-        // mta.cash.name === name ?
-        //   mta.cash :
           mta.marginableAssets.find(ma => ma.name === name);
-      // || mta.nonMarginableAssets.find(ma => ma.name === name);
 
       const mtAssetValueInDAI = asset ?
         // walletBalance.plus(asset.balance).times(
@@ -137,33 +132,6 @@ export function combineBalances(
     });
 
   return { mta, balances };
-
-  // const mtaCash = mta.state === MTAccountState.setup && mta.cash ?
-  //   mta.cash.balance : new BigNumber(0);
-  // const mtaAssets = mta.state === MTAccountState.setup && mta.marginableAssets ?
-  //   mta.marginableAssets : [];
-  //
-  // const combinedBalances = Object.keys(tokens).map(name => {
-  //   const walletBalance =  (walletBalances && walletBalances[name]) || new BigNumber(0);
-  //   const asset = mtaAssets.find(a => a.name === name);
-  //   const mtaAssetBalance = asset ? asset.balance : new BigNumber(0);
-  //   const mtaMarginableAssetValue = asset ? asset.balanceInCash : new BigNumber(0);
-  //   const marginBalance = name === 'DAI' ? mtaCash : mtaAssetBalance;
-  //   const allowance = asset ? asset.allowance : false;
-  //
-  //   const walletValue = name === 'DAI' ? walletBalance : walletBalance.times(1.5);
-  //   const marginValue = name === 'DAI' ? mtaCash : mtaMarginableAssetValue;
-  //   return {
-  //     name,
-  //     walletBalance,
-  //     marginBalance,
-  //     allowance,
-  //     value: walletValue.plus(marginValue),
-  //   };
-  // }).filter(combinedBalance =>
-  //   combinedBalance.walletBalance.gt(0) || combinedBalance.marginBalance.gt(0));
-  //
-  // return { mta, balances: combinedBalances };
 }
 
 export function createCombinedBalances(
@@ -177,18 +145,6 @@ export function createCombinedBalances(
     shareReplay(1)
   );
 }
-
-// export interface Balances {
-//   [token: string]: BigNumber;
-// }
-//
-// export interface Allowances {
-//   [token: string]: boolean;
-// }
-//
-// export interface DustLimits {
-//   [token: string]: BigNumber;
-// }
 
 export function  createTokenBalances$(
   context$: Observable<NetworkConfig>,
