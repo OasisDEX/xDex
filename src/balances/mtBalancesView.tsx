@@ -42,7 +42,7 @@ export class MTBalancesView
 {
   public render() {
     const { status, value, error, ...props } = this.props;
-    console.log('balances view', JSON.stringify(props));
+    console.log('balances view', JSON.stringify(props), status, value, error);
     return (
       <Panel className={styles.balancesPanel}>
         <PanelHeader>Leverage Account</PanelHeader>
@@ -95,7 +95,7 @@ export class MTBalancesViewInternal
         <thead>
         <tr>
           <th>Asset</th>
-          <th className={styles.amount}>Interest Rate (per s!)</th>
+          <th className={styles.amount}>Interest Rate</th>
           <th className={styles.amount}>Market Price</th>
           <th className={styles.amount}>Liqu. Price</th>
           <th className={styles.amount}>PnL</th>
@@ -103,165 +103,50 @@ export class MTBalancesViewInternal
         </tr>
         </thead>
         <tbody>
-        { (!this.props.balances || this.props.balances.length === 0) && <tr>
-          <td colSpan={7} className={styles.center}>You have no assets</td>
-        </tr> }
-        { this.props.balances && this.props.balances
+        {(!this.props.balances || this.props.balances.length === 0) && <tr>
+            <td colSpan={7} className={styles.center}>You have no assets</td>
+        </tr>}
+        {this.props.balances && this.props.balances
           .filter(b => b.asset && b.asset.assetKind === AssetKind.marginable)
           .map(combinedBalance => {
             const asset: MarginableAsset = combinedBalance.asset! as MarginableAsset;
             return (
-            <tr
-              onClick={ () => this.props.selectMa(asset)}
-              data-test-id={`${combinedBalance.name}-overview`}
-              key={combinedBalance.name}
-            >
-              <td>
-                <div className={styles.centeredAsset}>
-                <div style={{ width: '24px', height: '24px', marginRight: '12px' }}>
-                  {getToken(combinedBalance.name).iconColor}
-                </div>
-                  <Currency
-                  value={getToken(combinedBalance.name).name} />
-                </div>
-              </td>
-              <td className={styles.amount}>
-                {formatPercent(asset.fee, { precision: 2 })}
-              </td>
-              <td className={styles.amount}>
-                {formatAmount(asset.referencePrice, 'DAI')}
-              </td>
-              <td className={styles.amount}>
-                {!asset.liquidationPrice.isNaN() &&
-                formatAmount(asset.liquidationPrice, 'DAI') ||
-                '-'}
-              </td>
-              <td className={styles.amount}>
-                {asset.pnl && formatPercent(asset.pnl) || '-'}
-              </td>
-              <td className={styles.amount}>
-                {formatAmount(asset.balance, asset.name)}
-              </td>
-
-              {/*<td className={styles.center}>*/}
-                {/*{combinedBalance.asset &&*/}
-                  {/*<Slider blocked={!combinedBalance.asset.allowance}*/}
-                        {/*disabled={*/}
-                          {/*this.props.mta.state !== MTAccountState.setup ||*/}
-                          {/*combinedBalance.asset.allowance*/}
-                        {/*}*/}
-                        {/*onClick={this.approveMTProxy(combinedBalance)}*/}
-                        {/*data-test-id="toggle-leverage-allowance"*/}
-                  {/*/>*/}
-                {/*}*/}
-              {/*</td>*/}
-              {/*<td data-test-id={`${combinedBalance.name}-balance`} className={styles.amount}>*/}
-              {/*  <FormatAmount*/}
-              {/*    value={combinedBalance.walletBalance}*/}
-              {/*    token={combinedBalance.name}*/}
-              {/*  />*/}
-              {/*</td>*/}
-              {/*<td className={styles.center}>*/}
-                {/*{ combinedBalance.asset &&*/}
-                  {/*<div>*/}
-                    {/*<button className={`${styles.transferBtn} ${styles.transferBtnLeft}`}*/}
-                            {/*disabled={!this.isActionEnabled(*/}
-                              {/*combinedBalance.name,*/}
-                              {/*UserActionKind.draw)}*/}
-                            {/*onClick={() => this.transfer(*/}
-                              {/*UserActionKind.draw,*/}
-                              {/*combinedBalance.name)}*/}
-                    {/*>*/}
-                      {/*<Arrow/>*/}
-                    {/*</button>*/}
-                    {/*< button className={styles.transferBtn}*/}
-                             {/*disabled={!this.isActionEnabled(*/}
-                               {/*combinedBalance.name,*/}
-                               {/*UserActionKind.fund)}*/}
-                             {/*onClick={() => this.transfer(*/}
-                               {/*UserActionKind.fund,*/}
-                               {/*combinedBalance.name)}*/}
-                    {/*>*/}
-                      {/*<Arrow />*/}
-                    {/*</button>*/}
-                  {/*</div>*/}
-                {/*}*/}
-              {/*</td>*/}
-              {/*<td className={styles.amount}>*/}
-                {/*{combinedBalance.asset && combinedBalance.name !== 'DAI' &&*/}
-                 {/*<FormatAmount*/}
-                   {/*value={combinedBalance.asset.balance}*/}
-                   {/*token={combinedBalance.name}*/}
-                 {/*/>*/}
-                {/*}*/}
-              {/*</td>*/}
-              {/*<td className={styles.amount}>*/}
-                {/*{combinedBalance.name !== 'ETH' && combinedBalance.name !== 'DAI' &&*/}
-                  {/*<FormatAmount value={combinedBalance.mtAssetValueInDAI} token="DAI"/>*/}
-                {/*}*/}
-              {/*</td>*/}
-              {/*<td className={styles.amount}>*/}
-                  {/*<FormatAmount value={combinedBalance.cashBalance} token="DAI"/>*/}
-              {/*</td>*/}
-            </tr>
+              <tr
+                onClick={() => this.props.selectMa(asset)}
+                data-test-id={`${combinedBalance.name}-overview`}
+                key={combinedBalance.name}
+              >
+                <td>
+                  <div className={styles.centeredAsset}>
+                    <div style={{width: '24px', height: '24px', marginRight: '12px'}}>
+                      {getToken(combinedBalance.name).iconColor}
+                    </div>
+                    <Currency
+                      value={getToken(combinedBalance.name).name}/>
+                  </div>
+                </td>
+                <td className={styles.amount}>
+                  {formatPercent(asset.fee, {precision: 2})}
+                </td>
+                <td className={styles.amount}>
+                  {formatAmount(asset.referencePrice, 'DAI')}
+                </td>
+                <td className={styles.amount}>
+                  {!asset.liquidationPrice.isNaN() &&
+                  formatAmount(asset.liquidationPrice, 'DAI') ||
+                  '-'}
+                </td>
+                <td className={styles.amount}>
+                  {asset.pnl && formatPercent(asset.pnl) || '-'}
+                </td>
+                <td className={styles.amount}>
+                  {formatAmount(asset.balance, asset.name)}
+                </td>
+              </tr>
             );
           })}
         </tbody>
       </Table>
     );
   }
-
-  // private transfer (actionKind: UserActionKind, token: string) {
-  //   const fundForm$ = this.props.createMTFundForm$(actionKind, token);
-  //   const MTFundFormViewRxTx =
-  //     connect<MTTransferFormState, ModalProps>(
-  //       inject(MtTransferFormView,
-  //              this.props as (CreateMTAllocateForm$Props & ModalOpenerProps)
-  //       ),
-  //       fundForm$);
-  //   // const MTFundFormViewRxTx = withModal<ModalProps, ModalOpenerProps>(
-  //   //   connect<MTTransferFormState, ModalProps & ModalOpenerProps>(
-  //   //     inject(MtTransferFormView, this.props as CreateMTAllocateForm$Props),
-  //   //     fundForm$));
-  //   this.props.open(MTFundFormViewRxTx);
-  // }
-
-  // private approveMTProxy(combinedBalance: CombinedBalance): () => void {
-  //   return () => {
-  //     if (this.props.mta.state === MTAccountState.notSetup) {
-  //       return;
-  //     }
-  //     this.props.approveMTProxy({
-  //       token: combinedBalance.name,
-  //       proxyAddress: this.props.mta.proxy.address as string
-  //     });
-  //   };
-  // }
-
-  // private isActionEnabled(token: string, action: UserActionKind): boolean {
-  //   if (!this.props.mta || this.props.mta.state !== MTAccountState.setup) {
-  //     return false;
-  //   }
-  //
-  //   const asset = findAsset(token, this.props.mta);
-  //   return asset !== undefined &&
-  //     asset.availableActions.includes(action);
-  // }
 }
-
-// class Arrow extends React.PureComponent {
-//   public render() {
-//     // tslint:disable:max-line-length
-//     return (
-//       <svg width="20px" height="20px" viewBox="0 0 20 20" version="1.1">
-//         <g stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
-//          <polygon
-//            fill="#FFFFFF"
-//            fillRule="nonzero"
-//            points="11.51 9 4.5 9 4.5 11 11.51 11 11.51 14 15.5 10 11.51 6"
-//          />
-//         </g>
-//       </svg>
-//     );
-//   }
-// }
