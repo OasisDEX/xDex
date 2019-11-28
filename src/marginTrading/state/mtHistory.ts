@@ -8,65 +8,6 @@ import { MTHistoryEvent } from './mtAccount';
 
 export type RawMTHistoryEvent = Exclude<MTHistoryEvent, 'dAmount' | 'dDAIAmount' >;
 
-export function createRawMTLiquidationHistoryFromCache$(
-  context: NetworkConfig,
-  urn: string,
-  token: string
-): Observable<RawMTHistoryEvent[]> {
-  const client = new apolloBoost({
-    uri: context.oasisDataService.url,
-  });
-
-  const q = gql`
-    query allLeveragedLiquidationEvents($urn: String) {
-      allLeveragedLiquidationEvents(filter: {
-        urn: {equalTo: $urn}
-      }) {
-        nodes {
-          type
-          auctionId
-          lot
-          bid
-          tab
-          timestamp
-        }
-      }
-    }
-  `;
-
-  const variables = {
-    // devMode: config.devMode,
-    urn,
-  };
-
-  return from(client.query({ variables, query: q })).pipe(
-    tap(r => console.log('liquidation results:', urn, r)),
-    map((result: any) =>
-      result.data.allLeveragedLiquidationEvents.nodes.map(({
-        type,
-        auctionId,
-        lot, // Amount of asset that is up for auction/sale.
-        bid, // Current highest bid.
-        tab, // total dai wanted
-        timestamp,
-      }: any) => ({
-        timestamp,
-        token,
-        kind: type,
-        id: auctionId,
-        ...(lot ? { lot: new BigNumber(lot) } : undefined),
-        ...(bid ? { bid: new BigNumber(bid) } : undefined),
-        ...(tab ? { tab: new BigNumber(tab) } : undefined),
-      })),
-    ),
-    catchError(error => {
-      console.log(error);
-      return throwError(error);
-    }),
-    tap(r => console.log('liquidation results:', urn, r))
-  );
-}
-
 export function createRawMTHistoryFromCache(
   proxy: string,
   context: NetworkConfig,
@@ -82,7 +23,7 @@ export function createRawMTHistoryFromCache(
       allLeveragedEvents(
       filter: {
       ilk: {equalTo: $token },
-      address: {equalTo: $proxy}
+      owner: {equalTo: $proxy}
       }
       ) {
         nodes {
@@ -92,6 +33,9 @@ export function createRawMTHistoryFromCache(
           payAmount
           dgem
           ddai
+          auctionId
+          lot
+          bid
           timestamp
         }
       }
@@ -113,6 +57,9 @@ export function createRawMTHistoryFromCache(
         payAmount,
         dgem,
         ddai,
+        auctionId,
+        lot,
+        bid,
         timestamp
       }: any) => ({
         ilk,
@@ -121,6 +68,9 @@ export function createRawMTHistoryFromCache(
         payAmount: new BigNumber(payAmount),
         dgem:  new BigNumber(dgem),
         ddai:  new BigNumber(ddai),
+        auctionId: new BigNumber(auctionId),
+        lot: new BigNumber(lot),
+        bid: new BigNumber(bid),
         kind: type,
         token: ilk
       })),

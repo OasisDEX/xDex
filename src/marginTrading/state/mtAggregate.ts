@@ -31,36 +31,12 @@ import {
 import { calculateMTAccount, } from './mtCalculate';
 import {
   createRawMTHistoryFromCache,
-  createRawMTLiquidationHistoryFromCache$,
   RawMTHistoryEvent,
 } from './mtHistory';
 import { getCashCore, getMarginableCore } from './mtTestUtils';
 
 interface MTHistories {
   [index: string]: RawMTHistoryEvent[];
-}
-
-function rawMTLiquidationHistories$(
-  context: NetworkConfig, results: MTBalanceResult
-): Observable<MTHistories> {
-  return forkJoin(Object.entries(results).map(([token, result]) => {
-    return (result.urn === nullAddress) ?
-      of({ [token]: [] }) :
-      createRawMTLiquidationHistoryFromCache$(context, result.urn, token).pipe(
-        map(history => ({ [token]: history })),
-      );
-  })).pipe(
-    concatAll(),
-    catchError(error => {
-      console.log('error', error);
-      return of(Object.keys(results).reduce((r, t) => {
-        r[t] = [];
-        return r;
-      },                                    {} as MTHistories));
-    }
-    ),
-    reduce((a, e) => ({ ...a, ...e }), {}),
-  );
 }
 
 function rawMTHistories$(
@@ -138,13 +114,12 @@ export function aggregateMTAccountState(
     switchMap(balancesResult =>
       combineLatest(
         of(balancesResult),
-        rawMTLiquidationHistories$(context, balancesResult),
         rawMTHistories$(context, proxy.address, assetNames),
         osms$(context, assetNames),
         osmsParams$(assetNames),
       )
     ),
-    map(([balanceResult, rawLiquidationHistories, rawHistories, osmPrices, osmParams]) => {
+    map(([balanceResult, rawHistories, osmPrices, osmParams]) => {
       const marginables = tokenNames
         .filter(token => getToken(token).assetKind === AssetKind.marginable)
         .map(token => {
@@ -157,10 +132,7 @@ export function aggregateMTAccountState(
             safeCollRatio: new BigNumber(getToken(token).safeCollRatio as number),
             osmPriceNext: (osmPrices as any)[token].next,
             zzz: (osmParams as any)[token] as BigNumber,
-            rawHistory: [
-              ...rawHistories[token],
-              ...rawLiquidationHistories[token]
-            ].sort((h1, h2) => h1.timestamp - h2.timestamp),
+            rawHistory: rawHistories[token].sort((h1, h2) => h1.timestamp - h2.timestamp),
           });
         });
 

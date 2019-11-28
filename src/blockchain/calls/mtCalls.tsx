@@ -10,6 +10,7 @@ import { amountFromWei, amountToWei } from '../utils';
 import { web3 } from '../web3';
 import { DEFAULT_GAS } from './callsHelpers';
 import { TxMetaKind } from './txMeta';
+import {one} from "../../utils/zero";
 
 export const setupMTProxy = {
   call: (_data: {}, context: NetworkConfig) => context.marginProxyRegistry.contract.build[''],
@@ -60,9 +61,9 @@ export interface MTBalanceResult {
 }
 
 const BalanceOuts = 10;
-// const secondsPerYear = 60 * 60 * 24 * 365;
+const secondsPerYear = 60 * 60 * 24 * 365;
 
-BigNumber.config({ POW_PRECISION: 50 });
+BigNumber.config({ POW_PRECISION: 100 });
 
 function normalizeAddress(address: string): string | null {
   const m = address.match(/^(0x)([0-9a-zA-Z]*)$/);
@@ -77,6 +78,8 @@ function mtBalancePostprocess([result]: [BigNumber[]], { tokens }: MTBalanceData
   const balanceResult: MTBalanceResult = {};
   tokens.forEach((token: string, i: number) => {
     const row = i * BalanceOuts;
+    console.log('dai balance', amountFromWei(new BigNumber(result[row + 4]), 'DAI').toString());
+    console.log('dai debt', amountFromWei(new BigNumber(result[row + 3]), 'DAI').toString());
     balanceResult[token] = {
       walletBalance: amountFromWei(new BigNumber(result[row]), token),
       marginBalance: amountFromWei(new BigNumber(result[row + 1]), token),
@@ -88,9 +91,8 @@ function mtBalancePostprocess([result]: [BigNumber[]], { tokens }: MTBalanceData
       allowance: new BigNumber(result[row + 7]).gte(MIN_ALLOWANCE),
       fee: new BigNumber(result[row + 8])
         .div(new BigNumber(10).pow(27))
-        // .pow(secondsPerYear)
-        // .minus(one)
-      ,
+        .pow(secondsPerYear)
+        .minus(one).times(100),
       urn: normalizeAddress(web3.toHex(result[row + 9]))!,
     };
   });
@@ -148,6 +150,11 @@ function argsOfPerformOperations(
     web3.fromAscii(context.ilks[op.name]),
     toWei(op.name, (op as any).amount), toWei('DAI', (op as any).maxTotal),
   ];
+  const redeemArgs = (op: Operation, token: string) => [
+    context.cdpManager, web3.fromAscii(context.ilks[op.name]),
+    toWei(token, (op as any).amount),
+    context.mcd.vat,
+  ];
 
   const types = {
     [OperationKind.fundGem]: () =>
@@ -161,7 +168,9 @@ function argsOfPerformOperations(
     [OperationKind.buyRecursively]: () =>
       context.proxyActions.contract.buyLev.getData(...buySellArgs(plan[0])),
     [OperationKind.sellRecursively]: () =>
-      context.proxyActions.contract.sellLev.getData(...buySellArgs(plan[0]))
+      context.proxyActions.contract.sellLev.getData(...buySellArgs(plan[0])),
+    [OperationKind.redeem]: () =>
+      context.proxyActions.contract.redeem.getData(...redeemArgs(plan[0], plan[0].name)),
   };
 
   if (!types[plan[0].kind]) {
@@ -253,6 +262,20 @@ export const mtSell = {
   description: ({ baseToken, amount, total }: MTSellData) =>
     <React.Fragment>
       Sell <Money value={amount} token={baseToken}/> for <Money value={total} token={'DAI'}/>
+    </React.Fragment>
+};
+
+interface MTRedeemData extends PerformPlanData {
+  token: string;
+  amount: BigNumber;
+}
+
+export const mtRedeem = {
+  ...mtPerformPlan,
+  kind: TxMetaKind.redeem,
+  description: ({ token, amount }: MTRedeemData) =>
+    <React.Fragment>
+      Redeem <Money value={amount} token={token} /> from Vat
     </React.Fragment>
 };
 

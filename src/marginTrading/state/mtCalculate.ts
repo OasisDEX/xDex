@@ -161,7 +161,7 @@ export function calculateMTHistoryEvents(
       event = { ...h, token: ma.name, redeemable: h.amount.times(minusOne), };
     }
     if (h.kind === MTHistoryEventKind.bite) {
-      event = { ...h, token: ma.name, dAmount: h.lot.times(minusOne) };
+      event = { ...h, token: ma.name, dAmount: h.lot.times(minusOne), dDAIAmount: h.bid };
     }
 
     const prevDebt = debt;
@@ -172,6 +172,12 @@ export function calculateMTHistoryEvents(
         prevDebt.gt(zero) ? prevDebt.minus(debt) : zero;
 
       if (debtDelta.gt(zero)) {
+        event = { ...event, debtDelta };
+      }
+    } else if (h.kind === MTHistoryEventKind.bite) {
+      const debtDelta = h.bid ? h.bid.times(minusOne) : zero;
+
+      if (!debtDelta.eq(zero)) {
         event = { ...event, debtDelta };
       }
     } else {

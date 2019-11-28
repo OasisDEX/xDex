@@ -47,6 +47,7 @@ export class MTMyPositionView extends
     && !this.props.ma.liquidationPrice.isNaN() ?
       this.props.ma.liquidationPrice : zero;
 
+    // const totalBalance = this.props.ma.balance.plus(this.props.ma.amountBeingLiquidated);
     return (
       <div>
         <div className={styles.MTPositionPanel}>
@@ -218,9 +219,16 @@ export class MTMyPositionView extends
             <div className={styles.warningMessage}>
               <SvgImage image={warningIconSvg}/>
               <span>
-              {this.props.ma.amountBeingLiquidated.toString()}
-                &nbsp;of total {this.props.ma.balance.toString()} {this.props.ma.name}
-                &nbsp;is being liquidated from your position.&nbsp;
+                <Money
+                      value={this.props.ma.amountBeingLiquidated}
+                      token={this.props.ma.name}
+                      fallback="-"
+                />
+                &nbsp;of total <Money
+                    value={this.props.ma.balance}
+                    token={this.props.ma.name}
+                    fallback="-"
+                  />&nbsp;is being liquidated from your position.&nbsp;
                 { this.props.ma.redeemable.gt(zero) &&
                 // tslint:disable
                 <><br />You can redeem <Money
