@@ -39,7 +39,7 @@ export function getMarginableCore(props?: Partial<MarginableAssetCore>): Margina
     safeCollRatio: new BigNumber(0),
     rawHistory: [],
     fee: new BigNumber(1),
-    urn: '',
+    liquidationPenalty: new BigNumber(1),
     zzz: date,
     redeemable: new BigNumber(0),
     osmPriceNext: props && props.referencePrice ? props.referencePrice.minus(10) : new BigNumber(0),

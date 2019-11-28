@@ -44,11 +44,9 @@ function rawMTLiquidationHistories$(
   context: NetworkConfig, results: MTBalanceResult
 ): Observable<MTHistories> {
   return forkJoin(Object.entries(results).map(([token, result]) => {
-    return (result.urn === nullAddress) ?
-      of({ [token]: [] }) :
-      createRawMTLiquidationHistoryFromCache$(context, result.urn, token).pipe(
-        map(history => ({ [token]: history })),
-      );
+    return createRawMTLiquidationHistoryFromCache$(context, 'result.urn', token).pipe(
+      map(history => ({ [token]: history })),
+    );
   })).pipe(
     concatAll(),
     catchError(error => {

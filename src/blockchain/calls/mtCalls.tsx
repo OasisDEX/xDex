@@ -55,7 +55,7 @@ export interface MTBalanceResult {
     minCollRatio: BigNumber;
     allowance: boolean;
     fee: BigNumber;
-    urn: string;
+    liquidationPenalty: BigNumber;
   };
 }
 
@@ -63,15 +63,6 @@ const BalanceOuts = 10;
 // const secondsPerYear = 60 * 60 * 24 * 365;
 
 BigNumber.config({ POW_PRECISION: 50 });
-
-function normalizeAddress(address: string): string | null {
-  const m = address.match(/^(0x)([0-9a-zA-Z]*)$/);
-  if (!m) {
-    return m;
-  }
-  const [, prefix , value] = m;
-  return `${prefix}${'0'.repeat(40 - value.length)}${value}`;
-}
 
 function mtBalancePostprocess([result]: [BigNumber[]], { tokens }: MTBalanceData): MTBalanceResult {
   const balanceResult: MTBalanceResult = {};
@@ -91,7 +82,7 @@ function mtBalancePostprocess([result]: [BigNumber[]], { tokens }: MTBalanceData
         // .pow(secondsPerYear)
         // .minus(one)
       ,
-      urn: normalizeAddress(web3.toHex(result[row + 9]))!,
+      liquidationPenalty: new BigNumber(result[row + 9]).div(new BigNumber(10).pow(27)),
     };
   });
   return balanceResult;
@@ -109,6 +100,7 @@ export const mtBalance = {
       context.mcd.vat,
       context.spot,
       context.jug,
+      context.mcd.cat.address,
       context.cdpManager,
     ];
   },

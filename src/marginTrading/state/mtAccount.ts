@@ -173,7 +173,7 @@ export interface MarginableAssetCore extends Core {
   minCollRatio: BigNumber;
   safeCollRatio: BigNumber;
   fee: BigNumber;
-  urn: string;
+  liquidationPenalty: BigNumber;
   osmPriceNext: BigNumber | undefined;
   zzz: Date;
   redeemable: BigNumber;
