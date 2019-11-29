@@ -24,7 +24,11 @@ export enum TxMetaKind {
   makeLinearOffers = 'makeLinearOffers',
   cancelAllOffers = 'cancelAllOffers',
   swapSai = 'swapSai',
-  swapDai = 'swapDai'
+  swapDai = 'swapDai',
+  devDrip = 'devDrip',
+  devChangePrice = 'devChangePrice',
+  devPokeOsm = 'devPokeOsm',
+  devPokeSpotter = 'devPokeSpotter',
 }
 
 export type TxMeta = {

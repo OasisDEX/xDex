@@ -1,14 +1,15 @@
 import { BigNumber } from 'bignumber.js';
 import { identity, Observable, of } from 'rxjs';
 import { first, flatMap, tap } from 'rxjs/operators';
-import { Calls$ } from '../blockchain/calls/calls';
+import { Calls$, ReadCalls$ } from '../blockchain/calls/calls';
 import { NetworkConfig } from '../blockchain/config';
 import { web3 } from '../blockchain/web3';
-import { createProxyAddress$ } from '../marginTrading/state/mtAggregate';
+import { createProxyAddress$, readOsm } from '../marginTrading/state/mtAggregate';
 
 export function pluginDevModeHelpers(
   context$: Observable<NetworkConfig>,
   calls$: Calls$,
+  readCalls$: ReadCalls$,
   initializedAccount$: Observable<string>,
   onEveryBlock$: Observable<number>
 ) {
@@ -114,6 +115,81 @@ export function pluginDevModeHelpers(
             );
           }),
         ),
+      )
+    ).subscribe(identity);
+
+  (window as any).drip = (
+    token: string,
+  ) =>
+    calls$.pipe(
+      first(),
+      flatMap(calls =>
+        calls.drip(
+          { token },
+        )
+      )
+    ).subscribe(identity);
+
+  (window as any).readPrice = (
+    token: string,
+  ) =>
+    readCalls$.pipe(
+      first(),
+      flatMap(calls =>
+        calls.readPrice(
+          { token },
+        )
+      ),
+      tap(price => console.log(price.toString())),
+    ).subscribe(identity);
+
+  (window as any).changePrice = (
+    token: string,
+    price: number,
+  ) =>
+    calls$.pipe(
+      first(),
+      flatMap(calls =>
+        calls.changePrice(
+          { token, price },
+        )
+      )
+    ).subscribe(identity);
+
+  (window as any).readOsm = (
+    token: string,
+  ) =>
+    context$.pipe(
+      first(),
+      flatMap(context =>
+        readOsm(context, token)
+      ),
+      tap(({ current, next }) =>
+        console.log({ current: current && current.toString(), next: next && next.toString() })
+      ),
+    ).subscribe(identity);
+
+  (window as any).pokeOsm = (
+    token: string,
+  ) =>
+    calls$.pipe(
+      first(),
+      flatMap(calls =>
+        calls.pokeOsm(
+          { token },
+        )
+      )
+    ).subscribe(identity);
+
+  (window as any).pokeSpotter = (
+    token: string,
+  ) =>
+    calls$.pipe(
+      first(),
+      flatMap(calls =>
+        calls.pokeSpotter(
+          { token },
+        )
       )
     ).subscribe(identity);
 

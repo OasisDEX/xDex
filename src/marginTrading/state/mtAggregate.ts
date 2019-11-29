@@ -227,7 +227,7 @@ export function createMta$(
   );
 }
 
-function readOsm(context: NetworkConfig, token: string):
+export function readOsm(context: NetworkConfig, token: string):
 Observable<{current: number|undefined, next: number|undefined}> {
   const hilo = (uint256: string): [BigNumber, BigNumber] => {
     const match = uint256.match(/^0x(\w+)$/);
@@ -244,8 +244,8 @@ Observable<{current: number|undefined, next: number|undefined}> {
   const slotCurrent = 3;
   const slotNext = 4;
   return combineLatest(
-    bindNodeCallback(web3.eth.getStorageAt)(context.osms[token], slotCurrent),
-    bindNodeCallback(web3.eth.getStorageAt)(context.osms[token], slotNext),
+    bindNodeCallback(web3.eth.getStorageAt)(context.mcd.osms[token].address, slotCurrent),
+    bindNodeCallback(web3.eth.getStorageAt)(context.mcd.osms[token].address, slotNext),
   ).pipe(
     map(([cur, nxt]: [string, string]) => {
       const [current, next] = [hilo(cur), hilo(nxt)];

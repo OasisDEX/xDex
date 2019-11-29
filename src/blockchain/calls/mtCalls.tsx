@@ -94,12 +94,12 @@ export const mtBalance = {
     return [
       proxyAddress,
       tokens.map(token =>
-        token !== 'DAI' ? web3.fromAscii(context.ilks[token]) : token // DAI is temporary
+        token !== 'DAI' ? web3.fromAscii(context.mcd.ilks[token]) : token // DAI is temporary
       ),
       tokens.map(token => context.tokens[token].address),
       context.mcd.vat,
-      context.spot,
-      context.jug,
+      context.mcd.spot.address,
+      context.mcd.jug.address,
       context.mcd.cat.address,
       context.cdpManager,
     ];
@@ -122,22 +122,22 @@ function argsOfPerformOperations(
   }
 
   const fundArgs = (op: Operation, token: string) => [
-    context.cdpManager, web3.fromAscii(context.ilks[op.name]),
+    context.cdpManager, web3.fromAscii(context.mcd.ilks[op.name]),
     toWei(token, (op as any).amount),
-    context.tokens[token].address, context.joins[token], context.mcd.vat,
+    context.tokens[token].address, context.mcd.joins[token], context.mcd.vat,
   ];
   const drawArgs = (op: Operation, token: string) => [
-    context.cdpManager, web3.fromAscii(context.ilks[op.name]),
+    context.cdpManager, web3.fromAscii(context.mcd.ilks[op.name]),
     toWei(token, (op as any).amount),
-    context.joins[token], context.mcd.vat,
+    context.mcd.joins[token], context.mcd.vat,
   ];
   const buySellArgs = (op: Operation) => [
     [
-      context.tokens[op.name].address, context.joins[op.name],
-      context.tokens.DAI.address, context.joins.DAI,
+      context.tokens[op.name].address, context.mcd.joins[op.name],
+      context.tokens.DAI.address, context.mcd.joins.DAI,
       context.cdpManager, context.otc.address, context.mcd.vat,
     ],
-    web3.fromAscii(context.ilks[op.name]),
+    web3.fromAscii(context.mcd.ilks[op.name]),
     toWei(op.name, (op as any).amount), toWei('DAI', (op as any).maxTotal),
   ];
 
