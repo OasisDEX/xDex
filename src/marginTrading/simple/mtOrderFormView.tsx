@@ -608,7 +608,7 @@ export class MtSimpleOrderFormBody
           <div className={styles.orderSummaryLabel}>
             Purch. power
           </div>
-          <div className={styles.orderSummaryValue}>
+          <div className={styles.orderSummaryValue} data-test-id="purchasing-power">
             {
               this.props.realPurchasingPower &&
               <>
@@ -625,10 +625,10 @@ export class MtSimpleOrderFormBody
             { this.props.realPurchasingPowerPost &&
             <>
               <span className={styles.transitionArrow} />
-              { this.props.realPurchasingPowerPost ?
-                <>
+              { !this.props.realPurchasingPowerPost.isNaN() ?
+                <span data-test-id="estimated-purchasing-power">
                   {formatPrecision(this.props.realPurchasingPowerPost, 2)}
-                </>
+                </span>
                 : <span>-</span>
               }
             </>
