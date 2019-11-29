@@ -384,10 +384,10 @@ const kovan: NetworkConfig = {
     },
     flip: {
       get WETH() {
-        return load(mcdFlipper, '0x494d6664a6b305f1f6dbded879f01e5dc1ea8b55');
+        return load(mcdFlipper, '0xb40139ea36d35d0c9f6a2e62601b616f1ffbbd1b');
       },
       get REP() {
-        return load(mcdFlipper, '0x096f6bb4ad63d9c2787bb2be77a5a7ea74a35826');
+        return load(mcdFlipper, '0xc94014a032ca5fcc01271f4519add7e87a16b94c');
       },
       get ZRX() {
         return load(mcdFlipper, '0x2f5979b27cdc809a85300e1902827c2bd2dcc155');
@@ -434,7 +434,7 @@ const kovan: NetworkConfig = {
     return load(proxyRegistry, '0xa42bbce61c51aaab9f6f5b9df809d38ec164908a'); // fill
   },
   get proxyActions() {
-    return load(proxyActions, '0x2ba434fe3417f05b4fc2646e9ff78d917b8cba15'); // fill
+    return load(proxyActions, '0xee5ad01d71cfda4bcd15d2f62f22e3c3ebfebd76'); // fill
   },
   get migration() {
     return '0x411b2faa662c8e3e5cf8f01dfdae0aee482ca7b0';
