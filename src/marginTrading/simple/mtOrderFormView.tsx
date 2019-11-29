@@ -541,17 +541,17 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
           <div className={styles.orderSummaryValue}>
             {
               this.props.realPurchasingPower &&
-              <>
+              <span data-test-id="purchasing-power">
                 {formatPrecision(this.props.realPurchasingPower, 2)}
-              </>
+              </span>
             }
             { this.props.realPurchasingPowerPost &&
             <>
               <span className={styles.transitionArrow} />
               { !this.props.realPurchasingPowerPost.isNaN() ?
-                <>
+                <span data-test-id="estimated-purchasing-power">
                   {formatPrecision(this.props.realPurchasingPowerPost, 2)}
-                </>
+                </span>
                 : <span>-</span>
               }
             </>
