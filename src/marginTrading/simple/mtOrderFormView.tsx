@@ -561,16 +561,18 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
               this.props.realPurchasingPower &&
               <>
                 {this.props.dustWarning && <span title="Zero due to dust limit">! </span>}
-                {formatPrecision(this.props.realPurchasingPower, 2)}
+                <span data-test-id="purchasing-power">
+                  {formatPrecision(this.props.realPurchasingPower, 2)}
+                  </span>
               </>
             }
             { this.props.realPurchasingPowerPost &&
             <>
               <span className={styles.transitionArrow} />
-              { this.props.realPurchasingPowerPost ?
-                <>
+              { !this.props.realPurchasingPowerPost.isNaN() ?
+                <span data-test-id="estimated-purchasing-power">
                   {formatPrecision(this.props.realPurchasingPowerPost, 2)}
-                </>
+                </span>
                 : <span>-</span>
               }
             </>

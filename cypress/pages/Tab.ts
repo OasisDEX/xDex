@@ -14,4 +14,8 @@ export class Tab {
   public static instant = () => {
     cy.get(tid('Instant'), { ...defaultTimeout }).click();
   }
+
+  public static leverage = () => {
+    cy.get(tid('Leverage'), { ...defaultTimeout }).click();
+  }
 }
