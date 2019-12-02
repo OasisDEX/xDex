@@ -139,6 +139,7 @@ import { inject } from './utils/inject';
 import { Loadable, LoadableWithTradingPair, loadablifyLight, } from './utils/loadable';
 import { ModalOpenerProps, withModal } from './utils/modal';
 import { createWrapUnwrapForm$ } from './wrapUnwrap/wrapUnwrapForm';
+import {createRedeem} from "./marginTrading/positions/MTMyPositionView";
 
 export function setupAppContext() {
 
@@ -625,6 +626,7 @@ function mtSimpleOrderForm(
 
   const MTSimpleOrderPanelRxTx = connect(MTSimpleOrderPanel, mtOrderFormLoadable$);
 
+  const redeem = createRedeem(calls$);
   const MTMyPositionPanelRxTx =
     // @ts-ignore
     withModal(
@@ -641,6 +643,7 @@ function mtSimpleOrderForm(
                     value: {
                       createMTFundForm$,
                       approveMTProxy,
+                      redeem,
                       account: state.value.account,
                       mta: state.value.mta,
                       ma: findMarginableAsset(state.tradingPair.base, state.value.mta)

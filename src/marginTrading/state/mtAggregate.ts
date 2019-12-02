@@ -1,5 +1,5 @@
 import { BigNumber } from 'bignumber.js';
-import { bindNodeCallback, combineLatest, forkJoin, Observable, of } from 'rxjs';
+import {bindNodeCallback, combineLatest, forkJoin, Observable, of, throwError} from 'rxjs';
 import {
   catchError,
   concatAll,
@@ -109,17 +109,33 @@ export function aggregateMTAccountState(
     .map(t => t.symbol);
 
   const tokenNames = [...assetNames, 'DAI'];
-
+  console.log('tokens', tokenNames);
+  console.log('proxy', proxy, proxy.address);
   return calls.mtBalance({ tokens: tokenNames, proxyAddress: proxy.address }).pipe(
+    catchError(val => {
+            console.log(`balances: ${val}`, val);
+            throw throwError(val);
+          }),
     switchMap(balancesResult =>
       combineLatest(
         of(balancesResult),
         rawMTHistories$(context, proxy.address, assetNames),
-        osms$(context, assetNames),
-        osmsParams$(assetNames),
+        osms$(context, assetNames).pipe(
+          catchError(val => {
+            console.log(`osms$: ${val}`, val);
+            throw throwError(val);
+          })
+        ),
+        osmsParams$(assetNames).pipe(
+          catchError(val => {
+            console.log(` osm params: ${val}`, val);
+            throw throwError(val);
+          })
+        ),
       )
     ),
     map(([balanceResult, rawHistories, osmPrices, osmParams]) => {
+      console.log('mt balances1');
       const marginables = [...tokenNames.entries()]
         .filter(([_i, token]) => getToken(token).assetKind === AssetKind.marginable)
         .map(([, token]) => {
@@ -146,6 +162,10 @@ export function aggregateMTAccountState(
       });
 
       return calculateMTAccount(proxy, cash, marginables, []);
+    }),
+    catchError(val => {
+      console.log(`I caught: ${val}`, val);
+      throw throwError(val);
     })
   );
 }

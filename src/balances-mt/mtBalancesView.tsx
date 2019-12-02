@@ -23,6 +23,7 @@ import { Table } from '../utils/table/Table';
 import { Currency } from '../utils/text/Text';
 import { CombinedBalances } from './balances';
 import * as styles from './mtBalancesView.scss';
+import {default as BigNumber} from "bignumber.js";
 
 export type MTBalancesProps = CombinedBalances & {
   ma?: MarginableAsset;
@@ -34,6 +35,7 @@ export type MTBalancesOwnProps = ModalOpenerProps &
     createMTFundForm$:
       (actionKind: UserActionKind, token: string) => Observable<MTTransferFormState>,
     approveMTProxy: (args: {token: string; proxyAddress: string}) => Observable<TxState>,
+    redeem: (args: {token: string; proxy: any, amount: BigNumber}) => void;
     createMTAllocateForm$: CreateMTAllocateForm$,
   };
 
@@ -55,6 +57,7 @@ export class MTBalancesView
                 close: () => combinedBalances.selectMa(undefined),
                 createMTFundForm$: props.createMTFundForm$,
                 approveMTProxy: props.approveMTProxy,
+                redeem: props.redeem,
                 account: 'TODO',
                 ma: combinedBalances.ma,
                 mta: combinedBalances.mta

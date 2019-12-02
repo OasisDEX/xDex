@@ -81,6 +81,7 @@ stories.add('CDP 1 - no liquidation', () => (
       mta,
       ma:ethMarginableAsset,
       createMTFundForm$: () => of({} as MTTransferFormState),
+      redeem: () => null,
       open: () => null,
       approveMTProxy: (_args: {token: string; proxyAddress: string}) => of({} as TxState)
     }
@@ -104,6 +105,7 @@ stories.add('CDP 1 - liquidation imminent', () => (
       mta: mta2,
       ma:ethMarginableAsset2,
       createMTFundForm$: () => of({} as MTTransferFormState),
+      redeem: () => null,
       open: () => null,
       approveMTProxy: (_args: {token: string; proxyAddress: string}) => of({} as TxState)
     }
@@ -125,6 +127,7 @@ stories.add('CDP 1 - liquidation ongoing', () => (
       mta: mta3,
       ma:ethMarginableAsset3,
       createMTFundForm$: () => of({} as MTTransferFormState),
+      redeem: () => null,
       open: () => null,
       approveMTProxy: (_args: {token: string; proxyAddress: string}) => of({} as TxState)
     }
@@ -163,6 +166,7 @@ stories.add('CDP 1 - liquidation ongoing 2', () => (
     {...{
       mta: mta4,
       ma:ethMarginableAsset4,
+      redeem: () => null,
       createMTFundForm$: () => of({} as MTTransferFormState),
       open: () => null,
       approveMTProxy: (_args: {token: string; proxyAddress: string}) => of({} as TxState)
@@ -186,6 +190,7 @@ stories.add('CDP 1 - liquidation ended with redeem', () => (
       mta: mta5,
       ma:ethMarginableAsset5,
       createMTFundForm$: () => of({} as MTTransferFormState),
+      redeem: () => null,
       open: () => null,
       approveMTProxy: (_args: {token: string; proxyAddress: string}) => of({} as TxState)
     }
@@ -216,6 +221,7 @@ stories.add('CDP 1 - liquidation ended. After redeem', () => (
       mta: mta6,
       ma:ethMarginableAsset6,
       createMTFundForm$: () => of({} as MTTransferFormState),
+      redeem: () => null,
       open: () => null,
       approveMTProxy: (_args: {token: string; proxyAddress: string}) => of({} as TxState)
     }
@@ -234,10 +240,10 @@ stories.add('Not connected', () => (
       account: undefined,
       mta: { state: MTAccountState.notSetup } as MTAccount,
       ma: ethMarginableAsset,
+      redeem: () => null
     }}
     status="loaded"
-    open={ () => null
-    }
+    open={ () => null}
   />
 ));
 
@@ -248,6 +254,7 @@ stories.add('Not setup', () => (
       account: '0x123',
       mta: { state: MTAccountState.notSetup } as MTAccount,
       ma: ethMarginableAsset,
+      redeem: () => null
     }}
     status="loaded"
     open={ () => null }

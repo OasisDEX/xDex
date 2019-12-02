@@ -16,7 +16,6 @@ export enum OperationKind {
   drawDai = 'drawDai',
   buyRecursively = 'buyLev',
   sellRecursively = 'sellLev',
-  redeem = 'redeem',
 }
 
 export type Operation = {
@@ -40,10 +39,6 @@ export type Operation = {
   name: string;
   amount: BigNumber;
   maxTotal: BigNumber;
-} | {
-  kind: OperationKind.redeem;
-  name: string;
-  amount: BigNumber;
 };
 
 export enum UserActionKind {

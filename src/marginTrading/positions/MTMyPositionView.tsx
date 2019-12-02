@@ -1,7 +1,10 @@
+import bignumberJs, { default as BigNumber } from 'bignumber.js';
 import classnames from 'classnames';
 import * as React from 'react';
-import { Observable } from 'rxjs/index';
+import { combineLatest, Observable } from 'rxjs/index';
+import { first, switchMap } from 'rxjs/operators';
 import { CDPHistoryView } from '../../balances-mt/CDPHistoryView';
+import { Calls$ } from '../../blockchain/calls/calls';
 import { TxState } from '../../blockchain/transactions';
 import { connect } from '../../utils/connect';
 import { formatPrecision } from '../../utils/formatters/format';
@@ -29,7 +32,39 @@ interface MTMyPositionViewProps {
   ma: MarginableAsset;
   createMTFundForm$: CreateMTFundForm$;
   approveMTProxy: (args: {token: string; proxyAddress: string}) => Observable<TxState>;
+  redeem: (args: {token: string; proxy: any, amount: BigNumber}) => void;
   close?: () => void;
+}
+
+// interface RedeemButtonProps {
+//   disabled: boolean;
+//   redeem: () => void;
+// }
+//
+// export class RedeemButton extends React.Component<RedeemButtonProps> {
+//
+//   public render() {
+//     return (<Button
+//               size="md"
+//               disabled={this.props.disabled}
+//               className={styles.redeemButton}
+//               onClick={this.props.redeem}
+//             >Redeem</Button>
+//     );
+//   }
+// }
+
+export function createRedeem(calls$: Calls$) {
+  return (args: {token: string; proxy: any, amount: BigNumber}): Observable<TxState> => {
+    const r = calls$.pipe(
+      first(),
+      switchMap(calls => {
+        return calls.mtRedeem(args);
+      })
+    );
+    r.subscribe();
+    return r;
+  };
 }
 
 export class MTMyPositionView extends
@@ -246,6 +281,10 @@ export class MTMyPositionView extends
                   size="md"
                   disabled={this.props.ma.redeemable.eq(zero)}
                   className={styles.redeemButton}
+                  onClick={() => this.props.redeem({
+                    token: this.props.ma.name,
+                    proxy: this.props.mta.proxy,
+                    amount: this.props.ma.redeemable})}
                 >Redeem</Button>
               }
             </div>

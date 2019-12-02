@@ -21,6 +21,7 @@ import { TxState } from '../../blockchain/transactions';
 import { Money } from '../../utils/formatters/Formatters';
 import { LoggedOut } from '../../utils/loadingIndicator/LoggedOut';
 import backArrowSvg from './back-arrow.svg';
+import {default as BigNumber} from "bignumber.js";
 
 interface MTMyPositionPanelInternalProps {
   account: string | undefined;
@@ -28,6 +29,7 @@ interface MTMyPositionPanelInternalProps {
   ma: MarginableAsset;
   createMTFundForm$: CreateMTFundForm$;
   approveMTProxy: (args: { token: string; proxyAddress: string }) => Observable<TxState>;
+  redeem: (args: {token: string; proxy: any, amount: BigNumber}) => void;
   close?: () => void;
 }
 
@@ -198,6 +200,7 @@ export class MTMyPositionPanelInternal
             open: this.props.open,
             createMTFundForm$: this.props.createMTFundForm$,
             approveMTProxy: this.props.approveMTProxy,
+            redeem: this.props.redeem
           }} />}
         </PanelBody>
       </div>

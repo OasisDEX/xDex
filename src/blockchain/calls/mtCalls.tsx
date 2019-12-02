@@ -69,8 +69,6 @@ function mtBalancePostprocess([result]: [BigNumber[]], { tokens }: MTBalanceData
   const balanceResult: MTBalanceResult = {};
   tokens.forEach((token: string, i: number) => {
     const row = i * BalanceOuts;
-    console.log('dai balance', amountFromWei(new BigNumber(result[row + 4]), 'DAI').toString());
-    console.log('dai debt', amountFromWei(new BigNumber(result[row + 3]), 'DAI').toString());
     balanceResult[token] = {
       walletBalance: amountFromWei(new BigNumber(result[row]), token),
       marginBalance: amountFromWei(new BigNumber(result[row + 1]), token),
@@ -161,8 +159,6 @@ function argsOfPerformOperations(
       context.proxyActions.contract.buyLev.getData(...buySellArgs(plan[0])),
     [OperationKind.sellRecursively]: () =>
       context.proxyActions.contract.sellLev.getData(...buySellArgs(plan[0])),
-    [OperationKind.redeem]: () =>
-      context.proxyActions.contract.redeem.getData(...redeemArgs(plan[0], plan[0].name)),
   };
 
   if (!types[plan[0].kind]) {
@@ -257,13 +253,27 @@ export const mtSell = {
     </React.Fragment>
 };
 
-interface MTRedeemData extends PerformPlanData {
+interface MTRedeemData {
+  proxy: any;
   token: string;
   amount: BigNumber;
 }
 
 export const mtRedeem = {
-  ...mtPerformPlan,
+  call: ({ proxy }: MTRedeemData) => {
+    return proxy.execute['address,bytes'];
+  },
+  prepareArgs: ({ proxy, token, amount }: MTRedeemData, context: NetworkConfig) => {
+    return [
+      context.proxyActions.address,
+      context.proxyActions.contract.redeem.getData(
+        context.cdpManager,
+        web3.fromAscii(context.mcd.ilks[token]),
+        amountToWei(amount, token).toFixed(),
+        context.mcd.joins[token]
+      ),
+    ];
+  },
   kind: TxMetaKind.redeem,
   description: ({ token, amount }: MTRedeemData) =>
     <React.Fragment>
