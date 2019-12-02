@@ -203,7 +203,7 @@ export function createMta$(
   );
 }
 
-function readOsm(context: NetworkConfig, token: string):
+export function readOsm(context: NetworkConfig, token: string):
 Observable<{current: number|undefined, next: number|undefined}> {
   const hilo = (uint256: string): [BigNumber, BigNumber] => {
     const match = uint256.match(/^0x(\w+)$/);

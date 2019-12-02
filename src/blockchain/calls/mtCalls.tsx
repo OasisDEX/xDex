@@ -4,13 +4,13 @@ import * as React from 'react';
 import { Operation, OperationKind } from '../../marginTrading/state/mtAccount';
 import { Money } from '../../utils/formatters/Formatters';
 import { Currency } from '../../utils/text/Text';
+import { one } from '../../utils/zero';
 import { NetworkConfig } from '../config';
 import { MIN_ALLOWANCE } from '../network';
 import { amountFromWei, amountToWei } from '../utils';
 import { web3 } from '../web3';
 import { DEFAULT_GAS } from './callsHelpers';
 import { TxMetaKind } from './txMeta';
-import {one} from "../../utils/zero";
 
 export const setupMTProxy = {
   call: (_data: {}, context: NetworkConfig) => context.marginProxyRegistry.contract.build[''],
@@ -143,7 +143,7 @@ function argsOfPerformOperations(
     toWei(op.name, (op as any).amount), toWei('DAI', (op as any).maxTotal),
   ];
   const redeemArgs = (op: Operation, token: string) => [
-    context.cdpManager, web3.fromAscii(context.ilks[op.name]),
+    context.cdpManager, web3.fromAscii(context.mcd.ilks[op.name]),
     toWei(token, (op as any).amount),
     context.mcd.vat,
   ];
@@ -273,7 +273,7 @@ export const mtRedeem = {
 
 export const osmParams = {
   call: (_data: any, context: NetworkConfig) => {
-    return context.osms[_data.token].contract.zzz;
+    return context.mcd.osms[_data.token].contract.zzz;
   },
   prepareArgs: () => {
     return [];
