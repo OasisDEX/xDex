@@ -1,5 +1,5 @@
 import { BigNumber } from 'bignumber.js';
-import {bindNodeCallback, combineLatest, forkJoin, Observable, of, throwError} from 'rxjs';
+import { bindNodeCallback, combineLatest, forkJoin, Observable, of, throwError } from 'rxjs';
 import {
   catchError,
   concatAll,
@@ -8,11 +8,10 @@ import {
   map,
   mergeMap,
   reduce,
-  shareReplay,
+  shareReplay, startWith,
   switchMap,
 } from 'rxjs/operators';
 import * as dsProxy from '../../blockchain/abi/ds-proxy.abi.json';
-import { MTBalanceResult } from '../../blockchain/calls/mtCalls';
 import {
   AssetKind,
   getToken,
@@ -33,7 +32,7 @@ import {
   createRawMTHistoryFromCache,
   RawMTHistoryEvent,
 } from './mtHistory';
-import { getCashCore, getMarginableCore } from './mtTestUtils';
+import { getMarginableCore } from './mtTestUtils';
 
 interface MTHistories {
   [index: string]: RawMTHistoryEvent[];
@@ -89,7 +88,7 @@ function osmsParams$(assets: string[]) {
           )
         );
     }
-    )
+    ),
   );
 }
 
@@ -108,14 +107,13 @@ export function aggregateMTAccountState(
     )
     .map(t => t.symbol);
 
-  const tokenNames = [...assetNames, 'DAI'];
-  console.log('tokens', tokenNames);
-  console.log('proxy', proxy, proxy.address);
+  const tokenNames = [...assetNames];
+
   return calls.mtBalance({ tokens: tokenNames, proxyAddress: proxy.address }).pipe(
     catchError(val => {
-            console.log(`balances: ${val}`, val);
-            throw throwError(val);
-          }),
+      console.log(`balances: ${val}`, val);
+      throw throwError(val);
+    }),
     switchMap(balancesResult =>
       combineLatest(
         of(balancesResult),
@@ -135,10 +133,9 @@ export function aggregateMTAccountState(
       )
     ),
     map(([balanceResult, rawHistories, osmPrices, osmParams]) => {
-      console.log('mt balances1');
-      const marginables = [...tokenNames.entries()]
-        .filter(([_i, token]) => getToken(token).assetKind === AssetKind.marginable)
-        .map(([, token]) => {
+      const marginables = tokenNames
+        .filter(token => getToken(token).assetKind === AssetKind.marginable)
+        .map(token => {
           return getMarginableCore({
             name: token,
             assetKind: AssetKind.marginable,
@@ -151,21 +148,7 @@ export function aggregateMTAccountState(
             rawHistory: rawHistories[token].sort((h1, h2) => h1.timestamp - h2.timestamp),
           });
         });
-
-      const cashResult = balanceResult.DAI;
-
-      const cash = getCashCore({
-        balance: cashResult.marginBalance,
-        marginBalance: cashResult.marginBalance,
-        allowance: cashResult.allowance,
-        walletBalance: cashResult.walletBalance
-      });
-
-      return calculateMTAccount(proxy, cash, marginables, []);
-    }),
-    catchError(val => {
-      console.log(`I caught: ${val}`, val);
-      throw throwError(val);
+      return calculateMTAccount(proxy, marginables);
     })
   );
 }
@@ -224,7 +207,7 @@ export function createMta$(
 }
 
 export function readOsm(context: NetworkConfig, token: string):
-Observable<{current: number|undefined, next: number|undefined}> {
+  Observable<{next: number|undefined}> {
   const hilo = (uint256: string): [BigNumber, BigNumber] => {
     const match = uint256.match(/^0x(\w+)$/);
     if (!match) {
@@ -237,18 +220,18 @@ Observable<{current: number|undefined, next: number|undefined}> {
       new BigNumber(`0x${match[0].substr(match[0].length - 32, 32)}`)
     ];
   };
-  const slotCurrent = 3;
+  // const slotCurrent = 3;
   const slotNext = 4;
   return combineLatest(
-    bindNodeCallback(web3.eth.getStorageAt)(context.mcd.osms[token].address, slotCurrent),
-    bindNodeCallback(web3.eth.getStorageAt)(context.mcd.osms[token].address, slotNext),
+    bindNodeCallback(web3.eth.getStorageAt)(context.osms[token].address, slotNext),
   ).pipe(
-    map(([cur, nxt]: [string, string]) => {
-      const [current, next] = [hilo(cur), hilo(nxt)];
+    map(([nxt]: [string, string]) => {
+      const next = hilo(nxt);
       return {
-        current: current[0].isZero() ? undefined : amountFromWei(current[1], token),
+        // current: current[0].isZero() ? undefined : amountFromWei(current[1], token),
         next: next[0].isZero() ? undefined : amountFromWei(next[1], token),
       };
-    })
+    }),
+    startWith({})
   );
 }

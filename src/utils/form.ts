@@ -4,7 +4,7 @@ import { takeWhileInclusive } from 'rxjs-take-while-inclusive';
 import {
   catchError, distinctUntilChanged, first, flatMap, map, startWith, switchMap
 } from 'rxjs/operators';
-import { Balances, DustLimits } from '../balances-nomt/balances';
+import { Balances, DustLimits } from '../balances/balances';
 import { Calls, Calls$, ReadCalls, ReadCalls$ } from '../blockchain/calls/calls';
 import { TxState, TxStatus } from '../blockchain/transactions';
 import { User } from '../blockchain/user';

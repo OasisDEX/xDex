@@ -1,9 +1,9 @@
 import bignumberJs, { default as BigNumber } from 'bignumber.js';
 import classnames from 'classnames';
 import * as React from 'react';
-import { combineLatest, Observable } from 'rxjs/index';
-import { first, switchMap } from 'rxjs/operators';
-import { CDPHistoryView } from '../../balances-mt/CDPHistoryView';
+import { Observable } from 'rxjs/index';
+import { first, switchMap } from 'rxjs/internal/operators';
+import { CDPHistoryView } from '../../balances/CDPHistoryView';
 import { Calls$ } from '../../blockchain/calls/calls';
 import { TxState } from '../../blockchain/transactions';
 import { connect } from '../../utils/connect';

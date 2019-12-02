@@ -31,7 +31,7 @@ describe('prepareBuyAllocationRequest', () => {
       'WETH',
       new BigNumber('300'),
       new BigNumber('200'),
-      mtaOnlyWeth.cash.balance.times(mtaOnlyWeth.marginableAssets[0].safeCollRatio)
+      mtaOnlyWeth.marginableAssets[0].dai.times(mtaOnlyWeth.marginableAssets[0].safeCollRatio)
       );
     expect(request).toEqual(impossible('orderbook too shallow'));
   });

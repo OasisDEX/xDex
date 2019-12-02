@@ -8,7 +8,7 @@ import { FormChangeKind, GasEstimationStatus, ProgressStage } from '../../utils/
 import { unpack } from '../../utils/testHelpers';
 import { UserActionKind } from '../state/mtAccount';
 import { calculateMTAccount } from '../state/mtCalculate';
-import { getCashCore, getMarginableCore } from '../state/mtTestUtils';
+import { getMarginableCore } from '../state/mtTestUtils';
 import {
   createMTTransferForm$,
   MessageKind,
@@ -20,7 +20,6 @@ setupFakeWeb3ForTesting();
 const defParams = {
   mta$: calculateMTAccount(
     {},
-    getCashCore({}),
     [getMarginableCore({
       name: 'WETH',
       balance: new BigNumber(20),
@@ -28,7 +27,6 @@ const defParams = {
       allowance: true,
       referencePrice: new BigNumber(500),
     })],
-    [],
   ),
   gasPrice$: of(new BigNumber(100)),
   etherPriceUsd$: of(new BigNumber(13)),

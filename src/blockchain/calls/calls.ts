@@ -29,7 +29,8 @@ import {
   tradePayWithETHNoProxy, tradePayWithETHWithProxy
 } from './instant';
 import {
-  approveMTProxy, mtBalance, mtBuy, mtDraw, mtFund, mtReallocate, mtRedeem, mtSell, osmParams, setupMTProxy
+  approveMTProxy, mtBalance, mtBuy, mtDraw, mtFund, mtReallocate,
+  mtRedeem, mtSell, osmParams, setupMTProxy
 } from './mtCalls';
 import {
   cancelOffer, offerMake, offerMakeDirect

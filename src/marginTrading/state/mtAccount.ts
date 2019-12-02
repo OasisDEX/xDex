@@ -149,20 +149,6 @@ export type MTLiquidationEvent = {
 }
 );
 
-// export type MTLiquidationEvent = {
-//   timestamp: number;
-//   token: string;
-// } & ({
-//   kind: MTHistoryEventKind.bite | MTHistoryEventKind.kick |
-//     MTHistoryEventKind.tend | MTHistoryEventKind.dent;
-//   id: BigNumber;
-//   gem: BigNumber;
-//   dai: BigNumber;
-// } | {
-//   kind: MTHistoryEventKind.deal;
-//   id: BigNumber;
-// });
-
 export type MarginableAssetHistory = MTHistoryEvent[];
 
 export interface MarginableAssetCore extends Core {
@@ -204,20 +190,20 @@ export interface MarginableAsset extends MarginableAssetCore {
   nextPriceUpdateDelta: string;
 }
 
-export interface NonMarginableAssetCore extends Core {
-  assetKind: AssetKind.nonMarginable;
-  // price: BigNumber;
-  referencePrice: BigNumber;
-}
+// export interface NonMarginableAssetCore extends Core {
+//   assetKind: AssetKind.nonMarginable;
+//   // price: BigNumber;
+//   referencePrice: BigNumber;
+// }
+//
+// export interface NonMarginableAsset extends NonMarginableAssetCore {
+//   balance: BigNumber;
+//   balanceInCash: BigNumber;
+//   availableActions: UserActionKind[];
+// }
 
-export interface NonMarginableAsset extends NonMarginableAssetCore {
-  balance: BigNumber;
-  balanceInCash: BigNumber;
-  availableActions: UserActionKind[];
-}
-
-export type AssetCore = CashAssetCore | MarginableAssetCore | NonMarginableAssetCore;
-export type Asset = CashAsset | MarginableAsset | NonMarginableAsset;
+export type AssetCore = CashAssetCore | MarginableAssetCore; // | NonMarginableAssetCore;
+export type Asset = CashAsset | MarginableAsset; // | NonMarginableAsset;
 
 export enum MTAccountState {
   setup = 'setup',
@@ -226,9 +212,9 @@ export enum MTAccountState {
 
 export interface MTAccount {
   state: MTAccountState.setup | MTAccountState.notSetup;
-  cash: CashAsset;
+  // cash: CashAsset;
   marginableAssets: MarginableAsset[];
-  nonMarginableAssets: NonMarginableAsset[];
+  // nonMarginableAssets: NonMarginableAsset[];
   // calculated:
   totalAssetValue: BigNumber;
   totalDebt: BigNumber;
@@ -251,17 +237,17 @@ export function createMTProxyApprove(calls$: Calls$) {
 
 export function findAsset(
   name: string, mta?: MTAccount
-): MarginableAsset | NonMarginableAsset | CashAsset | undefined {
+): MarginableAsset /* | NonMarginableAsset | CashAsset */ | undefined {
   if (!mta) {
     return undefined;
   }
+  //
+  // if (mta.cash && mta.cash.name === name) {
+  //   return mta.cash;
+  // }
 
-  if (mta.cash && mta.cash.name === name) {
-    return mta.cash;
-  }
-
-  return mta.marginableAssets.find(a => a.name === name) ||
-    mta.nonMarginableAssets.find(a => a.name === name);
+  return mta.marginableAssets.find(a => a.name === name);
+  // || mta.nonMarginableAssets.find(a => a.name === name);
 }
 
 export function findMarginableAsset(
@@ -274,12 +260,12 @@ export function findMarginableAsset(
   return mta.marginableAssets.find(a => a.name === name);
 }
 
-export function findNonMarginableAsset(
-  name: string, mta?: MTAccount
-): NonMarginableAsset | undefined {
-  if (!mta) {
-    return undefined;
-  }
-
-  return mta.nonMarginableAssets.find(a => a.name === name);
-}
+// export function findNonMarginableAsset(
+//   name: string, mta?: MTAccount
+// ): NonMarginableAsset | undefined {
+//   if (!mta) {
+//     return undefined;
+//   }
+//
+//   return mta.nonMarginableAssets.find(a => a.name === name);
+// }
