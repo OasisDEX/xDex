@@ -142,7 +142,7 @@ import { createWrapUnwrapForm$ } from './wrapUnwrap/wrapUnwrapForm';
 
 export function setupAppContext() {
 
-  pluginDevModeHelpers(context$, calls$, initializedAccount$, onEveryBlock$);
+  pluginDevModeHelpers(context$, calls$, readCalls$, initializedAccount$, onEveryBlock$);
 
   const balances$ = balancesNoMT.createBalances$(context$, initializedAccount$, onEveryBlock$).pipe(
     shareReplay(1)

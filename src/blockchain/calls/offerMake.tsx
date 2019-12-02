@@ -6,10 +6,8 @@ import { OfferType } from '../../exchange/orderbook/orderbook';
 import { TradeAct } from '../../exchange/trades';
 import { OfferMatchType } from '../../utils/form';
 import { Money } from '../../utils/formatters/Formatters';
-import * as dsProxy from '../abi/ds-proxy.abi.json';
 import { NetworkConfig } from '../config';
 import { amountToWei } from '../utils';
-import { web3 } from '../web3';
 import { TransactionDef } from './callsHelpers';
 import { TxMetaKind } from './txMeta';
 
@@ -122,68 +120,4 @@ export const offerMakeDirect: TransactionDef<OfferMakeDirectData> = {
       <>
         Create Buy Order <Money value={quoteAmount} token={quoteToken}/>
       </>,
-};
-
-export interface MakeLinearOffersData {
-  proxyAddress: string;
-  baseToken: string;
-  quoteToken: string;
-  midPrice: number;
-  delta: number;
-  baseAmount: number;
-  count: number;
-}
-
-function q18(value: number): string {
-  return String(value * 10 ** 4) + '0'.repeat(14);
-}
-
-export const makeLinearOffers: TransactionDef<MakeLinearOffersData> = {
-  call: ({ proxyAddress }: MakeLinearOffersData, _context: NetworkConfig) =>
-    web3.eth.contract(dsProxy as any).at(proxyAddress).execute['address,bytes'],
-  prepareArgs: (
-    { baseToken, quoteToken, midPrice, delta, baseAmount, count }: MakeLinearOffersData,
-    context: NetworkConfig
-  ) => [
-    context.liquidityProvider.address,
-    context.liquidityProvider.contract.linearOffers.getData(
-      context.otc.address,
-      context.tokens[baseToken].address,
-      context.tokens[quoteToken].address,
-      q18(midPrice),
-      q18(delta),
-      q18(baseAmount),
-      String(count),
-    ),
-  ],
-  kind: TxMetaKind.makeLinearOffers,
-  description: ({ count, midPrice, baseToken, quoteToken }: MakeLinearOffersData) => <>
-    Create {count} offer pairs for trading {baseToken}/{quoteToken} around price {midPrice}
-  </>,
-};
-
-export interface CancelAllOffersData {
-  proxyAddress: string;
-  baseToken: string;
-  quoteToken: string;
-}
-
-export const cancelAllOffers: TransactionDef<CancelAllOffersData> = {
-  call: ({ proxyAddress }: CancelAllOffersData, _context: NetworkConfig) =>
-    web3.eth.contract(dsProxy as any).at(proxyAddress).execute['address,bytes'],
-  prepareArgs: (
-    { baseToken, quoteToken }: CancelAllOffersData,
-    context: NetworkConfig
-  ) => [
-    context.liquidityProvider.address,
-    context.liquidityProvider.contract.cancelMyOffers.getData(
-      context.otc.address,
-      context.tokens[baseToken].address,
-      context.tokens[quoteToken].address,
-    ),
-  ],
-  kind: TxMetaKind.cancelAllOffers,
-  description: ({ baseToken, quoteToken }: CancelAllOffersData) => <>
-    Cancel all your offers of {baseToken}/{quoteToken} !!!
-  </>,
 };

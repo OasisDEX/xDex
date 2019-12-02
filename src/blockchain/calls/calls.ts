@@ -11,6 +11,15 @@ import {
   sendTransactionWithGasConstraintsCurried
 } from './callsHelpers';
 import {
+  cancelAllOffers,
+  changePrice,
+  drip,
+  makeLinearOffers,
+  pokeOsm,
+  pokeSpotter,
+  readPrice,
+} from './devCalls';
+import {
   getBestOffer,
   getBuyAmount,
   getOffersAmount,
@@ -23,7 +32,7 @@ import {
   approveMTProxy, mtBalance, mtBuy, mtDraw, mtFund, mtReallocate, mtRedeem, mtSell, osmParams, setupMTProxy
 } from './mtCalls';
 import {
-  cancelAllOffers, cancelOffer, makeLinearOffers, offerMake, offerMakeDirect
+  cancelOffer, offerMake, offerMakeDirect
 } from './offerMake';
 import { swapDaiToSai, swapSaiToDai } from './swapCalls';
 import { unwrap, wrap } from './wrapUnwrapCalls';
@@ -81,6 +90,10 @@ function calls([context, account]: [NetworkConfig, string]) {
     mtReallocateEstimateGas: estimateGas(mtReallocate),
     makeLinearOffers: sendTransaction(makeLinearOffers),
     cancelAllOffers: sendTransaction(cancelAllOffers),
+    drip: sendTransaction(drip),
+    changePrice: sendTransaction(changePrice),
+    pokeOsm: sendTransaction(pokeOsm),
+    pokeSpotter: sendTransaction(pokeSpotter),
     mtRedeem: sendTransaction(mtRedeem),
   };
 }
@@ -95,6 +108,7 @@ function readCalls([context, account]: [NetworkConfig, string | undefined]) {
     otcGetOffersAmount: call(getOffersAmount),
     otcGetBestOffer: call(getBestOffer),
     otcOffers: call(offers),
+    readPrice: call(readPrice),
     osmParams: call(osmParams),
   };
 }

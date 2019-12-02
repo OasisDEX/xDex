@@ -35,7 +35,9 @@ import * as liquidityProvider from './abi/liquidity-provider.abi.json';
 import * as otc from './abi/matching-market.abi.json';
 import * as mcdCat from './abi/mcd-cat.abi.json';
 import * as mcdFlipper from './abi/mcd-flipper.abi.json';
-import * as osm from './abi/osm.abi.json';
+import * as mcdJug from './abi/mcd-jug.abi.json';
+import * as mcdOsm from './abi/mcd-osm.abi.json';
+import * as mcdSpotter from './abi/mcd-spotter.abi.json';
 import * as otcSupport from './abi/otc-support-methods.abi.json';
 import * as proxyActions from './abi/proxy-actions.abi.json';
 import * as proxyCreationAndExecute from './abi/proxy-creation-and-execute.abi.json';
@@ -277,13 +279,8 @@ const protoMain = {
       loadToken('USDC', erc20, '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'),
     ]);
   },
-  joins: {} as { [key: string]: string },
   mcd: {} as { [key: string]: any },
-  spot: '',
-  jug: '',
   cdpManager: '',
-  ilks: {} as { [key: string]: string },
-  osms: {} as { [key: string]: any },
   get otcSupportMethods() {
     return load(otcSupport, '0x9b3f075b12513afe56ca2ed838613b7395f57839');
   },
@@ -359,18 +356,31 @@ const kovan: NetworkConfig = {
       loadToken('USDC', erc20, '0x198419c5c340e8De47ce4C0E4711A03664d42CB2'),
     ]);
   },
-  joins: {
-    WETH: '0xc3abba566bb62c09b7f94704d8dfd9800935d3f9',
-    DAI: '0x61af28390d0b3e806bbaf09104317cb5d26e215d',
-    REP: '0xebbd300bb527f1d50abd937f8ca11d7fd0e5b68b',
-    ZRX: '0x79f15b0da982a99b7bcf602c8f384c56f0b0e8cd',
-    BAT: '0xf8e9b4c3e17c1a2d55767d44fb91feed798bb7e8',
-    DGD: '0x92a3b1c0882e6e17aa41c5116e01b0b9cf117cf2',
-  } as { [key: string]: string },
   mcd: {
     vat: '0x6e6073260e1a77dfaf57d0b92c44265122da8028',
     get cat() {
       return load(mcdCat, '0xdd9eff17f24f42adef1b240fc5dafba2aa6dcefd');
+    },
+    get jug() {
+      return load(mcdJug, '0x3793181ebbc1a72cc08ba90087d21c7862783fa5');
+    },
+    get spot() {
+      return load(mcdSpotter, '0xf5cdfce5a0b85ff06654ef35f4448e74c523c5ac');
+    },
+    ilks: {
+      WETH: 'ETH-A',
+      REP: 'REP-A',
+      ZRX: 'ZRX-A',
+      BAT: 'BAT-A',
+      DGD: 'DGD-A',
+    },
+    joins: {
+      WETH: '0xc3abba566bb62c09b7f94704d8dfd9800935d3f9',
+      DAI: '0x61af28390d0b3e806bbaf09104317cb5d26e215d',
+      REP: '0xebbd300bb527f1d50abd937f8ca11d7fd0e5b68b',
+      ZRX: '0x79f15b0da982a99b7bcf602c8f384c56f0b0e8cd',
+      BAT: '0xf8e9b4c3e17c1a2d55767d44fb91feed798bb7e8',
+      DGD: '0x92a3b1c0882e6e17aa41c5116e01b0b9cf117cf2',
     },
     flip: {
       get WETH() {
@@ -388,19 +398,25 @@ const kovan: NetworkConfig = {
       get DGD() {
         return load(mcdFlipper, '0x6ee776b367191fad854df97ef267462053af283d');
       },
-    }
+    },
+    prices: {
+      get WETH() {
+        return load(dsValue, '0x75dd74e8afe8110c8320ed397cccff3b8134d981');
+      },
+      get BAT() {
+        return load(dsValue, '0x5c40c9eb35c76069fa4c3a00ea59fac6ffa9c113');
+      },
+    },
+    osms: {
+      get WETH() {
+        return load(mcdOsm, '0x75dd74e8afe8110c8320ed397cccff3b8134d981');
+      },
+      get BAT() {
+        return load(mcdOsm, '0x5c40c9eb35c76069fa4c3a00ea59fac6ffa9c113');
+      },
+    },
   } as { [key: string]: any },
-  spot: '0xf5cdfce5a0b85ff06654ef35f4448e74c523c5ac',
-  jug: '0x3793181ebbc1a72cc08ba90087d21c7862783fa5',
   cdpManager: '0x81f0cb2030d173502a371dda849acd3966983817', // fill
-  ilks: {
-    WETH: 'ETH-A',
-    REP: 'REP-A',
-    ZRX: 'ZRX-A',
-    BAT: 'BAT-A',
-    DGD: 'DGD-A',
-  } as { [key: string]: string },
-  osms: {} as { [key: string]: any },
   get otcSupportMethods() {
     return load(otcSupport, '0x303f2bf24d98325479932881657f45567b3e47a8');
   },
@@ -475,49 +491,70 @@ const localnet: NetworkConfig =  {
       // loadToken('USDC', erc20, '0x0000000000000000000000000000000000000000'),
     ]);
   },
-  joins: {
-    WETH: '0x2B6D0E2703bCA807bF4f4ab6B542F665d2af3F9C',
-    DAI: '0x5DFA1cCcE9A29efB2d49AB82f10cB5F1bF8e5013',
-  } as { [key: string]: string },
   mcd: {
     vat: '0xBD96b03c371380FB916a6789BDa6AFf170E65c5f',
     get cat() {
       return load(mcdCat, '0x4a81317A82Fc95f5180B827Ed3EBAe838Ad6BD1B');
     },
+    get jug() {
+      return load(mcdJug, '0x5D8A44E8BE914e6C3bCADb46581502592Ac41a94');
+    },
+    get spot() {
+      return load(mcdSpotter, '0x42B7E35e4A2DE972F5Cf17417ED49aff869D7a40');
+    },
+    ilks: {
+      WETH: 'ETH',
+      DAI: 'DAI',
+      DGD: 'DGD',
+      REP: 'REP',
+      ZRX: 'ZRX',
+      BAT: 'BAT',
+    },
+    joins: {
+      WETH: '0x2B6D0E2703bCA807bF4f4ab6B542F665d2af3F9C',
+      DAI: '0x5DFA1cCcE9A29efB2d49AB82f10cB5F1bF8e5013',
+    },
     flip: {
       get WETH() {
         return load(mcdFlipper, '0x76fdFbdBaF5Ef599FBD6565e998D20A0C838d950');
       },
-    }
+    },
+    prices: {
+      get WETH() {
+        return load(dsValue, '0x8b8B359c33c13b818713570583C8bce2b030AD9A');
+      },
+      get DGD() {
+        return load(dsValue, '0xb113A6d8c86d2fF2CCFa3E9470B0Aa2A808278f1');
+      },
+      get REP() {
+        return load(dsValue, '0xe81E2F7Aa2A521424f47E05B90572510C9352058');
+      },
+      get ZRX() {
+        return load(dsValue, '0x20dC9F6AE213EA1D6d668D6bDa86c34EA6967889');
+      },
+      get BAT() {
+        return load(dsValue, '0x350431e42D01f7a81c6BD0E06251a24BB70d348B');
+      },
+    },
+    osms: {
+      get WETH() {
+        return load(mcdOsm, '0x7b0EFd60129c077D98fDFE6Fdbaf7265Df78697F');
+      },
+      get DGD() {
+        return load(mcdOsm, '0xc2fCc21890cd328109cA229959f40fcCaD94447B');
+      },
+      get REP() {
+        return load(mcdOsm, '0x36a16Ed65A10918E1283b702d5000D2d0592c792');
+      },
+      get ZRX() {
+        return load(mcdOsm, '0x357DA4c113A85BD27De51d4521BbA7C96a6f7a9E');
+      },
+      get BAT() {
+        return load(mcdOsm, '0x296D2971Ec5aA7Bc92CC5DEF463FD755635337Fb');
+      },
+    },
   } as { [key: string]: any },
-  spot: '0x42B7E35e4A2DE972F5Cf17417ED49aff869D7a40',
-  jug: '0x5D8A44E8BE914e6C3bCADb46581502592Ac41a94',
   cdpManager: '0xAFe25DF80A6Ce0890d1742767Fd6424bF845F39d',
-  ilks: {
-    WETH: 'ETH',
-    DAI: 'DAI',
-    DGD: 'DGD',
-    REP: 'REP',
-    ZRX: 'ZRX',
-    BAT: 'BAT',
-  } as { [key: string]: string },
-  osms: {
-    get WETH() {
-      return load(osm, '0x7b0EFd60129c077D98fDFE6Fdbaf7265Df78697F');
-    },
-    get DGD() {
-      return load(osm, '0xc2fCc21890cd328109cA229959f40fcCaD94447B');
-    },
-    get ZRX() {
-      return load(osm, '0x357DA4c113A85BD27De51d4521BbA7C96a6f7a9E');
-    },
-    get REP() {
-      return load(osm, '0x36a16Ed65A10918E1283b702d5000D2d0592c792');
-    },
-    get BAT() {
-      return load(osm, '0x296D2971Ec5aA7Bc92CC5DEF463FD755635337Fb');
-    },
-  } as { [key: string]: any },
   get otcSupportMethods() {
     return load(otcSupport, '0xee9F9B08E2eBc68e88c0e207A09EbaaeF4e5d94E');
   },

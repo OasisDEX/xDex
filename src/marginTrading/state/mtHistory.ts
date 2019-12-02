@@ -45,7 +45,7 @@ export function createRawMTHistoryFromCache(
   const variables = {
     // devMode: config.devMode,
     proxy,
-    token: context.ilks[token],
+    token: context.mcd.ilks[token],
   };
 
   return from(client.query({ variables, query: q })).pipe(

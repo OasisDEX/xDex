@@ -25,6 +25,10 @@ export enum TxMetaKind {
   cancelAllOffers = 'cancelAllOffers',
   swapSai = 'swapSai',
   swapDai = 'swapDai',
+  devDrip = 'devDrip',
+  devChangePrice = 'devChangePrice',
+  devPokeOsm = 'devPokeOsm',
+  devPokeSpotter = 'devPokeSpotter',
   redeem = 'redeem'
 }
 
