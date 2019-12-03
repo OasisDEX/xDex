@@ -5,6 +5,7 @@ import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
 import { getToken } from '../blockchain/config';
 import { User } from '../blockchain/user';
 import { OfferType } from '../exchange/orderbook/orderbook';
+import { ApproximateInputValue } from '../utils/Approximate';
 import { BigNumberInput } from '../utils/bigNumberInput/BigNumberInput';
 import { formatAmountInstant } from '../utils/formatters/format';
 import { Asset } from './asset/Asset';
@@ -34,7 +35,7 @@ class TradingSide extends React.Component<TradingSideProps> {
           <Asset currency={asset} balance={balance} user={user} onClick={this.changeToken}/>
         </div>
         {/* TODO: Make it parameterized like the tokens in offerMakeForm.*/}
-        <span className={styles.inputWrapper}>
+        <ApproximateInputValue shouldApproximate={approx}>
           <BigNumberInput
             data-test-id={'amount'}
             type="text"
@@ -52,8 +53,7 @@ class TradingSide extends React.Component<TradingSideProps> {
             guide={true}
             placeholder={placeholder}
           />
-          { approx && <span className={styles.inputApprox}>~</span> }
-        </span>
+        </ApproximateInputValue>
       </div>
     );
   }
