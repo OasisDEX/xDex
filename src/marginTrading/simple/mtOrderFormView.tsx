@@ -418,7 +418,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
   }
 
   private slippageLimit() {
-    const { slippageLimit, kind, amount, price } = this.props;
+    const { slippageLimit } = this.props;
     return (
       <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
         <div className={styles.orderSummaryLabel}>

@@ -5,7 +5,7 @@ import {
   CashAssetCore,
   MarginableAssetCore,
   MTAccount,
-  NonMarginableAssetCore
+  // NonMarginableAssetCore
 } from './mtAccount';
 import { calculateMTAccount } from './mtCalculate';
 
@@ -40,40 +40,40 @@ export function getMarginableCore(props?: Partial<MarginableAssetCore>): Margina
     rawHistory: [],
     fee: new BigNumber(1),
     liquidationPenalty: new BigNumber(1),
-    zzz: date,
+    zzz: new BigNumber(1575289000),
     redeemable: new BigNumber(0),
     osmPriceNext: props && props.referencePrice ? props.referencePrice.minus(10) : new BigNumber(0),
     ...props
   };
 }
 
-export function getNonMarginableCore(
-  props?: Partial<NonMarginableAssetCore>
-): NonMarginableAssetCore {
-  return {
-    name: 'MKR',
-    balance: new BigNumber(0),
-    walletBalance: new BigNumber(0),
-    marginBalance: new BigNumber(0),
-    allowance: true,
-    assetKind: AssetKind.nonMarginable,
-    referencePrice: new BigNumber(0),
-    rawHistory: [],
-    ...props
-  };
-}
+// export function getNonMarginableCore(
+//   props?: Partial<NonMarginableAssetCore>
+// ): NonMarginableAssetCore {
+//   return {
+//     name: 'MKR',
+//     balance: new BigNumber(0),
+//     walletBalance: new BigNumber(0),
+//     marginBalance: new BigNumber(0),
+//     allowance: true,
+//     assetKind: AssetKind.nonMarginable,
+//     referencePrice: new BigNumber(0),
+//     rawHistory: [],
+//     ...props
+//   };
+// }
 
 export function getMTAccount(props: {
   cash?: Partial<CashAssetCore>;
   marginableAssets?: Array<Partial<MarginableAssetCore>>;
-  nonMarginableAssets?: Array<Partial<NonMarginableAssetCore>>;
+  // nonMarginableAssets?: Array<Partial<NonMarginableAssetCore>>;
 } = {}): MTAccount {
   return calculateMTAccount(
     {
       address: ''
     },
-    props.cash ? getCashCore(props.cash) : getCashCore(),
+    // props.cash ? getCashCore(props.cash) : getCashCore(),
     props.marginableAssets ? props.marginableAssets.map(getMarginableCore) : [],
-    props.nonMarginableAssets ? props.nonMarginableAssets.map(getNonMarginableCore) : []
+    // props.nonMarginableAssets ? props.nonMarginableAssets.map(getNonMarginableCore) : []
   );
 }

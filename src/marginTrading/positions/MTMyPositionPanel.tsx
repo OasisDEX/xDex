@@ -1,5 +1,5 @@
 import * as React from 'react';
-import * as styles from '../../balances-mt/mtBalancesView.scss';
+import * as styles from '../../balances/mtBalancesView.scss';
 import tickSvg from '../../icons/tick.svg';
 import { CallForAction } from '../../migration/CallForAction';
 
@@ -15,6 +15,7 @@ import {
 import { CreateMTFundForm$ } from '../transfer/mtTransferForm';
 import { MTMyPositionView } from './MTMyPositionView';
 
+import { default as BigNumber } from 'bignumber.js';
 import { Observable } from 'rxjs';
 import { theAppContext } from '../../AppContext';
 import { TxState } from '../../blockchain/transactions';
@@ -28,6 +29,8 @@ interface MTMyPositionPanelInternalProps {
   ma: MarginableAsset;
   createMTFundForm$: CreateMTFundForm$;
   approveMTProxy: (args: { token: string; proxyAddress: string }) => Observable<TxState>;
+  redeem: (args: {token: string; proxy: any, amount: BigNumber}) => void;
+  transactions: TxState[];
   close?: () => void;
 }
 
@@ -198,6 +201,8 @@ export class MTMyPositionPanelInternal
             open: this.props.open,
             createMTFundForm$: this.props.createMTFundForm$,
             approveMTProxy: this.props.approveMTProxy,
+            transactions: this.props.transactions,
+            redeem: this.props.redeem
           }} />}
         </PanelBody>
       </div>

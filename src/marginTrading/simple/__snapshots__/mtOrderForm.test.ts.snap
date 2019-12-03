@@ -15,20 +15,7 @@ Object {
   "liquidationPrice": undefined,
   "messages": Array [],
   "mta": Object {
-    "cash": Object {
-      "allowance": true,
-      "assetKind": "cash",
-      "availableActions": Array [
-        "fund",
-        "draw",
-      ],
-      "balance": "0",
-      "marginBalance": "0",
-      "name": "DAI",
-      "walletBalance": "0",
-    },
     "marginableAssets": Array [],
-    "nonMarginableAssets": Array [],
     "proxy": Object {
       "address": "",
     },
@@ -113,20 +100,7 @@ Object {
   "liquidationPrice": undefined,
   "messages": Array [],
   "mta": Object {
-    "cash": Object {
-      "allowance": true,
-      "assetKind": "cash",
-      "availableActions": Array [
-        "fund",
-        "draw",
-      ],
-      "balance": "0",
-      "marginBalance": "0",
-      "name": "DAI",
-      "walletBalance": "0",
-    },
     "marginableAssets": Array [],
-    "nonMarginableAssets": Array [],
     "proxy": Object {
       "address": "",
     },

@@ -1,15 +1,19 @@
+import { default as BigNumber } from 'bignumber.js';
 import classnames from 'classnames';
-import * as moment from 'moment';
 import * as React from 'react';
 import { Observable } from 'rxjs/index';
-import { CDPHistoryView } from '../../balances-mt/CDPHistoryView';
-import { TxState } from '../../blockchain/transactions';
+import { first, switchMap } from 'rxjs/internal/operators';
+import { CDPHistoryView } from '../../balances/CDPHistoryView';
+import { Calls$ } from '../../blockchain/calls/calls';
+import { TxMetaKind } from '../../blockchain/calls/txMeta';
+import { isDone, TxState } from '../../blockchain/transactions';
 import { connect } from '../../utils/connect';
 import { formatPrecision } from '../../utils/formatters/format';
 import { FormatPercent, Money } from '../../utils/formatters/Formatters';
 import { Button } from '../../utils/forms/Buttons';
 import { SvgImage } from '../../utils/icons/utils';
 import { inject } from '../../utils/inject';
+import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
 import { ModalOpenerProps, ModalProps } from '../../utils/modal';
 import { minusOne, one, zero } from '../../utils/zero';
 import { CreateMTAllocateForm$Props } from '../allocate/mtOrderAllocateDebtFormView';
@@ -30,7 +34,50 @@ interface MTMyPositionViewProps {
   ma: MarginableAsset;
   createMTFundForm$: CreateMTFundForm$;
   approveMTProxy: (args: {token: string; proxyAddress: string}) => Observable<TxState>;
+  redeem: (args: {token: string; proxy: any, amount: BigNumber}) => void;
   close?: () => void;
+  transactions: TxState[];
+}
+
+interface RedeemButtonProps {
+  disabled: boolean;
+  redeem: () => void;
+  token: string;
+  transactions: TxState[];
+}
+
+class RedeemButton extends React.Component<RedeemButtonProps> {
+
+  public render() {
+    const txInProgress = Boolean(this.props.transactions.find((t: TxState) =>
+      t.meta.kind === TxMetaKind.redeem &&
+      !isDone(t) &&
+      t.meta.args.token === this.props.token
+    ));
+
+    return (<Button
+              size="md"
+              disabled={this.props.disabled || txInProgress}
+              className={styles.redeemButton}
+              onClick={this.props.redeem}
+            >
+        {txInProgress ? <LoadingIndicator className={styles.buttonLoading} /> : 'Redeem'}
+      </Button>
+    );
+  }
+}
+
+export function createRedeem(calls$: Calls$) {
+  return (args: {token: string; proxy: any, amount: BigNumber}): Observable<TxState> => {
+    const r = calls$.pipe(
+      first(),
+      switchMap(calls => {
+        return calls.mtRedeem(args);
+      })
+    );
+    r.subscribe();
+    return r;
+  };
 }
 
 export class MTMyPositionView extends
@@ -48,11 +95,7 @@ export class MTMyPositionView extends
     && !this.props.ma.liquidationPrice.isNaN() ?
       this.props.ma.liquidationPrice : zero;
 
-    const liquidationTime = moment(this.props.ma.zzz);
-    const duration = moment.duration(liquidationTime.diff(moment(new Date())));
-    const liquidationTimeDelta = this.props.ma.zzz
-      && moment.utc(duration.asMilliseconds()).format('HH:mm');
-
+    // const totalBalance = this.props.ma.balance.plus(this.props.ma.amountBeingLiquidated);
     return (
       <div>
         <div className={styles.MTPositionPanel}>
@@ -206,6 +249,7 @@ export class MTMyPositionView extends
         <div>
           {
             this.props.ma.bitable === 'imminent' &&
+            // tslint:disable
             <div className={styles.warningMessage}>
               <SvgImage image={warningIconSvg}/>
               <span>
@@ -213,17 +257,26 @@ export class MTMyPositionView extends
               ({this.props.ma.osmPriceNext && this.props.ma.osmPriceNext.toString()} USD)
               is approaching your Liquidation Price and your position will soon be liquidated.
               You&nbsp;may rescue your Position by paying off Dai debt or deposit&nbsp;
-                {this.props.ma.name} in the next {liquidationTimeDelta} minutes.</span>
+                {this.props.ma.name} in the next {this.props.ma.nextPriceUpdateDelta} minutes.
+              </span>
             </div>
+            // tslint:enable
           }
           {
             this.props.ma.bitable === 'yes' &&
             <div className={styles.warningMessage}>
               <SvgImage image={warningIconSvg}/>
               <span>
-              {this.props.ma.amountBeingLiquidated.toString()}
-                &nbsp;of total {this.props.ma.balance.toString()} {this.props.ma.name}
-                &nbsp;is being liquidated from your position.&nbsp;
+                <Money
+                      value={this.props.ma.amountBeingLiquidated}
+                      token={this.props.ma.name}
+                      fallback="-"
+                />
+                &nbsp;of total <Money
+                    value={this.props.ma.balance}
+                    token={this.props.ma.name}
+                    fallback="-"
+                  />&nbsp;is being liquidated from your position.&nbsp;
                 { this.props.ma.redeemable.gt(zero) &&
                 // tslint:disable
                 <><br />You can redeem <Money
@@ -236,13 +289,16 @@ export class MTMyPositionView extends
                 }
             </span>
 
-              {this.props.ma.redeemable.gt(zero) &&
-                <Button
-                  size="md"
-                  disabled={this.props.ma.redeemable.eq(zero)}
-                  className={styles.redeemButton}
-                >Redeem</Button>
-              }
+              <RedeemButton
+                redeem={() => this.props.redeem({
+                  token: this.props.ma.name,
+                  proxy: this.props.mta.proxy,
+                  amount: this.props.ma.redeemable})}
+
+                token={this.props.ma.name}
+                disabled={this.props.ma.redeemable.eq(zero)}
+                transactions={this.props.transactions}
+              />
             </div>
           }
           {

@@ -21,7 +21,7 @@ import {
 } from '../../utils/form';
 
 import { curry } from 'ramda';
-import { Balances } from '../../balances-nomt/balances';
+import { Balances } from '../../balances/balances';
 import { Calls, Calls$, ReadCalls, ReadCalls$ } from '../../blockchain/calls/calls';
 import { AssetKind } from '../../blockchain/config';
 import { Orderbook } from '../../exchange/orderbook/orderbook';
@@ -371,12 +371,12 @@ function validate(state: MTTransferFormState) {
       messages.push({
         kind: MessageKind.insufficientAvailableAmount,
       });
-    } else if (state.actionKind === UserActionKind.draw &&
-      asset && asset.assetKind === AssetKind.nonMarginable &&
-      (asset.balance || new BigNumber(0).lt(state.amount))) {
-      messages.push({
-        kind: MessageKind.insufficientAmount,
-      });
+    // } else if (state.actionKind === UserActionKind.draw &&
+    //   asset && asset.assetKind === AssetKind.nonMarginable &&
+    //   (asset.balance || new BigNumber(0).lt(state.amount))) {
+    //   messages.push({
+    //     kind: MessageKind.insufficientAmount,
+    //   });
     } else if (state.actionKind === UserActionKind.fund &&
       state.balances[state.token].lt(state.amount)) {
       (null || messages).push({

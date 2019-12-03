@@ -67,30 +67,30 @@ export class MtAccountDetailsView
               {/*</td>*/}
             {/*</tr>*/}
 
-            { this.props.nonMarginableAssets.map(ma => (
-              <tr key={ma.name}>
-                <td className={styles.left}><Currency value={ma.name} /></td>
-                <td><FormatAmount value={ma.balance} token={ma.name} /></td>
-                <td><FormatAmount value={ma.referencePrice} token="DAI" /></td>
-                <td><FormatAmount value={ma.balanceInCash} token="DAI" /></td>
-                <td />
-                <td />
-                <td />
-                <td />
-                <td />
-                <td />
-                <td><FormatAmount value={undefined} token="DAI" /></td>
-              </tr>
-            ))}
+            {/*{ this.props.nonMarginableAssets.map(ma => (*/}
+            {/*  <tr key={ma.name}>*/}
+            {/*    <td className={styles.left}><Currency value={ma.name} /></td>*/}
+            {/*    <td><FormatAmount value={ma.balance} token={ma.name} /></td>*/}
+            {/*    <td><FormatAmount value={ma.referencePrice} token="DAI" /></td>*/}
+            {/*    <td><FormatAmount value={ma.balanceInCash} token="DAI" /></td>*/}
+            {/*    <td />*/}
+            {/*    <td />*/}
+            {/*    <td />*/}
+            {/*    <td />*/}
+            {/*    <td />*/}
+            {/*    <td />*/}
+            {/*    <td><FormatAmount value={undefined} token="DAI" /></td>*/}
+            {/*  </tr>*/}
+            {/*))}*/}
             {/*<tr>*/}
               {/*<td colSpan={13} className={`${styles.center} ${styles.middleTh}`}>Cash</td>*/}
             {/*</tr>*/}
-          <tr>
-            <td className={styles.left}>{this.props.cash.name}</td>
-            <td>
-              <FormatAmount value={this.props.cash.balance} token={this.props.cash.name} />
-            </td>
-          </tr>
+          {/*<tr>*/}
+          {/*  <td className={styles.left}>{this.props.cash.name}</td>*/}
+          {/*  <td>*/}
+          {/*    <FormatAmount value={this.props.cash.balance} token={this.props.cash.name} />*/}
+          {/*  </td>*/}
+          {/*</tr>*/}
           </tbody>
         </Table>
       </Panel>

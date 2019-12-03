@@ -23,7 +23,6 @@ import {
   getCashCore,
   getMarginableCore,
   getMTAccount,
-  getNonMarginableCore
 } from './mtTestUtils';
 
 const noCash: CashAssetCore = getCashCore({
@@ -56,22 +55,6 @@ test('no cash, no assets', () => {
   const mta: MTAccount = getMTAccount();
 
   expect(mta.totalAssetValue).toEqual(zero);
-  expect(mta.totalDebt).toEqual(zero);
-});
-
-test('just cash, no assets', () => {
-
-  const mta: MTAccount = getMTAccount({ cash });
-
-  expect(mta.totalAssetValue).toEqual(cash.balance);
-  expect(mta.totalDebt).toEqual(zero);
-});
-
-test('cash, empty weth', () => {
-
-  const mta: MTAccount = getMTAccount({ cash, marginableAssets: [wethEmpty] });
-
-  expect(mta.totalAssetValue).toEqual(cash.balance);
   expect(mta.totalDebt).toEqual(zero);
 });
 
@@ -132,7 +115,7 @@ test('weth and dgx with debt', () => {
   expect(mta.totalDebt).toEqual(weth.debt.plus(dgx.debt));
 });
 
-test('cash, weth, dgx and mkr, no debt', () => {
+test('weth, dgx and mkr, no debt', () => {
 
   const wethAsset = {
     ...wethEmpty,
@@ -144,12 +127,12 @@ test('cash, weth, dgx and mkr, no debt', () => {
     balance: new BigNumber('100'),
   };
 
-  const mkrAsset = getNonMarginableCore({ name: 'MKR', balance: new BigNumber(50) });
+  // const mkrAsset = getNonMarginableCore({ name: 'MKR', balance: new BigNumber(50) });
 
   const mta: MTAccount = getMTAccount({
     cash,
     marginableAssets: [wethAsset, dgxAsset],
-    nonMarginableAssets: [mkrAsset]
+    // nonMarginableAssets: [mkrAsset]
   });
 
   const weth = mta.marginableAssets[0];
@@ -157,7 +140,7 @@ test('cash, weth, dgx and mkr, no debt', () => {
   // const mkr = mta.nonMarginableAssets[0];
 
   expect(mta.totalAssetValue)
-    .toEqual(cash.balance.plus(weth.balanceInCash).plus(dgx.balanceInCash));
+    .toEqual(weth.balanceInCash.plus(dgx.balanceInCash));
 
   expect(mta.totalDebt).toEqual(zero);
 });

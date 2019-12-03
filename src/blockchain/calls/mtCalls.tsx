@@ -4,6 +4,7 @@ import * as React from 'react';
 import { Operation, OperationKind } from '../../marginTrading/state/mtAccount';
 import { Money } from '../../utils/formatters/Formatters';
 import { Currency } from '../../utils/text/Text';
+import { one } from '../../utils/zero';
 import { NetworkConfig } from '../config';
 import { MIN_ALLOWANCE } from '../network';
 import { amountFromWei, amountToWei } from '../utils';
@@ -60,9 +61,9 @@ export interface MTBalanceResult {
 }
 
 const BalanceOuts = 10;
-// const secondsPerYear = 60 * 60 * 24 * 365;
+const secondsPerYear = 60 * 60 * 24 * 365;
 
-BigNumber.config({ POW_PRECISION: 50 });
+BigNumber.config({ POW_PRECISION: 100 });
 
 function mtBalancePostprocess([result]: [BigNumber[]], { tokens }: MTBalanceData): MTBalanceResult {
   const balanceResult: MTBalanceResult = {};
@@ -79,9 +80,8 @@ function mtBalancePostprocess([result]: [BigNumber[]], { tokens }: MTBalanceData
       allowance: new BigNumber(result[row + 7]).gte(MIN_ALLOWANCE),
       fee: new BigNumber(result[row + 8])
         .div(new BigNumber(10).pow(27))
-        // .pow(secondsPerYear)
-        // .minus(one)
-      ,
+        .pow(secondsPerYear)
+        .minus(one).times(100),
       liquidationPenalty: new BigNumber(result[row + 9]).div(new BigNumber(10).pow(27)),
     };
   });
@@ -153,7 +153,7 @@ function argsOfPerformOperations(
     [OperationKind.buyRecursively]: () =>
       context.proxyActions.contract.buyLev.getData(...buySellArgs(plan[0])),
     [OperationKind.sellRecursively]: () =>
-      context.proxyActions.contract.sellLev.getData(...buySellArgs(plan[0]))
+      context.proxyActions.contract.sellLev.getData(...buySellArgs(plan[0])),
   };
 
   if (!types[plan[0].kind]) {
@@ -246,4 +246,42 @@ export const mtSell = {
     <React.Fragment>
       Sell <Money value={amount} token={baseToken}/> for <Money value={total} token={'DAI'}/>
     </React.Fragment>
+};
+
+interface MTRedeemData {
+  proxy: any;
+  token: string;
+  amount: BigNumber;
+}
+
+export const mtRedeem = {
+  call: ({ proxy }: MTRedeemData) => {
+    return proxy.execute['address,bytes'];
+  },
+  prepareArgs: ({ token, amount }: MTRedeemData, context: NetworkConfig) => {
+    return [
+      context.proxyActions.address,
+      context.proxyActions.contract.redeem.getData(
+        context.cdpManager,
+        web3.fromAscii(context.mcd.ilks[token]),
+        amountToWei(amount, token).toFixed(),
+        context.mcd.joins[token]
+      ),
+    ];
+  },
+  kind: TxMetaKind.redeem,
+  description: ({ token, amount }: MTRedeemData) =>
+    <React.Fragment>
+      Redeem <Money value={amount} token={token} /> from Vat
+    </React.Fragment>
+};
+
+export const osmParams = {
+  call: (_data: any, context: NetworkConfig) => {
+    return context.mcd.osms[_data.token].contract.zzz;
+  },
+  prepareArgs: () => {
+    return [];
+  },
+  postprocess: (results: any, _data: any) => ({ [_data.token]: results }),
 };

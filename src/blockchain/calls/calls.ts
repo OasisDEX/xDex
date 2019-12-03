@@ -29,7 +29,8 @@ import {
   tradePayWithETHNoProxy, tradePayWithETHWithProxy
 } from './instant';
 import {
-  approveMTProxy, mtBalance, mtBuy, mtDraw, mtFund, mtReallocate, mtSell, setupMTProxy
+  approveMTProxy, mtBalance, mtBuy, mtDraw, mtFund, mtReallocate,
+  mtRedeem, mtSell, osmParams, setupMTProxy
 } from './mtCalls';
 import {
   cancelOffer, offerMake, offerMakeDirect
@@ -94,6 +95,7 @@ function calls([context, account]: [NetworkConfig, string]) {
     changePrice: sendTransaction(changePrice),
     pokeOsm: sendTransaction(pokeOsm),
     pokeSpotter: sendTransaction(pokeSpotter),
+    mtRedeem: sendTransaction(mtRedeem),
   };
 }
 
@@ -108,6 +110,7 @@ function readCalls([context, account]: [NetworkConfig, string | undefined]) {
     otcGetBestOffer: call(getBestOffer),
     otcOffers: call(offers),
     readPrice: call(readPrice),
+    osmParams: call(osmParams),
   };
 }
 

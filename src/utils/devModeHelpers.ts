@@ -164,8 +164,8 @@ export function pluginDevModeHelpers(
       flatMap(context =>
         readOsm(context, token)
       ),
-      tap(({ current, next }) =>
-        console.log({ current: current && current.toString(), next: next && next.toString() })
+      tap(({ next }) =>
+        console.log({ next: next && next.toString() })
       ),
     ).subscribe(identity);
 
