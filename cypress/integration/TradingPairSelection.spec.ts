@@ -167,7 +167,7 @@ const setAllowance = (token: string) => {
   Tab.balances();
 
   const allowance = Allowance.of(token);
-  allowance.toggle();
+  allowance.enable();
   allowance.shouldBe(ALLOWANCE_STATE.ENABLED);
 
   Tab.market();

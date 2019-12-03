@@ -12,18 +12,18 @@ describe('Setting allowances', () => {
   });
 
   it('should enable allowance on a given token', () => {
-    const allowance  = Allowance.of('WETH');
+    const allowance  = Allowance.of('ZRX');
 
     allowance.shouldBe(ALLOWANCE_STATE.DISABLED);
-    allowance.toggle();
+    allowance.enable();
     allowance.shouldBe(ALLOWANCE_STATE.ENABLED);
   });
 
   it('should disable allowance on a given token', () => {
-    const allowance  = Allowance.of('DAI');
+    const allowance  = Allowance.of('WETH');
 
-    allowance.shouldBe(ALLOWANCE_STATE.DISABLED);
-    allowance.toggle();
     allowance.shouldBe(ALLOWANCE_STATE.ENABLED);
+    allowance.disable();
+    allowance.shouldBe(ALLOWANCE_STATE.DISABLED);
   });
 });

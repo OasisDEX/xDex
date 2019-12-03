@@ -1,7 +1,7 @@
 version: "3.2"
 services:
   localnode:
-    image: oasisdexorg/localnode:6517fd7ff509e814cba9102d7b20ac9f67a06545
+    image: oasisdexorg/localnode:d8eb1d441eb7c464ffac9d13cc001b8ec7c0d5bd
     command: master
     ports:
       - "8545:8545"
