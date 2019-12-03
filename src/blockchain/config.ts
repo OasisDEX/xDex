@@ -437,10 +437,10 @@ const kovan: NetworkConfig = {
   },
 
   get marginProxyRegistry() {
-    return load(proxyRegistry, '0xa42bbce61c51aaab9f6f5b9df809d38ec164908a'); // fill
+    return load(proxyRegistry, '0x64a436ae831c1672ae81f674cab8b6775df3475c');
   },
   get proxyActions() {
-    return load(proxyActions, '0x9b562788e063368c83168069c732b1464aa22db8'); // fill
+    return load(proxyActions, '0x9b562788e063368c83168069c732b1464aa22db8');
   },
   get migration() {
     return '0x411b2faa662c8e3e5cf8f01dfdae0aee482ca7b0';
