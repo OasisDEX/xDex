@@ -139,12 +139,21 @@
 }
 
 
-.swapIcon {
+.swapBtn {
   position: relative;
   bottom: 1.5rem;
   margin: auto .5rem;
+  border: 0;
 
-  cursor: pointer;
+  &:hover, :active {
+    background: none !important;
+  }
+
+  &:disabled {
+    :global(.swap-icon) {
+      fill: $disabled;
+    }
+  }
 }
 
 .cornerIcon {

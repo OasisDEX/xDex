@@ -5,6 +5,7 @@ import * as React from 'react';
 import { etherscan, EtherscanConfig } from '../../blockchain/etherscan';
 import swapArrowsSvg from '../../icons/swap-arrows.svg';
 import { formatAmountInstant } from '../../utils/formatters/format';
+import { Button } from '../../utils/forms/Buttons';
 import { AccountIcon, SettingsIcon } from '../../utils/icons/Icons';
 import { SvgImage } from '../../utils/icons/utils';
 import { TopLeftCorner, TopRightCorner } from '../../utils/panel/TopRightCorner';
@@ -159,9 +160,15 @@ export class NewTradeView extends React.Component<InstantFormState> {
                    }
                    user={user}
                    approx={sellAmount && kind === 'buy'}/>
-          <div data-test-id="swap" className={styles.swapIcon} onClick={this.swap}>
+          <Button data-test-id="swap"
+                  className={
+                    classnames(
+                      styles.swapBtn
+                    )}
+                  disabled={this.props.sellToken === 'SAI'}
+                  onClick={this.swap}>
             <SvgImage image={swapArrowsSvg}/>
-          </div>
+          </Button>
           <Buying asset={buyToken}
                   amount={buyAmount}
                   onAmountChange={this.updateBuyingAmount}
@@ -177,7 +184,7 @@ export class NewTradeView extends React.Component<InstantFormState> {
              className={classnames(
                message && message.bottom &&
                (message.bottom.kind === MessageKind.notConnected
-                   || message.bottom.kind === MessageKind.txInProgress)
+                 || message.bottom.kind === MessageKind.txInProgress)
                  ? styles.warnings
                  : styles.errors,
                message && message.bottom
