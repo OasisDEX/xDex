@@ -357,15 +357,15 @@ const kovan: NetworkConfig = {
     ]);
   },
   mcd: {
-    vat: '0x6e6073260e1a77dfaf57d0b92c44265122da8028',
+    vat: '0xba987bdb501d131f766fee8180da5d81b34b69d9',
     get cat() {
-      return load(mcdCat, '0xdd9eff17f24f42adef1b240fc5dafba2aa6dcefd');
+      return load(mcdCat, '0x0511674a67192fe51e86fe55ed660eb4f995bdd6');
     },
     get jug() {
-      return load(mcdJug, '0x3793181ebbc1a72cc08ba90087d21c7862783fa5');
+      return load(mcdJug, '0xcbb7718c9f39d05aeede1c472ca8bf804b2f1ead');
     },
     get spot() {
-      return load(mcdSpotter, '0xf5cdfce5a0b85ff06654ef35f4448e74c523c5ac');
+      return load(mcdSpotter, '0x3a042de6413edb15f2784f2f97cc68c7e9750b2d');
     },
     ilks: {
       WETH: 'ETH-A',
@@ -384,16 +384,16 @@ const kovan: NetworkConfig = {
     },
     flip: {
       get WETH() {
-        return load(mcdFlipper, '0x494d6664a6b305f1f6dbded879f01e5dc1ea8b55');
+        return load(mcdFlipper, '0xb40139ea36d35d0c9f6a2e62601b616f1ffbbd1b');
       },
       get REP() {
-        return load(mcdFlipper, '0x096f6bb4ad63d9c2787bb2be77a5a7ea74a35826');
+        return load(mcdFlipper, '0xc94014a032ca5fcc01271f4519add7e87a16b94c');
       },
       get ZRX() {
         return load(mcdFlipper, '0x2f5979b27cdc809a85300e1902827c2bd2dcc155');
       },
       get BAT() {
-        return load(mcdFlipper, '0x6c5812f6db86aebdc54a0fcbf3bfd29884feb2f9');
+        return load(mcdFlipper, '0xc94014a032ca5fcc01271f4519add7e87a16b94c');
       },
       get DGD() {
         return load(mcdFlipper, '0x6ee776b367191fad854df97ef267462053af283d');
@@ -414,9 +414,15 @@ const kovan: NetworkConfig = {
       get BAT() {
         return load(mcdOsm, '0x5c40c9eb35c76069fa4c3a00ea59fac6ffa9c113');
       },
+      get REP() {
+        return load(mcdOsm, '0xffffffffffffffffffffffffffffffffffffffff');
+      },
+      get ZRX() {
+        return load(mcdOsm, '0xffffffffffffffffffffffffffffffffffffffff');
+      },
     },
   } as { [key: string]: any },
-  cdpManager: '0x81f0cb2030d173502a371dda849acd3966983817', // fill
+  cdpManager: '0x91f5b32a23702094eacb631bcb89a555ca8bfa4e', // fill
   get otcSupportMethods() {
     return load(otcSupport, '0x303f2bf24d98325479932881657f45567b3e47a8');
   },
@@ -434,7 +440,7 @@ const kovan: NetworkConfig = {
     return load(proxyRegistry, '0xa42bbce61c51aaab9f6f5b9df809d38ec164908a'); // fill
   },
   get proxyActions() {
-    return load(proxyActions, '0xd2263bd09f46632ccd43a99ba911f8067bed9b19'); // fill
+    return load(proxyActions, '0x9b562788e063368c83168069c732b1464aa22db8'); // fill
   },
   get migration() {
     return '0x411b2faa662c8e3e5cf8f01dfdae0aee482ca7b0';
