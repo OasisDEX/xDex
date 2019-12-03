@@ -118,7 +118,6 @@ export function createMyOpenTrades$(
   return combineLatest(orderbook$, account$, transactions$).pipe(
     map(([orderbook, account, txns]) => {
       const myOffer = (o: Offer) => o.ownerId === account;
-      console.log(tradingPair);
       return txns
         .filter(txn =>
           txnPerOrderbook(txn, tradingPair) &&

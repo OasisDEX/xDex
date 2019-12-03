@@ -1,5 +1,5 @@
 import { BigNumber } from 'bignumber.js';
-import classnames from 'classnames';
+import * as classnames from 'classnames';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
@@ -123,17 +123,11 @@ import * as styles from './mtOrderFormView.scss';
 //   width: 'auto',
 // };
 
-enum Approximate {
-  amount = 'amount',
-  total = 'total'
-}
-
 export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
 
   private amountInput?: HTMLElement;
   private priceInput?: HTMLElement;
   private slippageLimitInput?: HTMLElement;
-  private approximateValueOf: Approximate | undefined  = undefined;
 
   public handleKindChange(kind: OfferType) {
     this.props.change({
@@ -144,7 +138,6 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
 
   public handleTotalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/,/g, '');
-    this.approximateValueOf = Approximate.amount;
     this.props.change({
       kind: FormChangeKind.totalFieldChange,
       value: value === '' ? undefined : new BigNumber(value)
@@ -153,7 +146,6 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
 
   public handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/,/g, '');
-    this.approximateValueOf = Approximate.total;
     this.props.change({
       kind: FormChangeKind.amountFieldChange,
       value: value === '' ? undefined : new BigNumber(value)
@@ -653,13 +645,14 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
   }
 
   private total() {
+    const { total, quoteToken } = this.props;
     return (
       <div>
         <InputGroup>
           <InputGroupAddon border="right" className={styles.inputHeader}>Total</InputGroupAddon>
           <ApproximateInputValue shouldApproximate={
-            !!this.props.total
-            && this.approximateValueOf === Approximate.total
+            !!total
+            && !total.eq(new BigNumber(formatPrice(total, quoteToken)))
           }>
             <BigNumberInput
               ref={ (el: any) =>
@@ -673,8 +666,8 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
               })}
               onChange={this.handleTotalChange}
               value={
-                (this.props.total || null) &&
-                formatPrice(this.props.total as BigNumber, this.props.quoteToken)
+                (total || null) &&
+                formatPrice(total as BigNumber, quoteToken)
               }
               guide={true}
               placeholderChar={' '}
@@ -684,7 +677,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
             />
           </ApproximateInputValue>
           <InputGroupAddon className={styles.inputCurrencyAddon} onClick={ this.handlePriceFocus }>
-            {this.props.quoteToken}
+            {quoteToken}
           </InputGroupAddon>
 
         </InputGroup>
@@ -723,12 +716,13 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
   }
 
   private amountGroup() {
+    const { amount, baseToken } = this.props;
     return (
       <InputGroup>
         <InputGroupAddon border="right" className={styles.inputHeader}>Amount</InputGroupAddon>
         <ApproximateInputValue shouldApproximate={
-          !!this.props.amount
-          && this.approximateValueOf === Approximate.amount
+          !!amount
+          && !amount.eq(new BigNumber(formatAmount(amount, baseToken)))
         }>
           <BigNumberInput
             ref={(el: any) =>
@@ -742,8 +736,8 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
             })}
             onChange={this.handleAmountChange}
             value={
-              (this.props.amount || null) &&
-              formatAmount(this.props.amount as BigNumber, this.props.baseToken)
+              (amount || null) &&
+              formatAmount(amount as BigNumber, baseToken)
             }
             guide={true}
             placeholderChar={' '}
@@ -752,7 +746,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
           />
         </ApproximateInputValue>
         <InputGroupAddon className={styles.inputCurrencyAddon} onClick={ this.handleAmountFocus }>
-          {this.props.baseToken}
+          {baseToken}
         </InputGroupAddon>
 
       </InputGroup>
