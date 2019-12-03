@@ -117,6 +117,9 @@ import {
 import { MigrationButton } from './migration/MigrationFormView';
 
 import { MTMyPositionPanel } from './marginTrading/positions/MTMyPositionPanel';
+import {
+  createRedeem,
+} from './marginTrading/positions/MTMyPositionView';
 import { createMTSetupForm$, MTSetupFormState } from './marginTrading/setup/mtSetupForm';
 import { MTSetupButton } from './marginTrading/setup/mtSetupFormView';
 import { createMTSimpleOrderForm$ } from './marginTrading/simple/mtOrderForm';
@@ -135,7 +138,6 @@ import { inject } from './utils/inject';
 import { Loadable, LoadableWithTradingPair, loadablifyLight, } from './utils/loadable';
 import { ModalOpenerProps, withModal } from './utils/modal';
 import { createWrapUnwrapForm$ } from './wrapUnwrap/wrapUnwrapForm';
-import {createRedeem} from "./marginTrading/positions/MTMyPositionView";
 
 export function setupAppContext() {
 
@@ -587,8 +589,8 @@ function mtSimpleOrderForm(
       connect(
         // @ts-ignore
         MTMyPositionPanel,
-        mtOrderFormLoadable$.pipe(
-          map((state) =>
+        combineLatest(mtOrderFormLoadable$, transactions$).pipe(
+          map(([state, transactions]) =>
                 // @ts-ignore
                 state.status === 'loaded' && state.value
                   ? {
@@ -596,11 +598,12 @@ function mtSimpleOrderForm(
                     value: {
                       createMTFundForm$,
                       approveMTProxy,
+                      transactions,
                       redeem,
                       account: state.value.account,
                       mta: state.value.mta,
-                      ma: findMarginableAsset(state.tradingPair.base, state.value.mta)
-                    }
+                      ma: findMarginableAsset(state.tradingPair.base, state.value.mta),
+                    },
                   }
                   : {
                     value: state.value,

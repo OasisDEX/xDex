@@ -223,7 +223,7 @@ export function readOsm(context: NetworkConfig, token: string):
   // const slotCurrent = 3;
   const slotNext = 4;
   return combineLatest(
-    bindNodeCallback(web3.eth.getStorageAt)(context.osms[token].address, slotNext),
+    bindNodeCallback(web3.eth.getStorageAt)(context.mcd.osms[token].address, slotNext),
   ).pipe(
     map(([nxt]: [string, string]) => {
       const next = hilo(nxt);

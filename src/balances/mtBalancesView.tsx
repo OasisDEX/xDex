@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { default as BigNumber } from 'bignumber.js';
 import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
 import { map } from 'rxjs/internal/operators';
 import { AssetKind, getToken } from '../blockchain/config';
@@ -34,6 +35,8 @@ export type MTBalancesOwnProps = ModalOpenerProps &
     createMTFundForm$:
       (actionKind: UserActionKind, token: string) => Observable<MTTransferFormState>,
     approveMTProxy: (args: {token: string; proxyAddress: string}) => Observable<TxState>,
+    redeem: (args: {token: string; proxy: any, amount: BigNumber}) => void,
+    transactions: TxState[],
     createMTAllocateForm$: CreateMTAllocateForm$,
   };
 
@@ -56,6 +59,8 @@ export class MTBalancesView
                 createMTFundForm$: props.createMTFundForm$,
                 approveMTProxy: props.approveMTProxy,
                 account: 'TODO',
+                redeem: props.redeem,
+                transactions: props.transactions,
                 ma: combinedBalances.ma,
                 mta: combinedBalances.mta
               }}

@@ -1,11 +1,12 @@
-import bignumberJs, { default as BigNumber } from 'bignumber.js';
+import { default as BigNumber } from 'bignumber.js';
 import classnames from 'classnames';
 import * as React from 'react';
 import { Observable } from 'rxjs/index';
 import { first, switchMap } from 'rxjs/internal/operators';
 import { CDPHistoryView } from '../../balances/CDPHistoryView';
 import { Calls$ } from '../../blockchain/calls/calls';
-import { TxState } from '../../blockchain/transactions';
+import { TxMetaKind } from '../../blockchain/calls/txMeta';
+import { isDone, TxState } from '../../blockchain/transactions';
 import { connect } from '../../utils/connect';
 import { formatPrecision } from '../../utils/formatters/format';
 import { FormatPercent, Money } from '../../utils/formatters/Formatters';
@@ -34,25 +35,36 @@ interface MTMyPositionViewProps {
   approveMTProxy: (args: {token: string; proxyAddress: string}) => Observable<TxState>;
   redeem: (args: {token: string; proxy: any, amount: BigNumber}) => void;
   close?: () => void;
+  transactions: TxState[];
 }
 
-// interface RedeemButtonProps {
-//   disabled: boolean;
-//   redeem: () => void;
-// }
-//
-// export class RedeemButton extends React.Component<RedeemButtonProps> {
-//
-//   public render() {
-//     return (<Button
-//               size="md"
-//               disabled={this.props.disabled}
-//               className={styles.redeemButton}
-//               onClick={this.props.redeem}
-//             >Redeem</Button>
-//     );
-//   }
-// }
+interface RedeemButtonProps {
+  disabled: boolean;
+  redeem: () => void;
+  token: string;
+  transactions: TxState[];
+}
+
+class RedeemButton extends React.Component<RedeemButtonProps> {
+
+  public render() {
+    const txInProgress = this.props.transactions.find((t: TxState) =>
+      t.meta.kind === TxMetaKind.redeem &&
+      !isDone(t) &&
+      t.meta.args.token === this.props.token
+    );
+
+    return (<Button
+              size="md"
+              disabled={this.props.disabled}
+              className={styles.redeemButton}
+              onClick={this.props.redeem}
+            >Redeem
+
+      </Button>
+    );
+  }
+}
 
 export function createRedeem(calls$: Calls$) {
   return (args: {token: string; proxy: any, amount: BigNumber}): Observable<TxState> => {
@@ -276,17 +288,16 @@ export class MTMyPositionView extends
                 }
             </span>
 
-              {this.props.ma.redeemable.gt(zero) &&
-                <Button
-                  size="md"
-                  disabled={this.props.ma.redeemable.eq(zero)}
-                  className={styles.redeemButton}
-                  onClick={() => this.props.redeem({
-                    token: this.props.ma.name,
-                    proxy: this.props.mta.proxy,
-                    amount: this.props.ma.redeemable})}
-                >Redeem</Button>
-              }
+              <RedeemButton
+                redeem={() => this.props.redeem({
+                  token: this.props.ma.name,
+                  proxy: this.props.mta.proxy,
+                  amount: this.props.ma.redeemable})}
+
+                token={this.props.ma.name}
+                disabled={this.props.ma.redeemable.eq(zero)}
+                transactions={this.props.transactions}
+              />
             </div>
           }
           {

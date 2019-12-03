@@ -143,7 +143,7 @@ const tokens = asMap('symbol', [
       iconCircle: SvgImageSimple(repCircleSvg),
       iconColor: SvgImageSimple(repColorSvg),
       ticker: 'rep-augur',
-      assetKind: AssetKind.marginable,
+      assetKind: AssetKind.nonMarginable,
     },
     {
       symbol: 'ZRX',
@@ -158,7 +158,7 @@ const tokens = asMap('symbol', [
       iconCircle: SvgImageSimple(zrxCircleSvg),
       iconColor: SvgImageSimple(zrxColorSvg),
       ticker: 'zrx-0x',
-      assetKind: AssetKind.marginable,
+      assetKind: AssetKind.nonMarginable,
     },
     {
       symbol: 'BAT',
@@ -173,7 +173,7 @@ const tokens = asMap('symbol', [
       iconCircle: SvgImageSimple(batCircleSvg),
       iconColor: SvgImageSimple(batColorSvg),
       ticker: 'bat-basic-attention-token',
-      assetKind: AssetKind.marginable,
+      assetKind: AssetKind.nonMarginable,
     },
       // {
       //   symbol: 'USDC',
