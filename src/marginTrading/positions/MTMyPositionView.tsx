@@ -13,6 +13,7 @@ import { FormatPercent, Money } from '../../utils/formatters/Formatters';
 import { Button } from '../../utils/forms/Buttons';
 import { SvgImage } from '../../utils/icons/utils';
 import { inject } from '../../utils/inject';
+import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
 import { ModalOpenerProps, ModalProps } from '../../utils/modal';
 import { minusOne, one, zero } from '../../utils/zero';
 import { CreateMTAllocateForm$Props } from '../allocate/mtOrderAllocateDebtFormView';
@@ -48,19 +49,19 @@ interface RedeemButtonProps {
 class RedeemButton extends React.Component<RedeemButtonProps> {
 
   public render() {
-    const txInProgress = this.props.transactions.find((t: TxState) =>
+    const txInProgress = Boolean(this.props.transactions.find((t: TxState) =>
       t.meta.kind === TxMetaKind.redeem &&
       !isDone(t) &&
       t.meta.args.token === this.props.token
-    );
+    ));
 
     return (<Button
               size="md"
-              disabled={this.props.disabled}
+              disabled={this.props.disabled || txInProgress}
               className={styles.redeemButton}
               onClick={this.props.redeem}
-            >Redeem
-
+            >
+        {txInProgress ? <LoadingIndicator className={styles.buttonLoading} /> : 'Redeem'}
       </Button>
     );
   }

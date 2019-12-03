@@ -140,11 +140,6 @@ function argsOfPerformOperations(
     web3.fromAscii(context.mcd.ilks[op.name]),
     toWei(op.name, (op as any).amount), toWei('DAI', (op as any).maxTotal),
   ];
-  const redeemArgs = (op: Operation, token: string) => [
-    context.cdpManager, web3.fromAscii(context.mcd.ilks[op.name]),
-    toWei(token, (op as any).amount),
-    context.mcd.vat,
-  ];
 
   const types = {
     [OperationKind.fundGem]: () =>
@@ -263,7 +258,7 @@ export const mtRedeem = {
   call: ({ proxy }: MTRedeemData) => {
     return proxy.execute['address,bytes'];
   },
-  prepareArgs: ({ proxy, token, amount }: MTRedeemData, context: NetworkConfig) => {
+  prepareArgs: ({ token, amount }: MTRedeemData, context: NetworkConfig) => {
     return [
       context.proxyActions.address,
       context.proxyActions.contract.redeem.getData(

@@ -15,13 +15,13 @@ import {
 import { CreateMTFundForm$ } from '../transfer/mtTransferForm';
 import { MTMyPositionView } from './MTMyPositionView';
 
+import { default as BigNumber } from 'bignumber.js';
 import { Observable } from 'rxjs';
 import { theAppContext } from '../../AppContext';
 import { TxState } from '../../blockchain/transactions';
 import { Money } from '../../utils/formatters/Formatters';
 import { LoggedOut } from '../../utils/loadingIndicator/LoggedOut';
 import backArrowSvg from './back-arrow.svg';
-import {default as BigNumber} from "bignumber.js";
 
 interface MTMyPositionPanelInternalProps {
   account: string | undefined;

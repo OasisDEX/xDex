@@ -15,3 +15,4 @@ export const message: string;
 export const infoMessage: string;
 export const warningMessage: string;
 export const redeemButton: string;
+export const buttonLoading: string;

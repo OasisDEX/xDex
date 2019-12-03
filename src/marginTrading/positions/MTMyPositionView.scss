@@ -116,4 +116,9 @@
   &:disabled {
     color: #58585F !important;
   }
+
+  .buttonLoading {
+    margin: 0 0 0 20px;
+    min-height: 25px;
+  }
 }
