@@ -339,7 +339,7 @@ export function setupAppContext() {
     priceChartLoadable
   );
 
-  const { OfferMakePanelTxRx, OrderbookPanelTxRx } =
+  const { offerMakeLoadable$, OfferMakePanelTxRx, OrderbookPanelTxRx } =
     offerMake(currentOrderbook$, balances$);
 
   const myTradesKind$ = createMyTradesKind$();
@@ -510,6 +510,7 @@ export function setupAppContext() {
     );
 
   return {
+    offerMakeLoadable$,
     AllTradesTxRx,
     MyTradesTxRx,
     OfferMakePanelTxRx,
@@ -618,10 +619,10 @@ function mtSimpleOrderForm(
   const orderbookForView$ = createOrderbookForView(
     orderbook$,
     of({
-      change: () => {
-        return;
-      }
-    }),
+         change: () => {
+           return;
+         }
+       }),
     kindChange,
   );
   const OrderbookViewTxRx = connect<Props, {}>(OrderbookView, orderbookForView$);
@@ -705,6 +706,7 @@ function offerMake(
   );
 
   return {
+    offerMakeLoadable$,
     OfferMakePanelTxRx,
     OrderbookPanelTxRx
   };
