@@ -258,6 +258,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
         <PanelBody style={{ minWidth: '455px' }}>
           <form
             onSubmit={this.handleProceed}
+            data-test-id="order-form"
           >
             {/*{ this.orderType() }*/}
             {/*{ this.balanceButtons() }*/}
@@ -399,7 +400,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
         <div className={styles.orderSummaryLabel}>
           Price
         </div>
-        <div className={styles.orderSummaryValue}>
+        <div className={styles.orderSummaryValue} data-test-id="price">
           {
             this.props.priceImpact && <>
               <FormatPercent
@@ -576,7 +577,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
           <div className={styles.orderSummaryLabel}>
             Balance
           </div>
-          <div className={styles.orderSummaryValue}>
+          <div className={styles.orderSummaryValue} data-test-id="col-balance">
             { baseTokenAsset && !baseTokenAsset.balance.isNaN() ?
               <Money
                 value={baseTokenAsset.balance}
@@ -603,7 +604,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
           <div className={styles.orderSummaryLabel}>
             DAI Balance
           </div>
-          <div className={styles.orderSummaryValue}>
+          <div className={styles.orderSummaryValue} data-test-id="dai-balance">
             { baseTokenAsset && baseTokenAsset.debt.gt(zero) ?
               <Money
                 value={baseTokenAsset.debt.times(minusOne)}
