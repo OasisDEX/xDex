@@ -4,7 +4,7 @@ import { WalletConnection } from '../pages/WalletConnection';
 import { unwrapping, wrapping } from '../pages/WrapUnwrap';
 import { cypressVisitWithWeb3 } from '../utils';
 
-describe.skip('Wrapping ETH', () => {
+describe('Wrapping ETH', () => {
 
   beforeEach(() => {
     cypressVisitWithWeb3();
@@ -53,34 +53,34 @@ describe.skip('Wrapping ETH', () => {
   // tslint:disable-next-line:max-line-length
   it('should not proceed when trying to wrap ETH and gas cost amount',  () => {
     const gasCost = 0.00092;
-    const amountToWrap = 8999.94262 - gasCost + 0.00001 ;
+    const amountToWrap = 8999.94267 - gasCost + 0.00001 ;
 
     Tab.balances();
 
-    Balance.of('ETH').shouldBe(/8,999\.94262/);
+    Balance.of('ETH').shouldBe(/8,999\.94267/);
     Balance.of('WETH').shouldBe(/1,001.../);
 
     wrapping(`${amountToWrap}`).shouldFailWith(`You will not be able to pay the gas cost`);
 
-    Balance.of('ETH').shouldBe(/8,999\.94262/);
+    Balance.of('ETH').shouldBe(/8,999\.94267/);
     Balance.of('WETH').shouldBe(/1,001.../);
   });
 
   it('should not proceed when trying to wrap exact ETH balance',  () => {
-    const amountToWrap = 8999.94262;
+    const amountToWrap = 8999.94267;
     Tab.balances();
 
-    Balance.of('ETH').shouldBe(/8,999\.94262/);
+    Balance.of('ETH').shouldBe(/8,999\.94267/);
     Balance.of('WETH').shouldBe(/1,001.../);
 
     wrapping(`${amountToWrap}`).shouldFailWith(`You will not be able to pay the gas cost`);
 
-    Balance.of('ETH').shouldBe(/8,999\.94262/);
+    Balance.of('ETH').shouldBe(/8,999\.94267/);
     Balance.of('WETH').shouldBe(/1,001.../);
   });
 });
 
-describe.skip('Unwrapping ETH', () => {
+describe('Unwrapping ETH', () => {
 
   beforeEach(() => {
     cypressVisitWithWeb3();
