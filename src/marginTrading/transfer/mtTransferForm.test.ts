@@ -33,7 +33,6 @@ const defParams = {
   etherPriceUsd$: of(new BigNumber(13)),
 };
 
-
 const defaultBalances = {
   ETH: new BigNumber(3),
   WETH: new BigNumber(12),

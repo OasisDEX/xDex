@@ -15,6 +15,7 @@ Object {
   "liquidationPrice": undefined,
   "messages": Array [],
   "mta": Object {
+    "daiAllowance": false,
     "marginableAssets": Array [],
     "proxy": Object {
       "address": "",
@@ -100,6 +101,7 @@ Object {
   "liquidationPrice": undefined,
   "messages": Array [],
   "mta": Object {
+    "daiAllowance": false,
     "marginableAssets": Array [],
     "proxy": Object {
       "address": "",

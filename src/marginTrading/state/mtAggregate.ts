@@ -1,4 +1,5 @@
 import { BigNumber } from 'bignumber.js';
+import { isEqual } from 'lodash';
 import { bindNodeCallback, combineLatest, forkJoin, Observable, of } from 'rxjs';
 import {
   catchError,
@@ -12,16 +13,16 @@ import {
   switchMap,
 } from 'rxjs/operators';
 import * as dsProxy from '../../blockchain/abi/ds-proxy.abi.json';
+import { ReadCalls, readCalls$, ReadCalls$ } from '../../blockchain/calls/calls';
 import {
   AssetKind,
   getToken,
   NetworkConfig,
   tradingTokens
 } from '../../blockchain/config';
+import { Allowance, MIN_ALLOWANCE } from '../../blockchain/network';
 import { amountFromWei, nullAddress } from '../../blockchain/utils';
 import { web3 } from '../../blockchain/web3';
-import { ReadCalls, readCalls$, ReadCalls$ } from '../../blockchain/calls/calls';
-import { isEqual } from 'lodash';
 import { zero } from '../../utils/zero';
 import {
   MTAccount,
@@ -32,7 +33,6 @@ import {
   RawMTHistoryEvent,
 } from './mtHistory';
 import { getMarginableCore } from './mtTestUtils';
-import {Allowance, MIN_ALLOWANCE} from "../../blockchain/network";
 
 interface MTHistories {
   [index: string]: RawMTHistoryEvent[];
