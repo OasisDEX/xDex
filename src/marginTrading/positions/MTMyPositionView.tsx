@@ -36,7 +36,6 @@ interface MTMyPositionViewProps {
   redeem: (args: {token: string; proxy: any, amount: BigNumber}) => void;
   close?: () => void;
   transactions: TxState[];
-  daiAllowance: Observable<boolean>;
 }
 
 interface RedeemButtonProps {
@@ -215,7 +214,7 @@ export class MTMyPositionView extends
               Withdraw
             </Button>
 
-            {  this.props.daiAllowance ? <>
+            {  this.props.mta.daiAllowance ? <>
                 <Button
                   size="md"
                   className={styles.actionButton}

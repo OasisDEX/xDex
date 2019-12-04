@@ -220,6 +220,7 @@ export interface MTAccount {
   totalAssetValue: BigNumber;
   totalDebt: BigNumber;
   totalAvailableDebt: BigNumber;
+  daiAllowance: boolean;
   proxy: any;
 }
 

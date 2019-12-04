@@ -1,5 +1,5 @@
 import { BigNumber } from 'bignumber.js';
-import { bindNodeCallback, combineLatest, forkJoin, Observable, of, throwError } from 'rxjs';
+import { bindNodeCallback, combineLatest, forkJoin, Observable, of } from 'rxjs';
 import {
   catchError,
   concatAll,
@@ -20,11 +20,8 @@ import {
 } from '../../blockchain/config';
 import { amountFromWei, nullAddress } from '../../blockchain/utils';
 import { web3 } from '../../blockchain/web3';
-
 import { ReadCalls, readCalls$, ReadCalls$ } from '../../blockchain/calls/calls';
-
 import { isEqual } from 'lodash';
-import { Allowance, MIN_ALLOWANCE } from '../../blockchain/network';
 import { zero } from '../../utils/zero';
 import {
   MTAccount,
@@ -35,6 +32,7 @@ import {
   RawMTHistoryEvent,
 } from './mtHistory';
 import { getMarginableCore } from './mtTestUtils';
+import {Allowance, MIN_ALLOWANCE} from "../../blockchain/network";
 
 interface MTHistories {
   [index: string]: RawMTHistoryEvent[];
@@ -98,6 +96,7 @@ export function aggregateMTAccountState(
   context: NetworkConfig,
   proxy: any,
   calls: ReadCalls,
+  daiAllowance: boolean,
 ): Observable<MTAccount> {
 
   const assetNames: string[] = tradingTokens
@@ -111,29 +110,12 @@ export function aggregateMTAccountState(
 
   const tokenNames = [...assetNames];
 
-  return calls.mtBalance({ tokens: tokenNames, proxyAddress: proxy.address }).pipe(
-    catchError(val => {
-      console.log(`balances: ${val}`, val);
-      throw throwError(val);
-    }),
-    switchMap(balancesResult =>
-      combineLatest(
-        of(balancesResult),
+  return combineLatest(
+        calls.mtBalance({ tokens: tokenNames, proxyAddress: proxy.address }),
         rawMTHistories$(context, proxy.address, assetNames),
-        osms$(context, assetNames).pipe(
-          catchError(val => {
-            console.log(`osms$: ${val}`, val);
-            throw throwError(val);
-          })
-        ),
-        osmsParams$(assetNames).pipe(
-          catchError(val => {
-            console.log(` osm params: ${val}`, val);
-            throw throwError(val);
-          })
-        ),
-      )
-    ),
+        osms$(context, assetNames),
+        osmsParams$(assetNames),
+      ).pipe(
     map(([balanceResult, rawHistories, osmPrices, osmParams]) => {
       const marginables = tokenNames
         .filter(token => getToken(token).assetKind === AssetKind.marginable)
@@ -151,7 +133,7 @@ export function aggregateMTAccountState(
             minDebt: new BigNumber(20) // todo: take this value from mt balance
           });
         });
-      return calculateMTAccount(proxy, marginables);
+      return calculateMTAccount(proxy, marginables, daiAllowance);
     })
   );
 }
@@ -160,13 +142,9 @@ export function createProxyAllowance$(
   context$: Observable<NetworkConfig>,
   initializedAccount$: Observable<string>,
   onEveryBlock$: Observable<number>,
+  proxyAddress$:  Observable<string | undefined>,
   token: string,
 ): Observable<boolean> {
-  const proxyAddress$ = createProxyAddress$(
-      context$,
-      initializedAccount$,
-      onEveryBlock$
-    );
 
   return combineLatest(
       context$,
@@ -220,15 +198,22 @@ export function createMta$(
 
   const proxyAddress$ = createProxyAddress$(context$, initializedAccount$, onEveryBlock$);
 
-  return combineLatest(context$, calls$, proxyAddress$).pipe(
-    switchMap(([context, calls, proxyAddress]) => {
+  const daiAllowance$ = createProxyAllowance$(
+    context$,
+    initializedAccount$,
+    onEveryBlock$,
+    proxyAddress$,
+    'DAI',
+  );
+  return combineLatest(context$, calls$, proxyAddress$, daiAllowance$).pipe(
+    switchMap(([context, calls, proxyAddress, daiAllowance]) => {
 
       if (proxyAddress === undefined) {
         proxyAddress = nullAddress;
       }
 
       const proxy = web3.eth.contract(dsProxy as any).at(proxyAddress);
-      return aggregateMTAccountState(context, proxy, calls);
+      return aggregateMTAccountState(context, proxy, calls, daiAllowance);
     }),
     distinctUntilChanged(isEqual),
     shareReplay(1)
