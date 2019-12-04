@@ -308,6 +308,7 @@ export class MtSimpleOrderFormBody
       <>
         <form
           onSubmit={this.handleProceed}
+          data-test-id="order-form"
         >
           {this.renderAccountInfo()}
           <Hr color="dark" className={styles.hrMargin}/>
@@ -443,7 +444,7 @@ export class MtSimpleOrderFormBody
         <div className={styles.orderSummaryLabel}>
           Price (and Impact)
         </div>
-        <div className={styles.orderSummaryValue}>
+        <div className={styles.orderSummaryValue} data-test-id="price">
           <Money
             value={price || zero}
             token={quoteToken}
@@ -625,7 +626,7 @@ export class MtSimpleOrderFormBody
             { this.props.realPurchasingPowerPost &&
             <>
               <span className={styles.transitionArrow} />
-              { !this.props.realPurchasingPowerPost.isNaN() ?
+              { this.props.realPurchasingPowerPost ?
                 <span data-test-id="estimated-purchasing-power">
                   {formatPrecision(this.props.realPurchasingPowerPost, 2)}
                 </span>
@@ -659,7 +660,7 @@ export class MtSimpleOrderFormBody
             <WarningTooltip id="col-balance"
                             text={collateralBalanceTooltip(baseToken)}/>
           </div>
-          <div className={styles.orderSummaryValue}>
+          <div className={styles.orderSummaryValue} data-test-id="col-balance">
             { baseTokenAsset && baseTokenAsset.balance ?
               <CryptoMoney
                 value={baseTokenAsset.balance}
@@ -692,7 +693,7 @@ export class MtSimpleOrderFormBody
             <WarningTooltip id="dai-balance"
                             text={daiBalanceTooltip}/>
           </div>
-          <div className={styles.orderSummaryValue}>
+          <div className={styles.orderSummaryValue} data-test-id="dai-balance">
             { baseTokenAsset && baseTokenAsset.debt.gt(zero) ?
               <CryptoMoney
                 value={baseTokenAsset.debt.times(minusOne)}

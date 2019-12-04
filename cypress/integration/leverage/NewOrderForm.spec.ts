@@ -14,4 +14,16 @@ describe('Leverage form', () => {
   it('should display purchasing power', () => {
     Form.currentPurchasingPowerIs('0.00');
   });
+
+  it('should display collateral balance in margin account',  () => {
+    Form.currentBalanceIs('0.00');
+  });
+
+  it('should display dai balance in margin account',  () => {
+    Form.currentDaiBalanceIs('0.00');
+  });
+
+  it('should display price',  () => {
+    Form.currentPriceIs('301.00');
+  });
 });
