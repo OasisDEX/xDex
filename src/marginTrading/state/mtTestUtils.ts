@@ -43,6 +43,7 @@ export function getMarginableCore(props?: Partial<MarginableAssetCore>): Margina
     zzz: new BigNumber(1575289000),
     redeemable: new BigNumber(0),
     osmPriceNext: props && props.referencePrice ? props.referencePrice.minus(10) : new BigNumber(0),
+    minDebt: new BigNumber(20),
     ...props
   };
 }

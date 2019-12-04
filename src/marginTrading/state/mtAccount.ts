@@ -164,6 +164,7 @@ export interface MarginableAssetCore extends Core {
   osmPriceNext: BigNumber | undefined;
   zzz: BigNumber;
   redeemable: BigNumber;
+  minDebt: BigNumber;
 }
 
 export interface MarginableAsset extends MarginableAssetCore {

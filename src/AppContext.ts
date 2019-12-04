@@ -124,7 +124,7 @@ import { MTSimpleOrderPanel } from './marginTrading/simple/mtOrderPanel';
 import {
   createMTProxyApprove, findMarginableAsset, MTAccount
 } from './marginTrading/state/mtAccount';
-import { createMta$ } from './marginTrading/state/mtAggregate';
+import { createMta$, createProxyAllowance$ } from './marginTrading/state/mtAggregate';
 import { CreateMTFundForm$, createMTTransferForm$ } from './marginTrading/transfer/mtTransferForm';
 import { createTransactionNotifier$ } from './transactionNotifier/transactionNotifier';
 import { TransactionNotifierView } from './transactionNotifier/TransactionNotifierView';
@@ -546,6 +546,12 @@ function mtSimpleOrderForm(
   const MTSimpleOrderPanelRxTx = connect(MTSimpleOrderPanel, mtOrderFormLoadable$);
 
   const redeem = createRedeem(calls$);
+  const daiProxyAllowance$ = createProxyAllowance$(
+    context$,
+    initializedAccount$,
+    onEveryBlock$,
+    'DAI'
+  );
   const MTMyPositionPanelRxTx =
     // @ts-ignore
     withModal(
@@ -553,8 +559,8 @@ function mtSimpleOrderForm(
       connect(
         // @ts-ignore
         MTMyPositionPanel,
-        combineLatest(mtOrderFormLoadable$, transactions$).pipe(
-          map(([state, transactions]) =>
+        combineLatest(mtOrderFormLoadable$, transactions$, daiProxyAllowance$).pipe(
+          map(([state, transactions, daiAllowance]) =>
                 // @ts-ignore
                 state.status === 'loaded' && state.value
                   ? {
@@ -563,6 +569,7 @@ function mtSimpleOrderForm(
                       createMTFundForm$,
                       approveMTProxy,
                       transactions,
+                      daiAllowance,
                       redeem,
                       account: state.value.account,
                       mta: state.value.mta,

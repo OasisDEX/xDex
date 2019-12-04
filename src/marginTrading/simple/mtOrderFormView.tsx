@@ -779,5 +779,7 @@ function messageContent(msg: Message) {
       return `Can't plan operation: ${msg.message}`;
     case MessageKind.impossibleCalculateTotal:
       return `Can't calculate: ${msg.message}. Type smaller amount`;
+    case MessageKind.minDebt:
+      return `Order below ${msg.message} limit.`;
   }
 }

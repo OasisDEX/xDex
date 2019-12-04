@@ -24,6 +24,8 @@ import { web3 } from '../../blockchain/web3';
 import { ReadCalls, readCalls$, ReadCalls$ } from '../../blockchain/calls/calls';
 
 import { isEqual } from 'lodash';
+import { Allowance, MIN_ALLOWANCE } from '../../blockchain/network';
+import { zero } from '../../utils/zero';
 import {
   MTAccount,
 } from './mtAccount';
@@ -146,10 +148,37 @@ export function aggregateMTAccountState(
             osmPriceNext: (osmPrices as any)[token].next,
             zzz: (osmParams as any)[token] as BigNumber,
             rawHistory: rawHistories[token].sort((h1, h2) => h1.timestamp - h2.timestamp),
+            minDebt: new BigNumber(20) // todo: take this value from mt balance
           });
         });
       return calculateMTAccount(proxy, marginables);
     })
+  );
+}
+
+export function createProxyAllowance$(
+  context$: Observable<NetworkConfig>,
+  initializedAccount$: Observable<string>,
+  onEveryBlock$: Observable<number>,
+  token: string,
+): Observable<boolean> {
+  const proxyAddress$ = createProxyAddress$(
+      context$,
+      initializedAccount$,
+      onEveryBlock$
+    );
+
+  return combineLatest(
+      context$,
+      initializedAccount$,
+      proxyAddress$,
+      onEveryBlock$
+    ).pipe(
+    switchMap(([context, account, proxyAddress]) =>
+      proxyAddress ? bindNodeCallback(context.tokens[token].contract.allowance as Allowance)(
+        account, proxyAddress) : of(zero)
+    ),
+    map((x: BigNumber) => x.gte(MIN_ALLOWANCE)),
   );
 }
 

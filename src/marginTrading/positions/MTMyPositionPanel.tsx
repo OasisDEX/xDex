@@ -31,6 +31,7 @@ interface MTMyPositionPanelInternalProps {
   approveMTProxy: (args: { token: string; proxyAddress: string }) => Observable<TxState>;
   redeem: (args: {token: string; proxy: any, amount: BigNumber}) => void;
   transactions: TxState[];
+  daiAllowance: Observable<boolean>;
   close?: () => void;
 }
 
@@ -202,6 +203,7 @@ export class MTMyPositionPanelInternal
             createMTFundForm$: this.props.createMTFundForm$,
             approveMTProxy: this.props.approveMTProxy,
             transactions: this.props.transactions,
+            daiAllowance: this.props.daiAllowance,
             redeem: this.props.redeem
           }} />}
         </PanelBody>

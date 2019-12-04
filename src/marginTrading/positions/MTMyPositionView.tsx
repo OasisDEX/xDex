@@ -18,7 +18,6 @@ import { ModalOpenerProps, ModalProps } from '../../utils/modal';
 import { minusOne, one, zero } from '../../utils/zero';
 import { CreateMTAllocateForm$Props } from '../allocate/mtOrderAllocateDebtFormView';
 import {
-  findAsset,
   MarginableAsset,
   MTAccount,
   MTAccountState,
@@ -37,6 +36,7 @@ interface MTMyPositionViewProps {
   redeem: (args: {token: string; proxy: any, amount: BigNumber}) => void;
   close?: () => void;
   transactions: TxState[];
+  daiAllowance: Observable<boolean>;
 }
 
 interface RedeemButtonProps {
@@ -89,7 +89,6 @@ export class MTMyPositionView extends
     const leverage = this.props.ma.leverage && !this.props.ma.leverage.isNaN()
       ? this.props.ma.leverage :
       this.props.ma.balance.gt(zero) ? one : zero;
-    const dai = findAsset('DAI', this.props.mta);
     const asset = this.props.ma;
     const liquidationPrice = this.props.ma.liquidationPrice
     && !this.props.ma.liquidationPrice.isNaN() ?
@@ -216,7 +215,7 @@ export class MTMyPositionView extends
               Withdraw
             </Button>
 
-            { dai && dai.allowance ? <>
+            {  this.props.daiAllowance ? <>
                 <Button
                   size="md"
                   className={styles.actionButton}

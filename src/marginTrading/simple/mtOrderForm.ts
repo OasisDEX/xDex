@@ -65,13 +65,14 @@ export enum MessageKind {
   dustTotal = 'dustTotal',
   impossibleToPlan = 'impossibleToPlan',
   impossibleCalculateTotal = 'impossibleCalculateTotal',
+  minDebt = 'minDebt',
 }
 
 export type Message = {
   kind: MessageKind.dustTotal;
   field: string;
   priority: number;
-} |  {
+} | {
   kind: MessageKind.insufficientAmount | MessageKind.incredibleAmount;
   field: string;
   priority: number;
@@ -86,7 +87,12 @@ export type Message = {
   kind: MessageKind.impossibleToPlan | MessageKind.impossibleCalculateTotal;
   field?: string;
   priority: number;
-  message: string
+  message: string;
+} | {
+  kind: MessageKind.minDebt;
+  field?: string;
+  priority: number;
+  message: string;
 };
 
 export enum ViewKind {
@@ -315,6 +321,7 @@ function validate(state: MTSimpleFormState): MTSimpleFormState {
         priority: 1,
       });
     }
+
   }
   return {
     ...state,
@@ -580,9 +587,6 @@ function getBuyPlan(
   const balancePost = postTradeAsset.balance;
   const daiBalancePost = postTradeAsset.debt.gt(zero) ?
     postTradeAsset.debt.times(minusOne) : postTradeAsset.dai;
-
-  console.log('post trade debt', postTradeAsset.debt.toString());
-  console.log('post trade dai', postTradeAsset.dai.toString());
   return [
     request.createPlan([{
       ...request.assets.find(ai => ai.name === baseToken),
@@ -695,6 +699,22 @@ function addPlan(state: MTSimpleFormState): MTSimpleFormState {
       }
     ] :
       state.messages;
+
+  const baseAsset = findAsset(state.baseToken, state.mta);
+
+  if (postTradeInfo.daiBalancePost && baseAsset &&
+      (
+        postTradeInfo.daiBalancePost.times(minusOne).lt(baseAsset.minDebt)
+        || postTradeInfo.daiBalancePost.gt(zero)
+      )
+    ) {
+    messages.push({
+      kind: MessageKind.minDebt,
+      field: 'total',
+      priority: 1,
+      message: baseAsset.minDebt.toFixed(5)
+    });
+  }
 
   return {
     ...state,
@@ -817,15 +837,6 @@ function prepareSubmit(
 }
 
 function isReadyToProceed(state: MTSimpleFormState): MTSimpleFormState {
-
-  // console.log(
-  //   'readyToProceed',
-  //   state.messages.length,
-  //   state.plan,
-  //   state.gasEstimationStatus,
-  //   state.messages
-  // );
-  //
   if (
     state.messages.length === 0 &&
     state.plan && !isImpossible(state.plan) && state.plan.length !== 0 &&
@@ -912,9 +923,9 @@ export function createMTSimpleOrderForm$(
     map(addApr),
     map(addPrice),
     map(addPriceImpact),
-    map(validate),
     map(addPreTradeInfo),
     map(addPurchasingPower),
+    map(validate),
     map(addPlan),
     switchMap(curry(estimateGasPrice)(calls$, readCalls$)),
     scan(freezeGasEstimation),
