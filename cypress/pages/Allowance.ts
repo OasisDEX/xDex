@@ -26,23 +26,38 @@ export class Allowance {
   public static of = (tokenSymbol: string) => {
     const symbol = tokenSymbol.toUpperCase();
     cy.get(tid(`${symbol}-overview`), { timeout: 10000 }).as(`${symbol}`);
+    cy.get(`@${symbol}`).find(tid('dropdown')).trigger('mouseover');
 
     return {
-      toggle: () => {
-        cy.get(`@${symbol}`).find(tid('toggle-leverage-allowance')).click();
+      enable: () => {
+        cy.get(`@${symbol}`)
+          .find(tid('enable-allowance'))
+          .click();
+      },
+
+      disable: () => {
+        cy.get(`@${symbol}`)
+          .find(tid('disable-allowance'))
+          .click();
       },
 
       shouldBe: (state: ALLOWANCE_STATE) => {
         switch (state) {
           case ALLOWANCE_STATE.DISABLED:
             cy.get(`@${symbol}`)
-              .find(tid('toggle-button-state'), { timeout: 10000 })
-              .should('have.attr', 'data-toggle-state', 'disabled');
+              .find(tid('enable-allowance'))
+              .should('be.visible');
+            cy.get(`@${symbol}`)
+              .find(tid('disable-allowance'))
+              .should('not.be.visible');
             break;
           case ALLOWANCE_STATE.ENABLED:
             cy.get(`@${symbol}`)
-              .find(tid('toggle-button-state'), { timeout: 10000 })
-              .should('have.attr', 'data-toggle-state', 'enabled');
+              .find(tid('disable-allowance'))
+              .should('be.visible');
+            cy.get(`@${symbol}`)
+              .find(tid('enable-allowance'))
+              .should('not.be.visible');
             break;
         }
       }
