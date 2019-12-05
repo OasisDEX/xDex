@@ -704,8 +704,8 @@ function addPlan(state: MTSimpleFormState): MTSimpleFormState {
 
   if (postTradeInfo.daiBalancePost && baseAsset &&
       (
+        postTradeInfo.daiBalancePost.lt(zero) &&
         postTradeInfo.daiBalancePost.times(minusOne).lt(baseAsset.minDebt)
-        || postTradeInfo.daiBalancePost.gt(zero)
       )
     ) {
     messages.push({
