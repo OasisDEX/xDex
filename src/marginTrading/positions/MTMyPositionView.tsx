@@ -77,17 +77,17 @@ export class MTMyPositionView extends
   React.Component<MTMyPositionViewProps & ModalOpenerProps>
 {
   public render() {
-    const equity = this.props.ma.balance
-      .times(this.props.ma.referencePrice).minus(this.props.ma.debt).plus(this.props.ma.dai);
-    const leverage = this.props.ma.leverage && !this.props.ma.leverage.isNaN()
-      ? this.props.ma.leverage :
-      this.props.ma.balance.gt(zero) ? one : zero;
-    const asset = this.props.ma;
-    const liquidationPrice = this.props.ma.liquidationPrice
-    && !this.props.ma.liquidationPrice.isNaN() ?
-      this.props.ma.liquidationPrice : zero;
 
-    // const totalBalance = this.props.ma.balance.plus(this.props.ma.amountBeingLiquidated);
+    const { ma, mta } = this.props;
+    const equity = ma.balance
+      .times(ma.referencePrice).minus(ma.debt).plus(ma.dai);
+    const leverage = ma.leverage && !ma.leverage.isNaN()
+      ? ma.leverage :
+      ma.balance.gt(zero) ? one : zero;
+    const liquidationPrice = ma.liquidationPrice
+    && !ma.liquidationPrice.isNaN() ?
+      ma.liquidationPrice : zero;
+
     return (
       <div>
         <div className={styles.MTPositionPanel}>
@@ -108,7 +108,7 @@ export class MTMyPositionView extends
               </div>
               <div className={styles.summaryValue}>
                 <FormatPercent
-                  value={this.props.ma.fee}
+                  value={ma.fee}
                   fallback="-"
                   multiply={false}
                 />
@@ -119,14 +119,7 @@ export class MTMyPositionView extends
                 Liquidation Penalty
               </div>
               <div className={styles.summaryValue}>
-                {/*15%*/}
-                {/*{*/}
-                {/*this.props.liquidationFee && !this.props.liquidationFee.isNaN() ?*/}
-                {/*<>*/}
-                {/*{formatPrecision(this.props.liquidationPrice, 2)} USD*/}
-                {/*</>*/}
-                {/*: <span>-</span>*/}
-                {/*}*/}
+                0
               </div>
             </div>
           </div>
@@ -145,8 +138,8 @@ export class MTMyPositionView extends
                       fallback="-"
                       className={
                         classnames({
-                          [styles.summaryValuePositive]: asset && asset.safe,
-                          [styles.summaryValueNegative]: asset && !asset.safe,
+                          [styles.summaryValuePositive]: ma && ma.safe,
+                          [styles.summaryValueNegative]: ma && !ma.safe,
                         })
                       }
                     /> : <span>-</span>
@@ -158,8 +151,8 @@ export class MTMyPositionView extends
                 Current Price
               </div>
               <div className={styles.summaryValue}>
-                {this.props.ma.referencePrice &&
-                  <Money value={this.props.ma.referencePrice} token="USD"/>
+                {ma.referencePrice &&
+                  <Money value={ma.referencePrice} token="USD"/>
                 }
               </div>
             </div>
@@ -171,10 +164,10 @@ export class MTMyPositionView extends
               </div>
               <div className={styles.summaryValue}>
                 {
-                  this.props.ma.balance && !this.props.ma.balance.isNaN() ?
+                  ma.balance && !ma.balance.isNaN() ?
                     <Money
-                      value={this.props.ma.balance}
-                      token={this.props.ma.name}
+                      value={ma.balance}
+                      token={ma.name}
                       fallback="-"
                     /> : <span>-</span>
                 }
@@ -185,14 +178,14 @@ export class MTMyPositionView extends
                 DAI Balance
               </div>
               <div className={styles.summaryValue}>
-                { asset && asset.debt.gt(zero) ?
+                { ma && ma.debt.gt(zero) ?
                   <Money
-                    value={asset.debt.times(minusOne)}
+                    value={ma.debt.times(minusOne)}
                     token="DAI"
                     fallback="-"
-                  /> : asset && asset.dai ?
+                  /> : ma && ma.dai ?
                     <Money
-                      value={asset.dai}
+                      value={ma.dai}
                       token="DAI"
                       fallback="-"
                     /> : <span>-</span>
@@ -215,52 +208,44 @@ export class MTMyPositionView extends
 
               </div>
             </div>
-            {/*<div className={styles.summaryRow}>*/}
-              {/*<div className={styles.summaryLabel}>*/}
-                {/*Purchasing Power*/}
-              {/*</div>*/}
-              {/*<div className={styles.summaryValue}>*/}
-              {/*</div>*/}
-            {/*</div>*/}
           </div>
         </div>
-
         <div>
           {
-            this.props.ma.bitable === 'imminent' &&
+            ma.bitable === 'imminent' &&
             // tslint:disable
             <div className={styles.warningMessage}>
               <SvgImage image={warningIconSvg}/>
               <span>
-              The {this.props.ma.name} price&nbsp;
-                ({this.props.ma.osmPriceNext && this.props.ma.osmPriceNext.toString()} USD)
+              The {ma.name} price&nbsp;
+                ({ma.osmPriceNext && ma.osmPriceNext.toString()} USD)
               is approaching your Liquidation Price and your position will soon be liquidated.
               You&nbsp;may rescue your Position by paying off Dai debt or deposit&nbsp;
-                {this.props.ma.name} in the next {this.props.ma.nextPriceUpdateDelta} minutes.
+                {ma.name} in the next {ma.nextPriceUpdateDelta} minutes.
               </span>
             </div>
             // tslint:enable
           }
           {
-            this.props.ma.bitable === 'yes' &&
+            ma.bitable === 'yes' &&
             <div className={styles.warningMessage}>
               <SvgImage image={warningIconSvg}/>
               <span>
                 <Money
-                  value={this.props.ma.amountBeingLiquidated}
-                  token={this.props.ma.name}
+                  value={ma.amountBeingLiquidated}
+                  token={ma.name}
                   fallback="-"
                 />
                 &nbsp;of total <Money
-                value={this.props.ma.balance}
-                token={this.props.ma.name}
+                value={ma.balance}
+                token={ma.name}
                 fallback="-"
               />&nbsp;is being liquidated from your position.&nbsp;
-                { this.props.ma.redeemable.gt(zero) &&
+                { ma.redeemable.gt(zero) &&
                 // tslint:disable
                 <><br />You can redeem <Money
-                  value={this.props.ma.redeemable}
-                  token={this.props.ma.name}
+                  value={ma.redeemable}
+                  token={ma.name}
                   fallback="-"
                 /> collateral.
                 </>
@@ -270,33 +255,33 @@ export class MTMyPositionView extends
 
               <RedeemButton
                 redeem={() => this.props.redeem({
-                  token: this.props.ma.name,
-                  proxy: this.props.mta.proxy,
-                  amount: this.props.ma.redeemable})}
+                  token: ma.name,
+                  proxy: mta.proxy,
+                  amount: ma.redeemable})}
 
-                token={this.props.ma.name}
-                disabled={this.props.ma.redeemable.eq(zero)}
+                token={ma.name}
+                disabled={ma.redeemable.eq(zero)}
                 transactions={this.props.transactions}
               />
             </div>
           }
           {
-            this.props.ma.bitable === 'no' && this.props.ma.redeemable.gt(zero) &&
+            ma.bitable === 'no' && ma.redeemable.gt(zero) &&
             <div className={styles.infoMessage}>
               <span>
                 Your Position has been liquidated.
-                Please redeem {this.props.ma.redeemable.toString()}
-                &nbsp;{this.props.ma.name} of collateral.
+                Please redeem {ma.redeemable.toString()}
+                &nbsp;{ma.name} of collateral.
               </span>
               <Button
                 size="md"
-                disabled={this.props.ma.redeemable.eq(zero)}
+                disabled={ma.redeemable.eq(zero)}
                 className={styles.redeemButton}
               >Redeem</Button>
             </div>
           }
         </div>
-        <CDPHistoryView {...this.props.ma} />
+        <CDPHistoryView {...ma} />
       </div>);
   }
 }

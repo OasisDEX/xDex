@@ -11,7 +11,7 @@
   padding: 20px;
   flex-shrink: 0;
   flex-grow: 0;
-  border-left: 1px solid #D8E0E3;
+  border-left: 1px solid $element-border;
 
   &:first-child {
     border-left: 0;

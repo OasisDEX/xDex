@@ -169,17 +169,17 @@ export class MTMyPositionPanelInternal
                 <Button
                   size="md"
                   className={styles.actionButton}
-                  disabled={!this.props.ma.availableActions.includes(UserActionKind.fund)}
-                  onClick={() => this.transfer(UserActionKind.fund, this.props.ma.name, undefined)}
+                  disabled={!ma.availableActions.includes(UserActionKind.fund)}
+                  onClick={() => this.transfer(UserActionKind.fund, ma.name, undefined)}
                 >
                   Deposit {ma.name}
                 </Button>
-                { this.props.mta.daiAllowance ? <>
+                { mta.daiAllowance ? <>
                     <Button
                       size="md"
                       className={styles.actionButton}
-                      disabled={!this.props.ma.availableActions.includes(UserActionKind.fund)}
-                      onClick={() => this.transfer(UserActionKind.fund, 'DAI', this.props.ma.name)}
+                      disabled={!ma.availableActions.includes(UserActionKind.fund)}
+                      onClick={() => this.transfer(UserActionKind.fund, 'DAI', ma.name)}
                     >
                       Deposit DAI
                     </Button>
@@ -208,15 +208,15 @@ export class MTMyPositionPanelInternal
                 <Button
                   size="md"
                   className={styles.actionButton}
-                  onClick={() => this.transfer(UserActionKind.draw, this.props.ma.name, undefined)}
+                  onClick={() => this.transfer(UserActionKind.draw, ma.name, undefined)}
                 >
                   Withdraw {ma.name}
                 </Button>
-                { this.props.mta.daiAllowance ? <>
+                { mta.daiAllowance ? <>
                     <Button
                       size="md"
                       className={styles.actionButton}
-                      onClick={() => this.transfer(UserActionKind.draw, 'DAI', this.props.ma.name)}
+                      onClick={() => this.transfer(UserActionKind.draw, 'DAI', ma.name)}
                     >
                       Withdraw DAI
                     </Button>
@@ -253,17 +253,16 @@ export class MTMyPositionPanelInternal
 
   private approveMTProxy(token: string) {
     return () => {
-      if (this.props.mta.state === MTAccountState.notSetup) {
-        return;
+      if (this.props.mta.state !== MTAccountState.notSetup) {
+        this.props.approveMTProxy({
+          token,
+          proxyAddress: this.props.mta.proxy.address as string
+        });
       }
-      this.props.approveMTProxy({
-        token,
-        proxyAddress: this.props.mta.proxy.address as string
-      });
     };
   }
 
-  private transfer (actionKind: UserActionKind, token: string, ilk: string | undefined) {
+  private transfer (actionKind: UserActionKind, token: string, ilk?: string) {
     const fundForm$ = this.props.createMTFundForm$(actionKind, token, ilk);
     const MTFundFormViewRxTx =
       connect<MTTransferFormState, ModalProps>(
