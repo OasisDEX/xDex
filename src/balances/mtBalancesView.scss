@@ -101,8 +101,10 @@ $header-media-breakpoint: 880px;
 
 .dropdownButton {
   border: 0;
-  padding: 8px 0.833em 8px 50px;
+  padding: 8px 0.833em;
   margin-left: 10px;
+  font-size: 15px;
+
 
   :global(.dotted-menu-body) {
     fill: $desaturated-dark-blue;
@@ -129,6 +131,11 @@ $header-media-breakpoint: 880px;
   .actionButton:last-child {
     margin-bottom: 0;
   }
+}
+
+.headerActions {
+  display: flex;
+  margin-left: auto;
 }
 
 .dropdownMenu {

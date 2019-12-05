@@ -1,5 +1,5 @@
 import { BigNumber } from 'bignumber.js';
-import { bindNodeCallback, combineLatest, forkJoin, Observable, of, throwError } from 'rxjs';
+import { bindNodeCallback, combineLatest, forkJoin, Observable, of } from 'rxjs';
 import {
   catchError,
   concatAll,
@@ -109,29 +109,12 @@ export function aggregateMTAccountState(
 
   const tokenNames = [...assetNames];
 
-  return calls.mtBalance({ tokens: tokenNames, proxyAddress: proxy.address }).pipe(
-    catchError(val => {
-      console.log(`balances: ${val}`, val);
-      throw throwError(val);
-    }),
-    switchMap(balancesResult =>
-      combineLatest(
-        of(balancesResult),
+  return combineLatest(
+        calls.mtBalance({ tokens: tokenNames, proxyAddress: proxy.address }),
         rawMTHistories$(context, proxy.address, assetNames),
-        osms$(context, assetNames).pipe(
-          catchError(val => {
-            console.log(`osms$: ${val}`, val);
-            throw throwError(val);
-          })
-        ),
-        osmsParams$(assetNames).pipe(
-          catchError(val => {
-            console.log(` osm params: ${val}`, val);
-            throw throwError(val);
-          })
-        ),
-      )
-    ),
+        osms$(context, assetNames),
+        osmsParams$(assetNames),
+      ).pipe(
     map(([balanceResult, rawHistories, osmPrices, osmParams]) => {
       const marginables = tokenNames
         .filter(token => getToken(token).assetKind === AssetKind.marginable)
@@ -191,7 +174,7 @@ export function createMta$(
 
   const proxyAddress$ = createProxyAddress$(context$, initializedAccount$, onEveryBlock$);
 
-  return combineLatest(context$, calls$, proxyAddress$).pipe(
+  return combineLatest(context$, calls$, proxyAddress$, onEveryBlock$).pipe(
     switchMap(([context, calls, proxyAddress]) => {
 
       if (proxyAddress === undefined) {
