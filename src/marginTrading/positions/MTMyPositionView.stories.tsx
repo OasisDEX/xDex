@@ -84,7 +84,7 @@ stories.add('CDP 1 - no liquidation', () => (
       redeem: () => null,
       open: () => null,
       transactions: [],
-      approveMTProxy: (_args: {token: string; proxyAddress: string}) => of({} as TxState)
+      approveMTProxy: (_args: {token: string; proxyAddress: string}) => of({} as TxState),
     }
     } />
 ));
@@ -109,7 +109,7 @@ stories.add('CDP 1 - liquidation imminent', () => (
       redeem: () => null,
       open: () => null,
       transactions: [],
-      approveMTProxy: (_args: {token: string; proxyAddress: string}) => of({} as TxState)
+      approveMTProxy: (_args: {token: string; proxyAddress: string}) => of({} as TxState),
     }
     } />
 ));
@@ -132,7 +132,7 @@ stories.add('CDP 1 - liquidation ongoing', () => (
       redeem: () => null,
       open: () => null,
       transactions: [],
-      approveMTProxy: (_args: {token: string; proxyAddress: string}) => of({} as TxState)
+      approveMTProxy: (_args: {token: string; proxyAddress: string}) => of({} as TxState),
     }
     } />
 ));
@@ -173,7 +173,7 @@ stories.add('CDP 1 - liquidation ongoing 2', () => (
       createMTFundForm$: () => of({} as MTTransferFormState),
       open: () => null,
       transactions: [],
-      approveMTProxy: (_args: {token: string; proxyAddress: string}) => of({} as TxState)
+      approveMTProxy: (_args: {token: string; proxyAddress: string}) => of({} as TxState),
     }
     } />
 ));
@@ -197,7 +197,7 @@ stories.add('CDP 1 - liquidation ended with redeem', () => (
       redeem: () => null,
       open: () => null,
       transactions: [],
-      approveMTProxy: (_args: {token: string; proxyAddress: string}) => of({} as TxState)
+      approveMTProxy: (_args: {token: string; proxyAddress: string}) => of({} as TxState),
     }
     } />
 ));
@@ -229,7 +229,7 @@ stories.add('CDP 1 - liquidation ended. After redeem', () => (
       redeem: () => null,
       open: () => null,
       transactions: [],
-      approveMTProxy: (_args: {token: string; proxyAddress: string}) => of({} as TxState)
+      approveMTProxy: (_args: {token: string; proxyAddress: string}) => of({} as TxState),
     }
     } />
 ));
@@ -247,7 +247,7 @@ stories.add('Not connected', () => (
       mta: { state: MTAccountState.notSetup } as MTAccount,
       ma: ethMarginableAsset,
       transactions: [],
-      redeem: () => null
+      redeem: () => null,
     }}
     status="loaded"
     open={ () => null}
@@ -262,7 +262,7 @@ stories.add('Not setup', () => (
       mta: { state: MTAccountState.notSetup } as MTAccount,
       ma: ethMarginableAsset,
       transactions: [],
-      redeem: () => null
+      redeem: () => null,
     }}
     status="loaded"
     open={ () => null }

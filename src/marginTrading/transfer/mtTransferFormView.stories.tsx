@@ -34,6 +34,7 @@ const defaultParams = {
     balancePost: new BigNumber(5),
     daiBalance: new BigNumber(6),
     daiBalancePost: new BigNumber(6),
+    daiAllowance: true,
     realPurchasingPower: new BigNumber(7),
     realPurchasingPowerPost: new BigNumber(7),
     marginableAssets: [],

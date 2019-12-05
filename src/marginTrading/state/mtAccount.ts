@@ -164,6 +164,7 @@ export interface MarginableAssetCore extends Core {
   osmPriceNext: BigNumber | undefined;
   zzz: BigNumber;
   redeemable: BigNumber;
+  minDebt: BigNumber;
 }
 
 export interface MarginableAsset extends MarginableAssetCore {
@@ -219,6 +220,7 @@ export interface MTAccount {
   totalAssetValue: BigNumber;
   totalDebt: BigNumber;
   totalAvailableDebt: BigNumber;
+  daiAllowance: boolean;
   proxy: any;
 }
 

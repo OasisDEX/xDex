@@ -43,6 +43,7 @@ export function getMarginableCore(props?: Partial<MarginableAssetCore>): Margina
     zzz: new BigNumber(1575289000),
     redeemable: new BigNumber(0),
     osmPriceNext: props && props.referencePrice ? props.referencePrice.minus(10) : new BigNumber(0),
+    minDebt: new BigNumber(20),
     ...props
   };
 }
@@ -66,14 +67,13 @@ export function getMarginableCore(props?: Partial<MarginableAssetCore>): Margina
 export function getMTAccount(props: {
   cash?: Partial<CashAssetCore>;
   marginableAssets?: Array<Partial<MarginableAssetCore>>;
-  // nonMarginableAssets?: Array<Partial<NonMarginableAssetCore>>;
+  daiAllowance?: boolean;
 } = {}): MTAccount {
   return calculateMTAccount(
     {
       address: ''
     },
-    // props.cash ? getCashCore(props.cash) : getCashCore(),
     props.marginableAssets ? props.marginableAssets.map(getMarginableCore) : [],
-    // props.nonMarginableAssets ? props.nonMarginableAssets.map(getNonMarginableCore) : []
+    Boolean(props.daiAllowance)
   );
 }

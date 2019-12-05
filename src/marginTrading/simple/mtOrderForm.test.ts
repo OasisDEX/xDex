@@ -145,51 +145,50 @@ test('buy with leverage - match exactly one order', () => {
     referencePrice: new BigNumber(1),
     balance: new BigNumber(0),
     debt: new BigNumber(0),
-    dai: new BigNumber(1)
+    dai: new BigNumber(100)
   };
 
   const mta: MTAccount = getMTAccount({ cash, marginableAssets: [weth] });
 
   const sells = [
-    { price: 1, amount: 1 }, // 1
-    { price: 1, amount: 1 }, // 1
-    { price: 1.2, amount: 1 }, // 1
+    { price: 1, amount: 100 }, // 1
+    { price: 1, amount: 100 }, // 1
+    { price: 1.2, amount: 0 }, // 1
   ];
 
   const controller = controllerWithFakeOrderBook([], sells, mta);
   const { change } = unpack(controller);
 
-  expect(unpack(controller).realPurchasingPower).toEqual(new BigNumber(1.984375));
-  change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(1) });
+  expect(unpack(controller).realPurchasingPower).toEqual(new BigNumber(199.98779296875));
+  change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(20) });
 
   expect(unpack(controller).readyToProceed).toEqual(true);
-  expect(unpack(controller).realPurchasingPowerPost).toEqual(new BigNumber(0.984375));
+  expect(unpack(controller).realPurchasingPowerPost).toEqual(new BigNumber(179.98779296875));
 });
 
 test('buy with leverage - match more than one order', () => {
   const weth = {
     ...wethEmpty,
-    referencePrice: new BigNumber(1),
-    balance: new BigNumber(2),
+    referencePrice: new BigNumber(2),
+    balance: new BigNumber(30),
     debt: new BigNumber(0)
   };
 
   const mta: MTAccount = getMTAccount({ marginableAssets: [weth] });
 
   const sells = [
-    { price: 1, amount: 1 }, // 1
-    { price: 1.1, amount: 1 }, // 1
-    { price: 1.2, amount: 1 }, // 1
-
+    { price: 10, amount: 100 }, // 1
+    { price: 11, amount: 100 }, // 1
+    { price: 12, amount: 100 }, // 1
   ];
 
   const controller = controllerWithFakeOrderBook([], sells, mta);
   const { change } = unpack(controller);
 
-  change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(1.5) });
+  change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(2.5) });
 
   expect(unpack(controller).readyToProceed).toEqual(true);
-  // expect(unpack(controller).realPurchasingPowerPost).toEqual(new BigNumber(0.484375));
+  expect(unpack(controller).realPurchasingPowerPost).toEqual(new BigNumber(8.33));
 });
 
 test('buy with leverage - purchasing power too low', () => {
@@ -209,8 +208,7 @@ test('buy with leverage - purchasing power too low', () => {
 
   expect(unpack(controller).realPurchasingPower).toEqual(new BigNumber(1.984375));
   change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(3) });
-  expect(unpack(controller).messages[0].kind).toEqual(MessageKind.impossibleToPlan);
-  expect(unpack(controller).messages[0].message).toEqual('purchasing power too low');
+  expect(unpack(controller).messages[0].kind).toEqual(MessageKind.insufficientAmount);
 });
 
 test('buy with leverage - orderbook too shallow', () => {
