@@ -9,7 +9,6 @@ import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator'
 import { ModalOpenerProps, ModalProps } from '../../utils/modal';
 import { PanelBody, PanelHeader } from '../../utils/panel/Panel';
 import {
-  findAsset,
   MarginableAsset, MTAccount,
   MTAccountState, UserActionKind
 } from '../state/mtAccount';
@@ -145,7 +144,6 @@ export class MTMyPositionPanelInternal
   public render() {
 
     const { ma, mta } = this.props;
-    const dai = findAsset('DAI', this.props.mta);
 
     return (
       <div>
@@ -176,7 +174,7 @@ export class MTMyPositionPanelInternal
                 >
                   Deposit {ma.name}
                 </Button>
-                { dai && dai.allowance ? <>
+                { this.props.mta.daiAllowance ? <>
                     <Button
                       size="md"
                       className={styles.actionButton}
@@ -214,7 +212,7 @@ export class MTMyPositionPanelInternal
                 >
                   Withdraw {ma.name}
                 </Button>
-                { dai && dai.allowance ? <>
+                { this.props.mta.daiAllowance ? <>
                     <Button
                       size="md"
                       className={styles.actionButton}

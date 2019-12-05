@@ -87,10 +87,6 @@ export class MTMyPositionView extends
     && !this.props.ma.liquidationPrice.isNaN() ?
       this.props.ma.liquidationPrice : zero;
 
-    const dai = findAsset('DAI', this.props.mta);
-
-    console.log('DAI', dai);
-
     // const totalBalance = this.props.ma.balance.plus(this.props.ma.amountBeingLiquidated);
     return (
       <div>
