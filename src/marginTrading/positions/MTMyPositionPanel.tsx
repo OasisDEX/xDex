@@ -18,6 +18,7 @@ import { MTMyPositionView } from './MTMyPositionView';
 import { default as BigNumber } from 'bignumber.js';
 import { Observable } from 'rxjs';
 import { theAppContext } from '../../AppContext';
+import { AssetDropdownMenu } from '../../balances/AssetDropdownMenu';
 import { TxState } from '../../blockchain/transactions';
 import { connect } from '../../utils/connect';
 import { Button } from '../../utils/forms/Buttons';
@@ -157,83 +158,19 @@ export class MTMyPositionPanelInternal
           <span>My Position</span>
 
           <div className={styles.headerActions}>
-            <div className={styles.dropdownMenu}>
-              <Button
-                className={styles.dropdownButton}
-                data-test-id="myposition-actions-list"
-                size="md"
-              >
-                Deposit
-              </Button>
-              <div className={styles.dropdownList}>
-                <Button
-                  size="md"
-                  className={styles.actionButton}
-                  disabled={!ma.availableActions.includes(UserActionKind.fund)}
-                  onClick={() => this.transfer(UserActionKind.fund, ma.name, undefined)}
-                >
-                  Deposit {ma.name}
-                </Button>
-                { mta.daiAllowance ? <>
-                    <Button
-                      size="md"
-                      className={styles.actionButton}
-                      disabled={!ma.availableActions.includes(UserActionKind.fund)}
-                      onClick={() => this.transfer(UserActionKind.fund, 'DAI', ma.name)}
-                    >
-                      Deposit DAI
-                    </Button>
-                  </>
-                  : <>
-                    <Button
-                      size="md"
-                      className={styles.actionButton}
-                      onClick={ this.approveMTProxy('DAI')}
-                    >
-                      Enable DAI
-                    </Button>
-                  </>
-                }
-              </div>
-            </div>
-            <div className={styles.dropdownMenu}>
-              <Button
-                className={styles.dropdownButton}
-                data-test-id="myposition-actions-list"
-                size="md"
-              >
-                Withdraw
-              </Button>
-              <div className={styles.dropdownList}>
-                <Button
-                  size="md"
-                  className={styles.actionButton}
-                  onClick={() => this.transfer(UserActionKind.draw, ma.name, undefined)}
-                >
-                  Withdraw {ma.name}
-                </Button>
-                { mta.daiAllowance ? <>
-                    <Button
-                      size="md"
-                      className={styles.actionButton}
-                      onClick={() => this.transfer(UserActionKind.draw, 'DAI', ma.name)}
-                    >
-                      Withdraw DAI
-                    </Button>
-                  </>
-                  : <>
-                    <Button
-                      size="md"
-                      className={styles.actionButton}
-                      onClick={ this.approveMTProxy('DAI')}
-                    >
-                      Enable DAI
-                    </Button>
-                  </>
-                }
-              </div>
-            </div>
 
+            <AssetDropdownMenu
+              actions={this.createAssetActions(mta, ma, 'deposit')}
+              asset={ma.name}
+              hasIcon={false}
+              label="Deposit"
+            />
+            <AssetDropdownMenu
+              actions={this.createAssetActions(mta, ma, 'withdraw')}
+              asset={ma.name}
+              hasIcon={false}
+              label="Withdraw"
+            />
           </div>
         </PanelHeader>
         <PanelBody>
@@ -249,6 +186,77 @@ export class MTMyPositionPanelInternal
         </PanelBody>
       </div>
     );
+  }
+
+  private createAssetActions(mta: MTAccount, ma: MarginableAsset, type: string): React.ReactNode[] {
+
+    if (type === 'deposit') {
+      return [
+        <Button
+          size="md"
+          key={ma.name}
+          className={styles.actionButton}
+          disabled={!ma.availableActions.includes(UserActionKind.fund)}
+          onClick={() => this.transfer(UserActionKind.fund, ma.name, undefined)}
+        >
+          Deposit {ma.name}
+        </Button>,
+
+        (mta.daiAllowance &&
+          <Button
+            size="md"
+            className={styles.actionButton}
+            disabled={!ma.availableActions.includes(UserActionKind.fund)}
+            onClick={() => this.transfer(UserActionKind.fund, 'DAI', ma.name)}
+          >
+            Deposit DAI
+          </Button>
+        ),
+        (!mta.daiAllowance &&
+          <Button
+            size="md"
+            className={styles.actionButton}
+            onClick={ this.approveMTProxy('DAI')}
+          >
+            Enable DAI
+          </Button>
+        )
+      ];
+    }
+
+    if (type === 'withdraw') {
+      return [
+        <Button
+          size="md"
+          key={ma.name}
+          className={styles.actionButton}
+          onClick={() => this.transfer(UserActionKind.draw, ma.name, undefined)}
+        >
+          Withdraw {ma.name}
+        </Button>,
+
+        (mta.daiAllowance &&
+          <Button
+            size="md"
+            className={styles.actionButton}
+            onClick={() => this.transfer(UserActionKind.draw, 'DAI', ma.name)}
+          >
+            Withdraw DAI
+          </Button>
+        ),
+        (!mta.daiAllowance &&
+          <Button
+            size="md"
+            className={styles.actionButton}
+            onClick={ this.approveMTProxy('DAI')}
+          >
+            Enable DAI
+          </Button>
+        )
+      ];
+    }
+
+    return [];
   }
 
   private approveMTProxy(token: string) {

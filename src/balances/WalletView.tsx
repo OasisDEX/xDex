@@ -1,15 +1,12 @@
-import * as classnames from 'classnames';
 import * as React from 'react';
 import { Observable } from 'rxjs';
 import { theAppContext } from '../AppContext';
 import { getToken } from '../blockchain/config';
 import { TxState } from '../blockchain/transactions';
-import dottedMenuSvg from '../marginTrading/positions/dotted-menu.svg';
 import { connect } from '../utils/connect';
 import { formatPrecision } from '../utils/formatters/format';
 import { Money } from '../utils/formatters/Formatters';
 import { Button } from '../utils/forms/Buttons';
-import { SvgImage } from '../utils/icons/utils';
 import { inject } from '../utils/inject';
 import { Loadable, loadablifyLight } from '../utils/loadable';
 import { WithLoadingIndicator } from '../utils/loadingIndicator/LoadingIndicator';
@@ -20,6 +17,7 @@ import { Currency } from '../utils/text/Text';
 import { zero } from '../utils/zero';
 import { WrapUnwrapFormKind, WrapUnwrapFormState } from '../wrapUnwrap/wrapUnwrapForm';
 import { WrapUnwrapFormView } from '../wrapUnwrap/WrapUnwrapFormView';
+import { AssetDropdownMenu } from './AssetDropdownMenu';
 import { CombinedBalance, CombinedBalances } from './balances';
 import * as styles from './mtBalancesView.scss';
 
@@ -45,65 +43,6 @@ export class WalletView
         </WithLoadingIndicator>
       </Panel>
     );
-  }
-}
-
-interface AssetDropdownMenuProps {
-  asset: string;
-  actions: React.ReactNode[];
-}
-
-interface AssetDropdownMenuState {
-  isCollapsed: boolean;
-}
-
-class AssetDropdownMenu extends React.Component<AssetDropdownMenuProps,
-  AssetDropdownMenuState> {
-
-  constructor(props: AssetDropdownMenuProps) {
-    super(props);
-    this.state = {
-      isCollapsed: false
-    };
-  }
-
-  public render() {
-    const { asset, actions } = this.props;
-    return (
-      <div
-        className={classnames(styles.dropdownMenu, this.state.isCollapsed && styles.hover)}
-        data-test-id={'dropdown'}
-        onMouseOver={this.handleOnMouseOver}
-        onMouseOut={this.handleOnMouseOut}
-      >
-        <Button
-          size="sm"
-          color="secondaryOutlined"
-          className={styles.dropdownButton}
-        >
-          <SvgImage image={dottedMenuSvg}/>
-        </Button>
-        <div className={styles.dropdownList}>
-          {
-            actions.map((actionBtn, index) =>
-                          <div key={`${asset}-${index}`}
-                               className={styles.actionButton}
-                          >
-                            {actionBtn}
-                          </div>
-            )
-          }
-        </div>
-      </div>
-    );
-  }
-
-  private handleOnMouseOver = () => {
-    this.setState({ isCollapsed: true });
-  }
-
-  private handleOnMouseOut = () => {
-    this.setState({ isCollapsed: false });
   }
 }
 
@@ -170,6 +109,7 @@ export class WalletViewInternal extends React.Component<CombinedBalances & Walle
                   <AssetDropdownMenu
                     actions={this.createActionsPerAsset(combinedBalance)}
                     asset={combinedBalance.name}
+                    hasIcon={true}
                   />
                 }
               </td>
