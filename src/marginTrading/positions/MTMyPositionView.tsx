@@ -82,8 +82,7 @@ export class MTMyPositionView extends
     const equity = ma.balance
       .times(ma.referencePrice).minus(ma.debt).plus(ma.dai);
     const leverage = ma.leverage && !ma.leverage.isNaN()
-      ? ma.leverage :
-      ma.balance.gt(zero) ? one : zero;
+      ? ma.leverage : ma.balance.gt(zero) ? one : zero;
     const liquidationPrice = ma.liquidationPrice
     && !ma.liquidationPrice.isNaN() ?
       ma.liquidationPrice : zero;

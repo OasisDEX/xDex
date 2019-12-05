@@ -12,7 +12,6 @@ export const dropdownList: string;
 export const actionButton: string;
 export const headerActions: string;
 export const dropdownMenu: string;
-export const hover: string;
 export const setupSection: string;
 export const setupBox: string;
 export const setupTitle: string;
