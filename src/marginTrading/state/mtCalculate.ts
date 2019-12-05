@@ -252,6 +252,7 @@ export function calculateMarginable(
 export function calculateMTAccount(
   proxy: any,
   masCore: MarginableAssetCore[],
+  daiAllowance: boolean
 ): MTAccount {
 
   const totalDebt = masCore.reduce((debt, ma) => debt.plus(ma.debt), zero);
@@ -273,6 +274,7 @@ export function calculateMTAccount(
     totalAssetValue,
     totalDebt,
     totalAvailableDebt,
+    daiAllowance,
     state: proxy.address === nullAddress ? MTAccountState.notSetup : MTAccountState.setup,
   };
 }

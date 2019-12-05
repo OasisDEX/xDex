@@ -110,7 +110,7 @@ export const etherBalance$: Observable<BigNumber> = initializedAccount$.pipe(
 
 export const MIN_ALLOWANCE = new BigNumber('0xffffffffffffffffffffffffffffffff');
 
-type Allowance = (
+export type Allowance = (
   account: string,
   contract: string,
   callback: (err: any, r: BigNumber) => any

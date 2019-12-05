@@ -1,10 +1,11 @@
 import { BigNumber } from 'bignumber.js';
-import classnames from 'classnames';
+import * as classnames from 'classnames';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
 import * as formStyles from '../../exchange/offerMake/OfferMakeForm.scss';
 import { OfferType } from '../../exchange/orderbook/orderbook';
+import { ApproximateInputValue } from '../../utils/Approximate';
 import { BigNumberInput, lessThanOrEqual } from '../../utils/bigNumberInput/BigNumberInput';
 import { FormChangeKind } from '../../utils/form';
 import { formatAmount, formatPrecision, formatPrice } from '../../utils/formatters/format';
@@ -644,33 +645,39 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
   }
 
   private total() {
+    const { total, quoteToken } = this.props;
     return (
       <div>
         <InputGroup>
           <InputGroupAddon border="right" className={styles.inputHeader}>Total</InputGroupAddon>
-          <BigNumberInput
-            ref={ (el: any) =>
-              this.priceInput = (el && ReactDOM.findDOMNode(el) as HTMLElement) || undefined
-            }
-            type="text"
-            mask={createNumberMask({
-              allowDecimal: true,
-              decimalLimit: 5,
-              prefix: ''
-            })}
-            onChange={this.handleTotalChange}
-            value={
-              (this.props.total || null) &&
-              formatPrice(this.props.total as BigNumber, this.props.quoteToken)
-            }
-            guide={true}
-            placeholderChar={' '}
-            className={styles.input}
-            // disabled={this.props.stage === FormStage.waitingForAllocation}
-            // disabled={ true }
-          />
+          <ApproximateInputValue shouldApproximate={
+            !!total
+            && !total.eq(new BigNumber(formatPrice(total, quoteToken)))
+          }>
+            <BigNumberInput
+              ref={ (el: any) =>
+                this.priceInput = (el && ReactDOM.findDOMNode(el) as HTMLElement) || undefined
+              }
+              type="text"
+              mask={createNumberMask({
+                allowDecimal: true,
+                decimalLimit: 5,
+                prefix: ''
+              })}
+              onChange={this.handleTotalChange}
+              value={
+                (total || null) &&
+                formatPrice(total as BigNumber, quoteToken)
+              }
+              guide={true}
+              placeholderChar={' '}
+              className={styles.input}
+              // disabled={this.props.stage === FormStage.waitingForAllocation}
+              // disabled={ true }
+            />
+          </ApproximateInputValue>
           <InputGroupAddon className={styles.inputCurrencyAddon} onClick={ this.handlePriceFocus }>
-            {this.props.quoteToken}
+            {quoteToken}
           </InputGroupAddon>
 
         </InputGroup>
@@ -709,31 +716,37 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
   }
 
   private amountGroup() {
+    const { amount, baseToken } = this.props;
     return (
       <InputGroup>
         <InputGroupAddon border="right" className={styles.inputHeader}>Amount</InputGroupAddon>
-        <BigNumberInput
-          ref={ (el: any) =>
-            this.amountInput = (el && ReactDOM.findDOMNode(el) as HTMLElement) || undefined
-          }
-          type="text"
-          mask={createNumberMask({
-            allowDecimal: true,
-            decimalLimit: 5,
-            prefix: ''
-          })}
-          onChange={this.handleAmountChange}
-          value={
-            (this.props.amount || null) &&
-            formatAmount(this.props.amount as BigNumber, this.props.baseToken)
-          }
-          guide={true}
-          placeholderChar={' '}
-          className={styles.input}
-          // disabled={this.props.progress === FormStage.waitingForAllocation}
-        />
+        <ApproximateInputValue shouldApproximate={
+          !!amount
+          && !amount.eq(new BigNumber(formatAmount(amount, baseToken)))
+        }>
+          <BigNumberInput
+            ref={(el: any) =>
+              this.amountInput = (el && ReactDOM.findDOMNode(el) as HTMLElement) || undefined
+            }
+            type="text"
+            mask={createNumberMask({
+              allowDecimal: true,
+              decimalLimit: 5,
+              prefix: ''
+            })}
+            onChange={this.handleAmountChange}
+            value={
+              (amount || null) &&
+              formatAmount(amount as BigNumber, baseToken)
+            }
+            guide={true}
+            placeholderChar={' '}
+            className={styles.input}
+            // disabled={this.props.progress === FormStage.waitingForAllocation}
+          />
+        </ApproximateInputValue>
         <InputGroupAddon className={styles.inputCurrencyAddon} onClick={ this.handleAmountFocus }>
-          {this.props.baseToken}
+          {baseToken}
         </InputGroupAddon>
 
       </InputGroup>
@@ -766,5 +779,7 @@ function messageContent(msg: Message) {
       return `Can't plan operation: ${msg.message}`;
     case MessageKind.impossibleCalculateTotal:
       return `Can't calculate: ${msg.message}. Type smaller amount`;
+    case MessageKind.minDebt:
+      return `Order below ${msg.message} limit.`;
   }
 }

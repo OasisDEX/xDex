@@ -546,6 +546,7 @@ function mtSimpleOrderForm(
   const MTSimpleOrderPanelRxTx = connect(MTSimpleOrderPanel, mtOrderFormLoadable$);
 
   const redeem = createRedeem(calls$);
+
   const MTMyPositionPanelRxTx =
     // @ts-ignore
     withModal(

@@ -375,11 +375,11 @@ const kovan: NetworkConfig = {
       DGD: 'DGD-A',
     },
     joins: {
-      WETH: '0xc3abba566bb62c09b7f94704d8dfd9800935d3f9',
-      DAI: '0x61af28390d0b3e806bbaf09104317cb5d26e215d',
+      WETH: '0x775787933e92b709f2a3c70aa87999696e74a9f8',
+      DAI: '0x5aa71a3ae1c0bd6ac27a1f28e1415fffb6f15b8c',
       REP: '0xebbd300bb527f1d50abd937f8ca11d7fd0e5b68b',
       ZRX: '0x79f15b0da982a99b7bcf602c8f384c56f0b0e8cd',
-      BAT: '0xf8e9b4c3e17c1a2d55767d44fb91feed798bb7e8',
+      BAT: '0x2a4c485b1b8dfb46accfbecaf75b6188a59dbd0a',
       DGD: '0x92a3b1c0882e6e17aa41c5116e01b0b9cf117cf2',
     },
     flip: {
@@ -437,10 +437,10 @@ const kovan: NetworkConfig = {
   },
 
   get marginProxyRegistry() {
-    return load(proxyRegistry, '0xa42bbce61c51aaab9f6f5b9df809d38ec164908a'); // fill
+    return load(proxyRegistry, '0x64a436ae831c1672ae81f674cab8b6775df3475c');
   },
   get proxyActions() {
-    return load(proxyActions, '0x9b562788e063368c83168069c732b1464aa22db8'); // fill
+    return load(proxyActions, '0x9b562788e063368c83168069c732b1464aa22db8');
   },
   get migration() {
     return '0x411b2faa662c8e3e5cf8f01dfdae0aee482ca7b0';

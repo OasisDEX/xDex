@@ -1,4 +1,5 @@
 import { BigNumber } from 'bignumber.js';
+import { isEqual } from 'lodash';
 import { bindNodeCallback, combineLatest, forkJoin, Observable, of } from 'rxjs';
 import {
   catchError,
@@ -12,18 +13,17 @@ import {
   switchMap,
 } from 'rxjs/operators';
 import * as dsProxy from '../../blockchain/abi/ds-proxy.abi.json';
+import { ReadCalls, readCalls$, ReadCalls$ } from '../../blockchain/calls/calls';
 import {
   AssetKind,
   getToken,
   NetworkConfig,
   tradingTokens
 } from '../../blockchain/config';
+import { Allowance, MIN_ALLOWANCE } from '../../blockchain/network';
 import { amountFromWei, nullAddress } from '../../blockchain/utils';
 import { web3 } from '../../blockchain/web3';
-
-import { ReadCalls, readCalls$, ReadCalls$ } from '../../blockchain/calls/calls';
-
-import { isEqual } from 'lodash';
+import { zero } from '../../utils/zero';
 import {
   MTAccount,
 } from './mtAccount';
@@ -96,6 +96,7 @@ export function aggregateMTAccountState(
   context: NetworkConfig,
   proxy: any,
   calls: ReadCalls,
+  daiAllowance: boolean,
 ): Observable<MTAccount> {
 
   const assetNames: string[] = tradingTokens
@@ -129,10 +130,33 @@ export function aggregateMTAccountState(
             osmPriceNext: (osmPrices as any)[token].next,
             zzz: (osmParams as any)[token] as BigNumber,
             rawHistory: rawHistories[token].sort((h1, h2) => h1.timestamp - h2.timestamp),
+            minDebt: new BigNumber(20) // todo: take this value from mt balance
           });
         });
-      return calculateMTAccount(proxy, marginables);
+      return calculateMTAccount(proxy, marginables, daiAllowance);
     })
+  );
+}
+
+export function createProxyAllowance$(
+  context$: Observable<NetworkConfig>,
+  initializedAccount$: Observable<string>,
+  onEveryBlock$: Observable<number>,
+  proxyAddress$:  Observable<string | undefined>,
+  token: string,
+): Observable<boolean> {
+
+  return combineLatest(
+      context$,
+      initializedAccount$,
+      proxyAddress$,
+      onEveryBlock$
+    ).pipe(
+    switchMap(([context, account, proxyAddress]) =>
+      proxyAddress ? bindNodeCallback(context.tokens[token].contract.allowance as Allowance)(
+        account, proxyAddress) : of(zero)
+    ),
+    map((x: BigNumber) => x.gte(MIN_ALLOWANCE)),
   );
 }
 
@@ -174,15 +198,22 @@ export function createMta$(
 
   const proxyAddress$ = createProxyAddress$(context$, initializedAccount$, onEveryBlock$);
 
-  return combineLatest(context$, calls$, proxyAddress$, onEveryBlock$).pipe(
-    switchMap(([context, calls, proxyAddress]) => {
+  const daiAllowance$ = createProxyAllowance$(
+    context$,
+    initializedAccount$,
+    onEveryBlock$,
+    proxyAddress$,
+    'DAI',
+  );
+  return combineLatest(context$, calls$, proxyAddress$, daiAllowance$, onEveryBlock$).pipe(
+    switchMap(([context, calls, proxyAddress, daiAllowance]) => {
 
       if (proxyAddress === undefined) {
         proxyAddress = nullAddress;
       }
 
       const proxy = web3.eth.contract(dsProxy as any).at(proxyAddress);
-      return aggregateMTAccountState(context, proxy, calls);
+      return aggregateMTAccountState(context, proxy, calls, daiAllowance);
     }),
     distinctUntilChanged(isEqual),
     shareReplay(1)

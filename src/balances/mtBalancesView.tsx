@@ -38,6 +38,7 @@ export type MTBalancesOwnProps = ModalOpenerProps &
     redeem: (args: {token: string; proxy: any, amount: BigNumber}) => void,
     transactions: TxState[],
     createMTAllocateForm$: CreateMTAllocateForm$,
+    daiAllowance: Observable<boolean>,
   };
 
 export class MTBalancesView
@@ -61,6 +62,7 @@ export class MTBalancesView
                 account: 'TODO',
                 redeem: props.redeem,
                 transactions: props.transactions,
+                daiAllowance: props.daiAllowance,
                 ma: combinedBalances.ma,
                 mta: combinedBalances.mta
               }}

@@ -15,7 +15,6 @@ import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator'
 import { ModalOpenerProps } from '../../utils/modal';
 import { minusOne, one, zero } from '../../utils/zero';
 import {
-  findAsset,
   MarginableAsset,
   MTAccount
 } from '../state/mtAccount';
