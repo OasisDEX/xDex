@@ -61,10 +61,8 @@ describe('Trading pair dropdown', () => {
   });
 
   it.skip('should display last price and weekly volume for the newly selected pair', () => {
-    // there are two tx and depending on which one went through first
-    // the price might be either 300.00 or 300.10
-    TradingPairInfo.lastPrice().contains(/300.../);
-    TradingPairInfo.dailyVolume().contains('600.10');
+    TradingPairInfo.lastPrice().contains(/301.../);
+    TradingPairInfo.dailyVolume().contains('2,255.5999');
 
     const base = 'REP';
 
@@ -167,7 +165,7 @@ const setAllowance = (token: string) => {
   Tab.balances();
 
   const allowance = Allowance.of(token);
-  allowance.toggle();
+  allowance.enable();
   allowance.shouldBe(ALLOWANCE_STATE.ENABLED);
 
   Tab.market();
