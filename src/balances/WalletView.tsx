@@ -1,3 +1,4 @@
+import * as classnames from 'classnames';
 import * as React from 'react';
 import { Observable } from 'rxjs';
 import { theAppContext } from '../AppContext';
@@ -47,22 +48,38 @@ export class WalletView
   }
 }
 
-class AssetDropdownMenu extends React.Component<{
-  asset: string,
+interface AssetDropdownMenuProps {
+  asset: string;
   actions: React.ReactNode[];
-}> {
+}
+
+interface AssetDropdownMenuState {
+  isCollapsed: boolean;
+}
+
+class AssetDropdownMenu extends React.Component<AssetDropdownMenuProps,
+  AssetDropdownMenuState> {
+
+  constructor(props: AssetDropdownMenuProps) {
+    super(props);
+    this.state = {
+      isCollapsed: false
+    };
+  }
+
   public render() {
     const { asset, actions } = this.props;
     return (
       <div
-        className={styles.dropdownMenu}
-        style={{ display: 'flex' }}
+        className={classnames(styles.dropdownMenu, this.state.isCollapsed && styles.hover)}
+        data-test-id={'dropdown'}
+        onMouseOver={this.handleOnMouseOver}
+        onMouseOut={this.handleOnMouseOut}
       >
         <Button
           size="sm"
           color="secondaryOutlined"
           className={styles.dropdownButton}
-          data-test-id="myposition-actions-list"
         >
           <SvgImage image={dottedMenuSvg}/>
         </Button>
@@ -79,6 +96,14 @@ class AssetDropdownMenu extends React.Component<{
         </div>
       </div>
     );
+  }
+
+  private handleOnMouseOver = () => {
+    this.setState({ isCollapsed: true });
+  }
+
+  private handleOnMouseOut = () => {
+    this.setState({ isCollapsed: false });
   }
 }
 
@@ -169,6 +194,7 @@ export class WalletViewInternal extends React.Component<CombinedBalances & Walle
           size="sm"
           color="secondaryOutlined"
           block={true}
+          data-test-id="disable-allowance"
           onClick={() => this.props.disapproveWallet(combinedBalance.name)}
         >
           Disable
@@ -184,6 +210,8 @@ export class WalletViewInternal extends React.Component<CombinedBalances & Walle
           key={combinedBalance.name}
           size="sm"
           color="secondaryOutlined"
+          block={true}
+          data-test-id="enable-allowance"
           onClick={() => this.props.approveWallet(combinedBalance.name)}
         >
           Enable
@@ -198,20 +226,6 @@ export class WalletViewInternal extends React.Component<CombinedBalances & Walle
             // @ts-ignore
             <SAI2DAIMigrationTxRx label={'Upgrade Sai'}
                                   tid="update-btn-account"
-                                  className={styles.redeemBtn}
-            />
-          }
-        </theAppContext.Consumer>
-      );
-    }
-
-    if (combinedBalance && combinedBalance.name === 'DAI') {
-      actions.push(
-        <theAppContext.Consumer>
-          {({ DAI2SAIMigrationTxRx }) =>
-            // @ts-ignore
-            <DAI2SAIMigrationTxRx label={'Swap for Sai'}
-                                  tid="swap-btn-account"
                                   className={styles.redeemBtn}
             />
           }
