@@ -8,7 +8,7 @@ import * as styles from './mtBalancesView.scss';
 interface AssetDropdownMenuProps {
   asset: string;
   actions: React.ReactNode[];
-  hasIcon?: boolean;
+  withIcon?: boolean;
   label?: string;
 }
 
@@ -27,7 +27,7 @@ export class AssetDropdownMenu extends React.Component<AssetDropdownMenuProps,
   }
 
   public render() {
-    const { asset, actions } = this.props;
+    const { asset, actions, withIcon, label } = this.props;
     return (
       <div
         className={classnames(styles.dropdownMenu, this.state.isCollapsed && styles.hover)}
@@ -40,8 +40,8 @@ export class AssetDropdownMenu extends React.Component<AssetDropdownMenuProps,
           color="secondaryOutlined"
           className={styles.dropdownButton}
         >
-          { this.props.hasIcon && <SvgImage image={dottedMenuSvg}/> }
-          { this.props.label && <span>{this.props.label}</span> }
+          { withIcon && <SvgImage image={dottedMenuSvg}/> }
+          { label && <span>{label}</span> }
         </Button>
         <div className={styles.dropdownList}>
           {

@@ -162,13 +162,13 @@ export class MTMyPositionPanelInternal
             <AssetDropdownMenu
               actions={this.createAssetActions(mta, ma, 'deposit')}
               asset={ma.name}
-              hasIcon={false}
+              withIcon={false}
               label="Deposit"
             />
             <AssetDropdownMenu
               actions={this.createAssetActions(mta, ma, 'withdraw')}
               asset={ma.name}
-              hasIcon={false}
+              withIcon={false}
               label="Withdraw"
             />
           </div>
@@ -189,74 +189,70 @@ export class MTMyPositionPanelInternal
   }
 
   private createAssetActions(mta: MTAccount, ma: MarginableAsset, type: string): React.ReactNode[] {
+    const actions: React.ReactNode[] = [];
 
     if (type === 'deposit') {
-      return [
-        <Button
+      actions.push(<Button
+        size="md"
+        key={ma.name}
+        className={styles.actionButton}
+        disabled={!ma.availableActions.includes(UserActionKind.fund)}
+        onClick={() => this.transfer(UserActionKind.fund, ma.name, undefined)}
+      >
+        Deposit {ma.name}
+      </Button>);
+
+      if (mta.daiAllowance) {
+        actions.push(<Button
           size="md"
-          key={ma.name}
           className={styles.actionButton}
           disabled={!ma.availableActions.includes(UserActionKind.fund)}
-          onClick={() => this.transfer(UserActionKind.fund, ma.name, undefined)}
+          onClick={() => this.transfer(UserActionKind.fund, 'DAI', ma.name)}
         >
-          Deposit {ma.name}
-        </Button>,
-
-        (mta.daiAllowance &&
-          <Button
-            size="md"
-            className={styles.actionButton}
-            disabled={!ma.availableActions.includes(UserActionKind.fund)}
-            onClick={() => this.transfer(UserActionKind.fund, 'DAI', ma.name)}
-          >
-            Deposit DAI
-          </Button>
-        ),
-        (!mta.daiAllowance &&
-          <Button
-            size="md"
-            className={styles.actionButton}
-            onClick={ this.approveMTProxy('DAI')}
-          >
-            Enable DAI
-          </Button>
-        )
-      ];
+          Deposit DAI
+        </Button>);
+      } else {
+        actions.push(<Button
+          size="md"
+          className={styles.actionButton}
+          onClick={this.approveMTProxy('DAI')}
+        >
+          Enable DAI
+        </Button>);
+      }
     }
 
     if (type === 'withdraw') {
-      return [
-        <Button
-          size="md"
-          key={ma.name}
-          className={styles.actionButton}
-          onClick={() => this.transfer(UserActionKind.draw, ma.name, undefined)}
-        >
-          Withdraw {ma.name}
-        </Button>,
+      actions.push(<Button
+        size="md"
+        key={ma.name}
+        className={styles.actionButton}
+        onClick={() => this.transfer(UserActionKind.draw, ma.name, undefined)}
+      >
+        Withdraw {ma.name}
+      </Button>);
 
-        (mta.daiAllowance &&
-          <Button
-            size="md"
-            className={styles.actionButton}
-            onClick={() => this.transfer(UserActionKind.draw, 'DAI', ma.name)}
-          >
-            Withdraw DAI
-          </Button>
-        ),
-        (!mta.daiAllowance &&
-          <Button
-            size="md"
-            className={styles.actionButton}
-            onClick={ this.approveMTProxy('DAI')}
-          >
-            Enable DAI
-          </Button>
-        )
-      ];
+      if (mta.daiAllowance) {
+
+        actions.push(<Button
+          size="md"
+          className={styles.actionButton}
+          onClick={() => this.transfer(UserActionKind.draw, 'DAI', ma.name)}
+        >
+          Withdraw DAI
+        </Button>);
+      } else {
+        actions.push(<Button
+          size="md"
+          className={styles.actionButton}
+          onClick={ this.approveMTProxy('DAI')}
+        >
+          Enable DAI
+        </Button>);
+      }
     }
 
-    return [];
+    return actions;
   }
 
   private approveMTProxy(token: string) {
