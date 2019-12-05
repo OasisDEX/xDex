@@ -293,9 +293,6 @@ const protoMain = {
   get instantProxyCreationAndExecute() {
     return load(proxyCreationAndExecute, '0x793ebbe21607e4f04788f89c7a9b97320773ec59');
   },
-  get marginProxyRegistry() {
-    return load(proxyRegistry, '');
-  },
   get proxyActions() {
     return load(proxyActions, '');
   },
@@ -435,10 +432,6 @@ const kovan: NetworkConfig = {
   get instantProxyCreationAndExecute() {
     return load(proxyCreationAndExecute, '0xee419971e63734fed782cfe49110b1544ae8a773');
   },
-
-  get marginProxyRegistry() {
-    return load(proxyRegistry, '0x64a436ae831c1672ae81f674cab8b6775df3475c');
-  },
   get proxyActions() {
     return load(proxyActions, '0x9b562788e063368c83168069c732b1464aa22db8');
   },
@@ -572,9 +565,6 @@ const localnet: NetworkConfig =  {
   },
   get instantProxyCreationAndExecute() {
     return load(proxyCreationAndExecute, '0x39E338aDC718b67585AC4bE1A69Db0EE6C186487');
-  },
-  get marginProxyRegistry() {
-    return load(proxyRegistry, '0xaCEB44ca50eFaAb2787aD124d03e9116ec599817');
   },
   get proxyActions() {
     return load(proxyActions, '0xb39C3560062a2BA5CEFee7c7CDCd0f0e8fa8e17e');

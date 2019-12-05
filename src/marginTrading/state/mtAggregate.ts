@@ -168,7 +168,7 @@ export function createProxyAddress$(
   return combineLatest(context$, initializedAccount$, onEveryBlock$).pipe(
     exhaustMap(
       ([context, account]) => {
-        return bindNodeCallback(context.marginProxyRegistry.contract.proxies)(account).pipe(
+        return bindNodeCallback(context.instantProxyRegistry.contract.proxies)(account).pipe(
           mergeMap((proxyAddress: string) => {
             if (proxyAddress === nullAddress) {
               return of(undefined);
