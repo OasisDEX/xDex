@@ -7,24 +7,18 @@ import { CDPHistoryView } from '../../balances/CDPHistoryView';
 import { Calls$ } from '../../blockchain/calls/calls';
 import { TxMetaKind } from '../../blockchain/calls/txMeta';
 import { isDone, TxState } from '../../blockchain/transactions';
-import { connect } from '../../utils/connect';
 import { formatPrecision } from '../../utils/formatters/format';
 import { FormatPercent, Money } from '../../utils/formatters/Formatters';
 import { Button } from '../../utils/forms/Buttons';
 import { SvgImage } from '../../utils/icons/utils';
-import { inject } from '../../utils/inject';
 import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
-import { ModalOpenerProps, ModalProps } from '../../utils/modal';
+import { ModalOpenerProps } from '../../utils/modal';
 import { minusOne, one, zero } from '../../utils/zero';
-import { CreateMTAllocateForm$Props } from '../allocate/mtOrderAllocateDebtFormView';
 import {
   MarginableAsset,
-  MTAccount,
-  MTAccountState,
-  UserActionKind
+  MTAccount
 } from '../state/mtAccount';
-import { CreateMTFundForm$, MTTransferFormState } from '../transfer/mtTransferForm';
-import { MtTransferFormView } from '../transfer/mtTransferFormView';
+import { CreateMTFundForm$ } from '../transfer/mtTransferForm';
 import * as styles from './MTMyPositionView.scss';
 import warningIconSvg from './warning-icon.svg';
 
@@ -55,11 +49,11 @@ class RedeemButton extends React.Component<RedeemButtonProps> {
     ));
 
     return (<Button
-              size="md"
-              disabled={this.props.disabled || txInProgress}
-              className={styles.redeemButton}
-              onClick={this.props.redeem}
-            >
+        size="md"
+        disabled={this.props.disabled || txInProgress}
+        className={styles.redeemButton}
+        onClick={this.props.redeem}
+      >
         {txInProgress ? <LoadingIndicator className={styles.buttonLoading} /> : 'Redeem'}
       </Button>
     );
@@ -84,39 +78,55 @@ export class MTMyPositionView extends
 {
   public render() {
 
-    const { mta } = this.props;
-    // const equity = this.props.ma.balance
-    //   .times(this.props.ma.referencePrice).minus(this.props.ma.debt);
-    const leverage = this.props.ma.leverage && !this.props.ma.leverage.isNaN()
-      ? this.props.ma.leverage :
-      this.props.ma.balance.gt(zero) ? one : zero;
-    const asset = this.props.ma;
-    const liquidationPrice = this.props.ma.liquidationPrice
-    && !this.props.ma.liquidationPrice.isNaN() ?
-      this.props.ma.liquidationPrice : zero;
+    const { ma, mta } = this.props;
+    const equity = ma.balance
+      .times(ma.referencePrice).minus(ma.debt).plus(ma.dai);
+    const leverage = ma.leverage && !ma.leverage.isNaN()
+      ? ma.leverage : ma.balance.gt(zero) ? one : zero;
+    const liquidationPrice = ma.liquidationPrice
+    && !ma.liquidationPrice.isNaN() ?
+      ma.liquidationPrice : zero;
 
-    // const totalBalance = this.props.ma.balance.plus(this.props.ma.amountBeingLiquidated);
     return (
       <div>
         <div className={styles.MTPositionPanel}>
-          <div className={styles.MTPositionColumnNarrow}>
-            <div className={styles.statsBox}>
-              <div className={styles.summaryValue}>
-                <>Long - { formatPrecision(leverage, 1) }x</>
-                <div className={styles.summaryLabel}>Leverage</div>
-              </div>
-            </div>
-            <div className={styles.statsBox}>
-              <div className={styles.summaryValue}>
-                <>-</>
-                <div className={styles.summaryLabel}>PnL</div>
-              </div>
-            </div>
-          </div>
+
           <div className={styles.MTPositionColumn}>
             <div className={styles.summaryRow}>
               <div className={styles.summaryLabel}>
-                Liqu. Price
+                Leverage
+              </div>
+              <div className={styles.summaryValue}>
+                Long - { formatPrecision(leverage, 1) }x
+              </div>
+            </div>
+
+            <div className={styles.summaryRow}>
+              <div className={styles.summaryLabel}>
+                Stability Fee
+              </div>
+              <div className={styles.summaryValue}>
+                <FormatPercent
+                  value={ma.fee}
+                  fallback="-"
+                  multiply={false}
+                />
+              </div>
+            </div>
+            <div className={styles.summaryRow}>
+              <div className={styles.summaryLabel}>
+                Liquidation Penalty
+              </div>
+              <div className={styles.summaryValue}>
+                0
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.MTPositionColumn}>
+            <div className={styles.summaryRow}>
+              <div className={styles.summaryLabel}>
+                Liquidation Price
               </div>
               <div className={styles.summaryValue}>
                 {
@@ -127,8 +137,8 @@ export class MTMyPositionView extends
                       fallback="-"
                       className={
                         classnames({
-                          [styles.summaryValuePositive]: asset && asset.safe,
-                          [styles.summaryValueNegative]: asset && !asset.safe,
+                          [styles.summaryValuePositive]: ma && ma.safe,
+                          [styles.summaryValueNegative]: ma && !ma.safe,
                         })
                       }
                     /> : <span>-</span>
@@ -137,43 +147,26 @@ export class MTMyPositionView extends
             </div>
             <div className={styles.summaryRow}>
               <div className={styles.summaryLabel}>
-                Liqu. Fee
+                Current Price
               </div>
               <div className={styles.summaryValue}>
-                {/*15%*/}
-                {/*{*/}
-                {/*this.props.liquidationFee && !this.props.liquidationFee.isNaN() ?*/}
-                {/*<>*/}
-                {/*{formatPrecision(this.props.liquidationPrice, 2)} USD*/}
-                {/*</>*/}
-                {/*: <span>-</span>*/}
-                {/*}*/}
-              </div>
-            </div>
-            <div className={styles.summaryRow}>
-              <div className={styles.summaryLabel}>
-                Interest Rate
-              </div>
-              <div className={styles.summaryValue}>
-                <FormatPercent
-                  value={this.props.ma.fee}
-                  fallback="-"
-                  multiply={false}
-                />
+                {ma.referencePrice &&
+                  <Money value={ma.referencePrice} token="USD"/>
+                }
               </div>
             </div>
           </div>
           <div className={styles.MTPositionColumn}>
             <div className={styles.summaryRow}>
               <div className={styles.summaryLabel}>
-                Your Balance
+                Balance
               </div>
               <div className={styles.summaryValue}>
                 {
-                  this.props.ma.balance && !this.props.ma.balance.isNaN() ?
+                  ma.balance && !ma.balance.isNaN() ?
                     <Money
-                      value={this.props.ma.balance}
-                      token={this.props.ma.name}
+                      value={ma.balance}
+                      token={ma.name}
                       fallback="-"
                     /> : <span>-</span>
                 }
@@ -184,167 +177,110 @@ export class MTMyPositionView extends
                 DAI Balance
               </div>
               <div className={styles.summaryValue}>
-                { asset && asset.debt.gt(zero) ?
+                { ma && ma.debt.gt(zero) ?
                   <Money
-                    value={asset.debt.times(minusOne)}
+                    value={ma.debt.times(minusOne)}
                     token="DAI"
                     fallback="-"
-                  /> : asset && asset.dai ?
+                  /> : ma && ma.dai ?
                     <Money
-                      value={asset.dai}
+                      value={ma.dai}
                       token="DAI"
                       fallback="-"
                     /> : <span>-</span>
                 }
               </div>
             </div>
-          </div>
-          <div className={styles.MTPositionColumnNarrow}>
-            <Button
-              size="md"
-              className={styles.actionButton}
-              disabled={!this.props.ma.availableActions.includes(UserActionKind.fund)}
-              onClick={() => this.transfer(UserActionKind.fund, this.props.ma.name, undefined)}
-            >
-              Deposit
-            </Button>
-            <Button
-              size="md"
-              className={styles.actionButton}
-              onClick={() => this.transfer(UserActionKind.draw, this.props.ma.name, undefined)}
-            >
-              Withdraw
-            </Button>
+            <div className={styles.summaryRow}>
+              <div className={styles.summaryLabel}>
+                Equity
+              </div>
+              <div className={styles.summaryValue}>
+                {
+                  equity && !equity.isNaN() ?
+                    <Money
+                      value={equity}
+                      token="DAI"
+                      fallback="-"
+                    /> : <span>-</span>
+                }
 
-            { mta.daiAllowance ? <>
-                <Button
-                  size="md"
-                  className={styles.actionButton}
-                  disabled={!this.props.ma.availableActions.includes(UserActionKind.fund)}
-                  onClick={() => this.transfer(UserActionKind.fund, 'DAI', this.props.ma.name)}
-                >
-                  Deposit DAI
-                </Button>
-                <Button
-                  size="md"
-                  className={styles.actionButton}
-                  onClick={() => this.transfer(UserActionKind.draw, 'DAI', this.props.ma.name)}
-                >
-                  Withdraw DAI
-                </Button>
-              </>
-              : <>
-                <Button
-                  size="md"
-                  className={styles.actionButton}
-                  onClick={ this.approveMTProxy('DAI')}
-                >
-                  Enable DAI
-                </Button>
-              </>
-            }
+              </div>
+            </div>
           </div>
-          </div>
-
+        </div>
         <div>
           {
-            this.props.ma.bitable === 'imminent' &&
+            ma.bitable === 'imminent' &&
             // tslint:disable
             <div className={styles.warningMessage}>
               <SvgImage image={warningIconSvg}/>
               <span>
-              The {this.props.ma.name} price&nbsp;
-              ({this.props.ma.osmPriceNext && this.props.ma.osmPriceNext.toString()} USD)
+              The {ma.name} price&nbsp;
+                ({ma.osmPriceNext && ma.osmPriceNext.toString()} USD)
               is approaching your Liquidation Price and your position will soon be liquidated.
               You&nbsp;may rescue your Position by paying off Dai debt or deposit&nbsp;
-                {this.props.ma.name} in the next {this.props.ma.nextPriceUpdateDelta} minutes.
+                {ma.name} in the next {ma.nextPriceUpdateDelta} minutes.
               </span>
             </div>
             // tslint:enable
           }
           {
-            this.props.ma.bitable === 'yes' &&
+            ma.bitable === 'yes' &&
             <div className={styles.warningMessage}>
               <SvgImage image={warningIconSvg}/>
               <span>
                 <Money
-                      value={this.props.ma.amountBeingLiquidated}
-                      token={this.props.ma.name}
-                      fallback="-"
+                  value={ma.amountBeingLiquidated}
+                  token={ma.name}
+                  fallback="-"
                 />
                 &nbsp;of total <Money
-                    value={this.props.ma.balance}
-                    token={this.props.ma.name}
-                    fallback="-"
-                  />&nbsp;is being liquidated from your position.&nbsp;
-                { this.props.ma.redeemable.gt(zero) &&
+                value={ma.balance}
+                token={ma.name}
+                fallback="-"
+              />&nbsp;is being liquidated from your position.&nbsp;
+                { ma.redeemable.gt(zero) &&
                 // tslint:disable
                 <><br />You can redeem <Money
-                    value={this.props.ma.redeemable}
-                    token={this.props.ma.name}
-                    fallback="-"
-                  /> collateral.
+                  value={ma.redeemable}
+                  token={ma.name}
+                  fallback="-"
+                /> collateral.
                 </>
-                // tslint:enable
+                  // tslint:enable
                 }
             </span>
 
               <RedeemButton
                 redeem={() => this.props.redeem({
-                  token: this.props.ma.name,
-                  proxy: this.props.mta.proxy,
-                  amount: this.props.ma.redeemable})}
+                  token: ma.name,
+                  proxy: mta.proxy,
+                  amount: ma.redeemable})}
 
-                token={this.props.ma.name}
-                disabled={this.props.ma.redeemable.eq(zero)}
+                token={ma.name}
+                disabled={ma.redeemable.eq(zero)}
                 transactions={this.props.transactions}
               />
             </div>
           }
           {
-            this.props.ma.bitable === 'no' && this.props.ma.redeemable.gt(zero) &&
+            ma.bitable === 'no' && ma.redeemable.gt(zero) &&
             <div className={styles.infoMessage}>
               <span>
                 Your Position has been liquidated.
-                Please redeem {this.props.ma.redeemable.toString()}
-                &nbsp;{this.props.ma.name} of collateral.
+                Please redeem {ma.redeemable.toString()}
+                &nbsp;{ma.name} of collateral.
               </span>
               <Button
                 size="md"
-                disabled={this.props.ma.redeemable.eq(zero)}
+                disabled={ma.redeemable.eq(zero)}
                 className={styles.redeemButton}
               >Redeem</Button>
             </div>
           }
         </div>
-        <CDPHistoryView {...this.props.ma} />
+        <CDPHistoryView {...ma} />
       </div>);
-  }
-
-  private approveMTProxy(token: string) {
-    return () => {
-      if (this.props.mta.state === MTAccountState.notSetup) {
-        return;
-      }
-      this.props.approveMTProxy({
-        token,
-        proxyAddress: this.props.mta.proxy.address as string
-      });
-    };
-  }
-
-  private transfer (actionKind: UserActionKind, token: string, ilk: string | undefined) {
-    const fundForm$ = this.props.createMTFundForm$(actionKind, token, ilk);
-    const MTFundFormViewRxTx =
-      connect<MTTransferFormState, ModalProps>(
-        inject(
-          MtTransferFormView,
-          // cast is safe as CreateMTAllocateForm$Props
-          // is not used inside MtTransferFormView!
-          (this.props as any) as (CreateMTAllocateForm$Props & ModalOpenerProps)
-        ),
-        fundForm$
-      );
-    this.props.open(MTFundFormViewRxTx);
   }
 }

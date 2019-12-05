@@ -205,7 +205,7 @@ export function createMta$(
     proxyAddress$,
     'DAI',
   );
-  return combineLatest(context$, calls$, proxyAddress$, daiAllowance$).pipe(
+  return combineLatest(context$, calls$, proxyAddress$, daiAllowance$, onEveryBlock$).pipe(
     switchMap(([context, calls, proxyAddress, daiAllowance]) => {
 
       if (proxyAddress === undefined) {
