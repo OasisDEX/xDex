@@ -42,8 +42,8 @@ const liquidationHistory: RawMTHistoryEvent[] = [
   {
     kind: MTHistoryEventKind.bite,
     id: 1,
-    lot: new BigNumber(5),
-    bid: new BigNumber(1000),
+    ink: new BigNumber(5),
+    tab: new BigNumber(1000),
     timestamp: 1573141000,
     token: 'WETH'
   } as RawMTHistoryEvent,
@@ -51,7 +51,6 @@ const liquidationHistory: RawMTHistoryEvent[] = [
     kind: MTHistoryEventKind.kick,
     id: 1,
     lot: new BigNumber(5),
-    bid: new BigNumber(0),
     tab: new BigNumber(1200),
     timestamp: 1573141010,
     token: 'WETH'

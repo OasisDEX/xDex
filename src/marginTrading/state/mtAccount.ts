@@ -129,14 +129,12 @@ export type MTLiquidationEvent = {
   id: number;
 } & ({
   kind: MTHistoryEventKind.bite
-  lot: BigNumber;
+  ink: BigNumber;
   tab: BigNumber;
-  bid: BigNumber;
 } | {
   kind: MTHistoryEventKind.kick
   lot: BigNumber;
   tab: BigNumber;
-  bid: BigNumber;
 } | {
   kind: MTHistoryEventKind.tend | MTHistoryEventKind.dent;
   lot: BigNumber;
