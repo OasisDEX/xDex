@@ -70,6 +70,7 @@ export class MTMyPositionPanel
               <PanelHeader bordered={true}>Deploy Proxy and Enable {name}</PanelHeader>
               <div className={styles.setupSection}>
                 <CallForAction title="Deploy Proxy"
+                               tid="create-proxy"
                                description={
                                  // tslint:disable
                                  ` Proxies are used in Oasis to bundle multiple transactions into one,
@@ -93,9 +94,10 @@ export class MTMyPositionPanel
                                className={styles.setupBox}
                 />
                 <CallForAction title={`Enable ${name}`}
+                               tid="set-allowance"
                                description={
                                  // tslint:disable
-                                 `This permission allows Oasis smart contracts to interact with your {name}.
+                                 `This permission allows Oasis smart contracts to interact with your ${name}.
                                   This has to be done for each asset type.`
                                  // tslint:enable
                                }
@@ -119,12 +121,6 @@ export class MTMyPositionPanel
               </div>
             </div>
           );
-        }
-
-        if (!this.props.value.ma.allowance) {
-          return <div>
-            Allowance not set
-          </div>;
         }
 
         return (
