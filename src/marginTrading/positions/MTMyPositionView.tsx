@@ -84,7 +84,7 @@ export class MTMyPositionView extends
     const liquidationPrice = ma.liquidationPrice ? ma.liquidationPrice : zero;
 
     return (
-      <div>
+      <div data-test-id="my-position">
         <div className={styles.MTPositionPanel}>
           <div className={styles.MTPositionColumn}>
             <div className={styles.summaryRow}>
