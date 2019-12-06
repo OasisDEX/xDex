@@ -143,7 +143,7 @@ export class MTMyPositionView extends
         : undefined
       : markPrice;
     return (
-      <div>
+      <div data-test-id="my-position">
         <div className={styles.MTPositionPanel}>
           <div className={styles.MTPositionColumn}>
             <div className={styles.summaryRow}>

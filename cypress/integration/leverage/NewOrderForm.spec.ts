@@ -26,4 +26,8 @@ describe('Leverage form', () => {
   it('should display price',  () => {
     Form.currentPriceIs('301.00');
   });
+
+  // it('should recalculate purchasing power when user try to create new order',  () => {
+  //
+  // });
 });
