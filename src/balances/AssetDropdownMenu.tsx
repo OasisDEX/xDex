@@ -10,6 +10,7 @@ interface AssetDropdownMenuProps {
   actions: React.ReactNode[];
   withIcon?: boolean;
   label?: string;
+  tid?: string;
 }
 
 interface AssetDropdownMenuState {
@@ -27,11 +28,11 @@ export class AssetDropdownMenu extends React.Component<AssetDropdownMenuProps,
   }
 
   public render() {
-    const { asset, actions, withIcon, label } = this.props;
+    const { asset, actions, withIcon, label, tid } = this.props;
     return (
       <div
         className={classnames(styles.dropdownMenu, this.state.isCollapsed && styles.hover)}
-        data-test-id={'dropdown'}
+        data-test-id={tid}
         onMouseOver={this.handleOnMouseOver}
         onMouseOut={this.handleOnMouseOut}
       >

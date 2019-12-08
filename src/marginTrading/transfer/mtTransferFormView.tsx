@@ -11,15 +11,15 @@ import { BigNumberInput } from '../../utils/bigNumberInput/BigNumberInput';
 import { FormChangeKind, ProgressStage } from '../../utils/form';
 import { formatAmount } from '../../utils/formatters/format';
 import { Money } from '../../utils/formatters/Formatters';
-import { Button } from '../../utils/forms/Buttons';
+import { Button, CloseButton } from '../../utils/forms/Buttons';
 import { ErrorMessage } from '../../utils/forms/ErrorMessage';
 import { InputGroup, InputGroupAddon } from '../../utils/forms/InputGroup';
 import { GasCost } from '../../utils/gasCost/GasCost';
-import { SvgImage } from '../../utils/icons/utils';
 import { BorderBox, Hr } from '../../utils/layout/LayoutHelpers';
 import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
-import { ModalProps } from '../../utils/modal';
-import { Panel, PanelBody, PanelFooter } from '../../utils/panel/Panel';
+import { ModalOpenerProps, ModalProps } from '../../utils/modal';
+import { Panel, PanelBody, PanelFooter, PanelHeader } from '../../utils/panel/Panel';
+import { TopRightCorner } from '../../utils/panel/TopRightCorner';
 import { Muted } from '../../utils/text/Text';
 import { TransactionStateDescription } from '../../utils/text/TransactionStateDescription';
 import { zero } from '../../utils/zero';
@@ -35,6 +35,7 @@ import {
   Message, MessageKind, MTTransferFormState, MTTransferFormTab
 } from './mtTransferForm';
 import * as styles from './mtTransferFormView.scss';
+import { SvgImage } from 'src/utils/icons/utils';
 
 type MTFundFormProps = MTTransferFormState & ModalProps;
 
@@ -370,7 +371,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
           <span className={styles.checklistTitle}>
             {getToken(this.props.token).name} deposit
           </span>
-          <div className={styles.checklistSummary}>
+          <div className={styles.checklistSummary} data-test-id="tx-status">
             <TransactionStateDescription progress={this.props.progress}/>
           </div>
         </div>
@@ -429,6 +430,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
         {deposit &&
         <Button size="md"
                 className={styles.button}
+                data-test-id={`${proceedName.toLowerCase()}-btn`}
                 disabled={!depositEnabled}
                 onClick={() => this.transfer()}
         >
@@ -473,6 +475,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
           guide={true}
           placeholderChar={' '}
           disabled={disabled}
+          data-test-id="amount-input"
         />
       </InputGroup>
     );

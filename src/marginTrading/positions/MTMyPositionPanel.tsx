@@ -139,12 +139,14 @@ export class MTMyPositionPanelInternal
               asset={ma.name}
               withIcon={false}
               label="Deposit"
+              tid="deposit-actions-dropdown"
             />
             <AssetDropdownMenu
               actions={this.createAssetActions(mta, ma, 'withdraw')}
               asset={ma.name}
               withIcon={false}
               label="Withdraw"
+              tid="withdraw-actions-dropdown"
             />
           </div>
         </PanelHeader>
@@ -168,6 +170,7 @@ export class MTMyPositionPanelInternal
 
     if (type === 'deposit') {
       actions.push(<Button
+        data-test-id="deposit-collateral"
         size="md"
         key={ma.name}
         className={styles.actionButton}
@@ -179,6 +182,7 @@ export class MTMyPositionPanelInternal
 
       if (mta.daiAllowance) {
         actions.push(<Button
+          data-test-id="deposit-dai"
           size="md"
           className={styles.actionButton}
           disabled={!ma.availableActions.includes(UserActionKind.fund)}
@@ -188,6 +192,7 @@ export class MTMyPositionPanelInternal
         </Button>);
       } else {
         actions.push(<Button
+          data-test-id="set-allowance"
           size="md"
           className={styles.actionButton}
           onClick={this.approveMTProxy('DAI')}

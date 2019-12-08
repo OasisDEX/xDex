@@ -1,3 +1,4 @@
+import { Account } from '../../pages/leverage/Account';
 import { Form } from '../../pages/leverage/Form';
 import { Tab } from '../../pages/Tab';
 import { WalletConnection } from '../../pages/WalletConnection';
@@ -8,7 +9,10 @@ describe('Leverage form', () => {
   beforeEach(() => {
     cypressVisitWithWeb3();
     WalletConnection.connect();
+    WalletConnection.isConnected();
     Tab.leverage();
+    Account.setupProxy();
+    Account.shouldHaveProxyCreated();
   });
 
   it('should display purchasing power', () => {
@@ -26,8 +30,4 @@ describe('Leverage form', () => {
   it('should display price',  () => {
     Form.currentPriceIs('301.00');
   });
-
-  // it('should recalculate purchasing power when user try to create new order',  () => {
-  //
-  // });
 });

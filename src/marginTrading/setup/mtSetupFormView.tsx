@@ -19,6 +19,7 @@ export class MTSetupButton extends React.Component<MTSetupFormState & ModalOpene
       <Button size="sm"
               color="primary"
               className={styles.setupBtn}
+              data-test-id="setup-proxy"
               disabled={
                 this.props.mtaState === MTAccountState.setup ||
                 this.props.stage !== FormStage.idle
