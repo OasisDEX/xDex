@@ -1,33 +1,17 @@
-import { cypressVisitWithWeb3, tid } from '../../utils';
-import { Tab } from '../Tab';
+import { tid } from '../../utils';
 
 export class Position {
-  public static shouldHaveProxyCreated = () => {
-    cy.get(tid('create-proxy', tid('step-completed'))).should('exist');
+  public static depositCollateral = (amount: number) => {
+    cy.get(tid('deposit-actions-dropdown')).trigger('mouseover');
+    cy.get(tid('deposit-collateral')).click();
+    cy.get(tid('deposit-form')).should('be.visible');
+    cy.get(tid('deposit-form', tid('amount-input'))).type(`${amount}`);
+    cy.get(tid('deposit-form', tid('deposit-btn'))).click();
+    cy.get(tid('deposit-form', tid('tx-status'))).contains('Confirmed');
+    cy.get(tid('deposit-form', tid('close-btn'))).click();
   }
 
-  // CFA - call for action
-  public static shouldHaveProxyCFAHidden = () => {
-    cy.get(tid('create-proxy')).should('not.be.visible');
-  }
-
-  // CFA - call for action
-  public static shouldHaveProxyAllowanceCFAHidden = () => {
-    cy.get(tid('set-allowance')).should('not.be.visible');
-  }
-
-  public static shouldHaveNotCollateralAllowance = () => {
-    cy.get(tid('set-allowance', tid('step-completed'))).should('not.exist');
-  }
-
-  public static setAllowance = () => {
-    cy.get(tid('set-allowance', tid('cfa-btn'))).click();
-    // TODO: this should be removed. It's a hacky way to get to My Position panel due to bug
-    cypressVisitWithWeb3('', false);
-    Tab.leverage();
-  }
-
-  public static shouldBeVisible = () => {
-    cy.get(tid('my-position')).should('be.visible');
+  public static expectAmountOfCollateral = (amount: string | RegExp) => {
+    cy.get(tid('my-position', tid('summary', tid('collateral-balance')))).contains(amount);
   }
 }

@@ -26,7 +26,7 @@ export class Allowance {
   public static of = (tokenSymbol: string) => {
     const symbol = tokenSymbol.toUpperCase();
     cy.get(tid(`${symbol}-overview`), { timeout: 10000 }).as(`${symbol}`);
-    cy.get(`@${symbol}`).find(tid('dropdown')).trigger('mouseover');
+    cy.get(`@${symbol}`).find(tid('asset-actions-dropdown')).trigger('mouseover');
 
     return {
       enable: () => {
