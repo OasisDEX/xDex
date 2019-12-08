@@ -89,7 +89,7 @@ export class MTMyPositionView extends
 
     return (
       <div data-test-id="my-position">
-        <div className={styles.MTPositionPanel}>
+        <div className={styles.MTPositionPanel} data-test-id="summary">
 
           <div className={styles.MTPositionColumn}>
             <div className={styles.summaryRow}>
@@ -161,7 +161,9 @@ export class MTMyPositionView extends
               <div className={styles.summaryLabel}>
                 Balance
               </div>
-              <div className={styles.summaryValue}>
+              <div className={styles.summaryValue}
+                   data-test-id="collateral-balance"
+              >
                 {
                   ma.balance && !ma.balance.isNaN() ?
                     <Money

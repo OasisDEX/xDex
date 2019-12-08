@@ -109,6 +109,7 @@ export class WalletViewInternal extends React.Component<CombinedBalances & Walle
                   <AssetDropdownMenu
                     actions={this.createActionsPerAsset(combinedBalance)}
                     asset={combinedBalance.name}
+                    tid="asset-actions-dropdown"
                     withIcon={true}
                   />
                 }

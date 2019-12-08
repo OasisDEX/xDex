@@ -28,4 +28,3 @@ export const InfoRowLabel: string;
 export const infoRowLabel: string;
 export const notSetupBorder: string;
 export const headerWithIcon: string;
-export const closeButton: string;
