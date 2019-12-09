@@ -277,15 +277,18 @@ export class MtSimpleOrderFormBody
   }
 
   private renderAccountInfo = () => {
+    
     const accountNotConnected = !this.props.account;
     const accountNotSetup = this.props.mta && this.props.mta.state === MTAccountState.notSetup;
 
     if (accountNotConnected) {
-      return <div className={styles.notSetupBorder}><LoggedOut view="Balances"/></div>;
+      return <div className={styles.notSetupBorder} data-test-id="locked-form">
+        <LoggedOut view="Balances"/>
+        </div>;
     }
 
     if (accountNotSetup) {
-      return <div className={styles.notSetupBorder}>
+      return <div className={styles.notSetupBorder} data-test-id="locked-form">
         <Muted>
           Deploy your Proxy and enable {this.props.baseToken}
         </Muted>
@@ -765,6 +768,7 @@ export class MtSimpleOrderFormBody
                 `Max. ${formatAmount(maxTotal, quoteToken)}`
               }
               className={styles.input}
+              data-test-id="total-input"
               // disabled={this.props.stage === FormStage.waitingForAllocation}
               // disabled={ true }
             />
@@ -791,6 +795,7 @@ export class MtSimpleOrderFormBody
     return (
       <Button
         className={styles.confirmButton}
+        data-test-id="place-order"
         type="submit"
         value="submit"
         color={ this.props.kind === OfferType.buy ? 'primary' : 'danger' }
@@ -840,6 +845,7 @@ export class MtSimpleOrderFormBody
               `Max. ${formatAmount(maxAmount, baseToken)}`
             }
             className={styles.input}
+            data-test-id="amount-input"
             // disabled={this.props.progress === FormStage.waitingForAllocation}
           />
         </ApproximateInputValue>

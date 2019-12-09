@@ -352,9 +352,10 @@ export class MTMyPositionPanelInternal
         </Button>);
       }
     }
-
+    
     if (type === 'withdraw') {
       actions.push(<Button
+        data-test-id="withdraw-collateral"
         size="md"
         key={ma.name}
         className={styles.actionButton}
@@ -377,6 +378,7 @@ export class MTMyPositionPanelInternal
         size="md"
         className={styles.actionButton}
         disabled={ma.dai.eq(zero)}
+        data-test-id="withdraw-dai"
         onClick={
           () => {
             this.transfer(UserActionKind.draw, 'DAI', ma.name);

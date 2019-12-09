@@ -164,7 +164,9 @@ export class MTMyPositionView extends
                 <WarningTooltip id="stability-fee"
                                 text={stabilityFeeTooltip}/>
               </div>
-              <div className={styles.summaryValue}>
+              <div className={styles.summaryValue}
+                   data-test-id="stability-fee"
+              >
                 <FormatPercent
                   value={ma.fee}
                   fallback="-"
@@ -181,6 +183,7 @@ export class MTMyPositionView extends
               </div>
               <div className={styles.summaryValue}>
                 <FormatPercent
+                  data-test-id="penalty"
                   value={liquidationPenalty}
                   fallback="-"
                   multiply={false}
@@ -195,7 +198,9 @@ export class MTMyPositionView extends
               <div className={styles.summaryLabel}>
                 <span>Liquidation Price</span>
               </div>
-              <div className={styles.summaryValue}>
+              <div className={styles.summaryValue}
+                   data-test-id="liquidation-price"
+              >
                 {inDai && liquidationPriceDisplay && '~'}
                 <Money
                   value={liquidationPriceDisplay}
@@ -216,7 +221,9 @@ export class MTMyPositionView extends
                 <WarningTooltip id="mark-price"
                                 text={markPriceTooltip}/>
               </div>
-              <div className={styles.summaryValue}>
+              <div className={styles.summaryValue}
+                    data-test-id="price"
+              >
                 {
                   markPriceDisplay
                     ? (
@@ -241,11 +248,11 @@ export class MTMyPositionView extends
                                 text={collateralBalanceTooltip(ma.name)}/>
               </div>
               <div className={styles.summaryValue}
-                   data-test-id="collateral-balance"
               >
                 {
                   ma.balance ?
                     <CryptoMoney
+                      data-test-id="collateral-balance"
                       value={ma.balance}
                       token={ma.name}
                       fallback="-"
@@ -256,6 +263,7 @@ export class MTMyPositionView extends
                   ma.balanceInDai &&
                   <>
                     (<CryptoMoney
+                    data-test-id="dai-balance"
                     value={ma.balanceInDai}
                     token="DAI"
                     fallback="-"
@@ -270,7 +278,9 @@ export class MTMyPositionView extends
                 <WarningTooltip id="dai-balance"
                                 text={daiBalanceTooltip}/>
               </div>
-              <div className={styles.summaryValue}>
+              <div className={styles.summaryValue}
+                   data-test-id="equity"
+              >
                 {
                   ma && ma.debt.gt(zero) ?
                     <CryptoMoney
