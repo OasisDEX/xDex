@@ -13,7 +13,7 @@ import { DEFAULT_GAS } from './callsHelpers';
 import { TxMetaKind } from './txMeta';
 
 export const setupMTProxy = {
-  call: (_data: {}, context: NetworkConfig) => context.marginProxyRegistry.contract.build[''],
+  call: (_data: {}, context: NetworkConfig) => context.instantProxyRegistry.contract.build[''],
   prepareArgs: () => [],
   options: () => ({ gas: DEFAULT_GAS + 2000000 }), // this should be estimated as in setupProxy
   kind: TxMetaKind.setupMTProxy,
