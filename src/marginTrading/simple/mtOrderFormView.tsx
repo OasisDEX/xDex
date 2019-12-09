@@ -224,15 +224,18 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
   }
 
   private renderAccountInfo = () => {
+    
     const accountNotConnected = !this.props.account;
     const accountNotSetup = this.props.mta && this.props.mta.state === MTAccountState.notSetup;
 
     if (accountNotConnected) {
-      return <div className={styles.notSetupBorder}><LoggedOut view="Balances"/></div>;
+      return <div className={styles.notSetupBorder} data-test-id="locked-form">
+        <LoggedOut view="Balances"/>
+        </div>;
     }
 
     if (accountNotSetup) {
-      return <div className={styles.notSetupBorder}>
+      return <div className={styles.notSetupBorder} data-test-id="locked-form">
         <Muted>
           Deploy your Proxy and enable {this.props.baseToken}
         </Muted>
@@ -506,7 +509,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
       <div className={styles.InfoRow}>
         <div className={styles.InfoBox}>
           <div className={styles.InfoRowLabel}>Leverage</div>
-          <div>
+          <div data-test-id="leverage">
             {
               leverageDisplay.gte(zero) ?
                 <>{ formatPrecision(leverageDisplay, 1) }x</>
@@ -536,7 +539,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
         </div>
         <div className={styles.InfoBox}>
           <div className={styles.InfoRowLabel}>Interest Rate</div>
-          <div>
+          <div data-test-id="interest-rate">
             {
               this.props.fee ? <FormatPercent
                 value={this.props.fee}
@@ -694,6 +697,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
               guide={true}
               placeholderChar={' '}
               className={styles.input}
+              data-test-id="total-input"
               // disabled={this.props.stage === FormStage.waitingForAllocation}
               // disabled={ true }
             />
@@ -727,6 +731,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
     return (
       <Button
         className={styles.confirmButton}
+        data-test-id="place-order"
         type="submit"
         value="submit"
         color={ this.props.kind === OfferType.buy ? 'primary' : 'danger' }
@@ -764,6 +769,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
             guide={true}
             placeholderChar={' '}
             className={styles.input}
+            data-test-id="amount-input"
             // disabled={this.props.progress === FormStage.waitingForAllocation}
           />
         </ApproximateInputValue>

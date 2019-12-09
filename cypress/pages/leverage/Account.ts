@@ -32,9 +32,26 @@ export class Account {
     cy.get(tid('create-proxy', tid('setup-proxy'))).click();
   }
 
-  public static setOTCAllowance = () => {
+  // TODO: This to be changed if necessary once Kuba figures out which we are giving the allowance to
+  public static setCollateralAllowance = () => {
     cy.get(tid('set-allowance', tid('cfa-btn'))).click();
   }
+
+  /* In order to use this method one should:
+   * - create proxy
+   * - set collateral allowance
+   * so that the My Position form is visible
+   * and from one of the dropdowns ( deposit / withdraw )
+   * one can enable DAI allowance
+   */
+  public static setProxyDAIAllowance = () => {
+    cy.get(tid('withdraw-actions-dropdown'))
+    .trigger('mouseover')
+    .find(tid('set-allowance'))
+    .click();
+    cy.get(tid('withdraw-dai')).should('be.visible');
+  }
+
 
   public static leveragePositionShouldBeDisplayed = () => {
     cy.get(tid('my-position')).should('be.visible');

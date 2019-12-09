@@ -201,9 +201,10 @@ export class MTMyPositionPanelInternal
         </Button>);
       }
     }
-
+    
     if (type === 'withdraw') {
       actions.push(<Button
+        data-test-id="withdraw-collateral"
         size="md"
         key={ma.name}
         className={styles.actionButton}
@@ -215,6 +216,7 @@ export class MTMyPositionPanelInternal
       if (mta.daiAllowance) {
 
         actions.push(<Button
+          data-test-id="withdraw-dai"
           size="md"
           className={styles.actionButton}
           onClick={() => this.transfer(UserActionKind.draw, 'DAI', ma.name)}
@@ -223,6 +225,7 @@ export class MTMyPositionPanelInternal
         </Button>);
       } else {
         actions.push(<Button
+          data-test-id="set-allowance"
           size="md"
           className={styles.actionButton}
           onClick={ this.approveMTProxy('DAI')}

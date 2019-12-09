@@ -99,7 +99,9 @@ export class MTMyPositionView extends
               <div className={styles.summaryLabel}>
                 Stability Fee
               </div>
-              <div className={styles.summaryValue}>
+              <div className={styles.summaryValue}
+                   data-test-id="stability-fee"
+              >
                 <FormatPercent
                   value={ma.fee}
                   fallback="-"
@@ -113,6 +115,7 @@ export class MTMyPositionView extends
               </div>
               <div className={styles.summaryValue}>
                 <FormatPercent
+                  data-test-id="penalty"
                   value={liquidationPenalty}
                   fallback="-"
                   multiply={false}
@@ -126,7 +129,9 @@ export class MTMyPositionView extends
               <div className={styles.summaryLabel}>
                 Liquidation Price
               </div>
-              <div className={styles.summaryValue}>
+              <div className={styles.summaryValue}
+                   data-test-id="liquidation-price"
+              >
                 {
                   liquidationPrice.gt(zero) ?
                     <Money
@@ -147,7 +152,9 @@ export class MTMyPositionView extends
               <div className={styles.summaryLabel}>
                 Current Price
               </div>
-              <div className={styles.summaryValue}>
+              <div className={styles.summaryValue}
+                   data-test-id="price"
+              >
                 {ma.referencePrice &&
                   <Money value={ma.referencePrice} token="USD"/>
                 }
@@ -176,7 +183,9 @@ export class MTMyPositionView extends
               <div className={styles.summaryLabel}>
                 DAI Balance
               </div>
-              <div className={styles.summaryValue}>
+              <div className={styles.summaryValue}
+                   data-test-id="dai-balance"
+              >
                 { ma && ma.debt.gt(zero) ?
                   <Money
                     value={ma.debt.times(minusOne)}
@@ -195,7 +204,9 @@ export class MTMyPositionView extends
               <div className={styles.summaryLabel}>
                 Equity
               </div>
-              <div className={styles.summaryValue}>
+              <div className={styles.summaryValue}
+                   data-test-id="equity"
+              >
                 {
                   ma.equity &&
                     <Money
