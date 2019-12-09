@@ -36,6 +36,8 @@ export function createRawMTHistoryFromCache(
           auctionId
           lot
           bid
+          ink
+          tab
           timestamp
         }
       }
@@ -60,6 +62,8 @@ export function createRawMTHistoryFromCache(
         auctionId,
         lot,
         bid,
+        ink,
+        tab,
         timestamp
       }: any) => ({
         ilk,
@@ -71,6 +75,8 @@ export function createRawMTHistoryFromCache(
         auctionId: new BigNumber(auctionId),
         lot: new BigNumber(lot),
         bid: new BigNumber(bid),
+        ink: new BigNumber(ink),
+        tab: new BigNumber(tab),
         kind: type,
         token: ilk
       })),
