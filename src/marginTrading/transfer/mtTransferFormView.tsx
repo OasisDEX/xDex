@@ -45,6 +45,8 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
 
   public render() {
 
+    const operation = this.props.actionKind === UserActionKind.fund ? 'deposit' : 'withdraw'
+
     return (
       <ReactModal
         ariaHideApp={false}
@@ -55,10 +57,10 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
       >
         <Panel style={{ width: '550px', height: '580px' }}
                className={styles.modalChild}
-               data-test-id="deposit-form"
+               data-test-id={`${operation}-form`}
         >
           <PanelHeader bordered={true} className={styles.headerWithIcon}>
-            {this.header(this.props.progress)}
+            {this.header(operation, this.props.progress)}
             <TopRightCorner>
               <CloseButton theme="danger"
                            data-test-id="close-btn"
@@ -76,10 +78,9 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
     );
   }
 
-  private header(progress?: ProgressStage) {
+  private header(operation:string, progress?: ProgressStage) {
     return !progress ?
-      `${getToken(this.props.token).name} ${this.props.actionKind === UserActionKind.fund ?
-        'deposit' : 'withdraw' }` :
+      `${getToken(this.props.token).name} ${operation}` :
       'Finalize transaction';
   }
 

@@ -131,6 +131,8 @@ function argsOfPerformOperations(
     toWei(token, (op as any).amount),
     context.mcd.joins[token], context.mcd.vat,
   ];
+
+
   const buySellArgs = (op: Operation) => [
     [
       context.tokens[op.name].address, context.mcd.joins[op.name],
@@ -189,6 +191,7 @@ interface MTFundData extends PerformPlanData {
 export const mtFund = {
   ...mtPerformPlan,
   kind: TxMetaKind.fundMTAccount,
+  options: () => ({ gas: DEFAULT_GAS }),
   description: ({ token, amount }: MTFundData) =>
     <React.Fragment>
       Fund margin account with <Money value={amount} token={token} />
@@ -198,6 +201,7 @@ export const mtFund = {
 export const mtReallocate = {
   ...mtPerformPlan,
   kind: TxMetaKind.reallocateMTAccount,
+  options: () => ({ gas: DEFAULT_GAS }),
   description: () =>
     <React.Fragment>Reallocate margin account</React.Fragment>
 };
@@ -210,6 +214,7 @@ export interface MTDrawData extends PerformPlanData {
 export const mtDraw = {
   ...mtPerformPlan,
   kind: TxMetaKind.drawMTAccount,
+  options: () => ({ gas: DEFAULT_GAS }),
   description: ({ token, amount }: MTDrawData) =>
     <React.Fragment>
       Draw <Money value={amount} token={token} /> from margin account
@@ -226,6 +231,7 @@ export interface MTBuyData extends PerformPlanData {
 export const mtBuy = {
   ...mtPerformPlan,
   kind: TxMetaKind.buyMTAccount,
+  options: () => ({ gas: DEFAULT_GAS }),
   description: ({ baseToken, amount, total }: MTBuyData) =>
     <React.Fragment>
       Buy <Money value={amount} token={baseToken}/> for <Money value={total} token={'DAI'}/>
@@ -242,6 +248,7 @@ export interface MTSellData extends PerformPlanData {
 export const mtSell = {
   ...mtPerformPlan,
   kind: TxMetaKind.sellMTAccount,
+  options: () => ({ gas: DEFAULT_GAS }),
   description: ({ baseToken, amount, total }: MTSellData) =>
     <React.Fragment>
       Sell <Money value={amount} token={baseToken}/> for <Money value={total} token={'DAI'}/>
@@ -270,6 +277,7 @@ export const mtRedeem = {
     ];
   },
   kind: TxMetaKind.redeem,
+  options: () => ({ gas: DEFAULT_GAS }),
   description: ({ token, amount }: MTRedeemData) =>
     <React.Fragment>
       Redeem <Money value={amount} token={token} /> from Vat
