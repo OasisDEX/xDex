@@ -90,7 +90,6 @@ export class MTMyPositionView extends
     return (
       <div>
         <div className={styles.MTPositionPanel}>
-
           <div className={styles.MTPositionColumn}>
             <div className={styles.summaryRow}>
               <div className={styles.summaryLabel}>
@@ -100,7 +99,6 @@ export class MTMyPositionView extends
                 Long - { formatPrecision(leverage, 1) }x
               </div>
             </div>
-
             <div className={styles.summaryRow}>
               <div className={styles.summaryLabel}>
                 Stability Fee
@@ -118,7 +116,11 @@ export class MTMyPositionView extends
                 Liquidation Penalty
               </div>
               <div className={styles.summaryValue}>
-                0
+                <FormatPercent
+                  value={ma.liquidationPenalty}
+                  fallback="-"
+                  multiply={false}
+                />
               </div>
             </div>
           </div>

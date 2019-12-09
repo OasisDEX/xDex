@@ -120,6 +120,7 @@ export function aggregateMTAccountState(
       const marginables = tokenNames
         .filter(token => getToken(token).assetKind === AssetKind.marginable)
         .map(token => {
+          console.log('min debt', balanceResult[token].minDebt.toString());
           return getMarginableCore({
             name: token,
             assetKind: AssetKind.marginable,
@@ -130,7 +131,8 @@ export function aggregateMTAccountState(
             osmPriceNext: (osmPrices as any)[token].next,
             zzz: (osmParams as any)[token] as BigNumber,
             rawHistory: rawHistories[token].sort((h1, h2) => h1.timestamp - h2.timestamp),
-            minDebt: new BigNumber(20) // todo: take this value from mt balance
+            minDebt: balanceResult[token].minDebt,
+            liquidationPenalty: balanceResult[token].liquidationPenalty
           });
         });
       return calculateMTAccount(proxy, marginables, daiAllowance);

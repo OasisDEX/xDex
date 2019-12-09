@@ -57,6 +57,7 @@ export interface MTBalanceResult {
     allowance: boolean;
     fee: BigNumber;
     liquidationPenalty: BigNumber;
+    minDebt: BigNumber;
   };
 }
 
@@ -69,6 +70,8 @@ function mtBalancePostprocess([result]: [BigNumber[]], { tokens }: MTBalanceData
   const balanceResult: MTBalanceResult = {};
   tokens.forEach((token: string, i: number) => {
     const row = i * BalanceOuts;
+
+    console.log('liq penality', token, new BigNumber(result[row + 9]).div(new BigNumber(10).pow(27)).toString());
     balanceResult[token] = {
       walletBalance: amountFromWei(new BigNumber(result[row]), token),
       marginBalance: amountFromWei(new BigNumber(result[row + 1]), token),
@@ -83,6 +86,7 @@ function mtBalancePostprocess([result]: [BigNumber[]], { tokens }: MTBalanceData
         .pow(secondsPerYear)
         .minus(one).times(100),
       liquidationPenalty: new BigNumber(result[row + 9]).div(new BigNumber(10).pow(27)),
+      minDebt: amountFromWei(new BigNumber(result[row + 10]), 'DAI')
     };
   });
   return balanceResult;
