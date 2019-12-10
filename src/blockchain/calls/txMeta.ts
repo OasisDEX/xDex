@@ -29,7 +29,9 @@ export enum TxMetaKind {
   devChangePrice = 'devChangePrice',
   devPokeOsm = 'devPokeOsm',
   devPokeSpotter = 'devPokeSpotter',
-  redeem = 'redeem'
+  redeem = 'redeem',
+  join = 'join',
+  approveAdapter = 'approveAdapter',
 }
 
 export type TxMeta = {
@@ -89,4 +91,8 @@ export type TxMeta = {
   token: string
 } | {
   kind: TxMetaKind.reallocateMTAccount
+} | {
+  kind: TxMetaKind.join
+} | {
+  kind: TxMetaKind.approveAdapter
 });

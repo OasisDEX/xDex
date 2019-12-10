@@ -8,6 +8,7 @@ import { default as MediaQuery }from 'react-responsive';
 import { map } from 'rxjs/operators';
 import { setupAppContext, theAppContext } from './AppContext';
 import { BalancesView } from './balances/BalancesView';
+import {initDexCalls} from './blockchain/calls/oasisDexCalls';
 import { WalletStatus, walletStatus$ } from './blockchain/wallet';
 import { ExchangeViewTxRx } from './exchange/ExchangeView';
 import { HeaderTxRx } from './header/Header';
@@ -145,3 +146,5 @@ interface RouterContext {
 }
 
 export const routerContext = React.createContext<RouterContext>({ rootUrl: '/' });
+
+initDexCalls();
