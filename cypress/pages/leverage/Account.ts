@@ -1,5 +1,4 @@
-import { cypressVisitWithWeb3, tid } from '../../utils';
-import { Tab } from '../Tab';
+import { tid } from '../../utils';
 
 export class Account {
   public static shouldNotHaveProxy = () => {
@@ -32,6 +31,7 @@ export class Account {
     cy.get(tid('create-proxy', tid('setup-proxy'))).click();
   }
 
+  // tslint:disable-next-line:max-line-length
   // TODO: This to be changed if necessary once Kuba figures out which we are giving the allowance to
   public static setCollateralAllowance = () => {
     cy.get(tid('set-allowance', tid('cfa-btn'))).click();
@@ -51,7 +51,6 @@ export class Account {
     .click();
     cy.get(tid('withdraw-dai')).should('be.visible');
   }
-
 
   public static leveragePositionShouldBeDisplayed = () => {
     cy.get(tid('my-position')).should('be.visible');
