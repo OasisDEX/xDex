@@ -45,7 +45,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
 
   public render() {
 
-    const operation = this.props.actionKind === UserActionKind.fund ? 'deposit' : 'withdraw'
+    const operation = this.props.actionKind === UserActionKind.fund ? 'deposit' : 'withdraw';
 
     return (
       <ReactModal

@@ -6,7 +6,6 @@ import { cypressVisitWithWeb3 } from '../../utils';
 
 const format = (number: number) => `${number}.0000`;
 
-
 describe('My Position panel', () => {
 
   beforeEach(() => {
@@ -91,10 +90,10 @@ describe('My Position panel', () => {
       Position.expectAmountOfDAI(format(amount));
 
       Position.withdrawDAI(amount);
-      
+
       Position.expectAmountOfDAI(format(0));
     });
-    
+
     it('should display current price', () => {
       Position.expectPrice('174.99');
     });

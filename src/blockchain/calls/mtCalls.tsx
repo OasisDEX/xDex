@@ -132,7 +132,6 @@ function argsOfPerformOperations(
     context.mcd.joins[token], context.mcd.vat,
   ];
 
-
   const buySellArgs = (op: Operation) => [
     [
       context.tokens[op.name].address, context.mcd.joins[op.name],

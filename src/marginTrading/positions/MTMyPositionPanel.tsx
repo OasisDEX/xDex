@@ -222,7 +222,7 @@ export class MTMyPositionPanelInternal
         </Button>);
       }
     }
-    
+
     if (type === 'withdraw') {
       actions.push(<Button
         data-test-id="withdraw-collateral"
@@ -274,7 +274,7 @@ export class MTMyPositionPanelInternal
     const fundForm$ = this.props.createMTFundForm$(actionKind, token, ilk);
     const MTFundFormViewRxTx =
       connect<MTTransferFormState, ModalProps>(
-        //@ts-ignore
+        // @ts-ignore
         inject(
           MtTransferFormView,
           // cast is safe as CreateMTAllocateForm$Props

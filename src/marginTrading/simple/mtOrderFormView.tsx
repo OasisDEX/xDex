@@ -220,7 +220,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
   }
 
   private renderAccountInfo = () => {
-    
+
     const accountNotConnected = !this.props.account;
     const accountNotSetup = this.props.mta && this.props.mta.state === MTAccountState.notSetup;
 
@@ -309,6 +309,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
           className={formStyles.confirmButton}
           type="submit"
           onClick={this.switchToInstantOrderForm}
+          data-test-id="done"
         >
           Done
         </Button>
@@ -321,6 +322,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
       <>
         <SettingsIcon className={styles.settingsIcon}
                       onClick={this.switchToSettings}
+                      data-test-id="settings"
         />
         <ButtonGroup>
           <Button
@@ -429,7 +431,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
         <div className={styles.orderSummaryLabel}>
           Slippage limit
         </div>
-        <div className={styles.orderSummaryValue}>
+        <div className={styles.orderSummaryValue} data-test-id="slippage-limit">
           {
             slippageLimit &&
             <FormatPercent
@@ -463,7 +465,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
             ref={ (el: any) =>
               this.slippageLimitInput = (el && ReactDOM.findDOMNode(el) as HTMLElement) || undefined
             }
-            data-test-id="slippage-limit"
+            data-test-id="slippage-limit-input"
             type="text"
             mask={createNumberMask({
               allowDecimal: true,
@@ -643,7 +645,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
     return (
       <div>
         { this.amountGroup() }
-        <Error field="amount" messages={this.props.messages} />
+        <Error field="amount" messages={this.props.messages} tid="amount-error"/>
       </div>
     );
   }
@@ -686,7 +688,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
           </InputGroupAddon>
 
         </InputGroup>
-        <Error field="total" messages={this.props.messages} />
+        <Error field="total" messages={this.props.messages} tid="total-error"/>
       </div>
 
       // {/*<div>*/}
@@ -762,13 +764,17 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
 
 }
 
-const Error = ({ field, messages } : { field: string, messages?: Message[] }) => {
+const Error = ({ field, messages, tid } : {
+  field: string,
+  messages?: Message[],
+  tid?: string
+}) => {
   const myMsg = (messages || [])
     .filter((message: Message) => message.field === field)
     .sort((m1, m2) => m2.priority - m1.priority)
     .map(msg => messageContent(msg));
   return (
-    <ErrorMessage messages={myMsg} style={{ height: '28px' }}/>
+    <ErrorMessage messages={myMsg} style={{ height: '28px' }} data-test-id={tid}/>
   );
 };
 
