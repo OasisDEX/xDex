@@ -433,7 +433,7 @@ function addAmount(total: BigNumber | undefined, state: MTSimpleFormState): MTSi
         ...state.messages,
         {
           kind: MessageKind.impossibleCalculateTotal,
-          message: 'orderbook to shallow',
+          message: 'orderbook too shallow',
           priority: 1,
           field: 'total'
         }

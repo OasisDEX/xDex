@@ -137,11 +137,20 @@ function argsOfPerformOperations(
     context.mcd.joins[token],
   ];
 
+<<<<<<< HEAD
   const fundDaiArgs = (op: Operation, token:string) =>
                       [...fundArgs(op, token), context.mcd.vat];
 
   const drawArgs = (op: Operation, token: string) => [
     context.cdpManager,
+=======
+  const buySellArgs = (op: Operation) => [
+    [
+      context.tokens[op.name].address, context.mcd.joins[op.name],
+      context.tokens.DAI.address, context.mcd.joins.DAI,
+      context.cdpManager, context.otc.address, context.mcd.vat,
+    ],
+>>>>>>> Handle form calculation cases when the user hasn't locked any collateral yet
     Web3Utils.fromAscii(context.mcd.ilks[op.name]),
     toWei(token, (op as any).amount),
     context.mcd.joins[token],

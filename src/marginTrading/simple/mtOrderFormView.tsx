@@ -277,7 +277,7 @@ export class MtSimpleOrderFormBody
   }
 
   private renderAccountInfo = () => {
-    
+
     const accountNotConnected = !this.props.account;
     const accountNotSetup = this.props.mta && this.props.mta.state === MTAccountState.notSetup;
 
@@ -479,7 +479,7 @@ export class MtSimpleOrderFormBody
           <WarningTooltip id="slippage-limit"
                           text={slippageLimitTooltip}/>
         </div>
-        <div className={styles.orderSummaryValue}>
+        <div className={styles.orderSummaryValue} data-test-id="slippage-limit">
           {
             slippageLimit &&
             <FormatPercent
@@ -513,7 +513,7 @@ export class MtSimpleOrderFormBody
             ref={ (el: any) =>
               this.slippageLimitInput = (el && ReactDOM.findDOMNode(el) as HTMLElement) || undefined
             }
-            data-test-id="slippage-limit"
+            data-test-id="slippage-limit-input"
             type="text"
             mask={createNumberMask({
               allowDecimal: true,
@@ -732,7 +732,7 @@ export class MtSimpleOrderFormBody
     return (
       <div>
         { this.amountGroup() }
-        <Error field="amount" messages={this.props.messages} />
+        <Error field="amount" messages={this.props.messages} tid="amount-error"/>
       </div>
     );
   }
@@ -785,7 +785,7 @@ export class MtSimpleOrderFormBody
             {quoteToken}
           </InputGroupAddon>
         </InputGroup>
-        <Error field="total" messages={this.props.messages} />
+        <Error field="total" messages={this.props.messages} tid="total-error"/>
       </div>
     );
   }
@@ -1122,13 +1122,17 @@ export class MtSimpleOrderFormView extends React.Component<
   }
 }
 
-const Error = ({ field, messages } : { field: string, messages?: Message[] }) => {
+const Error = ({ field, messages, tid } : {
+  field: string,
+  messages?: Message[],
+  tid?: string
+}) => {
   const myMsg = (messages || [])
     .filter((message: Message) => message.field === field)
     .sort((m1, m2) => m2.priority - m1.priority)
     .map(msg => messageContent(msg));
   return (
-    <ErrorMessage messages={myMsg} style={{ height: '28px' }}/>
+    <ErrorMessage messages={myMsg} style={{ height: '28px' }} data-test-id={tid}/>
   );
 };
 

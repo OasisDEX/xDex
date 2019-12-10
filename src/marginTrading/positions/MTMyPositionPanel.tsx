@@ -352,7 +352,7 @@ export class MTMyPositionPanelInternal
         </Button>);
       }
     }
-    
+
     if (type === 'withdraw') {
       actions.push(<Button
         data-test-id="withdraw-collateral"
