@@ -270,12 +270,7 @@ export class MTMyPositionPanelInternal
     const fundForm$ = this.props.createMTFundForm$(actionKind, token, ilk);
     const MTFundFormViewRxTx =
       connect<MTTransferFormState, ModalProps>(
-        inject(
-          MtTransferFormView,
-          // cast is safe as CreateMTAllocateForm$Props
-          // is not used inside MtTransferFormView!
-          (this.props as any) as (CreateMTAllocateForm$Props & ModalOpenerProps)
-        ),
+        MtTransferFormView,
         fundForm$
       );
     this.props.open(MTFundFormViewRxTx);
