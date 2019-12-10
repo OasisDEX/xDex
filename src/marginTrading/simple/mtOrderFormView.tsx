@@ -399,6 +399,7 @@ export class MtSimpleOrderFormBody
           {
             liquidationPrice.gt(zero) ?
               <Money
+                data-test-id="liquidation-price"
                 value={liquidationPrice}
                 token="USD"
                 fallback="-"
@@ -408,7 +409,7 @@ export class MtSimpleOrderFormBody
                     [styles.orderSummaryValueNegative]: baseTokenAsset && !baseTokenAsset.safe,
                   })
                 }
-              /> : <span>-</span>
+              /> : <span data-test-id="liquidation-price">-</span>
           }
           {
             this.props.liquidationPricePost &&
@@ -418,6 +419,7 @@ export class MtSimpleOrderFormBody
               {
                 liquidationPricePost.gt(zero) ?
                   <Money
+                    data-test-id="estimated-liquidation-price"
                     value={liquidationPricePost}
                     token="USD"
                     fallback="-"
@@ -427,7 +429,7 @@ export class MtSimpleOrderFormBody
                         [styles.orderSummaryValueNegative]: !this.props.isSafePost,
                       })
                     }
-                  /> : <span>-</span>
+                  /> : <span data-test-id="estimated-liquidation-price">-</span>
               }
             </>
           }
@@ -696,7 +698,7 @@ export class MtSimpleOrderFormBody
             <WarningTooltip id="dai-balance"
                             text={daiBalanceTooltip}/>
           </div>
-          <div className={styles.orderSummaryValue} data-test-id="dai-balance">
+          <div className={styles.orderSummaryValue}>
             { baseTokenAsset && baseTokenAsset.debt.gt(zero) ?
               <CryptoMoney
                 value={baseTokenAsset.debt.times(minusOne)}
