@@ -49,7 +49,16 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
 
   public render() {
 
-    // const ma = findMarginableAsset(this.props.ilk, mta);
+    const onModalRef = (node: any) => {
+      if (node) {
+        node.addEventListener('click', (e: any) => {
+          e.stopPropagation();
+          if (e.target.classList.contains(styles.modal)) {
+            this.close();
+          }
+        });
+      }
+    };
 
     const allowance = (mta: MTAccount, token: string) =>  token === 'DAI' ? mta.daiAllowance :
       findMarginableAsset(token, mta)!.allowance;
@@ -58,6 +67,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
 
     const startIndex = this.props.startTab ? onboardingTabs.indexOf(this.props.startTab) : 0;
 
+
     return (
       <ReactModal
         ariaHideApp={false}
@@ -65,6 +75,8 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
         className={styles.modal}
         overlayClassName={styles.modalOverlay}
         closeTimeoutMS={250}
+        overlayRef={onModalRef}
+        shouldCloseOnEsc={true}
       >
         <Panel style={{ width: '450px', height: '575px' }} className={styles.modalChild}>
           <div className={styles.tabs}>
@@ -142,14 +154,6 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
       value: value === '' ? undefined : new BigNumber(value)
     });
   }
-
-  // private ilkChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-  //   const value = e.target.value;
-  //   this.props.change({
-  //     value,
-  //     kind: TransferFormChangeKind.ilkFieldChange,
-  //   });
-  // }
 
   private close = () => {
     this.props.cancel();
