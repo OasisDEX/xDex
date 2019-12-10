@@ -33,3 +33,5 @@ export const infoBox: string;
 export const InfoRowLabel: string;
 export const infoRowLabel: string;
 export const notSetupBorder: string;
+export const onboardingPanel: string;
+export const onboardingParagraph: string;

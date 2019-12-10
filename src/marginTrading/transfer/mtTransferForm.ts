@@ -61,14 +61,13 @@ export type Message = {
 
 export type ManualChange = TokenChange | AmountFieldChange | IlkFieldChange;
 
-enum MTTransferFormTab {
+export enum MTTransferFormTab {
   proxy = 'proxy',
   allowance = 'allowance',
   transfer = 'transfer',
 }
 
 export interface MTTransferFormState extends HasGasEstimation {
-  // tabsState:
   readyToProceed?: boolean;
   actionKind: UserActionKind.draw | UserActionKind.fund;
   mta?: MTAccount;
@@ -91,6 +90,7 @@ export interface MTTransferFormState extends HasGasEstimation {
   plan?: Operation[] | Impossible;
   progress?: ProgressStage;
   tab?: MTTransferFormTab;
+  startTab?: MTTransferFormTab;
   change: (change: ManualChange) => void;
   transfer: (state: MTTransferFormState) => void;
   setup: (state: MTTransferFormState) => void;
@@ -123,9 +123,7 @@ type MTSetupFormChange =
   ProgressChange;
 
 function initialTab(mta: MTAccount, name: string) {
-
   if (mta.proxy.address !== nullAddress) {
-    // if (name === 'DAI' && mta.daiAllowance || findMarginableAsset(name, mta)!.allowance) {
     if (name === 'DAI') {
       return mta.daiAllowance ? MTTransferFormTab.transfer : MTTransferFormTab.allowance;
     }
@@ -162,6 +160,7 @@ function applyChange(state: MTTransferFormState, change: MTSetupFormChange): MTT
       return { ...state,
         mta: change.mta,
         tab: !state.tab ? initialTab(change.mta, state.token) : state.tab,
+        startTab: !state.startTab ? initialTab(change.mta, state.token) : state.startTab,
         gasEstimationStatus: GasEstimationStatus.unset };
     case FormChangeKind.balancesChange:
       return { ...state,

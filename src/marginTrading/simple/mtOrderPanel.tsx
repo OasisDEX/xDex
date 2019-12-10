@@ -1,19 +1,18 @@
 import * as React from 'react';
+import { connect } from '../../utils/connect';
 import { Hr } from '../../utils/layout/LayoutHelpers';
 import { LoadableWithTradingPair } from '../../utils/loadable';
 import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
+import { ModalOpenerProps, ModalProps } from '../../utils/modal';
 import { PanelHeader } from '../../utils/panel/Panel';
 import { zero } from '../../utils/zero';
-import {findAsset, findMarginableAsset, MarginableAsset, UserActionKind} from '../state/mtAccount';
-import {CreateMTFundForm$, MTTransferFormState} from '../transfer/mtTransferForm';
+import { findMarginableAsset, MarginableAsset, UserActionKind } from '../state/mtAccount';
+import { CreateMTFundForm$, MTTransferFormState } from '../transfer/mtTransferForm';
+import { MtTransferFormView } from '../transfer/mtTransferFormView';
 import { MTSimpleFormState } from './mtOrderForm';
 import { MtSimpleOrderFormView } from './mtOrderFormView';
 import * as styles from './mtOrderFormView.scss';
-import {ModalOpenerProps, ModalProps} from "../../utils/modal";
-import {MtTransferFormView} from "../transfer/mtTransferFormView";
-import {connect} from "../../utils/connect";
-import {CreateMTAllocateForm$Props} from "../allocate/mtOrderAllocateDebtFormView";
-import {inject} from "../../utils/inject";
+import {Button} from '../../utils/forms/Buttons';
 
 const dimensions = {
   height: '605px',
@@ -50,10 +49,14 @@ export class MTSimpleOrderPanel extends React.Component<
     if (this.props.status === 'loaded') {
       const formState = this.props.value as MTSimpleFormState;
 
-      // TODO add loader when no ma!
-
       const { mta } = formState;
       const ma = findMarginableAsset(formState.baseToken, mta);
+
+      if (!ma) {
+        return <div style={dimensions}>
+          <LoadingIndicator size="lg"/>
+        </div>;
+      }
       if (mta && mta.proxy && ma && (ma.balance.gt(zero) || ma.dai.gt(zero))) {
         return (<MtSimpleOrderFormView {...{ ...this.props, ...formState }} />);
       }
@@ -72,16 +75,27 @@ export class MTSimpleOrderPanel extends React.Component<
 
   public CallForDeposit(ma?: MarginableAsset) {
     return (
-        <>
-          <button
+        <div className={styles.onboardingPanel} style={dimensions}>
+          <h3>Deposit into Leverage Account</h3>
+          <div className={styles.onboardingParagraph}>
+            Before opening a new position, deposit WETH<br/>
+            or DAI into your Leverage Trading Account
+          </div>
+
+          <Button
+            size="md"
+            color="primary"
             disabled={!ma}
             onClick={() => this.transfer(UserActionKind.fund, 'DAI', ma!.name)}
-          >Deposit DAI</button>
-          <button
+          >Deposit DAI</Button>
+          <br/>
+          <Button
+            size="md"
+            color="primary"
             disabled={!ma}
             onClick={() => this.transfer(UserActionKind.fund, ma!.name, ma!.name)}
-          >Deposit {ma && ma!.name}</button>
-        </>
+          >Deposit {ma && ma!.name}</Button>
+        </div>
     );
   }
 

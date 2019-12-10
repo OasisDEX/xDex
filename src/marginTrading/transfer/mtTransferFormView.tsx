@@ -3,8 +3,8 @@ import * as React from 'react';
 import * as ReactModal from 'react-modal';
 
 import classnames from 'classnames';
+import { Dictionary } from 'ramda';
 import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
-import { theAppContext } from '../../AppContext';
 import { getToken } from '../../blockchain/config';
 import { nullAddress } from '../../blockchain/utils';
 import { BigNumberInput } from '../../utils/bigNumberInput/BigNumberInput';
@@ -15,9 +15,8 @@ import { Button } from '../../utils/forms/Buttons';
 import { ErrorMessage } from '../../utils/forms/ErrorMessage';
 import { InputGroup, InputGroupAddon } from '../../utils/forms/InputGroup';
 import { GasCost } from '../../utils/gasCost/GasCost';
-import { SvgImage } from '../../utils/icons/utils';
 import { BorderBox, Hr } from '../../utils/layout/LayoutHelpers';
-import { ModalOpenerProps, ModalProps } from '../../utils/modal';
+import { ModalProps } from '../../utils/modal';
 import { Panel, PanelBody, PanelFooter, PanelHeader } from '../../utils/panel/Panel';
 import { Muted } from '../../utils/text/Text';
 import { TransactionStateDescription } from '../../utils/text/TransactionStateDescription';
@@ -29,13 +28,18 @@ import {
   MTAccountState,
   UserActionKind,
 } from '../state/mtAccount';
-import closeIconSvg from './close-icon.svg';
 import {
-  Message, MessageKind, MTTransferFormState
+  Message, MessageKind, MTTransferFormState, MTTransferFormTab
 } from './mtTransferForm';
 import * as styles from './mtTransferFormView.scss';
 
 type MTFundFormProps = MTTransferFormState & ModalProps;
+
+const tabLabels: Dictionary<string> = {
+  [MTTransferFormTab.proxy]: 'Deploy proxy',
+  [MTTransferFormTab.allowance]: 'Set allowance',
+  [MTTransferFormTab.transfer]: 'Deposit',
+};
 
 export class MtTransferFormView extends React.Component<MTFundFormProps> {
 
@@ -50,6 +54,10 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
     const allowance = (mta: MTAccount, token: string) =>  token === 'DAI' ? mta.daiAllowance :
       findMarginableAsset(token, mta)!.allowance;
 
+    const onboardingTabs = Object.keys(MTTransferFormTab);
+
+    const startIndex = this.props.startTab ? onboardingTabs.indexOf(this.props.startTab) : 0;
+
     return (
       <ReactModal
         ariaHideApp={false}
@@ -58,28 +66,49 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
         overlayClassName={styles.modalOverlay}
         closeTimeoutMS={250}
       >
-        <Panel style={{ width: '550px', height: '580px' }} className={styles.modalChild}>
-          <PanelHeader bordered={true} className={styles.headerWithIcon}>
-            {this.header(this.props.progress)}
-            <div onClick={this.close} className={styles.closeButton} >
-              <SvgImage image={closeIconSvg}/>
-            </div>
-          </PanelHeader>
-          { this.props.mta && this.props.mta.proxy && this.props.mta.proxy.address === nullAddress ?
-            <>proxy doesn't exist
-              <theAppContext.Consumer>
-                { ({ MTSetupButtonRxTx }) =>
-                   <MTSetupButtonRxTx />
+        <Panel style={{ width: '450px', height: '575px' }} className={styles.modalChild}>
+          <div className={styles.tabs}>
+          {
+            onboardingTabs.filter(
+              (tab: string, index: number) => (index >= startIndex)
+            ).map(tab => {
+              return (<div
+                className={
+                  classnames({
+                    [styles.tab]: true,
+                    [styles.tabActive]: (tab === this.props.tab)
+                  })
                 }
-              </theAppContext.Consumer>
-
-            </> :
+                key={tab}>{tabLabels[tab]}</div>);
+            })
+          }
+          </div>
+          { this.props.mta && this.props.mta.proxy && this.props.mta.proxy.address === nullAddress ?
+            <div className={styles.onboardingPanel}>
+              <h3 className={styles.onboardingHeader}>Deploy proxy</h3>
+              <div className={styles.onboardingParagraph}>
+                Proxies are used to bundle multiple transactions into one,
+                saving transaction time and gas costs. This only has to be done once.
+              </div>
+              <Button
+                size="md"
+                color="primary"
+                onClick={() => this.setup()}
+              >Deploy Proxy</Button>
+            </div> :
             this.props.mta && !allowance(this.props.mta, this.props.token) ?
-              <> No allowance
-              <button
-              onClick={() => this.allowance()}
-              >Set allowance</button>
-              </>
+              <div className={styles.onboardingPanel}>
+                <h3 className={styles.onboardingHeader}>Set allowance</h3>
+                <div className={styles.onboardingParagraph}>
+                  This permission allows Oasis smart contracts to interact with your {name}.
+                  This has to be done for each asset type.
+                </div>
+              <Button
+                size="md"
+                color="primary"
+                onClick={() => this.allowance()}
+              >Set allowance</Button>
+              </div>
               : <></>
           }
           { this.props.mta && allowance(this.props.mta, this.props.token) && this.props.mta.proxy ?
@@ -145,10 +174,9 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
     && !this.props.liquidationPricePost.isNaN() ? this.props.liquidationPricePost : zero;
     return(
       <>
-        <div className={styles.summaryBox}>
           <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
             <div className={styles.orderSummaryLabel}>
-              Purch. power
+              Purchasing Power
             </div>
             <div className={styles.orderSummaryValue}>
               {
@@ -176,7 +204,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
           </div>
           <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
             <div className={styles.orderSummaryLabel}>
-              Balance
+              Account Balance
             </div>
             <div className={styles.orderSummaryValue}>
               { baseAsset && !baseAsset.balance.isNaN() ?
@@ -204,7 +232,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
           </div>
           <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
             <div className={styles.orderSummaryLabel}>
-              Liqu. Price
+              Liquidation Price
             </div>
             <div className={styles.orderSummaryValue}>
               <Money
@@ -267,28 +295,6 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
               }
             </div>
           </div>
-        </div>
-
-        <div className={styles.InfoRow}>
-          <div className={styles.InfoBox}>
-            <div className={styles.InfoRowLabel}>Leverage</div>
-            <div>
-              <span>-</span>
-            </div>
-          </div>
-          <div className={styles.InfoBox}>
-            <div className={styles.InfoRowLabel}>Liqu. Fee</div>
-            <span>-</span>
-
-          </div>
-          <div className={styles.InfoBox}>
-            <div className={styles.InfoRowLabel}>Interest Rate</div>
-            <div>
-              <span>-</span>
-
-            </div>
-          </div>
-        </div>
 
         <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
           <div className={styles.orderSummaryLabel}>
@@ -354,15 +360,20 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
   }
 
   private transfer() {
-
     if (!this.props.mta || this.props.mta.state === MTAccountState.notSetup || !this.props.amount) {
       return;
     }
     this.props.transfer(this.props);
   }
 
-  private allowance() {
+  private setup() {
+    if (!this.props.mta) {
+      return;
+    }
+    this.props.setup(this.props);
+  }
 
+  private allowance() {
     if (!this.props.mta || this.props.mta.state === MTAccountState.notSetup) {
       return;
     }
