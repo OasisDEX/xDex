@@ -17,6 +17,7 @@ const summary = (property: string) =>
   cy.get(tid('my-position', tid('summary', tid(property))));
 
 export class Position {
+
   public static withdrawCollateral = (amount: number) =>
     execute('withdraw', amount, 'collateral')
 
@@ -50,8 +51,8 @@ export class Position {
     summary('dai-balance').contains(amount)
 
   public static expectPrice = (price: string | RegExp) =>
-    summary('price').contains(price)
+    summary('price').contains(price);
 
   public static expectEquity = (amount: string | RegExp) =>
-    summary('equity').contains(amount)
-}
+    summary('equity').contains(amount);
+  }
