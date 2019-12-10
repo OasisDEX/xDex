@@ -360,6 +360,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
           {
             liquidationPrice.gt(zero) ?
               <Money
+                data-test-id="liquidation-price"
                 value={liquidationPrice}
                 token="USD"
                 fallback="-"
@@ -369,7 +370,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
                     [styles.orderSummaryValueNegative]: baseTokenAsset && !baseTokenAsset.safe,
                   })
                 }
-              /> : <span>-</span>
+              /> : <span data-test-id="liquidation-price">-</span>
           }
           {
             this.props.liquidationPricePost &&
@@ -380,6 +381,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
               {
                 liquidationPricePost.gt(zero) ?
                   <Money
+                    data-test-id="estimated-liquidation-price"
                     value={liquidationPricePost}
                     token="USD"
                     fallback="-"
@@ -389,7 +391,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
                         [styles.orderSummaryValueNegative]: !this.props.isSafePost,
                       })
                     }
-                  /> : <span>-</span>
+                  /> : <span data-test-id="estimated-liquidation-price">-</span>
               }
             </>
           }
@@ -582,9 +584,10 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
           <div className={styles.orderSummaryLabel}>
             Balance
           </div>
-          <div className={styles.orderSummaryValue} data-test-id="col-balance">
+          <div className={styles.orderSummaryValue}>
             { baseTokenAsset && !baseTokenAsset.balance.isNaN() ?
               <Money
+                data-test-id="col-balance"
                 value={baseTokenAsset.balance}
                 token={this.props.baseToken}
                 fallback="-"
@@ -593,9 +596,10 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
             {
               this.props.balancePost &&
               <>
-                <span className={styles.transitionArrow} />
+                <span className={styles.transitionArrow}/>
                 { !this.props.balancePost.isNaN() ?
                   <Money
+                    data-test-id="estimated-col-balance"
                     value={this.props.balancePost}
                     token={this.props.baseToken}
                     fallback="-"
@@ -609,14 +613,16 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
           <div className={styles.orderSummaryLabel}>
             DAI Balance
           </div>
-          <div className={styles.orderSummaryValue} data-test-id="dai-balance">
+          <div className={styles.orderSummaryValue}>
             { baseTokenAsset && baseTokenAsset.debt.gt(zero) ?
               <Money
+                data-test-id="dai-balance"
                 value={baseTokenAsset.debt.times(minusOne)}
                 token={this.props.quoteToken}
                 fallback="-"
               /> : baseTokenAsset && baseTokenAsset.dai ?
                 <Money
+                  data-test-id="dai-balance"
                   value={baseTokenAsset.dai}
                   token={this.props.quoteToken}
                   fallback="-"
@@ -625,9 +631,10 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
             {
               this.props.daiBalancePost &&
               <>
-                <span className={styles.transitionArrow} />
+                <span className={styles.transitionArrow}/>
                 { !this.props.daiBalancePost.isNaN() ?
                   <Money
+                    data-test-id="estimated-dai-balance"
                     value={this.props.daiBalancePost}
                     token={this.props.quoteToken}
                     fallback="-"
