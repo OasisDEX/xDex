@@ -6,7 +6,7 @@ export const migrationBtnInMarket = () => cy.get(tid('update-btn-market'));
 export const migrationBtnInAccount = () => {
   cy.get(
     tid('SAI-overview',
-        tid('dropdown')
+        tid('asset-actions-dropdown')
     )
   ).trigger('mouseover');
 

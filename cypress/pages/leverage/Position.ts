@@ -51,8 +51,8 @@ export class Position {
     summary('dai-balance').contains(amount)
 
   public static expectPrice = (price: string | RegExp) =>
-    summary('price').contains(price);
+    summary('price').contains(price)
 
   public static expectEquity = (amount: string | RegExp) =>
-    summary('equity').contains(amount);
-  }
+    summary('equity').contains(amount)
+}

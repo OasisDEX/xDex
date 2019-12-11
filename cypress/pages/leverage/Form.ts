@@ -29,7 +29,7 @@ export class Form {
     orderForm('dai-balance').contains(value)
 
   public static currentLiquidationPrice = (value: string | RegExp) =>
-    orderForm('liquidation-price').contains(value);  
+    orderForm('liquidation-price').contains(value)
 
   public static currentPriceIs = (value: string | RegExp) =>
     orderForm('price').contains(value)
@@ -39,12 +39,12 @@ export class Form {
 
   public static estimatedBalanceIs = (value: string | RegExp) =>
     orderForm('estimated-col-balance').contains(value)
-  
+
   public static estimatedDaiBalanceIs = (value: string) =>
     orderForm('estimated-dai-balance').contains(value)
 
   public static estimatedLiquidationPrice = (value: string | RegExp) =>
-    orderForm('estimated-liquidation-price').contains(value);  
+    orderForm('estimated-liquidation-price').contains(value)
 
   public static leverageIs = (value: string | RegExp) =>
     orderForm('leverage').contains(value)
