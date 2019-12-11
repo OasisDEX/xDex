@@ -24,6 +24,7 @@ import { curry } from 'ramda';
 import { Balances } from '../../balances/balances';
 import { Calls, Calls$, ReadCalls, ReadCalls$ } from '../../blockchain/calls/calls';
 import { AssetKind } from '../../blockchain/config';
+import { nullAddress } from '../../blockchain/utils';
 import { Orderbook } from '../../exchange/orderbook/orderbook';
 import { combineAndMerge } from '../../utils/combineAndMerge';
 import { description, impossible, Impossible, isImpossible } from '../../utils/impossible';
@@ -41,7 +42,6 @@ import {
   calculateMarginable,
   realPurchasingPowerMarginable,
 } from '../state/mtCalculate';
-import {nullAddress} from "../../blockchain/utils";
 
 export enum MessageKind {
   insufficientAmount = 'insufficientAmount',
@@ -400,7 +400,7 @@ function prepareSetup(calls$: Calls$)
 
   const setupChange$ = new Subject<ProgressChange>();
 
-  function setup(state: MTTransferFormState) {
+  function setup(_state: MTTransferFormState) {
 
     const changes$: Observable<ProgressChange> = calls$.pipe(
         first(),

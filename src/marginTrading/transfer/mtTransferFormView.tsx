@@ -16,8 +16,9 @@ import { ErrorMessage } from '../../utils/forms/ErrorMessage';
 import { InputGroup, InputGroupAddon } from '../../utils/forms/InputGroup';
 import { GasCost } from '../../utils/gasCost/GasCost';
 import { BorderBox, Hr } from '../../utils/layout/LayoutHelpers';
+import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
 import { ModalProps } from '../../utils/modal';
-import { Panel, PanelBody, PanelFooter, PanelHeader } from '../../utils/panel/Panel';
+import { Panel, PanelBody, PanelFooter } from '../../utils/panel/Panel';
 import { Muted } from '../../utils/text/Text';
 import { TransactionStateDescription } from '../../utils/text/TransactionStateDescription';
 import { zero } from '../../utils/zero';
@@ -52,7 +53,6 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
     const onModalRef = (node: any) => {
       if (node) {
         node.addEventListener('click', (e: any) => {
-          e.stopPropagation();
           if (e.target.classList.contains(styles.modal)) {
             this.close();
           }
@@ -66,7 +66,6 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
     const onboardingTabs = Object.keys(MTTransferFormTab);
 
     const startIndex = this.props.startTab ? onboardingTabs.indexOf(this.props.startTab) : 0;
-
 
     return (
       <ReactModal
@@ -82,7 +81,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
           <div className={styles.tabs}>
           {
             onboardingTabs.filter(
-              (tab: string, index: number) => (index >= startIndex)
+              (_tab: string, index: number) => (index >= startIndex)
             ).map(tab => {
               return (<div
                 className={
@@ -95,44 +94,56 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
             })
           }
           </div>
-          { this.props.mta && this.props.mta.proxy && this.props.mta.proxy.address === nullAddress ?
-            <div className={styles.onboardingPanel}>
-              <h3 className={styles.onboardingHeader}>Deploy proxy</h3>
-              <div className={styles.onboardingParagraph}>
-                Proxies are used to bundle multiple transactions into one,
-                saving transaction time and gas costs. This only has to be done once.
-              </div>
-              <Button
-                size="md"
-                color="primary"
-                onClick={() => this.setup()}
-              >Deploy Proxy</Button>
-            </div> :
-            this.props.mta && !allowance(this.props.mta, this.props.token) ?
-              <div className={styles.onboardingPanel}>
-                <h3 className={styles.onboardingHeader}>Set allowance</h3>
-                <div className={styles.onboardingParagraph}>
-                  This permission allows Oasis smart contracts to interact with your {name}.
-                  This has to be done for each asset type.
-                </div>
-              <Button
-                size="md"
-                color="primary"
-                onClick={() => this.allowance()}
-              >Set allowance</Button>
-              </div>
-              : <></>
-          }
-          { this.props.mta && allowance(this.props.mta, this.props.token) && this.props.mta.proxy ?
+
+          { this.props.progress === ProgressStage.waitingForApproval
+            || this.props.progress === ProgressStage.waitingForConfirmation ?
             <>
-              <PanelBody paddingTop={true} style={{ height: '287px' }}>
-                {this.AccountSummary()}
-                <Hr color="dark" className={styles.hrBigMargin}/>
-                {this.FormOrTransactionState()}
-              </PanelBody>
-              {this.Buttons()}
+              <LoadingIndicator />
             </>
             : <>
+
+              {this.props.mta && this.props.mta.proxy
+                && this.props.mta.proxy.address === nullAddress ?
+                <div className={styles.onboardingPanel}>
+                  <h3 className={styles.onboardingHeader}>Deploy proxy</h3>
+                  <div className={styles.onboardingParagraph}>
+                    Proxies are used to bundle multiple transactions into one,
+                    saving transaction time and gas costs. This only has to be done once.
+                  </div>
+                  <Button
+                    size="md"
+                    color="primary"
+                    onClick={() => this.setup()}
+                  >Deploy Proxy</Button>
+                </div> :
+                this.props.mta && !allowance(this.props.mta, this.props.token) ?
+                  <div className={styles.onboardingPanel}>
+                    <h3 className={styles.onboardingHeader}>Set allowance</h3>
+                    <div className={styles.onboardingParagraph}>
+                      This permission allows Oasis smart contracts to interact with your {name}.
+                      This has to be done for each asset type.
+                    </div>
+                    <Button
+                      size="md"
+                      color="primary"
+                      onClick={() => this.allowance()}
+                    >Set allowance</Button>
+                  </div>
+                  : <></>
+              }
+              {this.props.mta && allowance(this.props.mta, this.props.token)
+                && this.props.mta.proxy ?
+                <>
+                  <PanelBody paddingTop={true} style={{ height: '287px' }}>
+                    {this.AccountSummary()}
+                    <Hr color="dark" className={styles.hrBigMargin}/>
+                    {this.FormOrTransactionState()}
+                  </PanelBody>
+                  {this.Buttons()}
+                </>
+                : <>
+                </>
+              }
             </>
           }
         </Panel>
@@ -140,12 +151,12 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
     );
   }
 
-  private header(progress?: ProgressStage) {
-    return !progress ?
-      `${getToken(this.props.token).name} ${this.props.actionKind === UserActionKind.fund ?
-        'deposit' : 'withdraw' }` :
-      'Finalize transaction';
-  }
+  // private header(progress?: ProgressStage) {
+  //   return !progress ?
+  //     `${getToken(this.props.token).name} ${this.props.actionKind === UserActionKind.fund ?
+  //       'deposit' : 'withdraw' }` :
+  //     'Finalize transaction';
+  // }
 
   private amountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/,/g, '');

@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { connect } from '../../utils/connect';
+import { Button } from '../../utils/forms/Buttons';
 import { Hr } from '../../utils/layout/LayoutHelpers';
 import { LoadableWithTradingPair } from '../../utils/loadable';
 import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
@@ -12,7 +13,6 @@ import { MtTransferFormView } from '../transfer/mtTransferFormView';
 import { MTSimpleFormState } from './mtOrderForm';
 import { MtSimpleOrderFormView } from './mtOrderFormView';
 import * as styles from './mtOrderFormView.scss';
-import {Button} from '../../utils/forms/Buttons';
 
 const dimensions = {
   height: '605px',
@@ -94,7 +94,7 @@ export class MTSimpleOrderPanel extends React.Component<
             color="primary"
             disabled={!ma}
             onClick={() => this.transfer(UserActionKind.fund, ma!.name, ma!.name)}
-          >Deposit {ma && ma!.name}</Button>
+          >Deposit {ma && ma.name}</Button>
         </div>
     );
   }
