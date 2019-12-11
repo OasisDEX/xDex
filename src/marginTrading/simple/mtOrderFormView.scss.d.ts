@@ -35,3 +35,4 @@ export const infoRowLabel: string;
 export const notSetupBorder: string;
 export const onboardingPanel: string;
 export const onboardingParagraph: string;
+export const orderPanel: string;

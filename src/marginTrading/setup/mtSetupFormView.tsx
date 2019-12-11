@@ -47,7 +47,7 @@ export class MTSetupModal extends React.Component<MTSetupProgressState & ModalPr
         overlayClassName={styles.modalOverlay}
         closeTimeoutMS={250}
       >
-        <Panel style={{ width: '450px', height: '575px' }} className={styles.modalChild}>
+        <Panel className={styles.modalChild}>
           <PanelHeader bordered={true}>Proxy setup</PanelHeader>
           <PanelBody paddingVertical={true}
                      style={{ height: '287px' }}>

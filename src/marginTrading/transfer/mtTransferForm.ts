@@ -134,13 +134,12 @@ function initialTab(mta: MTAccount, name: string) {
 }
 
 function nextTab(tab: MTTransferFormTab | undefined) {
-  if (tab === MTTransferFormTab.proxy) {
-    return MTTransferFormTab.allowance;
+  const { proxy, allowance, transfer } = MTTransferFormTab;
+  switch (tab) {
+    case proxy: return allowance;
+    case allowance: return transfer;
+    default: return transfer;
   }
-  if (tab === MTTransferFormTab.allowance) {
-    return MTTransferFormTab.transfer;
-  }
-  return MTTransferFormTab.transfer;
 }
 
 function applyChange(state: MTTransferFormState, change: MTSetupFormChange): MTTransferFormState {
@@ -180,7 +179,7 @@ function applyChange(state: MTTransferFormState, change: MTSetupFormChange): MTT
         tab: change.progress === ProgressStage.done ? nextTab(state.tab) : state.tab,
         progress:
           change.progress === ProgressStage.done && state.tab !== MTTransferFormTab.transfer ?
-          undefined : change.progress
+            undefined : change.progress
       };
     // default:
     //   const _exhaustiveCheck: never = change; // tslint:disable-line
@@ -291,8 +290,8 @@ function updatePlan(state: MTTransferFormState): MTTransferFormState {
   const daiBalancePost = postTradeAsset.debt.gt(zero) ?
     postTradeAsset.debt.times(minusOne) : postTradeAsset.dai;
   const realPurchasingPowerPost = realPurchasingPowerMarginable(
-      postTradeAsset,
-      state.orderbook.sell);
+    postTradeAsset,
+    state.orderbook.sell);
 
   return { ...state,
     messages,
@@ -330,6 +329,15 @@ function estimateGasPrice(
       calls.mtDrawEstimateGas : calls.mtFundEstimateGas;
     return call({ proxy, plan });
   });
+}
+
+function transactionHandler() {
+  return transactionToX(
+    progressChange(ProgressStage.waitingForApproval),
+    progressChange(ProgressStage.waitingForConfirmation),
+    progressChange(ProgressStage.fiasco),
+    () => of(progressChange(ProgressStage.done))
+  );
 }
 
 function prepareTransfer(calls$: Calls$)
@@ -371,12 +379,7 @@ function prepareTransfer(calls$: Calls$)
 
           return call({ proxy, plan, token, amount, })
             .pipe(
-              transactionToX(
-                progressChange(ProgressStage.waitingForApproval),
-                progressChange(ProgressStage.waitingForConfirmation),
-                progressChange(ProgressStage.fiasco),
-                () => of(progressChange(ProgressStage.done))
-              ),
+              transactionHandler(),
               takeUntil(cancel$)
             );
         }),
@@ -403,18 +406,13 @@ function prepareSetup(calls$: Calls$)
   function setup(_state: MTTransferFormState) {
 
     const changes$: Observable<ProgressChange> = calls$.pipe(
-        first(),
-        switchMap((calls): Observable<ProgressChange> => {
-          return calls.setupMTProxy({}).pipe(
-              transactionToX(
-                progressChange(ProgressStage.waitingForApproval),
-                progressChange(ProgressStage.waitingForConfirmation),
-                progressChange(ProgressStage.fiasco),
-                () => of(progressChange(ProgressStage.done))
-              ),
-            );
-        }),
-      );
+      first(),
+      switchMap((calls): Observable<ProgressChange> => {
+        return calls.setupMTProxy({}).pipe(
+          transactionHandler()
+        );
+      }),
+    );
 
     changes$.subscribe((change: ProgressChange) => setupChange$.next(change));
 
@@ -436,21 +434,16 @@ function prepareAllowance(calls$: Calls$)
 
     const proxyAddress = state.mta.proxy.address;
     const changes$: Observable<ProgressChange> = calls$.pipe(
-        first(),
-        switchMap((calls): Observable<ProgressChange> => {
-          return calls.approveMTProxy({
-            proxyAddress,
-            token: state.token
-          }).pipe(
-              transactionToX(
-                progressChange(ProgressStage.waitingForApproval),
-                progressChange(ProgressStage.waitingForConfirmation),
-                progressChange(ProgressStage.fiasco),
-                () => of(progressChange(ProgressStage.done))
-              ),
-            );
-        }),
-      );
+      first(),
+      switchMap((calls): Observable<ProgressChange> => {
+        return calls.approveMTProxy({
+          proxyAddress,
+          token: state.token
+        }).pipe(
+          transactionHandler()
+        );
+      }),
+    );
 
     changes$.subscribe((change: ProgressChange) => allowanceChange$.next(change));
 
@@ -476,12 +469,12 @@ function validate(state: MTTransferFormState) {
       messages.push({
         kind: MessageKind.insufficientAvailableAmount,
       });
-    // } else if (state.actionKind === UserActionKind.draw &&
-    //   asset && asset.assetKind === AssetKind.nonMarginable &&
-    //   (asset.balance || new BigNumber(0).lt(state.amount))) {
-    //   messages.push({
-    //     kind: MessageKind.insufficientAmount,
-    //   });
+      // } else if (state.actionKind === UserActionKind.draw &&
+      //   asset && asset.assetKind === AssetKind.nonMarginable &&
+      //   (asset.balance || new BigNumber(0).lt(state.amount))) {
+      //   messages.push({
+      //     kind: MessageKind.insufficientAmount,
+      //   });
     } else if (state.actionKind === UserActionKind.fund &&
       state.balances[state.token].lt(state.amount)) {
       (null || messages).push({

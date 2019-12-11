@@ -271,3 +271,13 @@ $historyPanelsHeight: 605px;
   width: 100%;
   text-align: center;
 }
+
+.orderPanel {
+  height: 605px;
+  min-width: 454px;
+  width: auto;
+  //padding: 10px 25px;
+  flex-direction: column;
+  justify-content: center;
+  display: flex;
+}

@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { connect } from '../../utils/connect';
 import { Button } from '../../utils/forms/Buttons';
-import { Hr } from '../../utils/layout/LayoutHelpers';
 import { LoadableWithTradingPair } from '../../utils/loadable';
 import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
 import { ModalOpenerProps, ModalProps } from '../../utils/modal';
@@ -34,41 +33,26 @@ export class MTSimpleOrderPanel extends React.Component<
       return (
         <div>
           <PanelHeader>Instant Order</PanelHeader>
-          <div style={{
-            ...dimensions,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            textAlign: 'center'
-          }}>Choose DAI<br/> to create a position
+          <div className={styles.orderPanel}>Choose DAI<br/> to create a position
           </div>
         </div>
       );
     }
 
-    if (this.props.status === 'loaded') {
-      const formState = this.props.value as MTSimpleFormState;
-
+    if (this.props.status === 'loaded' && this.props.value && this.props.value.mta) {
+      const formState = this.props.value;
       const { mta } = formState;
       const ma = findMarginableAsset(formState.baseToken, mta);
 
-      if (!ma) {
-        return <div style={dimensions}>
-          <LoadingIndicator size="lg"/>
-        </div>;
-      }
       if (mta && mta.proxy && ma && (ma.balance.gt(zero) || ma.dai.gt(zero))) {
         return (<MtSimpleOrderFormView {...{ ...this.props, ...formState }} />);
       }
 
       return (this.CallForDeposit(ma));
-
     }
 
-    return <div style={dimensions}>
+    return <div className={styles.orderPanel}>
       <PanelHeader>Instant Order</PanelHeader>
-      <Hr color="dark" className={styles.hrSmallMargin}/>
-      {/* TODO: Loading should be centered in the remaining space*/}
       <LoadingIndicator size="lg"/>
     </div>;
   }
