@@ -20,7 +20,7 @@ describe('Migration Wizard', () => {
     WalletConnection.isConnected();
   });
 
-  context('order cancellation', () => {
+  context.only('order cancellation', () => {
     it('should display all open orders in the SAI market', () => {
       MigrationWizardModal
         .openFrom(migrationBtnInHeader)
