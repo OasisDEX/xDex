@@ -60,13 +60,14 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
       }
     };
 
-    const allowance = (mta: MTAccount, token: string) =>  token === 'DAI' ? mta.daiAllowance :
-      findMarginableAsset(token, mta)!.allowance;
+    const allowance = (_mta: MTAccount, _token: string) =>  _token === 'DAI' ? _mta.daiAllowance :
+      findMarginableAsset(_token, _mta)!.allowance;
 
     const onboardingTabs = Object.keys(MTTransferFormTab);
 
     const startIndex = this.props.startTab ? onboardingTabs.indexOf(this.props.startTab) : 0;
 
+    const { mta, token, progress, tab } = this.props;
     return (
       <ReactModal
         ariaHideApp={false}
@@ -77,33 +78,31 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
         overlayRef={onModalRef}
         shouldCloseOnEsc={true}
       >
-        <Panel style={{ width: '450px', height: '575px' }} className={styles.modalChild}>
+        <Panel className={styles.modalChild}>
           <div className={styles.tabs}>
           {
             onboardingTabs.filter(
               (_tab: string, index: number) => (index >= startIndex)
-            ).map(tab => {
+            ).map(_tab => {
               return (<div
                 className={
                   classnames({
                     [styles.tab]: true,
-                    [styles.tabActive]: (tab === this.props.tab)
+                    [styles.tabActive]: (_tab === this.props.tab)
                   })
                 }
-                key={tab}>{tabLabels[tab]}</div>);
+                key={_tab}>{tabLabels[_tab]}</div>);
             })
           }
           </div>
-
-          { this.props.progress === ProgressStage.waitingForApproval
-            || this.props.progress === ProgressStage.waitingForConfirmation ?
+          { (tab === MTTransferFormTab.allowance || tab === MTTransferFormTab.proxy) &&
+          (progress === ProgressStage.waitingForApproval
+            || progress === ProgressStage.waitingForConfirmation) ?
             <>
               <LoadingIndicator />
             </>
             : <>
-
-              {this.props.mta && this.props.mta.proxy
-                && this.props.mta.proxy.address === nullAddress ?
+              {mta && mta.proxy && mta.proxy.address === nullAddress ?
                 <div className={styles.onboardingPanel}>
                   <h3 className={styles.onboardingHeader}>Deploy proxy</h3>
                   <div className={styles.onboardingParagraph}>
@@ -116,7 +115,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
                     onClick={() => this.setup()}
                   >Deploy Proxy</Button>
                 </div> :
-                this.props.mta && !allowance(this.props.mta, this.props.token) ?
+                mta && !allowance(mta, token) ?
                   <div className={styles.onboardingPanel}>
                     <h3 className={styles.onboardingHeader}>Set allowance</h3>
                     <div className={styles.onboardingParagraph}>
@@ -131,17 +130,13 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
                   </div>
                   : <></>
               }
-              {this.props.mta && allowance(this.props.mta, this.props.token)
-                && this.props.mta.proxy ?
-                <>
+              { mta && allowance(mta, token) && mta.proxy && <>
                   <PanelBody paddingTop={true} style={{ height: '287px' }}>
                     {this.AccountSummary()}
                     <Hr color="dark" className={styles.hrBigMargin}/>
                     {this.FormOrTransactionState()}
                   </PanelBody>
                   {this.Buttons()}
-                </>
-                : <>
                 </>
               }
             </>
@@ -150,13 +145,6 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
       </ReactModal>
     );
   }
-
-  // private header(progress?: ProgressStage) {
-  //   return !progress ?
-  //     `${getToken(this.props.token).name} ${this.props.actionKind === UserActionKind.fund ?
-  //       'deposit' : 'withdraw' }` :
-  //     'Finalize transaction';
-  // }
 
   private amountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/,/g, '');

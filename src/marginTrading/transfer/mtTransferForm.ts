@@ -123,14 +123,17 @@ type MTSetupFormChange =
   ProgressChange;
 
 function initialTab(mta: MTAccount, name: string) {
-  if (mta.proxy.address !== nullAddress) {
-    if (name === 'DAI') {
-      return mta.daiAllowance ? MTTransferFormTab.transfer : MTTransferFormTab.allowance;
-    }
-    return findMarginableAsset(name, mta)!.allowance ?
-      MTTransferFormTab.transfer : MTTransferFormTab.allowance;
+
+  const { proxy, allowance, transfer } = MTTransferFormTab;
+
+  if (mta.proxy.address !==  nullAddress) {
+    const isAllowance = name === 'DAI'
+              ? mta.daiAllowance
+              : findMarginableAsset(name, mta)!.allowance;
+    return isAllowance ? transfer : allowance;
   }
-  return MTTransferFormTab.proxy;
+
+  return proxy;
 }
 
 function nextTab(tab: MTTransferFormTab | undefined) {
