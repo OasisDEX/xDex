@@ -16,6 +16,7 @@ import { InstantExchange } from './instant/InstantViewPanel';
 import { Banner } from './landingPage/Banner';
 import { MarginTradingSimpleTxRx } from './marginTrading/MarginTradingSimple';
 import { connect } from './utils/connect';
+import {SetupModal} from './utils/modalHook';
 
 const {
   REACT_APP_INSTANT_ENABLED,
@@ -38,9 +39,11 @@ export class Main extends React.Component {
   public render() {
     return (
       <theAppContext.Provider value={setupAppContext()}>
-        <Router history={browserHistoryInstance}>
-          <MainContentWithRouter/>
-        </Router>
+        <SetupModal>
+          <Router history={browserHistoryInstance}>
+            <MainContentWithRouter/>
+          </Router>
+        </SetupModal>
       </theAppContext.Provider>
     );
   }

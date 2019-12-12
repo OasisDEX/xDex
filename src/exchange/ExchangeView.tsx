@@ -9,7 +9,7 @@ import { connect } from '../utils/connect';
 import { FlexLayoutRow } from '../utils/layout/FlexLayoutRow';
 import { Panel } from '../utils/panel/Panel';
 import * as styles from './ExchangeView.scss';
-import {OfferMakePanelArmed} from './offerMake/OfferMakePanelArmed';
+import {OfferMakePanelHooked} from './offerMake/OfferMakePanelHooked';
 import { currentTradingPair$, TradingPair } from './tradingPair/tradingPair';
 
 export interface ExchangeViewOwnProps {
@@ -84,7 +84,7 @@ class Content extends React.Component<ContentProps, { pairPickerOpen: boolean }>
             {/*    <OfferMakePanelTxRx />*/}
             {/*  }*/}
             {/*</theAppContext.Consumer>*/}
-            <OfferMakePanelArmed/>
+            <OfferMakePanelHooked/>
           </Panel>
           <Panel footerBordered={true} className={styles.orderbookPanel}>
             <theAppContext.Consumer>

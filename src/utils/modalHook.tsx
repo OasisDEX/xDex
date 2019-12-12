@@ -1,9 +1,10 @@
-import { ReactNode } from 'react';
+import { FunctionComponent, ReactNode } from 'react';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 const { useContext, useState } = React;
 
-export type Modal = (props: { close: () => void }) => JSX.Element;
+export interface ModalProps { close: () => void; }
+export type Modal = FunctionComponent<ModalProps>;
 export type ModalOpener = (modal: Modal) => void;
 
 const ModalContext = React.createContext<ModalOpener>(() => {
@@ -14,20 +15,16 @@ export function SetupModal(props: { children?: ReactNode }) {
 
   const [theModal, setModal] = useState<Modal>();
 
-  const close = () => { setModal(undefined); };
+  function close() { setModal(undefined); }
 
   return (
-    <>
-      <ModalContext.Provider value={setModal}>
-        {props.children}
-      </ModalContext.Provider>
+    <ModalContext.Provider value={(modal: Modal) => setModal(() => modal)}>
+      {props.children}
       {theModal && ReactDOM.createPortal(theModal({ close }), document.body)}
-    </>
+    </ModalContext.Provider>
   );
 }
 
-function useModal(): ModalOpener {
+export function useModal(): ModalOpener {
   return useContext(ModalContext);
 }
-
-useModal();
