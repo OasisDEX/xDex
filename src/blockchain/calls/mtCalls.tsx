@@ -84,6 +84,10 @@ function mtBalancePostprocess([result]: [BigNumber[]], { tokens }: MTBalanceData
         .minus(one).times(100),
       liquidationPenalty: new BigNumber(result[row + 9]).div(new BigNumber(10).pow(27)),
     };
+  // if(token === 'WETH') {
+  //     console.log( balanceResult['WETH'].debt.valueOf());
+  //     console.log( balanceResult['WETH'].dai.valueOf());
+  // }
   });
   return balanceResult;
 }

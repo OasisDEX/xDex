@@ -15,6 +15,8 @@ import {
 } from './mtAccount';
 import { RawMTHistoryEvent } from './mtHistory';
 
+BigNumber.config({EXPONENTIAL_AT: [-20, 20]})
+
 function marginableAvailableActions(asset: MarginableAssetCore) {
   const availableActions: UserActionKind[] = [];
 
@@ -29,32 +31,59 @@ function marginableAvailableActions(asset: MarginableAssetCore) {
   return availableActions;
 }
 
+type LeverageCalculation  = {
+  amount: BigNumber;
+  debt: BigNumber;
+  purchasingPower: BigNumber;
+  cash: BigNumber;
+  offers: Offer[];
+  referencePrice: BigNumber;
+  safeCollRatio: BigNumber;
+}
+
+const calculate = ({
+  amount, 
+  debt,
+  purchasingPower,
+  cash,
+  offers,
+  referencePrice,
+  safeCollRatio
+}: LeverageCalculation) => {
+  const [bought, cashLeft, offersLeft] = buy(cash, offers);
+  offers = offersLeft;
+  amount = amount.plus(bought);
+  purchasingPower = purchasingPower.plus(cash).minus(cashLeft);
+  const availableDebt = amount.times(referencePrice).div(safeCollRatio).minus(debt);
+  debt = debt.plus(availableDebt);
+  cash = availableDebt;
+
+  return { amount, debt ,purchasingPower, cash, offers, referencePrice, safeCollRatio } as LeverageCalculation;
+}
+
+const simulate = (leverageParams: LeverageCalculation): LeverageCalculation => {
+  const result = calculate(leverageParams);
+
+console.table(
+  `Amount: ${result.amount.toString()} \n`,
+  `Debt: ${result.debt.toString()} \n`,
+  `P. Power: ${result.purchasingPower.toString()} \n`,
+  `Cash: ${result.cash.toString()} \n`,
+  leverageParams.offers,
+);
+ 
+  if(result.cash.eq(zero) || leverageParams.offers.length === 0) return result;
+  return simulate(result);
+}
+
 export function realPurchasingPowerMarginable(
   ma: MarginableAsset,
   offers: Offer[]
 ): BigNumber {
-  let amount = ma.balance;
-  let debt = ma.debt;
+  const {balance:amount, debt, dai:cash, referencePrice, safeCollRatio} = ma;  
   let purchasingPower = zero;
-  let cash = ma.dai;
-  let first = true;
 
-  while ((cash.gt(0.01) || first) && offers.length > 0) {
-    first = false;
-    const [bought, cashLeft, offersLeft] = buy(cash, offers);
-    offers = offersLeft;
-    amount = amount.plus(bought);
-    purchasingPower = purchasingPower.plus(cash).minus(cashLeft);
-
-    // safety condition:
-    // amount * referencePrice / (debt + availableDebt) >= safeCollRatio
-    // ergo:
-    // availableDebt = amount * referencePrice / safeCollRatio - debt
-    const availableDebt = amount.times(ma.referencePrice).div(ma.safeCollRatio).minus(debt);
-    debt = debt.plus(availableDebt);
-    cash = availableDebt;
-  }
-  return purchasingPower;
+  return simulate({amount, debt, purchasingPower, cash, offers, referencePrice, safeCollRatio}).purchasingPower;
 }
 
 function findAuctionBite(rawHistory: RawMTHistoryEvent[], auctionId: number) {
