@@ -123,9 +123,7 @@ type MTSetupFormChange =
   ProgressChange;
 
 function initialTab(mta: MTAccount, name: string) {
-
   const { proxy, allowance, transfer } = MTTransferFormTab;
-
   if (mta.proxy.address !==  nullAddress) {
     const isAllowance = name === 'DAI'
               ? mta.daiAllowance

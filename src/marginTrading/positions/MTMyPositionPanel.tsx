@@ -75,6 +75,7 @@ export class MTMyPositionPanel
     </div>;
   }
 
+  // todo: refactor to separate component
   public CallForDeposit(ma?: MarginableAsset) {
     return (
       <div className={styles.onboardingPanel}>

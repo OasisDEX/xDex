@@ -42,6 +42,28 @@ const tabLabels: Dictionary<string> = {
   [MTTransferFormTab.transfer]: 'Deposit',
 };
 
+interface StepComponentProps {
+  title: string;
+  description: string;
+  btnLabel: string;
+  btnAction: () => void;
+}
+
+class StepComponent extends React.Component<StepComponentProps> {
+  public render() {
+    const { title, description, btnLabel, btnAction } = this.props;
+    return (<div className={styles.onboardingPanel}>
+      <h3 className={styles.onboardingHeader}>{title}</h3>
+      <div className={styles.onboardingParagraph}>{description}</div>
+      <Button
+        size="md"
+        color="primary"
+        onClick={() => btnAction()}
+      >{btnLabel}</Button>
+    </div>);
+  }
+}
+
 export class MtTransferFormView extends React.Component<MTFundFormProps> {
 
   constructor(p: MTFundFormProps) {
@@ -98,37 +120,26 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
           { (tab === MTTransferFormTab.allowance || tab === MTTransferFormTab.proxy) &&
           (progress === ProgressStage.waitingForApproval
             || progress === ProgressStage.waitingForConfirmation) ?
-            <>
               <LoadingIndicator />
-            </>
             : <>
               {mta && mta.proxy && mta.proxy.address === nullAddress ?
-                <div className={styles.onboardingPanel}>
-                  <h3 className={styles.onboardingHeader}>Deploy proxy</h3>
-                  <div className={styles.onboardingParagraph}>
-                    Proxies are used to bundle multiple transactions into one,
-                    saving transaction time and gas costs. This only has to be done once.
-                  </div>
-                  <Button
-                    size="md"
-                    color="primary"
-                    onClick={() => this.setup()}
-                  >Deploy Proxy</Button>
-                </div> :
-                mta && !allowance(mta, token) ?
-                  <div className={styles.onboardingPanel}>
-                    <h3 className={styles.onboardingHeader}>Set allowance</h3>
-                    <div className={styles.onboardingParagraph}>
-                      This permission allows Oasis smart contracts to interact with your {name}.
-                      This has to be done for each asset type.
-                    </div>
-                    <Button
-                      size="md"
-                      color="primary"
-                      onClick={() => this.allowance()}
-                    >Set allowance</Button>
-                  </div>
-                  : <></>
+                <StepComponent
+                  title="Deploy proxy"
+                  description={`Proxies are used to bundle multiple transactions into one,
+                  saving transaction time and gas costs. This only has to be done once.`}
+                  btnLabel="Deploy Proxy"
+                  btnAction={() => this.setup()}
+                />
+                :
+                mta && !allowance(mta, token) &&
+                  <StepComponent
+                    title="Set allowance"
+                    description={`This permission allows Oasis smart contracts
+                     to interact with your ${token}.
+                     This has to be done for each asset type.`}
+                    btnLabel="Set allowance"
+                    btnAction={() => this.allowance()}
+                  />
               }
               { mta && allowance(mta, token) && mta.proxy && <>
                   <PanelBody paddingTop={true} style={{ height: '287px' }}>
@@ -363,24 +374,21 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
   }
 
   private transfer() {
-    if (!this.props.mta || this.props.mta.state === MTAccountState.notSetup || !this.props.amount) {
-      return;
+    if (this.props.mta && this.props.mta.state !== MTAccountState.notSetup && this.props.amount) {
+      this.props.transfer(this.props);
     }
-    this.props.transfer(this.props);
   }
 
   private setup() {
-    if (!this.props.mta) {
-      return;
+    if (this.props.mta) {
+      this.props.setup(this.props);
     }
-    this.props.setup(this.props);
   }
 
   private allowance() {
-    if (!this.props.mta || this.props.mta.state === MTAccountState.notSetup) {
-      return;
+    if (this.props.mta && this.props.mta.state !== MTAccountState.notSetup) {
+      this.props.allowance(this.props);
     }
-    this.props.allowance(this.props);
   }
 
   private Buttons() {
