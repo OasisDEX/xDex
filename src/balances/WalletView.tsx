@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import { theAppContext } from '../AppContext';
 import { getToken } from '../blockchain/config';
 import { TxState } from '../blockchain/transactions';
+import {SAI2DAIMigrationTxRx} from '../migration/MigrationFormView';
 import { connect } from '../utils/connect';
 import { formatPrecision } from '../utils/formatters/format';
 import { Money } from '../utils/formatters/Formatters';
@@ -161,15 +162,10 @@ export class WalletViewInternal extends React.Component<CombinedBalances & Walle
 
     if (combinedBalance && combinedBalance.name === 'SAI') {
       actions.push(
-        <theAppContext.Consumer>
-          {({ SAI2DAIMigrationTxRx }) =>
-            // @ts-ignore
-            <SAI2DAIMigrationTxRx label={'Upgrade Sai'}
-                                  tid="update-btn-account"
-                                  className={styles.redeemBtn}
-            />
-          }
-        </theAppContext.Consumer>
+        <SAI2DAIMigrationTxRx label={'Upgrade Sai'}
+                              tid="update-btn-account"
+                              className={styles.redeemBtn}
+        />
       );
     }
     return actions;

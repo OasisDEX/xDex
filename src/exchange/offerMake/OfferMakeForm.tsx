@@ -8,6 +8,7 @@ import * as mixpanel from 'mixpanel-browser';
 import { theAppContext } from '../../AppContext';
 import { getToken, isDAIEnabled } from '../../blockchain/config';
 import { routerContext } from '../../Main';
+import {SAI2DAIMigrationTxRx} from '../../migration/MigrationFormView';
 import { BigNumberInput, lessThanOrEqual } from '../../utils/bigNumberInput/BigNumberInput';
 import { FormChangeKind, OfferMatchType } from '../../utils/form';
 import { formatAmount, formatPrice } from '../../utils/formatters/format';
@@ -235,19 +236,13 @@ export class OfferMakeForm extends React.Component<OfferFormState> {
         </div>
         {
           this.props.user && this.props.user.account && (
-            <theAppContext.Consumer>
-              {({ SAI2DAIMigrationTxRx }) =>
-                <SAI2DAIMigrationTxRx
-                  // @ts-ignore
-                  label={'Start Dai Migration'}
-                  className={styles.migrateButton}
-                  tid="update-btn-market"
-                />
-              }
-            </theAppContext.Consumer>
+            <SAI2DAIMigrationTxRx
+              label={'Start Dai Migration'}
+              className={styles.migrateButton}
+              tid="update-btn-market"
+            />
           )
         }
-
       </PanelBody>
     </div>;
   }

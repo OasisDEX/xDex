@@ -18,6 +18,7 @@ import { WalletStatus, walletStatus$ } from '../blockchain/wallet';
 import { web3Status$ } from '../blockchain/web3';
 import chevronDownSvg from '../icons/chevron-down.svg';
 import { routerContext } from '../Main';
+import {SAI2DAIMigrationTxRx} from '../migration/MigrationFormView';
 import { connect } from '../utils/connect';
 import { Button } from '../utils/forms/Buttons';
 import { SvgImage } from '../utils/icons/utils';
@@ -184,15 +185,10 @@ class WalletConnectionStatus extends React.Component<WalletConnectionStatusProps
           {
             isConnected
               ? (<>
-                  <theAppContext.Consumer>
-                    {({ SAI2DAIMigrationTxRx }) =>
-                      // @ts-ignore
-                      <SAI2DAIMigrationTxRx label="Upgrade Sai"
-                                            tid="update-btn-header"
-                                            className={styles.redeemBtn}
-                      />
-                    }
-                  </theAppContext.Consumer>
+                  <SAI2DAIMigrationTxRx label="Upgrade Sai"
+                                        tid="update-btn-header"
+                                        className={styles.redeemBtn}
+                  />
                   <div onClick={open} data-test-id="wallet-status">
                     <StatusTxRx/>
                   </div>

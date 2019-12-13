@@ -462,52 +462,52 @@ export function setupAppContext() {
     calls$,
     sai2DAIOps$(amount),
   );
+  //
+  // const dai2SAIMigration$ = (amount: BigNumber) => createExchangeMigration$(
+  //   proxyAddress$,
+  //   calls$,
+  //   dai2SAIOps$(amount),
+  // );
 
-  const dai2SAIMigration$ = (amount: BigNumber) => createExchangeMigration$(
-    proxyAddress$,
-    calls$,
-    dai2SAIOps$(amount),
-  );
-
-  const sai2DAIMigrationForm$ = createMigrationForm$(
+  const sai2DAIMigrationForm$ = loadablifyLight(createMigrationForm$(
     context$,
     saiBalance$,
     MigrationFormKind.sai2dai,
     sai2DAIMigration$,
     calls$,
     aggregateMyOpenTradesFor$('SAI', account$, transactions$, loadOrderbook)
-  );
+  ));
 
-  const dai2SAIMigrationForm$ = createMigrationForm$(
-    context$,
-    daiBalance$,
-    MigrationFormKind.dai2sai,
-    dai2SAIMigration$,
-    calls$,
-    aggregateMyOpenTradesFor$('DAI', account$, transactions$, loadOrderbook)
-  );
+  // const dai2SAIMigrationForm$ = loadablifyLight(createMigrationForm$(
+  //   context$,
+  //   daiBalance$,
+  //   MigrationFormKind.dai2sai,
+  //   dai2SAIMigration$,
+  //   calls$,
+  //   aggregateMyOpenTradesFor$('DAI', account$, transactions$, loadOrderbook)
+  // ));
 
-  const SAI2DAIMigrationTxRx =
-    inject<{ migration$: Observable<ExchangeMigrationState> }, any>(
-      withModal(
-        connect<Loadable<MigrationFormState>, any>(
-          MigrationButton,
-          loadablifyLight<MigrationFormState>(sai2DAIMigrationForm$)
-        )
-      ),
-      { migration$: sai2DAIMigrationForm$ }
-    );
-
-  const DAI2SAIMigrationTxRx =
-    inject<{ migration$: Observable<ExchangeMigrationState> }, any>(
-      withModal(
-        connect<Loadable<MigrationFormState>, any>(
-          MigrationButton,
-          loadablifyLight<MigrationFormState>(dai2SAIMigrationForm$)
-        )
-      ),
-      { migration$: dai2SAIMigrationForm$ }
-    );
+  // const SAI2DAIMigrationTxRx =
+  //   inject<{ migration$: Observable<ExchangeMigrationState> }, any>(
+  //     withModal(
+  //       connect<Loadable<MigrationFormState>, any>(
+  //         MigrationButton,
+  //         loadablifyLight<MigrationFormState>(sai2DAIMigrationForm$)
+  //       )
+  //     ),
+  //     { migration$: sai2DAIMigrationForm$ }
+  //   );
+  //
+  // const DAI2SAIMigrationTxRx =
+  //   inject<{ migration$: Observable<ExchangeMigrationState> }, any>(
+  //     withModal(
+  //       connect<Loadable<MigrationFormState>, any>(
+  //         MigrationButton,
+  //         loadablifyLight<MigrationFormState>(dai2SAIMigrationForm$)
+  //       )
+  //     ),
+  //     { migration$: dai2SAIMigrationForm$ }
+  //   );
 
   return {
     offerMakeLoadable$,
@@ -529,8 +529,9 @@ export function setupAppContext() {
     MTBalancesViewRxTx,
     WalletViewRxTx,
     MTSetupButtonRxTx,
-    SAI2DAIMigrationTxRx,
-    DAI2SAIMigrationTxRx,
+    // SAI2DAIMigrationTxRx,
+    // DAI2SAIMigrationTxRx,
+    sai2DAIMigrationForm$
   };
 }
 

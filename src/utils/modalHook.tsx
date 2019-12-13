@@ -13,14 +13,14 @@ const ModalContext = React.createContext<ModalOpener>(() => {
 
 export function SetupModal(props: { children?: ReactNode }) {
 
-  const [theModal, setModal] = useState<Modal>();
+  const [TheModal, setModal] = useState<Modal>();
 
   function close() { setModal(undefined); }
 
   return (
     <ModalContext.Provider value={(modal: Modal) => setModal(() => modal)}>
       {props.children}
-      {theModal && ReactDOM.createPortal(theModal({ close }), document.body)}
+      {TheModal && ReactDOM.createPortal(<TheModal {...{  close }}/>, document.body)}
     </ModalContext.Provider>
   );
 }
