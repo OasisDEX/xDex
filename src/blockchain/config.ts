@@ -364,6 +364,7 @@ const kovan: NetworkConfig = {
     get spot() {
       return load(mcdSpotter, '0x3a042de6413edb15f2784f2f97cc68c7e9750b2d');
     },
+    dssCdpManager: '0x1476483dd8c35f25e568113c5f70249d3976ba21',
     ilks: {
       WETH: 'ETH-A',
       REP: 'REP-A',
@@ -433,7 +434,7 @@ const kovan: NetworkConfig = {
     return load(proxyCreationAndExecute, '0xee419971e63734fed782cfe49110b1544ae8a773');
   },
   get proxyActions() {
-    return load(proxyActions, '0x9b562788e063368c83168069c732b1464aa22db8');
+    return load(proxyActions, '0x53fd25ea403ba60ddc614c17f45592986f2ec1bf');
   },
   get migration() {
     return '0x411b2faa662c8e3e5cf8f01dfdae0aee482ca7b0';

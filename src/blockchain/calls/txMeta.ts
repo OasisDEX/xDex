@@ -29,7 +29,8 @@ export enum TxMetaKind {
   devChangePrice = 'devChangePrice',
   devPokeOsm = 'devPokeOsm',
   devPokeSpotter = 'devPokeSpotter',
-  redeem = 'redeem'
+  redeem = 'redeem',
+  export = 'export',
 }
 
 export type TxMeta = {

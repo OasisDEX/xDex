@@ -136,6 +136,28 @@ export function pluginDevModeHelpers(
       )
     ).subscribe(identity);
 
+  (window as any).export = (
+    token: string,
+  ) =>
+    calls$.pipe(
+      first(),
+      flatMap(calls =>
+        createProxyAddress$(context$, initializedAccount$, onEveryBlock$).pipe(
+          first(),
+          tap(proxyAddress => console.log({ proxyAddress })),
+          flatMap(proxyAddress => {
+            if (!proxyAddress) {
+              console.log('Proxy not found!');
+              return of();
+            }
+            return calls.mtExport(
+              { token, proxyAddress },
+            );
+          }),
+        ),
+      )
+    ).subscribe(identity);
+
   (window as any).drip = (
     token: string,
   ) =>
