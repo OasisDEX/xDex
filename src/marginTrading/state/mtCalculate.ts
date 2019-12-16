@@ -115,13 +115,13 @@ export function calculateMTHistoryEvents(
     if (h.kind === MTHistoryEventKind.dent) {
       const bite: MTLiquidationEvent = findAuctionBite(rawHistory, h.id);
       // @ts-ignore
-      event = { ...h, token: ma.name, redeemable: bite.lot.minus(h.lot) };
+      event = { ...h, token: ma.name, redeemable: bite.ink.minus(h.lot) };
     }
     if (h.kind === MTHistoryEventKind.redeem) {
       event = { ...h, token: ma.name, redeemable: h.amount.times(minusOne), };
     }
     if (h.kind === MTHistoryEventKind.bite) {
-      event = { ...h, token: ma.name, dAmount: h.lot.times(minusOne), dDAIAmount: h.bid };
+      event = { ...h, token: ma.name, dAmount: h.ink.times(minusOne), dDAIAmount: h.tab };
     }
 
     const prevDebt = debt;
@@ -135,7 +135,7 @@ export function calculateMTHistoryEvents(
         event = { ...event, debtDelta };
       }
     } else if (h.kind === MTHistoryEventKind.bite) {
-      const debtDelta = h.bid ? h.bid.times(minusOne) : zero;
+      const debtDelta = h.tab ? h.tab.times(minusOne) : zero;
 
       if (!debtDelta.eq(zero)) {
         event = { ...event, debtDelta };
@@ -218,7 +218,7 @@ export function calculateMarginable(
   let amountBeingLiquidated = zero;
   ma.rawHistory.forEach(h => {
     if (h.kind === MTHistoryEventKind.bite) {
-      amountBeingLiquidated = amountBeingLiquidated.plus(h.lot);
+      amountBeingLiquidated = amountBeingLiquidated.plus(h.ink);
     }
   });
 

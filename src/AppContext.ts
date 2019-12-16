@@ -543,7 +543,14 @@ function mtSimpleOrderForm(
     )
   );
 
-  const MTSimpleOrderPanelRxTx = connect(MTSimpleOrderPanel, mtOrderFormLoadable$);
+  const MTSimpleOrderPanelRxTx = inject(
+      // @ts-ignore
+      withModal(
+        // @ts-ignore
+        connect(MTSimpleOrderPanel, mtOrderFormLoadable$)
+      ),
+      { createMTFundForm$ }
+    );
 
   const redeem = createRedeem(calls$);
 

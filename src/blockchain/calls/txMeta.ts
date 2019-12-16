@@ -32,6 +32,7 @@ export enum TxMetaKind {
   redeem = 'redeem',
   join = 'join',
   approveAdapter = 'approveAdapter',
+  export = 'export',
 }
 
 export type TxMeta = {

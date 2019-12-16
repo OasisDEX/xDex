@@ -51,7 +51,6 @@
     "ramda": "^0.25.0",
     "raven-js": "^3.27.2",
     "react": "^16.3.2",
-    "react-apollo": "^3.0.1",
     "react-css-modules": "^4.7.3",
     "react-custom-scrollbars": "^4.2.1",
     "react-dev-utils": "^5.0.1",
