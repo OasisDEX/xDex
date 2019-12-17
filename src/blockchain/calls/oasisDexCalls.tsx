@@ -13,10 +13,13 @@ import { callCurried, sendTransactionCurried, TransactionDef } from './callsHelp
 import {loadOrderbook$} from './oasisDexOrderbook';
 import { TxMetaKind } from './txMeta';
 
+import { Omit } from '../../utils/omit';
+
 import * as ethWethJoin from '../abi/eth-weth-join.abi.json';
 import * as gemJoin from '../abi/gem-join.abi.json';
 import * as oasisHelper from '../abi/oasis-helper.abi.json';
 import * as oasis from '../abi/oasis.abi.json';
+import { isObjectType } from 'graphql';
 
 function load(address: string, abi: any) {
   return web3.eth.contract(abi).at(address);
@@ -84,6 +87,9 @@ export interface LimitData {
   buying: boolean;
   pos?: number;
 }
+
+const limitType = (): TransactionDef<LimitData> => limit;
+
 export const limit: TransactionDef<LimitData> = {
   call: () => {
     return (Oasis as any).limit;
@@ -99,7 +105,7 @@ export const limit: TransactionDef<LimitData> = {
     console.log(x);
     return x;
   },
-  kind: TxMetaKind.join,
+  kind: TxMetaKind.join, // Why is this join ?
   description: ({ baseToken, quoteToken, amount, price, buying }: LimitData) => (
     <>
       { buying ? 'Buy' : 'Sell'} <Money value={amount} token={baseToken}/>
@@ -107,6 +113,34 @@ export const limit: TransactionDef<LimitData> = {
     </>
   )
 };
+
+export type IoCData = Omit<LimitData, 'pos'>;
+
+const iocType = (): TransactionDef<IoCData> => ioc;
+
+export const ioc: TransactionDef<IoCData> = {
+  call: () => {
+    return (Oasis as any).ioc;
+  },
+  prepareArgs: ({ baseToken, quoteToken, amount, price, buying }: IoCData) => {
+    const marketId = markets['WETH/DAI']; // `${quoteToken}/${baseToken}`
+    return [
+      marketId,
+      amountToWei(amount, 'WETH').toFixed(0),
+      amountToWei(price, 'WETH').toFixed(0),
+      buying,
+    ];
+  },
+  kind: TxMetaKind.join,
+  description: ({ baseToken, quoteToken, amount, price, buying }: IoCData) => (
+    <>
+      <span>Immediate-or-Cancel<br/></span>
+      { buying ? 'Buy' : 'Sell'} <Money value={amount} token={baseToken}/>
+      at: <Money value={price} token={quoteToken}/> {`${baseToken}/${quoteToken}`}
+    </>
+  )
+};
+
 
 export interface BalanceData {
   token: string;
@@ -198,6 +232,9 @@ function balances(context: NetworkConfig, account: string | undefined) {
   ).subscribe(amounts => console.table(amounts));
 }
 
+ type OfferType = typeof limitType | typeof iocType ;
+
+
 export function initDexCalls() {
   combineLatest(context$, initializedAccount$).pipe(
     first(),
@@ -206,6 +243,9 @@ export function initDexCalls() {
       const send = sendTransactionCurried(context, initializedAccount);
 
       const anyWindow = window as any;
+
+      anyWindow.limitType = limitType;
+      anyWindow.iocType = iocType;
 
       // Displays the locked balances for the callers account
       anyWindow.balances = () => balances(context, initializedAccount);
@@ -221,10 +261,10 @@ export function initDexCalls() {
         send(approveAdapter)({ token }).subscribe(identity);
 
       // Creates new Limit Buy Order
-      anyWindow.buy = (
+      anyWindow.buy = (offerType: OfferType) => (
         baseToken: string, quoteToken: string,
         amount: string, price: string,
-      ) => send(limit)({
+      ) => send(offerType())({
         baseToken, quoteToken,
         amount: new BigNumber(amount),
         price: new BigNumber(price),
@@ -232,15 +272,16 @@ export function initDexCalls() {
       }).subscribe(identity);
 
       // Creates new Limit Sell Order
-      anyWindow.sell = (
+      anyWindow.sell = (offerType: OfferType) => (
         baseToken: string, quoteToken: string,
         amount: string, price: string,
-      ) => send(limit)({
+      ) => send(offerType())({
         baseToken, quoteToken,
         amount: new BigNumber(amount),
         price: new BigNumber(price),
         buying: false
       }).subscribe(identity);
+      
 
       // Cancel an order
       // Should w ehave cancelBuy, cancelSell ?
