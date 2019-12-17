@@ -3,6 +3,7 @@ import { OfferType } from '../../exchange/orderbook/orderbook';
 
 export enum TxMetaKind {
   cancel = 'cancel',
+  cancel2 ='cancel2', // used for testing new contract
   offerMake = 'offerMake',
   approveWallet = 'approveWallet',
   disapproveWallet = 'disapproveWallet',
@@ -96,4 +97,6 @@ export type TxMeta = {
   kind: TxMetaKind.join
 } | {
   kind: TxMetaKind.approveAdapter
+} | {
+  kind: TxMetaKind.cancel2
 });

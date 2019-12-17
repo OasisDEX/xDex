@@ -124,6 +124,28 @@ export const balance = {
   postprocess: (b: BigNumber, { token }: BalanceData) => amountFromWei(b, token),
 };
 
+export interface CancelData {
+  baseToken: string;
+  quoteToken: string;
+  buying: boolean;
+  offerId: number; // For some reason the call fails when the value is BigNumber
+}
+
+export const cancel: TransactionDef<CancelData> = {
+  call: (_: CancelData) => (Oasis as any).cancel,
+  prepareArgs: ({baseToken, quoteToken, buying, offerId}: CancelData) => {
+    return [
+      markets['WETH/DAI'],
+      buying, 
+      offerId
+    ]
+  },
+  kind: TxMetaKind.cancel2,
+  description:({ buying }: CancelData) => (
+    <> Cancelling { buying ? 'Buy' : 'Sell' } Order </>
+  )
+}
+
 function balances(context: NetworkConfig, account: string | undefined) {
   forkJoin(Object.keys(gemJoins).map(token =>
     callCurried(context, account)(balance)({ token }).pipe(
@@ -147,14 +169,20 @@ export function initDexCalls() {
 
       const anyWindow = window as any;
 
+      // Displays the locked balances for the callers account
       anyWindow.balances = () => balances(context, initializedAccount);
 
+      // Locks given token amount in the token adapter ( GemJoin )
       anyWindow.join = (token: string, amount: string) =>
         send(join)({ token, amount: new BigNumber(amount) }).subscribe(identity);
 
+      // Setting allownce for the given adapter 
+      // so that it can make transfers on yur behalf
+      // Prerequisite step for `join` token amount.
       anyWindow.approveAdapter = (token: string) =>
         send(approveAdapter)({ token }).subscribe(identity);
 
+      // Creates new Limit Buy Order
       anyWindow.buy = (
         baseToken: string, quoteToken: string,
         amount: string, price: string,
@@ -165,6 +193,7 @@ export function initDexCalls() {
         buying: true
       }).subscribe(identity);
 
+      // Creates new Limit Sell Order
       anyWindow.sell = (
         baseToken: string, quoteToken: string,
         amount: BigNumber, price: BigNumber,
@@ -175,6 +204,18 @@ export function initDexCalls() {
         buying: false
       }).subscribe(identity);
 
+      // Cancel an order
+      anyWindow.cancel = (
+        buying: boolean,
+        offerId: number,
+      ) => send(cancel)({
+        baseToken:'WETH',
+        quoteToken:'DAI',
+        buying,
+        offerId,
+      }).subscribe(identity);
+
+      // Loads the orderbook for a given market
       anyWindow.orderbook = () => loadOrderbook$(
         context$,
         onEveryBlock$,
