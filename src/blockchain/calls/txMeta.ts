@@ -5,6 +5,7 @@ export enum TxMetaKind {
   cancel = 'cancel',
   cancel2 ='cancel2', // used for testing new contract
   offerMake = 'offerMake',
+  offerUpdate = 'offerUpdate',
   approveWallet = 'approveWallet',
   disapproveWallet = 'disapproveWallet',
   wrap = 'wrap',
@@ -99,4 +100,6 @@ export type TxMeta = {
   kind: TxMetaKind.approveAdapter
 } | {
   kind: TxMetaKind.cancel2
+} | {
+  kind: TxMetaKind.offerUpdate
 });

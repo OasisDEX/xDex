@@ -125,8 +125,10 @@ export const balance = {
 };
 
 export interface CancelData {
+  // Probably we can inject TradingPair directly ?
   baseToken: string;
   quoteToken: string;
+  // Probably we can use OfferType and in the calls to check if it's buy or sell ?
   buying: boolean;
   offerId: number; // For some reason the call fails when the value is BigNumber
 }
@@ -145,6 +147,42 @@ export const cancel: TransactionDef<CancelData> = {
     <> Cancelling { buying ? 'Buy' : 'Sell' } Order </>
   )
 }
+
+export interface OfferUpdateData {
+  baseToken: string;
+  quoteToken: string;
+  offerId: number;
+  buying: boolean;
+  amount: BigNumber;
+  price: BigNumber;
+  pos?: number;
+}
+
+export const update: TransactionDef<OfferUpdateData> = {
+  call: () => {
+    return (Oasis as any).update;
+  },
+  prepareArgs: ({ baseToken, quoteToken, offerId, amount, price, buying, pos }: OfferUpdateData) => {
+    const marketId = markets['WETH/DAI']; // `${quoteToken}/${baseToken}`
+    return [
+      marketId,
+      buying,
+      offerId,
+      amountToWei(amount, 'WETH').toFixed(0),
+      amountToWei(price, 'WETH').toFixed(0),
+      pos || 0
+    ];
+  },
+  kind: TxMetaKind.offerUpdate,
+  description: ({ baseToken, quoteToken, amount, price, buying }: OfferUpdateData) => (
+    <>
+      Update { buying ? 'Buy' : 'Sell'} Order.<br></br>
+      { buying ? 'Buy' : 'Sell'} <Money value={amount} token={baseToken}/>
+      at: <Money value={price} token={quoteToken}/> {`${baseToken}/${quoteToken}`}
+    </>
+  )
+};
+
 
 function balances(context: NetworkConfig, account: string | undefined) {
   forkJoin(Object.keys(gemJoins).map(token =>
@@ -196,7 +234,7 @@ export function initDexCalls() {
       // Creates new Limit Sell Order
       anyWindow.sell = (
         baseToken: string, quoteToken: string,
-        amount: BigNumber, price: BigNumber,
+        amount: string, price: string,
       ) => send(limit)({
         baseToken, quoteToken,
         amount: new BigNumber(amount),
@@ -205,6 +243,7 @@ export function initDexCalls() {
       }).subscribe(identity);
 
       // Cancel an order
+      // Should w ehave cancelBuy, cancelSell ?
       anyWindow.cancel = (
         buying: boolean,
         offerId: number,
@@ -214,6 +253,23 @@ export function initDexCalls() {
         buying,
         offerId,
       }).subscribe(identity);
+
+      // Should we have updateBuy , updateSell ?
+      anyWindow.update = (
+        buying: boolean,
+        offerId: number,
+        amount: string,
+        price: string,
+        pos?: number,
+      ) => send(update)({
+        baseToken: 'WETH',
+        quoteToken: 'DAI',
+        amount: new BigNumber(amount),
+        price: new BigNumber(price),
+        buying,
+        offerId,
+        pos
+      }).subscribe();
 
       // Loads the orderbook for a given market
       anyWindow.orderbook = () => loadOrderbook$(
