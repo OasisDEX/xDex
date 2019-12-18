@@ -54,7 +54,7 @@ import {
 } from '../state/mtAccount';
 import {
   calculateMarginable,
-  realPurchasingPowerMarginable,
+  realPurchasingPowerMarginable, sellable,
 } from '../state/mtCalculate';
 // import { getBuyPlan, getSellPlan } from './mtOrderPlan';
 
@@ -66,6 +66,7 @@ export enum MessageKind {
   impossibleToPlan = 'impossibleToPlan',
   impossibleCalculateTotal = 'impossibleCalculateTotal',
   minDebt = 'minDebt',
+  unsellable = 'unsellable',
 }
 
 export type Message = {
@@ -93,6 +94,10 @@ export type Message = {
   field?: string;
   priority: number;
   message: string;
+} | {
+  kind: MessageKind.unsellable;
+  field?: string;
+  priority: number;
 };
 
 export enum ViewKind {
@@ -322,6 +327,16 @@ function validate(state: MTSimpleFormState): MTSimpleFormState {
       });
     }
 
+    if (
+      state.kind === OfferType.sell && state.orderbook &&
+      !sellable(baseAsset, state.orderbook.sell, state.amount || baseAsset.availableBalance)
+    ) {
+      messages.push({
+        kind: MessageKind.unsellable,
+        field: 'total',
+        priority: 1,
+      });
+    }
   }
   return {
     ...state,

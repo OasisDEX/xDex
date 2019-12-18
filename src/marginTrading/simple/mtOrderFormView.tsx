@@ -781,5 +781,7 @@ function messageContent(msg: Message) {
       return `Can't calculate: ${msg.message}. Type smaller amount`;
     case MessageKind.minDebt:
       return `Order below ${msg.message} limit.`;
+    case MessageKind.unsellable:
+      return `Your position is unsellable give current state of the orderbook`;
   }
 }
