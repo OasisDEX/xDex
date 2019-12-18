@@ -88,8 +88,6 @@ export interface LimitData {
   pos?: number;
 }
 
-const limitType = (): TransactionDef<LimitData> => limit;
-
 export const limit: TransactionDef<LimitData> = {
   call: () => {
     return (Oasis as any).limit;
@@ -116,8 +114,6 @@ export const limit: TransactionDef<LimitData> = {
 
 export type IoCData = Omit<LimitData, 'pos'>;
 
-const iocType = (): TransactionDef<IoCData> => ioc;
-
 export const ioc: TransactionDef<IoCData> = {
   call: () => {
     return (Oasis as any).ioc;
@@ -141,6 +137,31 @@ export const ioc: TransactionDef<IoCData> = {
   )
 };
 
+export type FoKData = IoCData & { totalLimit: BigNumber };
+
+export const fok: TransactionDef<FoKData> = {
+  call: () => {
+    return (Oasis as any).fok;
+  },
+  prepareArgs: ({ baseToken, quoteToken, amount, price, buying, totalLimit }: FoKData) => {
+    const marketId = markets['WETH/DAI']; // `${quoteToken}/${baseToken}`
+    return [
+      marketId,
+      amountToWei(amount, 'WETH').toFixed(0),
+      amountToWei(price, 'WETH').toFixed(0),
+      buying,
+      totalLimit
+    ];
+  },
+  kind: TxMetaKind.join,
+  description: ({ baseToken, quoteToken, amount, price, buying }: FoKData) => (
+    <>
+      <span>Fill-or-Kill<br/></span>
+      { buying ? 'Buy' : 'Sell'} <Money value={amount} token={baseToken}/>
+      at: <Money value={price} token={quoteToken}/> {`${baseToken}/${quoteToken}`}
+    </>
+  )
+}
 
 export interface BalanceData {
   token: string;
@@ -232,8 +253,6 @@ function balances(context: NetworkConfig, account: string | undefined) {
   ).subscribe(amounts => console.table(amounts));
 }
 
- type OfferType = typeof limitType | typeof iocType ;
-
 
 export function initDexCalls() {
   combineLatest(context$, initializedAccount$).pipe(
@@ -244,9 +263,7 @@ export function initDexCalls() {
 
       const anyWindow = window as any;
 
-      anyWindow.limitType = limitType;
-      anyWindow.iocType = iocType;
-
+  
       // Displays the locked balances for the callers account
       anyWindow.balances = () => balances(context, initializedAccount);
 
@@ -261,27 +278,52 @@ export function initDexCalls() {
         send(approveAdapter)({ token }).subscribe(identity);
 
       // Creates new Limit Buy Order
-      anyWindow.buy = (offerType: OfferType) => (
+      anyWindow.buyLimit = (
         baseToken: string, quoteToken: string,
         amount: string, price: string,
-      ) => send(offerType())({
-        baseToken, quoteToken,
+      ) => send<LimitData>(limit)({
+        baseToken,
+        quoteToken,
         amount: new BigNumber(amount),
         price: new BigNumber(price),
-        buying: true
+        buying:true,
       }).subscribe(identity);
 
       // Creates new Limit Sell Order
-      anyWindow.sell = (offerType: OfferType) => (
+      anyWindow.sellLimit = (
         baseToken: string, quoteToken: string,
         amount: string, price: string,
-      ) => send(offerType())({
-        baseToken, quoteToken,
+      ) => send<LimitData>(limit)({
+        baseToken,
+        quoteToken,
         amount: new BigNumber(amount),
         price: new BigNumber(price),
         buying: false
       }).subscribe(identity);
       
+      // Created Immediate-or-Cancel buy order
+      anyWindow.buyIoC = (
+        baseToken: string, quoteToken: string,
+        amount: string, price: string,
+      ) => send<IoCData>(ioc)({
+        baseToken,
+        quoteToken,
+        amount: new BigNumber(amount),
+        price: new BigNumber(price),
+        buying: true,
+      }).subscribe(identity);
+
+      // Created Immediate-or-Cancel Sell order
+      anyWindow.sellIoC = (
+        baseToken: string, quoteToken: string,
+        amount: string, price: string,
+      ) => send<IoCData>(ioc)({
+        baseToken,
+        quoteToken,
+        amount: new BigNumber(amount),
+        price: new BigNumber(price),
+        buying: false,
+      }).subscribe(identity);
 
       // Cancel an order
       // Should w ehave cancelBuy, cancelSell ?
