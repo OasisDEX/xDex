@@ -179,13 +179,12 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
     const baseToken = this.props.token === 'DAI' && this.props.ilk || this.props.token;
     const baseAsset = this.getAsset(baseToken) as MarginableAsset;
 
-    // TODO: remove NaN conditions
-    const liquidationPrice =
-      this.props.liquidationPrice && !this.props.liquidationPrice.isNaN() ?
-        this.props.liquidationPrice : zero;
+    const liquidationPrice = this.props.liquidationPrice ?
+      this.props.liquidationPrice : zero;
 
-    const liquidationPricePost = this.props.liquidationPricePost
-    && !this.props.liquidationPricePost.isNaN() ? this.props.liquidationPricePost : zero;
+    const liquidationPricePost = this.props.liquidationPricePost ?
+      this.props.liquidationPricePost : zero;
+
     return(
       <>
           <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
@@ -204,7 +203,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
               { this.props.realPurchasingPowerPost &&
               <>
                 <span className={styles.transitionArrow} />
-                { !this.props.realPurchasingPowerPost.isNaN() ?
+                { this.props.realPurchasingPowerPost ?
                   <Money
                     value={ this.props.realPurchasingPowerPost}
                     token={'DAI'}
@@ -221,7 +220,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
               Account Balance
             </div>
             <div className={styles.orderSummaryValue}>
-              { baseAsset && !baseAsset.balance.isNaN() ?
+              { baseAsset && baseAsset.balance ?
                 <Money
                   value={baseAsset.balance}
                   token={baseToken}
@@ -233,7 +232,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
                 !this.props.balancePost.isEqualTo(baseAsset.balance) &&
                 <>
                   <span className={styles.transitionArrow} />
-                  { !this.props.balancePost.isNaN() ?
+                  { this.props.balancePost ?
                     <Money
                       value={this.props.balancePost}
                       token={baseToken}
@@ -286,7 +285,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
               DAI Balance
             </div>
             <div className={styles.orderSummaryValue}>
-              { this.props.daiBalance && !this.props.daiBalance.isNaN() &&
+              { this.props.daiBalance &&
               <Money
                 value={this.props.daiBalance}
                 token={'DAI'}
@@ -298,7 +297,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
                 !this.props.daiBalance.isEqualTo(this.props.daiBalancePost) &&
                 <>
                   <span className={styles.transitionArrow} />
-                  { !this.props.daiBalancePost.isNaN() ?
+                  { this.props.daiBalancePost ?
                     <Money
                       value={this.props.daiBalancePost}
                       token={'DAI'}
@@ -325,7 +324,6 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
   private Form() {
     return (
       <div>
-        {/*{this.props.token === 'DAI' ? this.TargetGroup() : null}*/}
         {this.AmountGroup(false)}
         { !!this.props.messages &&
         <ErrorMessage

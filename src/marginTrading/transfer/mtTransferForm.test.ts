@@ -4,6 +4,7 @@ import { shareReplay } from 'rxjs/internal/operators';
 import { TxState, TxStatus } from '../../blockchain/transactions';
 import { setupFakeWeb3ForTesting } from '../../blockchain/web3';
 import { emptyOrderBook } from '../../exchange/depthChart/fakeOrderBook';
+import { Orderbook } from '../../exchange/orderbook/orderbook';
 import { FormChangeKind, GasEstimationStatus, ProgressStage } from '../../utils/form';
 import { unpack } from '../../utils/testHelpers';
 import { UserActionKind } from '../state/mtAccount';
@@ -27,7 +28,10 @@ const defParams = {
       allowance: true,
       referencePrice: new BigNumber(500),
     })],
-    true
+    true,
+    {
+      WETH: { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook
+    }
   ),
   gasPrice$: of(new BigNumber(100)),
   etherPriceUsd$: of(new BigNumber(13)),

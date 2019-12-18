@@ -151,7 +151,9 @@ export function setupAppContext() {
     distinctUntilChanged(isEqual)
   );
 
-  const mta$ = createMta$(context$, initializedAccount$, onEveryBlock$, readCalls$);
+  const loadOrderbook = memoizeTradingPair(curry(loadOrderbook$)(context$, onEveryBlock$));
+
+  const mta$ = createMta$(context$, initializedAccount$, onEveryBlock$, readCalls$, loadOrderbook);
 
   const mtSetupForm$ = createMTSetupForm$(mta$, calls$, gasPrice$, etherPriceUsd$);
   const MTSetupButtonRxTx =
@@ -195,7 +197,6 @@ export function setupAppContext() {
       calls$
     );
 
-  const loadOrderbook = memoizeTradingPair(curry(loadOrderbook$)(context$, onEveryBlock$));
   const currentOrderbook$ = currentTradingPair$.pipe(
     switchMap(pair => loadOrderbook(pair))
   );

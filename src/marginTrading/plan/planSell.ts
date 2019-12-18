@@ -1,7 +1,7 @@
 import { BigNumber } from 'bignumber.js';
 
 import { AssetKind, getToken } from '../../blockchain/config';
-import { Offer } from '../../exchange/orderbook/orderbook';
+import { Offer, Orderbook } from '../../exchange/orderbook/orderbook';
 import {
   findMarginableAsset, MarginableAssetCore,
   MTAccount,
@@ -41,7 +41,7 @@ export function prepareSellAllocationRequest(
   if (
     asset.assetKind === AssetKind.marginable &&
     asset.balance.times(asset.referencePrice).div(asset.debt)
-    .lte(asset.minCollRatio)
+      .lte(asset.minCollRatio)
   ) {
     return impossible('debt at max possible value');
   }
@@ -59,21 +59,24 @@ export function prepareSellAllocationRequest(
   }
 
   const assets: AllocationRequestAssetInfo[] = mta.marginableAssets
-  .map(ma => (calculateMarginable({
-    ...ma,
-    balance: ma.name === baseToken ?
-      ma.balance.minus(amount) :
-      ma.balance,
-  } as MarginableAssetCore)))
-  .map(ai => ({
-    ...ai,
-    ...{
-      targetDebt: ai.name === baseToken ?
-          BigNumber.min(ai.maxDebt, ai.debt) :
-          ai.debt
-    }
-  })
-  );
+    .map(ma => (calculateMarginable(
+      {
+        ...ma,
+        balance: ma.name === baseToken ?
+          ma.balance.minus(amount) :
+          ma.balance,
+      } as MarginableAssetCore,
+      { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook
+    )))
+    .map(ai => ({
+      ...ai,
+      ...{
+        targetDebt: ai.name === baseToken ?
+            BigNumber.min(ai.maxDebt, ai.debt) :
+            ai.debt
+      }
+    })
+    );
 
   const cashBalance = asset.dai; // mta.cash.balance;
 
@@ -84,21 +87,21 @@ export function prepareSellAllocationRequest(
 
   const defaultTargetCash =
     cashBalance.plus(maxTotal)
-    .minus(BigNumber.max(zero, totalDebt.minus(totalTargetDebt)));
+      .minus(BigNumber.max(zero, totalDebt.minus(totalTargetDebt)));
 
   const createPlan = (debts: Array<Required<EditableDebt>>): Operations =>
-      planSell(baseToken, amount, maxTotal, debts);
+    planSell(baseToken, amount, maxTotal, debts);
 
   const execute = (calls: Calls, proxy: any, plan: Operation[], gas: number): Observable<TxState> =>
-      calls.mtSell({
-        amount,
-        baseToken,
-        price,
-        proxy,
-        plan,
-        gas,
-        total: maxTotal,
-      });
+    calls.mtSell({
+      amount,
+      baseToken,
+      price,
+      proxy,
+      plan,
+      gas,
+      total: maxTotal,
+    });
 
   const estimateGas = (calls: Calls, proxy: any, plan: Operation[]) =>
     calls.mtSellEstimateGas({ proxy, plan });
@@ -134,8 +137,8 @@ export function planSell(
         }
         return d;
       }))
-      .filter(d => !d.delta.eq(zero))
-      .map(deltaToOps)
+        .filter(d => !d.delta.eq(zero))
+        .map(deltaToOps)
     )
   ];
 }

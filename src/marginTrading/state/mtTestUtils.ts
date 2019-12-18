@@ -1,6 +1,7 @@
 import { BigNumber } from 'bignumber.js';
 
 import { AssetKind } from '../../blockchain/config';
+import { Orderbook } from '../../exchange/orderbook/orderbook';
 import {
   CashAssetCore,
   MarginableAssetCore,
@@ -74,6 +75,12 @@ export function getMTAccount(props: {
       address: ''
     },
     props.marginableAssets ? props.marginableAssets.map(getMarginableCore) : [],
-    Boolean(props.daiAllowance)
+    Boolean(props.daiAllowance),
+    {
+      WETH: { buy: [], sell: [],
+        tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook,
+      DGX: { buy: [], sell: [],
+        tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook,
+    }
   );
 }

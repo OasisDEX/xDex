@@ -3,6 +3,7 @@ import { BigNumber } from 'bignumber.js';
 import { setupFakeWeb3ForTesting } from '../../blockchain/web3';
 setupFakeWeb3ForTesting();
 
+import { Orderbook } from '../../exchange/orderbook/orderbook';
 import { zero } from '../../utils/zero';
 import { CashAssetCore, MarginableAssetCore, MTAccount } from './mtAccount';
 import {
@@ -147,7 +148,9 @@ test('weth, dgx and mkr, no debt', () => {
 
 test('Purchasing power marginable', () => {
   const purchasingPower = realPurchasingPowerMarginable(
-    calculateMarginable(weth2),
+    calculateMarginable(
+      weth2,
+      { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook),
     sellOffers
   );
   expect(purchasingPower).toEqual(new BigNumber(299.981689453125));
@@ -155,7 +158,9 @@ test('Purchasing power marginable', () => {
 
 test('Purchasing power marginable - shallow orderbook', () => {
   const purchasingPower = realPurchasingPowerMarginable(
-    calculateMarginable(weth2),
+    calculateMarginable(
+      weth2,
+      { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook),
     sellOffersShort
   );
   expect(purchasingPower).toEqual(new BigNumber(299.981689453125));
@@ -163,7 +168,9 @@ test('Purchasing power marginable - shallow orderbook', () => {
 
 test('Purchasing power marginable - cash only', () => {
   const purchasingPower = realPurchasingPowerMarginable(
-    calculateMarginable(dai100),
+    calculateMarginable(
+      dai100,
+      { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook),
     sellOffers
   );
   expect(purchasingPower.toFixed(0)).toEqual(new BigNumber(150).toFixed());
@@ -171,7 +178,9 @@ test('Purchasing power marginable - cash only', () => {
 
 test('Purchasing power marginable - cash + collateral', () => {
   const purchasingPower = realPurchasingPowerMarginable(
-    calculateMarginable(weth1dai100),
+    calculateMarginable(
+      weth1dai100,
+      { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook),
     sellOffers
   );
   expect(purchasingPower.toFixed(0)).toEqual(new BigNumber(300).toFixed());
