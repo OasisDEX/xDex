@@ -6,12 +6,14 @@ import { Error } from 'tslint/lib/error';
 import { Money } from '../../utils/formatters/Formatters';
 import { Currency } from '../../utils/text/Text';
 import { getToken, NetworkConfig } from '../config';
-import {context$, initializedAccount$, onEveryBlock$} from '../network';
+import { context$, initializedAccount$, onEveryBlock$ } from '../network';
 import { amountFromWei, amountToWei } from '../utils';
 import { web3 } from '../web3';
 import { callCurried, sendTransactionCurried, TransactionDef } from './callsHelpers';
-import {loadOrderbook$} from './oasisDexOrderbook';
+import { loadOrderbook$ } from './oasisDexOrderbook';
 import { TxMetaKind } from './txMeta';
+
+import { Omit } from '../../utils/omit';
 
 import * as ethWethJoin from '../abi/eth-weth-join.abi.json';
 import * as gemJoin from '../abi/gem-join.abi.json';
@@ -62,17 +64,32 @@ export interface ExitData {
 }
 
 export const join: TransactionDef<JoinData> = {
-  call: ({ token }: JoinData, context: NetworkConfig) => {
+  call: ({ token }: JoinData, _: NetworkConfig) => {
     if (token === 'ETH') {
       throw new Error('Not implemented yet!');
     }
-    return (gemJoins[token] as any).join;
+    return gemJoins[token].join;
   },
   prepareArgs: ({ amount, token }: JoinData, _: NetworkConfig, account: string | undefined) =>
     [account, amountToWei(amount, token).toFixed(0)],
   kind: TxMetaKind.join,
   description: ({ amount, token }: JoinData) => (
       <>Join <Money value={amount} token={token}/></>
+  )
+};
+
+export const exit: TransactionDef<ExitData> = {
+  call: ({ token }: JoinData) => {
+    if (token === 'ETH') {
+      throw new Error('Not implemented yet!');
+    }
+    return gemJoins[token].exit;
+  },
+  prepareArgs: ({ amount, token }: ExitData, _: NetworkConfig, account: string | undefined) =>
+    [account, amountToWei(amount, token).toFixed(0)],
+  kind: TxMetaKind.exit,
+  description: ({ amount, token }: ExitData) => (
+      <>Exit <Money value={amount} token={token}/></>
   )
 };
 
@@ -84,11 +101,19 @@ export interface LimitData {
   buying: boolean;
   pos?: number;
 }
+
 export const limit: TransactionDef<LimitData> = {
   call: () => {
-    return (Oasis as any).limit;
+    return Oasis.limit;
   },
-  prepareArgs: ({ baseToken, quoteToken, amount, price, buying, pos }: LimitData) => {
+  prepareArgs: ({
+    baseToken: _base,
+    quoteToken: _quote,
+    amount,
+    price,
+    buying,
+    pos
+  }: LimitData) => {
     const marketId = markets['WETH/DAI']; // `${quoteToken}/${baseToken}`
     const x = [
       marketId,
@@ -99,9 +124,79 @@ export const limit: TransactionDef<LimitData> = {
     console.log(x);
     return x;
   },
-  kind: TxMetaKind.join,
-  description: ({ baseToken, quoteToken, amount, price, buying }: LimitData) => (
+  kind: TxMetaKind.join, // Why is this join ?
+  description: ({
+    baseToken,
+    quoteToken,
+    amount,
+    price,
+    buying
+  }) => (
     <>
+      { buying ? 'Buy' : 'Sell'} <Money value={amount} token={baseToken}/>
+      at: <Money value={price} token={quoteToken}/> {`${baseToken}/${quoteToken}`}
+    </>
+  )
+};
+
+export type IoCData = Omit<LimitData, 'pos'>;
+
+export const ioc: TransactionDef<IoCData> = {
+  call: () => {
+    return Oasis.ioc;
+  },
+  prepareArgs: ({
+    baseToken: _base,
+    quoteToken: _quote,
+    amount,
+    price,
+    buying
+  }: IoCData) => {
+    const marketId = markets['WETH/DAI']; // `${quoteToken}/${baseToken}`
+    return [
+      marketId,
+      amountToWei(amount, 'WETH').toFixed(0),
+      amountToWei(price, 'WETH').toFixed(0),
+      buying,
+    ];
+  },
+  kind: TxMetaKind.join,
+  description: ({ baseToken, quoteToken, amount, price, buying }) => (
+    <>
+      <span>Immediate-or-Cancel<br/></span>
+      { buying ? 'Buy' : 'Sell'} <Money value={amount} token={baseToken}/>
+      at: <Money value={price} token={quoteToken}/> {`${baseToken}/${quoteToken}`}
+    </>
+  )
+};
+
+export type FoKData = IoCData & { totalLimit: BigNumber };
+
+export const fok: TransactionDef<FoKData> = {
+  call: () => {
+    return Oasis.fok;
+  },
+  prepareArgs: ({
+    baseToken: _base,
+    quoteToken: _quote,
+    amount,
+    price,
+    buying,
+    totalLimit
+  }: FoKData) => {
+    const marketId = markets['WETH/DAI']; // `${quoteToken}/${baseToken}`
+    return [
+      marketId,
+      amountToWei(amount, 'WETH').toFixed(0),
+      amountToWei(price, 'WETH').toFixed(0),
+      buying,
+      totalLimit
+    ];
+  },
+  kind: TxMetaKind.join,
+  description: ({ baseToken, quoteToken, amount, price, buying }) => (
+    <>
+      <span>Fill-or-Kill<br/></span>
       { buying ? 'Buy' : 'Sell'} <Money value={amount} token={baseToken}/>
       at: <Money value={price} token={quoteToken}/> {`${baseToken}/${quoteToken}`}
     </>
@@ -124,6 +219,78 @@ export const balance = {
   postprocess: (b: BigNumber, { token }: BalanceData) => amountFromWei(b, token),
 };
 
+export interface CancelData {
+  // Probably we can inject TradingPair directly ?
+  baseToken: string;
+  quoteToken: string;
+  // Probably we can use OfferType and in the calls to check if it's buy or sell ?
+  buying: boolean;
+  offerId: number; // For some reason the call fails when the value is BigNumber
+}
+
+export const cancel: TransactionDef<CancelData> = {
+  call: (_: CancelData) => Oasis.cancel,
+  prepareArgs: ({
+    baseToken: _base,
+    quoteToken: _quote,
+    buying,
+    offerId
+  }: CancelData) => {
+    return [
+      markets['WETH/DAI'],
+      buying,
+      offerId
+    ];
+  },
+  kind: TxMetaKind.cancel2,
+  description:({ buying }: CancelData) => (
+    <> Cancelling { buying ? 'Buy' : 'Sell' } Order </>
+  )
+};
+
+export interface OfferUpdateData {
+  baseToken: string;
+  quoteToken: string;
+  offerId: number;
+  buying: boolean;
+  amount: BigNumber;
+  price: BigNumber;
+  pos?: number;
+}
+
+export const update: TransactionDef<OfferUpdateData> = {
+  call: () => {
+    return Oasis.update;
+  },
+  prepareArgs: ({
+    baseToken: _base,
+    quoteToken: _quote,
+    offerId,
+    amount,
+    price,
+    buying,
+    pos
+  }: OfferUpdateData) => {
+    const marketId = markets['WETH/DAI']; // `${quoteToken}/${baseToken}`
+    return [
+      marketId,
+      buying,
+      offerId,
+      amountToWei(amount, 'WETH').toFixed(0),
+      amountToWei(price, 'WETH').toFixed(0),
+      pos || 0
+    ];
+  },
+  kind: TxMetaKind.offerUpdate,
+  description: ({ baseToken, quoteToken, amount, price, buying }: OfferUpdateData) => (
+    <>
+      Update { buying ? 'Buy' : 'Sell'} Order.<br/>
+      { buying ? 'Buy' : 'Sell'} <Money value={amount} token={baseToken}/>
+      at: <Money value={price} token={quoteToken}/> {`${baseToken}/${quoteToken}`}
+    </>
+  )
+};
+
 function balances(context: NetworkConfig, account: string | undefined) {
   forkJoin(Object.keys(gemJoins).map(token =>
     callCurried(context, account)(balance)({ token }).pipe(
@@ -142,43 +309,110 @@ export function initDexCalls() {
   combineLatest(context$, initializedAccount$).pipe(
     first(),
     tap(([context, initializedAccount]) => {
-      const call = callCurried(context, initializedAccount);
+      // const call = callCurried(context, initializedAccount);
       const send = sendTransactionCurried(context, initializedAccount);
 
       const anyWindow = window as any;
 
+      // Displays the locked balances for the callers account
       anyWindow.balances = () => balances(context, initializedAccount);
 
+      // Locks given token amount in the token adapter ( GemJoin )
       anyWindow.join = (token: string, amount: string) =>
         send(join)({ token, amount: new BigNumber(amount) }).subscribe(identity);
 
+      // Unlocks given token amount in the token adapter ( GemJoin )
+      anyWindow.exit = (token: string, amount: string) =>
+        send(exit)({ token, amount: new BigNumber(amount) }).subscribe(identity);
+
+      // Setting allownce for the given adapter
+      // so that it can make transfers on yur behalf
+      // Prerequisite step for `join` token amount.
       anyWindow.approveAdapter = (token: string) =>
         send(approveAdapter)({ token }).subscribe(identity);
 
-      anyWindow.buy = (
+      // Creates new Limit Buy Order
+      anyWindow.buyLimit = (
         baseToken: string, quoteToken: string,
         amount: string, price: string,
-      ) => send(limit)({
-        baseToken, quoteToken,
+      ) => send<LimitData>(limit)({
+        baseToken,
+        quoteToken,
         amount: new BigNumber(amount),
         price: new BigNumber(price),
-        buying: true
+        buying:true,
       }).subscribe(identity);
 
-      anyWindow.sell = (
+      // Creates new Limit Sell Order
+      anyWindow.sellLimit = (
         baseToken: string, quoteToken: string,
-        amount: BigNumber, price: BigNumber,
-      ) => send(limit)({
-        baseToken, quoteToken,
+        amount: string, price: string,
+      ) => send<LimitData>(limit)({
+        baseToken,
+        quoteToken,
         amount: new BigNumber(amount),
         price: new BigNumber(price),
         buying: false
       }).subscribe(identity);
 
+      // Created Immediate-or-Cancel buy order
+      anyWindow.buyIoC = (
+        baseToken: string, quoteToken: string,
+        amount: string, price: string,
+      ) => send<IoCData>(ioc)({
+        baseToken,
+        quoteToken,
+        amount: new BigNumber(amount),
+        price: new BigNumber(price),
+        buying: true,
+      }).subscribe(identity);
+
+      // Created Immediate-or-Cancel Sell order
+      anyWindow.sellIoC = (
+        baseToken: string, quoteToken: string,
+        amount: string, price: string,
+      ) => send<IoCData>(ioc)({
+        baseToken,
+        quoteToken,
+        amount: new BigNumber(amount),
+        price: new BigNumber(price),
+        buying: false,
+      }).subscribe(identity);
+
+      // Cancel an order
+      // Should w ehave cancelBuy, cancelSell ?
+      anyWindow.cancel = (
+        buying: boolean,
+        offerId: number,
+      ) => send(cancel)({
+        buying,
+        offerId,
+        baseToken:'WETH',
+        quoteToken:'DAI',
+      }).subscribe(identity);
+
+      // Should we have updateBuy , updateSell ?
+      anyWindow.update = (
+        buying: boolean,
+        offerId: number,
+        amount: string,
+        price: string,
+        pos?: number,
+      ) => send(update)({
+        buying,
+        offerId,
+        pos,
+        baseToken: 'WETH',
+        quoteToken: 'DAI',
+        amount: new BigNumber(amount),
+        price: new BigNumber(price),
+      }).subscribe();
+
+      // Loads the orderbook for a given market
       anyWindow.orderbook = () => loadOrderbook$(
         context$,
         onEveryBlock$,
-        {base: 'WETH', quote: 'DAI'}
+        { base: 'WETH', quote: 'DAI' }
       ).pipe(
         first(),
         tap(orderbook => {

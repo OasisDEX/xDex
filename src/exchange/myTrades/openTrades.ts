@@ -52,6 +52,7 @@ function txnPerOrderbook(txn: TxState, pair?: TradingPair) {
 }
 
 function isBeingCancelled(offer: Offer, transactions: TxState[]): boolean {
+
   return !!find(transactions, (t: TxState) =>
     t.meta.kind === TxMetaKind.cancel &&
     t.meta.args.offerId.eq(offer.offerId) &&
