@@ -116,12 +116,11 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
                 //   }
                 let sign = '';
                 let DAIsign = '';
-                const dAmount = e.dAmount && !e.dAmount.isNaN() ? e.dAmount : zero;
-                const dDAIAmount = e.dDAIAmount && !e.dDAIAmount.isNaN() ? e.dDAIAmount : zero;
-                const debtDelta = e.debtDelta && !e.debtDelta.isNaN() ? e.debtDelta : zero;
-                const liquidationPriceDelta =
-                    e.liquidationPriceDelta && !e.liquidationPriceDelta.isNaN() ?
-                      e.liquidationPriceDelta : zero;
+                const dAmount = e.dAmount ? e.dAmount : zero;
+                const dDAIAmount = e.dDAIAmount  ? e.dDAIAmount : zero;
+                const debtDelta = e.debtDelta ? e.debtDelta : zero;
+                const liquidationPriceDelta = e.liquidationPriceDelta ?
+                  e.liquidationPriceDelta : zero;
 
                 if (
                   e.kind === MTHistoryEventKind.fundGem ||
@@ -175,7 +174,7 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
                       classnames(styles.eventName, styles.cellLeftAligned)
                     }>{displayName}</td>
                     <td>{
-                      e.priceDai && !e.priceDai.isNaN() ? e.priceDai.toFixed(2)
+                      e.priceDai ? e.priceDai.toFixed(2)
                         : <span>-</span>
                     }</td>
                     <td>

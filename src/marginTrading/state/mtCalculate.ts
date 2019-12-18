@@ -150,7 +150,8 @@ export function calculateMTHistoryEvents(
 
     const prevLiquidationPrice = liquidationPrice;
     liquidationPrice = ma.minCollRatio.times(debt).div(balance);
-    if (!liquidationPrice.isEqualTo(prevLiquidationPrice)) {
+
+    if (prevLiquidationPrice.gt(zero) && !liquidationPrice.isEqualTo(prevLiquidationPrice)) {
       const liquidationPriceDelta = prevLiquidationPrice.minus(liquidationPrice).times(minusOne);
       event = { ...event, liquidationPriceDelta };
     }
