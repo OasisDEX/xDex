@@ -20,7 +20,9 @@ export function tradingPairResolver({ base, quote }: TradingPair) {
   return `${base}/${quote}`;
 }
 
-export function memoizeTradingPair<T>(f: (pair: TradingPair) => T) {
+export function memoizeTradingPair<T>(
+  f: (pair: TradingPair) => T
+): (pair: TradingPair) => T {
   return memoize(f, tp => tradingPairResolver(tp));
 }
 

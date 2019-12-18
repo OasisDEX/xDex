@@ -1,8 +1,9 @@
 import { BigNumber } from 'bignumber.js';
 import { findLastIndex } from 'lodash';
 import * as moment from 'moment';
+import { Dictionary } from 'ramda';
 import { nullAddress } from '../../blockchain/utils';
-import { Offer } from '../../exchange/orderbook/orderbook';
+import { Offer, Orderbook } from '../../exchange/orderbook/orderbook';
 import { minusOne, one, zero } from '../../utils/zero';
 import { buy } from '../plan/planUtils';
 import {
@@ -30,7 +31,7 @@ function marginableAvailableActions(asset: MarginableAssetCore) {
 }
 
 export function realPurchasingPowerMarginable(
-  ma: MarginableAsset,
+  ma: MarginableAssetCore,
   offers: Offer[]
 ): BigNumber {
   let amount = ma.balance;
@@ -160,10 +161,21 @@ export function calculateMTHistoryEvents(
   return events;
 }
 
+function calculateMidpointPrice(ob: Orderbook) {
+  if (ob.sell[0] && ob.buy[0] && ob.sell[0].price.gt(zero) && ob.buy[0].price.gt(zero)) {
+    return (ob.sell[0].price.plus(ob.buy[0].price)).div(2);
+  }
+  return zero;
+}
+
 export function calculateMarginable(
   ma: MarginableAssetCore,
+  orderbook: Orderbook,
 ): MarginableAsset {
-
+  const purchasingPower = realPurchasingPowerMarginable(ma, orderbook.sell);
+  const midpointPrice = calculateMidpointPrice(orderbook);
+  const equity = midpointPrice.gt(zero) ?
+    ma.balance.times(midpointPrice).minus(ma.debt).plus(ma.dai) : zero;
   const availableActions = marginableAvailableActions(ma);
   const balanceInCash = ma.balance.times(ma.referencePrice);
   const lockedBalance = BigNumber.min(
@@ -246,19 +258,22 @@ export function calculateMarginable(
     runningAuctions,
     amountBeingLiquidated,
     nextPriceUpdateDelta,
+    purchasingPower,
+    equity
   };
 }
 
 export function calculateMTAccount(
   proxy: any,
   masCore: MarginableAssetCore[],
-  daiAllowance: boolean
+  daiAllowance: boolean,
+  orderbooks: Dictionary<Orderbook>,
 ): MTAccount {
 
   const totalDebt = masCore.reduce((debt, ma) => debt.plus(ma.debt), zero);
 
   const marginableAssets = masCore.map(
-    ma => calculateMarginable(ma)
+    ma => calculateMarginable(ma, orderbooks[ma.name])
   );
 
   const totalAvailableDebt =
