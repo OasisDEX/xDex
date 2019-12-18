@@ -61,13 +61,15 @@ const sell = [
   // { price: 0.001, amount: 1.80740079125783 }
 ];
 
-function priceAmountToOffer({ price, amount }: { price: number, amount: number }): Offer {
+function priceAmountToOffer(
+  { price, amount, quoteToken, baseToken }:
+    { price: number, amount: number, quoteToken: string, baseToken: string  }): Offer {
   return {
+    baseToken,
+    quoteToken,
     offerId: new BigNumber(0),
     baseAmount: new BigNumber(amount),
-    baseToken: '',
     quoteAmount: new BigNumber(amount * price),
-    quoteToken: '',
     price: new BigNumber(price),
     ownerId: '',
     timestamp: new Date('2019-10-01 00:00:00Z'),

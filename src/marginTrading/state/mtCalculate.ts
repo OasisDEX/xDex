@@ -62,7 +62,7 @@ export function sellable(
   ma: MarginableAsset,
   offers: Offer[],
   amount: BigNumber
-): [boolean, any] {
+): [boolean, any, BigNumber] {
   let { balance, debt, dai } = ma;
   const { minCollRatio, referencePrice } = ma;
   let i = 0;
@@ -81,7 +81,7 @@ export function sellable(
 
     const dBalance = balance.minus(minCollRatio.times(debt).div(referencePrice));
     if (dBalance.lte(zero)) {
-      return [false, log];
+      return [false, log, amount];
     }
 
     // sell coll, increase sold and cash
@@ -96,7 +96,7 @@ export function sellable(
     i += 1;
   }
 
-  return [amount.eq(zero) && i < maxI, log];
+  return [amount.lte(zero) && i < maxI, log, amount];
 }
 
 function findAuctionBite(rawHistory: RawMTHistoryEvent[], auctionId: number) {

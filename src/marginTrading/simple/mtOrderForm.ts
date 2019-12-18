@@ -327,15 +327,24 @@ function validate(state: MTSimpleFormState): MTSimpleFormState {
       });
     }
 
-    if (
-      state.kind === OfferType.sell && state.orderbook &&
-      !sellable(baseAsset, state.orderbook.sell, state.amount || baseAsset.availableBalance)
-    ) {
-      messages.push({
-        kind: MessageKind.unsellable,
-        field: 'total',
-        priority: 1,
-      });
+    if (state.orderbook) {
+      const [isSellable, log, amount] = sellable(
+        baseAsset, state.orderbook.sell, state.amount || baseAsset.availableBalance
+      );
+
+      console.log(JSON.stringify(log, null, '  '));
+      console.log('amount', amount.toString());
+
+      if (
+        state.kind === OfferType.sell && state.orderbook &&
+        !isSellable
+      ) {
+        messages.push({
+          kind: MessageKind.unsellable,
+          field: 'total',
+          priority: 1,
+        });
+      }
     }
   }
   return {

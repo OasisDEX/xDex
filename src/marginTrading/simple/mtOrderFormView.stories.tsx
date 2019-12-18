@@ -4,14 +4,19 @@ import * as React from 'react';
 import { of } from 'rxjs/index';
 import { Calls$, ReadCalls$ } from '../../blockchain/calls/calls';
 import { createFakeOrderbook, emptyOrderBook } from '../../exchange/depthChart/fakeOrderBook';
+import { OfferType, Orderbook } from '../../exchange/orderbook/orderbook';
+import { OrderbookView } from '../../exchange/orderbook/OrderbookView';
+import { FormChangeKind, KindChange } from '../../utils/form';
+import { LoadableStatus, loadablifyLight } from '../../utils/loadable';
+import { zero } from '../../utils/zero';
 import { MTAccount } from '../state/mtAccount';
 import { calculateMarginable } from '../state/mtCalculate';
 import { getMarginableCore, getMTAccount } from '../state/mtTestUtils';
-import { createMTSimpleOrderForm$,
-  MTSimpleFormState, MTSimpleOrderFormParams } from './mtOrderForm';
+import {
+  createMTSimpleOrderForm$, ManualChange,
+  MTSimpleFormState, MTSimpleOrderFormParams
+} from './mtOrderForm';
 import { MtSimpleOrderFormView } from './mtOrderFormView';
-import {zero} from "../../utils/zero";
-import {OfferType} from "../../exchange/orderbook/orderbook";
 
 const stories = storiesOf('Leverage Trading/Order Form', module)
   .addDecorator(story => (
@@ -22,20 +27,22 @@ const stories = storiesOf('Leverage Trading/Order Form', module)
 
 const assetCore = {
   name: 'WETH',
-  balance: new BigNumber(0.33888),
+  balance: new BigNumber(1),
   walletBalance: new BigNumber(0),
   allowance: true,
-  debt: new BigNumber(25.0249),
+  debt: new BigNumber(123),
   dai: zero,
   minCollRatio: new BigNumber(1.5),
   safeCollRatio: new BigNumber(2),
 };
 
-const ethMarginableAsset = calculateMarginable(getMarginableCore({
-  ...assetCore,
-  referencePrice: new BigNumber(185.5),
-  osmPriceNext: new BigNumber(150),
-}));
+const ethMarginableAsset = calculateMarginable(
+  getMarginableCore({
+    ...assetCore,
+    referencePrice: new BigNumber(185.5),
+    osmPriceNext: new BigNumber(150),
+  }),
+  { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook);
 
 const mta: MTAccount = getMTAccount({ marginableAssets: [ethMarginableAsset] });
 
@@ -73,7 +80,7 @@ const controllerWithFakeOrderBook = (
   return createMTSimpleOrderForm$(
     {
       ...defParams,
-      orderbook$: of(orderbook),
+      orderbook$: of({ ...orderbook, tradingPair: { base: 'WETH', quote: 'DAI' } }),
       mta$: of(_mta),
     } as MTSimpleOrderFormParams,
     tradingPair
@@ -81,39 +88,60 @@ const controllerWithFakeOrderBook = (
 };
 
 const sell_orders = [
-    { price: 186, amount: 1 },
-    { price: 200, amount: 3 },
-    { price: 210, amount: 3 },
-    { price: 220, amount: 4 },
+  { price: 186, amount: 1, baseToken: 'WETH', quoteToken: 'DAI' },
+  { price: 200, amount: 3, baseToken: 'WETH', quoteToken: 'DAI' },
+  { price: 210, amount: 3, baseToken: 'WETH', quoteToken: 'DAI' },
+  { price: 220, amount: 4, baseToken: 'WETH', quoteToken: 'DAI' },
 ];
 
 const buy_orders = [
-    { price: 183, amount: 1 },
-    { price: 180, amount: 3 },
-    { price: 170, amount: 3 },
-    { price: 160, amount: 4 },
+  { price: 183, amount: 1, baseToken: 'WETH', quoteToken: 'DAI' },
+  { price: 180, amount: 3, baseToken: 'WETH', quoteToken: 'DAI' },
+  { price: 170, amount: 3, baseToken: 'WETH', quoteToken: 'DAI' },
+  { price: 160, amount: 4, baseToken: 'WETH', quoteToken: 'DAI' },
 ];
 
 const controller = controllerWithFakeOrderBook(buy_orders, sell_orders, mta);
 
-class DummyComponent extends React.Component<any> {
-
-  public state = {
-    state: {}
-  };
+class DummyComponent extends React.Component<any, MTSimpleFormState> {
 
   public componentDidMount() {
     controller.subscribe(state => {
-      this.setState({ state });
+      this.setState(state);
+      if (state.kind !== OfferType.sell) {
+        state.change({ kind: FormChangeKind.kindChange, newKind: OfferType.sell });
+      }
     });
   }
 
   public render() {
-    if (this.state.state) {
-      console.log('@@STATE', this.state.state);
-      return <MtSimpleOrderFormView
-        {...(this.state.state as MTSimpleFormState)}
-      />;
+    if (this.state) {
+
+      // console.log('OB', JSON.stringify(this.state.orderbook, null, '  '));
+      // const props = {
+      //   ...this.state,
+      //   value: this.state.orderbook,
+      //   change: () => {},
+      //   kindChange: () => {},
+      //   tradingPair: { base: 'WETH', quote: 'DAI' },
+      //   status: 'loaded' as LoadableStatus
+      // };
+
+      return <>
+        <MtSimpleOrderFormView
+          {...(this.state as MTSimpleFormState)}
+        />
+        <pre>
+          {this.state.orderbook && JSON.stringify(this.state.orderbook.sell, null, '  ')}
+        </pre>
+
+        {/*<OrderbookView {...props} />*/}
+        <>
+          <br/>
+          <br/>
+          <br/>
+        </>
+      </>;
     }
     return <>loading</>;
   }
