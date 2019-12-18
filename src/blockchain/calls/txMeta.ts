@@ -3,7 +3,7 @@ import { OfferType } from '../../exchange/orderbook/orderbook';
 
 export enum TxMetaKind {
   cancel = 'cancel',
-  cancel2 ='cancel2', // used for testing new contract
+  cancel2 = 'cancel2', // used for testing new contract
   offerMake = 'offerMake',
   offerUpdate = 'offerUpdate',
   approveWallet = 'approveWallet',

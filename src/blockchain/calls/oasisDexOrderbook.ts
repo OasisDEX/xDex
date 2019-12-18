@@ -4,7 +4,7 @@ import { bindNodeCallback, combineLatest, Observable, of, zip } from 'rxjs';
 import { expand, map, reduce, retryWhen, scan, shareReplay, switchMap } from 'rxjs/operators';
 import { NetworkConfig } from '../../blockchain/config';
 import { amountFromWei } from '../../blockchain/utils';
-import {TradingPair} from '../../exchange/tradingPair/tradingPair';
+import { TradingPair } from '../../exchange/tradingPair/tradingPair';
 import { zero } from '../../utils/zero';
 import { markets, Oasis, OasisHelper } from './oasisDexCalls';
 
@@ -67,9 +67,9 @@ function parseOffers(baseToken: string, quoteToken: string, type: OfferType, fir
 }
 
 function callGetOffers(
-  context: NetworkConfig,
-  baseToken: string,
-  quoteToken: string,
+  _context: NetworkConfig,
+  _baseToken: string,
+  _quoteToken: string,
   type: OfferType,
   offerId: BigNumber
 ) {
