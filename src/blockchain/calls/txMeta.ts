@@ -33,6 +33,7 @@ export enum TxMetaKind {
   devPokeSpotter = 'devPokeSpotter',
   redeem = 'redeem',
   join = 'join',
+  exit = 'exit',
   approveAdapter = 'approveAdapter',
   export = 'export',
 }
@@ -96,6 +97,8 @@ export type TxMeta = {
   kind: TxMetaKind.reallocateMTAccount
 } | {
   kind: TxMetaKind.join
+} | {
+  kind: TxMetaKind.exit
 } | {
   kind: TxMetaKind.approveAdapter
 } | {

@@ -79,6 +79,21 @@ export const join: TransactionDef<JoinData> = {
   )
 };
 
+export const exit: TransactionDef<ExitData> = {
+  call: ({ token }: JoinData) => {
+    if (token === 'ETH') {
+      throw new Error('Not implemented yet!');
+    }
+    return (gemJoins[token] as any).exit;
+  },
+  prepareArgs: ({ amount, token }: ExitData, _: NetworkConfig, account: string | undefined) =>
+    [account, amountToWei(amount, token).toFixed(0)],
+  kind: TxMetaKind.exit,
+  description: ({ amount, token }: ExitData) => (
+      <>Exit <Money value={amount} token={token}/></>
+  )
+}
+
 export interface LimitData {
   baseToken: string;
   quoteToken: string;
@@ -270,6 +285,10 @@ export function initDexCalls() {
       // Locks given token amount in the token adapter ( GemJoin )
       anyWindow.join = (token: string, amount: string) =>
         send(join)({ token, amount: new BigNumber(amount) }).subscribe(identity);
+
+      // Unlocks given token amount in the token adapter ( GemJoin )
+      anyWindow.exit = (token: string, amount: string) =>
+        send(exit)({ token, amount: new BigNumber(amount) }).subscribe(identity);
 
       // Setting allownce for the given adapter 
       // so that it can make transfers on yur behalf
