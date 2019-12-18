@@ -166,7 +166,7 @@ export interface MarginableAssetCore extends Core {
 }
 
 export interface MarginableAsset extends MarginableAssetCore {
-  balance: BigNumber;
+  // balance: BigNumber;
   balanceInCash: BigNumber;
   currentCollRatio?: BigNumber;
   cash: BigNumber;
@@ -187,6 +187,8 @@ export interface MarginableAsset extends MarginableAssetCore {
   runningAuctions: number;
   amountBeingLiquidated: BigNumber;
   nextPriceUpdateDelta: string;
+  purchasingPower: BigNumber;
+  equity: BigNumber;
 }
 
 // export interface NonMarginableAssetCore extends Core {

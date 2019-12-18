@@ -1,6 +1,7 @@
 import { BigNumber } from 'bignumber.js';
 import { isEqual } from 'lodash';
 import { bindNodeCallback, combineLatest, forkJoin, Observable, of } from 'rxjs';
+import { first } from 'rxjs/internal/operators';
 import {
   catchError,
   concatAll,
@@ -23,6 +24,8 @@ import {
 import { Allowance, MIN_ALLOWANCE } from '../../blockchain/network';
 import { amountFromWei, nullAddress } from '../../blockchain/utils';
 import { web3 } from '../../blockchain/web3';
+import { Orderbook } from '../../exchange/orderbook/orderbook';
+import { TradingPair } from '../../exchange/tradingPair/tradingPair';
 import { zero } from '../../utils/zero';
 import {
   MTAccount,
@@ -79,7 +82,9 @@ function osmsParams$(assets: string[]) {
   return readCalls$.pipe(
     switchMap(calls => {
       return forkJoin(assets.map((token) => {
-        return calls.osmParams({ token });
+        return calls.osmParams({ token }).pipe(
+          map(osmParams => ({ [token]: osmParams }))
+        );
       })).pipe(
           concatAll(),
           reduce(
@@ -92,32 +97,49 @@ function osmsParams$(assets: string[]) {
   );
 }
 
+function orderbooks$(
+  assetNames: string[],
+  loadOrderbook: (pair: TradingPair) => Observable<Orderbook>
+) {
+  return forkJoin(assetNames.map((token) => {
+    return loadOrderbook({ base: token, quote: 'DAI' }).pipe(
+      first(),
+      map(obk => ({ [obk.tradingPair.base]: obk })),
+      );
+  })).pipe(
+    concatAll(),
+    reduce(
+      (a, e) => ({ ...a, ...e }),
+      {},
+    ),
+  );
+}
+
 export function aggregateMTAccountState(
   context: NetworkConfig,
   proxy: any,
   calls: ReadCalls,
   daiAllowance: boolean,
+  loadOrderbook: (pair: TradingPair) => Observable<Orderbook>
 ): Observable<MTAccount> {
 
   const assetNames: string[] = tradingTokens
     .map((symbol: string) => getToken(symbol))
     .filter((t: any) =>
-      t.assetKind === AssetKind.marginable ||
-      t.assetKind === AssetKind.nonMarginable // ||
-      // t.symbol === 'DAI'
+      t.assetKind === AssetKind.marginable
     )
     .map(t => t.symbol);
 
-  const tokenNames = [...assetNames];
-
   return combineLatest(
-        calls.mtBalance({ tokens: tokenNames, proxyAddress: proxy.address }),
+        calls.mtBalance({ tokens: assetNames, proxyAddress: proxy.address }),
         rawMTHistories$(context, proxy.address, assetNames),
         osms$(context, assetNames),
         osmsParams$(assetNames),
+        orderbooks$(assetNames, loadOrderbook)
       ).pipe(
-    map(([balanceResult, rawHistories, osmPrices, osmParams]) => {
-      const marginables = tokenNames
+    map(([balanceResult, rawHistories, osmPrices, osmParams, orderbooks]) => {
+
+      const marginables = assetNames
         .filter(token => getToken(token).assetKind === AssetKind.marginable)
         .map(token => {
           return getMarginableCore({
@@ -133,7 +155,7 @@ export function aggregateMTAccountState(
             minDebt: new BigNumber(20) // todo: take this value from mt balance
           });
         });
-      return calculateMTAccount(proxy, marginables, daiAllowance);
+      return calculateMTAccount(proxy, marginables, daiAllowance, orderbooks);
     })
   );
 }
@@ -194,6 +216,7 @@ export function createMta$(
   initializedAccount$: Observable<string>,
   onEveryBlock$: Observable<number>,
   calls$: ReadCalls$,
+  loadOrderbook: (pair: TradingPair) => Observable<Orderbook>
 ): Observable<MTAccount> {
 
   const proxyAddress$ = createProxyAddress$(context$, initializedAccount$, onEveryBlock$);
@@ -205,6 +228,7 @@ export function createMta$(
     proxyAddress$,
     'DAI',
   );
+
   return combineLatest(context$, calls$, proxyAddress$, daiAllowance$, onEveryBlock$).pipe(
     switchMap(([context, calls, proxyAddress, daiAllowance]) => {
 
@@ -213,7 +237,7 @@ export function createMta$(
       }
 
       const proxy = web3.eth.contract(dsProxy as any).at(proxyAddress);
-      return aggregateMTAccountState(context, proxy, calls, daiAllowance);
+      return aggregateMTAccountState(context, proxy, calls, daiAllowance, loadOrderbook);
     }),
     distinctUntilChanged(isEqual),
     shareReplay(1)

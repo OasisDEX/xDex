@@ -305,11 +305,8 @@ export const mtExport = {
 };
 
 export const osmParams = {
-  call: (_data: any, context: NetworkConfig) => {
-    return context.mcd.osms[_data.token].contract.zzz;
-  },
+  call: (_data: any, context: NetworkConfig) => context.mcd.osms[_data.token].contract.zzz,
   prepareArgs: () => {
     return [];
   },
-  postprocess: (results: any, _data: any) => ({ [_data.token]: results }),
 };
