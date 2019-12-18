@@ -420,7 +420,7 @@ const kovan: NetworkConfig = {
       },
     },
   } as { [key: string]: any },
-  cdpManager: '0x91f5b32a23702094eacb631bcb89a555ca8bfa4e', // fill
+  cdpManager: '0xa07b43edc82a09f6657523aeeffd2db3a2f68986', // fill
   get otcSupportMethods() {
     return load(otcSupport, '0x303f2bf24d98325479932881657f45567b3e47a8');
   },
@@ -434,7 +434,7 @@ const kovan: NetworkConfig = {
     return load(proxyCreationAndExecute, '0xee419971e63734fed782cfe49110b1544ae8a773');
   },
   get proxyActions() {
-    return load(proxyActions, '0x53fd25ea403ba60ddc614c17f45592986f2ec1bf');
+    return load(proxyActions, '0x49832df12438381a9205feab84ceb6c922f2fcec');
   },
   get migration() {
     return '0x411b2faa662c8e3e5cf8f01dfdae0aee482ca7b0';
