@@ -42,6 +42,7 @@ import {
   calculateMarginable,
   realPurchasingPowerMarginable,
 } from '../state/mtCalculate';
+import {filter} from "rxjs/internal/operators";
 
 export enum MessageKind {
   insufficientAmount = 'insufficientAmount',
@@ -63,7 +64,6 @@ export type ManualChange = TokenChange | AmountFieldChange | IlkFieldChange;
 
 export enum MTTransferFormTab {
   proxy = 'proxy',
-  allowance = 'allowance',
   transfer = 'transfer',
 }
 
@@ -123,24 +123,27 @@ type MTSetupFormChange =
   ProgressChange;
 
 function initialTab(mta: MTAccount, name: string) {
-  const { proxy, allowance, transfer } = MTTransferFormTab;
+  const { proxy, transfer } = MTTransferFormTab;
   if (mta.proxy.address !==  nullAddress) {
     const isAllowance = name === 'DAI'
               ? mta.daiAllowance
               : findMarginableAsset(name, mta)!.allowance;
-    return isAllowance ? transfer : allowance;
+    return isAllowance ? transfer : proxy;
+    return isAllowance ? transfer : proxy;
   }
 
   return proxy;
 }
 
-function nextTab(tab: MTTransferFormTab | undefined) {
-  const { proxy, allowance, transfer } = MTTransferFormTab;
-  switch (tab) {
-    case proxy: return allowance;
-    case allowance: return transfer;
-    default: return transfer;
-  }
+function nextTab(mta: MTAccount, name: string, tab: MTTransferFormTab | undefined) {
+  const ma = findMarginableAsset(name, mta);
+  const { proxy, transfer } = MTTransferFormTab;
+
+  // if (ma && ma.allowance) {
+  //   return proxy;
+  // }
+
+  return tab;
 }
 
 function applyChange(state: MTTransferFormState, change: MTSetupFormChange): MTTransferFormState {
@@ -177,7 +180,6 @@ function applyChange(state: MTTransferFormState, change: MTSetupFormChange): MTT
     case FormChangeKind.progress:
       return {
         ...state,
-        tab: change.progress === ProgressStage.done ? nextTab(state.tab) : state.tab,
         progress:
           change.progress === ProgressStage.done && state.tab !== MTTransferFormTab.transfer ?
             undefined : change.progress
@@ -399,7 +401,7 @@ function prepareTransfer(calls$: Calls$)
   ];
 }
 
-function prepareSetup(calls$: Calls$)
+function prepareSetup(calls$: Calls$, mta$: Observable<MTAccount>)
   : [(state: MTTransferFormState) => void, Observable<ProgressChange>] {
 
   const setupChange$ = new Subject<ProgressChange>();
@@ -410,7 +412,17 @@ function prepareSetup(calls$: Calls$)
       first(),
       switchMap((calls): Observable<ProgressChange> => {
         return calls.setupMTProxy({}).pipe(
-          transactionHandler()
+          transactionHandler(),
+          switchMap(change => {
+            if (change.progress !== ProgressStage.done) {
+              of(change);
+            }
+            return mta$.pipe(
+              filter(mta => mta.state === MTAccountState.setup),
+              first(),
+              map(() => change)
+            );
+          })
         );
       }),
     );
@@ -544,7 +556,7 @@ export function createMTTransferForm$(
   );
 
   const [transfer, cancel, transferProgressChange$] = prepareTransfer(calls$);
-  const [setup, setupProgressChange$] = prepareSetup(calls$);
+  const [setup, setupProgressChange$] = prepareSetup(calls$, mta$);
   const [allowance, allowanceProgressChange$] = prepareAllowance(calls$);
 
   const change = manualChange$.next.bind(manualChange$);

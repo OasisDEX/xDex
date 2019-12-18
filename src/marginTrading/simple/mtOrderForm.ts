@@ -621,6 +621,7 @@ function getSellPlan(
         liquidationPricePost: undefined,
         leveragePost: undefined,
         balancePost: undefined,
+        daiBalancePost: undefined,
         isSafePost: undefined
       }
     ];
@@ -638,18 +639,22 @@ function getSellPlan(
     } as MarginableAssetCore,
   );
 
+  console.log('post trade debt', postTradeAsset.debt.toString());
+  console.log('post trade dai', postTradeAsset.dai.toString());
   const collRatioPost = postTradeAsset.currentCollRatio;
   const liquidationPricePost = postTradeAsset.liquidationPrice;
   const isSafePost = postTradeAsset.safe;
   const leveragePost = postTradeAsset.leverage;
   const balancePost = postTradeAsset.balance;
+  const daiBalancePost = postTradeAsset.debt.gt(zero) ?
+    postTradeAsset.debt.times(minusOne) : postTradeAsset.dai;
 
   return [
     request.createPlan([{
       ...request.assets.find(ai => ai.name === baseToken),
       delta
     } as Required<EditableDebt>]),
-    { collRatioPost, liquidationPricePost, leveragePost, isSafePost, balancePost }
+    { collRatioPost, liquidationPricePost, leveragePost, isSafePost, balancePost, daiBalancePost }
   ];
 }
 

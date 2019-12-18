@@ -38,7 +38,6 @@ type MTFundFormProps = MTTransferFormState & ModalProps;
 
 const tabLabels: Dictionary<string> = {
   [MTTransferFormTab.proxy]: 'Deploy proxy',
-  [MTTransferFormTab.allowance]: 'Set allowance',
   [MTTransferFormTab.transfer]: 'Deposit',
 };
 
@@ -47,19 +46,27 @@ interface StepComponentProps {
   description: string;
   btnLabel: string;
   btnAction: () => void;
+  btnDisabled: boolean;
+  stepCompleted: boolean;
+  isLoading: boolean;
 }
 
 class StepComponent extends React.Component<StepComponentProps> {
   public render() {
-    const { title, description, btnLabel, btnAction } = this.props;
+    const { title, description, btnLabel, btnAction,
+      stepCompleted, btnDisabled, isLoading } = this.props;
+
     return (<div className={styles.onboardingPanel}>
       <h3 className={styles.onboardingHeader}>{title}</h3>
       <div className={styles.onboardingParagraph}>{description}</div>
+      { !stepCompleted &&
       <Button
         size="md"
         color="primary"
+        disabled={btnDisabled || isLoading}
         onClick={() => btnAction()}
-      >{btnLabel}</Button>
+      >{ isLoading && !btnDisabled ?  <LoadingIndicator inline={true} /> : btnLabel}</Button>
+      }
     </div>);
   }
 }
@@ -89,7 +96,15 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
 
     const startIndex = this.props.startTab ? onboardingTabs.indexOf(this.props.startTab) : 0;
 
-    const { mta, token, progress, tab } = this.props;
+    const { mta, token, progress } = this.props;
+
+    const isLoading = (progress === ProgressStage.waitingForApproval
+      || progress === ProgressStage.waitingForConfirmation);
+
+    const currentTab = mta &&
+    (mta.proxy && mta.proxy.address !== nullAddress && allowance(mta, token)) ?
+      MTTransferFormTab.transfer : MTTransferFormTab.proxy;
+
     return (
       <ReactModal
         ariaHideApp={false}
@@ -102,55 +117,61 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
       >
         <Panel className={styles.modalChild}>
           <div className={styles.tabs}>
-          {
-            onboardingTabs.filter(
-              (_tab: string, index: number) => (index >= startIndex)
-            ).map(_tab => {
-              return (<div
-                className={
-                  classnames({
-                    [styles.tab]: true,
-                    [styles.tabActive]: (_tab === this.props.tab)
-                  })
-                }
-                key={_tab}>{tabLabels[_tab]}</div>);
-            })
-          }
+            {
+              onboardingTabs.filter(
+                (_tab: string, index: number) => (index >= startIndex)
+              ).map(_tab => {
+                return (<div
+                  className={
+                    classnames({
+                      [styles.tab]: true,
+                      [styles.tabActive]: (_tab === currentTab)
+                    })
+                  }
+                  key={_tab}>{tabLabels[_tab]}</div>);
+              })
+            }
           </div>
-          { (tab === MTTransferFormTab.allowance || tab === MTTransferFormTab.proxy) &&
-          (progress === ProgressStage.waitingForApproval
-            || progress === ProgressStage.waitingForConfirmation) ?
-              <LoadingIndicator />
-            : <>
-              {mta && mta.proxy && mta.proxy.address === nullAddress ?
-                <StepComponent
-                  title="Deploy proxy"
-                  description={`Proxies are used to bundle multiple transactions into one,
-                  saving transaction time and gas costs. This only has to be done once.`}
-                  btnLabel="Deploy Proxy"
-                  btnAction={() => this.setup()}
-                />
-                :
-                mta && !allowance(mta, token) &&
+
+          {mta ?
+            <>
+              {currentTab === MTTransferFormTab.proxy ?
+                <>
+                  <StepComponent
+                    title="Deploy proxy"
+                    description={`Proxies are used to bundle multiple transactions into one,
+                saving transaction time and gas costs. This only has to be done once.`}
+                    btnLabel="Deploy Proxy"
+                    btnAction={() => this.setup()}
+                    btnDisabled={false}
+                    isLoading={isLoading}
+                    stepCompleted={mta.proxy && mta.proxy.address !== nullAddress}
+                  />
                   <StepComponent
                     title="Set allowance"
                     description={`This permission allows Oasis smart contracts
-                     to interact with your ${token}.
-                     This has to be done for each asset type.`}
+                   to interact with your ${token}.
+                   This has to be done for each asset type.`}
                     btnLabel="Set allowance"
                     btnAction={() => this.allowance()}
+                    isLoading={isLoading}
+                    btnDisabled={mta.proxy && mta.proxy.address === nullAddress}
+                    stepCompleted={allowance(mta, token)}
                   />
-              }
-              { mta && allowance(mta, token) && mta.proxy && <>
-                  <PanelBody paddingTop={true} style={{ height: '287px' }}>
-                    {this.AccountSummary()}
-                    <Hr color="dark" className={styles.hrBigMargin}/>
-                    {this.FormOrTransactionState()}
-                  </PanelBody>
-                  {this.Buttons()}
+                </> :
+                <>
+                  {allowance(mta, token) && mta.proxy && <>
+                    <PanelBody paddingTop={true} style={{height: '287px'}}>
+                      {this.AccountSummary()}
+                      <Hr color="dark" className={styles.hrBigMargin}/>
+                      {this.FormOrTransactionState()}
+                    </PanelBody>
+                    {this.Buttons()}
+                  </>
+                  }
                 </>
               }
-            </>
+            </> : <LoadingIndicator/>
           }
         </Panel>
       </ReactModal>
@@ -188,127 +209,127 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
     && !this.props.liquidationPricePost.isNaN() ? this.props.liquidationPricePost : zero;
     return(
       <>
-          <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
-            <div className={styles.orderSummaryLabel}>
-              Purchasing Power
-            </div>
-            <div className={styles.orderSummaryValue}>
-              {
-                this.props.realPurchasingPower &&
-                <Money
-                  value={ this.props.realPurchasingPower}
-                  token={'DAI'}
-                  fallback="-"
-                />
-              }
-              { this.props.realPurchasingPowerPost &&
-              <>
-                <span className={styles.transitionArrow} />
-                { !this.props.realPurchasingPowerPost.isNaN() ?
-                  <Money
-                    value={ this.props.realPurchasingPowerPost}
-                    token={'DAI'}
-                    fallback="-"
-                  />
-                  : <span>-</span>
-                }
-              </>
-              }
-            </div>
+        <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
+          <div className={styles.orderSummaryLabel}>
+            Purchasing Power
           </div>
-          <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
-            <div className={styles.orderSummaryLabel}>
-              Account Balance
-            </div>
-            <div className={styles.orderSummaryValue}>
-              { baseAsset && !baseAsset.balance.isNaN() ?
-                <Money
-                  value={baseAsset.balance}
-                  token={baseToken}
-                  fallback="-"
-                /> : <span>-</span>
-              }
-              {
-                baseAsset && baseAsset.balance && this.props.balancePost &&
-                !this.props.balancePost.isEqualTo(baseAsset.balance) &&
-                <>
-                  <span className={styles.transitionArrow} />
-                  { !this.props.balancePost.isNaN() ?
-                    <Money
-                      value={this.props.balancePost}
-                      token={baseToken}
-                      fallback="-"
-                    /> : <span>-</span>
-                  }
-                </>
-              }
-            </div>
-          </div>
-          <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
-            <div className={styles.orderSummaryLabel}>
-              Liquidation Price
-            </div>
-            <div className={styles.orderSummaryValue}>
+          <div className={styles.orderSummaryValue}>
+            {
+              this.props.realPurchasingPower &&
               <Money
-                value={liquidationPrice}
-                token="USD"
-                fallback="-"
-                className={
-                  classnames({
-                    [styles.orderSummaryValuePositive]: baseAsset && baseAsset.safe,
-                    [styles.orderSummaryValueNegative]: baseAsset && !baseAsset.safe
-                  })
-                }
-              />
-              {
-                this.props.liquidationPricePost &&
-                this.props.liquidationPrice &&
-                !this.props.liquidationPrice.isEqualTo(this.props.liquidationPricePost) &&
-                <>
-                  <span className={styles.transitionArrow} />
-                  <Money
-                    value={liquidationPricePost}
-                    token="USD"
-                    fallback="-"
-                    className={
-                      classnames({
-                        [styles.orderSummaryValuePositive]: this.props.isSafePost,
-                        [styles.orderSummaryValueNegative]: !this.props.isSafePost,
-                      })
-                    }
-                  />
-                </>
-              }
-            </div>
-          </div>
-          <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
-            <div className={styles.orderSummaryLabel}>
-              DAI Balance
-            </div>
-            <div className={styles.orderSummaryValue}>
-              { this.props.daiBalance && !this.props.daiBalance.isNaN() &&
-              <Money
-                value={this.props.daiBalance}
+                value={ this.props.realPurchasingPower}
                 token={'DAI'}
                 fallback="-"
               />
+            }
+            { this.props.realPurchasingPowerPost &&
+            <>
+              <span className={styles.transitionArrow} />
+              { !this.props.realPurchasingPowerPost.isNaN() ?
+                <Money
+                  value={ this.props.realPurchasingPowerPost}
+                  token={'DAI'}
+                  fallback="-"
+                />
+                : <span>-</span>
               }
-              {
-                this.props.daiBalancePost && this.props.daiBalance &&
-                !this.props.daiBalance.isEqualTo(this.props.daiBalancePost) &&
-                <>
-                  <span className={styles.transitionArrow} />
-                  { !this.props.daiBalancePost.isNaN() ?
-                    <Money
-                      value={this.props.daiBalancePost}
-                      token={'DAI'}
-                      fallback="-"
-                    /> : <span>-</span>
-                  }
-                </>
-              }
-            </div>
+            </>
+            }
           </div>
+        </div>
+        <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
+          <div className={styles.orderSummaryLabel}>
+            Account Balance
+          </div>
+          <div className={styles.orderSummaryValue}>
+            { baseAsset && !baseAsset.balance.isNaN() ?
+              <Money
+                value={baseAsset.balance}
+                token={baseToken}
+                fallback="-"
+              /> : <span>-</span>
+            }
+            {
+              baseAsset && baseAsset.balance && this.props.balancePost &&
+              !this.props.balancePost.isEqualTo(baseAsset.balance) &&
+              <>
+                <span className={styles.transitionArrow} />
+                { !this.props.balancePost.isNaN() ?
+                  <Money
+                    value={this.props.balancePost}
+                    token={baseToken}
+                    fallback="-"
+                  /> : <span>-</span>
+                }
+              </>
+            }
+          </div>
+        </div>
+        <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
+          <div className={styles.orderSummaryLabel}>
+            Liquidation Price
+          </div>
+          <div className={styles.orderSummaryValue}>
+            <Money
+              value={liquidationPrice}
+              token="USD"
+              fallback="-"
+              className={
+                classnames({
+                  [styles.orderSummaryValuePositive]: baseAsset && baseAsset.safe,
+                  [styles.orderSummaryValueNegative]: baseAsset && !baseAsset.safe
+                })
+              }
+            />
+            {
+              this.props.liquidationPricePost &&
+              this.props.liquidationPrice &&
+              !this.props.liquidationPrice.isEqualTo(this.props.liquidationPricePost) &&
+              <>
+                <span className={styles.transitionArrow} />
+                <Money
+                  value={liquidationPricePost}
+                  token="USD"
+                  fallback="-"
+                  className={
+                    classnames({
+                      [styles.orderSummaryValuePositive]: this.props.isSafePost,
+                      [styles.orderSummaryValueNegative]: !this.props.isSafePost,
+                    })
+                  }
+                />
+              </>
+            }
+          </div>
+        </div>
+        <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
+          <div className={styles.orderSummaryLabel}>
+            DAI Balance
+          </div>
+          <div className={styles.orderSummaryValue}>
+            { this.props.daiBalance && !this.props.daiBalance.isNaN() &&
+            <Money
+              value={this.props.daiBalance}
+              token={'DAI'}
+              fallback="-"
+            />
+            }
+            {
+              this.props.daiBalancePost && this.props.daiBalance &&
+              !this.props.daiBalance.isEqualTo(this.props.daiBalancePost) &&
+              <>
+                <span className={styles.transitionArrow} />
+                { !this.props.daiBalancePost.isNaN() ?
+                  <Money
+                    value={this.props.daiBalancePost}
+                    token={'DAI'}
+                    fallback="-"
+                  /> : <span>-</span>
+                }
+              </>
+            }
+          </div>
+        </div>
 
         <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
           <div className={styles.orderSummaryLabel}>
