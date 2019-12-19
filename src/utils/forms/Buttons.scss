@@ -102,6 +102,23 @@
   ));
 }
 
+.primaryOutlinedDone {
+  opacity: .99;
+
+  @include button((
+    color: $green,
+    bg: transparent,
+    border-color: $green,
+
+    color-disabled: $green,
+    border-color-disabled: $green,
+
+    bg-hover: $green,
+
+    bg-active: transparent,
+  ));
+}
+
 .primary {
   opacity: .99;
 

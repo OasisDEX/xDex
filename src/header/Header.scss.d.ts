@@ -5,6 +5,7 @@ export const primaryOutlined: string;
 export const secondaryOutlined: string;
 export const dangerOutlined: string;
 export const greyOutlined: string;
+export const primaryOutlinedDone: string;
 export const primary: string;
 export const secondary: string;
 export const danger: string;
