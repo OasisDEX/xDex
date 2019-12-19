@@ -32,6 +32,12 @@ import {
 } from './WalletConnectionView';
 
 const {
+  REACT_APP_INSTANT_ENABLED,
+  REACT_APP_LT_ENABLED,
+  REACT_APP_SUBDIR
+} = process.env;
+
+const {
   header,
   nav,
   list,
@@ -107,8 +113,8 @@ class Header extends React.Component<HeaderProps> {
         {({ rootUrl }) =>
           <header className={header}>
             <section className={section}>
-              <a href={process.env.REACT_APP_SUBDIR
-                ? process.env.REACT_APP_SUBDIR
+              <a href={REACT_APP_SUBDIR
+                ? REACT_APP_SUBDIR
                 : '/'} className={logo}
               >
                 <SvgImage image={OasisDexLogo}/>
@@ -118,9 +124,10 @@ class Header extends React.Component<HeaderProps> {
               <nav className={nav}>
                 <div className={list}>
                   <HeaderNavLink to={`${rootUrl}market`} name="Market"/>
-                  {process.env.REACT_APP_INSTANT_ENABLED === '1' &&
+                  {REACT_APP_INSTANT_ENABLED === '1' &&
                   <HeaderNavLink to={`${rootUrl}instant`} name="Instant"/>}
-                  <HeaderNavLink to={`${rootUrl}Leverage`} name="Leverage"/>
+                  {REACT_APP_LT_ENABLED === '1' &&
+                  <HeaderNavLink to={`${rootUrl}Leverage`} name="Leverage"/> }
                   {this.props.walletStatus === 'connected' &&
                   <HeaderNavLink to={`${rootUrl}account`} name="Account"/>}
                 </div>
