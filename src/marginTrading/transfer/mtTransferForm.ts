@@ -21,6 +21,7 @@ import {
 } from '../../utils/form';
 
 import { curry } from 'ramda';
+import { filter } from 'rxjs/internal/operators';
 import { Balances } from '../../balances/balances';
 import { Calls, Calls$, ReadCalls, ReadCalls$ } from '../../blockchain/calls/calls';
 import { AssetKind } from '../../blockchain/config';
@@ -42,7 +43,6 @@ import {
   calculateMarginable,
   realPurchasingPowerMarginable,
 } from '../state/mtCalculate';
-import {filter} from "rxjs/internal/operators";
 
 export enum MessageKind {
   insufficientAmount = 'insufficientAmount',
@@ -135,17 +135,6 @@ function initialTab(mta: MTAccount, name: string) {
   return proxy;
 }
 
-function nextTab(mta: MTAccount, name: string, tab: MTTransferFormTab | undefined) {
-  const ma = findMarginableAsset(name, mta);
-  const { proxy, transfer } = MTTransferFormTab;
-
-  // if (ma && ma.allowance) {
-  //   return proxy;
-  // }
-
-  return tab;
-}
-
 function applyChange(state: MTTransferFormState, change: MTSetupFormChange): MTTransferFormState {
   switch (change.kind) {
     case FormChangeKind.gasPriceChange:
@@ -180,9 +169,8 @@ function applyChange(state: MTTransferFormState, change: MTSetupFormChange): MTT
     case FormChangeKind.progress:
       return {
         ...state,
-        progress:
-          change.progress === ProgressStage.done && state.tab !== MTTransferFormTab.transfer ?
-            undefined : change.progress
+        progress: change.progress === ProgressStage.done &&
+          state.tab !== MTTransferFormTab.transfer ? undefined : change.progress
       };
     // default:
     //   const _exhaustiveCheck: never = change; // tslint:disable-line
@@ -415,7 +403,7 @@ function prepareSetup(calls$: Calls$, mta$: Observable<MTAccount>)
           transactionHandler(),
           switchMap(change => {
             if (change.progress !== ProgressStage.done) {
-              of(change);
+              return of(change);
             }
             return mta$.pipe(
               filter(mta => mta.state === MTAccountState.setup),
@@ -435,7 +423,7 @@ function prepareSetup(calls$: Calls$, mta$: Observable<MTAccount>)
   return [setup, setupChange$];
 }
 
-function prepareAllowance(calls$: Calls$)
+function prepareAllowance(calls$: Calls$, mta$: Observable<MTAccount>)
   : [(state: MTTransferFormState) => void, Observable<ProgressChange>] {
 
   const allowanceChange$ = new Subject<ProgressChange>();
@@ -453,7 +441,17 @@ function prepareAllowance(calls$: Calls$)
           proxyAddress,
           token: state.token
         }).pipe(
-          transactionHandler()
+          transactionHandler(),
+          switchMap(change => {
+            if (change.progress !== ProgressStage.done) {
+              return of(change);
+            }
+            return mta$.pipe(
+              filter(mta => mta.state === MTAccountState.setup),
+              first(),
+              map(() => change)
+            );
+          })
         );
       }),
     );
@@ -525,6 +523,7 @@ function freezeIfInProgress(
   if (state.progress) {
     return {
       ...previous,
+      mta: state.mta,
       progress: state.progress,
     };
   }
@@ -557,7 +556,7 @@ export function createMTTransferForm$(
 
   const [transfer, cancel, transferProgressChange$] = prepareTransfer(calls$);
   const [setup, setupProgressChange$] = prepareSetup(calls$, mta$);
-  const [allowance, allowanceProgressChange$] = prepareAllowance(calls$);
+  const [allowance, allowanceProgressChange$] = prepareAllowance(calls$, mta$);
 
   const change = manualChange$.next.bind(manualChange$);
 

@@ -15,6 +15,7 @@ import { Button } from '../../utils/forms/Buttons';
 import { ErrorMessage } from '../../utils/forms/ErrorMessage';
 import { InputGroup, InputGroupAddon } from '../../utils/forms/InputGroup';
 import { GasCost } from '../../utils/gasCost/GasCost';
+import { SvgImage } from '../../utils/icons/utils';
 import { BorderBox, Hr } from '../../utils/layout/LayoutHelpers';
 import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
 import { ModalProps } from '../../utils/modal';
@@ -29,6 +30,7 @@ import {
   MTAccountState,
   UserActionKind,
 } from '../state/mtAccount';
+import checkIconSvg from './check-icon.svg';
 import {
   Message, MessageKind, MTTransferFormState, MTTransferFormTab
 } from './mtTransferForm';
@@ -59,14 +61,17 @@ class StepComponent extends React.Component<StepComponentProps> {
     return (<div className={styles.onboardingPanel}>
       <h3 className={styles.onboardingHeader}>{title}</h3>
       <div className={styles.onboardingParagraph}>{description}</div>
-      { !stepCompleted &&
       <Button
         size="md"
-        color="primary"
-        disabled={btnDisabled || isLoading}
+        color={stepCompleted ? 'primaryOutlinedDone' : 'primary'}
+        disabled={btnDisabled || isLoading || stepCompleted}
         onClick={() => btnAction()}
-      >{ isLoading && !btnDisabled ?  <LoadingIndicator inline={true} /> : btnLabel}</Button>
-      }
+        className={classnames({ [styles.buttonDone]: stepCompleted })}
+      >{
+        stepCompleted ? <SvgImage image={checkIconSvg}/> :
+          isLoading && !btnDisabled ?  <LoadingIndicator inline={true} /> : btnLabel
+      }</Button>
+
     </div>);
   }
 }
@@ -143,7 +148,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
                 saving transaction time and gas costs. This only has to be done once.`}
                     btnLabel="Deploy Proxy"
                     btnAction={() => this.setup()}
-                    btnDisabled={false}
+                    btnDisabled={mta.proxy && mta.proxy.address !== nullAddress}
                     isLoading={isLoading}
                     stepCompleted={mta.proxy && mta.proxy.address !== nullAddress}
                   />
@@ -155,13 +160,15 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
                     btnLabel="Set allowance"
                     btnAction={() => this.allowance()}
                     isLoading={isLoading}
-                    btnDisabled={mta.proxy && mta.proxy.address === nullAddress}
-                    stepCompleted={allowance(mta, token)}
+                    btnDisabled={
+                      mta.proxy && mta.proxy.address === nullAddress
+                    }
+                    stepCompleted={mta && allowance(mta, token)}
                   />
                 </> :
                 <>
                   {allowance(mta, token) && mta.proxy && <>
-                    <PanelBody paddingTop={true} style={{height: '287px'}}>
+                    <PanelBody paddingTop={true} style={{ height: '287px' }}>
                       {this.AccountSummary()}
                       <Hr color="dark" className={styles.hrBigMargin}/>
                       {this.FormOrTransactionState()}
