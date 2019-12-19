@@ -524,7 +524,7 @@ function freezeIfInProgress(
   if (state.progress) {
     return {
       ...previous,
-      mta: state.mta,
+      mta: state.mta, // todo: instead of freezing mta, handle proxy address update other way
       progress: state.progress,
     };
   }
