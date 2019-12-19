@@ -579,6 +579,7 @@ function getBuyPlan(
       urnBalance: asset.urnBalance.plus(amount),
       debt: asset.debt.plus(delta)
     } as MarginableAssetCore,
+    { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook
   );
   const collRatioPost = postTradeAsset.currentCollRatio;
   const liquidationPricePost = postTradeAsset.liquidationPrice;
@@ -637,6 +638,7 @@ function getSellPlan(
       ...asset,
       debt: asset.debt.plus(delta)
     } as MarginableAssetCore,
+    { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook
   );
 
   console.log('post trade debt', postTradeAsset.debt.toString());

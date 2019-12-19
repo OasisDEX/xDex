@@ -5,6 +5,7 @@ import { Operation, OperationKind } from '../../marginTrading/state/mtAccount';
 import { Money } from '../../utils/formatters/Formatters';
 import { Currency } from '../../utils/text/Text';
 import { one } from '../../utils/zero';
+import * as dsProxy from '../abi/ds-proxy.abi.json';
 import { NetworkConfig } from '../config';
 import { MIN_ALLOWANCE } from '../network';
 import { amountFromWei, amountToWei } from '../utils';
@@ -276,12 +277,36 @@ export const mtRedeem = {
     </React.Fragment>
 };
 
-export const osmParams = {
-  call: (_data: any, context: NetworkConfig) => {
-    return context.mcd.osms[_data.token].contract.zzz;
+interface MTExportData {
+  proxyAddress: string;
+  token: string;
+}
+
+export const mtExport = {
+  call: ({ proxyAddress }: MTExportData) => {
+    return web3.eth.contract(dsProxy as any).at(proxyAddress).execute['address,bytes'];
   },
+  prepareArgs: ({ token }: MTExportData, context: NetworkConfig) => {
+    return [
+      context.proxyActions.address,
+      context.proxyActions.contract.export.getData(
+        context.cdpManager,
+        web3.fromAscii(context.mcd.ilks[token]),
+        context.mcd.vat,
+        context.mcd.dssCdpManager,
+      ),
+    ];
+  },
+  kind: TxMetaKind.export,
+  description: ({ token }: MTExportData) =>
+    <React.Fragment>
+      Export {token} leveraged position to Oasis Borrow
+    </React.Fragment>
+};
+
+export const osmParams = {
+  call: (_data: any, context: NetworkConfig) => context.mcd.osms[_data.token].contract.zzz,
   prepareArgs: () => {
     return [];
   },
-  postprocess: (results: any, _data: any) => ({ [_data.token]: results }),
 };

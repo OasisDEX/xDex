@@ -79,13 +79,8 @@ export class MTMyPositionView extends
   public render() {
 
     const { ma, mta } = this.props;
-    const equity = ma.balance
-      .times(ma.referencePrice).minus(ma.debt).plus(ma.dai);
-    const leverage = ma.leverage && !ma.leverage.isNaN()
-      ? ma.leverage : ma.balance.gt(zero) ? one : zero;
-    const liquidationPrice = ma.liquidationPrice
-    && !ma.liquidationPrice.isNaN() ?
-      ma.liquidationPrice : zero;
+    const leverage = ma.leverage ? ma.leverage : ma.balance.gt(zero) ? one : zero;
+    const liquidationPrice = ma.liquidationPrice ? ma.liquidationPrice : zero;
 
     return (
       <div>
@@ -163,7 +158,7 @@ export class MTMyPositionView extends
               </div>
               <div className={styles.summaryValue}>
                 {
-                  ma.balance && !ma.balance.isNaN() ?
+                  ma.balance ?
                     <Money
                       value={ma.balance}
                       token={ma.name}
@@ -197,14 +192,25 @@ export class MTMyPositionView extends
               </div>
               <div className={styles.summaryValue}>
                 {
-                  equity && !equity.isNaN() ?
+                  ma.equity &&
                     <Money
-                      value={equity}
+                      value={ma.equity}
                       token="DAI"
                       fallback="-"
-                    /> : <span>-</span>
+                    />
                 }
 
+              </div>
+            </div>
+            <div className={styles.summaryRow}>
+              <div className={styles.summaryLabel}>
+                Purchasing power
+              </div>
+              <div className={styles.summaryValue}>
+                {
+                  ma.purchasingPower &&
+                    formatPrecision(ma.purchasingPower, 2)
+                }
               </div>
             </div>
           </div>

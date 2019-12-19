@@ -271,7 +271,8 @@ function updatePlan(state: MTTransferFormState): MTTransferFormState {
   }
 
   const postTradeAsset = calculateMarginable(
-    newAsset
+    newAsset,
+    { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook
   );
 
   const isSafePost = postTradeAsset.safe;

@@ -207,136 +207,135 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
     const baseToken = this.props.token === 'DAI' && this.props.ilk || this.props.token;
     const baseAsset = this.getAsset(baseToken) as MarginableAsset;
 
-    // TODO: remove NaN conditions
-    const liquidationPrice =
-      this.props.liquidationPrice && !this.props.liquidationPrice.isNaN() ?
-        this.props.liquidationPrice : zero;
+    const liquidationPrice = this.props.liquidationPrice ?
+      this.props.liquidationPrice : zero;
 
-    const liquidationPricePost = this.props.liquidationPricePost
-    && !this.props.liquidationPricePost.isNaN() ? this.props.liquidationPricePost : zero;
+    const liquidationPricePost = this.props.liquidationPricePost ?
+      this.props.liquidationPricePost : zero;
+
     return(
       <>
-        <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
-          <div className={styles.orderSummaryLabel}>
-            Purchasing Power
-          </div>
-          <div className={styles.orderSummaryValue}>
-            {
-              this.props.realPurchasingPower &&
-              <Money
-                value={ this.props.realPurchasingPower}
-                token={'DAI'}
-                fallback="-"
-              />
-            }
-            { this.props.realPurchasingPowerPost &&
-            <>
-              <span className={styles.transitionArrow} />
-              { !this.props.realPurchasingPowerPost.isNaN() ?
+          <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
+            <div className={styles.orderSummaryLabel}>
+              Purchasing Power
+            </div>
+            <div className={styles.orderSummaryValue}>
+              {
+                this.props.realPurchasingPower &&
                 <Money
-                  value={ this.props.realPurchasingPowerPost}
+                  value={ this.props.realPurchasingPower}
                   token={'DAI'}
                   fallback="-"
                 />
-                : <span>-</span>
               }
-            </>
-            }
-          </div>
-        </div>
-        <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
-          <div className={styles.orderSummaryLabel}>
-            Account Balance
-          </div>
-          <div className={styles.orderSummaryValue}>
-            { baseAsset && !baseAsset.balance.isNaN() ?
-              <Money
-                value={baseAsset.balance}
-                token={baseToken}
-                fallback="-"
-              /> : <span>-</span>
-            }
-            {
-              baseAsset && baseAsset.balance && this.props.balancePost &&
-              !this.props.balancePost.isEqualTo(baseAsset.balance) &&
+              { this.props.realPurchasingPowerPost &&
               <>
                 <span className={styles.transitionArrow} />
-                { !this.props.balancePost.isNaN() ?
+                { this.props.realPurchasingPowerPost ?
                   <Money
-                    value={this.props.balancePost}
-                    token={baseToken}
-                    fallback="-"
-                  /> : <span>-</span>
-                }
-              </>
-            }
-          </div>
-        </div>
-        <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
-          <div className={styles.orderSummaryLabel}>
-            Liquidation Price
-          </div>
-          <div className={styles.orderSummaryValue}>
-            <Money
-              value={liquidationPrice}
-              token="USD"
-              fallback="-"
-              className={
-                classnames({
-                  [styles.orderSummaryValuePositive]: baseAsset && baseAsset.safe,
-                  [styles.orderSummaryValueNegative]: baseAsset && !baseAsset.safe
-                })
-              }
-            />
-            {
-              this.props.liquidationPricePost &&
-              this.props.liquidationPrice &&
-              !this.props.liquidationPrice.isEqualTo(this.props.liquidationPricePost) &&
-              <>
-                <span className={styles.transitionArrow} />
-                <Money
-                  value={liquidationPricePost}
-                  token="USD"
-                  fallback="-"
-                  className={
-                    classnames({
-                      [styles.orderSummaryValuePositive]: this.props.isSafePost,
-                      [styles.orderSummaryValueNegative]: !this.props.isSafePost,
-                    })
-                  }
-                />
-              </>
-            }
-          </div>
-        </div>
-        <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
-          <div className={styles.orderSummaryLabel}>
-            DAI Balance
-          </div>
-          <div className={styles.orderSummaryValue}>
-            { this.props.daiBalance && !this.props.daiBalance.isNaN() &&
-            <Money
-              value={this.props.daiBalance}
-              token={'DAI'}
-              fallback="-"
-            />
-            }
-            {
-              this.props.daiBalancePost && this.props.daiBalance &&
-              !this.props.daiBalance.isEqualTo(this.props.daiBalancePost) &&
-              <>
-                <span className={styles.transitionArrow} />
-                { !this.props.daiBalancePost.isNaN() ?
-                  <Money
-                    value={this.props.daiBalancePost}
+                    value={ this.props.realPurchasingPowerPost}
                     token={'DAI'}
                     fallback="-"
-                  /> : <span>-</span>
+                  />
+                  : <span>-</span>
                 }
               </>
-            }
+              }
+            </div>
           </div>
-        </div>
+          <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
+            <div className={styles.orderSummaryLabel}>
+              Account Balance
+            </div>
+            <div className={styles.orderSummaryValue}>
+              { baseAsset && baseAsset.balance ?
+                <Money
+                  value={baseAsset.balance}
+                  token={baseToken}
+                  fallback="-"
+                /> : <span>-</span>
+              }
+              {
+                baseAsset && baseAsset.balance && this.props.balancePost &&
+                !this.props.balancePost.isEqualTo(baseAsset.balance) &&
+                <>
+                  <span className={styles.transitionArrow} />
+                  { this.props.balancePost ?
+                    <Money
+                      value={this.props.balancePost}
+                      token={baseToken}
+                      fallback="-"
+                    /> : <span>-</span>
+                  }
+                </>
+              }
+            </div>
+          </div>
+          <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
+            <div className={styles.orderSummaryLabel}>
+              Liquidation Price
+            </div>
+            <div className={styles.orderSummaryValue}>
+              <Money
+                value={liquidationPrice}
+                token="USD"
+                fallback="-"
+                className={
+                  classnames({
+                    [styles.orderSummaryValuePositive]: baseAsset && baseAsset.safe,
+                    [styles.orderSummaryValueNegative]: baseAsset && !baseAsset.safe
+                  })
+                }
+              />
+              {
+                this.props.liquidationPricePost &&
+                this.props.liquidationPrice &&
+                !this.props.liquidationPrice.isEqualTo(this.props.liquidationPricePost) &&
+                <>
+                  <span className={styles.transitionArrow} />
+                  <Money
+                    value={liquidationPricePost}
+                    token="USD"
+                    fallback="-"
+                    className={
+                      classnames({
+                        [styles.orderSummaryValuePositive]: this.props.isSafePost,
+                        [styles.orderSummaryValueNegative]: !this.props.isSafePost,
+                      })
+                    }
+                  />
+                </>
+              }
+            </div>
+          </div>
+          <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
+            <div className={styles.orderSummaryLabel}>
+              DAI Balance
+            </div>
+            <div className={styles.orderSummaryValue}>
+              { this.props.daiBalance &&
+              <Money
+                value={this.props.daiBalance}
+                token={'DAI'}
+                fallback="-"
+              />
+              }
+              {
+                this.props.daiBalancePost && this.props.daiBalance &&
+                !this.props.daiBalance.isEqualTo(this.props.daiBalancePost) &&
+                <>
+                  <span className={styles.transitionArrow} />
+                  { this.props.daiBalancePost ?
+                    <Money
+                      value={this.props.daiBalancePost}
+                      token={'DAI'}
+                      fallback="-"
+                    /> : <span>-</span>
+                  }
+                </>
+              }
+            </div>
+          </div>
 
         <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
           <div className={styles.orderSummaryLabel}>
@@ -353,7 +352,6 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
   private Form() {
     return (
       <div>
-        {/*{this.props.token === 'DAI' ? this.TargetGroup() : null}*/}
         {this.AmountGroup(false)}
         { !!this.props.messages &&
         <ErrorMessage
