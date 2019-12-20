@@ -1,14 +1,16 @@
 import { BigNumber } from 'bignumber.js';
 
 import { setupFakeWeb3ForTesting } from '../../blockchain/web3';
+import { fakeOrderbook } from '../../exchange/depthChart/depthchart.test';
 setupFakeWeb3ForTesting();
 
-import { zero } from '../../utils/zero';
+import { Orderbook } from '../../exchange/orderbook/orderbook';
+import { one, zero } from '../../utils/zero';
 import { CashAssetCore, MarginableAssetCore, MTAccount } from './mtAccount';
 import {
   calculateMarginable,
   calculateMTHistoryEvents,
-  realPurchasingPowerMarginable
+  realPurchasingPowerMarginable, sellable
 } from './mtCalculate';
 import {
   dai100,
@@ -147,7 +149,9 @@ test('weth, dgx and mkr, no debt', () => {
 
 test('Purchasing power marginable', () => {
   const purchasingPower = realPurchasingPowerMarginable(
-    calculateMarginable(weth2),
+    calculateMarginable(
+      weth2,
+      { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook),
     sellOffers
   );
   expect(purchasingPower).toEqual(new BigNumber(299.981689453125));
@@ -155,7 +159,9 @@ test('Purchasing power marginable', () => {
 
 test('Purchasing power marginable - shallow orderbook', () => {
   const purchasingPower = realPurchasingPowerMarginable(
-    calculateMarginable(weth2),
+    calculateMarginable(
+      weth2,
+      { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook),
     sellOffersShort
   );
   expect(purchasingPower).toEqual(new BigNumber(299.981689453125));
@@ -163,7 +169,9 @@ test('Purchasing power marginable - shallow orderbook', () => {
 
 test('Purchasing power marginable - cash only', () => {
   const purchasingPower = realPurchasingPowerMarginable(
-    calculateMarginable(dai100),
+    calculateMarginable(
+      dai100,
+      { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook),
     sellOffers
   );
   expect(purchasingPower.toFixed(0)).toEqual(new BigNumber(150).toFixed());
@@ -171,7 +179,9 @@ test('Purchasing power marginable - cash only', () => {
 
 test('Purchasing power marginable - cash + collateral', () => {
   const purchasingPower = realPurchasingPowerMarginable(
-    calculateMarginable(weth1dai100),
+    calculateMarginable(
+      weth1dai100,
+      { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook),
     sellOffers
   );
   expect(purchasingPower.toFixed(0)).toEqual(new BigNumber(300).toFixed());
@@ -193,4 +203,53 @@ test('Events history - SellLev', () => {
   expect(history[3].debtDelta).toEqual(new BigNumber('-100'));
   expect(history[3].dDAIAmount).toEqual(new BigNumber('250'));
   expect(history[3].dAmount).toEqual(new BigNumber('1'));
+});
+
+describe('Is position sellable', () => {
+  test('No debt, prices match', () => {
+
+    const ma = calculateMarginable(weth2, fakeOrderbook);
+
+    const [result] = sellable(ma, sellOffers, one);
+
+    expect(result).toBeTruthy();
+
+  });
+
+  test('Avg debt, prices match', () => {
+
+    const ma = calculateMarginable({
+      ...weth2,
+      debt: new BigNumber('150')
+    },                             fakeOrderbook);
+
+    const [result] = sellable(ma, sellOffers, one);
+
+    expect(result).toBeTruthy();
+  });
+
+  test('Large debt, prices match', () => {
+
+    const ma = calculateMarginable({
+      ...weth2,
+      debt: new BigNumber('199')
+    },                             fakeOrderbook);
+
+    const [result] = sellable(ma, sellOffers, one);
+
+    expect(result).toBeFalsy();
+  });
+
+  test('Avg debt, prices match', () => {
+
+    const ma = calculateMarginable({
+      ...weth2,
+      debt: new BigNumber('300'),
+      referencePrice: new BigNumber('600')
+    },                             fakeOrderbook);
+
+    const [result] = sellable(ma, sellOffers, one);
+
+    expect(result).toBeFalsy();
+  });
 });

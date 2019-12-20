@@ -52,6 +52,8 @@ const defaultParams = {
   // progress: ProgressStage.waitingForApproval,
   change: () => null,
   transfer: () => null,
+  setup: () => null,
+  allowance: () => null,
   cancel: () => null,
   reset: () => null,
   gasEstimationStatus: GasEstimationStatus.unset,

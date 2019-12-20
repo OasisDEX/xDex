@@ -1,4 +1,5 @@
 import { BigNumber } from 'bignumber.js';
+import { concat, range } from 'lodash';
 import { identity, Observable, of } from 'rxjs';
 import { first, flatMap, tap } from 'rxjs/operators';
 import { Calls$, ReadCalls$ } from '../blockchain/calls/calls';
@@ -73,6 +74,23 @@ export function pluginDevModeHelpers(
     ).subscribe(identity);
   };
 
+  (window as any).previewLinearOffers = (
+    baseToken: string, quoteToken: string,
+    midPrice: number, delta: number, baseAmount: number, count: number,
+  ) => {
+    const item = ({ pr, am }: { pr: number|string, am: number|string }) =>
+      ({ [`PRICE ${quoteToken}`]: pr, [`AMOUNT ${baseToken}`]: am });
+    console.table(concat(
+      range(1, count + 1).map(i => item({ pr: midPrice + i * delta, am: baseAmount })).reverse(),
+      [item({ pr: '---', am: '(spread)' })],
+      range(1, count + 1).map(i => item({ pr: midPrice - i * delta, am: baseAmount })),
+    ));
+    console.log('requires', {
+      [baseToken]: baseAmount * count,
+      [quoteToken]: baseAmount * count * (midPrice - delta * (count + 1) / 2),
+    });
+  };
+
   (window as any).makeLinearOffers = (
     baseToken: string, quoteToken: string,
     midPrice: number, delta: number, baseAmount: number, count: number,
@@ -112,6 +130,28 @@ export function pluginDevModeHelpers(
             }
             return calls.cancelAllOffers(
               { baseToken, quoteToken, proxyAddress },
+            );
+          }),
+        ),
+      )
+    ).subscribe(identity);
+
+  (window as any).export = (
+    token: string,
+  ) =>
+    calls$.pipe(
+      first(),
+      flatMap(calls =>
+        createProxyAddress$(context$, initializedAccount$, onEveryBlock$).pipe(
+          first(),
+          tap(proxyAddress => console.log({ proxyAddress })),
+          flatMap(proxyAddress => {
+            if (!proxyAddress) {
+              console.log('Proxy not found!');
+              return of();
+            }
+            return calls.mtExport(
+              { token, proxyAddress },
             );
           }),
         ),

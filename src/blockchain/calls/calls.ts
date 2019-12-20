@@ -29,7 +29,7 @@ import {
   tradePayWithETHNoProxy, tradePayWithETHWithProxy
 } from './instant';
 import {
-  approveMTProxy, mtBalance, mtBuy, mtDraw, mtFund, mtReallocate,
+  approveMTProxy, mtBalance, mtBuy, mtDraw, mtExport, mtFund, mtReallocate,
   mtRedeem, mtSell, osmParams, setupMTProxy
 } from './mtCalls';
 import {
@@ -96,6 +96,7 @@ function calls([context, account]: [NetworkConfig, string]) {
     pokeOsm: sendTransaction(pokeOsm),
     pokeSpotter: sendTransaction(pokeSpotter),
     mtRedeem: sendTransaction(mtRedeem),
+    mtExport: sendTransaction(mtExport),
   };
 }
 

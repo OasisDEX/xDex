@@ -1,10 +1,11 @@
 import { BigNumber } from 'bignumber.js';
 import { findLastIndex } from 'lodash';
 import * as moment from 'moment';
+import { Dictionary } from 'ramda';
 import { nullAddress } from '../../blockchain/utils';
-import { Offer } from '../../exchange/orderbook/orderbook';
+import { Offer, Orderbook } from '../../exchange/orderbook/orderbook';
 import { minusOne, one, zero } from '../../utils/zero';
-import { buy } from '../plan/planUtils';
+import { buy, sellAll } from '../plan/planUtils';
 import {
   MarginableAsset,
   MarginableAssetCore,
@@ -30,7 +31,7 @@ function marginableAvailableActions(asset: MarginableAssetCore) {
 }
 
 export function realPurchasingPowerMarginable(
-  ma: MarginableAsset,
+  ma: MarginableAssetCore,
   offers: Offer[]
 ): BigNumber {
   let amount = ma.balance;
@@ -55,6 +56,47 @@ export function realPurchasingPowerMarginable(
     cash = availableDebt;
   }
   return purchasingPower;
+}
+
+export function sellable(
+  ma: MarginableAsset,
+  offers: Offer[],
+  amount: BigNumber
+): [boolean, any, BigNumber] {
+  let { balance, debt, dai } = ma;
+  const { minCollRatio, referencePrice } = ma;
+  let i = 0;
+  const maxI = 10;
+  const log = [];
+  while (amount.gt(zero) && i < maxI) {
+
+    // payback dai debt with cash
+    const dDebt = BigNumber.min(dai, debt);
+    debt = debt.minus(dDebt);
+    dai = dai.minus(dDebt);
+
+    // take out max coll
+    // (balance - dBalance) * referencePrice / debt = minCollRatio
+    // dBalance = balance - minCollRatio * debt / referencePrice;
+
+    const dBalance = balance.minus(minCollRatio.times(debt).div(referencePrice));
+    if (dBalance.lte(zero)) {
+      return [false, log, amount];
+    }
+
+    // sell coll, increase sold and cash
+    const [dSold, dDai, newOffers] = sellAll(dBalance, offers);
+    offers = newOffers;
+
+    log.push({ dSold, dDai });
+
+    balance = balance.minus(dSold);
+    amount = amount.minus(dSold);
+    dai = dai.plus(dDai);
+    i += 1;
+  }
+
+  return [amount.lte(zero) && i < maxI, log, amount];
 }
 
 function findAuctionBite(rawHistory: RawMTHistoryEvent[], auctionId: number) {
@@ -149,7 +191,8 @@ export function calculateMTHistoryEvents(
 
     const prevLiquidationPrice = liquidationPrice;
     liquidationPrice = ma.minCollRatio.times(debt).div(balance);
-    if (!liquidationPrice.isEqualTo(prevLiquidationPrice)) {
+
+    if (prevLiquidationPrice.gt(zero) && !liquidationPrice.isEqualTo(prevLiquidationPrice)) {
       const liquidationPriceDelta = prevLiquidationPrice.minus(liquidationPrice).times(minusOne);
       event = { ...event, liquidationPriceDelta };
     }
@@ -160,25 +203,38 @@ export function calculateMTHistoryEvents(
   return events;
 }
 
+function calculateMidpointPrice(ob: Orderbook) {
+  if (ob.sell[0] && ob.buy[0] && ob.sell[0].price.gt(zero) && ob.buy[0].price.gt(zero)) {
+    return (ob.sell[0].price.plus(ob.buy[0].price)).div(2);
+  }
+  return zero;
+}
+
 export function calculateMarginable(
   ma: MarginableAssetCore,
+  orderbook: Orderbook,
 ): MarginableAsset {
-
+  const { debt, dai, balance } = ma;
+  const purchasingPower = realPurchasingPowerMarginable(ma, orderbook.sell);
+  const midpointPrice = calculateMidpointPrice(orderbook);
+  const equity = midpointPrice.gt(zero) ?
+    balance.times(midpointPrice).minus(debt).plus(dai) : zero;
   const availableActions = marginableAvailableActions(ma);
-  const balanceInCash = ma.balance.times(ma.referencePrice);
+  const balanceInCash = balance.times(ma.referencePrice);
   const lockedBalance = BigNumber.min(
-    ma.balance,
-    ma.debt.div(ma.referencePrice).times(ma.safeCollRatio)
+    balance,
+    debt.div(ma.referencePrice).times(ma.safeCollRatio)
   );
-  const availableBalance = BigNumber.max(zero, ma.balance.minus(lockedBalance));
-  const currentCollRatio = ma.debt.gt(0) ? balanceInCash.dividedBy(ma.debt) : undefined;
+  const availableBalance = BigNumber.max(zero, balance.minus(lockedBalance));
+  const currentCollRatio = debt.gt(0) ? balanceInCash.dividedBy(debt) : undefined;
   const maxSafeLeverage = one.div(one.minus(one.div(ma.safeCollRatio)));
   const maxDebt = balanceInCash.div(ma.safeCollRatio);
-  const availableDebt = BigNumber.max(zero, maxDebt.minus(ma.debt));
+  const availableDebt = BigNumber.max(zero, maxDebt.minus(debt));
 
-  const cash = balanceInCash.plus(ma.dai);
+  const cash = balanceInCash.plus(dai);
 
-  const liquidationPrice = ma.minCollRatio.times(ma.debt).div(ma.balance);
+  const liquidationPrice = debt.gt(zero) && balance.gt(zero) ?
+    ma.minCollRatio.times(debt).div(balance) : zero;
 
   const FullHistory = calculateMTHistoryEvents(ma.rawHistory, ma);
 
@@ -246,19 +302,22 @@ export function calculateMarginable(
     runningAuctions,
     amountBeingLiquidated,
     nextPriceUpdateDelta,
+    purchasingPower,
+    equity
   };
 }
 
 export function calculateMTAccount(
   proxy: any,
   masCore: MarginableAssetCore[],
-  daiAllowance: boolean
+  daiAllowance: boolean,
+  orderbooks: Dictionary<Orderbook>,
 ): MTAccount {
 
   const totalDebt = masCore.reduce((debt, ma) => debt.plus(ma.debt), zero);
 
   const marginableAssets = masCore.map(
-    ma => calculateMarginable(ma)
+    ma => calculateMarginable(ma, orderbooks[ma.name])
   );
 
   const totalAvailableDebt =

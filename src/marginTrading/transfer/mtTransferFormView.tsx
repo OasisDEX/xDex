@@ -3,8 +3,10 @@ import * as React from 'react';
 import * as ReactModal from 'react-modal';
 
 import classnames from 'classnames';
+import { Dictionary } from 'ramda';
 import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
 import { getToken } from '../../blockchain/config';
+import { nullAddress } from '../../blockchain/utils';
 import { BigNumberInput } from '../../utils/bigNumberInput/BigNumberInput';
 import { FormChangeKind, ProgressStage } from '../../utils/form';
 import { formatAmount } from '../../utils/formatters/format';
@@ -15,28 +17,64 @@ import { InputGroup, InputGroupAddon } from '../../utils/forms/InputGroup';
 import { GasCost } from '../../utils/gasCost/GasCost';
 import { SvgImage } from '../../utils/icons/utils';
 import { BorderBox, Hr } from '../../utils/layout/LayoutHelpers';
-import { ModalOpenerProps, ModalProps } from '../../utils/modal';
-import { Panel, PanelBody, PanelFooter, PanelHeader } from '../../utils/panel/Panel';
+import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
+import { ModalProps } from '../../utils/modal';
+import { Panel, PanelBody, PanelFooter } from '../../utils/panel/Panel';
 import { Muted } from '../../utils/text/Text';
 import { TransactionStateDescription } from '../../utils/text/TransactionStateDescription';
 import { zero } from '../../utils/zero';
 import {
-  CreateMTAllocateForm$Props} from '../allocate/mtOrderAllocateDebtFormView';
-import {
   CashAsset,
-  findAsset,
-  MarginableAsset,
+  findAsset, findMarginableAsset,
+  MarginableAsset, MTAccount,
   MTAccountState,
   UserActionKind,
 } from '../state/mtAccount';
-import closeIconSvg from './close-icon.svg';
+import checkIconSvg from './check-icon.svg';
 import {
-  Message, MessageKind, MTTransferFormState
+  Message, MessageKind, MTTransferFormState, MTTransferFormTab
 } from './mtTransferForm';
 import * as styles from './mtTransferFormView.scss';
 
-type MTFundFormProps =
-  MTTransferFormState & ModalProps & ModalOpenerProps & CreateMTAllocateForm$Props;
+type MTFundFormProps = MTTransferFormState & ModalProps;
+
+const tabLabels: Dictionary<string> = {
+  [MTTransferFormTab.proxy]: 'Deploy proxy',
+  [MTTransferFormTab.transfer]: 'Deposit',
+};
+
+interface StepComponentProps {
+  title: string;
+  description: string;
+  btnLabel: string;
+  btnAction: () => void;
+  btnDisabled: boolean;
+  stepCompleted: boolean;
+  isLoading: boolean;
+}
+
+class StepComponent extends React.Component<StepComponentProps> {
+  public render() {
+    const { title, description, btnLabel, btnAction,
+      stepCompleted, btnDisabled, isLoading } = this.props;
+
+    return (<div className={styles.onboardingPanel}>
+      <h3 className={styles.onboardingHeader}>{title}</h3>
+      <div className={styles.onboardingParagraph}>{description}</div>
+      <Button
+        size="md"
+        color={stepCompleted ? 'primaryOutlinedDone' : 'primary'}
+        disabled={btnDisabled || isLoading || stepCompleted}
+        onClick={() => btnAction()}
+        className={classnames({ [styles.buttonDone]: stepCompleted })}
+      >{
+        stepCompleted ? <SvgImage image={checkIconSvg}/> :
+          isLoading && !btnDisabled ?  <LoadingIndicator inline={true} /> : btnLabel
+      }</Button>
+
+    </div>);
+  }
+}
 
 export class MtTransferFormView extends React.Component<MTFundFormProps> {
 
@@ -46,6 +84,32 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
 
   public render() {
 
+    const onModalRef = (node: any) => {
+      if (node) {
+        node.addEventListener('click', (e: any) => {
+          if (e.target.classList.contains(styles.modal)) {
+            this.close();
+          }
+        });
+      }
+    };
+
+    const allowance = (_mta: MTAccount, _token: string) =>  _token === 'DAI' ? _mta.daiAllowance :
+      findMarginableAsset(_token, _mta)!.allowance;
+
+    const onboardingTabs = Object.keys(MTTransferFormTab);
+
+    const startIndex = this.props.startTab ? onboardingTabs.indexOf(this.props.startTab) : 0;
+
+    const { mta, token, progress } = this.props;
+
+    const isLoading = (progress === ProgressStage.waitingForApproval
+      || progress === ProgressStage.waitingForConfirmation);
+
+    const currentTab = mta &&
+    (mta.proxy && mta.proxy.address !== nullAddress && allowance(mta, token)) ?
+      MTTransferFormTab.transfer : MTTransferFormTab.proxy;
+
     return (
       <ReactModal
         ariaHideApp={false}
@@ -53,30 +117,72 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
         className={styles.modal}
         overlayClassName={styles.modalOverlay}
         closeTimeoutMS={250}
+        overlayRef={onModalRef}
+        shouldCloseOnEsc={true}
       >
-        <Panel style={{ width: '550px', height: '580px' }} className={styles.modalChild}>
-          <PanelHeader bordered={true} className={styles.headerWithIcon}>
-            {this.header(this.props.progress)}
-            <div onClick={this.close} className={styles.closeButton} >
-              <SvgImage image={closeIconSvg}/>
-            </div>
-          </PanelHeader>
-          <PanelBody paddingTop={true} style={{ height: '287px' }}>
-            {this.AccountSummary()}
-            <Hr color="dark" className={styles.hrBigMargin} />
-            {this.FormOrTransactionState()}
-          </PanelBody>
-          {this.Buttons()}
+        <Panel className={styles.modalChild}>
+          <div className={styles.tabs}>
+            {
+              onboardingTabs.filter(
+                (_tab: string, index: number) => (index >= startIndex)
+              ).map(_tab => {
+                return (<div
+                  className={
+                    classnames({
+                      [styles.tab]: true,
+                      [styles.tabActive]: (_tab === currentTab)
+                    })
+                  }
+                  key={_tab}>{tabLabels[_tab]}</div>);
+              })
+            }
+          </div>
+
+          {mta ?
+            <>
+              {currentTab === MTTransferFormTab.proxy ?
+                <>
+                  <StepComponent
+                    title="Deploy proxy"
+                    description={`Proxies are used to bundle multiple transactions into one,
+                saving transaction time and gas costs. This only has to be done once.`}
+                    btnLabel="Deploy Proxy"
+                    btnAction={() => this.setup()}
+                    btnDisabled={mta.proxy && mta.proxy.address !== nullAddress}
+                    isLoading={isLoading}
+                    stepCompleted={mta.proxy && mta.proxy.address !== nullAddress}
+                  />
+                  <StepComponent
+                    title="Set allowance"
+                    description={`This permission allows Oasis smart contracts
+                   to interact with your ${token}.
+                   This has to be done for each asset type.`}
+                    btnLabel="Set allowance"
+                    btnAction={() => this.allowance()}
+                    isLoading={isLoading}
+                    btnDisabled={
+                      mta.proxy && mta.proxy.address === nullAddress
+                    }
+                    stepCompleted={mta && allowance(mta, token)}
+                  />
+                </> :
+                <>
+                  {allowance(mta, token) && mta.proxy && <>
+                    <PanelBody paddingTop={true} style={{ height: '287px' }}>
+                      {this.AccountSummary()}
+                      <Hr color="dark" className={styles.hrBigMargin}/>
+                      {this.FormOrTransactionState()}
+                    </PanelBody>
+                    {this.Buttons()}
+                  </>
+                  }
+                </>
+              }
+            </> : <LoadingIndicator/>
+          }
         </Panel>
       </ReactModal>
     );
-  }
-
-  private header(progress?: ProgressStage) {
-    return !progress ?
-      `${getToken(this.props.token).name} ${this.props.actionKind === UserActionKind.fund ?
-        'deposit' : 'withdraw' }` :
-      'Finalize transaction';
   }
 
   private amountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,14 +192,6 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
       value: value === '' ? undefined : new BigNumber(value)
     });
   }
-
-  // private ilkChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-  //   const value = e.target.value;
-  //   this.props.change({
-  //     value,
-  //     kind: TransferFormChangeKind.ilkFieldChange,
-  //   });
-  // }
 
   private close = () => {
     this.props.cancel();
@@ -109,18 +207,17 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
     const baseToken = this.props.token === 'DAI' && this.props.ilk || this.props.token;
     const baseAsset = this.getAsset(baseToken) as MarginableAsset;
 
-    const liquidationPrice =
-      this.props.liquidationPrice && !this.props.liquidationPrice.isNaN() ?
-        this.props.liquidationPrice : zero;
+    const liquidationPrice = this.props.liquidationPrice ?
+      this.props.liquidationPrice : zero;
 
-    const liquidationPricePost = this.props.liquidationPricePost
-    && !this.props.liquidationPricePost.isNaN() ? this.props.liquidationPricePost : zero;
+    const liquidationPricePost = this.props.liquidationPricePost ?
+      this.props.liquidationPricePost : zero;
+
     return(
       <>
-        <div className={styles.summaryBox}>
           <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
             <div className={styles.orderSummaryLabel}>
-              Purch. power
+              Purchasing Power
             </div>
             <div className={styles.orderSummaryValue}>
               {
@@ -134,7 +231,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
               { this.props.realPurchasingPowerPost &&
               <>
                 <span className={styles.transitionArrow} />
-                { !this.props.realPurchasingPowerPost.isNaN() ?
+                { this.props.realPurchasingPowerPost ?
                   <Money
                     value={ this.props.realPurchasingPowerPost}
                     token={'DAI'}
@@ -148,10 +245,10 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
           </div>
           <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
             <div className={styles.orderSummaryLabel}>
-              Balance
+              Account Balance
             </div>
             <div className={styles.orderSummaryValue}>
-              { baseAsset && !baseAsset.balance.isNaN() ?
+              { baseAsset && baseAsset.balance ?
                 <Money
                   value={baseAsset.balance}
                   token={baseToken}
@@ -163,7 +260,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
                 !this.props.balancePost.isEqualTo(baseAsset.balance) &&
                 <>
                   <span className={styles.transitionArrow} />
-                  { !this.props.balancePost.isNaN() ?
+                  { this.props.balancePost ?
                     <Money
                       value={this.props.balancePost}
                       token={baseToken}
@@ -176,7 +273,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
           </div>
           <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
             <div className={styles.orderSummaryLabel}>
-              Liqu. Price
+              Liquidation Price
             </div>
             <div className={styles.orderSummaryValue}>
               <Money
@@ -216,7 +313,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
               DAI Balance
             </div>
             <div className={styles.orderSummaryValue}>
-              { this.props.daiBalance && !this.props.daiBalance.isNaN() &&
+              { this.props.daiBalance &&
               <Money
                 value={this.props.daiBalance}
                 token={'DAI'}
@@ -228,7 +325,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
                 !this.props.daiBalance.isEqualTo(this.props.daiBalancePost) &&
                 <>
                   <span className={styles.transitionArrow} />
-                  { !this.props.daiBalancePost.isNaN() ?
+                  { this.props.daiBalancePost ?
                     <Money
                       value={this.props.daiBalancePost}
                       token={'DAI'}
@@ -239,28 +336,6 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
               }
             </div>
           </div>
-        </div>
-
-        <div className={styles.InfoRow}>
-          <div className={styles.InfoBox}>
-            <div className={styles.InfoRowLabel}>Leverage</div>
-            <div>
-              <span>-</span>
-            </div>
-          </div>
-          <div className={styles.InfoBox}>
-            <div className={styles.InfoRowLabel}>Liqu. Fee</div>
-            <span>-</span>
-
-          </div>
-          <div className={styles.InfoBox}>
-            <div className={styles.InfoRowLabel}>Interest Rate</div>
-            <div>
-              <span>-</span>
-
-            </div>
-          </div>
-        </div>
 
         <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
           <div className={styles.orderSummaryLabel}>
@@ -270,40 +345,6 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
             {asset && formatAmount(asset.walletBalance, asset.name)} {this.props.token}
           </div>
         </div>
-
-        {/*<table className={styles.balanceTable}>*/}
-        {/*<tbody>*/}
-        {/*<tr>*/}
-        {/*<td><Muted>Wallet</Muted></td>*/}
-        {/*<td>*/}
-        {/*{asset && formatAmount(asset.walletBalance, asset.name)} {this.props.token}*/}
-        {/*</td>*/}
-        {/*</tr>*/}
-        {/*<tr>*/}
-        {/*<td><Muted>Margin account</Muted></td>*/}
-        {/*<td>{*/}
-        {/*this.props.token !== 'DAI' ?*/}
-        {/*asset && formatAmount(asset.balance, this.props.token) :*/}
-        {/*ilkAsset && formatAmount(ilkAsset.dai, this.props.token)*/}
-        {/*} {this.props.token}</td>*/}
-        {/*</tr>*/}
-        {/*/!*{ asset && asset.assetKind === AssetKind.marginable &&*!/*/}
-        {/*/!*<tr>*!/*/}
-        {/*/!*<td><Muted>Available amount</Muted></td>*!/*/}
-        {/*/!*<td><Money value={asset.availableBalance} token={this.props.token} /></td>*!/*/}
-        {/*/!*</tr>*!/*/}
-        {/*/!*}*!/*/}
-        {/*/!*{asset &&*!/*/}
-        {/*/!*(asset.assetKind === AssetKind.marginable ||*!/*/}
-        {/*/!*asset.assetKind === AssetKind.nonMarginable) &&*!/*/}
-        {/*/!*<tr>*!/*/}
-        {/*/!*<td><Muted>Purchasing power</Muted></td>*!/*/}
-        {/*/!*<td>{formatAmount(zero, 'DAI')} DAI*!/*/}
-        {/*/!*</td>*!/*/}
-        {/*/!*</tr>*!/*/}
-        {/*/!*}*!/*/}
-        {/*</tbody>*/}
-        {/*</table>*/}
       </>
     );
   }
@@ -311,27 +352,12 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
   private Form() {
     return (
       <div>
-        {/*{this.props.token === 'DAI' ? this.TargetGroup() : null}*/}
         {this.AmountGroup(false)}
         { !!this.props.messages &&
         <ErrorMessage
           messages={this.props.messages.map(msg => this.messageContent(msg))}
         />
         }
-
-        {/*<table className={styles.balanceTable}>*/}
-        {/*<tbody>*/}
-        {/*<tr>*/}
-        {/*<td><Muted>Gas cost</Muted></td>*/}
-        {/*<td>*/}
-        {/*<GasCost gasEstimationStatus={this.props.gasEstimationStatus}*/}
-        {/*gasEstimationUsd={this.props.gasEstimationUsd}*/}
-        {/*gasEstimationEth={this.props.gasEstimationEth}*/}
-        {/*/>*/}
-        {/*</td>*/}
-        {/*</tr>*/}
-        {/*</tbody>*/}
-        {/*</table>*/}
       </div>
     );
   }
@@ -374,42 +400,21 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
   }
 
   private transfer() {
-
-    if (!this.props.mta || this.props.mta.state === MTAccountState.notSetup || !this.props.amount) {
-      return;
+    if (this.props.mta && this.props.mta.state !== MTAccountState.notSetup && this.props.amount) {
+      this.props.transfer(this.props);
     }
+  }
 
-    // // always false for now -- separate transfer from reallocations
-    // if (this.props.mta.totalDebt.lt(zero)) {
-    //   const prepareRequest = this.props.actionKind === UserActionKind.fund ?
-    //     prepareFundRequest : prepareDrawRequest;
-    //   const view = this.props.actionKind === UserActionKind.fund ?
-    //     FundAllocateFormView : DrawAllocateFormView;
-    //
-    //   const transferProps = {
-    //     amount: this.props.amount,
-    //     token: this.props.token,
-    //   };
-    //
-    //   const allocateForm$ = this.props.createMTAllocateForm$(
-    //     this.props.mta.proxy,
-    //     prepareRequest(
-    //       this.props.ilk,
-    //       this.props.amount,
-    //       this.props.token,
-    //       this.props.mta)
-    //   );
-    //
-    //   this.props.open(
-    //     connect<Loadable<MTAllocateState>, ModalProps>(
-    //       inject(view, transferProps),
-    //       loadablifyLight(allocateForm$)
-    //     )
-    //   );
-    //   return;
-    // }
+  private setup() {
+    if (this.props.mta) {
+      this.props.setup(this.props);
+    }
+  }
 
-    this.props.transfer(this.props);
+  private allowance() {
+    if (this.props.mta && this.props.mta.state !== MTAccountState.notSetup) {
+      this.props.allowance(this.props);
+    }
   }
 
   private Buttons() {
@@ -472,22 +477,6 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
       </InputGroup>
     );
   }
-
-  // private TargetGroup() {
-  //   const marginableAssets = this.props.mta &&
-  //     this.props.mta.state === MTAccountState.setup && this.props.mta.marginableAssets;
-  //   return (
-  //     <InputGroup sizer="md" style={{ marginBottom: '1em' }}>
-  //       <InputGroupAddon border="right">Asset</InputGroupAddon>
-  //       <Select value={this.props.ilk} onChange={this.ilkChange} style={{ width: '100%' }}>
-  //         <option hidden={true} />
-  //         { (marginableAssets || []).map(
-  //           asset => <option key={asset.name}>{asset.name}</option>
-  //         )}
-  //       </Select>
-  //     </InputGroup>
-  //   );
-  // }
 
   private messageContent(msg: Message) {
     switch (msg.kind) {

@@ -17,8 +17,14 @@ import { Banner } from './landingPage/Banner';
 import { MarginTradingSimpleTxRx } from './marginTrading/MarginTradingSimple';
 import { connect } from './utils/connect';
 
+const {
+  REACT_APP_INSTANT_ENABLED,
+  REACT_APP_LT_ENABLED,
+  REACT_APP_SUBDIR,
+} = process.env;
+
 const browserHistoryInstance = createBrowserHistory({
-  basename: process.env.REACT_APP_SUBDIR ? process.env.REACT_APP_SUBDIR : '/'
+  basename: REACT_APP_SUBDIR ? REACT_APP_SUBDIR : '/'
 });
 
 browserHistoryInstance.listen(location => {
@@ -117,13 +123,17 @@ class Routes extends React.Component<{ status: WalletStatus }> {
     return (
       <Switch>
         <Route exact={false} path={'/market'} component={ExchangeViewTxRx}/>
-        {process.env.REACT_APP_INSTANT_ENABLED === '1' &&
-        <Route exact={false} path={'/instant'} component={InstantExchange}/>}
+        {
+          REACT_APP_INSTANT_ENABLED === '1' &&
+          <Route exact={false} path={'/instant'} component={InstantExchange}/>}
         {
           this.props.status === 'connected' &&
           <Route path={'/account'} component={BalancesView}/>
         }
-        <Route path={'/leverage'} component={MarginTradingSimpleTxRx} />
+        {
+          REACT_APP_LT_ENABLED === '1' &&
+          <Route path={'/leverage'} component={MarginTradingSimpleTxRx} />
+        }        
         <Redirect from={'/balances'} to={'/account'}/>
         <Redirect from={'/'} to={'/market'}/>
       </Switch>

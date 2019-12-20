@@ -22,3 +22,8 @@ export const setupBtn: string;
 export const buttonCheck: string;
 export const referencePriceField: string;
 export const callForAction: string;
+export const onboardingHeader: string;
+export const onboardingPanel: string;
+export const onboardingParagraph: string;
+export const buttonsGroup: string;
+export const groupInlineButton: string;

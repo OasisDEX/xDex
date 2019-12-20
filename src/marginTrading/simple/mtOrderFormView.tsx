@@ -339,10 +339,10 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
   }
 
   private liquidationPrice() {
-    const liquidationPrice = this.props.liquidationPrice && !this.props.liquidationPrice.isNaN() ?
+    const liquidationPrice = this.props.liquidationPrice ?
       this.props.liquidationPrice : zero;
-    const liquidationPricePost = this.props.liquidationPricePost
-    && !this.props.liquidationPricePost.isNaN() ? this.props.liquidationPricePost : zero;
+    const liquidationPricePost = this.props.liquidationPricePost ?
+      this.props.liquidationPricePost : zero;
 
     const baseTokenAsset = findMarginableAsset(this.props.baseToken, this.props.mta);
     return (
@@ -367,7 +367,6 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
           }
           {
             this.props.liquidationPricePost &&
-            !this.props.liquidationPricePost.isNaN() &&
             !liquidationPrice.isEqualTo(liquidationPricePost) &&
             <>
               <span className={styles.transitionArrow} />
@@ -486,9 +485,9 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
   }
 
   private feesBox() {
-    const leverage = this.props.leverage && !this.props.leverage.isNaN() ?
+    const leverage = this.props.leverage ?
       this.props.leverage :
-      this.props.leveragePost && !this.props.leveragePost.isNaN() ? zero : minusOne;
+      this.props.leveragePost ? zero : minusOne;
     return (
       <div className={styles.InfoRow}>
         <div className={styles.InfoBox}>
@@ -502,7 +501,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
             { this.props.leveragePost &&
             <>
               <span className={styles.transitionArrow}/>
-              { !this.props.leveragePost.isNaN() ?
+              { this.props.leveragePost ?
                 <>
                   {formatPrecision(this.props.leveragePost, 1)}x
                 </> : <span>-</span>
@@ -548,7 +547,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
             { this.props.realPurchasingPowerPost &&
             <>
               <span className={styles.transitionArrow} />
-              { !this.props.realPurchasingPowerPost.isNaN() ?
+              { this.props.realPurchasingPowerPost ?
                 <>
                   {formatPrecision(this.props.realPurchasingPowerPost, 2)}
                 </>
@@ -577,7 +576,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
             Balance
           </div>
           <div className={styles.orderSummaryValue}>
-            { baseTokenAsset && !baseTokenAsset.balance.isNaN() ?
+            { baseTokenAsset && baseTokenAsset.balance ?
               <Money
                 value={baseTokenAsset.balance}
                 token={this.props.baseToken}
@@ -588,7 +587,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
               this.props.balancePost &&
               <>
                 <span className={styles.transitionArrow} />
-                { !this.props.balancePost.isNaN() ?
+                { this.props.balancePost ?
                   <Money
                     value={this.props.balancePost}
                     token={this.props.baseToken}
@@ -620,7 +619,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
               this.props.daiBalancePost &&
               <>
                 <span className={styles.transitionArrow} />
-                { !this.props.daiBalancePost.isNaN() ?
+                { this.props.daiBalancePost ?
                   <Money
                     value={this.props.daiBalancePost}
                     token={this.props.quoteToken}
@@ -781,5 +780,7 @@ function messageContent(msg: Message) {
       return `Can't calculate: ${msg.message}. Type smaller amount`;
     case MessageKind.minDebt:
       return `Order below ${msg.message} limit.`;
+    case MessageKind.unsellable:
+      return `Your position is unsellable given current state of the orderbook`;
   }
 }

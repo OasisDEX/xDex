@@ -21,9 +21,11 @@ import {
 } from '../../utils/form';
 
 import { curry } from 'ramda';
+import { filter } from 'rxjs/internal/operators';
 import { Balances } from '../../balances/balances';
 import { Calls, Calls$, ReadCalls, ReadCalls$ } from '../../blockchain/calls/calls';
 import { AssetKind } from '../../blockchain/config';
+import { nullAddress } from '../../blockchain/utils';
 import { Orderbook } from '../../exchange/orderbook/orderbook';
 import { combineAndMerge } from '../../utils/combineAndMerge';
 import { description, impossible, Impossible, isImpossible } from '../../utils/impossible';
@@ -60,6 +62,11 @@ export type Message = {
 
 export type ManualChange = TokenChange | AmountFieldChange | IlkFieldChange;
 
+export enum MTTransferFormTab {
+  proxy = 'proxy',
+  transfer = 'transfer',
+}
+
 export interface MTTransferFormState extends HasGasEstimation {
   readyToProceed?: boolean;
   actionKind: UserActionKind.draw | UserActionKind.fund;
@@ -82,8 +89,12 @@ export interface MTTransferFormState extends HasGasEstimation {
   isSafePost?: boolean;
   plan?: Operation[] | Impossible;
   progress?: ProgressStage;
+  tab?: MTTransferFormTab;
+  startTab?: MTTransferFormTab;
   change: (change: ManualChange) => void;
   transfer: (state: MTTransferFormState) => void;
+  setup: (state: MTTransferFormState) => void;
+  allowance: (state: MTTransferFormState) => void;
   cancel: () => void;
   reset: () => void;
 }
@@ -111,6 +122,19 @@ type MTSetupFormChange =
   EnvironmentChange |
   ProgressChange;
 
+function initialTab(mta: MTAccount, name: string) {
+  const { proxy, transfer } = MTTransferFormTab;
+  if (mta.proxy.address !==  nullAddress) {
+    const isAllowance = name === 'DAI'
+              ? mta.daiAllowance
+              : findMarginableAsset(name, mta)!.allowance;
+    return isAllowance ? transfer : proxy;
+    return isAllowance ? transfer : proxy;
+  }
+
+  return proxy;
+}
+
 function applyChange(state: MTTransferFormState, change: MTSetupFormChange): MTTransferFormState {
   switch (change.kind) {
     case FormChangeKind.gasPriceChange:
@@ -127,6 +151,8 @@ function applyChange(state: MTTransferFormState, change: MTSetupFormChange): MTT
     case FormChangeKind.marginTradingAccountChange:
       return { ...state,
         mta: change.mta,
+        tab: !state.tab ? initialTab(change.mta, state.token) : state.tab,
+        startTab: !state.startTab ? initialTab(change.mta, state.token) : state.startTab,
         gasEstimationStatus: GasEstimationStatus.unset };
     case FormChangeKind.balancesChange:
       return { ...state,
@@ -141,7 +167,11 @@ function applyChange(state: MTTransferFormState, change: MTSetupFormChange): MTT
         ilk: change.value,
         gasEstimationStatus: GasEstimationStatus.unset };
     case FormChangeKind.progress:
-      return { ...state, progress: change.progress };
+      return {
+        ...state,
+        progress: change.progress === ProgressStage.done &&
+          state.tab !== MTTransferFormTab.transfer ? undefined : change.progress
+      };
     // default:
     //   const _exhaustiveCheck: never = change; // tslint:disable-line
   }
@@ -241,7 +271,8 @@ function updatePlan(state: MTTransferFormState): MTTransferFormState {
   }
 
   const postTradeAsset = calculateMarginable(
-    newAsset
+    newAsset,
+    { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook
   );
 
   const isSafePost = postTradeAsset.safe;
@@ -251,8 +282,8 @@ function updatePlan(state: MTTransferFormState): MTTransferFormState {
   const daiBalancePost = postTradeAsset.debt.gt(zero) ?
     postTradeAsset.debt.times(minusOne) : postTradeAsset.dai;
   const realPurchasingPowerPost = realPurchasingPowerMarginable(
-      postTradeAsset,
-      state.orderbook.sell);
+    postTradeAsset,
+    state.orderbook.sell);
 
   return { ...state,
     messages,
@@ -290,6 +321,15 @@ function estimateGasPrice(
       calls.mtDrawEstimateGas : calls.mtFundEstimateGas;
     return call({ proxy, plan });
   });
+}
+
+function transactionHandler() {
+  return transactionToX(
+    progressChange(ProgressStage.waitingForApproval),
+    progressChange(ProgressStage.waitingForConfirmation),
+    progressChange(ProgressStage.fiasco),
+    () => of(progressChange(ProgressStage.done))
+  );
 }
 
 function prepareTransfer(calls$: Calls$)
@@ -331,12 +371,7 @@ function prepareTransfer(calls$: Calls$)
 
           return call({ proxy, plan, token, amount, })
             .pipe(
-              transactionToX(
-                progressChange(ProgressStage.waitingForApproval),
-                progressChange(ProgressStage.waitingForConfirmation),
-                progressChange(ProgressStage.fiasco),
-                () => of(progressChange(ProgressStage.done))
-              ),
+              transactionHandler(),
               takeUntil(cancel$)
             );
         }),
@@ -355,6 +390,81 @@ function prepareTransfer(calls$: Calls$)
   ];
 }
 
+function prepareSetup(calls$: Calls$, mta$: Observable<MTAccount>)
+  : [(state: MTTransferFormState) => void, Observable<ProgressChange>] {
+
+  const setupChange$ = new Subject<ProgressChange>();
+
+  function setup(_state: MTTransferFormState) {
+
+    const changes$: Observable<ProgressChange> = calls$.pipe(
+      first(),
+      switchMap((calls): Observable<ProgressChange> => {
+        return calls.setupMTProxy({}).pipe(
+          transactionHandler(),
+          switchMap(change => {
+            if (change.progress !== ProgressStage.done) {
+              return of(change);
+            }
+            return mta$.pipe(
+              filter(mta => mta.state === MTAccountState.setup),
+              first(),
+              map(() => change)
+            );
+          })
+        );
+      }),
+    );
+
+    changes$.subscribe((change: ProgressChange) => setupChange$.next(change));
+
+    return changes$;
+  }
+
+  return [setup, setupChange$];
+}
+
+function prepareAllowance(calls$: Calls$, mta$: Observable<MTAccount>)
+  : [(state: MTTransferFormState) => void, Observable<ProgressChange>] {
+
+  const allowanceChange$ = new Subject<ProgressChange>();
+
+  function allowance(state: MTTransferFormState) {
+    if (!state.mta) {
+      return;
+    }
+
+    const proxyAddress = state.mta.proxy.address;
+    const changes$: Observable<ProgressChange> = calls$.pipe(
+      first(),
+      switchMap((calls): Observable<ProgressChange> => {
+        return calls.approveMTProxy({
+          proxyAddress,
+          token: state.token
+        }).pipe(
+          transactionHandler(),
+          switchMap(change => {
+            if (change.progress !== ProgressStage.done) {
+              return of(change);
+            }
+            return mta$.pipe(
+              filter(mta => mta.state === MTAccountState.setup),
+              first(),
+              map(() => change)
+            );
+          })
+        );
+      }),
+    );
+
+    changes$.subscribe((change: ProgressChange) => allowanceChange$.next(change));
+
+    return changes$;
+  }
+
+  return [allowance, allowanceChange$];
+}
+
 function validate(state: MTTransferFormState) {
 
   const messages: Message[] = [];
@@ -371,12 +481,12 @@ function validate(state: MTTransferFormState) {
       messages.push({
         kind: MessageKind.insufficientAvailableAmount,
       });
-    // } else if (state.actionKind === UserActionKind.draw &&
-    //   asset && asset.assetKind === AssetKind.nonMarginable &&
-    //   (asset.balance || new BigNumber(0).lt(state.amount))) {
-    //   messages.push({
-    //     kind: MessageKind.insufficientAmount,
-    //   });
+      // } else if (state.actionKind === UserActionKind.draw &&
+      //   asset && asset.assetKind === AssetKind.nonMarginable &&
+      //   (asset.balance || new BigNumber(0).lt(state.amount))) {
+      //   messages.push({
+      //     kind: MessageKind.insufficientAmount,
+      //   });
     } else if (state.actionKind === UserActionKind.fund &&
       state.balances[state.token].lt(state.amount)) {
       (null || messages).push({
@@ -414,6 +524,7 @@ function freezeIfInProgress(
   if (state.progress) {
     return {
       ...previous,
+      mta: state.mta, // todo: instead of freezing mta, handle proxy address update other way
       progress: state.progress,
     };
   }
@@ -445,12 +556,16 @@ export function createMTTransferForm$(
   );
 
   const [transfer, cancel, transferProgressChange$] = prepareTransfer(calls$);
+  const [setup, setupProgressChange$] = prepareSetup(calls$, mta$);
+  const [allowance, allowanceProgressChange$] = prepareAllowance(calls$, mta$);
 
   const change = manualChange$.next.bind(manualChange$);
 
   const initialState: MTTransferFormState = {
     actionKind,
     transfer,
+    setup,
+    allowance,
     change,
     cancel,
     token,
@@ -465,6 +580,8 @@ export function createMTTransferForm$(
     manualChange$,
     environmentChange$,
     transferProgressChange$,
+    setupProgressChange$,
+    allowanceProgressChange$,
     resetChange$,
   ).pipe(
     scan(applyChange, initialState),

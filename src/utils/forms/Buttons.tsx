@@ -16,6 +16,7 @@ export type ButtonProps =
       | 'secondaryOutlined'
       | 'dangerOutlined'
       | 'greyOutlined'
+      | 'primaryOutlinedDone'
     size?: 'xs' | 'sm' | 'md' | 'lg' | 'unsized' | 'full',
     block?: boolean,
     dataTestId?: string

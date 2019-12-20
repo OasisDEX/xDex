@@ -2,7 +2,7 @@ import { BigNumber } from 'bignumber.js';
 import { flatten } from 'lodash';
 
 import { AssetKind } from '../../blockchain/config';
-import { Offer } from '../../exchange/orderbook/orderbook';
+import { Offer, Orderbook } from '../../exchange/orderbook/orderbook';
 import {
   findAsset, findMarginableAsset, MarginableAsset, MarginableAssetCore, MTAccount,
   Operation,
@@ -60,7 +60,9 @@ export function prepareBuyAllocationRequest(
       {
         ...ma,
         balance,
-      } as MarginableAssetCore);
+      } as MarginableAssetCore,
+      { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook
+    );
   });
 
   const baseAsset = findMarginableAsset(baseToken, mta);

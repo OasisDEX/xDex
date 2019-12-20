@@ -54,7 +54,7 @@ import {
 } from '../state/mtAccount';
 import {
   calculateMarginable,
-  realPurchasingPowerMarginable,
+  realPurchasingPowerMarginable, sellable,
 } from '../state/mtCalculate';
 // import { getBuyPlan, getSellPlan } from './mtOrderPlan';
 
@@ -66,6 +66,7 @@ export enum MessageKind {
   impossibleToPlan = 'impossibleToPlan',
   impossibleCalculateTotal = 'impossibleCalculateTotal',
   minDebt = 'minDebt',
+  unsellable = 'unsellable',
 }
 
 export type Message = {
@@ -93,6 +94,10 @@ export type Message = {
   field?: string;
   priority: number;
   message: string;
+} | {
+  kind: MessageKind.unsellable;
+  field?: string;
+  priority: number;
 };
 
 export enum ViewKind {
@@ -322,6 +327,24 @@ function validate(state: MTSimpleFormState): MTSimpleFormState {
       });
     }
 
+    if (state.orderbook) {
+      const [isSellable, log] = sellable(
+        baseAsset, state.orderbook.sell, state.amount || baseAsset.availableBalance
+      );
+
+      console.log(JSON.stringify(log, null, '  '));
+
+      if (
+        state.kind === OfferType.sell && state.orderbook &&
+        !isSellable
+      ) {
+        messages.push({
+          kind: MessageKind.unsellable,
+          field: 'total',
+          priority: 1,
+        });
+      }
+    }
   }
   return {
     ...state,
@@ -579,6 +602,7 @@ function getBuyPlan(
       urnBalance: asset.urnBalance.plus(amount),
       debt: asset.debt.plus(delta)
     } as MarginableAssetCore,
+    { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook
   );
   const collRatioPost = postTradeAsset.currentCollRatio;
   const liquidationPricePost = postTradeAsset.liquidationPrice;
@@ -621,6 +645,7 @@ function getSellPlan(
         liquidationPricePost: undefined,
         leveragePost: undefined,
         balancePost: undefined,
+        daiBalancePost: undefined,
         isSafePost: undefined
       }
     ];
@@ -636,20 +661,25 @@ function getSellPlan(
       ...asset,
       debt: asset.debt.plus(delta)
     } as MarginableAssetCore,
+    { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook
   );
 
+  console.log('post trade debt', postTradeAsset.debt.toString());
+  console.log('post trade dai', postTradeAsset.dai.toString());
   const collRatioPost = postTradeAsset.currentCollRatio;
   const liquidationPricePost = postTradeAsset.liquidationPrice;
   const isSafePost = postTradeAsset.safe;
   const leveragePost = postTradeAsset.leverage;
   const balancePost = postTradeAsset.balance;
+  const daiBalancePost = postTradeAsset.debt.gt(zero) ?
+    postTradeAsset.debt.times(minusOne) : postTradeAsset.dai;
 
   return [
     request.createPlan([{
       ...request.assets.find(ai => ai.name === baseToken),
       delta
     } as Required<EditableDebt>]),
-    { collRatioPost, liquidationPricePost, leveragePost, isSafePost, balancePost }
+    { collRatioPost, liquidationPricePost, leveragePost, isSafePost, balancePost, daiBalancePost }
   ];
 }
 
@@ -884,7 +914,11 @@ export function createMTSimpleOrderForm$(
     dustLimits$,
     account$
   } : MTSimpleOrderFormParams,
-  tradingPair: TradingPair
+  tradingPair: TradingPair,
+  defaults:
+  {
+    kind?: OfferType,
+  } = {}
 ): Observable<MTSimpleFormState> {
 
   const manualChange$ = new Subject<ManualChange>();
@@ -910,7 +944,8 @@ export function createMTSimpleOrderForm$(
     gasEstimationStatus: GasEstimationStatus.unset,
     messages: [],
     change: manualChange$.next.bind(manualChange$),
-    view: ViewKind.instantTradeForm
+    view: ViewKind.instantTradeForm,
+    ...defaults
   };
 
   return merge(
