@@ -1,15 +1,16 @@
 import { BigNumber } from 'bignumber.js';
 
 import { setupFakeWeb3ForTesting } from '../../blockchain/web3';
+import { fakeOrderbook } from '../../exchange/depthChart/depthchart.test';
 setupFakeWeb3ForTesting();
 
 import { Orderbook } from '../../exchange/orderbook/orderbook';
-import { zero } from '../../utils/zero';
+import { one, zero } from '../../utils/zero';
 import { CashAssetCore, MarginableAssetCore, MTAccount } from './mtAccount';
 import {
   calculateMarginable,
   calculateMTHistoryEvents,
-  realPurchasingPowerMarginable
+  realPurchasingPowerMarginable, sellable
 } from './mtCalculate';
 import {
   dai100,
@@ -202,4 +203,53 @@ test('Events history - SellLev', () => {
   expect(history[3].debtDelta).toEqual(new BigNumber('-100'));
   expect(history[3].dDAIAmount).toEqual(new BigNumber('250'));
   expect(history[3].dAmount).toEqual(new BigNumber('1'));
+});
+
+describe('Is position sellable', () => {
+  test('No debt, prices match', () => {
+
+    const ma = calculateMarginable(weth2, fakeOrderbook);
+
+    const [result] = sellable(ma, sellOffers, one);
+
+    expect(result).toBeTruthy();
+
+  });
+
+  test('Avg debt, prices match', () => {
+
+    const ma = calculateMarginable({
+      ...weth2,
+      debt: new BigNumber('150')
+    },                             fakeOrderbook);
+
+    const [result] = sellable(ma, sellOffers, one);
+
+    expect(result).toBeTruthy();
+  });
+
+  test('Large debt, prices match', () => {
+
+    const ma = calculateMarginable({
+      ...weth2,
+      debt: new BigNumber('199')
+    },                             fakeOrderbook);
+
+    const [result] = sellable(ma, sellOffers, one);
+
+    expect(result).toBeFalsy();
+  });
+
+  test('Avg debt, prices match', () => {
+
+    const ma = calculateMarginable({
+      ...weth2,
+      debt: new BigNumber('300'),
+      referencePrice: new BigNumber('600')
+    },                             fakeOrderbook);
+
+    const [result] = sellable(ma, sellOffers, one);
+
+    expect(result).toBeFalsy();
+  });
 });

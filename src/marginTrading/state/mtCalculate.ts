@@ -5,7 +5,7 @@ import { Dictionary } from 'ramda';
 import { nullAddress } from '../../blockchain/utils';
 import { Offer, Orderbook } from '../../exchange/orderbook/orderbook';
 import { minusOne, one, zero } from '../../utils/zero';
-import { buy } from '../plan/planUtils';
+import { buy, sellAll } from '../plan/planUtils';
 import {
   MarginableAsset,
   MarginableAssetCore,
@@ -56,6 +56,47 @@ export function realPurchasingPowerMarginable(
     cash = availableDebt;
   }
   return purchasingPower;
+}
+
+export function sellable(
+  ma: MarginableAsset,
+  offers: Offer[],
+  amount: BigNumber
+): [boolean, any, BigNumber] {
+  let { balance, debt, dai } = ma;
+  const { minCollRatio, referencePrice } = ma;
+  let i = 0;
+  const maxI = 10;
+  const log = [];
+  while (amount.gt(zero) && i < maxI) {
+
+    // payback dai debt with cash
+    const dDebt = BigNumber.min(dai, debt);
+    debt = debt.minus(dDebt);
+    dai = dai.minus(dDebt);
+
+    // take out max coll
+    // (balance - dBalance) * referencePrice / debt = minCollRatio
+    // dBalance = balance - minCollRatio * debt / referencePrice;
+
+    const dBalance = balance.minus(minCollRatio.times(debt).div(referencePrice));
+    if (dBalance.lte(zero)) {
+      return [false, log, amount];
+    }
+
+    // sell coll, increase sold and cash
+    const [dSold, dDai, newOffers] = sellAll(dBalance, offers);
+    offers = newOffers;
+
+    log.push({ dSold, dDai });
+
+    balance = balance.minus(dSold);
+    amount = amount.minus(dSold);
+    dai = dai.plus(dDai);
+    i += 1;
+  }
+
+  return [amount.lte(zero) && i < maxI, log, amount];
 }
 
 function findAuctionBite(rawHistory: RawMTHistoryEvent[], auctionId: number) {
