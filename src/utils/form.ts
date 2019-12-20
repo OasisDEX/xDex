@@ -412,9 +412,7 @@ export function doGasEstimation<S extends HasGasEstimation>(
   return combineLatest(calls$ || of(undefined), readCalls$ || of(undefined)).pipe(
     first(),
     switchMap(([calls, readCalls]) => {
-      if (!calls
-        || !readCalls
-        || state.gasEstimationStatus !== GasEstimationStatus.unset) {
+      if (state.gasEstimationStatus !== GasEstimationStatus.unset) {
         return of(state);
       }
 
@@ -426,6 +424,7 @@ export function doGasEstimation<S extends HasGasEstimation>(
         ...stateWithoutGasEstimation
       } = state as object;
 
+      // @ts-ignore
       const gasCall = call(calls, readCalls, state);
       const gasPrice = state.gasPrice;
       const etherPriceUsd = state.etherPriceUsd;
