@@ -412,7 +412,9 @@ export function doGasEstimation<S extends HasGasEstimation>(
   return combineLatest(calls$ || of(undefined), readCalls$ || of(undefined)).pipe(
     first(),
     switchMap(([calls, readCalls]) => {
-      if (state.gasEstimationStatus !== GasEstimationStatus.unset) {
+      if (!calls 
+        || !readCalls
+        || state.gasEstimationStatus !== GasEstimationStatus.unset) {
         return of(state);
       }
 

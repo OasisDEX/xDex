@@ -13,7 +13,7 @@ import { createZoom$, ZoomChange } from './depthchart';
 import { DepthChartView } from './DepthChartView';
 import * as styles from './DepthChartView.scss';
 
-type DepthChartProps = Loadable<Orderbook> & {
+export type DepthChartProps = Loadable<Orderbook> & {
   kind: OfferType;
   matchType: OfferMatchType;
   amount?: BigNumber;

@@ -36,7 +36,7 @@ export function withModal<O, P extends ModalOpenerProps>(
     public render() {
       return <React.Fragment>
         <ReRenderBarrier>
-          <Wrapped { ...{ ...this.props as any, open: this.open } as Readonly<P> }/>
+          <Wrapped { ...{ ...this.props as any, open: this.open } as Readonly<O & P> }/>
         </ReRenderBarrier>
         {this.state.modalType !== undefined &&
         // This fix is taken from xDex

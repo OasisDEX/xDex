@@ -9,11 +9,11 @@ import { Muted } from '../utils/text/Text';
 import { TradeExport } from './taxExporter';
 import * as styles from './TaxExporter.scss';
 
-interface TaxExporterViewProps {
+export interface TaxExporterViewProps {
   export: () => Observable<any[]>;
 }
 
-interface TaxExporterState {
+export interface TaxExporterState {
   inProgress: boolean;
 }
 

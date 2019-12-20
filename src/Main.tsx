@@ -141,7 +141,7 @@ class Routes extends React.Component<{ status: WalletStatus }> {
   }
 }
 
-const RoutesRx = connect(Routes, walletStatus$
+const RoutesRx = connect<{status: WalletStatus}, {}>(Routes, walletStatus$
   .pipe(
     map(status => ({
       status

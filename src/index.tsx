@@ -84,7 +84,7 @@ const props$: Observable<Props> = web3StatusResolve$.pipe(
   distinctUntilChanged(isEqual)
 );
 
-const AppTxRx = connect(App, props$);
+const AppTxRx = connect<Props, {}>(App, props$);
 
 const root: HTMLElement = document.getElementById('root')!;
 

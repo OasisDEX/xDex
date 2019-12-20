@@ -51,8 +51,8 @@ class Content extends React.Component<ContentProps, { pairPickerOpen: boolean }>
           )}>
             <theAppContext.Consumer>
               { ({ TradingPairsTxRx }) =>
-                // @ts-ignore
                 <TradingPairsTxRx
+                 // @ts-ignore
                   parentMatch={parentMatch}
                   setPairPickerOpen={(pairPickerOpen: boolean) => this.setState({ pairPickerOpen })}
                 />

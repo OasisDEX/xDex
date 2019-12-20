@@ -143,7 +143,7 @@ class Header extends React.Component<HeaderProps> {
   }
 }
 
-export const HeaderTxRx = connect(Header, combineLatest(walletStatus$).pipe(
+export const HeaderTxRx = connect<HeaderProps, {}>(Header, combineLatest(walletStatus$).pipe(
   map(([walletStatus]) => ({ walletStatus })),
 ));
 
@@ -223,11 +223,11 @@ class WalletConnectionStatus extends React.Component<WalletConnectionStatusProps
           }
         </div>
       </ReactPopover>
-    );
+    );  
   }
 }
 
-const WalletConnectionStatusRx = connect(WalletConnectionStatus, popup$);
+const WalletConnectionStatusRx = connect<WalletConnectionStatusProps, {}>(WalletConnectionStatus, popup$);
 
 interface StatusProps extends Loadable
   <Account> {
@@ -284,7 +284,7 @@ const loadableAccount$: Observable<Loadable<Account>> = combineLatest(walletStat
   }),
 );
 
-export const StatusTxRx = connect(Status, loadableAccount$);
+export const StatusTxRx = connect<StatusProps,{}>(Status, loadableAccount$);
 
 export const HeaderNavLink = ({ to, name }: { to: string, name: string }) => (
   <NavLink

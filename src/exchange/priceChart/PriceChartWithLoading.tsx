@@ -12,7 +12,7 @@ import { GroupMode, PriceChartDataPoint, } from './pricechart';
 import { PriceChartView } from './PriceChartView';
 import * as styles from './PriceChartWithLoading.scss';
 
-interface PriceChartProps extends LoadableWithTradingPair<PriceChartDataPoint[]> {
+export interface PriceChartProps extends LoadableWithTradingPair<PriceChartDataPoint[]> {
   groupMode: GroupMode;
   groupMode$: BehaviorSubject<GroupMode>;
 }

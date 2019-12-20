@@ -161,6 +161,7 @@ function doApprove(
             return doTradePayWithERC20(calls, proxyAddress, state, {
               ...initialProgress,
               allowanceTxStatus: txState.status,
+              // @ts-ignore
               allowanceTxHash: getTxHash(txState),
             });
           }

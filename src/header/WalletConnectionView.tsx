@@ -355,7 +355,7 @@ export enum WalletConnectionViewKind {
 
 export const walletConnectionViewManual$ = new BehaviorSubject('');
 
-export const WalletConnectionViews = new Map<WalletConnectionViewKind>(
+export const WalletConnectionViews = new Map<WalletConnectionViewKind, any>(
   [
     [WalletConnectionViewKind.connected, Connected],
     [WalletConnectionViewKind.notConnected, NotConnected],
