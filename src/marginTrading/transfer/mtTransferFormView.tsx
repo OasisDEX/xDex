@@ -15,6 +15,7 @@ import { Button } from '../../utils/forms/Buttons';
 import { ErrorMessage } from '../../utils/forms/ErrorMessage';
 import { InputGroup, InputGroupAddon } from '../../utils/forms/InputGroup';
 import { GasCost } from '../../utils/gasCost/GasCost';
+import { SvgImage } from '../../utils/icons/utils';
 import { BorderBox, Hr } from '../../utils/layout/LayoutHelpers';
 import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
 import { ModalProps } from '../../utils/modal';
@@ -29,6 +30,7 @@ import {
   MTAccountState,
   UserActionKind,
 } from '../state/mtAccount';
+import checkIconSvg from './check-icon.svg';
 import {
   Message, MessageKind, MTTransferFormState, MTTransferFormTab
 } from './mtTransferForm';
@@ -38,7 +40,6 @@ type MTFundFormProps = MTTransferFormState & ModalProps;
 
 const tabLabels: Dictionary<string> = {
   [MTTransferFormTab.proxy]: 'Deploy proxy',
-  [MTTransferFormTab.allowance]: 'Set allowance',
   [MTTransferFormTab.transfer]: 'Deposit',
 };
 
@@ -47,19 +48,30 @@ interface StepComponentProps {
   description: string;
   btnLabel: string;
   btnAction: () => void;
+  btnDisabled: boolean;
+  stepCompleted: boolean;
+  isLoading: boolean;
 }
 
 class StepComponent extends React.Component<StepComponentProps> {
   public render() {
-    const { title, description, btnLabel, btnAction } = this.props;
+    const { title, description, btnLabel, btnAction,
+      stepCompleted, btnDisabled, isLoading } = this.props;
+
     return (<div className={styles.onboardingPanel}>
       <h3 className={styles.onboardingHeader}>{title}</h3>
       <div className={styles.onboardingParagraph}>{description}</div>
       <Button
         size="md"
-        color="primary"
+        color={stepCompleted ? 'primaryOutlinedDone' : 'primary'}
+        disabled={btnDisabled || isLoading || stepCompleted}
         onClick={() => btnAction()}
-      >{btnLabel}</Button>
+        className={classnames({ [styles.buttonDone]: stepCompleted })}
+      >{
+        stepCompleted ? <SvgImage image={checkIconSvg}/> :
+          isLoading && !btnDisabled ?  <LoadingIndicator inline={true} /> : btnLabel
+      }</Button>
+
     </div>);
   }
 }
@@ -89,7 +101,15 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
 
     const startIndex = this.props.startTab ? onboardingTabs.indexOf(this.props.startTab) : 0;
 
-    const { mta, token, progress, tab } = this.props;
+    const { mta, token, progress } = this.props;
+
+    const isLoading = (progress === ProgressStage.waitingForApproval
+      || progress === ProgressStage.waitingForConfirmation);
+
+    const currentTab = mta &&
+    (mta.proxy && mta.proxy.address !== nullAddress && allowance(mta, token)) ?
+      MTTransferFormTab.transfer : MTTransferFormTab.proxy;
+
     return (
       <ReactModal
         ariaHideApp={false}
@@ -102,55 +122,63 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
       >
         <Panel className={styles.modalChild}>
           <div className={styles.tabs}>
-          {
-            onboardingTabs.filter(
-              (_tab: string, index: number) => (index >= startIndex)
-            ).map(_tab => {
-              return (<div
-                className={
-                  classnames({
-                    [styles.tab]: true,
-                    [styles.tabActive]: (_tab === this.props.tab)
-                  })
-                }
-                key={_tab}>{tabLabels[_tab]}</div>);
-            })
-          }
+            {
+              onboardingTabs.filter(
+                (_tab: string, index: number) => (index >= startIndex)
+              ).map(_tab => {
+                return (<div
+                  className={
+                    classnames({
+                      [styles.tab]: true,
+                      [styles.tabActive]: (_tab === currentTab)
+                    })
+                  }
+                  key={_tab}>{tabLabels[_tab]}</div>);
+              })
+            }
           </div>
-          { (tab === MTTransferFormTab.allowance || tab === MTTransferFormTab.proxy) &&
-          (progress === ProgressStage.waitingForApproval
-            || progress === ProgressStage.waitingForConfirmation) ?
-              <LoadingIndicator />
-            : <>
-              {mta && mta.proxy && mta.proxy.address === nullAddress ?
-                <StepComponent
-                  title="Deploy proxy"
-                  description={`Proxies are used to bundle multiple transactions into one,
-                  saving transaction time and gas costs. This only has to be done once.`}
-                  btnLabel="Deploy Proxy"
-                  btnAction={() => this.setup()}
-                />
-                :
-                mta && !allowance(mta, token) &&
+
+          {mta ?
+            <>
+              {currentTab === MTTransferFormTab.proxy ?
+                <>
+                  <StepComponent
+                    title="Deploy proxy"
+                    description={`Proxies are used to bundle multiple transactions into one,
+                saving transaction time and gas costs. This only has to be done once.`}
+                    btnLabel="Deploy Proxy"
+                    btnAction={() => this.setup()}
+                    btnDisabled={mta.proxy && mta.proxy.address !== nullAddress}
+                    isLoading={isLoading}
+                    stepCompleted={mta.proxy && mta.proxy.address !== nullAddress}
+                  />
                   <StepComponent
                     title="Set allowance"
                     description={`This permission allows Oasis smart contracts
-                     to interact with your ${token}.
-                     This has to be done for each asset type.`}
+                   to interact with your ${token}.
+                   This has to be done for each asset type.`}
                     btnLabel="Set allowance"
                     btnAction={() => this.allowance()}
+                    isLoading={isLoading}
+                    btnDisabled={
+                      mta.proxy && mta.proxy.address === nullAddress
+                    }
+                    stepCompleted={mta && allowance(mta, token)}
                   />
-              }
-              { mta && allowance(mta, token) && mta.proxy && <>
-                  <PanelBody paddingTop={true} style={{ height: '287px' }}>
-                    {this.AccountSummary()}
-                    <Hr color="dark" className={styles.hrBigMargin}/>
-                    {this.FormOrTransactionState()}
-                  </PanelBody>
-                  {this.Buttons()}
+                </> :
+                <>
+                  {allowance(mta, token) && mta.proxy && <>
+                    <PanelBody paddingTop={true} style={{ height: '287px' }}>
+                      {this.AccountSummary()}
+                      <Hr color="dark" className={styles.hrBigMargin}/>
+                      {this.FormOrTransactionState()}
+                    </PanelBody>
+                    {this.Buttons()}
+                  </>
+                  }
                 </>
               }
-            </>
+            </> : <LoadingIndicator/>
           }
         </Panel>
       </ReactModal>

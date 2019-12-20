@@ -251,11 +251,15 @@ export function toDustLimitChange$(
 }
 
 export function toMTAccountChange(mta$: Observable<MTAccount>) {
+
   return mta$.pipe(
-    map(mta => ({
-      mta,
-      kind: FormChangeKind.marginTradingAccountChange,
-    } as MTAccountChange))
+    map(mta => {
+      return ({
+        mta,
+        kind: FormChangeKind.marginTradingAccountChange,
+      } as MTAccountChange);
+
+    })
   );
 }
 

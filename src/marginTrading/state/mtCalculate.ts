@@ -173,25 +173,27 @@ export function calculateMarginable(
   ma: MarginableAssetCore,
   orderbook: Orderbook,
 ): MarginableAsset {
+  const { debt, dai, balance } = ma;
   const purchasingPower = realPurchasingPowerMarginable(ma, orderbook.sell);
   const midpointPrice = calculateMidpointPrice(orderbook);
   const equity = midpointPrice.gt(zero) ?
-    ma.balance.times(midpointPrice).minus(ma.debt).plus(ma.dai) : zero;
+    balance.times(midpointPrice).minus(debt).plus(dai) : zero;
   const availableActions = marginableAvailableActions(ma);
-  const balanceInCash = ma.balance.times(ma.referencePrice);
+  const balanceInCash = balance.times(ma.referencePrice);
   const lockedBalance = BigNumber.min(
-    ma.balance,
-    ma.debt.div(ma.referencePrice).times(ma.safeCollRatio)
+    balance,
+    debt.div(ma.referencePrice).times(ma.safeCollRatio)
   );
-  const availableBalance = BigNumber.max(zero, ma.balance.minus(lockedBalance));
-  const currentCollRatio = ma.debt.gt(0) ? balanceInCash.dividedBy(ma.debt) : undefined;
+  const availableBalance = BigNumber.max(zero, balance.minus(lockedBalance));
+  const currentCollRatio = debt.gt(0) ? balanceInCash.dividedBy(debt) : undefined;
   const maxSafeLeverage = one.div(one.minus(one.div(ma.safeCollRatio)));
   const maxDebt = balanceInCash.div(ma.safeCollRatio);
-  const availableDebt = BigNumber.max(zero, maxDebt.minus(ma.debt));
+  const availableDebt = BigNumber.max(zero, maxDebt.minus(debt));
 
-  const cash = balanceInCash.plus(ma.dai);
+  const cash = balanceInCash.plus(dai);
 
-  const liquidationPrice = ma.minCollRatio.times(ma.debt).div(ma.balance);
+  const liquidationPrice = debt.gt(zero) && balance.gt(zero) ?
+    ma.minCollRatio.times(debt).div(balance) : zero;
 
   const FullHistory = calculateMTHistoryEvents(ma.rawHistory, ma);
 

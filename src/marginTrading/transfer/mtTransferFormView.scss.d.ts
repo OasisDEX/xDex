@@ -36,3 +36,4 @@ export const onboardingHeader: string;
 export const onboardingPanel: string;
 export const onboardingParagraph: string;
 export const onboardingButton: string;
+export const buttonDone: string;

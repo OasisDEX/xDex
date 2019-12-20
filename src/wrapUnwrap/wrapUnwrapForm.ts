@@ -6,6 +6,7 @@ import { Calls, Calls$ } from '../blockchain/calls/calls';
 import {
   ProxyChange
 } from '../instant/instantForm';
+import { MTAccount } from '../marginTrading/state/mtAccount';
 import { combineAndMerge } from '../utils/combineAndMerge';
 import {
   AmountFieldChange, doGasEstimation,
@@ -63,6 +64,7 @@ export interface WrapUnwrapFormState extends HasGasEstimation {
   change: (change: ManualChange) => void;
   proceed: (state: WrapUnwrapFormState) => void;
   cancel: () => void;
+  mta?:MTAccount;
 }
 
 function applyChange(

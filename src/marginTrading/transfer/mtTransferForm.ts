@@ -21,6 +21,7 @@ import {
 } from '../../utils/form';
 
 import { curry } from 'ramda';
+import { filter } from 'rxjs/internal/operators';
 import { Balances } from '../../balances/balances';
 import { Calls, Calls$, ReadCalls, ReadCalls$ } from '../../blockchain/calls/calls';
 import { AssetKind } from '../../blockchain/config';
@@ -63,7 +64,6 @@ export type ManualChange = TokenChange | AmountFieldChange | IlkFieldChange;
 
 export enum MTTransferFormTab {
   proxy = 'proxy',
-  allowance = 'allowance',
   transfer = 'transfer',
 }
 
@@ -123,24 +123,16 @@ type MTSetupFormChange =
   ProgressChange;
 
 function initialTab(mta: MTAccount, name: string) {
-  const { proxy, allowance, transfer } = MTTransferFormTab;
+  const { proxy, transfer } = MTTransferFormTab;
   if (mta.proxy.address !==  nullAddress) {
     const isAllowance = name === 'DAI'
               ? mta.daiAllowance
               : findMarginableAsset(name, mta)!.allowance;
-    return isAllowance ? transfer : allowance;
+    return isAllowance ? transfer : proxy;
+    return isAllowance ? transfer : proxy;
   }
 
   return proxy;
-}
-
-function nextTab(tab: MTTransferFormTab | undefined) {
-  const { proxy, allowance, transfer } = MTTransferFormTab;
-  switch (tab) {
-    case proxy: return allowance;
-    case allowance: return transfer;
-    default: return transfer;
-  }
 }
 
 function applyChange(state: MTTransferFormState, change: MTSetupFormChange): MTTransferFormState {
@@ -177,10 +169,8 @@ function applyChange(state: MTTransferFormState, change: MTSetupFormChange): MTT
     case FormChangeKind.progress:
       return {
         ...state,
-        tab: change.progress === ProgressStage.done ? nextTab(state.tab) : state.tab,
-        progress:
-          change.progress === ProgressStage.done && state.tab !== MTTransferFormTab.transfer ?
-            undefined : change.progress
+        progress: change.progress === ProgressStage.done &&
+          state.tab !== MTTransferFormTab.transfer ? undefined : change.progress
       };
     // default:
     //   const _exhaustiveCheck: never = change; // tslint:disable-line
@@ -400,7 +390,7 @@ function prepareTransfer(calls$: Calls$)
   ];
 }
 
-function prepareSetup(calls$: Calls$)
+function prepareSetup(calls$: Calls$, mta$: Observable<MTAccount>)
   : [(state: MTTransferFormState) => void, Observable<ProgressChange>] {
 
   const setupChange$ = new Subject<ProgressChange>();
@@ -411,7 +401,17 @@ function prepareSetup(calls$: Calls$)
       first(),
       switchMap((calls): Observable<ProgressChange> => {
         return calls.setupMTProxy({}).pipe(
-          transactionHandler()
+          transactionHandler(),
+          switchMap(change => {
+            if (change.progress !== ProgressStage.done) {
+              return of(change);
+            }
+            return mta$.pipe(
+              filter(mta => mta.state === MTAccountState.setup),
+              first(),
+              map(() => change)
+            );
+          })
         );
       }),
     );
@@ -424,7 +424,7 @@ function prepareSetup(calls$: Calls$)
   return [setup, setupChange$];
 }
 
-function prepareAllowance(calls$: Calls$)
+function prepareAllowance(calls$: Calls$, mta$: Observable<MTAccount>)
   : [(state: MTTransferFormState) => void, Observable<ProgressChange>] {
 
   const allowanceChange$ = new Subject<ProgressChange>();
@@ -442,7 +442,17 @@ function prepareAllowance(calls$: Calls$)
           proxyAddress,
           token: state.token
         }).pipe(
-          transactionHandler()
+          transactionHandler(),
+          switchMap(change => {
+            if (change.progress !== ProgressStage.done) {
+              return of(change);
+            }
+            return mta$.pipe(
+              filter(mta => mta.state === MTAccountState.setup),
+              first(),
+              map(() => change)
+            );
+          })
         );
       }),
     );
@@ -514,6 +524,7 @@ function freezeIfInProgress(
   if (state.progress) {
     return {
       ...previous,
+      mta: state.mta, // todo: instead of freezing mta, handle proxy address update other way
       progress: state.progress,
     };
   }
@@ -545,8 +556,8 @@ export function createMTTransferForm$(
   );
 
   const [transfer, cancel, transferProgressChange$] = prepareTransfer(calls$);
-  const [setup, setupProgressChange$] = prepareSetup(calls$);
-  const [allowance, allowanceProgressChange$] = prepareAllowance(calls$);
+  const [setup, setupProgressChange$] = prepareSetup(calls$, mta$);
+  const [allowance, allowanceProgressChange$] = prepareAllowance(calls$, mta$);
 
   const change = manualChange$.next.bind(manualChange$);
 

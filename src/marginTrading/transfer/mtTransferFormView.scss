@@ -218,3 +218,13 @@
   width: 450px;
   height: 575px;
 }
+
+.buttonDone {
+  background: none;
+  border: 1px solid $green;
+
+  &:hover {
+    background: none;
+    border: 1px solid $green;
+  }
+}
