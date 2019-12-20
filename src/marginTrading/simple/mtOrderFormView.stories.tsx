@@ -14,7 +14,7 @@ import { MTAccount } from '../state/mtAccount';
 import { calculateMarginable } from '../state/mtCalculate';
 import { getMarginableCore, getMTAccount } from '../state/mtTestUtils';
 import {
-  createMTSimpleOrderForm$, MTSimpleOrderFormParams, MTSimpleFormState
+  createMTSimpleOrderForm$, MTSimpleFormState, MTSimpleOrderFormParams
 } from './mtOrderForm';
 import { MtSimpleOrderFormView } from './mtOrderFormView';
 

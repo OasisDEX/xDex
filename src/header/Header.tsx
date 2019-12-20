@@ -223,11 +223,14 @@ class WalletConnectionStatus extends React.Component<WalletConnectionStatusProps
           }
         </div>
       </ReactPopover>
-    );  
+    );
   }
 }
 
-const WalletConnectionStatusRx = connect<WalletConnectionStatusProps, {}>(WalletConnectionStatus, popup$);
+const WalletConnectionStatusRx = connect<WalletConnectionStatusProps, {}>(
+  WalletConnectionStatus,
+  popup$
+);
 
 interface StatusProps extends Loadable
   <Account> {
@@ -272,7 +275,10 @@ interface Account {
   available?: boolean;
 }
 
-const loadableAccount$: Observable<Loadable<Account>> = combineLatest(walletStatus$, account$).pipe(
+const loadableAccount$: Observable<Loadable<Account>> = combineLatest(
+  walletStatus$,
+  account$
+).pipe(
   map(([walletStatus, account]) => {
     if (walletStatus === 'connecting') {
       return { status: 'loading' } as Loadable<Account>;
@@ -284,7 +290,7 @@ const loadableAccount$: Observable<Loadable<Account>> = combineLatest(walletStat
   }),
 );
 
-export const StatusTxRx = connect<StatusProps,{}>(Status, loadableAccount$);
+export const StatusTxRx = connect<StatusProps, {}>(Status, loadableAccount$);
 
 export const HeaderNavLink = ({ to, name }: { to: string, name: string }) => (
   <NavLink

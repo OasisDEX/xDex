@@ -23,7 +23,7 @@ import {
 import { MtAccountDetailsView } from './balances/mtAccountDetailsView';
 import { createBalancesView$, MTBalancesView } from './balances/mtBalancesView';
 import { createTaxExport$ } from './balances/taxExporter';
-import { TaxExporterView, TaxExporterViewProps, TaxExporterState } from './balances/TaxExporterView';
+import { TaxExporterView, TaxExporterViewProps } from './balances/TaxExporterView';
 import { WalletView } from './balances/WalletView';
 import { calls$, readCalls$ } from './blockchain/calls/calls';
 import {
@@ -50,18 +50,18 @@ import { BigNumber } from 'bignumber.js';
 import * as mixpanel from 'mixpanel-browser';
 import { transactions$, TxState } from './blockchain/transactions';
 import {
+  AllTradesProps,
   createAllTrades$,
   createTradesBrowser$,
   loadAllTrades,
   loadPriceDaysAgo,
-  loadVolumeForThePastDay,
-  AllTradesProps
+  loadVolumeForThePastDay
 } from './exchange/allTrades/allTrades';
 import { AllTrades } from './exchange/allTrades/AllTradesView';
 import {
   createDepthChartWithLoading$,
-  DepthChartWithLoading,
   DepthChartProps,
+  DepthChartWithLoading,
 } from './exchange/depthChart/DepthChartWithLoading';
 import {
   createCurrentPrice$,
@@ -99,13 +99,16 @@ import {
 } from './exchange/priceChart/pricechart';
 import {
   createPriceChartLoadable$,
-  PriceChartWithLoading,
-  PriceChartProps
+  PriceChartProps,
+  PriceChartWithLoading
 } from './exchange/priceChart/PriceChartWithLoading';
 import { TradingPairView } from './exchange/tradingPair/TradingPairView';
-import { createFooter$, TheFooter, FooterProps } from './footer/Footer';
+import { createFooter$, FooterProps, TheFooter } from './footer/Footer';
 import { Network } from './header/Network';
-import { createFormController$ as createInstantFormController$, InstantFormChangeKind, InstantFormState } from './instant/instantForm';
+import {
+  createFormController$ as createInstantFormController$,
+  InstantFormState
+} from './instant/instantForm';
 import { InstantViewPanel } from './instant/InstantViewPanel';
 import {
   createExchangeMigration$,
@@ -119,6 +122,7 @@ import {
 } from './migration/migrationForm';
 import { MigrationButton } from './migration/MigrationFormView';
 
+import { NetworkConfig } from './blockchain/config';
 import { MTMyPositionPanel } from './marginTrading/positions/MTMyPositionPanel';
 import {
   createRedeem,
@@ -131,9 +135,15 @@ import {
   createMTProxyApprove, findMarginableAsset, MTAccount
 } from './marginTrading/state/mtAccount';
 import { createMta$ } from './marginTrading/state/mtAggregate';
-import { CreateMTFundForm$, createMTTransferForm$ } from './marginTrading/transfer/mtTransferForm';
+import {
+  CreateMTFundForm$,
+  createMTTransferForm$
+} from './marginTrading/transfer/mtTransferForm';
 import { createTransactionNotifier$ } from './transactionNotifier/transactionNotifier';
-import { TransactionNotifierView, TransactionNotifierPros } from './transactionNotifier/TransactionNotifierView';
+import {
+  TransactionNotifierPros,
+  TransactionNotifierView
+} from './transactionNotifier/TransactionNotifierView';
 import { connect } from './utils/connect';
 import { pluginDevModeHelpers } from './utils/devModeHelpers';
 import { OfferMatchType } from './utils/form';
@@ -141,7 +151,6 @@ import { inject } from './utils/inject';
 import { Loadable, LoadableWithTradingPair, loadablifyLight, } from './utils/loadable';
 import { ModalOpenerProps, withModal } from './utils/modal';
 import { createWrapUnwrapForm$ } from './wrapUnwrap/wrapUnwrapForm';
-import { NetworkConfig } from './blockchain/config';
 export function setupAppContext() {
 
   pluginDevModeHelpers(context$, calls$, readCalls$, initializedAccount$, onEveryBlock$);
@@ -325,7 +334,10 @@ export function setupAppContext() {
     ),
   };
   const priceChartLoadable = createPriceChartLoadable$(groupMode$, dataSources);
-  const PriceChartWithLoadingTxRx = connect<PriceChartProps, {}>(PriceChartWithLoading, priceChartLoadable);
+  const PriceChartWithLoadingTxRx = connect<PriceChartProps, {}>(
+    PriceChartWithLoading,
+    priceChartLoadable
+  );
 
   const { OfferMakePanelTxRx, OrderbookPanelTxRx } =
     offerMake(currentOrderbook$, balances$);
@@ -367,7 +379,10 @@ export function setupAppContext() {
 
   const transactionNotifier$ =
     createTransactionNotifier$(transactions$, interval(5 * 1000), context$);
-  const TransactionNotifierTxRx = connect<TransactionNotifierPros, {}>(TransactionNotifierView, transactionNotifier$);
+  const TransactionNotifierTxRx = connect<TransactionNotifierPros, {}>(
+    TransactionNotifierView,
+    transactionNotifier$
+  );
 
   const transactionsLog: string[] = [];
   combineLatest(transactionNotifier$, context$).pipe(
@@ -411,7 +426,10 @@ export function setupAppContext() {
     }
   );
 
-  const InstantTxRx = connect<Loadable<InstantFormState>,{}>(InstantViewPanel, loadablifyLight(instant$));
+  const InstantTxRx = connect<Loadable<InstantFormState>, {}>(
+    InstantViewPanel,
+    loadablifyLight(instant$)
+  );
 
   const TaxExporterTxRx = inject<{}, TaxExporterViewProps>(TaxExporterView, {
     export: () => createTaxExport$(context$, initializedAccount$)
@@ -617,7 +635,10 @@ function mtSimpleOrderForm(
     kindChange
   );
 
-  const DepthChartWithLoadingTxRx = connect<DepthChartProps, {}>(DepthChartWithLoading, depthChartWithLoading$);
+  const DepthChartWithLoadingTxRx = connect<DepthChartProps, {}>(
+    DepthChartWithLoading,
+    depthChartWithLoading$
+  );
 
   const MTSimpleOrderbookPanelTxRx = connect(
     inject<OrderbookPanelProps, SubViewsProps>(
@@ -651,7 +672,10 @@ function offerMake(
   );
 
   const offerMakeLoadable$ = loadablifyLight(offerMake$);
-  const OfferMakePanelTxRx = connect<Loadable<OfferFormState>, {}>(OfferMakePanel, offerMakeLoadable$);
+  const OfferMakePanelTxRx = connect<Loadable<OfferFormState>, {}>(
+    OfferMakePanel,
+    offerMakeLoadable$
+  );
 
   const [kindChange, orderbookPanel$] = createOrderbookPanel$();
 
@@ -660,7 +684,10 @@ function offerMake(
     orderbook$,
     kindChange
   );
-  const DepthChartWithLoadingTxRx = connect<DepthChartProps, {}>(DepthChartWithLoading, depthChartWithLoading$);
+  const DepthChartWithLoadingTxRx = connect<DepthChartProps, {}>(
+    DepthChartWithLoading,
+    depthChartWithLoading$
+  );
 
   const orderbookForView$ = createOrderbookForView(
     orderbook$,

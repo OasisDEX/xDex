@@ -257,5 +257,5 @@ export function createMigrationForm$(
         scan(freezeIfInProgress),
       );
     })
-  ); 
+  );
 }
