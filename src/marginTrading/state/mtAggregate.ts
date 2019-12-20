@@ -138,11 +138,9 @@ export function aggregateMTAccountState(
         orderbooks$(assetNames, loadOrderbook)
       ).pipe(
     map(([balanceResult, rawHistories, osmPrices, osmParams, orderbooks]) => {
-
       const marginables = assetNames
         .filter(token => getToken(token).assetKind === AssetKind.marginable)
         .map(token => {
-          console.log('min debt', balanceResult[token].minDebt.toString());
           return getMarginableCore({
             name: token,
             assetKind: AssetKind.marginable,

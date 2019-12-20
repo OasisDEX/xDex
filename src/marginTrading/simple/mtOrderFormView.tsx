@@ -485,17 +485,28 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
   }
 
   private feesBox() {
-    const leverage = this.props.leverage ?
-      this.props.leverage :
-      this.props.leveragePost ? zero : minusOne;
+    const { leverage, leveragePost, baseToken, mta } = this.props;
+    const baseTokenAsset = findMarginableAsset(baseToken, mta);
+
+    if (!baseTokenAsset) {
+      return;
+    }
+
+    const { liquidationPenalty } = baseTokenAsset;
+
+    const liquidationPenalityPercent = liquidationPenalty.gt(zero) ?
+      liquidationPenalty.minus(1).times(100) : zero;
+
+    const leverageDisplay = leverage ?
+      leverage : leveragePost ? zero : minusOne;
     return (
       <div className={styles.InfoRow}>
         <div className={styles.InfoBox}>
           <div className={styles.InfoRowLabel}>Leverage</div>
           <div>
             {
-              leverage.gte(zero) ?
-                <>{ formatPrecision(leverage, 1) }x</>
+              leverageDisplay.gte(zero) ?
+                <>{ formatPrecision(leverageDisplay, 1) }x</>
                 : <span>-</span>
             }
             { this.props.leveragePost &&
@@ -511,8 +522,14 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
           </div>
         </div>
         <div className={styles.InfoBox}>
-          <div className={styles.InfoRowLabel}>Liqu. Fee</div>
-          <div>15 %</div>
+          <div className={styles.InfoRowLabel}>Liqu. Penality</div>
+          <div>
+            <FormatPercent
+              value={liquidationPenalityPercent}
+              fallback="-"
+              multiply={false}
+            />
+          </div>
         </div>
         <div className={styles.InfoBox}>
           <div className={styles.InfoRowLabel}>Interest Rate</div>

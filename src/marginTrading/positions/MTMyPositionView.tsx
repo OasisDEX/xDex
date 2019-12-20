@@ -81,6 +81,9 @@ export class MTMyPositionView extends
     const { ma, mta } = this.props;
     const leverage = ma.leverage ? ma.leverage : ma.balance.gt(zero) ? one : zero;
     const liquidationPrice = ma.liquidationPrice ? ma.liquidationPrice : zero;
+    const { liquidationPenalty } = ma;
+    const liquidationPenalityPercent = liquidationPenalty.gt(zero) ?
+      liquidationPenalty.minus(1).times(100) : zero;
 
     return (
       <div>
@@ -112,7 +115,7 @@ export class MTMyPositionView extends
               </div>
               <div className={styles.summaryValue}>
                 <FormatPercent
-                  value={ma.liquidationPenalty}
+                  value={liquidationPenalityPercent}
                   fallback="-"
                   multiply={false}
                 />
