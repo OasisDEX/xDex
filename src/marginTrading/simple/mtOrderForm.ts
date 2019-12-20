@@ -328,12 +328,11 @@ function validate(state: MTSimpleFormState): MTSimpleFormState {
     }
 
     if (state.orderbook) {
-      const [isSellable, log, amount] = sellable(
+      const [isSellable, log] = sellable(
         baseAsset, state.orderbook.sell, state.amount || baseAsset.availableBalance
       );
 
       console.log(JSON.stringify(log, null, '  '));
-      console.log('amount', amount.toString());
 
       if (
         state.kind === OfferType.sell && state.orderbook &&
@@ -910,7 +909,11 @@ export function createMTSimpleOrderForm$(
     dustLimits$,
     account$
   } : MTSimpleOrderFormParams,
-  tradingPair: TradingPair
+  tradingPair: TradingPair,
+  defaults:
+  {
+    kind?: OfferType,
+  } = {}
 ): Observable<MTSimpleFormState> {
 
   const manualChange$ = new Subject<ManualChange>();
@@ -936,7 +939,8 @@ export function createMTSimpleOrderForm$(
     gasEstimationStatus: GasEstimationStatus.unset,
     messages: [],
     change: manualChange$.next.bind(manualChange$),
-    view: ViewKind.instantTradeForm
+    view: ViewKind.instantTradeForm,
+    ...defaults
   };
 
   return merge(

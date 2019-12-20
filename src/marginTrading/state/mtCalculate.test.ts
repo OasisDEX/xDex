@@ -1,7 +1,7 @@
 import { BigNumber } from 'bignumber.js';
 
 import { setupFakeWeb3ForTesting } from '../../blockchain/web3';
-import {fakeOrderbook} from '../../exchange/depthChart/depthchart.test';
+import { fakeOrderbook } from '../../exchange/depthChart/depthchart.test';
 setupFakeWeb3ForTesting();
 
 import { Orderbook } from '../../exchange/orderbook/orderbook';
@@ -221,7 +221,7 @@ describe('Is position sellable', () => {
     const ma = calculateMarginable({
       ...weth2,
       debt: new BigNumber('150')
-    }, fakeOrderbook);
+    },                             fakeOrderbook);
 
     const [result] = sellable(ma, sellOffers, one);
 
@@ -233,7 +233,7 @@ describe('Is position sellable', () => {
     const ma = calculateMarginable({
       ...weth2,
       debt: new BigNumber('199')
-    }, fakeOrderbook);
+    },                             fakeOrderbook);
 
     const [result] = sellable(ma, sellOffers, one);
 
@@ -246,7 +246,7 @@ describe('Is position sellable', () => {
       ...weth2,
       debt: new BigNumber('300'),
       referencePrice: new BigNumber('600')
-    }, fakeOrderbook);
+    },                             fakeOrderbook);
 
     const [result] = sellable(ma, sellOffers, one);
 

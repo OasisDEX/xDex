@@ -2,19 +2,19 @@ import { storiesOf } from '@storybook/react';
 import { BigNumber } from 'bignumber.js';
 import * as React from 'react';
 import { of } from 'rxjs/index';
+import { first } from 'rxjs/internal/operators';
 import { Calls$, ReadCalls$ } from '../../blockchain/calls/calls';
 import { createFakeOrderbook, emptyOrderBook } from '../../exchange/depthChart/fakeOrderBook';
 import { OfferType, Orderbook } from '../../exchange/orderbook/orderbook';
-import { OrderbookView } from '../../exchange/orderbook/OrderbookView';
-import { FormChangeKind, KindChange } from '../../utils/form';
-import { LoadableStatus, loadablifyLight } from '../../utils/loadable';
+import { TradingPair } from '../../exchange/tradingPair/tradingPair';
+import { connect } from '../../utils/connect';
+import { FormChangeKind } from '../../utils/form';
 import { zero } from '../../utils/zero';
 import { MTAccount } from '../state/mtAccount';
 import { calculateMarginable } from '../state/mtCalculate';
 import { getMarginableCore, getMTAccount } from '../state/mtTestUtils';
 import {
-  createMTSimpleOrderForm$, ManualChange,
-  MTSimpleFormState, MTSimpleOrderFormParams
+  createMTSimpleOrderForm$, MTSimpleOrderFormParams
 } from './mtOrderForm';
 import { MtSimpleOrderFormView } from './mtOrderFormView';
 
@@ -46,8 +46,6 @@ const ethMarginableAsset = calculateMarginable(
 
 const mta: MTAccount = getMTAccount({ marginableAssets: [ethMarginableAsset] });
 
-const tradingPair = { base: 'WETH', quote: 'DAI' };
-
 const defaultCalls = {
   mtBuyEstimateGas: () => of(20),
   mtSellEstimateGas: () => of(30),
@@ -72,7 +70,11 @@ const defParams = {
 };
 
 const controllerWithFakeOrderBook = (
-  buys: any = [], sells: any = [], _mta: MTAccount = mtaEmpty
+  buys: any = [],
+  sells: any = [],
+  _mta: MTAccount = mtaEmpty,
+  kind: OfferType,
+  tradingPair: TradingPair
 ) => {
   const orderbook = createFakeOrderbook(buys, sells);
   orderbook.buy.forEach((v, i) => v.offerId = new BigNumber(i + 1));
@@ -80,10 +82,13 @@ const controllerWithFakeOrderBook = (
   return createMTSimpleOrderForm$(
     {
       ...defParams,
-      orderbook$: of({ ...orderbook, tradingPair: { base: 'WETH', quote: 'DAI' } }),
+      orderbook$: of({ ...orderbook, tradingPair }),
       mta$: of(_mta),
     } as MTSimpleOrderFormParams,
-    tradingPair
+    tradingPair,
+    {
+      kind,
+    }
   );
 };
 
@@ -101,52 +106,29 @@ const buy_orders = [
   { price: 160, amount: 4, baseToken: 'WETH', quoteToken: 'DAI' },
 ];
 
-const controller = controllerWithFakeOrderBook(buy_orders, sell_orders, mta);
-
-class DummyComponent extends React.Component<any, MTSimpleFormState> {
-
-  public componentDidMount() {
-    controller.subscribe(state => {
-      this.setState(state);
-      if (state.kind !== OfferType.sell) {
-        state.change({ kind: FormChangeKind.kindChange, newKind: OfferType.sell });
-      }
-    });
-  }
-
-  public render() {
-    if (this.state) {
-
-      // console.log('OB', JSON.stringify(this.state.orderbook, null, '  '));
-      // const props = {
-      //   ...this.state,
-      //   value: this.state.orderbook,
-      //   change: () => {},
-      //   kindChange: () => {},
-      //   tradingPair: { base: 'WETH', quote: 'DAI' },
-      //   status: 'loaded' as LoadableStatus
-      // };
-
-      return <>
-        <MtSimpleOrderFormView
-          {...(this.state as MTSimpleFormState)}
-        />
-        <pre>
-          {this.state.orderbook && JSON.stringify(this.state.orderbook.sell, null, '  ')}
-        </pre>
-
-        {/*<OrderbookView {...props} />*/}
-        <>
-          <br/>
-          <br/>
-          <br/>
-        </>
-      </>;
-    }
-    return <>loading</>;
-  }
-}
-
 stories.add('Sell', () => {
-  return <DummyComponent/>;
+  const controller1 = controllerWithFakeOrderBook(
+    buy_orders, sell_orders, mta, OfferType.sell, { base: 'WETH', quote: 'DAI' }
+    );
+
+  controller1.pipe(first()).subscribe(state => {
+    state.change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber('1') });
+  });
+
+  const Case1 = connect(MtSimpleOrderFormView, controller1);
+
+  const controller2 = controllerWithFakeOrderBook(
+    buy_orders, sell_orders, mta, OfferType.sell, { base: 'WETH', quote: 'DAI' }
+  );
+
+  controller2.pipe(first()).subscribe(state => {
+    state.change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber('0.4') });
+  });
+
+  const Case2 = connect(MtSimpleOrderFormView, controller2);
+
+  return <>
+    <Case1/>
+    <Case2/>
+  </>;
 });
