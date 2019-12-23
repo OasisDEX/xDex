@@ -19,7 +19,7 @@ export function getTotal(amount: BigNumber, orders: Offer[]): Impossible | BigNu
     amountLeft = amountLeft.minus(done);
     total = total.plus(paid);
 
-    if (amountLeft.isEqualTo(zero)) {
+    if (amountLeft.eq(zero)) {
       break;
     }
   }
@@ -140,10 +140,10 @@ export function sellAll(
     totalSold = totalSold.plus(sold);
     totalEarned = totalEarned.plus(earned);
     amountToBeSold = amountToBeSold.minus(sold);
-    if (amountToBeSold.isEqualTo(zero)) {
+    if (amountToBeSold.eq(zero)) {
       const baseAmount = offer.baseAmount.minus(sold);
 
-      if (baseAmount.isEqualTo(zero)) {
+      if (baseAmount.eq(zero)) {
         break;
       }
 
