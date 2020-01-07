@@ -1,6 +1,6 @@
 import { BigNumber } from 'bignumber.js';
 import { isEqual } from 'lodash';
-import { bindNodeCallback, combineLatest, forkJoin, Observable, of } from 'rxjs';
+import { bindNodeCallback, combineLatest, forkJoin, from, Observable, of } from 'rxjs';
 import { first } from 'rxjs/internal/operators';
 import {
   catchError,
@@ -13,6 +13,7 @@ import {
   shareReplay, startWith,
   switchMap,
 } from 'rxjs/operators';
+import { Contract } from 'web3-eth-contract';
 import * as dsProxy from '../../blockchain/abi/ds-proxy.abi.json';
 import { ReadCalls, readCalls$, ReadCalls$ } from '../../blockchain/calls/calls';
 import {
@@ -21,7 +22,7 @@ import {
   NetworkConfig,
   tradingTokens
 } from '../../blockchain/config';
-import { Allowance, MIN_ALLOWANCE } from '../../blockchain/network';
+import { MIN_ALLOWANCE } from '../../blockchain/network';
 import { amountFromWei, nullAddress } from '../../blockchain/utils';
 import { web3 } from '../../blockchain/web3';
 import { Orderbook } from '../../exchange/orderbook/orderbook';
@@ -65,10 +66,11 @@ function rawMTHistories$(
 
 function osms$(context: NetworkConfig, assets: string[]) {
   return forkJoin(assets.map((token) =>
-    readOsm(context, token).pipe(
-      map(osm => ({ [token]: osm })
-      ),
-    )
+    context.mcd.osms[token] ?
+      readOsm(context, token).pipe(
+        map(osm => ({ [token]: osm })),
+      ) :
+      of({}),
   )).pipe(
     concatAll(),
     reduce(
@@ -78,14 +80,16 @@ function osms$(context: NetworkConfig, assets: string[]) {
   );
 }
 
-function osmsParams$(assets: string[]) {
+function osmsParams$(context: NetworkConfig, assets: string[]) {
   return readCalls$.pipe(
     switchMap(calls => {
-      return forkJoin(assets.map((token) => {
-        return calls.osmParams({ token }).pipe(
-          map(osmParams => ({ [token]: osmParams }))
-        );
-      })).pipe(
+      return forkJoin(assets.map((token) =>
+        context.mcd.osms[token] 
+        ? calls.osmParams({ token }).pipe(
+            map(osmParams => ({ [token]: osmParams }))
+          ) 
+        : of({}),
+      )).pipe(
           concatAll(),
           reduce(
             (a, e) => ({ ...a, ...e }),
@@ -117,7 +121,7 @@ function orderbooks$(
 
 export function aggregateMTAccountState(
   context: NetworkConfig,
-  proxy: any,
+  proxy: Contract,
   calls: ReadCalls,
   daiAllowance: boolean,
   loadOrderbook: (pair: TradingPair) => Observable<Orderbook>
@@ -131,10 +135,10 @@ export function aggregateMTAccountState(
     .map(t => t.symbol);
 
   return combineLatest(
-        calls.mtBalance({ tokens: assetNames, proxyAddress: proxy.address }),
-        rawMTHistories$(context, proxy.address, assetNames),
+        calls.mtBalance({ tokens: assetNames, proxyAddress: proxy.options.address }),
+        rawMTHistories$(context, proxy.options.address, assetNames),
         osms$(context, assetNames),
-        osmsParams$(assetNames),
+        osmsParams$(context, assetNames),
         orderbooks$(assetNames, loadOrderbook)
       ).pipe(
     map(([balanceResult, rawHistories, osmPrices, osmParams, orderbooks]) => {
@@ -174,8 +178,12 @@ export function createProxyAllowance$(
       onEveryBlock$
     ).pipe(
     switchMap(([context, account, proxyAddress]) =>
-      proxyAddress ? bindNodeCallback(context.tokens[token].contract.allowance as Allowance)(
-        account, proxyAddress) : of(zero)
+      proxyAddress ?
+      from(context.tokens[token].contract.methods.allowance(
+        account, proxyAddress
+      ).call()).pipe(
+        map((x: string) => new BigNumber(x)),
+      ) : of(zero)
     ),
     map((x: BigNumber) => x.gte(MIN_ALLOWANCE)),
   );
@@ -189,13 +197,15 @@ export function createProxyAddress$(
   return combineLatest(context$, initializedAccount$, onEveryBlock$).pipe(
     exhaustMap(
       ([context, account]) => {
-        return bindNodeCallback(context.instantProxyRegistry.contract.proxies)(account).pipe(
+        return from(context.instantProxyRegistry.contract.methods.proxies(
+          account
+        ).call()).pipe(
           mergeMap((proxyAddress: string) => {
             if (proxyAddress === nullAddress) {
               return of(undefined);
             }
-            const proxy = web3.eth.contract(dsProxy as any).at(proxyAddress);
-            return bindNodeCallback(proxy.owner)().pipe(
+            const proxy = new web3.eth.Contract(dsProxy as any, proxyAddress);
+            return from(proxy.methods.owner().call()).pipe(
               mergeMap((ownerAddress: string) =>
                 ownerAddress === account ?
                   of(proxyAddress) :
@@ -235,7 +245,7 @@ export function createMta$(
         proxyAddress = nullAddress;
       }
 
-      const proxy = web3.eth.contract(dsProxy as any).at(proxyAddress);
+      const proxy = new web3.eth.Contract(dsProxy as any, proxyAddress);
       return aggregateMTAccountState(context, proxy, calls, daiAllowance, loadOrderbook);
     }),
     distinctUntilChanged(isEqual),

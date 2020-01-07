@@ -1,4 +1,4 @@
-import { bindNodeCallback, combineLatest, Observable } from 'rxjs';
+import { combineLatest, from, Observable } from 'rxjs';
 import { first, map, switchMap } from 'rxjs/internal/operators';
 import { NetworkConfig } from '../config';
 import { GasPrice$ } from '../network';
@@ -29,10 +29,9 @@ export interface TransactionDef<A> extends GasDef<A> {
 export function callCurried(context: NetworkConfig, account: string | undefined) {
   return <D, R>({ call, prepareArgs, postprocess }: CallDef<D, R>) => {
     return (args: D) => {
-      return bindNodeCallback(call(args, context).call)(
+      return from(call(args, context)(
         ...prepareArgs(args, context),
-        { from: account }
-      ).pipe(
+      ).call({ from: account })).pipe(
         map(i => (postprocess ? postprocess(i, args) : i))
       ) as Observable<R>;
     };
@@ -42,10 +41,11 @@ export function callCurried(context: NetworkConfig, account: string | undefined)
 export function estimateGasCurried(context: NetworkConfig, account: string) {
   return <D>(callData: GasDef<D>) => {
     return (args: D) => {
-      const result = bindNodeCallback(callData.call(args, context, account).estimateGas)(
+      const result = from((callData.call)(args, context, account)(
         ...callData.prepareArgs(args, context, account),
-        { from: account, ...(callData.options ? callData.options(args) : {}) },
-      ).pipe(
+      ).estimateGas({
+        from: account, ...(callData.options ? callData.options(args) : {})
+      })).pipe(
         map((e: number) => {
           return Math.floor(e * GAS_ESTIMATION_MULTIPLIER);
         }),
@@ -79,9 +79,11 @@ export function sendTransactionCurried(context: NetworkConfig, account: string) 
           descriptionIcon,
           args,
         },
-        call(args, context, account).sendTransaction,
-        ...prepareArgs(args, context, account),
-        { from: account, ...(options ? options(args) : {}) },
+        () => call(args, context, account)(
+          ...prepareArgs(args, context, account)
+        ).send(
+          { from: account, ...(options ? options(args) : {}) }
+        ),
       );
     };
   };
@@ -104,14 +106,14 @@ export function sendTransactionWithGasConstraintsCurried(context: NetworkConfig,
               descriptionIcon,
               args,
             },
-            call(args, context, account).sendTransaction,
-            ...prepareArgs(args, context, account),
-            {
+            () => call(args, context, account)(
+              ...prepareArgs(args, context, account)
+            ).send({
               from: account,
               ...(options ? options(args) : {}),
               gas,
               gasPrice,
-            },
+            }),
           );
         }),
       );

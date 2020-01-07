@@ -1,5 +1,6 @@
 import { BigNumber } from 'bignumber.js';
 import * as React from 'react';
+import * as Web3Utils from 'web3-utils';
 
 import { Operation, OperationKind } from '../../marginTrading/state/mtAccount';
 import { Money } from '../../utils/formatters/Formatters';
@@ -14,7 +15,8 @@ import { DEFAULT_GAS } from './callsHelpers';
 import { TxMetaKind } from './txMeta';
 
 export const setupMTProxy = {
-  call: (_data: {}, context: NetworkConfig) => context.instantProxyRegistry.contract.build[''],
+  call: (_data: {}, context: NetworkConfig) =>
+    context.instantProxyRegistry.contract.methods['build()'],
   prepareArgs: () => [],
   options: () => ({ gas: DEFAULT_GAS + 2000000 }), // this should be estimated as in setupProxy
   kind: TxMetaKind.setupMTProxy,
@@ -28,11 +30,11 @@ export interface ApproveData {
 
 export const approveMTProxy = {
   call: ({ token }: ApproveData, context: NetworkConfig) =>
-    context.tokens[token].contract.approve['address,uint256'],
+    context.tokens[token].contract.methods['approve(address,uint256)'],
   prepareArgs: ({ token, proxyAddress }: ApproveData, context: NetworkConfig) => {
     console.log('proxyAddress', proxyAddress,
                 'token', token,
-                context.tokens[token].contract.address);
+                context.tokens[token].contract.options.address);
     return [proxyAddress, -1];
   },
   options: () => ({ gas: DEFAULT_GAS }),
@@ -67,38 +69,40 @@ const secondsPerYear = 60 * 60 * 24 * 365;
 
 BigNumber.config({ POW_PRECISION: 100 });
 
-function mtBalancePostprocess([result]: [BigNumber[]], { tokens }: MTBalanceData): MTBalanceResult {
+function mtBalancePostprocess({ data }: { data: BigNumber[]}, { tokens }: MTBalanceData):
+MTBalanceResult {
   const balanceResult: MTBalanceResult = {};
   tokens.forEach((token: string, i: number) => {
     const row = i * BalanceOuts;
 
     balanceResult[token] = {
-      walletBalance: amountFromWei(new BigNumber(result[row]), token),
-      marginBalance: amountFromWei(new BigNumber(result[row + 1]), token),
-      urnBalance: amountFromWei(new BigNumber(result[row + 2]), token),
-      debt: amountFromWei(new BigNumber(result[row + 3]), 'DAI'),
-      dai: amountFromWei(new BigNumber(result[row + 4]), 'DAI'),
-      referencePrice: amountFromWei(new BigNumber(result[row + 5]), 'DAI'),
-      minCollRatio: amountFromWei(new BigNumber(result[row + 6]), 'ETH'),
-      allowance: new BigNumber(result[row + 7]).gte(MIN_ALLOWANCE),
-      fee: new BigNumber(result[row + 8])
+      walletBalance: amountFromWei(new BigNumber(data[row]), token),
+      marginBalance: amountFromWei(new BigNumber(data[row + 1]), token),
+      urnBalance: amountFromWei(new BigNumber(data[row + 2]), token),
+      debt: amountFromWei(new BigNumber(data[row + 3]), 'DAI'),
+      dai: amountFromWei(new BigNumber(data[row + 4]), 'DAI'),
+      referencePrice: amountFromWei(new BigNumber(data[row + 5]), 'DAI'),
+      minCollRatio: amountFromWei(new BigNumber(data[row + 6]), 'ETH'),
+      allowance: new BigNumber(data[row + 7]).gte(MIN_ALLOWANCE),
+      fee: new BigNumber(data[row + 8])
         .div(new BigNumber(10).pow(27))
         .pow(secondsPerYear)
         .minus(one),
-      liquidationPenalty: new BigNumber(result[row + 9]).div(new BigNumber(10).pow(27)),
-      minDebt: amountFromWei(new BigNumber(result[row + 10]), 'DAI')
+      liquidationPenalty: new BigNumber(data[row + 9]).div(new BigNumber(10).pow(27)),
+      minDebt: amountFromWei(new BigNumber(data[row + 10]), 'DAI')
     };
   });
   return balanceResult;
 }
 
 export const mtBalance = {
-  call: (_data: MTBalanceData, context: NetworkConfig) => context.proxyActions.contract.balance,
+  call: (_data: MTBalanceData, context: NetworkConfig) =>
+    context.proxyActions.contract.methods.balance,
   prepareArgs: ({ proxyAddress, tokens }: MTBalanceData, context: NetworkConfig) => {
     return [
       proxyAddress,
       tokens.map(token =>
-        token !== 'DAI' ? web3.fromAscii(context.mcd.ilks[token]) : token // DAI is temporary
+        token !== 'DAI' ? Web3Utils.fromAscii(context.mcd.ilks[token]) : token // DAI is temporary
       ),
       tokens.map(token => context.tokens[token].address),
       context.mcd.vat,
@@ -126,12 +130,12 @@ function argsOfPerformOperations(
   }
 
   const fundArgs = (op: Operation, token: string) => [
-    context.cdpManager, web3.fromAscii(context.mcd.ilks[op.name]),
+    context.cdpManager, Web3Utils.fromAscii(context.mcd.ilks[op.name]),
     toWei(token, (op as any).amount),
     context.tokens[token].address, context.mcd.joins[token], context.mcd.vat,
   ];
   const drawArgs = (op: Operation, token: string) => [
-    context.cdpManager, web3.fromAscii(context.mcd.ilks[op.name]),
+    context.cdpManager, Web3Utils.fromAscii(context.mcd.ilks[op.name]),
     toWei(token, (op as any).amount),
     context.mcd.joins[token], context.mcd.vat,
   ];
@@ -141,23 +145,23 @@ function argsOfPerformOperations(
       context.tokens.DAI.address, context.mcd.joins.DAI,
       context.cdpManager, context.otc.address, context.mcd.vat,
     ],
-    web3.fromAscii(context.mcd.ilks[op.name]),
+    Web3Utils.fromAscii(context.mcd.ilks[op.name]),
     toWei(op.name, (op as any).amount), toWei('DAI', (op as any).maxTotal),
   ];
 
   const types = {
     [OperationKind.fundGem]: () =>
-      context.proxyActions.contract.fundGem.getData(...fundArgs(plan[0], plan[0].name)),
+      context.proxyActions.contract.methods.fundGem(...fundArgs(plan[0], plan[0].name)).encodeABI(),
     [OperationKind.fundDai]: () =>
-      context.proxyActions.contract.fundDai.getData(...fundArgs(plan[0], 'DAI')),
+      context.proxyActions.contract.methods.fundDai(...fundArgs(plan[0], 'DAI')).encodeABI(),
     [OperationKind.drawGem]: () =>
-      context.proxyActions.contract.drawGem.getData(...drawArgs(plan[0], plan[0].name)),
+      context.proxyActions.contract.methods.drawGem(...drawArgs(plan[0], plan[0].name)).encodeABI(),
     [OperationKind.drawDai]: () =>
-      context.proxyActions.contract.drawDai.getData(...drawArgs(plan[0], 'DAI')),
+      context.proxyActions.contract.methods.drawDai(...drawArgs(plan[0], 'DAI')).encodeABI(),
     [OperationKind.buyRecursively]: () =>
-      context.proxyActions.contract.buyLev.getData(...buySellArgs(plan[0])),
+      context.proxyActions.contract.methods.buyLev(...buySellArgs(plan[0])).encodeABI(),
     [OperationKind.sellRecursively]: () =>
-      context.proxyActions.contract.sellLev.getData(...buySellArgs(plan[0])),
+      context.proxyActions.contract.methods.sellLev(...buySellArgs(plan[0])).encodeABI(),
   };
 
   if (!types[plan[0].kind]) {
@@ -178,7 +182,7 @@ interface PerformPlanData {
 const mtPerformPlan = {
   call: ({ proxy }: PerformPlanData, _context: NetworkConfig) => {
     console.log('proxyproxy', proxy);
-    return proxy.execute['address,bytes'];
+    return proxy['execute(address,bytes)'];
   },
   prepareArgs: argsOfPerformOperations,
   // options: () => ({ gas: DEFAULT_GAS * 6 }), // TODO
@@ -260,17 +264,17 @@ interface MTRedeemData {
 
 export const mtRedeem = {
   call: ({ proxy }: MTRedeemData) => {
-    return proxy.execute['address,bytes'];
+    return proxy['execute(address,bytes)'];
   },
   prepareArgs: ({ token, amount }: MTRedeemData, context: NetworkConfig) => {
     return [
       context.proxyActions.address,
-      context.proxyActions.contract.redeem.getData(
+      context.proxyActions.contract.methods.redeem(
         context.cdpManager,
-        web3.fromAscii(context.mcd.ilks[token]),
+        Web3Utils.fromAscii(context.mcd.ilks[token]),
         amountToWei(amount, token).toFixed(),
         context.mcd.joins[token]
-      ),
+      ).encodeABI(),
     ];
   },
   kind: TxMetaKind.redeem,
@@ -287,17 +291,17 @@ interface MTExportData {
 
 export const mtExport = {
   call: ({ proxyAddress }: MTExportData) => {
-    return web3.eth.contract(dsProxy as any).at(proxyAddress).execute['address,bytes'];
+    return new web3.eth.Contract(dsProxy as any, proxyAddress).methods['execute(address,bytes)'];
   },
   prepareArgs: ({ token }: MTExportData, context: NetworkConfig) => {
     return [
       context.proxyActions.address,
-      context.proxyActions.contract.export.getData(
+      context.proxyActions.contract.methods.export(
         context.cdpManager,
-        web3.fromAscii(context.mcd.ilks[token]),
+        Web3Utils.fromAscii(context.mcd.ilks[token]),
         context.mcd.vat,
         context.mcd.dssCdpManager,
-      ),
+      ).encodeABI(),
     ];
   },
   kind: TxMetaKind.export,
@@ -308,8 +312,11 @@ export const mtExport = {
 };
 
 export const osmParams = {
-  call: (_data: any, context: NetworkConfig) => context.mcd.osms[_data.token].contract.zzz,
+  call: (_data: any, context: NetworkConfig) => {
+    return context.mcd.osms[_data.token].contract.methods.zzz;
+  },
   prepareArgs: () => {
     return [];
   },
+  postprocess: (results: any, _data: any) => ({ [_data.token]: new BigNumber(results) }),
 };

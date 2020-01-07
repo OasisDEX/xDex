@@ -2,12 +2,12 @@ import { Tab } from '../../pages/Tab';
 import { Trade } from '../../pages/Trade';
 import { WalletConnection } from '../../pages/WalletConnection';
 import {
-  ACCOUNT_3_PUBLIC,
+  // ACCOUNT_3_PUBLIC,
   cypressVisitWithWeb3,
-  INSTANT_PROXY_CREATE_AND_EXECUTE_ADDRESS,
+  // INSTANT_PROXY_CREATE_AND_EXECUTE_ADDRESS,
   tid,
-  toHex,
-  verifySendTxs
+  // toHex,
+  // verifySendTxs
 } from '../../utils';
 
 const nextTrade = () => {
@@ -43,13 +43,13 @@ describe('Buying', () => {
       summary.expectProxyBeingCreated();
       summary.expectBought(willReceive, to);
       summary.expectSold(willPay, from);
-      summary.expectPriceOf(price).then(() => {
+      summary.expectPriceOf(price); /* TODO .then(() => {
         verifySendTxs([{
           from: ACCOUNT_3_PUBLIC,
           to: INSTANT_PROXY_CREATE_AND_EXECUTE_ADDRESS,
           value: toHex('374999999999999999'),
         }]);
-      });
+      });*/
     });
 
     it('with proxy', () => {

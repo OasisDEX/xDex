@@ -1,6 +1,6 @@
 import { BigNumber } from 'bignumber.js';
 import * as React from 'react';
-import { bindNodeCallback, Observable, of } from 'rxjs';
+import { from, Observable, of } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 import { OfferType } from '../../exchange/orderbook/orderbook';
 
@@ -36,7 +36,7 @@ export function weth2eth(token: string): string {
 
 export const tradePayWithETHWithProxy: TransactionDef<InstantOrderData> = {
   call: ({ proxyAddress }: InstantOrderData) => {
-    return web3.eth.contract(dsProxy as any).at(proxyAddress!).execute['address,bytes'];
+    return new web3.eth.Contract(dsProxy as any, proxyAddress!).methods['execute(address,bytes)'];
   },
   prepareArgs: (
     {
@@ -51,8 +51,8 @@ export const tradePayWithETHWithProxy: TransactionDef<InstantOrderData> = {
       buyAmount;
 
     const method = kind === OfferType.sell ?
-      context.instantProxyCreationAndExecute.contract.sellAllAmountPayEth :
-      context.instantProxyCreationAndExecute.contract.buyAllAmountPayEth;
+      context.instantProxyCreationAndExecute.contract.methods.sellAllAmountPayEth :
+      context.instantProxyCreationAndExecute.contract.methods.buyAllAmountPayEth;
 
     const params = kind === OfferType.sell ? [
       context.otc.address,
@@ -68,7 +68,7 @@ export const tradePayWithETHWithProxy: TransactionDef<InstantOrderData> = {
 
     return [
       context.instantProxyCreationAndExecute.address,
-      method.getData(...params)
+      method(...params).encodeABI()
     ];
 
   },
@@ -101,8 +101,8 @@ export const tradePayWithETHWithProxy: TransactionDef<InstantOrderData> = {
 export const tradePayWithETHNoProxy: TransactionDef<InstantOrderData> = {
   call: ({ kind }: InstantOrderData, context: NetworkConfig) => {
     return kind === OfferType.sell ?
-      context.instantProxyCreationAndExecute.contract.createAndSellAllAmountPayEth :
-      context.instantProxyCreationAndExecute.contract.createAndBuyAllAmountPayEth;
+      context.instantProxyCreationAndExecute.contract.methods.createAndSellAllAmountPayEth :
+      context.instantProxyCreationAndExecute.contract.methods.createAndBuyAllAmountPayEth;
   },
   prepareArgs: (
     {
@@ -156,7 +156,7 @@ function fixSellAmount(sellAmount: BigNumber, slippageLimit: BigNumber) {
 
 export const tradePayWithERC20: TransactionDef<InstantOrderData> = {
   call: ({ proxyAddress }: InstantOrderData) => {
-    return web3.eth.contract(dsProxy as any).at(proxyAddress!).execute['address,bytes'];
+    return new web3.eth.Contract(dsProxy as any, proxyAddress!).methods['execute(address,bytes)'];
   },
   prepareArgs: (
     {
@@ -173,12 +173,12 @@ export const tradePayWithERC20: TransactionDef<InstantOrderData> = {
 
     const method = kind === OfferType.sell ?
       buyToken === 'ETH' ?
-        context.instantProxyCreationAndExecute.contract.sellAllAmountBuyEth :
-        context.instantProxyCreationAndExecute.contract.sellAllAmount
+        context.instantProxyCreationAndExecute.contract.methods.sellAllAmountBuyEth :
+        context.instantProxyCreationAndExecute.contract.methods.sellAllAmount
       :
       buyToken === 'ETH' ?
-        context.instantProxyCreationAndExecute.contract.buyAllAmountBuyEth :
-        context.instantProxyCreationAndExecute.contract.buyAllAmount;
+        context.instantProxyCreationAndExecute.contract.methods.buyAllAmountBuyEth :
+        context.instantProxyCreationAndExecute.contract.methods.buyAllAmount;
 
     const params = kind === OfferType.sell ? [
       context.otc.address,
@@ -196,7 +196,7 @@ export const tradePayWithERC20: TransactionDef<InstantOrderData> = {
 
     return [
       context.instantProxyCreationAndExecute.address,
-      method.getData(...params)
+      method(...params).encodeABI()
     ];
   },
   options: ({
@@ -220,7 +220,7 @@ export const tradePayWithERC20: TransactionDef<InstantOrderData> = {
 
 export const migrateTradePayWithERC20: TransactionDef<InstantOrderData> = {
   call: ({ proxyAddress }: InstantOrderData) => {
-    return web3.eth.contract(dsProxy as any).at(proxyAddress!).execute['address,bytes'];
+    return new web3.eth.Contract(dsProxy as any, proxyAddress!).methods['execute(address,bytes)'];
   },
   prepareArgs: (
     {
@@ -237,12 +237,12 @@ export const migrateTradePayWithERC20: TransactionDef<InstantOrderData> = {
 
     const method = kind === OfferType.sell ?
       buyToken === 'ETH' ?
-        context.instantMigrationProxyActions.contract.sellAllAmountBuyEthAndMigrateSai :
-        context.instantMigrationProxyActions.contract.sellAllAmountAndMigrateSai
+        context.instantMigrationProxyActions.contract.methods.sellAllAmountBuyEthAndMigrateSai :
+        context.instantMigrationProxyActions.contract.methods.sellAllAmountAndMigrateSai
       :
       buyToken === 'ETH' ?
-        context.instantMigrationProxyActions.contract.buyAllAmountBuyEthAndMigrateSai :
-        context.instantMigrationProxyActions.contract.buyAllAmountAndMigrateSai;
+        context.instantMigrationProxyActions.contract.methods.buyAllAmountBuyEthAndMigrateSai :
+        context.instantMigrationProxyActions.contract.methods.buyAllAmountAndMigrateSai;
 
     const params = kind === OfferType.sell ? [
       context.otc.address,
@@ -260,11 +260,11 @@ export const migrateTradePayWithERC20: TransactionDef<InstantOrderData> = {
       context.migration
     ];
 
-    console.log('params', kind, params, method.getData(...params));
+    console.log('params', kind, params, method(...params).encodeABI());
 
     return [
       context.instantMigrationProxyActions.address,
-      method.getData(...params)
+      method(...params).encodeABI()
     ];
   },
   options: ({
@@ -293,7 +293,7 @@ export interface GetBuyAmountData {
 
 export const getBuyAmount: CallDef<GetBuyAmountData, BigNumber> = {
   call: (_: GetBuyAmountData, context: NetworkConfig) => {
-    return context.otc.contract.getBuyAmount;
+    return context.otc.contract.methods.getBuyAmount;
   },
   prepareArgs: ({ sellToken, buyToken, amount }: GetBuyAmountData, context: NetworkConfig) => {
     sellToken = eth2weth(sellToken);
@@ -304,7 +304,7 @@ export const getBuyAmount: CallDef<GetBuyAmountData, BigNumber> = {
       amountToWei(amount, sellToken).toFixed(0)
     ];
   },
-  postprocess: (result, { buyToken }) => amountFromWei(result, buyToken),
+  postprocess: (result, { buyToken }) => amountFromWei(new BigNumber(result), buyToken),
 };
 
 export interface GetPayAmountData {
@@ -315,7 +315,7 @@ export interface GetPayAmountData {
 
 export const getPayAmount: CallDef<GetPayAmountData, BigNumber> = {
   call: (_: GetPayAmountData, context: NetworkConfig) => {
-    return context.otc.contract.getPayAmount;
+    return context.otc.contract.methods.getPayAmount;
   },
   prepareArgs: ({ sellToken, buyToken, amount }: GetPayAmountData, context: NetworkConfig) => {
     sellToken = eth2weth(sellToken);
@@ -327,7 +327,7 @@ export const getPayAmount: CallDef<GetPayAmountData, BigNumber> = {
     ];
   },
   postprocess: (result: BigNumber, { sellToken }: GetPayAmountData) =>
-    amountFromWei(result, eth2weth(sellToken)),
+    amountFromWei(new BigNumber(result), eth2weth(sellToken)),
 };
 
 export interface GetOffersAmountData {
@@ -342,8 +342,8 @@ export type GetOffersAmountResult = [BigNumber, boolean];
 
 export const getOffersAmount: CallDef<GetOffersAmountData, GetOffersAmountResult> = {
   call: ({ kind }: GetOffersAmountData, context: NetworkConfig) => kind === OfferType.sell ?
-    context.otcSupportMethods.contract.getOffersAmountToSellAll :
-    context.otcSupportMethods.contract.getOffersAmountToBuyAll,
+    context.otcSupportMethods.contract.methods.getOffersAmountToSellAll :
+    context.otcSupportMethods.contract.methods.getOffersAmountToBuyAll,
   prepareArgs: (
     { kind, buyAmount, sellAmount, buyToken, sellToken }: GetOffersAmountData,
     context: NetworkConfig
@@ -371,7 +371,7 @@ export interface GetBestOfferData {
 
 export const getBestOffer: CallDef<GetBestOfferData, BigNumber> = {
   call: (_: GetBestOfferData, context: NetworkConfig) => {
-    return context.otc.contract.getBestOffer;
+    return context.otc.contract.methods.getBestOffer;
   },
   prepareArgs: ({ sellToken, buyToken }: GetBestOfferData, context: NetworkConfig) => [
     context.tokens[eth2weth(sellToken)].address,
@@ -383,7 +383,7 @@ type OffersData = BigNumber;
 
 export const offers: CallDef<OffersData, any> = {
   call: (_: OffersData, context: NetworkConfig) => {
-    return context.otc.contract.offers;
+    return context.otc.contract.methods.offers;
   },
   prepareArgs: (offerId: OffersData) => [offerId],
 };
@@ -397,19 +397,16 @@ export function proxyAddress$(
   proxyRegistryAddress?: string
 ): Observable<string | undefined> {
 
-  return bindNodeCallback(
-    (
-    proxyRegistryAddress
-      ? web3.eth.contract(proxyRegistry as any).at(proxyRegistryAddress)
-      : context.instantProxyRegistry.contract
-    ).proxies
-  )(account).pipe(
+  return from((proxyRegistryAddress
+    ? new web3.eth.Contract(proxyRegistry as any, proxyRegistryAddress).methods
+    : context.instantProxyRegistry.contract.methods
+  ).proxies(account).call()).pipe(
     mergeMap((proxyAddress: string) => {
       if (proxyAddress === nullAddress || proxyAddress === nullAddress0x) {
         return of(undefined);
       }
-      const proxy = web3.eth.contract(dsProxy as any).at(proxyAddress);
-      return bindNodeCallback(proxy.owner)().pipe(
+      const proxy = new web3.eth.Contract(dsProxy as any, proxyAddress);
+      return from(proxy.methods.owner().call()).pipe(
         mergeMap((ownerAddress: string) =>
                    ownerAddress === account ? of(proxyAddress) : of(undefined)
         )
@@ -423,7 +420,8 @@ export interface SetupProxyData {
   gasEstimation?: number;
 }
 export const setupProxy = {
-  call: (_: any, context: NetworkConfig) => context.instantProxyRegistry.contract.build[''],
+  call: (_: any, context: NetworkConfig) =>
+    context.instantProxyRegistry.contract.methods['build()'],
   prepareArgs: () => [],
   options: ({ gasPrice, gasEstimation }: SetupProxyData) =>
     ({ ...gasPrice ? gasPrice : {}, ...gasEstimation ? { gas: gasEstimation } : {} }),
@@ -438,7 +436,7 @@ export interface SetOwnerData {
 
 export const setOwner = {
   call: ({ proxyAddress }: SetOwnerData) =>
-    web3.eth.contract(dsProxy as any).at(proxyAddress).setOwner,
+    new web3.eth.Contract(dsProxy as any, proxyAddress).methods.setOwner,
   prepareArgs: ({ ownerAddress }: SetOwnerData) => [ownerAddress],
   options: () => ({ gas: 1000000 }),
   kind: TxMetaKind.setupProxy,

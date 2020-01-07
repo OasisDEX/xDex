@@ -50,7 +50,7 @@ describe('New trade', () => {
 
       TradeData.expectPriceOf(/(279\.37)/);
       TradeData.expectSlippageLimit(/5\.00%/);
-      TradeData.expectPriceImpact(/0\.22%/);
+      TradeData.expectPriceImpact(/0\.23%/);
     });
 
     it('should remove how much the user will receive if the pay value is cleared', () => {
@@ -166,7 +166,7 @@ describe('New trade', () => {
       trade.sell('ETH')
         .amount('5');
 
-      trade.expectPriceImpact(`19.28%`, true);
+      trade.expectPriceImpact(`19.29%`, true);
 
       cy.wait(500);
       makeScreenshots('price-impact-highlight');
@@ -195,7 +195,7 @@ describe('New trade', () => {
       trade.sell('ETH')
         .amount('5');
 
-      trade.expectPriceImpact(`19.28%`, true);
+      trade.expectPriceImpact(`19.29%`, true);
 
       const finalization = trade.execute();
 
@@ -231,13 +231,13 @@ describe('New trade', () => {
 
       trade.expectToReceive('1,130.00');
       trade.expectToPay('5');
-      trade.expectPriceImpact('19.28%', true);
+      trade.expectPriceImpact('19.29%', true);
 
       const finalization = trade.execute();
       finalization.shouldHavePriceImpactWarning();
       finalization.dismissPriceImpact();
 
-      trade.expectPriceImpact('19.28%', true);
+      trade.expectPriceImpact('19.29%', true);
       trade.expectToReceive('1,130.00');
       trade.expectToPay('5.000');
     });

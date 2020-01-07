@@ -1,6 +1,8 @@
 // tslint:disable:no-console
 import { BigNumber } from 'bignumber.js';
-import { bindNodeCallback, combineLatest, concat, forkJoin, interval, Observable, of } from 'rxjs';
+import {
+  bindNodeCallback, combineLatest, concat, forkJoin, from, interval, Observable, of
+} from 'rxjs';
 import { takeWhileInclusive } from 'rxjs-take-while-inclusive';
 import { ajax } from 'rxjs/ajax';
 import {
@@ -31,11 +33,11 @@ export const every5Seconds$ = interval(5000).pipe(startWith(0));
 export const every10Seconds$ = interval(10000).pipe(startWith(0));
 export const every30Seconds$ = interval(30000).pipe(startWith(0));
 
-export const version$ = web3 && bindNodeCallback(web3.version.getNode)();
+export const version$ = web3 && bindNodeCallback(web3.eth.getNodeInfo)();
 
 export const networkId$ = every3Seconds$.pipe(
   startWith(0),
-  switchMap(() => bindNodeCallback(web3.version.getNetwork)()),
+  switchMap(() => bindNodeCallback(web3.eth.net.getId)()),
   distinctUntilChanged(),
   shareReplay(1)
 );
@@ -94,6 +96,7 @@ export const etherBalance$: Observable<BigNumber> = initializedAccount$.pipe(
     onEveryBlock$.pipe(
       switchMap((): Observable<BigNumber> =>
         bindNodeCallback(web3.eth.getBalance as GetBalanceType)(address).pipe(
+          map((x: string) => new BigNumber(x)),
           map(balance => {
             return amountFromWei(balance, 'ETH');
           })
@@ -110,18 +113,14 @@ export const etherBalance$: Observable<BigNumber> = initializedAccount$.pipe(
 
 export const MIN_ALLOWANCE = new BigNumber('0xffffffffffffffffffffffffffffffff');
 
-export type Allowance = (
-  account: string,
-  contract: string,
-  callback: (err: any, r: BigNumber) => any
-) => any;
-
 export function allowance$(token: string, guy?: string): Observable<boolean> {
   return combineLatest(context$, initializedAccount$, onEveryBlock$).pipe(
     switchMap(([context, account]) =>
-      bindNodeCallback(context.tokens[token].contract.allowance as Allowance)(
-        account, guy ? guy : context.otc.address)
+      from(context.tokens[token].contract.methods.allowance(
+        account, guy ? guy : context.otc.address
+      ).call())
     ),
+    map((x: string) => new BigNumber(x)),
     map((x: BigNumber) => x.gte(MIN_ALLOWANCE)),
   );
 }
@@ -130,7 +129,8 @@ export type GasPrice$ = Observable<BigNumber>;
 
 export const gasPrice$: GasPrice$ = onEveryBlock$.pipe(
   switchMap(() => bindNodeCallback(web3.eth.getGasPrice)()),
-  map(x => x.mul(1.25)),
+  map(x => new BigNumber(x)),
+  map(x => x.multipliedBy(1.25)),
   distinctUntilChanged((x: BigNumber, y: BigNumber) => x.eq(y)),
   shareReplay(1),
 );
@@ -171,12 +171,12 @@ export const tokenPricesInUSD$: Observable<Ticker> = onEveryBlock$.pipe(
 );
 
 export const etherPriceUsd$: Observable<BigNumber> = concat(
-  context$.pipe(
-    filter(context => !!context),
-    first(),
-    switchMap(context => bindNodeCallback(context.ethPip.contract.read)()),
-    map((value: string) => new BigNumber(value).div(new BigNumber(10).pow(18))),
-  ),
+  // context$.pipe(
+  //   filter(context => !!context),
+  //   first(),
+  //   switchMap(context => from(context.ethPip.contract.methods.read().call())),
+  //   map((value: string) => new BigNumber(value).div(new BigNumber(10).pow(18))),
+  // ),
   onEveryBlock$.pipe(
     switchMap(() => ajax({
       url: 'https://api.coinpaprika.com/v1/tickers/eth-ethereum/',

@@ -239,7 +239,7 @@ const load = memoize(
   (abi: any, address: string) => {
     return {
       address,
-      contract: web3.eth.contract(abi).at(address)
+      contract: new web3.eth.Contract(abi, address)
     };
   },
   (_abi: any, address: string) => address
@@ -413,10 +413,10 @@ const kovan: NetworkConfig = {
         return load(mcdOsm, '0x5c40c9eb35c76069fa4c3a00ea59fac6ffa9c113');
       },
       get REP() {
-        return load(mcdOsm, '0xffffffffffffffffffffffffffffffffffffffff');
+        return load(mcdOsm, '0x5c40c9eb35c76069fa4c3a00ea59fac6ffa9c113');
       },
       get ZRX() {
-        return load(mcdOsm, '0xffffffffffffffffffffffffffffffffffffffff');
+        return load(mcdOsm, '0x5c40c9eb35c76069fa4c3a00ea59fac6ffa9c113');
       },
     },
   } as { [key: string]: any },

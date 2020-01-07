@@ -2,14 +2,14 @@
 
 import { BigNumber } from 'bignumber.js';
 import { isEqual } from 'lodash';
-import { bindNodeCallback, combineLatest, forkJoin, Observable, of } from 'rxjs';
+import { combineLatest, forkJoin, from, Observable, of } from 'rxjs';
 import {
   concatAll,
   distinctUntilChanged,
   first,
   last,
   map,
-  scan, shareReplay, switchMap
+  scan, shareReplay, switchMap,
 } from 'rxjs/operators';
 import { Calls$ } from '../blockchain/calls/calls';
 
@@ -35,8 +35,6 @@ export interface DustLimits {
   [token: string]: BigNumber;
 }
 
-type BalanceOf = (account: string, callback: (err: any, r: BigNumber) => any) => any;
-
 export function balance$(
   context: NetworkConfig,
   token: string,
@@ -48,9 +46,8 @@ export function balance$(
       first(),
     );
   }
-  return bindNodeCallback(context.tokens[token].contract.balanceOf as BalanceOf)(
-    account
-  ).pipe(
+  return from(context.tokens[token].contract.methods.balanceOf(account).call()).pipe(
+    map((x: string) => new BigNumber(x)),
     map(balance => {
       return amountFromWei(balance, token);
     }),
@@ -163,16 +160,15 @@ export function  createTokenBalances$(
   );
 }
 
-type Dust = (token: string, callback: (err: any, r: BigNumber) => any) => any;
-
 export function createDustLimits$(context$: Observable<NetworkConfig>): Observable<DustLimits> {
   return combineLatest(context$).pipe(
     switchMap(([context]) =>
                 forkJoin(
                   tradingTokens.filter(name => name !== 'ETH').map((token: string) => {
-                    return bindNodeCallback(context.otc.contract.getMinSell as Dust)(
+                    return from(context.otc.contract.methods.getMinSell(
                       context.tokens[token].address
-                    ).pipe(
+                    ).call()).pipe(
+                      map((x: string) => new BigNumber(x)),
                       map(dustLimit => ({
                         [token]: amountFromWei(dustLimit, token)
                       }))
@@ -185,12 +181,6 @@ export function createDustLimits$(context$: Observable<NetworkConfig>): Observab
   );
 }
 
-type Allowance = (
-  account: string,
-  contract: string,
-  callback: (err: any, r: BigNumber) => any
-) => any;
-
 export function createAllowances$(
   context$: Observable<NetworkConfig>,
   initializedAccount$: Observable<string>,
@@ -202,9 +192,10 @@ export function createAllowances$(
                   tradingTokens
                     .filter(token => token !== 'ETH')
                     .map((token: string) =>
-                           bindNodeCallback(context.tokens[token].contract.allowance as Allowance)(
+                           from(context.tokens[token].contract.methods.allowance(
                              account, context.otc.address
-                           ).pipe(
+                           ).call()).pipe(
+                             map((balance: string) => new BigNumber(balance)),
                              map((x: BigNumber) => ({ [token]: x.gte(MIN_ALLOWANCE) }))
                            )
                     )
@@ -227,9 +218,10 @@ export function createProxyAllowances$(
                     .filter(token => token !== 'ETH')
                     .map((token: string) =>
                       proxy ?
-                        bindNodeCallback(context.tokens[token].contract.allowance as Allowance)(
+                        from(context.tokens[token].contract.methods.allowance(
                           account, proxy
-                        ).pipe(
+                        ).call()).pipe(
+                          map((balance: string) => new BigNumber(balance)),
                           map((x: BigNumber) => ({ [token]: x.gte(MIN_ALLOWANCE) }))
                         )
                       :

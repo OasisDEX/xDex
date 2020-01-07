@@ -21,9 +21,10 @@ export interface CancelData {
 }
 
 export const cancelOffer: TransactionDef<CancelData> = {
-  call: (_data: CancelData, context: NetworkConfig) => context.otc.contract.cancel.uint256,
+  call: (_data: CancelData, context: NetworkConfig) =>
+    context.otc.contract.methods['cancel(uint256)'],
   prepareArgs: ({ offerId }: CancelData) => [
-    offerId
+    offerId.toFixed()
   ],
   options: () => ({ gas: 500000 }),
   kind: TxMetaKind.cancel,
@@ -52,7 +53,7 @@ export interface OfferMakeData {
 export const offerMake: TransactionDef<OfferMakeData> = {
   call: (data: OfferMakeData, context: NetworkConfig) => {
     if (data.matchType === OfferMatchType.limitOrder) {
-      return context.otc.contract.offer['uint256,address,uint256,address,uint256,bool'];
+      return context.otc.contract.methods['offer(uint256,address,uint256,address,uint256,bool)'];
     }
     throw new Error('should not be here');
   },
@@ -62,7 +63,7 @@ export const offerMake: TransactionDef<OfferMakeData> = {
   ) => [
     amountToWei(sellAmount, sellToken).toFixed(0), context.tokens[sellToken].address,
     amountToWei(buyAmount, buyToken).toFixed(0), context.tokens[buyToken].address,
-    ...matchType === OfferMatchType.limitOrder ? [position || 0] : [],
+    ...matchType === OfferMatchType.limitOrder ? [position ? position.toFixed() : 0] : [],
     true,
   ],
   options: ({ gasPrice, gasEstimation }: OfferMakeData) => ({
@@ -96,8 +97,8 @@ export interface OfferMakeDirectData {
 
 export const offerMakeDirect: TransactionDef<OfferMakeDirectData> = {
   call: ({ kind }: OfferMakeDirectData, context: NetworkConfig) => kind === OfferType.buy ?
-    context.otc.contract.buyAllAmount['address,uint256,address,uint256'] :
-    context.otc.contract.sellAllAmount['address,uint256,address,uint256'],
+    context.otc.contract.methods['buyAllAmount(address,uint256,address,uint256)'] :
+    context.otc.contract.methods['sellAllAmount(address,uint256,address,uint256)'],
   prepareArgs: (
     { baseAmount, baseToken, quoteAmount, quoteToken }: OfferMakeDirectData,
     context: NetworkConfig

@@ -1,6 +1,8 @@
 import * as _ from 'lodash';
 import { fromPairs } from 'ramda';
-import { bindNodeCallback, combineLatest, Observable, of, Subject, timer } from 'rxjs';
+import {
+  bindNodeCallback, combineLatest, fromEvent, merge, Observable, of, Subject, timer,
+} from 'rxjs';
 import { takeWhileInclusive } from 'rxjs-take-while-inclusive';
 import { ajax } from 'rxjs/ajax';
 import {
@@ -117,7 +119,13 @@ type NodeCallback<I, R> = (
   callback: (err: any, r: R) => any,
 ) => any;
 
-type GetTransactionReceipt = NodeCallback<string, { blockNumber: number, transactionHash: string }>;
+interface TransactionReceiptLike {
+  transactionHash: string;
+  status: boolean;
+  blockNumber: number;
+}
+
+type GetTransactionReceipt = NodeCallback<string, TransactionReceiptLike>;
 
 interface TransactionLike {
   hash: string;
@@ -149,8 +157,7 @@ export function send(
   account: string,
   networkId: string,
   meta: any,
-  method: (...args: any[]) => string, // Any contract method
-  ...args: any[]
+  method: (...args: any[]) => any, // Any contract method
 ): Observable<TxState> {
   const common = {
     account,
@@ -162,11 +169,11 @@ export function send(
   };
 
   function successOrFailure(
-    txHash: string, receipt: any, rebroadcast: TxRebroadcastStatus | undefined
+    txHash: string, receipt: TransactionReceiptLike, rebroadcast: TxRebroadcastStatus | undefined
   ): Observable<TxState> {
     const end = new Date();
 
-    if (receipt.status !== '0x1') {
+    if (!receipt.status) {
       // TODO: failure should be confirmed!
       return of({
         ...common,
@@ -201,8 +208,13 @@ export function send(
     );
   }
 
-  const result: Observable<TxState> = bindNodeCallback(method)(...args).pipe(
+  const promiEvent = method();
+  const result: Observable<TxState> = merge(
+    fromEvent(promiEvent, 'transactionHash'),
+    promiEvent,
+  ).pipe(
     map((txHash: string) => [txHash, new Date()]),
+    first(),
     mergeMap(([txHash, broadcastedAt]: [string, Date]) =>
       timer(0, 1000).pipe(
         switchMap(() => bindNodeCallback(web3.eth.getTransaction as GetTransaction)(txHash)),

@@ -1,6 +1,6 @@
 import { BigNumber } from 'bignumber.js';
-import { isEmpty, uniqBy, unzip } from 'lodash';
-import { bindNodeCallback, combineLatest, Observable, of, zip } from 'rxjs';
+import { at, isEmpty, uniqBy, unzip } from 'lodash';
+import { combineLatest, from, Observable, of, zip } from 'rxjs';
 import { expand, map, reduce, retryWhen, scan, shareReplay, switchMap } from 'rxjs/operators';
 import { NetworkConfig } from '../../blockchain/config';
 import { amountFromWei } from '../../blockchain/utils';
@@ -37,16 +37,16 @@ class InconsistentLoadingError extends Error {
 
 function parseOffers(sellToken: string, buyToken: string, type: OfferType, firstPage: boolean) {
   return (data: any[][]): { lastOfferId: BigNumber, offers: Offer[] } => {
-    if (!firstPage && data[0][0].isZero()) {
+    if (!firstPage && data[0][0] === '0') {
       throw new InconsistentLoadingError('empty orderbook page loaded');
     }
     return {
-      lastOfferId: data[0][data[0].length - 1] as BigNumber,
-      offers: unzip(data)
-        .filter(([id]) => !(id as BigNumber).eq(0))
+      lastOfferId: new BigNumber(data[0][data[0].length - 1]),
+      offers: unzip(at(data, 'ids', 'payAmts', 'buyAmts', 'owners', 'timestamps'))
+        .filter(([id]) => id !== '0')
         .map(([offerId, sellAmt, buyAmt, ownerId, timestamp]) => {
-          const sellAmount = amountFromWei(sellAmt as BigNumber, sellToken);
-          const buyAmount = amountFromWei(buyAmt as BigNumber, buyToken);
+          const sellAmount = amountFromWei(new BigNumber(sellAmt), sellToken);
+          const buyAmount = amountFromWei(new BigNumber(buyAmt), buyToken);
           return {
             ...type === 'sell' ?
               {
@@ -64,9 +64,9 @@ function parseOffers(sellToken: string, buyToken: string, type: OfferType, first
                 quoteToken: sellToken,
               }, ...{
                 type,
-                offerId: offerId as BigNumber,
+                offerId: new BigNumber(offerId),
                 ownerId: ownerId as string,
-                timestamp: new Date(1000 * (timestamp as BigNumber).toNumber())
+                timestamp: new Date(1000 * Number(timestamp)),
               }
           } as Offer;
         })
@@ -74,38 +74,24 @@ function parseOffers(sellToken: string, buyToken: string, type: OfferType, first
   };
 }
 
-type GetOffersFirst = (
-  address: string, sellToken: string, buyToken: string,
-  callback: (err: any, r: any) => any
-) => any;
-
-type GetOffersNext = (
-  address: string, lastOfferId: string,
-  callback: (err: any, r: any) => any
-) => any;
-
 function loadOffersAllAtOnce(
   context: NetworkConfig,
   sellToken: string,
   buyToken: string,
   type: OfferType
 ): Observable<Offer[]> {
-  return bindNodeCallback(
-    context.otcSupportMethods.contract.getOffers as GetOffersFirst
-  )(
+  return from(context.otcSupportMethods.contract.methods['getOffers(address,address,address)'](
     context.otc.address,
     context.tokens[sellToken].address,
-    context.tokens[buyToken].address
-  ).pipe(
+    context.tokens[buyToken].address,
+  ).call()).pipe(
     map(parseOffers(sellToken, buyToken, type, true)),
-    expand(({ lastOfferId }) => lastOfferId.isZero() ?
+    expand<{ lastOfferId: BigNumber; offers: Offer[] }>(({ lastOfferId }) => lastOfferId.isZero() ?
       of() :
-      bindNodeCallback(
-        context.otcSupportMethods.contract.getOffers['address,uint256'] as GetOffersNext
-      )(
+      from(context.otcSupportMethods.contract.methods['getOffers(address,uint256)'](
         context.otc.address,
         lastOfferId.toString(),
-      ).pipe(
+      ).call()).pipe(
         map(parseOffers(sellToken, buyToken, type, false)),
       )
     ),

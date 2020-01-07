@@ -16,21 +16,18 @@ export interface SwapData {
   gasPrice?: BigNumber;
 }
 
-const execute = (proxyAddress: string) => web3.eth.contract(dsProxy as any)
-  .at(proxyAddress)
-  .execute['address,bytes'];
+const execute = (proxyAddress: string) => new web3.eth.Contract(dsProxy as any, proxyAddress)
+  .methods['execute(address,bytes)'];
 
 export const swapSaiToDai: TransactionDef<SwapData> = {
   call: ({ proxyAddress }: SwapData) => execute(proxyAddress),
   prepareArgs: ({ amount }: SwapData, context: NetworkConfig) => [
     context.migrationProxyActions,
-    web3.eth.contract(migrationProxyActions as any)
-      .at(context.migrationProxyActions)
-      .swapSaiToDai
-      .getData(
+    new web3.eth.Contract(migrationProxyActions as any, context.migrationProxyActions).methods
+      .swapSaiToDai(
         context.migration,
         amountToWei(amount, 'SAI').toFixed(0)
-      )
+      ).encodeABI()
   ],
   kind: TxMetaKind.swapDai,
   options: () => ({ gas: 5000000 }),
@@ -43,13 +40,11 @@ export const swapDaiToSai: TransactionDef<SwapData> = {
   call: ({ proxyAddress }: SwapData) => execute(proxyAddress),
   prepareArgs: ({ amount }: SwapData, context: NetworkConfig) => [
     context.migrationProxyActions,
-    web3.eth.contract(migrationProxyActions as any)
-      .at(context.migrationProxyActions)
-      .swapDaiToSai
-      .getData(
+    new web3.eth.Contract(migrationProxyActions as any, context.migrationProxyActions).methods
+      .swapDaiToSai(
         context.migration,
         amountToWei(amount, 'DAI').toFixed(0)
-      )
+      ).encodeABI()
   ],
   kind: TxMetaKind.swapSai,
   options: () => ({ gas: 5000000 }),

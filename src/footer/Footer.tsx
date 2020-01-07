@@ -1,8 +1,7 @@
-import { BigNumber } from 'bignumber.js';
 import * as moment from 'moment';
 import * as React from 'react';
 import { default as MediaQuery } from 'react-responsive';
-import { bindNodeCallback, Observable } from 'rxjs';
+import { from, Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { NetworkConfig } from '../blockchain/config';
 import { Github, Reddit, RocketChat } from '../utils/icons/SocialIcons';
@@ -146,20 +145,18 @@ export class TheFooter extends React.Component<FooterProps> {
   }
 }
 
-type CloseTimeType = (callback: (err: any, r: BigNumber) => any) => any;
-
 export function createFooter$(context$: Observable<NetworkConfig>): Observable<FooterProps> {
   return context$.pipe(
     switchMap(context =>
-      loadablifyLight(
-        bindNodeCallback(context.otc.contract.close_time as CloseTimeType)().pipe(
-          map(closeTime => moment.unix(closeTime.toNumber()).toDate())
+      loadablifyLight<Date>(
+        from(context.otc.contract.methods.close_time().call()).pipe(
+          map((closeTime: string) => moment.unix(Number(closeTime)).toDate()),
         )
       ).pipe(
-        map((expirationDate) => ({
+        map(expirationDate => ({
           expirationDate,
           etherscan: context.etherscan,
-          address: context.otc.contract.address as string,
+          address: context.otc.contract.options.address as string,
         }))
       )
     ),

@@ -14,7 +14,7 @@ export interface WrapUnwrapData {
 
 export const wrap: TransactionDef<WrapUnwrapData> = {
   call: (_: WrapUnwrapData, context: NetworkConfig) =>
-    context.tokens.WETH.contract.deposit,
+    context.tokens.WETH.contract.methods.deposit,
   options: ({ amount, gasPrice, gas }: WrapUnwrapData) => ({
     gas,
     gasPrice: gasPrice.toString(),
@@ -31,7 +31,7 @@ export const wrap: TransactionDef<WrapUnwrapData> = {
 
 export const unwrap: TransactionDef<WrapUnwrapData> = {
   call: (_: WrapUnwrapData, context: NetworkConfig) =>
-    context.tokens.WETH.contract.withdraw,
+    context.tokens.WETH.contract.methods.withdraw,
   options: ({ gasPrice, gas }) => ({ gas, gasPrice: gasPrice.toString() }),
   kind: TxMetaKind.unwrap,
   prepareArgs: ({ amount }: WrapUnwrapData) =>
