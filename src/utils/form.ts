@@ -424,6 +424,7 @@ export function doGasEstimation<S extends HasGasEstimation>(
         ...stateWithoutGasEstimation
       } = state as object;
 
+      // @ts-ignore
       const gasCall = call(calls, readCalls, state);
       const gasPrice = state.gasPrice;
       const etherPriceUsd = state.etherPriceUsd;

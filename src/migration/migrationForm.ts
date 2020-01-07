@@ -251,7 +251,7 @@ export function createMigrationForm$(
         environmentChange$,
         proceedProgressChange$
       ).pipe(
-        scan(applyChange, initialState),
+        scan<any>(applyChange, initialState),
         map(validate),
         map(checkIfIsReadyToProceed),
         scan(freezeIfInProgress),

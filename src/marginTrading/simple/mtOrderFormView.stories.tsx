@@ -14,7 +14,7 @@ import { MTAccount } from '../state/mtAccount';
 import { calculateMarginable } from '../state/mtCalculate';
 import { getMarginableCore, getMTAccount } from '../state/mtTestUtils';
 import {
-  createMTSimpleOrderForm$, MTSimpleOrderFormParams
+  createMTSimpleOrderForm$, MTSimpleFormState, MTSimpleOrderFormParams
 } from './mtOrderForm';
 import { MtSimpleOrderFormView } from './mtOrderFormView';
 
@@ -115,7 +115,7 @@ stories.add('Sell', () => {
     state.change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber('1') });
   });
 
-  const Case1 = connect(MtSimpleOrderFormView, controller1);
+  const Case1 = connect<MTSimpleFormState, {}>(MtSimpleOrderFormView, controller1);
 
   const controller2 = controllerWithFakeOrderBook(
     buy_orders, sell_orders, mta, OfferType.sell, { base: 'WETH', quote: 'DAI' }
@@ -125,7 +125,7 @@ stories.add('Sell', () => {
     state.change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber('0.4') });
   });
 
-  const Case2 = connect(MtSimpleOrderFormView, controller2);
+  const Case2 = connect<MTSimpleFormState, {}>(MtSimpleOrderFormView, controller2);
 
   return <>
     <Case1/>

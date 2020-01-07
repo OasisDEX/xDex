@@ -237,8 +237,8 @@ export class OfferMakeForm extends React.Component<OfferFormState> {
           this.props.user && this.props.user.account && (
             <theAppContext.Consumer>
               {({ SAI2DAIMigrationTxRx }) =>
-                // @ts-ignore
                 <SAI2DAIMigrationTxRx
+                  // @ts-ignore
                   label={'Start Dai Migration'}
                   className={styles.migrateButton}
                   tid="update-btn-market"

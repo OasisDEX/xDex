@@ -10,7 +10,7 @@ import { Loadable, loadablifyLight } from '../utils/loadable';
 import { WithLoadingIndicatorInline } from '../utils/loadingIndicator/LoadingIndicator';
 import * as styles from './Footer.scss';
 
-interface FooterProps {
+export interface FooterProps {
   etherscan: any;
   address: string;
   expirationDate: Loadable<Date>;

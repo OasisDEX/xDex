@@ -14,10 +14,12 @@ import * as styles from './TransactionNotifier.scss';
 
 const VISIBILITY_TIMEOUT: number = 5;
 
-export class TransactionNotifierView extends React.Component<{
+export interface TransactionNotifierPros{
   transactions: TxState[];
   etherscan: { url: string, apiUrl: string, apiKey: string };
-}> {
+}
+
+export class TransactionNotifierView extends React.Component<TransactionNotifierPros> {
   public render() {
     const now = new Date().getTime();
     return (
