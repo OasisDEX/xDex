@@ -151,7 +151,6 @@ export function aggregateMTAccountState(
             osmPriceNext: (osmPrices as any)[token].next,
             zzz: (osmParams as any)[token] as BigNumber,
             rawHistory: rawHistories[token].sort((h1, h2) => h1.timestamp - h2.timestamp),
-            minDebt: balanceResult[token].minDebt,
             liquidationPenalty: balanceResult[token].liquidationPenalty
           });
         });

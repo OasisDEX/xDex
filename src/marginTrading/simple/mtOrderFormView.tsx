@@ -8,7 +8,12 @@ import { OfferType } from '../../exchange/orderbook/orderbook';
 import { ApproximateInputValue } from '../../utils/Approximate';
 import { BigNumberInput, lessThanOrEqual } from '../../utils/bigNumberInput/BigNumberInput';
 import { FormChangeKind } from '../../utils/form';
-import { formatAmount, formatPrecision, formatPrice } from '../../utils/formatters/format';
+import {
+  formatAmount,
+  formatLiqPenaltyPercent,
+  formatPrecision,
+  formatPrice
+} from '../../utils/formatters/format';
 import { FormatPercent, Money } from '../../utils/formatters/Formatters';
 import { Button, ButtonGroup } from '../../utils/forms/Buttons';
 import { ErrorMessage } from '../../utils/forms/ErrorMessage';
@@ -348,7 +353,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
     return (
       <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
         <div className={styles.orderSummaryLabel}>
-          Liqu. price
+          Liq. price
         </div>
         <div className={classnames(styles.orderSummaryValue, styles.orderSummaryValuePositive)}>
           {
@@ -494,11 +499,12 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
 
     const { liquidationPenalty } = baseTokenAsset;
 
-    const liquidationPenalityPercent = liquidationPenalty.gt(zero) ?
-      liquidationPenalty.minus(1).times(100) : zero;
+    const liquidationPenaltyPercent = formatLiqPenaltyPercent(liquidationPenalty);
 
-    const leverageDisplay = leverage ?
-      leverage : leveragePost ? zero : minusOne;
+    const leverageDisplay = leverage
+                            ? leverage
+                            : leveragePost
+                              ? zero : minusOne;
     return (
       <div className={styles.InfoRow}>
         <div className={styles.InfoBox}>
@@ -522,10 +528,10 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
           </div>
         </div>
         <div className={styles.InfoBox}>
-          <div className={styles.InfoRowLabel}>Liqu. Penality</div>
+          <div className={styles.InfoRowLabel}>Liq. Penalty</div>
           <div>
             <FormatPercent
-              value={liquidationPenalityPercent}
+              value={liquidationPenaltyPercent}
               fallback="-"
               multiply={false}
             />

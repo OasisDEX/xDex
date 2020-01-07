@@ -2,6 +2,7 @@ import { BigNumber } from 'bignumber.js';
 import * as moment from 'moment';
 
 import { getToken } from '../../blockchain/config';
+import { zero } from '../zero';
 
 BigNumber.config({
   FORMAT: {
@@ -50,4 +51,8 @@ export function formatPercent(number: BigNumber, { precision = 0, plus = false }
 
 export function formatDateTime(time: Date, showMs?: boolean): string {
   return moment(time).format(showMs ? 'DD.MM HH:mm:ss' : 'DD.MM HH:mm');
+}
+
+export function formatLiqPenaltyPercent(value: BigNumber) {
+  return value.gt(zero) ? value.minus(1).times(100) : zero;
 }

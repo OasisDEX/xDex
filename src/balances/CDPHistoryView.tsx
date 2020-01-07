@@ -63,7 +63,7 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
                   <span className={styles.headerDark}>Debt</span> DAI
                 </th>
                 <th>
-                  <span className={styles.headerDark}>Liqu. Price</span> USD
+                  <span className={styles.headerDark}>Liq. Price</span> USD
                 </th>
                 <th>
                   TIME
