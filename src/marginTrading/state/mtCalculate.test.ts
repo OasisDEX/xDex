@@ -1,7 +1,7 @@
 import { BigNumber } from 'bignumber.js';
 
 import { setupFakeWeb3ForTesting } from '../../blockchain/web3';
-import {fakeOrderbook} from '../../exchange/depthChart/depthchart.test';
+import { fakeOrderbook } from '../../exchange/depthChart/depthchart.test';
 setupFakeWeb3ForTesting();
 
 import { Orderbook } from '../../exchange/orderbook/orderbook';
@@ -218,10 +218,13 @@ describe('Is position sellable', () => {
 
   test('Avg debt, prices match', () => {
 
-    const ma = calculateMarginable({
-      ...weth2,
-      debt: new BigNumber('150')
-    }, fakeOrderbook);
+    const ma = calculateMarginable(
+      {
+        ...weth2,
+        debt: new BigNumber('150')
+      },
+      fakeOrderbook
+    );
 
     const [result] = sellable(ma, sellOffers, one);
 
@@ -230,10 +233,13 @@ describe('Is position sellable', () => {
 
   test('Large debt, prices match', () => {
 
-    const ma = calculateMarginable({
-      ...weth2,
-      debt: new BigNumber('199')
-    }, fakeOrderbook);
+    const ma = calculateMarginable(
+      {
+        ...weth2,
+        debt: new BigNumber('199')
+      },
+      fakeOrderbook
+    );
 
     const [result] = sellable(ma, sellOffers, one);
 
@@ -242,14 +248,36 @@ describe('Is position sellable', () => {
 
   test('Avg debt, prices match', () => {
 
-    const ma = calculateMarginable({
-      ...weth2,
-      debt: new BigNumber('300'),
-      referencePrice: new BigNumber('600')
-    }, fakeOrderbook);
+    const ma = calculateMarginable(
+      {
+        ...weth2,
+        debt: new BigNumber('300'),
+        referencePrice: new BigNumber('600')
+      },
+      fakeOrderbook
+    );
 
     const [result] = sellable(ma, sellOffers, one);
 
     expect(result).toBeFalsy();
   });
+
+  test('Can\'t jump over dust', () => {
+    const ma = calculateMarginable(
+      getMarginableCore({
+        name: 'WETH',
+        referencePrice: new BigNumber('300'),
+        minCollRatio: new BigNumber('1.5'),
+        safeCollRatio: new BigNumber('2'),
+        balance: new BigNumber('0.11'),
+        debt: new BigNumber('21'),
+      }),
+      fakeOrderbook
+    );
+
+    const [result, , message] = sellable(ma, sellOffers, one);
+    expect(result).toBeFalsy();
+    expect(message).toEqual('Can\'t jump over dust');
+  });
+
 });
