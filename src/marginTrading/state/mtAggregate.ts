@@ -138,7 +138,6 @@ export function aggregateMTAccountState(
         orderbooks$(assetNames, loadOrderbook)
       ).pipe(
     map(([balanceResult, rawHistories, osmPrices, osmParams, orderbooks]) => {
-
       const marginables = assetNames
         .filter(token => getToken(token).assetKind === AssetKind.marginable)
         .map(token => {
@@ -152,7 +151,7 @@ export function aggregateMTAccountState(
             osmPriceNext: (osmPrices as any)[token].next,
             zzz: (osmParams as any)[token] as BigNumber,
             rawHistory: rawHistories[token].sort((h1, h2) => h1.timestamp - h2.timestamp),
-            minDebt: new BigNumber(20) // todo: take this value from mt balance
+            liquidationPenalty: balanceResult[token].liquidationPenalty
           });
         });
       return calculateMTAccount(proxy, marginables, daiAllowance, orderbooks);

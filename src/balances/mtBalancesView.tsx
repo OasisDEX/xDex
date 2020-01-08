@@ -104,7 +104,7 @@ export class MTBalancesViewInternal
           <th>Asset</th>
           <th className={styles.amount}>Interest Rate</th>
           <th className={styles.amount}>Market Price</th>
-          <th className={styles.amount}>Liqu. Price</th>
+          <th className={styles.amount}>Liq. Price</th>
           <th className={styles.amount}>PnL</th>
           <th className={styles.amount}>Your Balance</th>
         </tr>

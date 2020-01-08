@@ -79,13 +79,13 @@ export class MTMyPositionView extends
   public render() {
 
     const { ma, mta } = this.props;
+    const { liquidationPenalty } = ma;
     const leverage = ma.leverage ? ma.leverage : ma.balance.gt(zero) ? one : zero;
     const liquidationPrice = ma.liquidationPrice ? ma.liquidationPrice : zero;
 
     return (
       <div>
         <div className={styles.MTPositionPanel}>
-
           <div className={styles.MTPositionColumn}>
             <div className={styles.summaryRow}>
               <div className={styles.summaryLabel}>
@@ -95,7 +95,6 @@ export class MTMyPositionView extends
                 Long - { formatPrecision(leverage, 1) }x
               </div>
             </div>
-
             <div className={styles.summaryRow}>
               <div className={styles.summaryLabel}>
                 Stability Fee
@@ -113,7 +112,11 @@ export class MTMyPositionView extends
                 Liquidation Penalty
               </div>
               <div className={styles.summaryValue}>
-                0
+                <FormatPercent
+                  value={liquidationPenalty}
+                  fallback="-"
+                  multiply={false}
+                />
               </div>
             </div>
           </div>

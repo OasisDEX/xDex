@@ -8,7 +8,11 @@ import { OfferType } from '../../exchange/orderbook/orderbook';
 import { ApproximateInputValue } from '../../utils/Approximate';
 import { BigNumberInput, lessThanOrEqual } from '../../utils/bigNumberInput/BigNumberInput';
 import { FormChangeKind } from '../../utils/form';
-import { formatAmount, formatPrecision, formatPrice } from '../../utils/formatters/format';
+import {
+  formatAmount,
+  formatPrecision,
+  formatPrice
+} from '../../utils/formatters/format';
 import { FormatPercent, Money } from '../../utils/formatters/Formatters';
 import { Button, ButtonGroup } from '../../utils/forms/Buttons';
 import { ErrorMessage } from '../../utils/forms/ErrorMessage';
@@ -348,7 +352,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
     return (
       <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
         <div className={styles.orderSummaryLabel}>
-          Liqu. price
+          Liq. price
         </div>
         <div className={classnames(styles.orderSummaryValue, styles.orderSummaryValuePositive)}>
           {
@@ -485,17 +489,26 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
   }
 
   private feesBox() {
-    const leverage = this.props.leverage ?
-      this.props.leverage :
-      this.props.leveragePost ? zero : minusOne;
+    const { leverage, leveragePost, baseToken, mta } = this.props;
+    const baseTokenAsset = findMarginableAsset(baseToken, mta);
+
+    if (!baseTokenAsset) {
+      return;
+    }
+
+    const { liquidationPenalty } = baseTokenAsset;
+    const leverageDisplay = leverage
+                            ? leverage
+                            : leveragePost
+                              ? zero : minusOne;
     return (
       <div className={styles.InfoRow}>
         <div className={styles.InfoBox}>
           <div className={styles.InfoRowLabel}>Leverage</div>
           <div>
             {
-              leverage.gte(zero) ?
-                <>{ formatPrecision(leverage, 1) }x</>
+              leverageDisplay.gte(zero) ?
+                <>{ formatPrecision(leverageDisplay, 1) }x</>
                 : <span>-</span>
             }
             { this.props.leveragePost &&
@@ -511,8 +524,14 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
           </div>
         </div>
         <div className={styles.InfoBox}>
-          <div className={styles.InfoRowLabel}>Liqu. Fee</div>
-          <div>15 %</div>
+          <div className={styles.InfoRowLabel}>Liq. Penalty</div>
+          <div>
+            <FormatPercent
+              value={liquidationPenalty}
+              fallback="-"
+              multiply={false}
+            />
+          </div>
         </div>
         <div className={styles.InfoBox}>
           <div className={styles.InfoRowLabel}>Interest Rate</div>
