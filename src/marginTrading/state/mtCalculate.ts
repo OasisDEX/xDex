@@ -62,26 +62,35 @@ export function sellable(
   ma: MarginableAsset,
   offers: Offer[],
   amount: BigNumber
-): [boolean, any, BigNumber] {
+): [boolean, any, BigNumber, string?] {
+
   let { balance, debt, dai } = ma;
   const { minCollRatio, referencePrice } = ma;
   let i = 0;
   const maxI = 10;
   const log = [];
+
+  const dust = new BigNumber('20');
+
   while (amount.gt(zero) && i < maxI) {
 
-    // payback dai debt with cash
-    const dDebt = BigNumber.min(dai, debt);
+    // payback dai debt with cash, take care of dust limit
+    // debt - dDebt >= dust || debt - dDebt === 0
+    const dDebt = dai.gte(debt) ? debt : BigNumber.min(dai, debt.minus(dust));
+
+    if (dDebt.eq(zero) && dai.gt(zero)) {
+      return [false, log, amount, 'Can\'t jump over dust'];
+    }
+
     debt = debt.minus(dDebt);
     dai = dai.minus(dDebt);
 
     // take out max coll
     // (balance - dBalance) * referencePrice / debt = minCollRatio
     // dBalance = balance - minCollRatio * debt / referencePrice;
-
     const dBalance = balance.minus(minCollRatio.times(debt).div(referencePrice));
     if (dBalance.lte(zero)) {
-      return [false, log, amount];
+      return [false, log, amount, 'Can\'t free collateral'];
     }
 
     // sell coll, increase sold and cash
@@ -96,7 +105,7 @@ export function sellable(
     i += 1;
   }
 
-  return [amount.lte(zero) && i < maxI, log, amount];
+  return [amount.eq(zero) && i < maxI, log, amount, 'Too many iterations'];
 }
 
 function findAuctionBite(rawHistory: RawMTHistoryEvent[], auctionId: number) {
