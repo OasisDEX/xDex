@@ -84,7 +84,7 @@ function mtBalancePostprocess([result]: [BigNumber[]], { tokens }: MTBalanceData
       fee: new BigNumber(result[row + 8])
         .div(new BigNumber(10).pow(27))
         .pow(secondsPerYear)
-        .minus(one).times(100),
+        .minus(one),
       liquidationPenalty: new BigNumber(result[row + 9]).div(new BigNumber(10).pow(27)),
       minDebt: amountFromWei(new BigNumber(result[row + 10]), 'DAI')
     };

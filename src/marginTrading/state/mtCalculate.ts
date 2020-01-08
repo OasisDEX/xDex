@@ -281,6 +281,9 @@ export function calculateMarginable(
   const lastPriceUpdate = moment.unix(ma.zzz.toNumber());
   const duration = moment.duration(lastPriceUpdate.add(1, 'hours').diff(moment(new Date())));
   const nextPriceUpdateDelta = moment.utc(duration.asMilliseconds()).format('HH:mm');
+  const fee = ma.fee.times(100);
+  const liquidationPenalty = ma.liquidationPenalty.gt(zero) ?
+    ma.liquidationPenalty.minus(1).times(100) : zero;
 
   return {
     ...ma,
@@ -303,7 +306,9 @@ export function calculateMarginable(
     amountBeingLiquidated,
     nextPriceUpdateDelta,
     purchasingPower,
-    equity
+    equity,
+    fee,
+    liquidationPenalty,
   };
 }
 

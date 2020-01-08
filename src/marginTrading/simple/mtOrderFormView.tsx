@@ -10,7 +10,6 @@ import { BigNumberInput, lessThanOrEqual } from '../../utils/bigNumberInput/BigN
 import { FormChangeKind } from '../../utils/form';
 import {
   formatAmount,
-  formatLiqPenaltyPercent,
   formatPrecision,
   formatPrice
 } from '../../utils/formatters/format';
@@ -498,9 +497,6 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
     }
 
     const { liquidationPenalty } = baseTokenAsset;
-
-    const liquidationPenaltyPercent = formatLiqPenaltyPercent(liquidationPenalty);
-
     const leverageDisplay = leverage
                             ? leverage
                             : leveragePost
@@ -531,7 +527,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
           <div className={styles.InfoRowLabel}>Liq. Penalty</div>
           <div>
             <FormatPercent
-              value={liquidationPenaltyPercent}
+              value={liquidationPenalty}
               fallback="-"
               multiply={false}
             />

@@ -7,7 +7,7 @@ import { CDPHistoryView } from '../../balances/CDPHistoryView';
 import { Calls$ } from '../../blockchain/calls/calls';
 import { TxMetaKind } from '../../blockchain/calls/txMeta';
 import { isDone, TxState } from '../../blockchain/transactions';
-import { formatLiqPenaltyPercent, formatPrecision } from '../../utils/formatters/format';
+import { formatPrecision } from '../../utils/formatters/format';
 import { FormatPercent, Money } from '../../utils/formatters/Formatters';
 import { Button } from '../../utils/forms/Buttons';
 import { SvgImage } from '../../utils/icons/utils';
@@ -82,7 +82,6 @@ export class MTMyPositionView extends
     const { liquidationPenalty } = ma;
     const leverage = ma.leverage ? ma.leverage : ma.balance.gt(zero) ? one : zero;
     const liquidationPrice = ma.liquidationPrice ? ma.liquidationPrice : zero;
-    const liquidationPenaltyPercent = formatLiqPenaltyPercent(liquidationPenalty);
 
     return (
       <div>
@@ -114,7 +113,7 @@ export class MTMyPositionView extends
               </div>
               <div className={styles.summaryValue}>
                 <FormatPercent
-                  value={liquidationPenaltyPercent}
+                  value={liquidationPenalty}
                   fallback="-"
                   multiply={false}
                 />
