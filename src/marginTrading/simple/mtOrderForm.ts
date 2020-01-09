@@ -394,15 +394,9 @@ function addPurchasingPower(state: MTSimpleFormState) {
   const [isDust, realPurchasingPower] =
     realPurchasingPowerMarginable(baseAsset, state.orderbook.sell);
 
-  const realPurchasingPowerPost =
-    state.messages.length === 0 &&
-    state.total &&
-    realPurchasingPower.minus(state.total);
-
   return {
     ...state,
     realPurchasingPower,
-    realPurchasingPowerPost,
     dustWarning: isDust,
   };
 }
@@ -549,6 +543,7 @@ type PlanInfo = [
     leveragePost?: BigNumber,
     balancePost?: BigNumber,
     daiBalancePost?: BigNumber,
+    realPurchasingPowerPost?: BigNumber,
     isSafePost?: boolean
   }
   ];
@@ -559,6 +554,7 @@ function getBuyPlan(
   baseToken: string,
   amount: BigNumber,
   price: BigNumber,
+  total: BigNumber,
   realPurchasingPower: BigNumber,
 ): PlanInfo {
 
@@ -580,6 +576,7 @@ function getBuyPlan(
         leveragePost: undefined,
         balancePost: undefined,
         daiBalancePost: undefined,
+        realPurchasingPowerPost: undefined,
         isSafePost: undefined
       }
     ];
@@ -614,12 +611,24 @@ function getBuyPlan(
   const balancePost = postTradeAsset.balance;
   const daiBalancePost = postTradeAsset.debt.gt(zero) ?
     postTradeAsset.debt.times(minusOne) : postTradeAsset.dai;
+
+  const [, , offersLeft] = buy(total, sellOffers);
+  const realPurchasingPowerPost = realPurchasingPowerMarginable(postTradeAsset, offersLeft);
+
   return [
     request.createPlan([{
       ...request.assets.find(ai => ai.name === baseToken),
       delta
     } as Required<EditableDebt>]),
-    { collRatioPost, liquidationPricePost, isSafePost, leveragePost, balancePost, daiBalancePost }
+    {
+      collRatioPost,
+      liquidationPricePost,
+      isSafePost,
+      leveragePost,
+      balancePost,
+      daiBalancePost,
+      realPurchasingPowerPost
+    }
   ];
 }
 
@@ -667,8 +676,6 @@ function getSellPlan(
     { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook
   );
 
-  console.log('post trade debt', postTradeAsset.debt.toString());
-  console.log('post trade dai', postTradeAsset.dai.toString());
   const collRatioPost = postTradeAsset.currentCollRatio;
   const liquidationPricePost = postTradeAsset.liquidationPrice;
   const isSafePost = postTradeAsset.safe;
@@ -709,6 +716,7 @@ function addPlan(state: MTSimpleFormState): MTSimpleFormState {
       state.baseToken,
       state.amount,
       state.price,
+      state.total,
       state.realPurchasingPower,
     ) :
     getSellPlan(
@@ -736,11 +744,11 @@ function addPlan(state: MTSimpleFormState): MTSimpleFormState {
   const baseAsset = findAsset(state.baseToken, state.mta);
 
   if (postTradeInfo.daiBalancePost && baseAsset &&
-      (
-        postTradeInfo.daiBalancePost.lt(zero) &&
-        postTradeInfo.daiBalancePost.times(minusOne).lt(baseAsset.minDebt)
-      )
-    ) {
+    (
+      postTradeInfo.daiBalancePost.lt(zero) &&
+      postTradeInfo.daiBalancePost.times(minusOne).lt(baseAsset.minDebt)
+    )
+  ) {
     messages.push({
       kind: MessageKind.minDebt,
       field: 'total',
@@ -919,9 +927,9 @@ export function createMTSimpleOrderForm$(
   } : MTSimpleOrderFormParams,
   tradingPair: TradingPair,
   defaults:
-  {
-    kind?: OfferType,
-  } = {}
+    {
+      kind?: OfferType,
+    } = {}
 ): Observable<MTSimpleFormState> {
 
   const manualChange$ = new Subject<ManualChange>();

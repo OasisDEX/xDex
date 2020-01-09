@@ -163,7 +163,7 @@ test('buy with leverage - match exactly one order', () => {
   change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(20) });
 
   expect(unpack(controller).readyToProceed).toEqual(true);
-  expect(unpack(controller).realPurchasingPowerPost).toEqual(new BigNumber(179.98779296875));
+  expect(unpack(controller).realPurchasingPowerPost).toEqual(new BigNumber(180));
 });
 
 test('buy with leverage - match more than one order', () => {
@@ -188,7 +188,7 @@ test('buy with leverage - match more than one order', () => {
   change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(2.5) });
 
   expect(unpack(controller).readyToProceed).toEqual(true);
-  expect(unpack(controller).realPurchasingPowerPost).toEqual(new BigNumber(8.33));
+  expect(unpack(controller).realPurchasingPowerPost).toEqual(new BigNumber(8.325));
 });
 
 test('buy with leverage - purchasing power too low', () => {
