@@ -102,7 +102,7 @@ export function sellable(
     }
 
     // sell coll, increase sold and cash
-    const [dSold, dDai, newOffers] = sellAll(dBalance, offers);
+    const [dSold, dDai, newOffers] = sellAll(BigNumber.min(dBalance, amount), offers);
     offers = newOffers;
 
     log.push({ dSold, dDai });

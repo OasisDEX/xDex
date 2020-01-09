@@ -223,6 +223,16 @@ describe('Is position sellable', () => {
 
   });
 
+  test('No debt, prices match - partial sell', () => {
+
+    const ma = calculateMarginable(weth2, fakeOrderbook);
+
+    const [result] = sellable(ma, sellOffers, new BigNumber(0.9));
+
+    expect(result).toBeTruthy();
+
+  });
+
   test('Avg debt, prices match', () => {
 
     const ma = calculateMarginable(
