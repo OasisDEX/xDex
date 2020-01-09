@@ -4,7 +4,6 @@ import * as moment from 'moment';
 import { Dictionary } from 'ramda';
 import { nullAddress } from '../../blockchain/utils';
 import { Offer, Orderbook } from '../../exchange/orderbook/orderbook';
-import { impossible, Impossible } from '../../utils/impossible';
 import { minusOne, one, zero } from '../../utils/zero';
 import { buy, sellAll } from '../plan/planUtils';
 import {
@@ -31,7 +30,7 @@ function marginableAvailableActions(asset: MarginableAssetCore) {
   return availableActions;
 }
 
-export type PurchasingPower = BigNumber | Impossible;
+export type PurchasingPower = [boolean, BigNumber];
 
 export function realPurchasingPowerMarginable(
   ma: MarginableAssetCore,
@@ -58,12 +57,12 @@ export function realPurchasingPowerMarginable(
     debt = debt.plus(availableDebt);
 
     if (debt.lt(dust)) {
-      return impossible('dust');
+      return [true, zero];
     }
 
     cash = availableDebt;
   }
-  return purchasingPower;
+  return [false, purchasingPower];
 }
 
 export function sellable(
@@ -232,7 +231,7 @@ export function calculateMarginable(
   orderbook: Orderbook,
 ): MarginableAsset {
   const { debt, dai, balance } = ma;
-  const purchasingPower = realPurchasingPowerMarginable(ma, orderbook.sell);
+  const [, purchasingPower] = realPurchasingPowerMarginable(ma, orderbook.sell);
   const midpointPrice = calculateMidpointPrice(orderbook);
   const equity = midpointPrice.gt(zero) ?
     balance.times(midpointPrice).minus(debt).plus(dai) : zero;

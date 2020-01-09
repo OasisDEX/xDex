@@ -149,7 +149,7 @@ test('weth, dgx and mkr, no debt', () => {
 });
 
 test('Purchasing power marginable', () => {
-  const purchasingPower = realPurchasingPowerMarginable(
+  const [, purchasingPower] = realPurchasingPowerMarginable(
     calculateMarginable(
       weth2,
       { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook),
@@ -159,7 +159,7 @@ test('Purchasing power marginable', () => {
 });
 
 test('Purchasing power marginable - shallow orderbook', () => {
-  const purchasingPower = realPurchasingPowerMarginable(
+  const [, purchasingPower] = realPurchasingPowerMarginable(
     calculateMarginable(
       weth2,
       { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook),
@@ -169,7 +169,7 @@ test('Purchasing power marginable - shallow orderbook', () => {
 });
 
 test('Purchasing power marginable - cash only', () => {
-  const purchasingPower = realPurchasingPowerMarginable(
+  const [, purchasingPower] = realPurchasingPowerMarginable(
     calculateMarginable(
       dai100,
       { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook),
@@ -182,7 +182,7 @@ test('Purchasing power marginable - cash only', () => {
 });
 
 test('Purchasing power marginable - cash + collateral', () => {
-  const purchasingPower = realPurchasingPowerMarginable(
+  const [, purchasingPower] = realPurchasingPowerMarginable(
     calculateMarginable(
       weth1dai100,
       { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook),

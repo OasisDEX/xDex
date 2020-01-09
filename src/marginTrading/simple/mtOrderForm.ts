@@ -126,6 +126,7 @@ export interface MTSimpleFormState extends HasGasEstimation {
   mta?: MTAccount;
   realPurchasingPower?: BigNumber;
   realPurchasingPowerPost?: BigNumber;
+  dustWarning?: boolean;
   plan?: Operation[] | Impossible;
   collRatio?: BigNumber;
   collRatioPost?: BigNumber;
@@ -390,7 +391,8 @@ function addPurchasingPower(state: MTSimpleFormState) {
     return state;
   }
 
-  const realPurchasingPower = realPurchasingPowerMarginable(baseAsset, state.orderbook.sell);
+  const [isDust, realPurchasingPower] =
+    realPurchasingPowerMarginable(baseAsset, state.orderbook.sell);
 
   const realPurchasingPowerPost =
     state.messages.length === 0 &&
@@ -401,6 +403,7 @@ function addPurchasingPower(state: MTSimpleFormState) {
     ...state,
     realPurchasingPower,
     realPurchasingPowerPost,
+    dustWarning: isDust,
   };
 }
 

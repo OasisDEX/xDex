@@ -194,20 +194,20 @@ test('buy with leverage - match more than one order', () => {
 test('buy with leverage - purchasing power too low', () => {
   const weth = {
     ...wethEmpty,
-    referencePrice: new BigNumber('1'),
+    referencePrice: new BigNumber('100'),
     balance: new BigNumber('2'),
     debt: new BigNumber('0')
   };
   const mta: MTAccount = getMTAccount({ marginableAssets: [weth] });
   const sells = [
-    { price: 1, amount: 10 }
+    { price: 100, amount: 100 }
   ];
 
   const controller = controllerWithFakeOrderBook([], sells, mta);
   const { change } = unpack(controller);
 
-  expect(unpack(controller).realPurchasingPower).toEqual(new BigNumber(1.984375));
-  change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(3) });
+  expect(unpack(controller).realPurchasingPower).toEqual(new BigNumber(199.98779296875));
+  change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(30) });
   expect(unpack(controller).messages[0].kind).toEqual(MessageKind.insufficientAmount);
 });
 
@@ -234,14 +234,14 @@ test('buy with leverage - orderbook too shallow', () => {
 test('buy with leverage - collateral and cash', () => {
   const weth = {
     ...wethEmpty,
-    referencePrice: new BigNumber(1),
-    balance: new BigNumber(5),
+    referencePrice: new BigNumber(100),
+    balance: new BigNumber(15),
     debt: new BigNumber(0),
-    dai: new BigNumber(5),
+    dai: new BigNumber(500),
   };
   const mta: MTAccount = getMTAccount({ marginableAssets: [weth] });
   const sells = [
-    { price: 1, amount: 20 }
+    { price: 100, amount: 20 }
   ];
 
   const controller = controllerWithFakeOrderBook([], sells, mta);
@@ -249,20 +249,20 @@ test('buy with leverage - collateral and cash', () => {
 
   expect(unpack(controller).leverage).toEqual(new BigNumber(1));
   change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(14.98) });
-  expect(unpack(controller).leveragePost).toEqual(new BigNumber(1.998));
+  expect(unpack(controller).leveragePost).toEqual(new BigNumber(1.499));
 });
 
 test('buy with leverage - cash only', () => {
   const weth = {
     ...wethEmpty,
-    referencePrice: new BigNumber(1),
+    referencePrice: new BigNumber(100),
     balance: new BigNumber(0),
     debt: new BigNumber(0),
-    dai: new BigNumber(10),
+    dai: new BigNumber(1000),
   };
   const mta: MTAccount = getMTAccount({ marginableAssets: [weth] });
   const sells = [
-    { price: 1, amount: 20 }
+    { price: 100, amount: 20 }
   ];
 
   const controller = controllerWithFakeOrderBook([], sells, mta);
