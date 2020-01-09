@@ -4,6 +4,7 @@ import * as moment from 'moment';
 import { Dictionary } from 'ramda';
 import { nullAddress } from '../../blockchain/utils';
 import { Offer, Orderbook } from '../../exchange/orderbook/orderbook';
+import { impossible, Impossible } from '../../utils/impossible';
 import { minusOne, one, zero } from '../../utils/zero';
 import { buy, sellAll } from '../plan/planUtils';
 import {
@@ -30,16 +31,18 @@ function marginableAvailableActions(asset: MarginableAssetCore) {
   return availableActions;
 }
 
+export type PurchasingPower = BigNumber | Impossible;
+
 export function realPurchasingPowerMarginable(
   ma: MarginableAssetCore,
   offers: Offer[]
-): BigNumber {
+): PurchasingPower {
   let amount = ma.balance;
   let debt = ma.debt;
   let purchasingPower = zero;
   let cash = ma.dai;
   let first = true;
-
+  const dust = new BigNumber('20');
   while ((cash.gt(0.01) || first) && offers.length > 0) {
     first = false;
     const [bought, cashLeft, offersLeft] = buy(cash, offers);
@@ -53,6 +56,11 @@ export function realPurchasingPowerMarginable(
     // availableDebt = amount * referencePrice / safeCollRatio - debt
     const availableDebt = amount.times(ma.referencePrice).div(ma.safeCollRatio).minus(debt);
     debt = debt.plus(availableDebt);
+
+    if (debt.lt(dust)) {
+      return impossible('dust');
+    }
+
     cash = availableDebt;
   }
   return purchasingPower;

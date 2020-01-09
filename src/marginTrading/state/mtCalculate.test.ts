@@ -5,6 +5,7 @@ import { fakeOrderbook } from '../../exchange/depthChart/depthchart.test';
 setupFakeWeb3ForTesting();
 
 import { Orderbook } from '../../exchange/orderbook/orderbook';
+import { isImpossible } from '../../utils/impossible';
 import { one, zero } from '../../utils/zero';
 import { CashAssetCore, MarginableAssetCore, MTAccount } from './mtAccount';
 import {
@@ -174,7 +175,10 @@ test('Purchasing power marginable - cash only', () => {
       { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook),
     sellOffers
   );
-  expect(purchasingPower.toFixed(0)).toEqual(new BigNumber(150).toFixed());
+  expect(isImpossible(purchasingPower)).toBeFalsy();
+  if (!isImpossible(purchasingPower)) {
+    expect(purchasingPower.toFixed(0)).toEqual(new BigNumber(150).toFixed());
+  }
 });
 
 test('Purchasing power marginable - cash + collateral', () => {
@@ -184,7 +188,10 @@ test('Purchasing power marginable - cash + collateral', () => {
       { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook),
     sellOffers
   );
-  expect(purchasingPower.toFixed(0)).toEqual(new BigNumber(300).toFixed());
+  expect(isImpossible(purchasingPower)).toBeFalsy();
+  if (!isImpossible(purchasingPower)) {
+    expect(purchasingPower.toFixed(0)).toEqual(new BigNumber(300).toFixed());
+  }
 });
 
 test('Events history - BuyLev', () => {
