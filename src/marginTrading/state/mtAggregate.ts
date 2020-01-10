@@ -85,9 +85,7 @@ function osmsParams$(context: NetworkConfig, assets: string[]) {
     switchMap(calls => {
       return forkJoin(assets.map((token) =>
         context.mcd.osms[token] 
-        ? calls.osmParams({ token }).pipe(
-            map(osmParams => ({ [token]: osmParams }))
-          ) 
+        ? calls.osmParams({ token })
         : of({}),
       )).pipe(
           concatAll(),

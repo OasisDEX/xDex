@@ -181,8 +181,7 @@ interface PerformPlanData {
 
 const mtPerformPlan = {
   call: ({ proxy }: PerformPlanData, _context: NetworkConfig) => {
-    console.log('proxyproxy', proxy);
-    return proxy['execute(address,bytes)'];
+    return proxy.methods['execute(address,bytes)'];
   },
   prepareArgs: argsOfPerformOperations,
   // options: () => ({ gas: DEFAULT_GAS * 6 }), // TODO

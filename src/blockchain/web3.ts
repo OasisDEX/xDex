@@ -33,5 +33,7 @@ export const web3Status$: Observable<Web3Status> = from(['initializing']).pipe(
 web3Status$.subscribe();
 
 export function setupFakeWeb3ForTesting() {
-  web3 = new Web3();
+  // This is a temporary workaround
+  const Web3Mock = require('web3');
+  web3 = new Web3Mock();
 }

@@ -231,11 +231,11 @@ export class MTMyPositionPanelInternal
   }
 
   private approveMTProxy(token: string) {
-    return () => {
+    return () => {      
       if (this.props.mta.state !== MTAccountState.notSetup) {
         this.props.approveMTProxy({
           token,
-          proxyAddress: this.props.mta.proxy.address as string
+          proxyAddress: this.props.mta.proxy.options.address as string
         });
       }
     };
