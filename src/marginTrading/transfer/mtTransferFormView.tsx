@@ -107,7 +107,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
       || progress === ProgressStage.waitingForConfirmation);
 
     const currentTab = mta &&
-    (mta.proxy && mta.proxy.address !== nullAddress && allowance(mta, token)) ?
+    (mta.proxy && mta.proxy.options.address !== nullAddress && allowance(mta, token)) ?
       MTTransferFormTab.transfer : MTTransferFormTab.proxy;
 
     return (
@@ -148,9 +148,9 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
                 saving transaction time and gas costs. This only has to be done once.`}
                     btnLabel="Deploy Proxy"
                     btnAction={() => this.setup()}
-                    btnDisabled={mta.proxy && mta.proxy.address !== nullAddress}
+                    btnDisabled={mta.proxy && mta.proxy.options.address !== nullAddress}
                     isLoading={isLoading}
-                    stepCompleted={mta.proxy && mta.proxy.address !== nullAddress}
+                    stepCompleted={mta.proxy && mta.proxy.options.address !== nullAddress}
                   />
                   <StepComponent
                     title="Set allowance"
@@ -161,7 +161,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
                     btnAction={() => this.allowance()}
                     isLoading={isLoading}
                     btnDisabled={
-                      mta.proxy && mta.proxy.address === nullAddress
+                      mta.proxy && mta.proxy.options.address === nullAddress
                     }
                     stepCompleted={mta && allowance(mta, token)}
                   />
