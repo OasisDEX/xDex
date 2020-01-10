@@ -327,7 +327,7 @@ export function calculateMTAccount(
   const totalAvailableDebt =
     marginableAssets.reduce((debt, ma) => debt.plus(ma.availableDebt), zero);
   const totalMAValue = marginableAssets.reduce((t, ma) => t.plus(ma.balanceInCash), zero);
-  const totalAssetValue = totalMAValue; // .plus(totalNMAValue); // .plus(cashCore.balance);  
+  const totalAssetValue = totalMAValue; // .plus(totalNMAValue); // .plus(cashCore.balance);
 
   return {
     proxy,

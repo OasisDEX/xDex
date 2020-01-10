@@ -156,7 +156,7 @@ export function createFooter$(context$: Observable<NetworkConfig>): Observable<F
         map(expirationDate => ({
           expirationDate,
           etherscan: context.etherscan,
-          address: context.otc.contract.options.address as string,
+          address: context.otc.contract.options.address,
         }))
       )
     ),

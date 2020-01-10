@@ -72,7 +72,7 @@ export function getMTAccount(props: {
 } = {}): MTAccount {
   return calculateMTAccount(
     {
-      address: ''
+      options: { address: '' }
     },
     props.marginableAssets ? props.marginableAssets.map(getMarginableCore) : [],
     Boolean(props.daiAllowance),
