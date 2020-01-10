@@ -41,7 +41,7 @@ export function realPurchasingPowerMarginable(
   let purchasingPower = zero;
   let cash = ma.dai;
   let first = true;
-  const dust = new BigNumber('20');
+  const dust = ma.minDebt;
   while ((cash.gt(0.01) || first) && offers.length > 0) {
     first = false;
     const [bought, cashLeft, offersLeft] = buy(cash, offers);
@@ -101,6 +101,8 @@ export function sellable(
     }
 
     // sell coll, increase sold and cash
+    console.log('dbalance ', dBalance.toString());
+    console.log('amount ', amount.toString());
     const [dSold, dDai, newOffers] = sellAll(BigNumber.min(dBalance, amount), offers);
     offers = newOffers;
 

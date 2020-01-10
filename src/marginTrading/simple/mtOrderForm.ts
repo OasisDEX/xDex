@@ -329,10 +329,12 @@ function validate(state: MTSimpleFormState): MTSimpleFormState {
     }
 
     if (state.orderbook) {
+      const offers = state.kind === OfferType.buy ? state.orderbook.sell : state.orderbook.buy;
       const [isSellable, log] = sellable(
-        baseAsset, state.orderbook.sell, state.amount || baseAsset.availableBalance
+        baseAsset, offers, state.amount || baseAsset.availableBalance
       );
 
+      console.log('isSellable', isSellable);
       console.log(JSON.stringify(log, null, '  '));
 
       if (
@@ -613,7 +615,7 @@ function getBuyPlan(
     postTradeAsset.debt.times(minusOne) : postTradeAsset.dai;
 
   const [, , offersLeft] = buy(total, sellOffers);
-  const realPurchasingPowerPost = realPurchasingPowerMarginable(postTradeAsset, offersLeft);
+  const [, realPurchasingPowerPost] = realPurchasingPowerMarginable(postTradeAsset, offersLeft);
 
   return [
     request.createPlan([{
