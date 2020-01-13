@@ -1,10 +1,8 @@
-import { BigNumber } from 'bignumber.js';
 import { concat, range } from 'lodash';
 import { identity, Observable, of } from 'rxjs';
 import { first, flatMap, tap } from 'rxjs/operators';
 import { Calls$, ReadCalls$ } from '../blockchain/calls/calls';
 import { NetworkConfig } from '../blockchain/config';
-import { web3 } from '../blockchain/web3';
 import { createProxyAddress$, readOsm } from '../marginTrading/state/mtAggregate';
 
 export function pluginDevModeHelpers(
@@ -44,35 +42,13 @@ export function pluginDevModeHelpers(
             }
             console.log('proxyAddress:', proxyAddress);
             return calls.disapproveProxy({
-              proxyAddress, token,
-              gasPrice: new BigNumber(web3.eth.gasPrice.toString()),
-              gasEstimation: 1000000
-            });
-          })
-        )
-      )
-    ).subscribe(identity);
-
-  (window as any).removeMTProxy = () => {
-    calls$.pipe(
-      flatMap(calls =>
-        createProxyAddress$(context$, initializedAccount$, onEveryBlock$).pipe(
-          first(),
-          flatMap(proxyAddress => {
-            if (!proxyAddress) {
-              console.log('Proxy not found!');
-              return of();
-            }
-            console.log('proxyAddress:', proxyAddress);
-            return calls.setOwner({
               proxyAddress,
-              ownerAddress: '0x0000000000000000000000000000000000000000'
+              token,
             });
           })
         )
       )
     ).subscribe(identity);
-  };
 
   (window as any).previewLinearOffers = (
     baseToken: string, quoteToken: string,

@@ -18,7 +18,9 @@ Object {
     "daiAllowance": false,
     "marginableAssets": Array [],
     "proxy": Object {
-      "address": "",
+      "options": Object {
+        "address": "",
+      },
     },
     "state": "setup",
     "totalAssetValue": "0",
@@ -104,7 +106,9 @@ Object {
     "daiAllowance": false,
     "marginableAssets": Array [],
     "proxy": Object {
-      "address": "",
+      "options": Object {
+        "address": "",
+      },
     },
     "state": "setup",
     "totalAssetValue": "0",

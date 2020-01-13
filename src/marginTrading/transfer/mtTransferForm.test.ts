@@ -20,7 +20,7 @@ setupFakeWeb3ForTesting();
 
 const defParams = {
   mta$: calculateMTAccount(
-    {},
+    { options: {} },
     [getMarginableCore({
       name: 'WETH',
       balance: new BigNumber(20),

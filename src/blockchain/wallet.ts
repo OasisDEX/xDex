@@ -10,7 +10,8 @@ import {
   switchMap,
   tap
 } from 'rxjs/operators';
-import * as Web3 from 'web3';
+// tslint:disable:import-name
+import Web3 from 'web3';
 
 import { isEqual } from 'lodash';
 import { account$ } from './network';
@@ -38,7 +39,7 @@ const connecting$ = connectToWallet$.pipe(
       win.web3 = new Web3(win.ethereum);
       return from(win.ethereum.enable()).pipe(
         switchMap(([enabled]) => account$.pipe(
-          filter(account => account === enabled),
+          filter(account => (account && account.toLowerCase()) === enabled),
           first(),
           map(() => {
             return undefined;

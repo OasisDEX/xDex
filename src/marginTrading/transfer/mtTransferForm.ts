@@ -124,7 +124,8 @@ type MTSetupFormChange =
 
 function initialTab(mta: MTAccount, name: string) {
   const { proxy, transfer } = MTTransferFormTab;
-  if (mta.proxy.address !==  nullAddress) {
+
+  if (mta.proxy.options.address !==  nullAddress) {
     const isAllowance = name === 'DAI'
               ? mta.daiAllowance
               : findMarginableAsset(name, mta)!.allowance;
@@ -434,7 +435,7 @@ function prepareAllowance(calls$: Calls$, mta$: Observable<MTAccount>)
       return;
     }
 
-    const proxyAddress = state.mta.proxy.address;
+    const proxyAddress = state.mta.proxy.options.address;
     const changes$: Observable<ProgressChange> = calls$.pipe(
       first(),
       switchMap((calls): Observable<ProgressChange> => {

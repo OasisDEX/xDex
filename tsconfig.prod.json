@@ -5,6 +5,6 @@
     "lib": ["dom", "dom.iterable", "esnext"],
     "types": []
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "*.d.ts", "./node_modules/web3-typescript-typings/index.d.ts"],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "*.d.ts"],
   "exclude": ["src/**/*.test.ts"]
 }

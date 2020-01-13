@@ -1,6 +1,7 @@
 import { from, Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
-import * as Web3 from 'web3';
+// tslint:disable:import-name
+import Web3 from 'web3';
 
 const infuraProjectId = 'd96fcc7c667e4a03abf1cecd266ade2d';
 const infuraUrl = `https://mainnet.infura.io/v3/${infuraProjectId}`;
@@ -32,5 +33,7 @@ export const web3Status$: Observable<Web3Status> = from(['initializing']).pipe(
 web3Status$.subscribe();
 
 export function setupFakeWeb3ForTesting() {
-  web3 = new Web3();
+  // This is a temporary workaround
+  const Web3Mock = require('web3');
+  web3 = new Web3Mock();
 }

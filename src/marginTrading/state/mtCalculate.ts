@@ -336,6 +336,6 @@ export function calculateMTAccount(
     totalDebt,
     totalAvailableDebt,
     daiAllowance,
-    state: proxy.address === nullAddress ? MTAccountState.notSetup : MTAccountState.setup,
+    state: proxy.options.address === nullAddress ? MTAccountState.notSetup : MTAccountState.setup,
   };
 }

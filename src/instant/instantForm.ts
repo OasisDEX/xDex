@@ -11,7 +11,8 @@ import {
   scan,
   shareReplay,
   startWith,
-  switchMap, take,
+  switchMap,
+  take,
 } from 'rxjs/operators';
 
 import { Allowances, Balances, DustLimits } from '../balances/balances';
@@ -565,15 +566,14 @@ function getBestPrice(
   buyToken: string
 ): Observable<BigNumber> {
   return calls.otcGetBestOffer({ sellToken, buyToken }).pipe(
-    flatMap(offerId =>
-      calls.otcOffers(offerId).pipe(
-        map(([a, _, b]: BigNumber[]) => {
-          return daiOrSAI(sellToken) || (eth2weth(sellToken) === 'WETH' && !daiOrSAI(buyToken))
-            ? amountFromWei(a, sellToken).div(amountFromWei(b, buyToken))
-            : amountFromWei(b, buyToken).div(amountFromWei(a, sellToken));
-        })
-      )
-    )
+    flatMap(offerId => calls.otcOffers(offerId)),
+    map(({ pay_amt, buy_amt }) => {
+      return daiOrSAI(sellToken) || (eth2weth(sellToken) === 'WETH' && !daiOrSAI(buyToken))
+        ? amountFromWei(new BigNumber(pay_amt), sellToken)
+          .div(amountFromWei(new BigNumber(buy_amt), buyToken))
+        : amountFromWei(new BigNumber(buy_amt), buyToken)
+          .div(amountFromWei(new BigNumber(pay_amt), sellToken));
+    }),
   );
 }
 
