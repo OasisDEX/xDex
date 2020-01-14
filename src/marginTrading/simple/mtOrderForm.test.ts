@@ -60,7 +60,7 @@ const controllerWithFakeOrderBook = (
 test('initial state', done => {
   // const controller = createMTSimpleOrderForm$(defParams, tradingPair);
   const sells = [
-    { price: 1.3, amount: 3 }, // 1
+    { price: 1, amount: 3 }, // 1
     { price: 2, amount: 3 }, // 2
     { price: 4, amount: 3 }, // 3
     { price: 5, amount: 4 }, // 4
@@ -74,7 +74,7 @@ test('initial state', done => {
 
 test('set price and amount', () => {
   const sells = [
-    { price: 1.3, amount: 3 }, // 1
+    { price: 1, amount: 3 }, // 1
     { price: 2, amount: 3 }, // 2
     { price: 4, amount: 3 }, // 3
     { price: 5, amount: 4 }, // 4
@@ -85,8 +85,8 @@ test('set price and amount', () => {
   change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(1) });
 
   expect(unpack(controller).amount).toEqual(new BigNumber(1));
-  expect(unpack(controller).price).toEqual(new BigNumber(1.3));
-  expect(unpack(controller).total).toEqual(new BigNumber(1.3));
+  expect(unpack(controller).price).toEqual(new BigNumber(1));
+  expect(unpack(controller).total).toEqual(new BigNumber(1));
   expect(unpack(controller).gasEstimationStatus).toEqual(GasEstimationStatus.unset);
   expect(snapshotify(unpack(controller))).toMatchSnapshot();
 });
@@ -118,7 +118,7 @@ test('calculate undefined position in empty order book for buy', () => {
 
 test('calculate position in orderbook for sell', () => {
   const sells = [
-    { price: 1.3, amount: 3 }, // 1
+    { price: 1, amount: 3 }, // 1
     { price: 2, amount: 3 }, // 2
     { price: 4, amount: 3 }, // 3
     { price: 5, amount: 4 }, // 4
@@ -131,9 +131,9 @@ test('calculate position in orderbook for sell', () => {
   expect(unpack(controller).kind).toEqual(OfferType.sell);
   expect(unpack(controller).amount).toBeUndefined();
 
-  change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(3.5) });
-  expect(unpack(controller).price).toEqual(new BigNumber(1.4));
-  expect(unpack(controller).total).toEqual(new BigNumber(4.9));
+  change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(3) });
+  expect(unpack(controller).price).toEqual(new BigNumber(1));
+  expect(unpack(controller).total).toEqual(new BigNumber(3));
 });
 
 test('buy with leverage - match exactly one order', () => {

@@ -297,22 +297,4 @@ describe('Is position sellable', () => {
     expect(message).toEqual('Can\'t jump over dust');
   });
 
-  test('Test', () => {
-    const ma = calculateMarginable(
-      getMarginableCore({
-        name: 'WETH',
-        referencePrice: new BigNumber('300'),
-        minCollRatio: new BigNumber('1.5'),
-        safeCollRatio: new BigNumber('2'),
-        balance: new BigNumber('1'),
-        debt: new BigNumber('132'),
-      }),
-      fakeOrderbook
-    );
-
-    const [result, , , message] = sellable(ma, sellOffers, one);
-    expect(result).toBeFalsy();
-    expect(message).toEqual('Can\'t jump over dust');
-  });
-
 });
