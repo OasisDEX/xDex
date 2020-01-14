@@ -30,16 +30,18 @@ function marginableAvailableActions(asset: MarginableAssetCore) {
   return availableActions;
 }
 
+export type PurchasingPower = [boolean, BigNumber];
+
 export function realPurchasingPowerMarginable(
   ma: MarginableAssetCore,
   offers: Offer[]
-): BigNumber {
+): PurchasingPower {
   let amount = ma.balance;
   let debt = ma.debt;
   let purchasingPower = zero;
   let cash = ma.dai;
   let first = true;
-
+  const dust = ma.minDebt;
   while ((cash.gt(0.01) || first) && offers.length > 0) {
     first = false;
     const [bought, cashLeft, offersLeft] = buy(cash, offers);
@@ -53,39 +55,53 @@ export function realPurchasingPowerMarginable(
     // availableDebt = amount * referencePrice / safeCollRatio - debt
     const availableDebt = amount.times(ma.referencePrice).div(ma.safeCollRatio).minus(debt);
     debt = debt.plus(availableDebt);
+
+    if (debt.lt(dust)) {
+      return [true, zero];
+    }
+
     cash = availableDebt;
   }
-  return purchasingPower;
+  return [false, purchasingPower];
 }
 
 export function sellable(
   ma: MarginableAsset,
   offers: Offer[],
   amount: BigNumber
-): [boolean, any, BigNumber] {
+): [boolean, any, BigNumber, string?] {
+
   let { balance, debt, dai } = ma;
   const { minCollRatio, referencePrice } = ma;
   let i = 0;
   const maxI = 10;
   const log = [];
+
+  const dust = new BigNumber('20');
+
   while (amount.gt(zero) && i < maxI) {
 
-    // payback dai debt with cash
-    const dDebt = BigNumber.min(dai, debt);
+    // payback dai debt with cash, take care of dust limit
+    // debt - dDebt >= dust || debt - dDebt === 0
+    const dDebt = dai.gte(debt) ? debt : BigNumber.min(dai, debt.minus(dust));
+
+    if (dDebt.eq(zero) && dai.gt(zero)) {
+      return [false, log, amount, 'Can\'t jump over dust'];
+    }
+
     debt = debt.minus(dDebt);
     dai = dai.minus(dDebt);
 
     // take out max coll
     // (balance - dBalance) * referencePrice / debt = minCollRatio
     // dBalance = balance - minCollRatio * debt / referencePrice;
-
     const dBalance = balance.minus(minCollRatio.times(debt).div(referencePrice));
     if (dBalance.lte(zero)) {
-      return [false, log, amount];
+      return [false, log, amount, 'Can\'t free collateral'];
     }
 
     // sell coll, increase sold and cash
-    const [dSold, dDai, newOffers] = sellAll(dBalance, offers);
+    const [dSold, dDai, newOffers] = sellAll(BigNumber.min(dBalance, amount), offers);
     offers = newOffers;
 
     log.push({ dSold, dDai });
@@ -96,7 +112,7 @@ export function sellable(
     i += 1;
   }
 
-  return [amount.lte(zero) && i < maxI, log, amount];
+  return [amount.eq(zero) && i < maxI, log, amount, 'Too many iterations'];
 }
 
 function findAuctionBite(rawHistory: RawMTHistoryEvent[], auctionId: number) {
@@ -215,7 +231,7 @@ export function calculateMarginable(
   orderbook: Orderbook,
 ): MarginableAsset {
   const { debt, dai, balance } = ma;
-  const purchasingPower = realPurchasingPowerMarginable(ma, orderbook.sell);
+  const [, purchasingPower] = realPurchasingPowerMarginable(ma, orderbook.sell);
   const midpointPrice = calculateMidpointPrice(orderbook);
   const equity = midpointPrice.gt(zero) ?
     balance.times(midpointPrice).minus(debt).plus(dai) : zero;

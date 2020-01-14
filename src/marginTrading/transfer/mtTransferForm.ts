@@ -192,7 +192,7 @@ function updatePlan(state: MTTransferFormState): MTTransferFormState {
   }
 
   const liquidationPrice = asset.liquidationPrice;
-  const realPurchasingPower = realPurchasingPowerMarginable(
+  const [, realPurchasingPower] = realPurchasingPowerMarginable(
     asset,
     state.orderbook.sell);
   const daiBalance = asset.debt.gt(zero) ?
@@ -282,7 +282,7 @@ function updatePlan(state: MTTransferFormState): MTTransferFormState {
   const balancePost = postTradeAsset.balance;
   const daiBalancePost = postTradeAsset.debt.gt(zero) ?
     postTradeAsset.debt.times(minusOne) : postTradeAsset.dai;
-  const realPurchasingPowerPost = realPurchasingPowerMarginable(
+  const [, realPurchasingPowerPost] = realPurchasingPowerMarginable(
     postTradeAsset,
     state.orderbook.sell);
 

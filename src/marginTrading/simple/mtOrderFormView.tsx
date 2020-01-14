@@ -560,6 +560,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
             {
               this.props.realPurchasingPower &&
               <>
+                {this.props.dustWarning && <span title="Zero due to dust limit">! </span>}
                 {formatPrecision(this.props.realPurchasingPower, 2)}
               </>
             }

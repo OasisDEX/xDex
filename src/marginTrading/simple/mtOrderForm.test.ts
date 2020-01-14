@@ -60,7 +60,7 @@ const controllerWithFakeOrderBook = (
 test('initial state', done => {
   // const controller = createMTSimpleOrderForm$(defParams, tradingPair);
   const sells = [
-    { price: 1.3, amount: 3 }, // 1
+    { price: 1, amount: 3 }, // 1
     { price: 2, amount: 3 }, // 2
     { price: 4, amount: 3 }, // 3
     { price: 5, amount: 4 }, // 4
@@ -74,7 +74,7 @@ test('initial state', done => {
 
 test('set price and amount', () => {
   const sells = [
-    { price: 1.3, amount: 3 }, // 1
+    { price: 1, amount: 3 }, // 1
     { price: 2, amount: 3 }, // 2
     { price: 4, amount: 3 }, // 3
     { price: 5, amount: 4 }, // 4
@@ -85,8 +85,8 @@ test('set price and amount', () => {
   change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(1) });
 
   expect(unpack(controller).amount).toEqual(new BigNumber(1));
-  expect(unpack(controller).price).toEqual(new BigNumber(1.3));
-  expect(unpack(controller).total).toEqual(new BigNumber(1.3));
+  expect(unpack(controller).price).toEqual(new BigNumber(1));
+  expect(unpack(controller).total).toEqual(new BigNumber(1));
   expect(unpack(controller).gasEstimationStatus).toEqual(GasEstimationStatus.unset);
   expect(snapshotify(unpack(controller))).toMatchSnapshot();
 });
@@ -118,7 +118,7 @@ test('calculate undefined position in empty order book for buy', () => {
 
 test('calculate position in orderbook for sell', () => {
   const sells = [
-    { price: 1.3, amount: 3 }, // 1
+    { price: 1, amount: 3 }, // 1
     { price: 2, amount: 3 }, // 2
     { price: 4, amount: 3 }, // 3
     { price: 5, amount: 4 }, // 4
@@ -131,9 +131,9 @@ test('calculate position in orderbook for sell', () => {
   expect(unpack(controller).kind).toEqual(OfferType.sell);
   expect(unpack(controller).amount).toBeUndefined();
 
-  change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(3.5) });
-  expect(unpack(controller).price).toEqual(new BigNumber(1.4));
-  expect(unpack(controller).total).toEqual(new BigNumber(4.9));
+  change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(3) });
+  expect(unpack(controller).price).toEqual(new BigNumber(1));
+  expect(unpack(controller).total).toEqual(new BigNumber(3));
 });
 
 test('buy with leverage - match exactly one order', () => {
@@ -163,7 +163,7 @@ test('buy with leverage - match exactly one order', () => {
   change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(20) });
 
   expect(unpack(controller).readyToProceed).toEqual(true);
-  expect(unpack(controller).realPurchasingPowerPost).toEqual(new BigNumber(179.98779296875));
+  expect(unpack(controller).realPurchasingPowerPost).toEqual(new BigNumber(180));
 });
 
 test('buy with leverage - match more than one order', () => {
@@ -188,26 +188,26 @@ test('buy with leverage - match more than one order', () => {
   change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(2.5) });
 
   expect(unpack(controller).readyToProceed).toEqual(true);
-  expect(unpack(controller).realPurchasingPowerPost).toEqual(new BigNumber(8.33));
+  expect(unpack(controller).realPurchasingPowerPost).toEqual(new BigNumber(8.325));
 });
 
 test('buy with leverage - purchasing power too low', () => {
   const weth = {
     ...wethEmpty,
-    referencePrice: new BigNumber('1'),
+    referencePrice: new BigNumber('100'),
     balance: new BigNumber('2'),
     debt: new BigNumber('0')
   };
   const mta: MTAccount = getMTAccount({ marginableAssets: [weth] });
   const sells = [
-    { price: 1, amount: 10 }
+    { price: 100, amount: 100 }
   ];
 
   const controller = controllerWithFakeOrderBook([], sells, mta);
   const { change } = unpack(controller);
 
-  expect(unpack(controller).realPurchasingPower).toEqual(new BigNumber(1.984375));
-  change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(3) });
+  expect(unpack(controller).realPurchasingPower).toEqual(new BigNumber(199.98779296875));
+  change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(30) });
   expect(unpack(controller).messages[0].kind).toEqual(MessageKind.insufficientAmount);
 });
 
@@ -234,14 +234,14 @@ test('buy with leverage - orderbook too shallow', () => {
 test('buy with leverage - collateral and cash', () => {
   const weth = {
     ...wethEmpty,
-    referencePrice: new BigNumber(1),
-    balance: new BigNumber(5),
+    referencePrice: new BigNumber(100),
+    balance: new BigNumber(15),
     debt: new BigNumber(0),
-    dai: new BigNumber(5),
+    dai: new BigNumber(500),
   };
   const mta: MTAccount = getMTAccount({ marginableAssets: [weth] });
   const sells = [
-    { price: 1, amount: 20 }
+    { price: 100, amount: 20 }
   ];
 
   const controller = controllerWithFakeOrderBook([], sells, mta);
@@ -249,20 +249,20 @@ test('buy with leverage - collateral and cash', () => {
 
   expect(unpack(controller).leverage).toEqual(new BigNumber(1));
   change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(14.98) });
-  expect(unpack(controller).leveragePost).toEqual(new BigNumber(1.998));
+  expect(unpack(controller).leveragePost).toEqual(new BigNumber(1.499));
 });
 
 test('buy with leverage - cash only', () => {
   const weth = {
     ...wethEmpty,
-    referencePrice: new BigNumber(1),
+    referencePrice: new BigNumber(100),
     balance: new BigNumber(0),
     debt: new BigNumber(0),
-    dai: new BigNumber(10),
+    dai: new BigNumber(1000),
   };
   const mta: MTAccount = getMTAccount({ marginableAssets: [weth] });
   const sells = [
-    { price: 1, amount: 20 }
+    { price: 100, amount: 20 }
   ];
 
   const controller = controllerWithFakeOrderBook([], sells, mta);
