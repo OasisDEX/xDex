@@ -98,6 +98,7 @@ export type Message = {
   kind: MessageKind.unsellable;
   field?: string;
   priority: number;
+  message: string;
 };
 
 export enum ViewKind {
@@ -330,7 +331,7 @@ function validate(state: MTSimpleFormState): MTSimpleFormState {
 
     if (state.orderbook) {
       const offers = state.kind === OfferType.buy ? state.orderbook.sell : state.orderbook.buy;
-      const [isSellable, log] = sellable(
+      const [isSellable, log, amount, reason] = sellable(
         baseAsset, offers, state.amount || baseAsset.availableBalance
       );
 
@@ -345,6 +346,7 @@ function validate(state: MTSimpleFormState): MTSimpleFormState {
           kind: MessageKind.unsellable,
           field: 'total',
           priority: 1,
+          message: reason ? reason : ''
         });
       }
     }

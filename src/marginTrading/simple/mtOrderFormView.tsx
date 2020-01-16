@@ -801,6 +801,6 @@ function messageContent(msg: Message) {
     case MessageKind.minDebt:
       return `Order below ${msg.message} limit.`;
     case MessageKind.unsellable:
-      return `Your position is unsellable given current state of the orderbook`;
+      return `Your position is unsellable given current state of the orderbook. ${msg.message}`;
   }
 }

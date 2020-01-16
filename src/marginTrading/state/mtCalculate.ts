@@ -56,12 +56,13 @@ export function realPurchasingPowerMarginable(
     const availableDebt = amount.times(ma.referencePrice).div(ma.safeCollRatio).minus(debt);
     debt = debt.plus(availableDebt);
 
-    if (debt.lt(dust)) {
-      return [true, zero];
-    }
-
     cash = availableDebt;
   }
+
+  if (debt.lt(dust)) {
+    return [true, zero];
+  }
+
   return [false, purchasingPower];
 }
 
@@ -83,7 +84,11 @@ export function sellable(
 
     // payback dai debt with cash, take care of dust limit
     // debt - dDebt >= dust || debt - dDebt === 0
+    console.log('inter start dai', dai.toString());
+    console.log('inter start debt', debt.toString());
     const dDebt = dai.gte(debt) ? debt : BigNumber.min(dai, debt.minus(dust));
+    console.log('inter start dDebt', dDebt.toString());
+
 
     if (dDebt.eq(zero) && dai.gt(zero)) {
       return [false, log, amount, 'Can\'t jump over dust'];
@@ -92,10 +97,18 @@ export function sellable(
     debt = debt.minus(dDebt);
     dai = dai.minus(dDebt);
 
+    console.log('iter debt', debt.toString());
+    console.log('iter dai', dai.toString());
     // take out max coll
     // (balance - dBalance) * referencePrice / debt = minCollRatio
     // dBalance = balance - minCollRatio * debt / referencePrice;
+
+    console.log('balance', balance.toString());
+    console.log('debt', debt.toString());
+    console.log('referencePrice', referencePrice.toString());
     const dBalance = balance.minus(minCollRatio.times(debt).div(referencePrice));
+    console.log('iter dBalance', dBalance.toString());
+
     if (dBalance.lte(zero)) {
       return [false, log, amount, 'Can\'t free collateral'];
     }

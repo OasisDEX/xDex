@@ -132,3 +132,142 @@ stories.add('Sell', () => {
     <Case2/>
   </>;
 });
+
+
+
+const assetCore2 = {
+  name: 'WETH',
+  balance: new BigNumber(1),
+  walletBalance: new BigNumber(0),
+  allowance: true,
+  debt: new BigNumber(200),
+  dai: zero,
+  minCollRatio: new BigNumber(1.5),
+  safeCollRatio: new BigNumber(2),
+};
+
+const ethMarginableAsset2 = calculateMarginable(
+  getMarginableCore({
+    ...assetCore2,
+    referencePrice: new BigNumber(300),
+    osmPriceNext: new BigNumber(150),
+  }),
+  { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook);
+
+const mta2: MTAccount = getMTAccount({ marginableAssets: [ethMarginableAsset2] });
+
+const sell_orders2 = [
+  { price: 186, amount: 5, baseToken: 'WETH', quoteToken: 'DAI' },
+];
+
+const buy_orders2 = [
+  { price: 290, amount: 5, baseToken: 'WETH', quoteToken: 'DAI' },
+];
+
+stories.add('Sell - can\'t free collateral, not-sellable', () => {
+  const controller1 = controllerWithFakeOrderBook(
+    buy_orders2, sell_orders2, mta2, OfferType.sell, { base: 'WETH', quote: 'DAI' }
+    );
+
+  controller1.pipe(first()).subscribe(state => {
+    state.change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber('1') });
+  });
+
+  const Case1 = connect<MTSimpleFormState, {}>(MtSimpleOrderFormView, controller1);
+
+  return <>
+    <Case1/>
+  </>;
+});
+
+
+const assetCore3 = {
+  name: 'WETH',
+  balance: new BigNumber(1),
+  walletBalance: new BigNumber(0),
+  allowance: true,
+  debt: new BigNumber(200),
+  dai: zero,
+  minCollRatio: new BigNumber(1.5),
+  safeCollRatio: new BigNumber(2),
+};
+
+const ethMarginableAsset3 = calculateMarginable(
+  getMarginableCore({
+    ...assetCore3,
+    referencePrice: new BigNumber(310),
+    osmPriceNext: new BigNumber(150),
+  }),
+  { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook);
+
+const mta3: MTAccount = getMTAccount({ marginableAssets: [ethMarginableAsset3] });
+
+const sell_orders3 = [
+  { price: 186, amount: 5, baseToken: 'WETH', quoteToken: 'DAI' },
+];
+
+const buy_orders3 = [
+  { price: 190, amount: 5, baseToken: 'WETH', quoteToken: 'DAI' },
+];
+
+stories.add('Sell - too many iterations, not-sellable', () => {
+  const controller1 = controllerWithFakeOrderBook(
+    buy_orders3, sell_orders3, mta3, OfferType.sell, { base: 'WETH', quote: 'DAI' }
+    );
+
+  controller1.pipe(first()).subscribe(state => {
+    state.change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber('1') });
+  });
+
+  const Case1 = connect<MTSimpleFormState, {}>(MtSimpleOrderFormView, controller1);
+
+  return <>
+    <Case1/>
+  </>;
+});
+
+
+const assetCore4 = {
+  name: 'WETH',
+  balance: new BigNumber(0.41),
+  walletBalance: new BigNumber(0),
+  allowance: true,
+  debt: new BigNumber(21),
+  dai: zero,
+  minCollRatio: new BigNumber(1.5),
+  safeCollRatio: new BigNumber(2),
+};
+
+const ethMarginableAsset4 = calculateMarginable(
+  getMarginableCore({
+    ...assetCore4,
+    referencePrice: new BigNumber(150),
+    osmPriceNext: new BigNumber(100),
+  }),
+  { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook);
+
+const mta4: MTAccount = getMTAccount({ marginableAssets: [ethMarginableAsset4] });
+
+const sell_orders4 = [
+  { price: 100, amount: 5, baseToken: 'WETH', quoteToken: 'DAI' },
+];
+
+const buy_orders4 = [
+  { price: 100, amount: 5, baseToken: 'WETH', quoteToken: 'DAI' },
+];
+
+stories.add('Sell - can\'t cover full debt', () => {
+  const controller1 = controllerWithFakeOrderBook(
+    buy_orders4, sell_orders4, mta4, OfferType.sell, { base: 'WETH', quote: 'DAI' }
+    );
+
+  controller1.pipe(first()).subscribe(state => {
+    state.change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber('0.41') });
+  });
+
+  const Case1 = connect<MTSimpleFormState, {}>(MtSimpleOrderFormView, controller1);
+
+  return <>
+    <Case1/>
+  </>;
+});
