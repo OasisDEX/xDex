@@ -10,7 +10,7 @@ import { one, zero } from '../../utils/zero';
 import { CashAssetCore, MarginableAssetCore, MTAccount } from './mtAccount';
 import {
   calculateMarginable,
-  calculateMTHistoryEvents,
+  calculateMTHistoryEvents, maxSellable,
   realPurchasingPowerMarginable, sellable
 } from './mtCalculate';
 import {
@@ -279,7 +279,7 @@ describe('Is position sellable', () => {
     expect(result).toBeFalsy();
   });
 
-  test('Can\'t jump over dust', () => {
+  test('Don\'t jump over dust', () => {
     const ma = calculateMarginable(
       getMarginableCore({
         name: 'WETH',
@@ -292,9 +292,76 @@ describe('Is position sellable', () => {
       fakeOrderbook
     );
 
-    const [result, , , message] = sellable(ma, sellOffers, one);
+    const sellableAmount = new BigNumber('0.011');
+    const [result, , , message] = sellable(ma, sellOffers, sellableAmount);
     expect(result).toBeFalsy();
     expect(message).toEqual('Can\'t jump over dust');
+  });
+});
+
+describe('Calculate maxSellable', () => {
+  test('Partially sellable, dust', () => {
+    const ma = calculateMarginable(
+      getMarginableCore({
+        name: 'WETH',
+        referencePrice: new BigNumber('300'),
+        minCollRatio: new BigNumber('1.5'),
+        safeCollRatio: new BigNumber('2'),
+        balance: new BigNumber('0.11'),
+        debt: new BigNumber('21'),
+      }),
+      fakeOrderbook
+    );
+    const result = maxSellable(ma, sellOffers);
+    expect(result).toEqual(new BigNumber('0.01'));
+  });
+
+  test('Partially sellable, too many iterations', () => {
+    const ma = calculateMarginable(
+      getMarginableCore({
+        name: 'WETH',
+        referencePrice: new BigNumber('300'),
+        minCollRatio: new BigNumber('1.5'),
+        safeCollRatio: new BigNumber('2'),
+        balance: new BigNumber('1'),
+        debt: new BigNumber('199'),
+      }),
+      fakeOrderbook
+    );
+    const result = maxSellable(ma, sellOffers);
+    expect(result.gt(zero)).toBeTruthy();
+  });
+
+  test('Fully sellable, no debt', () => {
+    const ma = calculateMarginable(
+      getMarginableCore({
+        name: 'WETH',
+        referencePrice: new BigNumber('300'),
+        minCollRatio: new BigNumber('1.5'),
+        safeCollRatio: new BigNumber('2'),
+        balance: new BigNumber('0.11'),
+        debt: new BigNumber('0'),
+      }),
+      fakeOrderbook
+    );
+    const result = maxSellable(ma, sellOffers);
+    expect(result).toEqual(new BigNumber('0.11'));
+  });
+
+  test('Fully sellable, small debt', () => {
+    const ma = calculateMarginable(
+      getMarginableCore({
+        name: 'WETH',
+        referencePrice: new BigNumber('300'),
+        minCollRatio: new BigNumber('1.5'),
+        safeCollRatio: new BigNumber('2'),
+        balance: new BigNumber('0.11'),
+        debt: new BigNumber('0.001'),
+      }),
+      fakeOrderbook
+    );
+    const result = maxSellable(ma, sellOffers);
+    expect(result).toEqual(new BigNumber('0.11'));
   });
 
 });
