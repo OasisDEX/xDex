@@ -133,8 +133,6 @@ stories.add('Sell', () => {
   </>;
 });
 
-
-
 const assetCore2 = {
   name: 'WETH',
   balance: new BigNumber(1),
@@ -176,10 +174,15 @@ stories.add('Sell - can\'t free collateral, not-sellable', () => {
   const Case1 = connect<MTSimpleFormState, {}>(MtSimpleOrderFormView, controller1);
 
   return <>
+    <div style={{ margin: '10px' }}>
+      Oracle price: 300 USD<br/>
+      Position is at liquidation price level (not being liquidated yet)<br/>
+      Cannot free any collateral. Position is unsellable.
+      <br/>
+    </div>
     <Case1/>
   </>;
 });
-
 
 const assetCore3 = {
   name: 'WETH',
@@ -222,17 +225,24 @@ stories.add('Sell - too many iterations, not-sellable', () => {
   const Case1 = connect<MTSimpleFormState, {}>(MtSimpleOrderFormView, controller1);
 
   return <>
+    <div style={{ margin: '10px' }}>
+      Oracle price: 310 USD<br/>
+      Orderbook price: 190 DAI<br/>
+      Can free some collateral, but selling it on market gives less collateral
+      for next iterations than at the beginning.<br/>
+      Only a part of the position possible to sell (max to sell: 0.212 WETH)
+      <br/>
+    </div>
     <Case1/>
   </>;
 });
-
 
 const assetCore4 = {
   name: 'WETH',
   balance: new BigNumber(0.41),
   walletBalance: new BigNumber(0),
   allowance: true,
-  debt: new BigNumber(21),
+  debt: new BigNumber(31),
   dai: zero,
   minCollRatio: new BigNumber(1.5),
   safeCollRatio: new BigNumber(2),
@@ -256,7 +266,7 @@ const buy_orders4 = [
   { price: 100, amount: 5, baseToken: 'WETH', quoteToken: 'DAI' },
 ];
 
-stories.add('Sell - can\'t cover full debt', () => {
+stories.add('Sell - can\'t jump dust', () => {
   const controller1 = controllerWithFakeOrderBook(
     buy_orders4, sell_orders4, mta4, OfferType.sell, { base: 'WETH', quote: 'DAI' }
     );
@@ -268,6 +278,64 @@ stories.add('Sell - can\'t cover full debt', () => {
   const Case1 = connect<MTSimpleFormState, {}>(MtSimpleOrderFormView, controller1);
 
   return <>
+    <div style={{ margin: '10px' }}>
+      Oracle price: 150 USD<br/>
+      Cannot sell in iterations avoiding dust limit (20 DAI)<br/>
+      Only a part of the position possible to sell (max to sell: 0.21 WETH)
+    </div>
+    <Case1/>
+  </>;
+});
+
+const assetCore5 = {
+  name: 'WETH',
+  balance: new BigNumber(0.1),
+  walletBalance: new BigNumber(0),
+  allowance: true,
+  debt: new BigNumber(0),
+  dai: zero,
+  minCollRatio: new BigNumber(1.5),
+  safeCollRatio: new BigNumber(2),
+};
+
+const ethMarginableAsset5 = calculateMarginable(
+  getMarginableCore({
+    ...assetCore5,
+    referencePrice: new BigNumber(100),
+    osmPriceNext: new BigNumber(100),
+  }),
+  { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook);
+
+const mta5: MTAccount = getMTAccount({ marginableAssets: [ethMarginableAsset5] });
+
+const sell_orders5 = [
+  { price: 100, amount: 5, baseToken: 'WETH', quoteToken: 'DAI' },
+];
+
+const buy_orders5 = [
+  { price: 100, amount: 5, baseToken: 'WETH', quoteToken: 'DAI' },
+];
+
+stories.add('Buy - purchasing power not available - dust', () => {
+  const controller1 = controllerWithFakeOrderBook(
+    buy_orders5, sell_orders5, mta5, OfferType.sell, { base: 'WETH', quote: 'DAI' }
+    );
+
+  controller1.pipe(first()).subscribe(state => {
+    state.change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber('0.41') });
+  });
+
+  const Case1 = connect<MTSimpleFormState, {}>(MtSimpleOrderFormView, controller1);
+
+  return <>
+    <div style={{ margin: '10px' }}>
+      Purchasing Power is 0 due to dust limit and particular market conditions.<br/>
+      Oracle price: 100 USD.<br/>
+      Purchasing power in this case is 20 DAI, <br/>
+      but using it debt is falling into dust limit,<br/>
+      so Purchasing Power is shown as 0, with "!" sign.<br/>
+      <br/>
+    </div>
     <Case1/>
   </>;
 });
