@@ -48,7 +48,8 @@ export function getPriceImpact(amount: BigNumber, orders: Offer[]):
     }
     lastOffer = offer;
     const done = BigNumber.min(amountLeft, offer.baseAmount);
-    const paid = done.times(offer.price);
+    const paid = done.times(offer.quoteAmount).div(offer.baseAmount)
+      .toFixed(18, BigNumber.ROUND_DOWN);
 
     amountLeft = amountLeft.minus(done);
     total = total.plus(paid);
@@ -78,7 +79,8 @@ export function buy(
   for (const offer of offers) {
     i += 1;
     const paid = BigNumber.min(cashLeft, offer.quoteAmount);
-    const bought = paid.div(offer.price);
+    const bought = paid.times(offer.baseAmount).div(offer.quoteAmount)
+      .toFixed(18, BigNumber.ROUND_DOWN);
     totalBought = totalBought.plus(bought);
     cashLeft = cashLeft.minus(paid);
     if (cashLeft.isEqualTo(zero)) {
@@ -138,7 +140,8 @@ export function sellAll(
   for (const offer of offers) {
     i += 1;
     const sold = BigNumber.min(amountToBeSold, offer.baseAmount);
-    const earned = sold.times(offer.price);
+    const earned = sold.times(offer.quoteAmount).div(offer.baseAmount)
+      .toFixed(18, BigNumber.ROUND_DOWN);
     totalSold = totalSold.plus(sold);
     totalEarned = totalEarned.plus(earned);
     amountToBeSold = amountToBeSold.minus(sold);

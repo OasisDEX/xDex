@@ -261,6 +261,7 @@ export function setupAppContext() {
   const TheFooterTxRx = connect<FooterProps, {}>(TheFooter, createFooter$(context$));
 
   const balancesWithEth$ = combineLatest(balances$, etherBalance$).pipe(
+    // @ts-ignore
     map(([balances, etherBalance]) => ({ ...balances, ETH: etherBalance })),
   );
 

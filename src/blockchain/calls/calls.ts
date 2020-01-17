@@ -22,7 +22,6 @@ import {
 import {
   getBestOffer,
   getBuyAmount,
-  getOffersAmount,
   getPayAmount, migrateTradePayWithERC20,
   offers,
   proxyAddress$, setOwner, setupProxy, tradePayWithERC20,
@@ -107,7 +106,7 @@ function readCalls([context, account]: [NetworkConfig, string | undefined]) {
     mtBalance: call(mtBalance),
     otcGetBuyAmount: call(getBuyAmount),
     otcGetPayAmount: call(getPayAmount),
-    otcGetOffersAmount: call(getOffersAmount),
+    // otcGetOffersAmount: call(getOffersAmount),
     otcGetBestOffer: call(getBestOffer),
     otcOffers: call(offers),
     readPrice: call(readPrice),
