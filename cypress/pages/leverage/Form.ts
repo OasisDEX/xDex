@@ -40,7 +40,7 @@ export class Form {
   public static estimatedBalanceIs = (value: string | RegExp) =>
     orderForm('estimated-col-balance').contains(value)
 
-  public static estimatedDaiBalanceIs = (value: string) =>
+  public static estimatedDaiBalanceIs = (value: string | RegExp) =>
     orderForm('estimated-dai-balance').contains(value)
 
   public static estimatedLiquidationPrice = (value: string | RegExp) =>

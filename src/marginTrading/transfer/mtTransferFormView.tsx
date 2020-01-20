@@ -18,7 +18,11 @@ import { GasCost } from '../../utils/gasCost/GasCost';
 import { BorderBox, Hr } from '../../utils/layout/LayoutHelpers';
 import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
 import { ModalProps } from '../../utils/modal';
+<<<<<<< HEAD
 import { Panel, PanelBody, PanelFooter, PanelHeader } from '../../utils/panel/Panel';
+=======
+import { Panel, PanelBody, PanelFooter } from '../../utils/panel/Panel';
+>>>>>>> Add basic E2E test scenarios for sellLev and sellBuy
 import { Muted } from '../../utils/text/Text';
 import { TransactionStateDescription } from '../../utils/text/TransactionStateDescription';
 import { zero } from '../../utils/zero';
@@ -43,6 +47,7 @@ import {
 } from './mtTransferForm';
 import * as styles from './mtTransferFormView.scss';
 import { SvgImage } from 'src/utils/icons/utils';
+import { hidden } from 'src/exchange/depthChart/DepthChartView.scss';
 
 type MTFundFormProps = MTTransferFormState & ModalProps;
 
@@ -60,24 +65,26 @@ interface StepComponentProps {
   btnDisabled: boolean;
   stepCompleted: boolean;
   isLoading: boolean;
+  tid?: string;
 }
 
 class StepComponent extends React.Component<StepComponentProps> {
   public render() {
     const { title, description, btnLabel, btnAction,
-      stepCompleted, btnDisabled, isLoading } = this.props;
+      stepCompleted, btnDisabled, isLoading, tid } = this.props;
 
     return (<div className={styles.onboardingPanel}>
       <h3 className={styles.onboardingHeader}>{title}</h3>
       <div className={styles.onboardingParagraph}>{description}</div>
       <Button
         size="md"
+        data-test-id={tid}
         color={stepCompleted ? 'primaryOutlinedDone' : 'primary'}
         disabled={btnDisabled || isLoading || stepCompleted}
         onClick={() => btnAction()}
         className={classnames({ [styles.buttonDone]: stepCompleted })}
       >{
-        stepCompleted ? <SvgImage image={checkIconSvg}/> :
+        stepCompleted ? <SvgImage data-test-id="step-completed" image={checkIconSvg}/> :
           isLoading && !btnDisabled ?  <LoadingIndicator inline={true} /> : btnLabel
       }</Button>
 
