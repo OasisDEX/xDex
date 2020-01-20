@@ -1,4 +1,5 @@
 import { tid } from '../../utils';
+import { Modal } from './Modal';
 
 type Operation = 'withdraw' | 'deposit';
 type Token = 'dai' | 'collateral';
@@ -6,17 +7,21 @@ type Token = 'dai' | 'collateral';
 const execute = (operation: Operation, amount: number, token: Token) => {
   cy.get(tid(`${operation}-actions-dropdown`)).trigger('mouseover');
   cy.get(tid(`${operation}-${token}`)).click();
-  cy.get(tid(`${operation}-form`)).should('be.visible').as('form');
-  cy.get('@form').find(tid('amount-input')).type(`${amount}`);
-  cy.get('@form').find(tid(`${operation}-btn`)).click();
-  cy.get('@form').find(tid('tx-status')).contains('Confirmed');
-  cy.get('@form').find(tid('close-btn')).click();
+  cy.get(tid(`leverage-ops-modal`)).find(tid('active-tab')).contains(new RegExp(operation, "i"));
+  cy.get(tid(`leverage-ops-modal`)).find(tid('amount-input')).type(`${amount}`);
+  cy.get(tid(`leverage-ops-modal`)).find(tid(`${operation}-btn`)).click();
+  cy.get(tid(`leverage-ops-modal`)).find(tid('tx-status')).contains('Confirmed');
+  Modal.close()
 };
 
 const summary = (property: string) =>
   cy.get(tid('my-position', tid('summary', tid(property))));
 
 export class Position {
+
+  public static new = (asset: 'DAI' | 'WETH') =>
+    cy.get(tid(`open-position-with-${asset}`));
+  
 
   public static withdrawCollateral = (amount: number) =>
     execute('withdraw', amount, 'collateral')

@@ -70,6 +70,7 @@ export class MTSimpleOrderPanel extends React.Component<
             size="md"
             color="primary"
             disabled={!ma}
+            data-test-id={`open-position-with-DAI`}
             onClick={() => this.transfer(UserActionKind.fund, 'DAI', ma!.name)}
           >Deposit DAI</Button>
           <br/>
@@ -77,6 +78,7 @@ export class MTSimpleOrderPanel extends React.Component<
             size="md"
             color="primary"
             disabled={!ma}
+            data-test-id={`open-position-with-${ma?.name}`}
             onClick={() => this.transfer(UserActionKind.fund, ma!.name, ma!.name)}
           >Deposit {ma && ma.name}</Button>
         </div>

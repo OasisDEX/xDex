@@ -1,42 +1,39 @@
 import { tid } from '../../utils';
 
 export class Account {
+
   public static shouldNotHaveProxy = () => {
-    cy.get(tid('create-proxy', tid('setup-proxy'))).should('be.enabled');
+    cy.get(tid(`create-proxy`, tid('step-completed'))).should('not.exist');
   }
 
   public static shouldHaveProxyCreated = () => {
     cy.get(tid('create-proxy', tid('step-completed'))).should('exist');
   }
 
-  // CFA - call for action
-  public static shouldHaveProxyCFAHidden = () => {
-    cy.get(tid('create-proxy')).should('not.be.visible');
-  }
-
-  // CFA - call for action
-  public static shouldHaveAllowanceCFAHidden = () => {
-    cy.get(tid('set-allowance')).should('not.be.visible');
-  }
-
   public static shouldNotHaveAllowance = () => {
-    cy.get(tid('set-allowance', tid('cfa-btn'))).should('be.enabled');
+    cy.get(tid('set-allowance', tid('step-completed'))).should('not.exist');
   }
 
-  public static shouldHaveOTCAllowanceSet = () => {
-    cy.get(tid('set-allowance', tid('step-completed'))).should('exist');
+  public static shouldSeeDepositForm = () => {
+    cy.get(tid('active-tab')).should('have.text', 'Deposit');
   }
 
   public static setupProxy = () => {
-    cy.get(tid('create-proxy', tid('setup-proxy'))).click();
+    cy.get(tid('create-proxy')).click();
   }
 
-  // tslint:disable-next-line:max-line-length
-  // TODO: This to be changed if necessary once Kuba figures out which we are giving the allowance to
-  public static setCollateralAllowance = () => {
-    cy.get(tid('set-allowance', tid('cfa-btn'))).click();
+  public static setAllowance = () => {
+    cy.get(tid('set-allowance')).click();
   }
 
+  public static deposit = (amount: number) => {
+    cy.get(tid('amount-input')).type(amount.toString());
+    cy.get(tid('deposit-btn')).click();
+  }
+
+  public static depositedAmount = ( amount : string | RegExp) => {
+    cy.get(tid('col-balance')).contains(amount);
+  }
   /* In order to use this method one should:
    * - create proxy
    * - set collateral allowance

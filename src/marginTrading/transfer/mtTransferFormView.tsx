@@ -17,9 +17,8 @@ import { InputGroup, InputGroupAddon } from '../../utils/forms/InputGroup';
 import { GasCost } from '../../utils/gasCost/GasCost';
 import { BorderBox, Hr } from '../../utils/layout/LayoutHelpers';
 import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
-import { ModalOpenerProps, ModalProps } from '../../utils/modal';
-import { Panel, PanelBody, PanelFooter, PanelHeader } from '../../utils/panel/Panel';
-import { TopRightCorner } from '../../utils/panel/TopRightCorner';
+import { ModalProps } from '../../utils/modal';
+import { Panel, PanelBody, PanelFooter } from '../../utils/panel/Panel';
 import { Muted } from '../../utils/text/Text';
 import { TransactionStateDescription } from '../../utils/text/TransactionStateDescription';
 import { zero } from '../../utils/zero';
@@ -36,12 +35,14 @@ import {
 } from './mtTransferForm';
 import * as styles from './mtTransferFormView.scss';
 import { SvgImage } from 'src/utils/icons/utils';
+import { hidden } from 'src/exchange/depthChart/DepthChartView.scss';
 
 type MTFundFormProps = MTTransferFormState & ModalProps;
 
 const tabLabels: Dictionary<string> = {
   [MTTransferFormTab.proxy]: 'Deploy proxy',
-  [MTTransferFormTab.transfer]: 'Deposit',
+  [UserActionKind.fund]: 'Deposit',
+  [UserActionKind.draw]: 'Withdraw',
 };
 
 interface StepComponentProps {
@@ -52,24 +53,26 @@ interface StepComponentProps {
   btnDisabled: boolean;
   stepCompleted: boolean;
   isLoading: boolean;
+  tid?: string;
 }
 
 class StepComponent extends React.Component<StepComponentProps> {
   public render() {
     const { title, description, btnLabel, btnAction,
-      stepCompleted, btnDisabled, isLoading } = this.props;
+      stepCompleted, btnDisabled, isLoading, tid } = this.props;
 
     return (<div className={styles.onboardingPanel}>
       <h3 className={styles.onboardingHeader}>{title}</h3>
       <div className={styles.onboardingParagraph}>{description}</div>
       <Button
         size="md"
+        data-test-id={tid}
         color={stepCompleted ? 'primaryOutlinedDone' : 'primary'}
         disabled={btnDisabled || isLoading || stepCompleted}
         onClick={() => btnAction()}
         className={classnames({ [styles.buttonDone]: stepCompleted })}
       >{
-        stepCompleted ? <SvgImage image={checkIconSvg}/> :
+        stepCompleted ? <SvgImage data-test-id="step-completed" image={checkIconSvg}/> :
           isLoading && !btnDisabled ?  <LoadingIndicator inline={true} /> : btnLabel
       }</Button>
 
@@ -121,12 +124,25 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
         overlayRef={onModalRef}
         shouldCloseOnEsc={true}
       >
-        <Panel className={styles.modalChild}>
+        <Panel className={styles.modalChild} data-test-id="leverage-ops-modal">
+          {/* 
+            * THIS IS A HACKY  WAY TO CLOSE THE MODAL SINCE I CAN"T CLICK OUTSIDE MODAL USING CYPRESS
+            * TODO: find different way to do it
+            * 
+            * START OF HACK
+            */}
+          <div style={{visibility: 'hidden', position: 'absolute'}}>
+            <Button onClick={this.close} data-test-id="close-modal">
+              TEST
+              </Button>
+          </div>
+          {/* END OF HACK */}
           <div className={styles.tabs}>
             {
               onboardingTabs.filter(
                 (_tab: string, index: number) => (index >= startIndex)
               ).map(_tab => {
+                const tab = _tab === MTTransferFormTab.proxy ? _tab : this.props.actionKind;
                 return (<div
                   className={
                     classnames({
@@ -134,7 +150,8 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
                       [styles.tabActive]: (_tab === currentTab)
                     })
                   }
-                  key={_tab}>{tabLabels[_tab]}</div>);
+                  data-test-id={_tab === currentTab ? 'active-tab' : null}
+                  key={_tab}>{tabLabels[tab]}</div>);
               })
             }
           </div>
@@ -146,7 +163,8 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
                   <StepComponent
                     title="Deploy proxy"
                     description={`Proxies are used to bundle multiple transactions into one,
-                saving transaction time and gas costs. This only has to be done once.`}
+                    saving transaction time and gas costs. This only has to be done once.`}
+                    tid='create-proxy'
                     btnLabel="Deploy Proxy"
                     btnAction={() => this.setup()}
                     btnDisabled={mta.proxy && mta.proxy.options.address !== nullAddress}
@@ -158,6 +176,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
                     description={`This permission allows Oasis smart contracts
                    to interact with your ${token}.
                    This has to be done for each asset type.`}
+                    tid="set-allowance"
                     btnLabel="Set allowance"
                     btnAction={() => this.allowance()}
                     isLoading={isLoading}
@@ -251,6 +270,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
             <div className={styles.orderSummaryValue}>
               { baseAsset && baseAsset.balance ?
                 <Money
+                  data-test-id="col-balance"
                   value={baseAsset.balance}
                   token={baseToken}
                   fallback="-"
@@ -263,6 +283,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
                   <span className={styles.transitionArrow} />
                   { this.props.balancePost ?
                     <Money
+                      data-test-id="post-col-balance"
                       value={this.props.balancePost}
                       token={baseToken}
                       fallback="-"
@@ -316,6 +337,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
             <div className={styles.orderSummaryValue}>
               { this.props.daiBalance &&
               <Money
+                data-test-id='dai-balance'
                 value={this.props.daiBalance}
                 token={'DAI'}
                 fallback="-"
@@ -328,6 +350,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
                   <span className={styles.transitionArrow} />
                   { this.props.daiBalancePost ?
                     <Money
+                      data-test-id="post-dai-balance"
                       value={this.props.daiBalancePost}
                       token={'DAI'}
                       fallback="-"
