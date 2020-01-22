@@ -375,7 +375,6 @@ export function setupAppContext() {
     dailyVolume$,
     marketDetails$,
   );
-  const TradingPairsTxRx = connect<TradingPairsProps, {}>(TradingPairView, tradingPairView$);
 
   const transactionNotifier$ =
     createTransactionNotifier$(transactions$, interval(5 * 1000), context$);
@@ -517,7 +516,6 @@ export function setupAppContext() {
     OrderbookPanelTxRx,
     InstantTxRx,
     PriceChartWithLoadingTxRx,
-    TradingPairsTxRx,
     TransactionNotifierTxRx,
     NetworkTxRx,
     TheFooterTxRx,
@@ -531,7 +529,8 @@ export function setupAppContext() {
     MTSetupButtonRxTx,
     // SAI2DAIMigrationTxRx,
     // DAI2SAIMigrationTxRx,
-    sai2DAIMigrationForm$
+    sai2DAIMigrationForm$,
+    tradingPairView$
   };
 }
 

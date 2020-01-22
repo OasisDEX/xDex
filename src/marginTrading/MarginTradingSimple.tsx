@@ -12,6 +12,7 @@ import { FlexLayoutRow } from '../utils/layout/FlexLayoutRow';
 import { Panel } from '../utils/panel/Panel';
 
 import * as styles from './MarginTradingSimple.scss';
+import { TradingPairViewHook } from 'src/exchange/tradingPair/TradingPairView';
 
 export interface MarginTradingOwnProps {
   setTradingPair: (tp: TradingPair) => void;
@@ -32,14 +33,7 @@ const Content = (props: any | { parentMatch: string }) => {
   return (
     <div>
       <FlexLayoutRow>
-        <Panel className={styles.tradingPairPanel}>
-          <theAppContext.Consumer>
-            { ({ TradingPairsTxRx }) =>
-              // @ts-ignore
-              <TradingPairsTxRx parentMatch={parentMatch} />
-            }
-          </theAppContext.Consumer>
-        </Panel>
+        <TradingPairViewHook parentMatch={parentMatch} />
       </FlexLayoutRow>
       <FlexLayoutRow>
         <Panel className={styles.priceChartPanel} footerBordered={true}>

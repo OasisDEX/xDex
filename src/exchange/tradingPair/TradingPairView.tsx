@@ -9,13 +9,18 @@ import {
   FormatAmount, FormatPercent, FormatPrice, FormatQuoteToken
 } from '../../utils/formatters/Formatters';
 import { Loadable } from '../../utils/loadable';
-import { WithLoadingIndicatorInline } from '../../utils/loadingIndicator/LoadingIndicator';
+import { WithLoadingIndicatorInline, LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
 import { ServerUnreachableInline } from '../../utils/loadingIndicator/ServerUnreachable';
 import { Scrollbar } from '../../utils/Scrollbar/Scrollbar';
 import { BoundarySpan, InfoLabel } from '../../utils/text/Text';
 import { MarketsDetails } from '../exchange';
 import { TradingPair, tradingPairResolver, TradingPairsProps } from './tradingPair';
 import * as styles from './TradingPairView.scss';
+import { useState, useEffect, useContext } from 'react';
+import { theAppContext } from 'src/AppContext';
+import { useObservable } from 'src/utils/observableHook';
+import { Panel } from 'src/utils/panel/Panel';
+import { observable } from 'rxjs';
 
 interface PairInfoVP {
   value: any;
@@ -23,19 +28,33 @@ interface PairInfoVP {
   dataTestId ?: string;
 }
 
-interface TradingPairViewState {
-  showMenu: boolean;
-}
+export const TradingPairView = (props: TradingPairsProps) => {
 
-export class TradingPairView extends React.Component<TradingPairsProps, TradingPairViewState> {
+  const [ showMenu, toggleMenu ] = useState(false);
 
-  public static PairVP({ pair, parentMatch, marketsDetailsLoadable, clickHandler }: {
+  useEffect(() => {
+    showMenu
+      ? document.addEventListener('click', closeMenu)
+      : document.removeEventListener('click', closeMenu);
+  }, [showMenu]);
+
+  const toggle = () => {
+    toggleMenu(!showMenu);
+  }
+
+  const closeMenu = (_event: any) => {
+    if (_event.path.filter((p: any) => p.className === styles.dropdown).length === 0) {
+      toggleMenu(false);
+    }
+  }
+
+  const PairVP = (props: {
     pair: TradingPair,
     parentMatch?: string,
     marketsDetailsLoadable: Loadable<MarketsDetails>,
     clickHandler: () => void,
-  }) {
-
+  }) => {
+    const { pair, parentMatch, marketsDetailsLoadable, clickHandler } = props;
     const pathname = `${parentMatch}/${pair.base}/${pair.quote}`;
 
     return (
@@ -56,16 +75,17 @@ export class TradingPairView extends React.Component<TradingPairsProps, TradingP
             });
           }}
         >
-          <TradingPairView.PairView {...{ pair, marketsDetailsLoadable }} />
+          <PairView {...{ pair, marketsDetailsLoadable }} />
         </NavLink>
       </li>
     );
+    
   }
 
-  public static PairView({ pair, marketsDetailsLoadable }: {
+  const PairView = ({ pair, marketsDetailsLoadable }: {
     pair: TradingPair,
     marketsDetailsLoadable: Loadable<MarketsDetails>,
-  }) {
+  })  => {
     const { base, quote } = pair;
     return (
       <>
@@ -99,8 +119,7 @@ export class TradingPairView extends React.Component<TradingPairsProps, TradingP
     );
   }
 
-  public static ActivePairView({ base, quote }: any) {
-    return (
+  const ActivePairView = ({ base, quote }: any) => (
       <div  data-test-id="active-pair" className={styles.activePairView}>
         <div className={styles.activePairViewIcon}>{getToken(base).iconCircle}</div>
         <span data-test-id="base" className={styles.activePairViewTokenBase}>{base}</span>
@@ -110,11 +129,10 @@ export class TradingPairView extends React.Component<TradingPairsProps, TradingP
         <span className={styles.dropdownIcon}/>
       </div>
     );
-  }
 
-  public static YesterdayPriceVP(
+  const YesterdayPriceVP = (
     { yesterdayPriceChange }: { yesterdayPriceChange: BigNumber | undefined }
-  ) {
+  ) => {
     return !yesterdayPriceChange ? null : (
       <BoundarySpan value={yesterdayPriceChange}>
         <FormatPercent value={yesterdayPriceChange} plus={true} fallback=""/>
@@ -122,8 +140,7 @@ export class TradingPairView extends React.Component<TradingPairsProps, TradingP
     );
   }
 
-  public static PairInfoVP({ value, label, dataTestId }: PairInfoVP) {
-    return (
+  const PairInfoVP = ({ value, label, dataTestId }: PairInfoVP) => (
       <div className={styles.pairInfo}>
         <div data-test-id={dataTestId} className={styles.mobileWrapper}>
           <span data-test-id="value" className={styles.pairInfoValue}>{value}</span>
@@ -131,16 +148,7 @@ export class TradingPairView extends React.Component<TradingPairsProps, TradingP
         </div>
       </div>
     );
-  }
 
-  public constructor(props: TradingPairsProps) {
-    super(props);
-    this.state = {
-      showMenu: false,
-    };
-  }
-
-  public render() {
     const {
       parentMatch = '/',
       base,
@@ -148,7 +156,7 @@ export class TradingPairView extends React.Component<TradingPairsProps, TradingP
       quote,
       weeklyVolume,
       yesterdayPriceChange
-    } = this.props;
+    } = props;
     const dropdownDisabled = tradingPairs.length <= 1;
 
     return (
@@ -156,25 +164,25 @@ export class TradingPairView extends React.Component<TradingPairsProps, TradingP
         <div className={styles.dropdown}>
           <div tabIndex={dropdownDisabled ? undefined : -1}
                data-test-id="select-pair"
-               onClick={dropdownDisabled ? undefined : this.showMenu}
+               onClick={dropdownDisabled ? undefined : toggle}
                className={classnames(styles.dropdownBtn, {
                  [styles.dropdownBtnDisabled]: dropdownDisabled,
-                 [styles.dropdownBtnActive]: this.state.showMenu
+                 [styles.dropdownBtnActive]: showMenu
                })}>
-            <TradingPairView.ActivePairView base={base} quote={quote}/>
+            <ActivePairView base={base} quote={quote}/>
           </div>
           {
-            this.state.showMenu && (
+            showMenu && (
               <div className={styles.dropdownListWrapper}>
                 <ul className={styles.dropdownList}>
                   <Scrollbar autoHeight={true}>
                     {tradingPairs.map((pair, i) => (
-                      <TradingPairView.PairVP
+                      <PairVP
                         key={i}
                         parentMatch={parentMatch}
                         pair={pair}
-                        marketsDetailsLoadable={this.props.marketsDetails}
-                        clickHandler={this.closeMenuHandler}
+                        marketsDetailsLoadable={props.marketsDetails}
+                        clickHandler={toggle}
                       />
                     ))}
                   </Scrollbar>
@@ -184,7 +192,7 @@ export class TradingPairView extends React.Component<TradingPairsProps, TradingP
           }
         </div>
         <div className={styles.container} data-test-id="trading-pair-info">
-          <TradingPairView.PairInfoVP dataTestId="last-price" label="Last price" value={
+          <PairInfoVP dataTestId="last-price" label="Last price" value={
             <WithLoadingIndicatorInline
               error={<ServerUnreachableInline fallback="-"/>}
               loadable={currentPrice}
@@ -197,7 +205,7 @@ export class TradingPairView extends React.Component<TradingPairsProps, TradingP
               )}
             </WithLoadingIndicatorInline>
           }/>
-          <TradingPairView.PairInfoVP dataTestId="24h-price" label="24h price" value={
+          <PairInfoVP dataTestId="24h-price" label="24h price" value={
             <WithLoadingIndicatorInline
               error={<ServerUnreachableInline fallback="-"/>}
               loadable={yesterdayPriceChange}
@@ -205,14 +213,14 @@ export class TradingPairView extends React.Component<TradingPairsProps, TradingP
             >
               {(yesterdayPriceChangeLoaded?: BigNumber) => (
                 yesterdayPriceChangeLoaded ?
-                  <TradingPairView.YesterdayPriceVP
+                  <YesterdayPriceVP
                     yesterdayPriceChange={yesterdayPriceChangeLoaded}
                   /> :
                   <span>?</span>
               )}
             </WithLoadingIndicatorInline>
           }/>
-          <TradingPairView.PairInfoVP dataTestId="24h-volume" label="24h volume" value={
+          <PairInfoVP dataTestId="24h-volume" label="24h volume" value={
             <WithLoadingIndicatorInline
               loadable={weeklyVolume}
               className={styles.pairInfo}
@@ -226,33 +234,24 @@ export class TradingPairView extends React.Component<TradingPairsProps, TradingP
         </div>
       </>
     );
+
+}
+
+export const TradingPairViewHook = (props: {
+  parentMatch?: string;
+}) => {
+  const { tradingPairView$ } = useContext(theAppContext);
+  const observableProps = useObservable<TradingPairsProps>(tradingPairView$);
+
+  if(observableProps){
+    return (
+      <Panel className={classnames(
+        styles.tradingPairPanel,
+      )}>
+        <TradingPairView { ...{...observableProps, ...props} }/>
+      </Panel>
+    )
   }
-
-  private showMenu = (event: any) => {
-    event.preventDefault();
-
-    this.setState({ showMenu: true }, () => {
-      document.addEventListener('click', this.closeMenu);
-    });
-
-    if (this.props.setPairPickerOpen) {
-      this.props.setPairPickerOpen(true);
-    }
-  }
-
-  private closeMenu = (_event: any) => {
-    if (_event.path.filter((p: any) => p.className === styles.dropdown).length === 0) {
-      this.closeMenuHandler();
-    }
-  }
-
-  private closeMenuHandler = () => {
-    this.setState({ showMenu: false }, () => {
-      document.removeEventListener('click', this.closeMenu);
-    });
-
-    if (this.props.setPairPickerOpen) {
-      this.props.setPairPickerOpen(false);
-    }
-  }
+  
+  return null;
 }

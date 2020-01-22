@@ -1,7 +1,7 @@
 import { BigNumber } from 'bignumber.js';
 import { first, memoize } from 'lodash';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { map, switchMap, shareReplay } from 'rxjs/operators';
 
 import { tradingPairs } from '../../blockchain/config';
 import {
@@ -63,7 +63,6 @@ export interface TradingPairsProps {
   yesterdayPriceChange: Loadable<BigNumber | undefined>;
   weeklyVolume: Loadable<BigNumber>;
   marketsDetails: Loadable<MarketsDetails>;
-  setPairPickerOpen?: (open: boolean) => void;
 }
 
 export function createTradingPair$(
@@ -90,5 +89,6 @@ export function createTradingPair$(
         select: currentTradingPair$$.next.bind(currentTradingPair$$),
       })
     ),
+    shareReplay(1)
   );
 }
