@@ -157,7 +157,7 @@ export class MTMyPositionView extends
           <div className={styles.MTPositionColumn}>
             <div className={styles.summaryRow}>
               <div className={styles.summaryLabel}>
-                Balance
+                {ma.name} Bal
               </div>
               <div className={styles.summaryValue}>
                 {
@@ -168,11 +168,22 @@ export class MTMyPositionView extends
                       fallback="-"
                     /> : <span>-</span>
                 }
+                <br/>
+                 {
+                  ma.balanceInDai &&
+                    <>
+                      (<Money
+                        value={ma.balanceInDai}
+                        token="DAI"
+                        fallback="-"
+                      />)
+                    </>
+                }
               </div>
             </div>
             <div className={styles.summaryRow}>
               <div className={styles.summaryLabel}>
-                DAI Balance
+                DAI Bal
               </div>
               <div className={styles.summaryValue}>
                 { ma && ma.debt.gt(zero) ?
@@ -205,17 +216,17 @@ export class MTMyPositionView extends
 
               </div>
             </div>
-            <div className={styles.summaryRow}>
-              <div className={styles.summaryLabel}>
-                Purchasing power
-              </div>
-              <div className={styles.summaryValue}>
-                {
-                  ma.purchasingPower &&
-                    formatPrecision(ma.purchasingPower, 2)
-                }
-              </div>
-            </div>
+            {/*<div className={styles.summaryRow}>*/}
+              {/*<div className={styles.summaryLabel}>*/}
+                {/*Purchasing power*/}
+              {/*</div>*/}
+              {/*<div className={styles.summaryValue}>*/}
+                {/*{*/}
+                  {/*ma.purchasingPower &&*/}
+                    {/*formatPrecision(ma.purchasingPower, 2)*/}
+                {/*}*/}
+              {/*</div>*/}
+            {/*</div>*/}
           </div>
         </div>
         <div>
