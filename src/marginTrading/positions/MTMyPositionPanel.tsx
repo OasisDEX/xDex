@@ -3,9 +3,8 @@ import * as styles from '../../balances/mtBalancesView.scss';
 
 import { SvgImage } from '../../utils/icons/utils';
 import { Loadable } from '../../utils/loadable';
-import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
 import { ModalOpenerProps, ModalProps } from '../../utils/modal';
-import { PanelBody, PanelHeader } from '../../utils/panel/Panel';
+import { Panel, PanelBody, PanelHeader } from '../../utils/panel/Panel';
 import {
   MarginableAsset, MTAccount,
   MTAccountState, UserActionKind
@@ -44,7 +43,7 @@ export class MTMyPositionPanel
         `${this.props.value.ma.name} Position` : 'My Position';
       if (this.props.value && !this.props.value.account) {
         return (
-          <div>
+          <Panel style={{ flexGrow: 1 }}>
             <PanelHeader>{panelTitle}</PanelHeader>
             {
               this.props.value.ma && this.props.value.ma.name &&
@@ -52,7 +51,7 @@ export class MTMyPositionPanel
                 <LoggedOut view={`${this.props.value.ma.name} Position`}/>
               </div>
             }
-          </div>
+          </Panel>
         );
       }
 
@@ -61,47 +60,15 @@ export class MTMyPositionPanel
 
         if (mta && mta.proxy && ma && (ma.balance.gt(zero) || ma.dai.gt(zero))) {
           return (
-            <MTMyPositionPanelInternal {...this.props.value} {...{ open: this.props.open }} />
+            <Panel style={{ flexGrow: 1 }}>
+              <MTMyPositionPanelInternal {...this.props.value} {...{ open: this.props.open }} />
+            </Panel>
           );
         }
-
-        return this.CallForDeposit(ma);
       }
     }
 
-    return <div>
-      <PanelHeader>My Position</PanelHeader>
-      <LoadingIndicator/>
-    </div>;
-  }
-
-  // todo: refactor to separate component
-  public CallForDeposit(ma?: MarginableAsset) {
-    return (
-      <div className={styles.onboardingPanel}>
-        <div className={styles.onboardingParagraph}>
-          Before opening a new position, deposit WETH
-          or DAI into your Leverage Trading Account
-        </div>
-        <div className={styles.buttonsGroup}>
-          <Button
-            size="md"
-            color="primary"
-            disabled={!ma}
-            className={styles.groupInlineButton}
-            onClick={() => this.transfer(UserActionKind.fund, 'DAI', ma!.name)}
-          >Deposit DAI</Button>
-          <br/>
-          <Button
-            size="md"
-            color="primary"
-            disabled={!ma}
-            className={styles.groupInlineButton}
-            onClick={() => this.transfer(UserActionKind.fund, ma!.name, ma!.name)}
-          >Deposit {ma && ma.name}</Button>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   public transfer (actionKind: UserActionKind, token: string, ilk?: string) {

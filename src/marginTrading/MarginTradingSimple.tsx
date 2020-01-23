@@ -70,14 +70,12 @@ const Content = (props: any | { parentMatch: string }) => {
         </Panel>
       </FlexLayoutRow>
       <FlexLayoutRow>
-        <Panel style={{ flexGrow: 1 }}>
-          <theAppContext.Consumer>
-            { ({ MTMyPositionPanelRxTx }) =>
-              // @ts-ignore
-              <MTMyPositionPanelRxTx/>
-            }
-          </theAppContext.Consumer>
-        </Panel>
+        <theAppContext.Consumer>
+          { ({ MTMyPositionPanelRxTx }) =>
+            // @ts-ignore
+            <MTMyPositionPanelRxTx/>
+          }
+        </theAppContext.Consumer>
       </FlexLayoutRow>
     </div>
   );
