@@ -331,7 +331,7 @@ function validate(state: MTSimpleFormState): MTSimpleFormState {
 
     if (state.orderbook) {
       const offers = state.kind === OfferType.buy ? state.orderbook.sell : state.orderbook.buy;
-      const [isSellable, log, amount, reason] = sellable(
+      const [isSellable, log, , reason] = sellable(
         baseAsset, offers, state.amount || baseAsset.availableBalance
       );
 
