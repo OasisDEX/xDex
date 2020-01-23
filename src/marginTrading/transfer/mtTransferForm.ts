@@ -65,6 +65,7 @@ export type ManualChange = TokenChange | AmountFieldChange | IlkFieldChange;
 export enum MTTransferFormTab {
   proxy = 'proxy',
   transfer = 'transfer',
+  buy = 'buy',
 }
 
 export interface MTTransferFormState extends HasGasEstimation {

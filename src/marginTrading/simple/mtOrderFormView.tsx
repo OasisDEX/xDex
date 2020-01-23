@@ -127,7 +127,7 @@ import * as styles from './mtOrderFormView.scss';
 //   width: 'auto',
 // };
 
-export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
+export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
 
   private amountInput?: HTMLElement;
   private priceInput?: HTMLElement;
@@ -215,10 +215,6 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
     </div>);
   }
 
-  private switchToSettings = () => {
-    this.props.change({ kind: FormChangeKind.viewChange, value: ViewKind.settings });
-  }
-
   private switchToInstantOrderForm = () => {
     this.props.change({ kind: FormChangeKind.viewChange, value: ViewKind.instantTradeForm });
   }
@@ -242,105 +238,55 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
     return (<div className={styles.summaryBox}>
       {this.purchasingPower2()}
       {this.accountBalance()}
-      {/*{this.leverage()}*/}
-      {/*{ this.collateralizationRatio() }*/}
       {this.liquidationPrice()}
       {this.price()}
       {this.slippageLimit()}
-      {/*{this.balanceButtons()}*/}
-      {/*{this.interestRate()}*/}
     </div>);
   }
 
   private instantOrderForm = () => {
     return (
       <>
-        <PanelHeader>
-          Instant Order
-          {this.headerButtons()}
-        </PanelHeader>
-        <PanelBody style={{ minWidth: '455px' }}>
-          <form
-            onSubmit={this.handleProceed}
-          >
-            {/*{ this.orderType() }*/}
-            {/*{ this.balanceButtons() }*/}
-            {/*{ this.purchasingPower() }*/}
-            {this.renderAccountInfo()}
-            {this.feesBox()}
-            <Hr color="dark" className={styles.hrMargin}/>
-            {this.amount()}
-            {/*{ this.price() }*/}
-            {this.total()}
-            {/*{ this.gasCost() }*/}
-            {this.proceedButton()}
-          </form>
-        </PanelBody>
-        {/*{this.props && <DevInfos value={this.props as MTSimpleFormState}/>}*/}
+        <form
+          onSubmit={this.handleProceed}
+        >
+          {this.renderAccountInfo()}
+          {this.feesBox()}
+          <Hr color="dark" className={styles.hrMargin}/>
+          {this.amount()}
+          {this.total()}
+          {this.proceedButton()}
+        </form>
       </>
     );
   }
 
   private advancedSettings = () => (
     <>
-      <PanelHeader>
-        Advanced Settings
-      </PanelHeader>
-      <Hr color="dark" className={styles.hrSmallMargin}/>
-      <PanelBody>
-        <div className={formStyles.pickerOrderType}>
-          <Radio
-            dataTestId="fillOrKill"
-            name="orderType"
-            value="direct"
-            defaultChecked={true}
-          >
-            Average price fill or kill order type
-          </Radio>
-          <Muted className={formStyles.pickerDescription}>
-            The order is executed in its entirety such that the average fill price is
-            the limit price or better, otherwise it is canceled
-          </Muted>
-          { this.slippageLimitForm() }
-        </div>
-      </PanelBody>
-      <PanelFooter className={styles.settingsFooter}>
-        <Button
-          className={formStyles.confirmButton}
-          type="submit"
-          onClick={this.switchToInstantOrderForm}
+      <div className={formStyles.pickerOrderType}>
+        <Radio
+          dataTestId="fillOrKill"
+          name="orderType"
+          value="direct"
+          defaultChecked={true}
         >
-          Done
-        </Button>
-      </PanelFooter>
+          Average price fill or kill order type
+        </Radio>
+        <Muted className={formStyles.pickerDescription}>
+          The order is executed in its entirety such that the average fill price is
+          the limit price or better, otherwise it is canceled
+        </Muted>
+        { this.slippageLimitForm() }
+      </div>
+      <Button
+        className={formStyles.confirmButton}
+        type="submit"
+        onClick={this.switchToInstantOrderForm}
+      >
+        Done
+      </Button>
     </>
   )
-
-  private headerButtons()   {
-    return (
-      <>
-        <SettingsIcon className={styles.settingsIcon}
-                      onClick={this.switchToSettings}
-        />
-        <ButtonGroup>
-          <Button
-            data-test-id="new-buy-order"
-            className={styles.btn}
-            onClick={() => this.handleKindChange(OfferType.buy)}
-            color={this.props.kind === OfferType.buy ? 'primary' : 'greyOutlined'}
-            size="sm"
-          >Buy</Button>
-          <Button
-            data-test-id="new-sell-order"
-            className={styles.btn}
-            onClick={() => this.handleKindChange(OfferType.sell)}
-            color={this.props.kind === OfferType.sell ? 'danger' : 'greyOutlined'}
-            size="sm"
-          >Sell</Button>
-        </ButtonGroup>
-      </>
-    );
-  }
 
   private liquidationPrice() {
     const liquidationPrice = this.props.liquidationPrice ?
@@ -702,20 +648,6 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
         </InputGroup>
         <Error field="total" messages={this.props.messages} />
       </div>
-
-      // {/*<div>*/}
-      //   {/*<div className={styles.flexContainer}>*/}
-      //     {/*<span><Muted>Total</Muted></span>*/}
-      //     {/*<span>*/}
-      //           {/*{this.props.total && <FormatAmount*/}
-      //             {/*value={this.props.total} token={this.props.quoteToken}*/}
-      //           {/*/>}*/}
-      //       {/*&#x20;*/}
-      //       {/*{this.props.quoteToken}*/}
-      //     {/*</span>*/}
-      //   {/*</div>*/}
-      //   {/*<Error field="total" messages={this.props.messages} />*/}
-      // {/*</div>*/}
     );
   }
 
@@ -771,7 +703,166 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
       </InputGroup>
     );
   }
+}
 
+export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
+
+  private slippageLimitInput?: HTMLElement;
+
+  public handleKindChange(kind: OfferType) {
+    this.props.change({
+      kind: FormChangeKind.kindChange,
+      newKind: kind,
+    });
+  }
+
+  public handleSlippageLimitChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = new BigNumber(e.target.value.replace(/,/g, ''));
+    if (!value.isNaN()) {
+      this.props.change({
+        kind: FormChangeKind.slippageLimitChange,
+        value: value.div(100),
+      });
+    }
+  }
+
+  public handleSlippageLimitFocus = () => {
+    if (this.slippageLimitInput) {
+      this.slippageLimitInput.focus();
+    }
+  }
+
+  public render() {
+    return (
+      <>
+        <PanelHeader>
+          {
+            this.props.view === ViewKind.instantTradeForm ?
+              <>
+                Manage your Leverage
+                 {this.headerButtons()}
+              </>
+              : 'Advanced Settings'
+          }
+        </PanelHeader>
+        <PanelBody style={{ minWidth: '455px' }}>
+          {
+            this.props.view === ViewKind.instantTradeForm
+              ? <MtSimpleOrderFormBody {...this.props} />
+              : this.advancedSettings()
+          }
+        </PanelBody>
+        {
+          this.props.view === ViewKind.settings &&
+          <PanelFooter className={styles.settingsFooter}>
+            <Button
+              className={formStyles.confirmButton}
+              type="submit"
+              onClick={this.switchToInstantOrderForm}
+            >
+              Done
+            </Button>
+          </PanelFooter>
+        }
+    </>);
+  }
+
+  private switchToSettings = () => {
+    this.props.change({ kind: FormChangeKind.viewChange, value: ViewKind.settings });
+  }
+
+  private switchToInstantOrderForm = () => {
+    this.props.change({ kind: FormChangeKind.viewChange, value: ViewKind.instantTradeForm });
+  }
+
+  private advancedSettings = () => (
+    <>
+      <div className={formStyles.pickerOrderType}>
+        <Radio
+          dataTestId="fillOrKill"
+          name="orderType"
+          value="direct"
+          defaultChecked={true}
+        >
+          Average price fill or kill order type
+        </Radio>
+        <Muted className={formStyles.pickerDescription}>
+          The order is executed in its entirety such that the average fill price is
+          the limit price or better, otherwise it is canceled
+        </Muted>
+        { this.slippageLimitForm() }
+      </div>
+    </>
+  )
+
+  private headerButtons()   {
+    return (
+      <>
+        <SettingsIcon className={styles.settingsIcon}
+                      onClick={this.switchToSettings}
+        />
+        <ButtonGroup>
+          <Button
+            data-test-id="new-buy-order"
+            className={styles.btn}
+            onClick={() => this.handleKindChange(OfferType.buy)}
+            color={this.props.kind === OfferType.buy ? 'primary' : 'greyOutlined'}
+            size="sm"
+          >Buy</Button>
+          <Button
+            data-test-id="new-sell-order"
+            className={styles.btn}
+            onClick={() => this.handleKindChange(OfferType.sell)}
+            color={this.props.kind === OfferType.sell ? 'danger' : 'greyOutlined'}
+            size="sm"
+          >Sell</Button>
+        </ButtonGroup>
+      </>
+    );
+  }
+
+  private slippageLimitForm() {
+    const slippageLimit = this.props.slippageLimit
+      ? this.props.slippageLimit.times(100).valueOf()
+      : '';
+    return (
+      <InputGroup
+        sizer="lg"
+        style={ { marginTop: '24px' } }
+      >
+        <InputGroupAddon className={formStyles.inputHeader}>
+          Slippage limit
+        </InputGroupAddon>
+        <div className={formStyles.inputTail}>
+          <BigNumberInput
+            ref={ (el: any) =>
+              this.slippageLimitInput = (el && ReactDOM.findDOMNode(el) as HTMLElement) || undefined
+            }
+            data-test-id="slippage-limit"
+            type="text"
+            mask={createNumberMask({
+              allowDecimal: true,
+              precision: 2,
+              prefix: ''
+            })}
+            pipe={
+              lessThanOrEqual(new BigNumber(100))
+            }
+            onChange={this.handleSlippageLimitChange}
+            value={ slippageLimit }
+            guide={true}
+            placeholder={ slippageLimit }
+            className={styles.input}
+          />
+          <InputGroupAddon className={formStyles.inputPercentAddon}
+                           onClick={this.handleSlippageLimitFocus}
+          >
+            %
+          </InputGroupAddon>
+        </div>
+      </InputGroup>
+    );
+  }
 }
 
 const Error = ({ field, messages } : { field: string, messages?: Message[] }) => {

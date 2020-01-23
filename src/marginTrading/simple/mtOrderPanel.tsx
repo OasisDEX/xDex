@@ -32,7 +32,7 @@ export class MTSimpleOrderPanel extends React.Component<
     if (this.props.tradingPair.quote !== 'DAI') {
       return (
         <div>
-          <PanelHeader>Instant Order</PanelHeader>
+          <PanelHeader>Manage Your Leverage</PanelHeader>
           <div className={styles.orderPanel}>Choose DAI<br/> to create a position
           </div>
         </div>
@@ -52,7 +52,7 @@ export class MTSimpleOrderPanel extends React.Component<
     }
 
     return <div className={styles.orderPanel}>
-      <PanelHeader>Instant Order</PanelHeader>
+      <PanelHeader>Manage Your Leverage</PanelHeader>
       <LoadingIndicator size="lg"/>
     </div>;
   }

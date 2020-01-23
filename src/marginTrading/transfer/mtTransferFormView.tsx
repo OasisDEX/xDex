@@ -19,10 +19,15 @@ import { SvgImage } from '../../utils/icons/utils';
 import { BorderBox, Hr } from '../../utils/layout/LayoutHelpers';
 import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
 import { ModalProps } from '../../utils/modal';
-import { Panel, PanelBody, PanelFooter } from '../../utils/panel/Panel';
+import { Panel, PanelBody, PanelFooter, PanelHeader } from '../../utils/panel/Panel';
 import { Muted } from '../../utils/text/Text';
 import { TransactionStateDescription } from '../../utils/text/TransactionStateDescription';
 import { zero } from '../../utils/zero';
+
+import { theAppContext } from 'src/AppContext';
+import { LoadableWithTradingPair } from '../../utils/loadable';
+import { MTSimpleFormState } from '../simple/mtOrderForm';
+import { MtSimpleOrderFormBody } from '../simple/mtOrderFormView';
 import {
   CashAsset,
   findAsset, findMarginableAsset,
@@ -41,6 +46,7 @@ type MTFundFormProps = MTTransferFormState & ModalProps;
 const tabLabels: Dictionary<string> = {
   [MTTransferFormTab.proxy]: 'Deploy proxy',
   [MTTransferFormTab.transfer]: 'Deposit',
+  [MTTransferFormTab.buy]: 'Buy',
 };
 
 interface StepComponentProps {
@@ -106,9 +112,16 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
     const isLoading = (progress === ProgressStage.waitingForApproval
       || progress === ProgressStage.waitingForConfirmation);
 
-    const currentTab = mta &&
-    (mta.proxy && mta.proxy.options.address !== nullAddress && allowance(mta, token)) ?
-      MTTransferFormTab.transfer : MTTransferFormTab.proxy;
+    let currentTab = MTTransferFormTab.proxy;
+
+    if (mta && (mta.proxy && mta.proxy.options.address !== nullAddress && allowance(mta, token))) {
+      currentTab = MTTransferFormTab.transfer;
+    }
+
+    const ma = findMarginableAsset(token, mta);
+    if (mta && ma && ma.purchasingPower.gt(zero)) {
+      currentTab = MTTransferFormTab.buy;
+    }
 
     return (
       <ReactModal
@@ -138,9 +151,11 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
             }
           </div>
 
-          {mta ?
+          {
+            mta ?
             <>
-              {currentTab === MTTransferFormTab.proxy ?
+              {
+                currentTab === MTTransferFormTab.proxy &&
                 <>
                   <StepComponent
                     title="Deploy proxy"
@@ -165,7 +180,10 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
                     }
                     stepCompleted={mta && allowance(mta, token)}
                   />
-                </> :
+                </>
+              }
+              {
+                currentTab === MTTransferFormTab.transfer &&
                 <>
                   {allowance(mta, token) && mta.proxy && <>
                     <PanelBody paddingTop={true} style={{ height: '287px' }}>
@@ -177,6 +195,16 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
                   </>
                   }
                 </>
+              }
+              {
+                currentTab === MTTransferFormTab.buy &&
+                  <>
+                    <theAppContext.Consumer>
+                      {
+                        // @ts-ignore
+                        ({ MTSimpleOrderBuyPanelRxTx }) => <MTSimpleOrderBuyPanelRxTx /> }
+                    </theAppContext.Consumer>
+                  </>
               }
             </> : <LoadingIndicator/>
           }
@@ -490,5 +518,39 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
         return msg.message;
     }
   }
+}
 
+export class MTSimpleOrderBuyPanel extends React.Component<
+  LoadableWithTradingPair<MTSimpleFormState>
+> {
+  public render() {
+    if (this.props.tradingPair.quote !== 'DAI') {
+      return (
+        <div>
+          <PanelHeader>Manage Your Leverage</PanelHeader>
+          <div
+            // className={styles.orderPanel}
+          >Choose DAI<br/> to create a position
+          </div>
+        </div>
+      );
+    }
+
+    if (this.props.status === 'loaded' && this.props.value && this.props.value.mta) {
+      const formState = this.props.value;
+      const { mta } = formState;
+      const ma = findMarginableAsset(formState.baseToken, mta);
+
+      if (mta && mta.proxy && ma && (ma.balance.gt(zero) || ma.dai.gt(zero))) {
+        return (<MtSimpleOrderFormBody {...{ ...this.props, ...formState }} />);
+      }
+    }
+
+    return <div
+      // className={styles.orderPanel}
+    >
+      <PanelHeader>Manage Your Leverage</PanelHeader>
+      <LoadingIndicator size="lg"/>
+    </div>;
+  }
 }

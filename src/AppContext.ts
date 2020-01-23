@@ -139,6 +139,7 @@ import {
   CreateMTFundForm$,
   createMTTransferForm$
 } from './marginTrading/transfer/mtTransferForm';
+import { MTSimpleOrderBuyPanel } from './marginTrading/transfer/mtTransferFormView';
 import { createTransactionNotifier$ } from './transactionNotifier/transactionNotifier';
 import {
   TransactionNotifierPros,
@@ -270,7 +271,12 @@ export function setupAppContext() {
     onEveryBlock$,
   );
 
-  const { MTSimpleOrderPanelRxTx, MTMyPositionPanelRxTx, MTSimpleOrderbookPanelTxRx } =
+  const {
+    MTSimpleOrderPanelRxTx,
+    MTSimpleOrderBuyPanelRxTx,
+    MTMyPositionPanelRxTx,
+    MTSimpleOrderbookPanelTxRx
+  } =
     mtSimpleOrderForm(mta$, currentOrderbook$, createMTFundForm$, approveMTProxy);
 
   const MTAccountDetailsRxTx = connect<MTAccount, {}>(MtAccountDetailsView, mta$);
@@ -522,6 +528,7 @@ export function setupAppContext() {
     TheFooterTxRx,
     TaxExporterTxRx,
     MTSimpleOrderPanelRxTx,
+    MTSimpleOrderBuyPanelRxTx,
     MTMyPositionPanelRxTx,
     MTSimpleOrderbookPanelTxRx,
     MTAccountDetailsRxTx,
@@ -577,6 +584,10 @@ function mtSimpleOrderForm(
       ),
       { createMTFundForm$ }
     );
+
+  // @ts-ignore
+  const MTSimpleOrderBuyPanelRxTx =
+    connect(MTSimpleOrderBuyPanel, mtOrderFormLoadable$);
 
   const redeem = createRedeem(calls$);
 
@@ -647,7 +658,12 @@ function mtSimpleOrderForm(
       { DepthChartWithLoadingTxRx, OrderbookViewTxRx }),
     orderbookPanel$);
 
-  return { MTSimpleOrderPanelRxTx, MTMyPositionPanelRxTx, MTSimpleOrderbookPanelTxRx };
+  return {
+    MTSimpleOrderPanelRxTx,
+    MTSimpleOrderBuyPanelRxTx,
+    MTMyPositionPanelRxTx,
+    MTSimpleOrderbookPanelTxRx
+  };
 }
 
 function offerMake(
