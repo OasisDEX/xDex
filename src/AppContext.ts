@@ -530,7 +530,8 @@ export function setupAppContext() {
     // SAI2DAIMigrationTxRx,
     // DAI2SAIMigrationTxRx,
     sai2DAIMigrationForm$,
-    tradingPairView$
+    tradingPairView$,
+    mtSetupForm$
   };
 }
 

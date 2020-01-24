@@ -12,29 +12,45 @@ import { TransactionStateDescription } from '../../utils/text/TransactionStateDe
 import { MTAccountState } from '../state/mtAccount';
 import { MTSetupFormState, MTSetupProgressState } from './mtSetupForm';
 import * as styles from './mtSetupFormView.scss';
+import { Observable } from 'rxjs';
+import { useObservable } from 'src/utils/observableHook';
+import { useModal } from 'src/utils/modalHook';
+import { render } from 'react-dom';
+import { theAppContext } from 'src/AppContext';
+import { curry } from 'ramda';
 
-export class MTSetupButton extends React.Component<MTSetupFormState & ModalOpenerProps> {
-  public render() {
-    return (
-      <Button size="sm"
-              color="primary"
-              className={styles.setupBtn}
-              disabled={
-                this.props.mtaState === MTAccountState.setup ||
-                this.props.stage !== FormStage.idle
-              }
-              onClick={() => this.setup()}
-      >
-        Create proxy
-      </Button>
-    );
+export function MTSetupButton() {
+  const openModal = useModal();
+  const { mtSetupForm$ } = React.useContext(theAppContext);
+  const props = useObservable(mtSetupForm$);
+
+  if (!props) {
+    return <>...</>
   }
 
-  private setup() {
-    const setup$ = this.props.setup();
-    const MTSetupModalRxTx = connect<MTSetupProgressState, ModalProps>(MTSetupModal, setup$);
-    this.props.open(MTSetupModalRxTx);
+  const setup = () => {
+    openModal(curry(MTSetupModalHook)(props.setup()));
   }
+
+  return (
+    <Button size="sm"
+            color="primary"
+            className={styles.setupBtn}
+            disabled={
+              props.mtaState === MTAccountState.setup ||
+              props.stage !== FormStage.idle
+            }
+            onClick={() => setup()}
+    >
+      Create proxy HOOKs
+    </Button>
+  );  
+}
+
+export const MTSetupModalHook = (setup$: Observable<MTSetupProgressState>, { close }: ModalProps) => {
+  const props = useObservable(setup$);
+ 
+  return props ? <MTSetupModal {...{ ...props , close }}/> : null;
 }
 
 export class MTSetupModal extends React.Component<MTSetupProgressState & ModalProps> {

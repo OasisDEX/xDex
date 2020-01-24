@@ -29,7 +29,7 @@ const defaultMTSetupProgressState = {
 stories.add('Create proxy button', () => (
   <div>
     <h3>Form stage = Not setup</h3>
-    <MTSetupButton
+    {/* <MTSetupButton
       {...defaultMtSetupButton}
       mtaState={MTAccountState.notSetup}
       stage={FormStage.idle}
@@ -45,7 +45,7 @@ stories.add('Create proxy button', () => (
       {...defaultMtSetupButton}
       mtaState={MTAccountState.setup}
       stage={FormStage.idle}
-    />
+    /> */}
   </div>
 ));
 
