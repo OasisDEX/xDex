@@ -307,6 +307,7 @@ export function calculateMarginable(
     availableActions,
     balanceInCash,
     balanceInDai,
+    midpointPrice,
     cash,
     maxDebt,
     availableDebt,
