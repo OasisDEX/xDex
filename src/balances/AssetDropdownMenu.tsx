@@ -1,7 +1,7 @@
 import * as classnames from 'classnames';
 import * as React from 'react';
-import dottedMenuSvg from '../marginTrading/positions/dotted-menu.svg';
 import chevronDownSvg from '../icons/chevron-down.svg';
+import dottedMenuSvg from '../marginTrading/positions/dotted-menu.svg';
 import { Button } from '../utils/forms/Buttons';
 import { SvgImage } from '../utils/icons/utils';
 import * as styles from './mtBalancesView.scss';
@@ -43,10 +43,10 @@ export class AssetDropdownMenu extends React.Component<AssetDropdownMenuProps,
         >
           { withIcon && <SvgImage image={dottedMenuSvg}/> }
           {
-            label && 
+            label &&
             <>
-              <span>{label}</span> 
-              <SvgImage image={chevronDownSvg} 
+              <span>{label}</span>
+              <SvgImage image={chevronDownSvg}
                         className={classnames(styles.arrowDown, styles.dark)
               }/>
             </>
