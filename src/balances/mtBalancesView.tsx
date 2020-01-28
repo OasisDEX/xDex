@@ -33,7 +33,8 @@ export type MTBalancesProps = CombinedBalances & {
 export type MTBalancesOwnProps = ModalOpenerProps &
   {
     createMTFundForm$:
-      (actionKind: UserActionKind, token: string) => Observable<MTTransferFormState>,
+      (params: { actionKind: UserActionKind, token: string }) =>
+        Observable<MTTransferFormState>,
     approveMTProxy: (args: {token: string; proxyAddress: string}) => Observable<TxState>,
     redeem: (args: {token: string; proxy: any, amount: BigNumber}) => void,
     transactions: TxState[],

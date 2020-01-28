@@ -91,6 +91,8 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
 
   public render() {
 
+    const { mta, token, progress, startTab, withOnboarding, actionKind } = this.props;
+
     const onModalRef = (node: any) => {
       if (node) {
         node.addEventListener('click', (e: any) => {
@@ -101,27 +103,35 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
       }
     };
 
-    const allowance = (_mta: MTAccount, _token: string) =>  _token === 'DAI' ? _mta.daiAllowance :
-      findMarginableAsset(_token, _mta)!.allowance;
-
-    const onboardingTabs = Object.keys(MTTransferFormTab);
-
-    const startIndex = this.props.startTab ? onboardingTabs.indexOf(this.props.startTab) : 0;
-
-    const { mta, token, progress } = this.props;
+    let modalTitle = '';
+    let currentTab = MTTransferFormTab.transfer;
+    let onboardingTabs: string[] = [];
+    let startIndex = 0;
 
     const isLoading = (progress === ProgressStage.waitingForApproval
-      || progress === ProgressStage.waitingForConfirmation);
+        || progress === ProgressStage.waitingForConfirmation);
 
-    let currentTab = MTTransferFormTab.proxy;
+    const allowance = (_mta: MTAccount, _token: string) => _token === 'DAI' ? _mta.daiAllowance :
+      findMarginableAsset(_token, _mta)!.allowance;
 
-    if (mta && (mta.proxy && mta.proxy.options.address !== nullAddress && allowance(mta, token))) {
-      currentTab = MTTransferFormTab.transfer;
-    }
+    if (withOnboarding) {
+      onboardingTabs = Object.keys(MTTransferFormTab);
+      startIndex = startTab ? onboardingTabs.indexOf(startTab) : 0;
+      currentTab = MTTransferFormTab.proxy;
 
-    const ma = findMarginableAsset(token, mta);
-    if (mta && ma && ma.purchasingPower.gt(zero)) {
-      currentTab = MTTransferFormTab.buy;
+      if (
+        mta && (mta.proxy && mta.proxy.options.address !== nullAddress && allowance(mta, token))
+      ) {
+        currentTab = MTTransferFormTab.transfer;
+      }
+
+      const ma = findMarginableAsset(token, mta);
+
+      if (mta && ma && ma.purchasingPower.gt(zero)) {
+        currentTab = MTTransferFormTab.buy;
+      }
+    } else {
+      modalTitle = actionKind === UserActionKind.fund ? 'Deposit' : 'Withdraw';
     }
 
     return (
@@ -135,23 +145,28 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
         shouldCloseOnEsc={true}
       >
         <Panel className={styles.modalChild}>
-          <div className={styles.tabs}>
-            {
-              onboardingTabs.filter(
-                (_tab: string, index: number) => (index >= startIndex)
-              ).map(_tab => {
-                return (<div
-                  className={
-                    classnames({
-                      [styles.tab]: true,
-                      [styles.tabActive]: (_tab === currentTab)
-                    })
-                  }
-                  key={_tab}>{tabLabels[_tab]}</div>);
-              })
-            }
-          </div>
-
+          { withOnboarding ?
+            <div className={styles.tabs}>
+              {
+                onboardingTabs.filter(
+                  (_tab: string, index: number) => (index >= startIndex)
+                ).map(_tab => {
+                  return (<div
+                    className={
+                      classnames({
+                        [styles.tab]: true,
+                        [styles.tabActive]: (_tab === currentTab)
+                      })
+                    }
+                    key={_tab}>{tabLabels[_tab]}</div>);
+                })
+              }
+            </div>
+            :
+            <PanelHeader>
+              {modalTitle}
+            </PanelHeader>
+          }
           {
             mta ?
             <>
@@ -232,15 +247,14 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
   }
 
   private AccountSummary = () => {
-    const asset = this.getAsset(this.props.token);
-    const baseToken = this.props.token === 'DAI' && this.props.ilk || this.props.token;
+    const { token, ilk, liquidationPrice, liquidationPricePost,
+    realPurchasingPower, realPurchasingPowerPost, balancePost,
+    isSafePost, daiBalance, daiBalancePost} = this.props;
+    const asset = this.getAsset(token);
+    const baseToken = token === 'DAI' && ilk || token;
     const baseAsset = this.getAsset(baseToken) as MarginableAsset;
-
-    const liquidationPrice = this.props.liquidationPrice ?
-      this.props.liquidationPrice : zero;
-
-    const liquidationPricePost = this.props.liquidationPricePost ?
-      this.props.liquidationPricePost : zero;
+    const liquidationPriceDisplay = liquidationPrice ? liquidationPrice : zero;
+    const liquidationPricePostDisplay = liquidationPricePost ? liquidationPricePost : zero;
 
     return(
       <>
@@ -250,19 +264,19 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
             </div>
             <div className={styles.orderSummaryValue}>
               {
-                this.props.realPurchasingPower &&
+                realPurchasingPower &&
                 <Money
-                  value={ this.props.realPurchasingPower}
+                  value={ realPurchasingPower}
                   token={'DAI'}
                   fallback="-"
                 />
               }
-              { this.props.realPurchasingPowerPost &&
+              { realPurchasingPowerPost &&
               <>
                 <span className={styles.transitionArrow} />
-                { this.props.realPurchasingPowerPost ?
+                { realPurchasingPowerPost ?
                   <Money
-                    value={ this.props.realPurchasingPowerPost}
+                    value={realPurchasingPowerPost}
                     token={'DAI'}
                     fallback="-"
                   />
@@ -285,13 +299,13 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
                 /> : <span>-</span>
               }
               {
-                baseAsset && baseAsset.balance && this.props.balancePost &&
-                !this.props.balancePost.isEqualTo(baseAsset.balance) &&
+                baseAsset && baseAsset.balance && balancePost &&
+                !balancePost.isEqualTo(baseAsset.balance) &&
                 <>
                   <span className={styles.transitionArrow} />
-                  { this.props.balancePost ?
+                  { balancePost ?
                     <Money
-                      value={this.props.balancePost}
+                      value={balancePost}
                       token={baseToken}
                       fallback="-"
                     /> : <span>-</span>
@@ -306,7 +320,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
             </div>
             <div className={styles.orderSummaryValue}>
               <Money
-                value={liquidationPrice}
+                value={liquidationPriceDisplay}
                 token="USD"
                 fallback="-"
                 className={
@@ -317,19 +331,19 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
                 }
               />
               {
-                this.props.liquidationPricePost &&
-                this.props.liquidationPrice &&
-                !this.props.liquidationPrice.isEqualTo(this.props.liquidationPricePost) &&
+                liquidationPricePost &&
+                liquidationPrice &&
+                !liquidationPrice.isEqualTo(liquidationPricePost) &&
                 <>
                   <span className={styles.transitionArrow} />
                   <Money
-                    value={liquidationPricePost}
+                    value={liquidationPricePostDisplay}
                     token="USD"
                     fallback="-"
                     className={
                       classnames({
-                        [styles.orderSummaryValuePositive]: this.props.isSafePost,
-                        [styles.orderSummaryValueNegative]: !this.props.isSafePost,
+                        [styles.orderSummaryValuePositive]: isSafePost,
+                        [styles.orderSummaryValueNegative]: !isSafePost,
                       })
                     }
                   />
@@ -342,21 +356,21 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
               DAI Balance
             </div>
             <div className={styles.orderSummaryValue}>
-              { this.props.daiBalance &&
+              { daiBalance &&
               <Money
-                value={this.props.daiBalance}
+                value={daiBalance}
                 token={'DAI'}
                 fallback="-"
               />
               }
               {
-                this.props.daiBalancePost && this.props.daiBalance &&
-                !this.props.daiBalance.isEqualTo(this.props.daiBalancePost) &&
+                daiBalancePost && daiBalance &&
+                !daiBalance.isEqualTo(daiBalancePost) &&
                 <>
                   <span className={styles.transitionArrow} />
-                  { this.props.daiBalancePost ?
+                  { daiBalancePost ?
                     <Money
-                      value={this.props.daiBalancePost}
+                      value={daiBalancePost}
                       token={'DAI'}
                       fallback="-"
                     /> : <span>-</span>
@@ -371,7 +385,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
             Wallet Balance
           </div>
           <div className={styles.orderSummaryValue}>
-            {asset && formatAmount(asset.walletBalance, asset.name)} {this.props.token}
+            {asset && formatAmount(asset.walletBalance, asset.name)} {token}
           </div>
         </div>
       </>
@@ -447,12 +461,13 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
   }
 
   private Buttons() {
-    const retry = this.props.progress === ProgressStage.fiasco;
-    const depositAgain = this.props.progress === ProgressStage.done;
+    const { actionKind, progress, readyToProceed, token, ilk } = this.props;
+    const retry = progress === ProgressStage.fiasco;
+    const depositAgain = progress === ProgressStage.done;
     const deposit = !retry && !depositAgain;
-    const depositEnabled = this.props.readyToProceed && this.props.progress === undefined &&
-      (this.props.token !== 'DAI' || !!this.props.ilk);
-    const proceedName = this.props.actionKind === UserActionKind.fund ? 'Deposit' : 'Withdraw';
+    const depositEnabled = readyToProceed && progress === undefined &&
+      (token !== 'DAI' || !!ilk);
+    const proceedName = actionKind === UserActionKind.fund ? 'Deposit' : 'Withdraw';
     return (
       <PanelFooter className={styles.buttons}>
         {deposit &&

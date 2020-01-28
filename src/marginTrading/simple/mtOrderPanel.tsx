@@ -84,7 +84,9 @@ export class MTSimpleOrderPanel extends React.Component<
   }
 
   public transfer (actionKind: UserActionKind, token: string, ilk?: string) {
-    const fundForm$ = this.props.createMTFundForm$(actionKind, token, ilk);
+    const fundForm$ = this.props.createMTFundForm$({
+      actionKind, token, ilk, withOnboarding: true
+    });
     const MTFundFormViewRxTx =
       connect<MTTransferFormState, ModalProps>(
         MtTransferFormView,

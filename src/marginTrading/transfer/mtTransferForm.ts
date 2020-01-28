@@ -98,10 +98,15 @@ export interface MTTransferFormState extends HasGasEstimation {
   allowance: (state: MTTransferFormState) => void;
   cancel: () => void;
   reset: () => void;
+  withOnboarding?: boolean;
 }
 
 export type CreateMTFundForm$ =
-  (actionKind: UserActionKind, token: string, ilk: string | undefined)
+  (params: {
+    actionKind: UserActionKind,
+    token: string, ilk: string | undefined,
+    withOnboarding: boolean
+  })
     => Observable<MTTransferFormState>;
 
 export enum TransferFormChangeKind {
@@ -541,11 +546,15 @@ export function createMTTransferForm$(
   orderbook$: Observable<Orderbook>,
   calls$: Calls$,
   readCalls$: ReadCalls$,
-  actionKind: UserActionKind.fund | UserActionKind.draw,
-  token: string,
-  ilk: string,
+  params: {
+    actionKind: UserActionKind.fund | UserActionKind.draw,
+    token: string,
+    ilk: string,
+    withOnboarding: boolean,
+  }
 ): Observable<MTTransferFormState> {
 
+  const { token, ilk, withOnboarding, actionKind } = params;
   const manualChange$ = new Subject<ManualChange>();
   const resetChange$ = new Subject<ProgressChange>();
 
@@ -572,6 +581,7 @@ export function createMTTransferForm$(
     cancel,
     token,
     ilk,
+    withOnboarding,
     reset: () => resetChange$.next(progressChange(undefined)),
     messages: [],
     gasEstimationStatus: GasEstimationStatus.unset,

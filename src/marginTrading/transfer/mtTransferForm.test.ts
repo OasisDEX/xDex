@@ -64,6 +64,7 @@ function createForm(props?: {}): Observable<MTTransferFormState> {
     kind: UserActionKind.fund,
     token: 'WETH',
     ilk: 'WETH',
+    withOnboarding: false,
     ...props,
   };
 
@@ -78,9 +79,12 @@ function createForm(props?: {}): Observable<MTTransferFormState> {
     params.calls,
     // @ts-ignore
     of({}),
-    params.kind as UserActionKind.fund | UserActionKind.draw,
-    params.token,
-    params.ilk
+    {
+      actionKind: params.kind as UserActionKind.fund | UserActionKind.draw,
+      token: params.token,
+      ilk: params.ilk,
+      withOnboarding: params.withOnboarding,
+    }
   ).pipe(
     shareReplay(1)
   );
@@ -161,9 +165,9 @@ test('proceed fund DAI confirmed', () => {
     calls: of({
       ...defaultCalls,
       mtFund: () => of(
-          { status: TxStatus.WaitingForApproval } as TxState,
-          { status: TxStatus.WaitingForConfirmation } as TxState,
-        ),
+        { status: TxStatus.WaitingForApproval } as TxState,
+        { status: TxStatus.WaitingForConfirmation } as TxState,
+      ),
     })
   });
   const { change, transfer } = unpack(transferForm);
@@ -180,10 +184,10 @@ test('proceed fund DAI success', () => {
     calls: of({
       ...defaultCalls,
       mtFund: () => of(
-          { status: TxStatus.WaitingForApproval } as TxState,
-          { status: TxStatus.WaitingForConfirmation } as TxState,
-          { status: TxStatus.Success } as TxState,
-        ),
+        { status: TxStatus.WaitingForApproval } as TxState,
+        { status: TxStatus.WaitingForConfirmation } as TxState,
+        { status: TxStatus.Success } as TxState,
+      ),
     })
   });
   const { change, transfer } = unpack(transferForm);
@@ -200,10 +204,10 @@ test('reset after fund DAI success', () => {
     calls: of({
       ...defaultCalls,
       mtFund: () => of(
-          { status: TxStatus.WaitingForApproval } as TxState,
-          { status: TxStatus.WaitingForConfirmation } as TxState,
-          { status: TxStatus.Success } as TxState,
-        ),
+        { status: TxStatus.WaitingForApproval } as TxState,
+        { status: TxStatus.WaitingForConfirmation } as TxState,
+        { status: TxStatus.Success } as TxState,
+      ),
     })
   });
   const { change, transfer, reset } = unpack(transferForm);

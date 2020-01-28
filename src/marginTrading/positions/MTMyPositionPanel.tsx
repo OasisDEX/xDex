@@ -72,7 +72,9 @@ export class MTMyPositionPanel
   }
 
   public transfer (actionKind: UserActionKind, token: string, ilk?: string) {
-    const fundForm$ = this.props.value!.createMTFundForm$(actionKind, token, ilk);
+    const fundForm$ = this.props.value!.createMTFundForm$({
+      actionKind, token, ilk, withOnboarding:false
+    });
     const MTFundFormViewRxTx =
       connect<MTTransferFormState, ModalProps>(
         MtTransferFormView,
@@ -209,7 +211,9 @@ export class MTMyPositionPanelInternal
   }
 
   private transfer (actionKind: UserActionKind, token: string, ilk?: string) {
-    const fundForm$ = this.props.createMTFundForm$(actionKind, token, ilk);
+    const fundForm$ = this.props.createMTFundForm$({
+      actionKind, token, ilk, withOnboarding:false
+    });
     const MTFundFormViewRxTx =
       connect<MTTransferFormState, ModalProps>(
         MtTransferFormView,
