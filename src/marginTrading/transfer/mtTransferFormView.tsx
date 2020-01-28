@@ -28,6 +28,7 @@ import { theAppContext } from 'src/AppContext';
 import { LoadableWithTradingPair } from '../../utils/loadable';
 import { MTSimpleFormState } from '../simple/mtOrderForm';
 import { MtSimpleOrderFormBody } from '../simple/mtOrderFormView';
+import * as stylesOrder from '../simple/mtOrderFormView.scss';
 import {
   CashAsset,
   findAsset, findMarginableAsset,
@@ -524,31 +525,19 @@ export class MTSimpleOrderBuyPanel extends React.Component<
   LoadableWithTradingPair<MTSimpleFormState>
 > {
   public render() {
-    if (this.props.tradingPair.quote !== 'DAI') {
-      return (
-        <div>
-          <PanelHeader>Manage Your Leverage</PanelHeader>
-          <div
-            // className={styles.orderPanel}
-          >Choose DAI<br/> to create a position
-          </div>
-        </div>
-      );
-    }
-
     if (this.props.status === 'loaded' && this.props.value && this.props.value.mta) {
       const formState = this.props.value;
       const { mta } = formState;
       const ma = findMarginableAsset(formState.baseToken, mta);
 
       if (mta && mta.proxy && ma && (ma.balance.gt(zero) || ma.dai.gt(zero))) {
-        return (<MtSimpleOrderFormBody {...{ ...this.props, ...formState }} />);
+        return <div className={stylesOrder.buyFormWrapper}>
+          <MtSimpleOrderFormBody {...{ ...this.props, ...formState }} />
+        </div>;
       }
     }
 
-    return <div
-      // className={styles.orderPanel}
-    >
+    return <div className={stylesOrder.orderPanel}>
       <PanelHeader>Manage Your Leverage</PanelHeader>
       <LoadingIndicator size="lg"/>
     </div>;
