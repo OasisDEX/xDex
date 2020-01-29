@@ -19,7 +19,7 @@ services:
       - "5432:5432"
 
   oasis-cache-etl:
-    image: oasisdexorg/oasis-cache:726c3bbca40aa2647af0b0a6c8f0202badaa4639
+    image: oasisdexorg/oasis-cache:3e17430b867beda9f89570f2bc35d65bdfd711b5
     environment:
       VL_DB_DATABASE: database
       VL_DB_USER: user
@@ -33,7 +33,7 @@ services:
       - sleep 10 && yarn migrate && yarn start-etl
 
   oasis-cache-api:
-    image: oasisdexorg/oasis-cache:726c3bbca40aa2647af0b0a6c8f0202badaa4639
+    image: oasisdexorg/oasis-cache:3e17430b867beda9f89570f2bc35d65bdfd711b5
     environment:
       VL_DB_DATABASE: database
       VL_DB_USER: user
