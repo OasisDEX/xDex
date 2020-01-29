@@ -12,7 +12,7 @@ jobs:
       - checkout
       - restore_cache:
             keys:
-            - v10-dependencies-{{ checksum "package.json" }}
+            - v11-dependencies-{{ checksum "package.json" }}
 
       - run: yarn install --frozen-lockfile
 
@@ -20,7 +20,7 @@ jobs:
           paths:
             - node_modules
             - ~/.cache
-          key: v10-dependencies-{{ checksum "package.json" }}
+          key: v11-dependencies-{{ checksum "package.json" }}
 
   test:
     docker:
@@ -29,7 +29,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-          - v10-dependencies-{{ checksum "package.json" }}
+          - v11-dependencies-{{ checksum "package.json" }}
       - run: 
           name: Run linting & tests
           command: yarn test
@@ -44,7 +44,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-          - v10-dependencies-{{ checksum "package.json" }}
+          - v11-dependencies-{{ checksum "package.json" }}
       - run: .circleci/install-yarn.sh
       - run: 
           name: Get & run locanode and cache image
@@ -95,7 +95,7 @@ jobs:
       - checkout
       - restore_cache:
             keys:
-            - v10-dependencies-{{ checksum "package.json" }}
+            - v11-dependencies-{{ checksum "package.json" }}
       - run: PUBLIC_URL=. ENV=dev yarn build
       - run: DEBUG=codechecks:* yarn codechecks
 
@@ -125,7 +125,7 @@ jobs:
       - checkout
       - restore_cache:
             keys:
-            - v10-dependencies-{{ checksum "package.json" }}
+            - v11-dependencies-{{ checksum "package.json" }}
       - attach_workspace:
           at: /tmp/workspace
       - run:
@@ -144,7 +144,7 @@ jobs:
       - checkout
       - restore_cache:
             keys:
-            - v10-dependencies-{{ checksum "package.json" }}
+            - v11-dependencies-{{ checksum "package.json" }}
       - run: yarn run deploy:dev
 
   deploy_prod:
@@ -157,7 +157,7 @@ jobs:
       - checkout
       - restore_cache:
             keys:
-            - v10-dependencies-{{ checksum "package.json" }}
+            - v11-dependencies-{{ checksum "package.json" }}
       - run:
           name: Configure git defaults
           command:  git config user.email "circleci@makerdao.com" && git config user.name "CircleCI"
