@@ -56,12 +56,13 @@ export function realPurchasingPowerMarginable(
     const availableDebt = amount.times(ma.referencePrice).div(ma.safeCollRatio).minus(debt);
     debt = debt.plus(availableDebt);
 
-    if (debt.lt(dust)) {
-      return [true, zero];
-    }
-
     cash = availableDebt;
   }
+
+  if (debt.lt(dust)) {
+    return [true, zero];
+  }
+
   return [false, purchasingPower];
 }
 
@@ -95,7 +96,9 @@ export function sellable(
     // take out max coll
     // (balance - dBalance) * referencePrice / debt = minCollRatio
     // dBalance = balance - minCollRatio * debt / referencePrice;
+
     const dBalance = balance.minus(minCollRatio.times(debt).div(referencePrice));
+
     if (dBalance.lte(zero)) {
       return [false, log, amount, 'Can\'t free collateral'];
     }
@@ -104,15 +107,43 @@ export function sellable(
     const [dSold, dDai, newOffers] = sellAll(BigNumber.min(dBalance, amount), offers);
     offers = newOffers;
 
-    log.push({ dSold, dDai });
-
     balance = balance.minus(dSold);
+    log.push({ dSold, dDai, debt, balance });
     amount = amount.minus(dSold);
     dai = dai.plus(dDai);
     i += 1;
   }
 
-  return [amount.eq(zero) && i < maxI, log, amount, 'Too many iterations'];
+  // console.log(JSON.stringify(log, null, ' '));
+
+  if (amount.eq(zero) && i < maxI) {
+    return [true, log, amount];
+  }
+  return [false, log, amount, 'Too many iterations'];
+}
+
+export function maxSellable(ma: MarginableAsset, offers: Offer[]) {
+  let min = zero;
+  let max = ma.balance;
+  let r = max;
+  const prec = new BigNumber('0.001').div(ma.referencePrice);
+  while (max.minus(min).gt(prec)) {
+    if (sellable(ma, offers, r)[0]) {
+      min = r;
+    } else {
+      max = r;
+    }
+    r = max.plus(min).div(2);
+  }
+
+  const result = sellable(ma, offers, max)[0] ? max : min;
+
+  // round to the nearest
+  const rounded = new BigNumber(result.times(ma.referencePrice).toFixed(2))
+      .div(ma.referencePrice);
+
+  return sellable(ma, offers, rounded)[0] ? rounded : result;
+
 }
 
 function findAuctionBite(rawHistory: RawMTHistoryEvent[], auctionId: number) {

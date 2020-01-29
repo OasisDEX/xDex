@@ -53,7 +53,7 @@ import {
   Operation
 } from '../state/mtAccount';
 import {
-  calculateMarginable,
+  calculateMarginable, maxSellable,
   realPurchasingPowerMarginable, sellable,
 } from '../state/mtCalculate';
 // import { getBuyPlan, getSellPlan } from './mtOrderPlan';
@@ -98,6 +98,7 @@ export type Message = {
   kind: MessageKind.unsellable;
   field?: string;
   priority: number;
+  message: string;
 };
 
 export enum ViewKind {
@@ -330,11 +331,12 @@ function validate(state: MTSimpleFormState): MTSimpleFormState {
 
     if (state.orderbook) {
       const offers = state.kind === OfferType.buy ? state.orderbook.sell : state.orderbook.buy;
-      const [isSellable, log] = sellable(
+      const [isSellable, log, , reason] = sellable(
         baseAsset, offers, state.amount || baseAsset.availableBalance
       );
 
-      console.log('isSellable', isSellable);
+      const maxToSell = maxSellable(baseAsset, offers);
+
       console.log(JSON.stringify(log, null, '  '));
 
       if (
@@ -345,6 +347,7 @@ function validate(state: MTSimpleFormState): MTSimpleFormState {
           kind: MessageKind.unsellable,
           field: 'total',
           priority: 1,
+          message: reason ? reason + `, max to sell: ${maxToSell}. Deposit now` : ''
         });
       }
     }

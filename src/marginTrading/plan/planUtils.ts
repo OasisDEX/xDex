@@ -78,7 +78,11 @@ export function buy(
   for (const offer of offers) {
     i += 1;
     const paid = BigNumber.min(cashLeft, offer.quoteAmount);
-    const bought = paid.div(offer.price);
+    // const bought = paid.div(offer.price);
+    const bought = paid.div(offer.quoteAmount.div(offer.baseAmount))
+      .toFixed(18, BigNumber.ROUND_DOWN);
+    // console.log('bought2', bought2.toString());
+
     totalBought = totalBought.plus(bought);
     cashLeft = cashLeft.minus(paid);
     if (cashLeft.isEqualTo(zero)) {
