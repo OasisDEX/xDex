@@ -1,5 +1,6 @@
 import * as classnames from 'classnames';
 import * as React from 'react';
+import chevronDownSvg from '../icons/chevron-down.svg';
 import dottedMenuSvg from '../marginTrading/positions/dotted-menu.svg';
 import { Button } from '../utils/forms/Buttons';
 import { SvgImage } from '../utils/icons/utils';
@@ -36,12 +37,20 @@ export class AssetDropdownMenu extends React.Component<AssetDropdownMenuProps,
         onMouseOut={this.handleOnMouseOut}
       >
         <Button
-          size="sm"
+          size="md"
           color="secondaryOutlined"
           className={styles.dropdownButton}
         >
           { withIcon && <SvgImage image={dottedMenuSvg}/> }
-          { label && <span>{label}</span> }
+          {
+            label &&
+            <>
+              <span>{label}</span>
+              <SvgImage image={chevronDownSvg}
+                        className={classnames(styles.arrowDown, styles.dark)
+              }/>
+            </>
+          }
         </Button>
         <div className={styles.dropdownList}>
           {

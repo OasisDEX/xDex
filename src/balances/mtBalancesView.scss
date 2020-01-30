@@ -100,8 +100,8 @@ $header-media-breakpoint: 880px;
 }
 
 .dropdownButton {
+  width: 130px;
   border: 0;
-  padding: 8px 0.833em;
   margin-left: 10px;
   font-size: 15px;
 
@@ -111,13 +111,32 @@ $header-media-breakpoint: 880px;
   }
 }
 
+.arrowDown {
+  width: 12px;
+  height: 7px;
+  margin-left: .875rem;
+  display: inherit;
+
+  &.dark svg path {
+    fill: $dark-grayish-blue;
+  }
+
+  &.mild svg path {
+    fill: $grayish-blue;
+  }
+
+  &.light svg path {
+    fill: $white;
+  }
+}
+
 .dropdownList {
   width: 200px;
   min-height: 100px;
   display: none;
   position: absolute;
   right: 0;
-  top: 28px;
+  top: 38px;
   background: $white;
   box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
   border-radius: 8px;
@@ -179,10 +198,10 @@ $header-media-breakpoint: 880px;
 }
 
 button.actionButton {
+  width: 100%;
   font-size: 14px;
   font-weight: 400;
   text-transform: none;
-  margin-left: 10px;
   padding: 6px 20px;
 }
 
