@@ -82,6 +82,9 @@ export class MTMyPositionView extends
     const { liquidationPenalty } = ma;
     const leverage = ma.leverage ? ma.leverage : ma.balance.gt(zero) ? one : zero;
     const liquidationPrice = ma.liquidationPrice ? ma.liquidationPrice : zero;
+    const liquidationPriceMarket = ma.liquidationPrice && ma.midpointPrice ?
+      ma.liquidationPrice.times(ma.midpointPrice.div(ma.referencePrice))
+      : zero;
 
     return (
       <div>
@@ -141,15 +144,43 @@ export class MTMyPositionView extends
                       }
                     /> : <span>-</span>
                 }
+                <br/>
+                {
+                  liquidationPriceMarket.gt(zero) &&
+                  <>~<Money
+                    value={liquidationPriceMarket}
+                    token="DAI"
+                    fallback="-"
+                    className={
+                      classnames({
+                        [styles.summaryValuePositive]: ma && ma.safe,
+                        [styles.summaryValueNegative]: ma && !ma.safe,
+                      })
+                    }
+                  />
+                  </>
+                }
               </div>
             </div>
             <div className={styles.summaryRow}>
               <div className={styles.summaryLabel}>
-                Current Price
+                Current Price (OSM)
               </div>
               <div className={styles.summaryValue}>
-                {ma.referencePrice &&
+                {
+                  ma.referencePrice &&
                   <Money value={ma.referencePrice} token="USD"/>
+                }
+              </div>
+            </div>
+            <div className={styles.summaryRow}>
+              <div className={styles.summaryLabel}>
+                Current Price (Market)
+              </div>
+              <div className={styles.summaryValue}>
+                {
+                  ma.midpointPrice &&
+                  <Money value={ma.midpointPrice} token="DAI"/>
                 }
               </div>
             </div>
@@ -157,7 +188,7 @@ export class MTMyPositionView extends
           <div className={styles.MTPositionColumn}>
             <div className={styles.summaryRow}>
               <div className={styles.summaryLabel}>
-                Balance
+                {ma.name} Bal
               </div>
               <div className={styles.summaryValue}>
                 {
@@ -168,19 +199,31 @@ export class MTMyPositionView extends
                       fallback="-"
                     /> : <span>-</span>
                 }
+                <br/>
+                {
+                  ma.balanceInDai &&
+                  <>
+                    (<Money
+                    value={ma.balanceInDai}
+                    token="DAI"
+                    fallback="-"
+                  />)
+                  </>
+                }
               </div>
             </div>
             <div className={styles.summaryRow}>
               <div className={styles.summaryLabel}>
-                DAI Balance
+                DAI Bal
               </div>
               <div className={styles.summaryValue}>
-                { ma && ma.debt.gt(zero) ?
-                  <Money
-                    value={ma.debt.times(minusOne)}
-                    token="DAI"
-                    fallback="-"
-                  /> : ma && ma.dai ?
+                {
+                  ma && ma.debt.gt(zero) ?
+                    <Money
+                      value={ma.debt.times(minusOne)}
+                      token="DAI"
+                      fallback="-"
+                    /> : ma && ma.dai ?
                     <Money
                       value={ma.dai}
                       token="DAI"
@@ -196,24 +239,13 @@ export class MTMyPositionView extends
               <div className={styles.summaryValue}>
                 {
                   ma.equity &&
-                    <Money
-                      value={ma.equity}
-                      token="DAI"
-                      fallback="-"
-                    />
+                  <Money
+                    value={ma.equity}
+                    token="DAI"
+                    fallback="-"
+                  />
                 }
 
-              </div>
-            </div>
-            <div className={styles.summaryRow}>
-              <div className={styles.summaryLabel}>
-                Purchasing power
-              </div>
-              <div className={styles.summaryValue}>
-                {
-                  ma.purchasingPower &&
-                    formatPrecision(ma.purchasingPower, 2)
-                }
               </div>
             </div>
           </div>

@@ -268,6 +268,7 @@ export function calculateMarginable(
     balance.times(midpointPrice).minus(debt).plus(dai) : zero;
   const availableActions = marginableAvailableActions(ma);
   const balanceInCash = balance.times(ma.referencePrice);
+  const balanceInDai = balance.times(midpointPrice);
   const lockedBalance = BigNumber.min(
     balance,
     debt.div(ma.referencePrice).times(ma.safeCollRatio)
@@ -336,6 +337,8 @@ export function calculateMarginable(
     ...ma,
     availableActions,
     balanceInCash,
+    balanceInDai,
+    midpointPrice,
     cash,
     maxDebt,
     availableDebt,
