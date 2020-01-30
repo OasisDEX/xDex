@@ -246,10 +246,12 @@ $historyPanelsHeight: 605px;
 }
 
 .onboardingPanel {
-  padding: 160px 35px;
+  padding: 90px 30px;
   flex-direction: column;
   justify-content: center;
   display: flex;
+
+  color: #48495F;
 
   h3 {
     font-style: normal;
@@ -284,4 +286,13 @@ $historyPanelsHeight: 605px;
 
 .buyFormWrapper {
   margin: 15px;
+}
+
+.warningMessage {
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 24px;
+  text-align: center;
+  letter-spacing: 0.3px;
+  color: #DC5D00;
 }

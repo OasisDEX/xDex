@@ -184,6 +184,9 @@ export class MTMyPositionView extends
                 }
               </div>
             </div>
+            <div className={styles.summaryRow}>
+              Coll ratio: {ma && ma.currentCollRatio && ma.currentCollRatio.toString()}
+            </div>
           </div>
           <div className={styles.MTPositionColumn}>
             <div className={styles.summaryRow}>
