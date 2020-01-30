@@ -108,7 +108,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
     let onboardingTabs: string[] = [];
     let startIndex = 0;
 
-    const isLoading = (progress === ProgressStage.waitingForApproval
+    const isLoading = !mta || (progress === ProgressStage.waitingForApproval
         || progress === ProgressStage.waitingForConfirmation);
 
     const allowance = (_mta: MTAccount, _token: string) => _token === 'DAI' ? _mta.daiAllowance :
