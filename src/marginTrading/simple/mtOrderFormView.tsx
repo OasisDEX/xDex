@@ -131,7 +131,7 @@ import { MTSimpleOrderPanelProps } from './mtOrderPanel';
 //   );
 // };
 
-const SAFE_COLL_RATIO_SELL = 2.5;
+const SAFE_COLL_RATIO_SELL = 1.65;
 
 enum depositMessageType {
   onboarding = 'onboarding',
