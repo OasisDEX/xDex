@@ -214,11 +214,12 @@ function applyChange(state: MTSimpleFormState, change: MTFormChange): MTSimpleFo
         ...state,
       };
     case FormChangeKind.kindChange:
-      return {
+      const newState = {
         ...state,
         kind: change.newKind,
         gasEstimationStatus: GasEstimationStatus.unset
       };
+      return state.amount ? addTotal(state.amount, newState) : newState;
     case FormChangeKind.formResetChange:
       return {
         ...state,
@@ -277,7 +278,7 @@ function validate(state: MTSimpleFormState): MTSimpleFormState {
   const baseAsset = findAsset(state.baseToken, state.mta) as MarginableAsset;
   // const quoteAsset = findAsset(state.quoteToken, state.mta);
   if (
-    state.price && state.amount && state.total &&
+    state.amount && state.total &&
     baseAsset && state.realPurchasingPower
   ) {
     const [spendAmount, spendAssetAvailBalance, spendAssetName, spendField, spendDustLimit,
@@ -506,7 +507,7 @@ function addPrice(state: MTSimpleFormState) {
     };
   }
 
-  if (!state.total || ! state.amount) {
+  if (!state.total || ! state.amount || state.total.eq(zero) || state.amount.eq(zero)) {
     return state;
   }
 
