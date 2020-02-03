@@ -219,6 +219,10 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
     this.props.change({ kind: FormChangeKind.viewChange, value: ViewKind.instantTradeForm });
   }
 
+  private switchToSettings = () => {
+    this.props.change({ kind: FormChangeKind.viewChange, value: ViewKind.settings });
+  }
+
   private renderAccountInfo = () => {
     const accountNotConnected = !this.props.account;
     const accountNotSetup = this.props.mta && this.props.mta.state === MTAccountState.notSetup;
@@ -237,10 +241,12 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
 
     return (<div className={styles.summaryBox}>
       {this.purchasingPower2()}
-      {this.accountBalance()}
-      {this.liquidationPrice()}
-      {this.price()}
       {this.slippageLimit()}
+      {this.stabilityFee()}
+      {this.accountBalance()}
+      {this.leverage()}
+      {this.price()}
+      {this.liquidationPrice()}
     </div>);
   }
 
@@ -251,7 +257,6 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
           onSubmit={this.handleProceed}
         >
           {this.renderAccountInfo()}
-          {this.feesBox()}
           <Hr color="dark" className={styles.hrMargin}/>
           {this.amount()}
           {this.total()}
@@ -296,9 +301,13 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
 
     const baseTokenAsset = findMarginableAsset(this.props.baseToken, this.props.mta);
     return (
-      <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
+      <div className={classnames(
+        styles.orderSummaryRow,
+        styles.orderSummaryRowDark,
+        this.props.liquidationPricePost ? styles.visible : styles.hidden
+      )}>
         <div className={styles.orderSummaryLabel}>
-          Liq. price
+          Liquidation price
         </div>
         <div className={classnames(styles.orderSummaryValue, styles.orderSummaryValuePositive)}>
           {
@@ -342,26 +351,31 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
   }
 
   private price() {
-    const price = this.props.price || new BigNumber(0);
+    const { price, priceImpact, quoteToken, messages } = this.props;
     return (
-      <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
+      <div className={classnames(
+        styles.orderSummaryRow,
+        styles.orderSummaryRowDark,
+        price && priceImpact && messages.length === 0 ? styles.visible : styles.hidden
+      )}>
         <div className={styles.orderSummaryLabel}>
-          Price
+          Price (and Impact)
         </div>
         <div className={styles.orderSummaryValue}>
+          <Money
+            value={price || zero}
+            token={quoteToken}
+          />
+          {' '}
           {
-            this.props.priceImpact && <>
-              <FormatPercent
-                value={this.props.priceImpact}
+            priceImpact && <>
+               (<FormatPercent
+                value={priceImpact}
                 fallback="-"
                 multiply={true}
-              /> Impact &nbsp;&nbsp;&nbsp;&nbsp;
+              /> Impact)
             </>
           }
-          <Money
-            value={price}
-            token={this.props.quoteToken}
-          />
         </div>
       </div>
     );
@@ -372,7 +386,10 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
     return (
       <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
         <div className={styles.orderSummaryLabel}>
-          Slippage limit
+          <span>Slippage limit</span>
+          <SettingsIcon className={styles.settingsIcon}
+                        onClick={this.switchToSettings}
+          />
         </div>
         <div className={styles.orderSummaryValue}>
           {
@@ -434,24 +451,47 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
     );
   }
 
-  private feesBox() {
-    const { leverage, leveragePost, baseToken, mta } = this.props;
+  private stabilityFee() {
+    const {  baseToken, mta } = this.props;
     const baseTokenAsset = findMarginableAsset(baseToken, mta);
 
-    if (!baseTokenAsset) {
-      return;
-    }
+    return (
+      <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
+        <div className={styles.orderSummaryLabel}>
+          Stability Fee (Variable)
+        </div>
+        <div className={styles.orderSummaryValue}>
+            {
+              baseTokenAsset?.fee ? <FormatPercent
+                value={baseTokenAsset?.fee}
+                fallback="-"
+                multiply={false}
+                precision={2}
+              /> : <span>-</span>
+            }
+        </div>
+      </div>
+    );
+  }
 
-    const { liquidationPenalty } = baseTokenAsset;
+  private leverage() {
+    const { leverage, leveragePost } = this.props;
+
     const leverageDisplay = leverage
                             ? leverage
                             : leveragePost
                               ? zero : minusOne;
+
     return (
-      <div className={styles.InfoRow}>
-        <div className={styles.InfoBox}>
-          <div className={styles.InfoRowLabel}>Leverage</div>
-          <div>
+      <div className={classnames(
+        styles.orderSummaryRow,
+        styles.orderSummaryRowDark,
+        leveragePost ? styles.visible : styles.hidden
+      )}>
+        <div className={styles.orderSummaryLabel}>
+          Leverage
+        </div>
+        <div className={styles.orderSummaryValue}>
             {
               leverageDisplay.gte(zero) ?
                 <>{ formatPrecision(leverageDisplay, 1) }x</>
@@ -467,29 +507,6 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
               }
             </>
             }
-          </div>
-        </div>
-        <div className={styles.InfoBox}>
-          <div className={styles.InfoRowLabel}>Liq. Penalty</div>
-          <div>
-            <FormatPercent
-              value={liquidationPenalty}
-              fallback="-"
-              multiply={false}
-            />
-          </div>
-        </div>
-        <div className={styles.InfoBox}>
-          <div className={styles.InfoRowLabel}>Interest Rate</div>
-          <div>
-            {
-              this.props.fee ? <FormatPercent
-                value={this.props.fee}
-                fallback="-"
-                multiply={false}
-              /> : <span>-</span>
-            }
-          </div>
         </div>
       </div>
     );
@@ -534,10 +551,14 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
 
   private accountBalance() {
     const baseTokenAsset = findMarginableAsset(this.props.baseToken, this.props.mta);
+    const { balancePost, daiBalancePost, baseToken, quoteToken } = this.props;
 
     return (
       <>
-        <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
+        <div className={classnames(
+          styles.orderSummaryRow,
+          styles.orderSummaryRowDark,
+          balancePost ? styles.visible : styles.hidden)}>
           <div className={styles.orderSummaryLabel}>
             Balance
           </div>
@@ -545,18 +566,18 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
             { baseTokenAsset && baseTokenAsset.balance ?
               <Money
                 value={baseTokenAsset.balance}
-                token={this.props.baseToken}
+                token={baseToken}
                 fallback="-"
               /> : <span>-</span>
             }
             {
-              this.props.balancePost &&
+              balancePost &&
               <>
                 <span className={styles.transitionArrow} />
-                { this.props.balancePost ?
+                { balancePost ?
                   <Money
-                    value={this.props.balancePost}
-                    token={this.props.baseToken}
+                    value={balancePost}
+                    token={baseToken}
                     fallback="-"
                   /> : <span>-</span>
                 }
@@ -564,7 +585,11 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
             }
           </div>
         </div>
-        <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
+        <div className={classnames(
+          styles.orderSummaryRow,
+          styles.orderSummaryRowDark,
+          daiBalancePost ? styles.visible : styles.hidden
+        )}>
           <div className={styles.orderSummaryLabel}>
             DAI Balance
           </div>
@@ -572,23 +597,23 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
             { baseTokenAsset && baseTokenAsset.debt.gt(zero) ?
               <Money
                 value={baseTokenAsset.debt.times(minusOne)}
-                token={this.props.quoteToken}
+                token={quoteToken}
                 fallback="-"
               /> : baseTokenAsset && baseTokenAsset.dai ?
                 <Money
                   value={baseTokenAsset.dai}
-                  token={this.props.quoteToken}
+                  token={quoteToken}
                   fallback="-"
                 /> : <span>-</span>
             }
             {
-              this.props.daiBalancePost &&
+              daiBalancePost &&
               <>
                 <span className={styles.transitionArrow} />
-                { this.props.daiBalancePost ?
+                { daiBalancePost ?
                   <Money
-                    value={this.props.daiBalancePost}
-                    token={this.props.quoteToken}
+                    value={daiBalancePost}
+                    token={quoteToken}
                     fallback="-"
                   /> : <span>-</span>
                 }
@@ -767,10 +792,6 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
     </>);
   }
 
-  private switchToSettings = () => {
-    this.props.change({ kind: FormChangeKind.viewChange, value: ViewKind.settings });
-  }
-
   private switchToInstantOrderForm = () => {
     this.props.change({ kind: FormChangeKind.viewChange, value: ViewKind.instantTradeForm });
   }
@@ -798,10 +819,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
   private headerButtons()   {
     return (
       <>
-        <SettingsIcon className={styles.settingsIcon}
-                      onClick={this.switchToSettings}
-        />
-        <ButtonGroup>
+        <ButtonGroup style={{ marginLeft: 'auto' }}>
           <Button
             data-test-id="new-buy-order"
             className={styles.btn}
