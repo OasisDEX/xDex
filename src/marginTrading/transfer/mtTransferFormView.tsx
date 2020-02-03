@@ -259,8 +259,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
   private AccountSummary = () => {
     const { token, ilk, liquidationPrice, liquidationPricePost,
       realPurchasingPower, realPurchasingPowerPost, balancePost,
-      isSafePost, daiBalance, daiBalancePost} = this.props;
-    const asset = this.getAsset(token);
+      isSafePost, daiBalance, daiBalancePost, balances} = this.props;
     const baseToken = token === 'DAI' && ilk || token;
     const baseAsset = this.getAsset(baseToken) as MarginableAsset;
     const liquidationPriceDisplay = liquidationPrice ? liquidationPrice : zero;
@@ -395,7 +394,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
             Wallet Balance
           </div>
           <div className={styles.orderSummaryValue}>
-            {asset && formatAmount(asset.walletBalance, asset.name)} {token}
+            { balances && formatAmount(balances[token], token) } {token}
           </div>
         </div>
       </>
