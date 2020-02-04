@@ -7,9 +7,13 @@
   font-size: 15px;
   padding-left: 1em;
   padding-right: .25em;
-  text-align: right;
+  text-align: left;
   width: 100%;
   min-width: 0;
+}
+
+.inputBase::placeholder {
+  color : #9FAFB9;
 }
 
 .inputBase:disabled {

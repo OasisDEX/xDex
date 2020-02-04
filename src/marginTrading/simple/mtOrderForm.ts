@@ -820,7 +820,6 @@ function prepareSubmit(
   const cancel$ = new Subject<void>();
 
   function submit(state: MTSimpleFormState) {
-
     const {
       mta,
       plan,

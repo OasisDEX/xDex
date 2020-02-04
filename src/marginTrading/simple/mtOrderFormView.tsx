@@ -2,6 +2,7 @@ import { BigNumber } from 'bignumber.js';
 import * as classnames from 'classnames';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import { Impossible, isImpossible } from 'src/utils/impossible';
 import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
 import * as formStyles from '../../exchange/offerMake/OfferMakeForm.scss';
 import { OfferType } from '../../exchange/orderbook/orderbook';
@@ -34,6 +35,8 @@ import {
 } from '../state/mtAccount';
 import { MTTransferFormState } from '../transfer/mtTransferForm';
 import { MtTransferFormView } from '../transfer/mtTransferFormView';
+import { buy, getTotal } from '../plan/planUtils';
+import { maxSellable } from '../state/mtCalculate';
 import { Message, MessageKind, MTSimpleFormState, ViewKind } from './mtOrderForm';
 import * as styles from './mtOrderFormView.scss';
 import { MTSimpleOrderPanelProps } from './mtOrderPanel';
@@ -175,11 +178,11 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
     }
   }
 
-  public handleSetMax = () => {
-    this.props.change({
-      kind: FormChangeKind.setMaxChange,
-    });
-  }
+  public handleSetMaxTotal = (value: BigNumber) =>
+   this.handleSetMax(value, FormChangeKind.totalFieldChange)
+
+  public handleSetMaxAmount = (value: BigNumber) =>
+    this.handleSetMax(value, FormChangeKind.amountFieldChange)
 
   public handleProceed = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -222,6 +225,13 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
           : this.advancedSettings()
       }
     </div>);
+  }
+
+  private handleSetMax = (
+    value: BigNumber,
+    kind: FormChangeKind.amountFieldChange | FormChangeKind.totalFieldChange
+  ) => {
+    this.props.change({ kind, value });
   }
 
   private switchToInstantOrderForm = () => {
@@ -642,8 +652,42 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
     );
   }
 
+  private calculateMaxAmount = () => {
+    const { baseToken, realPurchasingPower, orderbook, kind, mta } = this.props;
+    const ma = findMarginableAsset(baseToken, mta);
+
+    let maxAmount: BigNumber | undefined;
+
+    if (realPurchasingPower && orderbook && ma) {
+      maxAmount = kind === OfferType.buy
+        ? buy(realPurchasingPower, orderbook.sell)[0]
+        : maxSellable(ma, orderbook.buy);
+    }
+
+    return maxAmount;
+  }
+
+  private calculateMaxTotal = () => {
+    const { baseToken, realPurchasingPower, orderbook, mta, kind } = this.props;
+    const ma = findMarginableAsset(baseToken, mta);
+
+    let maxTotal: BigNumber | undefined | Impossible;
+
+    if (realPurchasingPower && orderbook && ma) {
+      const maxSellableAmount = maxSellable(ma, orderbook.buy);
+      maxTotal = kind === OfferType.buy
+        ? realPurchasingPower
+        : getTotal(maxSellableAmount, orderbook.buy);
+    }
+
+    return isImpossible(maxTotal) ? undefined : maxTotal;
+  }
+
   private total() {
     const { total, quoteToken } = this.props;
+
+    const maxTotal: BigNumber | undefined = this.calculateMaxTotal();
+
     return (
       <div>
         <InputGroup>
@@ -668,16 +712,32 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
                 formatPrice(total as BigNumber, quoteToken)
               }
               guide={true}
-              placeholderChar={' '}
+              placeholder={
+                !isImpossible(maxTotal) && maxTotal?.gte(zero)
+                && `Max. ${formatAmount(maxTotal, quoteToken)}`
+              }
               className={styles.input}
               // disabled={this.props.stage === FormStage.waitingForAllocation}
               // disabled={ true }
             />
           </ApproximateInputValue>
+          <InputGroupAddon  className={styles.setMaxBtnAddon}
+                            onClick={
+                              () => {
+                                if (maxTotal) {
+                                  this.handleSetMaxTotal(
+                                    maxTotal
+                                  );
+                                }
+                              }
+                            }>
+            <Button size="sm" className={styles.setMaxBtn}>
+              Set Max
+            </Button>
+        </InputGroupAddon>
           <InputGroupAddon className={styles.inputCurrencyAddon} onClick={ this.handlePriceFocus }>
             {quoteToken}
           </InputGroupAddon>
-
         </InputGroup>
         <Error field="total" messages={this.props.messages} />
       </div>
@@ -701,6 +761,9 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
 
   private amountGroup() {
     const { amount, baseToken } = this.props;
+
+    const maxAmount: BigNumber | undefined = this.calculateMaxAmount();
+
     return (
       <InputGroup>
         <InputGroupAddon border="right" className={styles.inputHeader}>Amount</InputGroupAddon>
@@ -724,11 +787,26 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
               formatAmount(amount as BigNumber, baseToken)
             }
             guide={true}
-            placeholderChar={' '}
+            placeholder={
+              maxAmount?.gte(zero)
+              && `Max. ${formatAmount(maxAmount, baseToken)}`
+            }
             className={styles.input}
             // disabled={this.props.progress === FormStage.waitingForAllocation}
           />
         </ApproximateInputValue>
+        <InputGroupAddon  className={styles.setMaxBtnAddon}
+                          onClick={() => {
+                            if (maxAmount) {
+                              this.handleSetMaxAmount(
+                                maxAmount
+                              );
+                            }
+                          }}>
+            <Button size="sm" className={styles.setMaxBtn}>
+              Set Max
+            </Button>
+        </InputGroupAddon>
         <InputGroupAddon className={styles.inputCurrencyAddon} onClick={ this.handleAmountFocus }>
           {baseToken}
         </InputGroupAddon>
