@@ -4,8 +4,18 @@
 
 // panel header
 .settingsIcon {
-  margin-left: auto;
-  margin-right: 14px;
+  margin-left: 4px;
+  height: 18px;
+  width: 18px;
+  padding: 2px;
+}
+
+.visible {
+  visibility: visible;
+}
+
+.hidden {
+  visibility: hidden;
 }
 
 .btn {
@@ -153,9 +163,9 @@ $historyPanelsHeight: 605px;
 }
 
 .summaryBox {
+  min-height: 284px;
   margin-top: 16px;
   border: 1px solid $element-border;
-  border-bottom: 0;
   padding: 16px 12px;
 }
 

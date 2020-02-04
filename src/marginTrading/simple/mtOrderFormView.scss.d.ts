@@ -1,4 +1,6 @@
 export const settingsIcon: string;
+export const visible: string;
+export const hidden: string;
 export const btn: string;
 export const InstantOrderPanel: string;
 export const instantOrderPanel: string;

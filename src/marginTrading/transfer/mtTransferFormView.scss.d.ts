@@ -11,6 +11,8 @@ export const hrBigMargin: string;
 export const hrSmallMargin: string;
 export const buttons: string;
 export const button: string;
+export const confirmButton: string;
+export const cancelButton: string;
 export const summaryBox: string;
 export const summary: string;
 export const transitionArrow: string;
