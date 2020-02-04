@@ -889,7 +889,8 @@ function isReadyToProceed(state: MTSimpleFormState): MTSimpleFormState {
   if (
     state.messages.length === 0 &&
     state.plan && !isImpossible(state.plan) && state.plan.length !== 0 &&
-    state.gasEstimationStatus === GasEstimationStatus.calculated
+    state.gasEstimationStatus === GasEstimationStatus.calculated &&
+    state.isSafeCollRatio
   ) {
     return  { ...state, readyToProceed: true };
   }
