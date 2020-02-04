@@ -339,7 +339,7 @@ const kovan: NetworkConfig = {
   safeConfirmations: 0,
   avgBlocksPerDay: 21600 * 0.55,
   startingBlock: 5216718,
-  get otc() { return load(otc, '0x4a6bc4e803c62081ffebcc8d227b5a87a58f1f8f'); },
+  get otc() { return load(otc, '0xe325acB9765b02b8b418199bf9650972299235F4'); },
   // get saiTub() { return load(saiTub, '0xa71937147b55deb8a530c7229c442fd3f31b7db2'); },
   get ethPip() { return load(dsValue, '0xd44d1823c8839559c2d663e98261e0b193c256ad'); }, // ???
   get tokens() {
