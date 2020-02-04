@@ -57,6 +57,7 @@
 
 .buttons {
   display: flex;
+  flex-direction: column;
   justify-content: space-between;
   margin-top: auto;
 }
@@ -64,6 +65,24 @@
 .button {
   min-width: 95px;
   padding: 0 20px;
+}
+
+.confirmButton {
+  font-size: 16px;
+  height: 35px;
+  margin-top: 2px;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.cancelButton {
+  font-size: 14px;
+  height: 35px;
+  margin-top: 2px;
+  background: $another-light-grayish-blue;
+  color: $very-dark-desaturated-blue;
+  width: 100%;
+  margin-bottom: 10px;
 }
 
 .summaryBox {
