@@ -131,8 +131,6 @@ import { MTSimpleOrderPanelProps } from './mtOrderPanel';
 //   );
 // };
 
-const SAFE_COLL_RATIO_SELL = 1.65;
-
 enum depositMessageType {
   onboarding = 'onboarding',
   collRatioUnsafe = 'collRatioUnsafe',
@@ -812,10 +810,10 @@ export class MtSimpleOrderFormView extends React.Component<
   }
 
   public MainContent() {
-    const { mta, baseToken } = this.props;
+    const { mta, baseToken, isSafeCollRatio } = this.props;
     const ma = findMarginableAsset(baseToken, mta);
 
-    if (ma && ma.currentCollRatio && ma.currentCollRatio.lt(SAFE_COLL_RATIO_SELL)) {
+    if (!isSafeCollRatio) {
       return this.CallForDeposit(depositMessageType.collRatioUnsafe, ma);
     }
     if (mta && mta.proxy && ma && (ma.balance.gt(zero) || ma.dai.gt(zero))) {

@@ -58,6 +58,8 @@ import {
 } from '../state/mtCalculate';
 // import { getBuyPlan, getSellPlan } from './mtOrderPlan';
 
+const SAFE_COLL_RATIO_SELL = 1.65;
+
 export enum MessageKind {
   insufficientAmount = 'insufficientAmount',
   incredibleAmount = 'incredibleAmount',
@@ -145,6 +147,7 @@ export interface MTSimpleFormState extends HasGasEstimation {
   view: ViewKind;
   account?: string;
   isSafePost?: boolean;
+  isSafeCollRatio: boolean;
 }
 
 export type ManualChange =
@@ -900,9 +903,13 @@ function addPreTradeInfo(state: MTSimpleFormState): MTSimpleFormState {
   const liquidationPrice = ma && ma.liquidationPrice;
   const leverage = ma && ma.leverage;
 
+  const isSafeCollRatio =
+    !(ma && ma.currentCollRatio && ma.currentCollRatio.lt(SAFE_COLL_RATIO_SELL));
+
   return {
     ...state,
     collRatio,
+    isSafeCollRatio,
     liquidationPrice,
     leverage
   };
@@ -961,6 +968,7 @@ export function createMTSimpleOrderForm$(
     messages: [],
     change: manualChange$.next.bind(manualChange$),
     view: ViewKind.instantTradeForm,
+    isSafeCollRatio: true,
     ...defaults
   };
 
