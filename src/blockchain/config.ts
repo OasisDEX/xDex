@@ -420,7 +420,7 @@ const kovan: NetworkConfig = {
       // },
     },
   } as { [key: string]: any },
-  cdpManager: '0x07906683200ca59c2ca4a73f1ce19d825cbe8ad1', // Oasis CDP Manager
+  cdpManager: '0x1a4a0603d8ba90571b1e95d996588b205edfb0fd', // Oasis CDP Manager
   get otcSupportMethods() {
     return load(otcSupport, '0x303f2bf24d98325479932881657f45567b3e47a8');
   },
@@ -434,7 +434,7 @@ const kovan: NetworkConfig = {
     return load(proxyCreationAndExecute, '0xee419971e63734fed782cfe49110b1544ae8a773');
   },
   get proxyActions() {
-    return load(proxyActions, '0x724d8450e38822409be595318802eac384ed186a');
+    return load(proxyActions, '0x808676419e60ea0cb25e0a33ae8c492dad1e6fcf');
   },
   get migration() {
     return '0x411b2faa662c8e3e5cf8f01dfdae0aee482ca7b0';
