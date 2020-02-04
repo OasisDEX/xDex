@@ -149,7 +149,7 @@ export function aggregateMTAccountState(
             balance: balanceResult[token].urnBalance,
             redeemable: balanceResult[token].marginBalance,
             ...balanceResult[token],
-            allowance: proxy.options.address !== '0x0000000000000000000000000000000000000000' ?
+            allowance: proxy.options.address !== nullAddress ?
               balanceResult[token].allowance : false,
             safeCollRatio: new BigNumber(getToken(token).safeCollRatio as number),
             osmPriceNext: (osmPrices as any)[token].next,
