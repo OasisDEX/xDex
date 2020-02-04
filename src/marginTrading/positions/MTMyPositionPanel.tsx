@@ -22,6 +22,8 @@ import { LoggedOut } from '../../utils/loadingIndicator/LoggedOut';
 import { zero } from '../../utils/zero';
 import { MtTransferFormView } from '../transfer/mtTransferFormView';
 import backArrowSvg from './back-arrow.svg';
+import * as myPositionStyles from './MTMyPositionView.scss';
+import warningIconSvg from './warning-icon.svg';
 
 interface MTMyPositionPanelInternalProps {
   account: string | undefined;
@@ -32,6 +34,34 @@ interface MTMyPositionPanelInternalProps {
   redeem: (args: {token: string; proxy: any, amount: BigNumber}) => void;
   transactions: TxState[];
   close?: () => void;
+}
+
+export class MTLiquidationNotification
+  extends React.Component<Loadable<MTMyPositionPanelInternalProps>> {
+  public render() {
+
+    if (this.props.value && this.props.status === 'loaded' && this.props.value.mta) {
+      const { ma } = this.props.value;
+
+      return <>
+        {
+          ma.bitable === 'imminent' &&
+          // tslint:disable
+          <div className={myPositionStyles.warningMessage}>
+            <SvgImage image={warningIconSvg}/>
+            <span>
+              The {ma.name} price&nbsp;
+              ({ma.osmPriceNext && ma.osmPriceNext.toString()} USD)
+              is approaching your Liquidation Price and your position will soon be liquidated.
+              You&nbsp;may rescue your Position by depositing either DAI or {ma.name} in the next {ma.nextPriceUpdateDelta} minutes.
+              </span>
+          </div>
+          // tslint:enable
+        }
+      </>;
+    }
+    return null;
+  }
 }
 
 export class MTMyPositionPanel

@@ -123,7 +123,10 @@ import {
 import { MigrationButton } from './migration/MigrationFormView';
 
 import { NetworkConfig } from './blockchain/config';
-import { MTMyPositionPanel } from './marginTrading/positions/MTMyPositionPanel';
+import {
+  MTLiquidationNotification,
+  MTMyPositionPanel
+} from './marginTrading/positions/MTMyPositionPanel';
 import {
   createRedeem,
 } from './marginTrading/positions/MTMyPositionView';
@@ -162,9 +165,9 @@ export function setupAppContext() {
 
   const proxyAddress$ = onEveryBlock$.pipe(
     switchMap(() =>
-                calls$.pipe(
-                  flatMap(calls => calls.proxyAddress())
-                )),
+      calls$.pipe(
+        flatMap(calls => calls.proxyAddress())
+      )),
     distinctUntilChanged(isEqual)
   );
 
@@ -279,6 +282,7 @@ export function setupAppContext() {
     MTSimpleOrderPanelRxTx,
     MTSimpleOrderBuyPanelRxTx,
     MTMyPositionPanelRxTx,
+    MTLiquidationNotificationRxTx,
     MTSimpleOrderbookPanelTxRx
   } =
     mtSimpleOrderForm(mta$, currentOrderbook$, createMTFundForm$, approveMTProxy);
@@ -534,6 +538,7 @@ export function setupAppContext() {
     MTSimpleOrderPanelRxTx,
     MTSimpleOrderBuyPanelRxTx,
     MTMyPositionPanelRxTx,
+    MTLiquidationNotificationRxTx,
     MTSimpleOrderbookPanelTxRx,
     MTAccountDetailsRxTx,
     MTBalancesViewRxTx,
@@ -552,42 +557,42 @@ function mtSimpleOrderForm(
 ) {
   const mtOrderForm$ = currentTradingPair$.pipe(
     switchMap(tradingPair =>
-                createMTSimpleOrderForm$(
-                  {
-                    gasPrice$,
-                    etherPriceUsd$,
-                    orderbook$,
-                    mta$,
-                    calls$,
-                    readCalls$,
-                    account$,
-                    dustLimits$: createDustLimits$(context$),
-                  },
-                  tradingPair
-                )
+      createMTSimpleOrderForm$(
+        {
+          gasPrice$,
+          etherPriceUsd$,
+          orderbook$,
+          mta$,
+          calls$,
+          readCalls$,
+          account$,
+          dustLimits$: createDustLimits$(context$),
+        },
+        tradingPair
+      )
     ),
     shareReplay(1)
   );
 
   const mtOrderFormLoadable$ = currentTradingPair$.pipe(
     switchMap(tradingPair =>
-                loadablifyLight(mtOrderForm$).pipe(
-                  map(mtOrderFormLoadablified => ({
-                    tradingPair,
-                    ...mtOrderFormLoadablified
-                  }))
-                )
+      loadablifyLight(mtOrderForm$).pipe(
+        map(mtOrderFormLoadablified => ({
+          tradingPair,
+          ...mtOrderFormLoadablified
+        }))
+      )
     )
   );
 
   const MTSimpleOrderPanelRxTx = inject(
+    // @ts-ignore
+    withModal(
       // @ts-ignore
-      withModal(
-        // @ts-ignore
-        connect(MTSimpleOrderPanel, mtOrderFormLoadable$)
-      ),
-      { createMTFundForm$ }
-    );
+      connect(MTSimpleOrderPanel, mtOrderFormLoadable$)
+    ),
+    { createMTFundForm$ }
+  );
 
   // @ts-ignore
   const MTSimpleOrderBuyPanelRxTx =
@@ -595,6 +600,29 @@ function mtSimpleOrderForm(
 
   const redeem = createRedeem(calls$);
 
+  const MTMyPositionPanel$ = combineLatest(mtOrderFormLoadable$, transactions$).pipe(
+    map(([state, transactions]) =>
+      // @ts-ignore
+      state.status === 'loaded' && state.value
+        ? {
+          status: state.status,
+          value: {
+            createMTFundForm$,
+            approveMTProxy,
+            transactions,
+            redeem,
+            account: state.value.account,
+            mta: state.value.mta,
+            ma: findMarginableAsset(state.tradingPair.base, state.value.mta),
+          },
+        }
+        : {
+          value: state.value,
+          status: state.status,
+          error: state.error,
+        }
+    )
+  );
   const MTMyPositionPanelRxTx =
     // @ts-ignore
     withModal(
@@ -602,30 +630,16 @@ function mtSimpleOrderForm(
       connect(
         // @ts-ignore
         MTMyPositionPanel,
-        combineLatest(mtOrderFormLoadable$, transactions$).pipe(
-          map(([state, transactions]) =>
-                // @ts-ignore
-                state.status === 'loaded' && state.value
-                  ? {
-                    status: state.status,
-                    value: {
-                      createMTFundForm$,
-                      approveMTProxy,
-                      transactions,
-                      redeem,
-                      account: state.value.account,
-                      mta: state.value.mta,
-                      ma: findMarginableAsset(state.tradingPair.base, state.value.mta),
-                    },
-                  }
-                  : {
-                    value: state.value,
-                    status: state.status,
-                    error: state.error,
-                  }
-          )
-        ),
+        MTMyPositionPanel$
       )
+    );
+
+  const MTLiquidationNotificationRxTx =
+    // @ts-ignore
+    connect(
+      // @ts-ignore
+      MTLiquidationNotification,
+      MTMyPositionPanel$
     );
 
   const [kindChange, orderbookPanel$] = createOrderbookPanel$();
@@ -666,6 +680,7 @@ function mtSimpleOrderForm(
     MTSimpleOrderPanelRxTx,
     MTSimpleOrderBuyPanelRxTx,
     MTMyPositionPanelRxTx,
+    MTLiquidationNotificationRxTx,
     MTSimpleOrderbookPanelTxRx
   };
 }
@@ -718,7 +733,7 @@ function offerMake(
 
   const OrderbookPanelTxRx = connect(
     inject<OrderbookPanelProps, SubViewsProps>(
-    // @ts-ignore
+      // @ts-ignore
       OrderbookPanel, { DepthChartWithLoadingTxRx, OrderbookViewTxRx }
     ),
     orderbookPanel$
