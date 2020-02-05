@@ -18,9 +18,9 @@ import repSvg from '../icons/coins/rep.svg';
 import saiCircleSvg from '../icons/coins/sai-circle.svg';
 import saiColorSvg from '../icons/coins/sai-color.svg';
 import saiSvg from '../icons/coins/sai.svg';
-// import wbtcCircleSvg from '../icons/coins/wbtc-circle.svg';
-// import wbtcColorSvg from '../icons/coins/wbtc-color.svg';
-// import wbtcSvg from '../icons/coins/wbtc.svg';
+import usdcCircleSvg from '../icons/coins/usdc-circle.svg';
+import usdcColorSvg from '../icons/coins/usdc-color.svg';
+import usdcSvg from '../icons/coins/usdc.svg';
 import zrxCircleSvg from '../icons/coins/zrx-circle.svg';
 import zrxColorSvg from '../icons/coins/zrx-color.svg';
 import zrxSvg from '../icons/coins/zrx.svg';
@@ -46,18 +46,18 @@ import { web3 } from './web3';
 
 export const tradingPairs: TradingPair[] = [
   { base: 'WETH', quote: 'DAI' },
-  // { base: 'REP', quote: 'DAI' },
-  // { base: 'ZRX', quote: 'DAI' },
-  // { base: 'BAT', quote: 'DAI' },
-  // { base: 'DAI', quote: 'USDC' },
-  // { base: 'SAI', quote: 'USDC' },
-  // { base: 'REP', quote: 'WETH' },
-  // { base: 'ZRX', quote: 'WETH' },
-  // { base: 'BAT', quote: 'WETH' },
-  // { base: 'WETH', quote: 'SAI' },
-  // { base: 'REP', quote: 'SAI' },
-  // { base: 'ZRX', quote: 'SAI' },
-  // { base: 'BAT', quote: 'SAI' },
+  { base: 'REP', quote: 'DAI' },
+  { base: 'ZRX', quote: 'DAI' },
+  { base: 'BAT', quote: 'DAI' },
+  { base: 'DAI', quote: 'USDC' },
+  { base: 'SAI', quote: 'USDC' },
+  { base: 'REP', quote: 'WETH' },
+  { base: 'ZRX', quote: 'WETH' },
+  { base: 'BAT', quote: 'WETH' },
+  { base: 'WETH', quote: 'SAI' },
+  { base: 'REP', quote: 'SAI' },
+  { base: 'ZRX', quote: 'SAI' },
+  { base: 'BAT', quote: 'SAI' },
 ];
 
 function asMap<D>(key: string, data: D[]): { [key: string]: D } {
@@ -175,22 +175,22 @@ const tokens = asMap('symbol', [
       ticker: 'bat-basic-attention-token',
       assetKind: AssetKind.nonMarginable,
     },
-      // {
-      //   symbol: 'USDC',
-      //   precision: 6,
-      //   digits: 6,
-      //   digitsInstant: 2,
-      //   safeCollRatio: 1.5,
-      //   maxSell: '1000000000000000',
-      //   name: 'USD Coin',
-      //   icon: SvgImageSimple(usdcSvg),
-      //   // iconInverse: SvgImageSimple(usdcInverseSvg),
-      //   iconCircle: SvgImageSimple(usdcCircleSvg),
-      //   iconColor: SvgImageSimple(usdcColorSvg),
-      //   ticker: 'usdc-usd-coin',
-      //   assetKind: AssetKind.marginable,
-      //   // address: 0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48
-      // },
+    {
+      symbol: 'USDC',
+      precision: 6,
+      digits: 6,
+      digitsInstant: 2,
+      safeCollRatio: 1.5,
+      maxSell: '1000000000000000',
+      name: 'USD Coin',
+      icon: SvgImageSimple(usdcSvg),
+        // iconInverse: SvgImageSimple(usdcInverseSvg),
+      iconCircle: SvgImageSimple(usdcCircleSvg),
+      iconColor: SvgImageSimple(usdcColorSvg),
+      ticker: 'usdc-usd-coin',
+      assetKind: AssetKind.unknown,
+        // address: 0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48
+    },
   // {
   //   symbol: 'WBTC',
   //   precision: 8,
@@ -347,10 +347,10 @@ const kovan: NetworkConfig = {
       loadToken('WETH', eth, '0xd0a1e359811322d97991e03f863a0c30c2cf029c'),
       loadToken('SAI', erc20, '0xc4375b7de8af5a38a93548eb8453a498222c4ff2'),
       loadToken('DAI', erc20, '0x08ae34860fbfe73e223596e65663683973c72dd3'),
-      // loadToken('REP', erc20, '0xc7aa227823789e363f29679f23f7e8f6d9904a9b'),
-      // loadToken('ZRX', erc20, '0x18392097549390502069c17700d21403ea3c721a'),
-      // loadToken('BAT', erc20, '0x9f8cfb61d3b2af62864408dd703f9c3beb55dff7'),
-      // loadToken('USDC', erc20, '0x198419c5c340e8De47ce4C0E4711A03664d42CB2'),
+      loadToken('REP', erc20, '0xc7aa227823789e363f29679f23f7e8f6d9904a9b'),
+      loadToken('ZRX', erc20, '0x18392097549390502069c17700d21403ea3c721a'),
+      loadToken('BAT', erc20, '0x9f8cfb61d3b2af62864408dd703f9c3beb55dff7'),
+      loadToken('USDC', erc20, '0x198419c5c340e8De47ce4C0E4711A03664d42CB2'),
     ]);
   },
   mcd: {

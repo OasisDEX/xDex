@@ -181,7 +181,9 @@ export function setupAppContext() {
     etherBalance$,
     balances$,
     createAllowances$(context$, initializedAccount$, onEveryBlock$),
-    mta$
+    mta$,
+    transactions$,
+    onEveryBlock$
   );
 
   const wethBalance$ = createTokenBalances$(

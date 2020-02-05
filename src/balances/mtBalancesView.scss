@@ -46,6 +46,10 @@ $header-media-breakpoint: 880px;
     text-align: right;
   }
 
+  .symbol {
+    text-align: left;
+  }
+
   //// align tokens icons so they look like they
   //// aligned to left with column name "Asset"
   //td:nth-child(2) {
@@ -202,7 +206,6 @@ button.actionButton {
   font-size: 14px;
   font-weight: 400;
   text-transform: none;
-  padding: 6px 20px;
 }
 
 .backButton {
