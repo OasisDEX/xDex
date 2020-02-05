@@ -7,6 +7,7 @@ import * as formStyles from '../../exchange/offerMake/OfferMakeForm.scss';
 import { OfferType } from '../../exchange/orderbook/orderbook';
 import { ApproximateInputValue } from '../../utils/Approximate';
 import { BigNumberInput, lessThanOrEqual } from '../../utils/bigNumberInput/BigNumberInput';
+import { connect } from '../../utils/connect';
 import { FormChangeKind } from '../../utils/form';
 import {
   formatAmount,
@@ -21,12 +22,21 @@ import { Radio } from '../../utils/forms/Radio';
 import { SettingsIcon } from '../../utils/icons/Icons';
 import { Hr } from '../../utils/layout/LayoutHelpers';
 import { LoggedOut } from '../../utils/loadingIndicator/LoggedOut';
+import { ModalOpenerProps, ModalProps } from '../../utils/modal';
 import { PanelBody, PanelFooter, PanelHeader } from '../../utils/panel/Panel';
 import { Muted } from '../../utils/text/Text';
 import { minusOne, zero } from '../../utils/zero';
-import { findMarginableAsset, MTAccountState } from '../state/mtAccount';
+import {
+  findMarginableAsset,
+  MarginableAsset,
+  MTAccountState,
+  UserActionKind
+} from '../state/mtAccount';
+import { MTTransferFormState } from '../transfer/mtTransferForm';
+import { MtTransferFormView } from '../transfer/mtTransferFormView';
 import { Message, MessageKind, MTSimpleFormState, ViewKind } from './mtOrderForm';
 import * as styles from './mtOrderFormView.scss';
+import { MTSimpleOrderPanelProps } from './mtOrderPanel';
 
 // const DevInfos = ({ value }: { value: MTSimpleFormState }) => {
 //   //  assetKind: AssetKind.marginable;
@@ -121,11 +131,10 @@ import * as styles from './mtOrderFormView.scss';
 //   );
 // };
 
-// const dimensions = {
-//   height: '605px',
-//   minWidth: '454px',
-//   width: 'auto',
-// };
+enum depositMessageType {
+  onboarding = 'onboarding',
+  collRatioUnsafe = 'collRatioUnsafe',
+}
 
 export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
 
@@ -481,7 +490,6 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
                             ? leverage
                             : leveragePost
                               ? zero : minusOne;
-
     return (
       <div className={classnames(
         styles.orderSummaryRow,
@@ -730,7 +738,8 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
   }
 }
 
-export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
+export class MtSimpleOrderFormView extends React.Component<
+  MTSimpleFormState & MTSimpleOrderPanelProps & ModalOpenerProps> {
 
   private slippageLimitInput?: HTMLElement;
 
@@ -757,6 +766,87 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
     }
   }
 
+  public CallForDeposit(messageType: depositMessageType, ma?: MarginableAsset) {
+    const { baseToken } = this.props;
+    const transferWithOnboarding = messageType === depositMessageType.onboarding;
+    return (
+      <div className={styles.onboardingPanel}>
+        {
+          messageType === depositMessageType.onboarding &&
+          <>
+            <h3>Deposit into Leverage Account</h3>
+            <div className={styles.onboardingParagraph}>
+              Before opening a new position, deposit WETH<br/>
+              or DAI into your Leverage Trading Account
+            </div>
+          </>
+        }
+        {
+          messageType === depositMessageType.collRatioUnsafe &&
+          <>
+            <div className={styles.onboardingParagraph}>
+              <div className={styles.warningMessage}>
+                Warning - Your Position is currently too close to the Liquidation Price to sell
+              </div>
+              <br/>
+              <br/>
+
+              In order to save your Position, you are required to<br/>
+              pay off some debt by depositing more DAI or {baseToken}<br/><br/>
+              Once you have deposited more DAI or {baseToken}, you <br/>
+              will be able to sell the rest of your Position.
+            </div>
+          </>
+        }
+        <Button
+          size="md"
+          color="primary"
+          disabled={!ma}
+          onClick={
+            () => this.transfer(UserActionKind.fund, 'DAI', transferWithOnboarding, ma!.name)
+          }
+        >Deposit DAI</Button>
+        <br/>
+        <Button
+          size="md"
+          color="primary"
+          disabled={!ma}
+          onClick={
+            () => this.transfer(UserActionKind.fund, ma!.name, transferWithOnboarding, ma!.name)
+          }
+        >Deposit {ma && ma.name}</Button>
+      </div>
+    );
+  }
+
+  public transfer(
+    actionKind: UserActionKind, token: string, withOnboarding: boolean, ilk?: string
+  ) {
+    const fundForm$ = this.props.createMTFundForm$({
+      actionKind, token, ilk, withOnboarding
+    });
+    const MTFundFormViewRxTx =
+      connect<MTTransferFormState, ModalProps>(
+        MtTransferFormView,
+        fundForm$
+      );
+    this.props.open(MTFundFormViewRxTx);
+  }
+
+  public MainContent() {
+    const { mta, baseToken, isSafeCollRatio } = this.props;
+    const ma = findMarginableAsset(baseToken, mta);
+
+    if (!isSafeCollRatio) {
+      return this.CallForDeposit(depositMessageType.collRatioUnsafe, ma);
+    }
+    if (mta && mta.proxy && ma && (ma.balance.gt(zero) || ma.dai.gt(zero))) {
+      return <MtSimpleOrderFormBody {...this.props} />;
+    }
+
+    return this.CallForDeposit(depositMessageType.onboarding, ma);
+  }
+
   public render() {
     return (
       <>
@@ -765,7 +855,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
             this.props.view === ViewKind.instantTradeForm ?
               <>
                 Manage your Leverage
-                 {this.headerButtons()}
+                {this.headerButtons()}
               </>
               : 'Advanced Settings'
           }
@@ -773,7 +863,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
         <PanelBody style={{ minWidth: '455px' }}>
           {
             this.props.view === ViewKind.instantTradeForm
-              ? <MtSimpleOrderFormBody {...this.props} />
+              ? this.MainContent()
               : this.advancedSettings()
           }
         </PanelBody>
@@ -789,7 +879,7 @@ export class MtSimpleOrderFormView extends React.Component<MTSimpleFormState> {
             </Button>
           </PanelFooter>
         }
-    </>);
+      </>);
   }
 
   private switchToInstantOrderForm = () => {

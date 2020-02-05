@@ -39,3 +39,4 @@ export const onboardingPanel: string;
 export const onboardingParagraph: string;
 export const orderPanel: string;
 export const buyFormWrapper: string;
+export const warningMessage: string;
