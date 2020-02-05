@@ -42,6 +42,14 @@ const Content = (props: any | { parentMatch: string }) => {
         </Panel>
       </FlexLayoutRow>
       <FlexLayoutRow>
+          <theAppContext.Consumer>
+            { ({ MTLiquidationNotificationRxTx }) =>
+              // @ts-ignore
+              <MTLiquidationNotificationRxTx />
+            }
+          </theAppContext.Consumer>
+      </FlexLayoutRow>
+      <FlexLayoutRow>
         <Panel className={styles.priceChartPanel} footerBordered={true}>
           <theAppContext.Consumer>
             { ({ PriceChartWithLoadingTxRx }) =>

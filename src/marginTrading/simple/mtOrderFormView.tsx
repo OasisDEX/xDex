@@ -908,7 +908,7 @@ function messageContent(msg: Message) {
     case MessageKind.impossibleCalculateTotal:
       return `Can't calculate: ${msg.message}. Type smaller amount`;
     case MessageKind.minDebt:
-      return `Order below ${msg.message} limit.`;
+      return `Dai debt below ${msg.message} limit`;
     case MessageKind.unsellable:
       return `Your position is unsellable. ${msg.message}`;
   }

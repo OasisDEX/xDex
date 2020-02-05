@@ -48,7 +48,8 @@ export enum MessageKind {
   insufficientAmount = 'insufficientAmount',
   insufficientAvailableAmount = 'insufficientAvailableAmount',
   dustAmount = 'dustAmount',
-  impossibleToPlan = 'impossibleToPlan'
+  impossibleToPlan = 'impossibleToPlan',
+  minDebt = 'minDebt'
 }
 
 export type Message = {
@@ -57,6 +58,10 @@ export type Message = {
     MessageKind.dustAmount;
 } | {
   kind: MessageKind.impossibleToPlan;
+  message: string;
+} | {
+  kind: MessageKind.minDebt;
+  field?: string;
   message: string;
 };
 
@@ -133,8 +138,8 @@ function initialTab(mta: MTAccount, name: string) {
 
   if (mta.proxy.options.address !==  nullAddress) {
     const isAllowance = name === 'DAI'
-              ? mta.daiAllowance
-              : findMarginableAsset(name, mta)!.allowance;
+      ? mta.daiAllowance
+      : findMarginableAsset(name, mta)!.allowance;
     return isAllowance ? transfer : proxy;
     return isAllowance ? transfer : proxy;
   }
@@ -177,7 +182,7 @@ function applyChange(state: MTTransferFormState, change: MTSetupFormChange): MTT
       return {
         ...state,
         progress: change.progress === ProgressStage.done &&
-          state.tab !== MTTransferFormTab.transfer ? undefined : change.progress
+        state.tab !== MTTransferFormTab.transfer ? undefined : change.progress
       };
     // default:
     //   const _exhaustiveCheck: never = change; // tslint:disable-line
@@ -291,6 +296,16 @@ function updatePlan(state: MTTransferFormState): MTTransferFormState {
   const [, realPurchasingPowerPost] = realPurchasingPowerMarginable(
     postTradeAsset,
     state.orderbook.sell);
+
+  if (
+    daiBalancePost.lt(zero) &&
+    daiBalancePost.times(minusOne).lt(postTradeAsset.minDebt)
+  ) {
+    messages.push({
+      kind: MessageKind.minDebt,
+      message: postTradeAsset.minDebt.toFixed(5)
+    });
+  }
 
   return { ...state,
     messages,
