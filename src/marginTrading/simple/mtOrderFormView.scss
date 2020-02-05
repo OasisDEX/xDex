@@ -28,11 +28,11 @@
   font-size: 14px;
   border: 0;
   background: transparent;
-  color: #447AFB;
+  color: $bright-blue;
 
   &:hover:enabled:not(:disabled) {
     background: transparent;
-    color: #447AFB;
+    color: $bright-blue;
   }
 }
 
