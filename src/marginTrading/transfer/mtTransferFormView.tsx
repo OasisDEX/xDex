@@ -555,6 +555,8 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
         return `Order below token limit`;
       case MessageKind.impossibleToPlan:
         return msg.message;
+      case MessageKind.minDebt:
+        return `Dai debt below ${msg.message} limit`;
     }
   }
 }
