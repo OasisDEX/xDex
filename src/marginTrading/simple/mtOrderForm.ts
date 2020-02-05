@@ -120,8 +120,10 @@ export interface MTSimpleFormState extends HasGasEstimation {
   progress?: ProgressStage;
   readyToProceed?: boolean;
   amount?: BigNumber;
+  maxAmount: BigNumber;
   price?: BigNumber;
   total?: BigNumber;
+  maxTotal: BigNumber;
   messages: Message[];
   orderbook?: Orderbook;
   dustLimitQuote?: BigNumber;
@@ -184,38 +186,6 @@ function applyChange(state: MTSimpleFormState, change: MTFormChange): MTSimpleFo
         ...addAmount(change.value, state),
         gasEstimationStatus: GasEstimationStatus.unset
       };
-    case FormChangeKind.setMaxChange:
-      const baseAsset = findAsset(state.baseToken, state.mta);
-      switch (state.kind) {
-        case OfferType.sell:
-          const baseBalance = (baseAsset && baseAsset.balance) || new BigNumber(0);
-          if (state.price) {
-            return {
-              ...state,
-              amount: baseBalance,
-              total: baseBalance.times(state.price),
-              gasEstimationStatus: GasEstimationStatus.unset
-            };
-          }
-          return {
-            ...state,
-            amount: baseBalance,
-            gasEstimationStatus: GasEstimationStatus.unset
-          };
-        case OfferType.buy:
-          const basePurchasingPower = state.realPurchasingPower || new BigNumber(0);
-          if (state.price) {
-            return {
-              ...state,
-              amount: basePurchasingPower.dividedBy(state.price),
-              total: basePurchasingPower,
-              gasEstimationStatus: GasEstimationStatus.unset
-            };
-          }
-      }
-      return {
-        ...state,
-      };
     case FormChangeKind.kindChange:
       const newState = {
         ...state,
@@ -269,6 +239,8 @@ function applyChange(state: MTSimpleFormState, change: MTFormChange): MTSimpleFo
         ...state,
         account: change.value
       };
+    default:
+      return state;
   }
 }
 
@@ -820,7 +792,6 @@ function prepareSubmit(
   const cancel$ = new Subject<void>();
 
   function submit(state: MTSimpleFormState) {
-
     const {
       mta,
       plan,
@@ -898,6 +869,43 @@ function isReadyToProceed(state: MTSimpleFormState): MTSimpleFormState {
   return { ...state, readyToProceed: false };
 }
 
+function calculateMaxAmount(state: MTSimpleFormState): MTSimpleFormState {
+  const { baseToken, realPurchasingPower, orderbook, kind, mta } = state;
+  const ma = findMarginableAsset(baseToken, mta);
+
+  let maxAmount: BigNumber | undefined;
+
+  if (realPurchasingPower && orderbook && ma) {
+    maxAmount = kind === OfferType.buy
+      ? buy(realPurchasingPower, orderbook.sell)[0]
+      : maxSellable(ma, orderbook.buy);
+  }
+
+  return {
+    ...state,
+    maxAmount: maxAmount ? maxAmount : zero
+  };
+}
+
+function calculateMaxTotal(state: MTSimpleFormState): MTSimpleFormState {
+  const { baseToken, realPurchasingPower, orderbook, mta, kind } = state;
+  const ma = findMarginableAsset(baseToken, mta);
+
+  let maxTotal: BigNumber | undefined | Impossible;
+
+  if (realPurchasingPower && orderbook && ma) {
+    const maxSellableAmount = maxSellable(ma, orderbook.buy);
+    maxTotal = kind === OfferType.buy
+      ? realPurchasingPower
+      : getTotal(maxSellableAmount, orderbook.buy);
+  }
+
+  return {
+    ...state,
+    maxTotal: isImpossible(maxTotal) || !maxTotal ? zero : maxTotal
+  };
+}
+
 function addPreTradeInfo(state: MTSimpleFormState): MTSimpleFormState {
   const ma = findMarginableAsset(state.baseToken, state.mta);
 
@@ -968,6 +976,8 @@ export function createMTSimpleOrderForm$(
     quoteToken: tradingPair.quote,
     gasEstimationStatus: GasEstimationStatus.unset,
     messages: [],
+    maxAmount: zero,
+    maxTotal: zero,
     change: manualChange$.next.bind(manualChange$),
     view: ViewKind.instantTradeForm,
     isSafeCollRatio: true,
@@ -986,6 +996,8 @@ export function createMTSimpleOrderForm$(
     map(addPriceImpact),
     map(addPreTradeInfo),
     map(addPurchasingPower),
+    map(calculateMaxAmount),
+    map(calculateMaxTotal),
     map(validate),
     map(addPlan),
     switchMap(curry(estimateGasPrice)(calls$, readCalls$)),

@@ -175,11 +175,11 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
     }
   }
 
-  public handleSetMax = () => {
-    this.props.change({
-      kind: FormChangeKind.setMaxChange,
-    });
-  }
+  public handleSetMaxTotal = () =>
+   this.handleSetMax(this.props.maxTotal, FormChangeKind.totalFieldChange)
+
+  public handleSetMaxAmount = () =>
+    this.handleSetMax(this.props.maxAmount, FormChangeKind.amountFieldChange)
 
   public handleProceed = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -222,6 +222,13 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
           : this.advancedSettings()
       }
     </div>);
+  }
+
+  private handleSetMax = (
+    value: BigNumber,
+    kind: FormChangeKind.amountFieldChange | FormChangeKind.totalFieldChange
+  ) => {
+    this.props.change({ kind, value });
   }
 
   private switchToInstantOrderForm = () => {
@@ -643,7 +650,8 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
   }
 
   private total() {
-    const { total, quoteToken } = this.props;
+    const { total, quoteToken, maxTotal } = this.props;
+
     return (
       <div>
         <InputGroup>
@@ -668,16 +676,25 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
                 formatPrice(total as BigNumber, quoteToken)
               }
               guide={true}
-              placeholderChar={' '}
+              placeholder={
+                `Max. ${formatAmount(maxTotal, quoteToken)}`
+              }
               className={styles.input}
               // disabled={this.props.stage === FormStage.waitingForAllocation}
               // disabled={ true }
             />
           </ApproximateInputValue>
+          <InputGroupAddon  className={styles.setMaxBtnAddon}
+                            onClick={
+                              this.handleSetMaxTotal
+                            }>
+            <Button size="sm" className={styles.setMaxBtn}>
+              Set Max
+            </Button>
+        </InputGroupAddon>
           <InputGroupAddon className={styles.inputCurrencyAddon} onClick={ this.handlePriceFocus }>
             {quoteToken}
           </InputGroupAddon>
-
         </InputGroup>
         <Error field="total" messages={this.props.messages} />
       </div>
@@ -700,7 +717,8 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
   }
 
   private amountGroup() {
-    const { amount, baseToken } = this.props;
+    const { amount, baseToken, maxAmount } = this.props;
+
     return (
       <InputGroup>
         <InputGroupAddon border="right" className={styles.inputHeader}>Amount</InputGroupAddon>
@@ -724,11 +742,19 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
               formatAmount(amount as BigNumber, baseToken)
             }
             guide={true}
-            placeholderChar={' '}
+            placeholder={
+              `Max. ${formatAmount(maxAmount, baseToken)}`
+            }
             className={styles.input}
             // disabled={this.props.progress === FormStage.waitingForAllocation}
           />
         </ApproximateInputValue>
+        <InputGroupAddon  className={styles.setMaxBtnAddon}
+                          onClick={this.handleSetMaxAmount}>
+            <Button size="sm" className={styles.setMaxBtn}>
+              Set Max
+            </Button>
+        </InputGroupAddon>
         <InputGroupAddon className={styles.inputCurrencyAddon} onClick={ this.handleAmountFocus }>
           {baseToken}
         </InputGroupAddon>
