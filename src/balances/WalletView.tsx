@@ -6,7 +6,7 @@ import { getToken } from '../blockchain/config';
 import { TxState } from '../blockchain/transactions';
 import { connect } from '../utils/connect';
 import { formatPrecision } from '../utils/formatters/format';
-import { Money } from '../utils/formatters/Formatters';
+import { FormatAmount } from '../utils/formatters/Formatters';
 import { Button } from '../utils/forms/Buttons';
 import { inject } from '../utils/inject';
 import { Loadable, loadablifyLight } from '../utils/loadable';
@@ -95,7 +95,14 @@ export class WalletViewInternal extends React.Component<CombinedBalances & Walle
                 }
               </td>
               <td data-test-id={`${combinedBalance.name}-balance`} className={styles.amount}>
-                <Money value={combinedBalance.walletBalance} token={combinedBalance.name}/>
+                <div>
+                  <FormatAmount data-test-id="amount"
+                                token={combinedBalance.name}
+                                value={combinedBalance.walletBalance}/>
+                  <div className={styles.amountCurrency}>
+                    <Currency value={combinedBalance.name}/>
+                  </div>
+                </div>
               </td>
               <td className={classnames(styles.amount, 'hide-md')} >
                 $ {formatPrecision(combinedBalance.mtAssetValueInDAI, 2)}

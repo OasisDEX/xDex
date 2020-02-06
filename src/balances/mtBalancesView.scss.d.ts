@@ -32,3 +32,4 @@ export const onboardingPanel: string;
 export const onboardingParagraph: string;
 export const buttonsGroup: string;
 export const groupInlineButton: string;
+export const amountCurrency: string;
