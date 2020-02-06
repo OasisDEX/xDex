@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { default as BigNumber } from 'bignumber.js';
 import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
-import {map, switchMap} from 'rxjs/internal/operators';
+import { map, switchMap } from 'rxjs/internal/operators';
 import { AssetKind, getToken } from '../blockchain/config';
 import { TxState } from '../blockchain/transactions';
 import {
