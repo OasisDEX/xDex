@@ -47,7 +47,7 @@ export class MTBalancesView
 {
   public render() {
     const { status, value, error, ...props } = this.props;
-    console.log('balances view', JSON.stringify(props), status, value, error);
+
     return (
       <Panel className={styles.balancesPanel}>
         <PanelHeader>Leverage Account</PanelHeader>

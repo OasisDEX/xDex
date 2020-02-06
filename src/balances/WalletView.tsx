@@ -1,11 +1,12 @@
+import * as classnames from 'classnames';
 import * as React from 'react';
 import { Observable } from 'rxjs';
-import { theAppContext } from '../AppContext';
+import { Slider } from 'src/utils/forms/Slider';
 import { getToken } from '../blockchain/config';
 import { TxState } from '../blockchain/transactions';
 import { connect } from '../utils/connect';
 import { formatPrecision } from '../utils/formatters/format';
-import { Money } from '../utils/formatters/Formatters';
+import { FormatAmount } from '../utils/formatters/Formatters';
 import { Button } from '../utils/forms/Buttons';
 import { inject } from '../utils/inject';
 import { Loadable, loadablifyLight } from '../utils/loadable';
@@ -17,8 +18,7 @@ import { Currency } from '../utils/text/Text';
 import { zero } from '../utils/zero';
 import { WrapUnwrapFormKind, WrapUnwrapFormState } from '../wrapUnwrap/wrapUnwrapForm';
 import { WrapUnwrapFormView } from '../wrapUnwrap/WrapUnwrapFormView';
-import { AssetDropdownMenu } from './AssetDropdownMenu';
-import { CombinedBalance, CombinedBalances } from './balances';
+import { CombinedBalances } from './balances';
 import * as styles from './mtBalancesView.scss';
 
 export type WalletViewProps = ModalOpenerProps & {
@@ -52,9 +52,11 @@ export class WalletViewInternal extends React.Component<CombinedBalances & Walle
       <Table className={styles.table} align="left">
         <thead>
         <tr>
-          <th>Asset</th>
+          <th>Symbol</th>
+          <th className="hide-lg">Asset</th>
+          <th style={{ textAlign: 'center' }}>Unlock</th>
           <th className={styles.amount}>Your Balance</th>
-          <th className={styles.amount}>Total Value</th>
+          <th className={classnames(styles.amount, 'hide-md')}>Total Value</th>
           <th className={styles.amount}>Actions</th>
         </tr>
         </thead>
@@ -66,52 +68,74 @@ export class WalletViewInternal extends React.Component<CombinedBalances & Walle
           return (
             <tr data-test-id={`${combinedBalance.name}-overview`} key={combinedBalance.name}>
               <td>
+                <div style={{ display: 'flex' }}>
+                  <span style={{ marginRight: '12px' }}>
+                    {getToken(combinedBalance.name).icon}
+                  </span>
+                  <span>{getToken(combinedBalance.name).symbol}</span>
+                </div>
+              </td>
+              <td className="hide-lg">
                 <div className={styles.centeredAsset}>
-                  <div style={{ width: '24px', height: '24px', marginRight: '12px' }}>
-                    {getToken(combinedBalance.name).iconColor}
-                  </div>
                   <Currency
                     value={getToken(combinedBalance.name).name}/>
                 </div>
               </td>
-              <td data-test-id={`${combinedBalance.name}-balance`} className={styles.amount}>
-                <Money value={combinedBalance.walletBalance} token={combinedBalance.name}/>
-              </td>
-              <td className={styles.amount}>
-                $ {formatPrecision(combinedBalance.mtAssetValueInDAI, 2)}
-              </td>
-              <td className={styles.amount} style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                {combinedBalance.name === 'ETH' &&
-                <Button
-                  color="secondaryOutlined"
-                  data-test-id="open-wrap-form"
-                  className={styles.actionButton}
-                  size="sm"
-                  onClick={() => this.wrap()}
-                  disabled={combinedBalance.walletBalance.eq(zero)}
-                >
-                  Wrap
-                </Button>}
-                {combinedBalance.name === 'WETH' &&
-                <Button
-                  color="secondaryOutlined"
-                  data-test-id="open-unwrap-form"
-                  className={styles.actionButton}
-                  size="sm"
-                  onClick={() => this.unwrap()}
-                  disabled={combinedBalance.walletBalance.eq(zero)}
-                >
-                  Unwrap
-                </Button>
-                }
+              <td style={{ textAlign: 'center' }}>
                 {
-                  combinedBalance.name !== 'ETH' &&
-                  <AssetDropdownMenu
-                    actions={this.createActionsPerAsset(combinedBalance)}
-                    asset={combinedBalance.name}
-                    withIcon={true}
+                  combinedBalance.name !== 'ETH' && <Slider blocked={!combinedBalance.allowance}
+                          data-test-id="toggle-allowance"
+                          disabled={combinedBalance.allowanceChangeInProgress}
+                          inProgress={combinedBalance.allowanceChangeInProgress}
+                          onClick={() => combinedBalance.allowance ?
+                            this.props.disapproveWallet(combinedBalance.name) :
+                            this.props.approveWallet(combinedBalance.name)
+                          }
                   />
                 }
+              </td>
+              <td data-test-id={`${combinedBalance.name}-balance`} className={styles.amount}>
+                <div>
+                  <FormatAmount data-test-id="amount"
+                                token={combinedBalance.name}
+                                value={combinedBalance.walletBalance}/>
+                  <div className={styles.amountCurrency}>
+                    <Currency value={combinedBalance.name}/>
+                  </div>
+                </div>
+              </td>
+              <td className={classnames(styles.amount, 'hide-md')} >
+                $ {formatPrecision(combinedBalance.mtAssetValueInDAI, 2)}
+              </td>
+              <td>
+                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  {
+                    combinedBalance.name === 'ETH' &&
+                    <Button
+                      color="secondaryOutlined"
+                      data-test-id="open-wrap-form"
+                      className={styles.actionButton}
+                      size="xs"
+                      onClick={() => this.wrap()}
+                      disabled={combinedBalance.walletBalance.eq(zero)}
+                    >
+                    Wrap
+                  </Button>
+                  }
+                  {
+                    combinedBalance.name === 'WETH' &&
+                    <Button
+                      color="secondaryOutlined"
+                      data-test-id="open-unwrap-form"
+                      className={styles.actionButton}
+                      size="xs"
+                      onClick={() => this.unwrap()}
+                      disabled={combinedBalance.walletBalance.eq(zero)}
+                    >
+                      Unwrap
+                    </Button>
+                  }
+                </div>
               </td>
             </tr>
           );
@@ -119,60 +143,6 @@ export class WalletViewInternal extends React.Component<CombinedBalances & Walle
         </tbody>
       </Table>
     );
-  }
-
-  private createActionsPerAsset = (combinedBalance: CombinedBalance): (React.ReactNode[]) => {
-    const actions: React.ReactNode[] = [];
-
-    if (combinedBalance
-      && combinedBalance.name !== 'ETH'
-      && combinedBalance.allowance
-    ) {
-      actions.push(
-        <Button
-          key={combinedBalance.name}
-          size="sm"
-          color="secondaryOutlined"
-          block={true}
-          data-test-id="disable-allowance"
-          onClick={() => this.props.disapproveWallet(combinedBalance.name)}
-        >
-          Disable
-        </Button>
-      );
-    }
-
-    if (combinedBalance
-      && combinedBalance.name !== 'ETH'
-      && !combinedBalance.allowance) {
-      actions.push(
-        <Button
-          key={combinedBalance.name}
-          size="sm"
-          color="secondaryOutlined"
-          block={true}
-          data-test-id="enable-allowance"
-          onClick={() => this.props.approveWallet(combinedBalance.name)}
-        >
-          Enable
-        </Button>
-      );
-    }
-
-    if (combinedBalance && combinedBalance.name === 'SAI') {
-      actions.push(
-        <theAppContext.Consumer>
-          {({ SAI2DAIMigrationTxRx }) =>
-            // @ts-ignore
-            <SAI2DAIMigrationTxRx label={'Upgrade Sai'}
-                                  tid="update-btn-account"
-                                  className={styles.redeemBtn}
-            />
-          }
-        </theAppContext.Consumer>
-      );
-    }
-    return actions;
   }
 
   private openWrapUnwrap(kind: WrapUnwrapFormKind) {
