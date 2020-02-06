@@ -13,9 +13,10 @@ import {
 } from 'rxjs/operators';
 import { Calls$ } from '../blockchain/calls/calls';
 
+import { TxMetaKind } from 'src/blockchain/calls/txMeta';
 import { AssetKind, NetworkConfig, tradingTokens } from '../blockchain/config';
 import { account$, GasPrice$, MIN_ALLOWANCE } from '../blockchain/network';
-import { TxState } from '../blockchain/transactions';
+import { TxState, TxStatus } from '../blockchain/transactions';
 import { amountFromWei } from '../blockchain/utils';
 import {
   MarginableAsset,
@@ -87,6 +88,7 @@ export interface CombinedBalance {
   mtAssetValueInDAI: BigNumber;
   cashBalance?: BigNumber;
   allowance: boolean;
+  allowanceChangeInProgress: boolean;
 }
 
 export interface CombinedBalances {
@@ -94,8 +96,25 @@ export interface CombinedBalances {
   mta: MTAccount;
 }
 
+function isAllowanceChangeInProgress(token: string, currentBlock: number) {
+  return (tx: TxState) => (
+    tx.meta.kind === TxMetaKind.approveWallet ||
+    tx.meta.kind === TxMetaKind.disapproveWallet
+  ) && (
+    tx.status === TxStatus.WaitingForApproval ||
+    tx.status === TxStatus.WaitingForConfirmation ||
+    tx.status === TxStatus.Success && tx.blockNumber > currentBlock ||
+    tx.status === TxStatus.Failure && tx.blockNumber > currentBlock
+  ) && tx.meta.args.token === token;
+}
+
 export function combineBalances(
-  etherBalance: BigNumber, walletBalances: Balances, allowances: Allowances, mta: MTAccount
+  etherBalance: BigNumber,
+  walletBalances: Balances,
+  allowances: Allowances,
+  mta: MTAccount,
+  transactions: TxState[],
+  currentBlock: number
 ): CombinedBalances {
 
   const balances = tradingTokens
@@ -118,13 +137,18 @@ export function combineBalances(
 
       const allowance = allowances[name];
 
+      const allowanceChangeInProgress = !!transactions.find(
+        isAllowanceChangeInProgress(name, currentBlock)
+      );
+
       return {
         name,
         asset,
         walletBalance,
         mtAssetValueInDAI,
         cashBalance,
-        allowance
+        allowance,
+        allowanceChangeInProgress
       };
     });
 
@@ -135,10 +159,20 @@ export function createCombinedBalances(
   etherBalance$$: Observable<BigNumber>,
   balances$$: Observable<Balances>,
   allowances$: Observable<Allowances>,
-  mta$: Observable<MTAccount>): Observable<CombinedBalances> {
-  return combineLatest(etherBalance$$, balances$$, allowances$, mta$).pipe(
-    map(([etherBalance, balances, allowances, mta]) =>
-      combineBalances(etherBalance, balances, allowances, mta)),
+  mta$: Observable<MTAccount>,
+  transactions$: Observable<TxState[]>,
+  currentBlock$: Observable<number>
+): Observable<CombinedBalances> {
+  return combineLatest(
+    etherBalance$$,
+    balances$$,
+    allowances$,
+    mta$,
+    transactions$,
+    currentBlock$
+  ).pipe(
+    map(([etherBalance, balances, allowances, mta, txs, block]) =>
+      combineBalances(etherBalance, balances, allowances, mta, txs, block)),
     shareReplay(1)
   );
 }

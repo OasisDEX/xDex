@@ -23,6 +23,19 @@
   width: 68px;
 }
 
+.setMaxBtn {
+  padding: 0;
+  font-size: 14px;
+  border: 0;
+  background: transparent;
+  color: $bright-blue;
+
+  &:hover:enabled:not(:disabled) {
+    background: transparent;
+    color: $bright-blue;
+  }
+}
+
 // form
 
 $twoColumnsPanelWidth: 454px;
@@ -104,7 +117,7 @@ $historyPanelsHeight: 605px;
   flex-basis: 186px;
   flex-grow: 4;
   width: 186px;
-  text-align: right;
+  padding-left: 3em;
 }
 
 .inputCurrencyAddon {
@@ -113,6 +126,14 @@ $historyPanelsHeight: 605px;
   flex-shrink: 0;
   justify-content: start;
   padding: 10px 16px;
+  white-space: nowrap;
+}
+
+.setMaxBtnAddon {
+  padding: 0;
+  flex-basis: 36px;
+  flex-grow: 0;
+  flex-shrink: 0;
   white-space: nowrap;
 }
 
@@ -295,7 +316,7 @@ $historyPanelsHeight: 605px;
 }
 
 .buyFormWrapper {
-  margin: 15px;
+  margin: 0 15px 15px 15px;
 }
 
 .warningMessage {

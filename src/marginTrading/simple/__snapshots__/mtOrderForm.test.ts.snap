@@ -14,6 +14,8 @@ Object {
   "kind": "buy",
   "leverage": undefined,
   "liquidationPrice": undefined,
+  "maxAmount": "0",
+  "maxTotal": "0",
   "messages": Array [],
   "mta": Object {
     "daiAllowance": false,
@@ -103,6 +105,8 @@ Object {
   "kind": "buy",
   "leverage": undefined,
   "liquidationPrice": undefined,
+  "maxAmount": "0",
+  "maxTotal": "0",
   "messages": Array [],
   "mta": Object {
     "daiAllowance": false,
