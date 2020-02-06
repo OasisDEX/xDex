@@ -840,7 +840,10 @@ export class MtSimpleOrderFormView extends React.Component<
     if (!isSafeCollRatio) {
       return this.CallForDeposit(depositMessageType.collRatioUnsafe, ma);
     }
-    if (mta && mta.proxy && ma && (ma.balance.gt(zero) || ma.dai.gt(zero))) {
+
+    const hasHistoryEvents = ma && ma.rawHistory.length > 0;
+
+    if (hasHistoryEvents) {
       return <MtSimpleOrderFormBody {...this.props} />;
     }
 

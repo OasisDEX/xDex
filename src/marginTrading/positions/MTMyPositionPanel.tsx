@@ -19,7 +19,6 @@ import { TxState } from '../../blockchain/transactions';
 import { connect } from '../../utils/connect';
 import { Button } from '../../utils/forms/Buttons';
 import { LoggedOut } from '../../utils/loadingIndicator/LoggedOut';
-import { zero } from '../../utils/zero';
 import { MtTransferFormView } from '../transfer/mtTransferFormView';
 import backArrowSvg from './back-arrow.svg';
 import * as myPositionStyles from './MTMyPositionView.scss';
@@ -86,9 +85,11 @@ export class MTMyPositionPanel
       }
 
       if (this.props.status === 'loaded' && this.props.value.mta) {
-        const { ma, mta } = this.props.value;
+        const { ma } = this.props.value;
 
-        if (mta && mta.proxy && ma && (ma.balance.gt(zero) || ma.dai.gt(zero))) {
+        const hasHistoryEvents = ma && ma.rawHistory.length > 0;
+
+        if (hasHistoryEvents) {
           return (
             <Panel style={{ flexGrow: 1 }}>
               <MTMyPositionPanelInternal {...this.props.value} {...{ open: this.props.open }} />
