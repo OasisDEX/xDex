@@ -263,7 +263,7 @@ interface MTRedeemData {
 
 export const mtRedeem = {
   call: ({ proxy }: MTRedeemData) => {
-    return proxy['execute(address,bytes)'];
+    return proxy.methods['execute(address,bytes)'];
   },
   prepareArgs: ({ token, amount }: MTRedeemData, context: NetworkConfig) => {
     return [
