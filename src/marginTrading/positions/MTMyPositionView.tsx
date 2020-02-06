@@ -313,11 +313,16 @@ export class MTMyPositionView extends
                 Please redeem {ma.redeemable.toString()}
                 &nbsp;{ma.name} of collateral.
               </span>
-              <Button
-                size="md"
+              <RedeemButton
+                redeem={() => this.props.redeem({
+                  token: ma.name,
+                  proxy: mta.proxy,
+                  amount: ma.redeemable})}
+
+                token={ma.name}
                 disabled={ma.redeemable.eq(zero)}
-                className={styles.redeemButton}
-              >Redeem</Button>
+                transactions={this.props.transactions}
+              />
             </div>
           }
         </div>
