@@ -240,7 +240,7 @@ export function setupAppContext() {
         connect(
           // @ts-ignore
           MTBalancesView,
-          loadablifyLight(createBalancesView$(mtBalances$))
+          loadablifyLight(createBalancesView$(initializedAccount$, mtBalances$))
         )
       ),
       {
