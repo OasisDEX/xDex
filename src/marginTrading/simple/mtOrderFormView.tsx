@@ -688,7 +688,7 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
                             onClick={
                               this.handleSetMaxTotal
                             }>
-            <Button size="sm" className={styles.setMaxBtn}>
+            <Button size="sm" type="button" className={styles.setMaxBtn}>
               Set Max
             </Button>
         </InputGroupAddon>
@@ -751,7 +751,7 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
         </ApproximateInputValue>
         <InputGroupAddon  className={styles.setMaxBtnAddon}
                           onClick={this.handleSetMaxAmount}>
-            <Button size="sm" className={styles.setMaxBtn}>
+            <Button size="sm" type="button" className={styles.setMaxBtn}>
               Set Max
             </Button>
         </InputGroupAddon>
