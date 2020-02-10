@@ -19,7 +19,7 @@ import { RawMTHistoryEvent } from './mtHistory';
 function marginableAvailableActions(asset: MarginableAssetCore) {
   const availableActions: UserActionKind[] = [];
 
-  if (asset.allowance && asset.walletBalance.gt(zero)) {
+  if (asset.allowance) {
     availableActions.push(UserActionKind.fund);
   }
 
