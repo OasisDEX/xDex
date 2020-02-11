@@ -18,7 +18,7 @@ import { GasCost } from '../../utils/gasCost/GasCost';
 import { SvgImage } from '../../utils/icons/utils';
 import { BorderBox, Hr } from '../../utils/layout/LayoutHelpers';
 import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
-import { ModalProps, ModalOpenerProps } from '../../utils/modal';
+import { ModalProps } from '../../utils/modal';
 import { Panel, PanelBody, PanelFooter, PanelHeader } from '../../utils/panel/Panel';
 import { Muted } from '../../utils/text/Text';
 import { TransactionStateDescription } from '../../utils/text/TransactionStateDescription';
@@ -227,8 +227,10 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
                   <>
                     <theAppContext.Consumer>
                       {
+                        ({ MTSimpleOrderBuyPanelRxTx }) =>
                         // @ts-ignore
-                        ({ MTSimpleOrderBuyPanelRxTx }) => <MTSimpleOrderBuyPanelRxTx close={this.props.close}/> }
+                        <MTSimpleOrderBuyPanelRxTx close={this.props.close}/>
+                      }
                     </theAppContext.Consumer>
                   </>
                 }

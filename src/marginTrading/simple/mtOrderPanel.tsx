@@ -2,7 +2,7 @@ import * as React from 'react';
 import { LoadableWithTradingPair } from '../../utils/loadable';
 import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
 import { ModalOpenerProps } from '../../utils/modal';
-import { PanelHeader, PanelBody, Panel } from '../../utils/panel/Panel';
+import { PanelBody, PanelHeader } from '../../utils/panel/Panel';
 import { CreateMTFundForm$ } from '../transfer/mtTransferForm';
 import { MTSimpleFormState } from './mtOrderForm';
 import { MtSimpleOrderFormView } from './mtOrderFormView';

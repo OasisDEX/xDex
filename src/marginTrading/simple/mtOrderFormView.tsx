@@ -296,7 +296,7 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
         { this.slippageLimitForm() }
       </div>
       <Button
-        style={{ marginTop: 'auto'}}
+        style={{ marginTop: 'auto' }}
         className={formStyles.confirmButton}
         type="submit"
         onClick={this.switchToInstantOrderForm}
