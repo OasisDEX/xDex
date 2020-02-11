@@ -227,8 +227,10 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
                   <>
                     <theAppContext.Consumer>
                       {
-                        // @ts-ignore
-                        ({ MTSimpleOrderBuyPanelRxTx }) => <MTSimpleOrderBuyPanelRxTx /> }
+                        ({ MTSimpleOrderBuyPanelRxTx }) =>
+                          // @ts-ignore
+                          <MTSimpleOrderBuyPanelRxTx close={this.props.close} />
+                      }
                     </theAppContext.Consumer>
                   </>
                 }
@@ -548,11 +550,11 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
   private messageContent(msg: Message) {
     switch (msg.kind) {
       case MessageKind.insufficientAvailableAmount:
-        return  `Your available balance is too low to fund this order`;
+        return  `You don't have enough free tokens to withdraw`;
       case MessageKind.insufficientAmount:
-        return  `Your balance is too low to fund this order`;
+        return  `You don't have enough free tokens to withdraw`;
       case MessageKind.dustAmount:
-        return `Order below token limit`;
+        return `Transfer below token limit`;
       case MessageKind.impossibleToPlan:
         return msg.message;
       case MessageKind.minDebt:
@@ -562,7 +564,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
 }
 
 export class MTSimpleOrderBuyPanel extends React.Component<
-  LoadableWithTradingPair<MTSimpleFormState>
+  LoadableWithTradingPair<MTSimpleFormState> & { close: (() => void) | undefined }
   > {
   public render() {
     if (this.props.status === 'loaded' && this.props.value && this.props.value.mta) {
@@ -572,7 +574,7 @@ export class MTSimpleOrderBuyPanel extends React.Component<
 
       if (mta && mta.proxy && ma && (ma.balance.gt(zero) || ma.dai.gt(zero))) {
         return <div className={stylesOrder.buyFormWrapper}>
-          <MtSimpleOrderFormBody {...{ ...this.props, ...formState }} />
+          <MtSimpleOrderFormBody {...{ ...this.props, ...formState, close: this.props.close }} />
         </div>;
       }
     }

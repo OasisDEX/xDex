@@ -8,7 +8,7 @@ import { OfferType } from '../../exchange/orderbook/orderbook';
 import { ApproximateInputValue } from '../../utils/Approximate';
 import { BigNumberInput, lessThanOrEqual } from '../../utils/bigNumberInput/BigNumberInput';
 import { connect } from '../../utils/connect';
-import { FormChangeKind } from '../../utils/form';
+import { FormChangeKind, ProgressStage } from '../../utils/form';
 import {
   formatAmount,
   formatPrecision,
@@ -136,7 +136,7 @@ enum depositMessageType {
   collRatioUnsafe = 'collRatioUnsafe',
 }
 
-export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
+export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState & {close?: () => void}> {
 
   private amountInput?: HTMLElement;
   private priceInput?: HTMLElement;
@@ -176,7 +176,7 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
   }
 
   public handleSetMaxTotal = () =>
-   this.handleSetMax(this.props.maxTotal, FormChangeKind.totalFieldChange)
+    this.handleSetMax(this.props.maxTotal, FormChangeKind.totalFieldChange)
 
   public handleSetMaxAmount = () =>
     this.handleSetMax(this.props.maxAmount, FormChangeKind.amountFieldChange)
@@ -193,7 +193,17 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
     ) {
       return;
     }
-    this.props.submit(this.props);
+    const submitCall$ = this.props.submit(this.props);
+    if (this.props.close) {
+      submitCall$.subscribe((next: any) => {
+        if (next.progress === ProgressStage.waitingForConfirmation) {
+          if (this.props.close) {
+            this.props.close();
+          }
+
+        }
+      });
+    }
   }
 
   public handleAmountFocus = () => {
@@ -385,7 +395,7 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
           {' '}
           {
             priceImpact && <>
-               (<FormatPercent
+              (<FormatPercent
                 value={priceImpact}
                 fallback="-"
                 multiply={true}
@@ -477,14 +487,14 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
           Stability Fee (Variable)
         </div>
         <div className={styles.orderSummaryValue}>
-            {
-              baseTokenAsset?.fee ? <FormatPercent
-                value={baseTokenAsset?.fee}
-                fallback="-"
-                multiply={false}
-                precision={2}
-              /> : <span>-</span>
-            }
+          {
+            baseTokenAsset?.fee ? <FormatPercent
+              value={baseTokenAsset?.fee}
+              fallback="-"
+              multiply={false}
+              precision={2}
+            /> : <span>-</span>
+          }
         </div>
       </div>
     );
@@ -494,9 +504,9 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
     const { leverage, leveragePost } = this.props;
 
     const leverageDisplay = leverage
-                            ? leverage
-                            : leveragePost
-                              ? zero : minusOne;
+      ? leverage
+      : leveragePost
+        ? zero : minusOne;
     return (
       <div className={classnames(
         styles.orderSummaryRow,
@@ -507,21 +517,21 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
           Leverage
         </div>
         <div className={styles.orderSummaryValue}>
-            {
-              leverageDisplay.gte(zero) ?
-                <>{ formatPrecision(leverageDisplay, 1) }x</>
-                : <span>-</span>
+          {
+            leverageDisplay.gte(zero) ?
+              <>{ formatPrecision(leverageDisplay, 1) }x</>
+              : <span>-</span>
+          }
+          { this.props.leveragePost &&
+          <>
+            <span className={styles.transitionArrow}/>
+            { this.props.leveragePost ?
+              <>
+                {formatPrecision(this.props.leveragePost, 1)}x
+              </> : <span>-</span>
             }
-            { this.props.leveragePost &&
-            <>
-              <span className={styles.transitionArrow}/>
-              { this.props.leveragePost ?
-                <>
-                  {formatPrecision(this.props.leveragePost, 1)}x
-                </> : <span>-</span>
-              }
-            </>
-            }
+          </>
+          }
         </div>
       </div>
     );
@@ -691,7 +701,7 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
             <Button size="sm" type="button" className={styles.setMaxBtn}>
               Set Max
             </Button>
-        </InputGroupAddon>
+          </InputGroupAddon>
           <InputGroupAddon className={styles.inputCurrencyAddon} onClick={ this.handlePriceFocus }>
             {quoteToken}
           </InputGroupAddon>
@@ -751,9 +761,9 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
         </ApproximateInputValue>
         <InputGroupAddon  className={styles.setMaxBtnAddon}
                           onClick={this.handleSetMaxAmount}>
-            <Button size="sm" type="button" className={styles.setMaxBtn}>
-              Set Max
-            </Button>
+          <Button size="sm" type="button" className={styles.setMaxBtn}>
+            Set Max
+          </Button>
         </InputGroupAddon>
         <InputGroupAddon className={styles.inputCurrencyAddon} onClick={ this.handleAmountFocus }>
           {baseToken}
