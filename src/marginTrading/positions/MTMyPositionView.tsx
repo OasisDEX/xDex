@@ -30,6 +30,7 @@ interface MTMyPositionViewProps {
   redeem: (args: {token: string; proxy: any, amount: BigNumber}) => void;
   close?: () => void;
   transactions: TxState[];
+  inDai: boolean;
 }
 
 interface RedeemButtonProps {
@@ -78,7 +79,7 @@ export class MTMyPositionView extends
 {
   public render() {
 
-    const { ma, mta } = this.props;
+    const { ma, mta, inDai } = this.props;
     const { liquidationPenalty } = ma;
     const leverage = ma.leverage ? ma.leverage : ma.balance.gt(zero) ? one : zero;
     const liquidationPrice = ma.liquidationPrice ? ma.liquidationPrice : zero;
@@ -131,10 +132,11 @@ export class MTMyPositionView extends
               </div>
               <div className={styles.summaryValue}>
                 {
-                  liquidationPrice.gt(zero) ?
+                 inDai
+                  ? (
                     <Money
-                      value={liquidationPrice}
-                      token="USD"
+                      value={liquidationPriceMarket.gt(zero) ? liquidationPriceMarket : undefined}
+                      token="DAI"
                       fallback="-"
                       className={
                         classnames({
@@ -142,48 +144,54 @@ export class MTMyPositionView extends
                           [styles.summaryValueNegative]: ma && !ma.safe,
                         })
                       }
-                    /> : <span>-</span>
-                }
-                <br/>
-                {
-                  liquidationPriceMarket.gt(zero) &&
-                  <>~<Money
-                    value={liquidationPriceMarket}
-                    token="DAI"
-                    fallback="-"
-                    className={
-                      classnames({
-                        [styles.summaryValuePositive]: ma && ma.safe,
-                        [styles.summaryValueNegative]: ma && !ma.safe,
-                      })
-                    }
-                  />
+                    />
+                  )
+                  : (
+                    <>
+                    ~<Money value={liquidationPrice.gt(zero) ? liquidationPrice : undefined}
+                            token="USD"
+                            fallback="-"
+                            className={
+                              classnames({
+                                [styles.summaryValuePositive]: ma && ma.safe,
+                                [styles.summaryValueNegative]: ma && !ma.safe,
+                              })
+                            }
+                     />
                   </>
+                  )
                 }
               </div>
             </div>
-            <div className={styles.summaryRow}>
-              <div className={styles.summaryLabel}>
-                Current Price (OSM)
-              </div>
-              <div className={styles.summaryValue}>
-                {
-                  ma.referencePrice &&
-                  <Money value={ma.referencePrice} token="USD"/>
-                }
-              </div>
-            </div>
-            <div className={styles.summaryRow}>
-              <div className={styles.summaryLabel}>
-                Current Price (Market)
-              </div>
-              <div className={styles.summaryValue}>
-                {
-                  ma.midpointPrice &&
-                  <Money value={ma.midpointPrice} token="DAI"/>
-                }
-              </div>
-            </div>
+            {
+                inDai
+                  ? (
+                    <div className={styles.summaryRow}>
+                      <div className={styles.summaryLabel}>
+                        Current Price (Market)
+                      </div>
+                      <div className={styles.summaryValue}>
+                        {
+                          ma.midpointPrice &&
+                          <Money value={ma.midpointPrice} token="DAI"/>
+                        }
+                      </div>
+                    </div>
+                  )
+                  : (
+                    <div className={styles.summaryRow}>
+                      <div className={styles.summaryLabel}>
+                        Current Price (OSM)
+                      </div>
+                      <div className={styles.summaryValue}>
+                        {
+                          ma.referencePrice &&
+                          <Money value={ma.referencePrice} token="USD"/>
+                        }
+                      </div>
+                    </div>
+                  )
+              }
           </div>
           <div className={styles.MTPositionColumn}>
             <div className={styles.summaryRow}>

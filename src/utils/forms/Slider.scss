@@ -89,3 +89,13 @@
 .progressUnblocked {
   left: 4px;
 }
+
+.option {
+  z-index: 2;
+  transition: color .5s ease 0s;
+  color: $green;
+
+  &.highlight {
+    color: white;
+  }
+}
