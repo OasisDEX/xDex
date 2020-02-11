@@ -168,12 +168,12 @@ export class MTMyPositionView extends
                   ? (
                     <div className={styles.summaryRow}>
                       <div className={styles.summaryLabel}>
-                        Current Price (Market)
+                        Mark Price
                       </div>
                       <div className={styles.summaryValue}>
                         {
-                          ma.midpointPrice &&
-                          <Money value={ma.midpointPrice} token="DAI"/>
+                          ma.osmPriceNext &&
+                          <Money value={ma.osmPriceNext} token="DAI"/>
                         }
                       </div>
                     </div>
@@ -181,12 +181,12 @@ export class MTMyPositionView extends
                   : (
                     <div className={styles.summaryRow}>
                       <div className={styles.summaryLabel}>
-                        Current Price (OSM)
+                        Mark Price
                       </div>
                       <div className={styles.summaryValue}>
                         {
-                          ma.referencePrice &&
-                          <Money value={ma.referencePrice} token="USD"/>
+                          ma.osmPriceNext &&
+                          <Money value={ma.osmPriceNext} token="USD"/>
                         }
                       </div>
                     </div>
