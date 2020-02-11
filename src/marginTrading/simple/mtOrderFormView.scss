@@ -304,12 +304,12 @@ $historyPanelsHeight: 605px;
 }
 
 .orderPanel {
-  height: 605px;
+  height: 100%;
   min-width: 454px;
   width: auto;
-  //padding: 10px 25px;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
   display: flex;
 }
 
