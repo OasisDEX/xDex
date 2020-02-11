@@ -222,6 +222,44 @@ button.actionButton {
   font-weight: 600;
 }
 
+.toggle {
+  display: flex;
+  width: 90px !important;
+  height: 40px !important;
+  border-radius: 90px !important;
+  margin-left: 8px !important;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  justify-content: space-between;
+  padding: 0 12px !important;
+  background: #F6F6F6 !important;
+  border: 1px solid #D8D8D8 !important;
+}
+
+.togglePointerBlocked {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 3px !important;
+  width: 44px !important;
+  height: 32px !important;
+  border-radius: 90px !important;
+  background-color: $green !important;
+}
+
+.togglePointerUnblocked {
+  position: absolute;
+  top:0;
+  left: 38px;
+  margin: 3px !important;
+  width: 44px !important;
+  height: 32px !important;
+  border-radius: 90px !important;
+  background-color: $green !important;
+}
+
+
 .buttonCheck {
   min-width: 115px;
 }

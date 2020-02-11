@@ -14,6 +14,7 @@ import { MTMyPositionView } from './MTMyPositionView';
 
 import { default as BigNumber } from 'bignumber.js';
 import { Observable } from 'rxjs';
+import { Switch } from 'src/utils/forms/Slider';
 import { AssetDropdownMenu } from '../../balances/AssetDropdownMenu';
 import { TxState } from '../../blockchain/transactions';
 import { connect } from '../../utils/connect';
@@ -116,7 +117,16 @@ export class MTMyPositionPanel
 }
 
 export class MTMyPositionPanelInternal
-  extends React.Component<MTMyPositionPanelInternalProps & ModalOpenerProps> {
+  extends React.Component<MTMyPositionPanelInternalProps & ModalOpenerProps, {blocked: boolean}> {
+
+  public constructor(props:any) {
+    super(props);
+    // TODO: this should come from the pipeline;
+    this.state = {
+      blocked: true
+    };
+  }
+
   public render() {
 
     const { ma, mta } = this.props;
@@ -131,7 +141,18 @@ export class MTMyPositionPanelInternal
           ><SvgImage image={backArrowSvg}/></div>
           }
           <span>My Position</span>
-
+          <Switch blocked={this.state.blocked}
+                  onClick={() => this.setState(prevState =>
+                    ({ blocked: !prevState.blocked })
+                  )}
+                  optionOne="DAI"
+                  optionTwo="USD"
+                  className={styles.toggle}
+                  pointerStyle={
+                    this.state.blocked
+                      ? styles.togglePointerBlocked
+                      : styles.togglePointerUnblocked
+                  }/>
           <div className={styles.headerActions}>
 
             <AssetDropdownMenu
@@ -156,7 +177,8 @@ export class MTMyPositionPanelInternal
             createMTFundForm$: this.props.createMTFundForm$,
             approveMTProxy: this.props.approveMTProxy,
             transactions: this.props.transactions,
-            redeem: this.props.redeem
+            redeem: this.props.redeem,
+            inDai: this.state.blocked
           }} />}
         </PanelBody>
       </div>

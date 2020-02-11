@@ -88,6 +88,7 @@ stories.add('CDP 1 - no liquidation', () => (
       open: () => null,
       transactions: [],
       approveMTProxy: (_args: {token: string; proxyAddress: string}) => of({} as TxState),
+      inDai: false,
     }
     } />
 ));
@@ -116,6 +117,7 @@ stories.add('CDP 1 - liquidation imminent', () => (
       open: () => null,
       transactions: [],
       approveMTProxy: (_args: {token: string; proxyAddress: string}) => of({} as TxState),
+      inDai: false,
     }
     } />
 ));
@@ -142,6 +144,7 @@ stories.add('CDP 1 - liquidation ongoing', () => (
       open: () => null,
       transactions: [],
       approveMTProxy: (_args: {token: string; proxyAddress: string}) => of({} as TxState),
+      inDai: false,
     }
     } />
 ));
@@ -185,6 +188,7 @@ stories.add('CDP 1 - liquidation ongoing 2', () => (
       open: () => null,
       transactions: [],
       approveMTProxy: (_args: {token: string; proxyAddress: string}) => of({} as TxState),
+      inDai: false,
     }
     } />
 ));
@@ -212,6 +216,7 @@ stories.add('CDP 1 - liquidation ended with redeem', () => (
       open: () => null,
       transactions: [],
       approveMTProxy: (_args: {token: string; proxyAddress: string}) => of({} as TxState),
+      inDai: false,
     }
     } />
 ));
@@ -247,6 +252,7 @@ stories.add('CDP 1 - liquidation ended. After redeem', () => (
       open: () => null,
       transactions: [],
       approveMTProxy: (_args: {token: string; proxyAddress: string}) => of({} as TxState),
+      inDai: false,
     }
     } />
 ));
