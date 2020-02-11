@@ -41,6 +41,7 @@ import {
   Message, MessageKind, MTTransferFormState, MTTransferFormTab
 } from './mtTransferForm';
 import * as styles from './mtTransferFormView.scss';
+import { LoggedOut } from 'src/utils/loadingIndicator/LoggedOut';
 
 type MTFundFormProps = MTTransferFormState & ModalProps;
 

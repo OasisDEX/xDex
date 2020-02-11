@@ -7,6 +7,7 @@ import { CreateMTFundForm$ } from '../transfer/mtTransferForm';
 import { MTSimpleFormState } from './mtOrderForm';
 import { MtSimpleOrderFormView } from './mtOrderFormView';
 import * as styles from './mtOrderFormView.scss';
+import { LoggedOut } from 'src/utils/loadingIndicator/LoggedOut';
 
 export interface MTSimpleOrderPanelProps {
   createMTFundForm$: CreateMTFundForm$;
@@ -29,14 +30,23 @@ export class MTSimpleOrderPanel extends React.Component<
       );
     }
 
-    if (this.props.status === 'loaded' && this.props.value && this.props.value.mta) {
+    if (
+      this.props.status === 'loaded'
+      && this.props.value
+      && this.props.value.mta
+      && this.props.value.account
+    ) {
       const formState = this.props.value;
       return (<MtSimpleOrderFormView {...{ ...this.props, ...formState }} />);
     }
 
     return <div className={styles.orderPanel}>
-      <PanelHeader>Manage Your Leverage</PanelHeader>
-      <LoadingIndicator size="lg"/>
+      <PanelHeader style={{ width: '100%'}}>Manage Your Leverage</PanelHeader>
+      {
+        this.props.status === 'loaded' && !this.props.value?.account
+        ? <LoggedOut view="Leverage Trading form"/>
+        : <LoadingIndicator size="lg"/>
+      }
     </div>;
   }
 }

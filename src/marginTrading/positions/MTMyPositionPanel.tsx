@@ -72,19 +72,19 @@ export class MTMyPositionPanel
     if (this.props.value) {
       const panelTitle = this.props.value.ma && this.props.value.ma.name ?
         `${this.props.value.ma.name} Position` : 'My Position';
-      if (this.props.value && !this.props.value.account) {
-        return (
-          <Panel style={{ flexGrow: 1 }}>
-            <PanelHeader>{panelTitle}</PanelHeader>
-            {
-              this.props.value.ma && this.props.value.ma.name &&
-              <div style={{ padding: '150px 30px' }}>
-                <LoggedOut view={`${this.props.value.ma.name} Position`}/>
-              </div>
-            }
-          </Panel>
-        );
-      }
+      // if (this.props.value && !this.props.value.account) {
+      //   return (
+      //     <Panel style={{ flexGrow: 1 }}>
+      //       <PanelHeader>{panelTitle}</PanelHeader>
+      //       {
+      //         this.props.value.ma && this.props.value.ma.name &&
+      //         <div style={{ padding: '150px 30px' }}>
+      //           <LoggedOut view={`${this.props.value.ma.name} Position`}/>
+      //         </div>
+      //       }
+      //     </Panel>
+      //   );
+      // }
 
       if (this.props.status === 'loaded' && this.props.value.mta) {
         const { ma } = this.props.value;

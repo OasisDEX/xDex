@@ -11,6 +11,7 @@ import {
   mergeMap,
   shareReplay,
   switchMap,
+  tap,
 } from 'rxjs/operators';
 import {
   Balances,
@@ -556,8 +557,12 @@ function mtSimpleOrderForm(
   orderbook$: Observable<Orderbook>,
   createMTFundForm$: CreateMTFundForm$,
 ) {
-  const mtOrderForm$ = currentTradingPair$.pipe(
-    switchMap(tradingPair =>
+  const eventEmitter = combineLatest(currentTradingPair$, user$);
+
+  eventEmitter.pipe(tap(console.log));
+
+  const mtOrderForm$ = eventEmitter.pipe(
+    switchMap(([tradingPair]) =>
       createMTSimpleOrderForm$(
         {
           gasPrice$,
@@ -575,8 +580,8 @@ function mtSimpleOrderForm(
     shareReplay(1)
   );
 
-  const mtOrderFormLoadable$ = currentTradingPair$.pipe(
-    switchMap(tradingPair =>
+  const mtOrderFormLoadable$ = eventEmitter.pipe(
+    switchMap(([tradingPair]) =>
       loadablifyLight(mtOrderForm$).pipe(
         map(mtOrderFormLoadablified => ({
           tradingPair,
