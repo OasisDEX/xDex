@@ -652,7 +652,8 @@ function getSellPlan(
   const postTradeAsset = calculateMarginable(
     {
       ...asset,
-      debt: asset.debt.plus(delta)
+      debt: asset.debt.plus(delta),
+      dai: total.plus(delta)
     } as MarginableAssetCore,
     { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook
   );
