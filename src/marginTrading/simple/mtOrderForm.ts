@@ -1,7 +1,7 @@
 import { BigNumber } from 'bignumber.js';
 import { curry } from 'lodash';
 import { merge, Observable, of, Subject } from 'rxjs';
-import {share, shareReplay} from 'rxjs/internal/operators';
+import { share, shareReplay } from 'rxjs/internal/operators';
 import { first, map, scan, switchMap, takeUntil } from 'rxjs/operators';
 import { DustLimits } from '../../balances/balances';
 import { Calls, Calls$, ReadCalls$ } from '../../blockchain/calls/calls';

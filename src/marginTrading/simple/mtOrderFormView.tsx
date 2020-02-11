@@ -136,7 +136,8 @@ enum depositMessageType {
   collRatioUnsafe = 'collRatioUnsafe',
 }
 
-export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState & {close?: () => void}> {
+export class MtSimpleOrderFormBody
+  extends React.Component<MTSimpleFormState & {close?: () => void}> {
 
   private amountInput?: HTMLElement;
   private priceInput?: HTMLElement;
