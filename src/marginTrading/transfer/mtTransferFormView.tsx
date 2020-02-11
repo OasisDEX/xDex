@@ -548,7 +548,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
   private messageContent(msg: Message) {
     switch (msg.kind) {
       case MessageKind.insufficientAvailableAmount:
-        return  `Your available balance is too low to fund this order`;
+        return  `Your balance is not enough to withdraw that amount`;
       case MessageKind.insufficientAmount:
         return  `Your balance is too low to fund this order`;
       case MessageKind.dustAmount:
