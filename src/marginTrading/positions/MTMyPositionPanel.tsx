@@ -45,7 +45,7 @@ export class MTLiquidationNotification
 
       return <>
         {
-          ma.bitable === 'imminent' &&
+          ma?.bitable === 'imminent' &&
           // tslint:disable
           <div className={myPositionStyles.warningMessage}>
             <SvgImage image={warningIconSvg}/>

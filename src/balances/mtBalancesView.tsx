@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { default as BigNumber } from 'bignumber.js';
 import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
-import { map } from 'rxjs/internal/operators';
+import { map, switchMap } from 'rxjs/internal/operators';
 import { AssetKind, getToken } from '../blockchain/config';
 import { TxState } from '../blockchain/transactions';
 import {
@@ -81,16 +81,22 @@ export class MTBalancesView
   }
 }
 
-export function createBalancesView$(mtBalances$: Observable<CombinedBalances>) {
-  const ma$: Subject<MarginableAsset | undefined> =
-    new BehaviorSubject<MarginableAsset | undefined>(undefined);
-
-  return combineLatest(ma$, mtBalances$).pipe(
-    map(([ma, balances]) => ({
-      ...balances,
-      ma,
-      selectMa: ma$.next.bind(ma$)
-    }))
+export function createBalancesView$(
+  initializedAccount$: Observable<string>,
+  mtBalances$: Observable<CombinedBalances>
+) {
+  return initializedAccount$.pipe(
+    switchMap(() => {
+      const ma$: Subject<MarginableAsset | undefined> =
+        new BehaviorSubject<MarginableAsset | undefined>(undefined);
+      return combineLatest(ma$, mtBalances$).pipe(
+        map(([ma, balances]) => ({
+          ...balances,
+          ma,
+          selectMa: ma$.next.bind(ma$)
+        }))
+      );
+    })
   );
 }
 
