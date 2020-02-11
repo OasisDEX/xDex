@@ -193,6 +193,23 @@ export const etherPriceUsd$: Observable<BigNumber> = concat(
   shareReplay(1),
 );
 
+export const daiPriceUsd$: Observable<BigNumber> = concat(
+  onEveryBlock$.pipe(
+    switchMap(() => ajax({
+      url: 'https://api.coinpaprika.com/v1/tickers/dai-dai/',
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+      },
+    })),
+    map(({ response }) => new BigNumber(response.quotes.USD.price)),
+    retryWhen(errors => errors.pipe(delayWhen(() => onEveryBlock$.pipe(skip(1))))),
+  ),
+).pipe(
+  distinctUntilChanged((x: BigNumber, y: BigNumber) => x.eq(y)),
+  shareReplay(1),
+);
+
 export function waitUntil<T>(
   value: Observable<T>, condition: (v: T) => boolean, maxRetries = 5, generator$ = onEveryBlock$,
 ): Observable<T> {

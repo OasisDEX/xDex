@@ -29,7 +29,7 @@ import { calls$, readCalls$ } from './blockchain/calls/calls';
 import {
   account$,
   allowance$,
-  context$,
+  context$, daiPriceUsd$,
   etherBalance$,
   etherPriceUsd$,
   gasPrice$,
@@ -128,6 +128,7 @@ import {
   MTMyPositionPanel
 } from './marginTrading/positions/MTMyPositionPanel';
 import {
+  createMTMyPositionView$,
   createRedeem,
 } from './marginTrading/positions/MTMyPositionView';
 import { createMTSetupForm$, MTSetupFormState } from './marginTrading/setup/mtSetupForm';
@@ -600,30 +601,11 @@ function mtSimpleOrderForm(
   const MTSimpleOrderBuyPanelRxTx =
     connect(MTSimpleOrderBuyPanel, mtOrderFormLoadable$);
 
-  const redeem = createRedeem(calls$);
-
-  const MTMyPositionPanel$ = combineLatest(mtOrderFormLoadable$, transactions$).pipe(
-    map(([state, transactions]) =>
-      // @ts-ignore
-      state.status === 'loaded' && state.value
-        ? {
-          status: state.status,
-          value: {
-            createMTFundForm$,
-            approveMTProxy,
-            transactions,
-            redeem,
-            account: state.value.account,
-            mta: state.value.mta,
-            ma: findMarginableAsset(state.tradingPair.base, state.value.mta),
-          },
-        }
-        : {
-          value: state.value,
-          status: state.status,
-          error: state.error,
-        }
-    )
+  const MTMyPositionPanel$ = createMTMyPositionView$(
+    mtOrderFormLoadable$,
+    createMTFundForm$,
+    calls$,
+    daiPriceUsd$
   );
   const MTMyPositionPanelRxTx =
     // @ts-ignore

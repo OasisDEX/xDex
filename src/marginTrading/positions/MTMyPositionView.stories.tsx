@@ -89,6 +89,7 @@ stories.add('CDP 1 - no liquidation', () => (
       transactions: [],
       approveMTProxy: (_args: {token: string; proxyAddress: string}) => of({} as TxState),
       inDai: false,
+      daiPrice: new BigNumber(1)
     }
     } />
 ));
@@ -118,6 +119,7 @@ stories.add('CDP 1 - liquidation imminent', () => (
       transactions: [],
       approveMTProxy: (_args: {token: string; proxyAddress: string}) => of({} as TxState),
       inDai: false,
+      daiPrice: new BigNumber(1)
     }
     } />
 ));
@@ -145,6 +147,7 @@ stories.add('CDP 1 - liquidation ongoing', () => (
       transactions: [],
       approveMTProxy: (_args: {token: string; proxyAddress: string}) => of({} as TxState),
       inDai: false,
+      daiPrice: new BigNumber(1)
     }
     } />
 ));
@@ -189,6 +192,7 @@ stories.add('CDP 1 - liquidation ongoing 2', () => (
       transactions: [],
       approveMTProxy: (_args: {token: string; proxyAddress: string}) => of({} as TxState),
       inDai: false,
+      daiPrice: new BigNumber(1)
     }
     } />
 ));
@@ -217,6 +221,7 @@ stories.add('CDP 1 - liquidation ended with redeem', () => (
       transactions: [],
       approveMTProxy: (_args: {token: string; proxyAddress: string}) => of({} as TxState),
       inDai: false,
+      daiPrice: new BigNumber(1)
     }
     } />
 ));
@@ -253,6 +258,7 @@ stories.add('CDP 1 - liquidation ended. After redeem', () => (
       transactions: [],
       approveMTProxy: (_args: {token: string; proxyAddress: string}) => of({} as TxState),
       inDai: false,
+      daiPrice: new BigNumber(1)
     }
     } />
 ));
@@ -271,6 +277,7 @@ stories.add('Not connected', () => (
       ma: ethMarginableAsset,
       transactions: [],
       redeem: () => null,
+      daiPrice: new BigNumber(1)
     }}
     status="loaded"
     open={ () => null}
@@ -286,6 +293,7 @@ stories.add('Not setup', () => (
       ma: ethMarginableAsset,
       transactions: [],
       redeem: () => null,
+      daiPrice: new BigNumber(1)
     }}
     status="loaded"
     open={ () => null }

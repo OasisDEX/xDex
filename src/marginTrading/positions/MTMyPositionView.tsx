@@ -2,19 +2,25 @@ import { default as BigNumber } from 'bignumber.js';
 import classnames from 'classnames';
 import * as React from 'react';
 import { Observable } from 'rxjs/index';
+import { combineLatest } from 'rxjs';
 import { first, switchMap } from 'rxjs/internal/operators';
+import { map } from 'rxjs/operators';
 import { CDPHistoryView } from '../../balances/CDPHistoryView';
 import { Calls$ } from '../../blockchain/calls/calls';
+import { approveMTProxy } from '../../blockchain/calls/mtCalls';
 import { TxMetaKind } from '../../blockchain/calls/txMeta';
-import { isDone, TxState } from '../../blockchain/transactions';
+import { isDone, transactions$, TxState } from '../../blockchain/transactions';
 import { formatPrecision } from '../../utils/formatters/format';
 import { FormatPercent, Money } from '../../utils/formatters/Formatters';
 import { Button } from '../../utils/forms/Buttons';
 import { SvgImage } from '../../utils/icons/utils';
+import { LoadableWithTradingPair } from '../../utils/loadable';
 import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
 import { ModalOpenerProps } from '../../utils/modal';
 import { minusOne, one, zero } from '../../utils/zero';
+import { MTSimpleOrderFormParams } from '../simple/mtOrderForm';
 import {
+  findMarginableAsset,
   MarginableAsset,
   MTAccount
 } from '../state/mtAccount';
@@ -31,6 +37,7 @@ interface MTMyPositionViewProps {
   close?: () => void;
   transactions: TxState[];
   inDai: boolean;
+  daiPrice: BigNumber;
 }
 
 interface RedeemButtonProps {
@@ -74,12 +81,44 @@ export function createRedeem(calls$: Calls$) {
   };
 }
 
+export function createMTMyPositionView$(
+  mtOrderFormLoadable$: Observable<any>,
+  createMTFundForm$: CreateMTFundForm$,
+  calls$: Calls$,
+  daiPriceUsd$: Observable<BigNumber>
+) {
+  const redeem = createRedeem(calls$);
+  return combineLatest(mtOrderFormLoadable$, transactions$, daiPriceUsd$).pipe(
+    map(([state, transactions, daiPrice]) => {
+      return state.status === 'loaded' && state.value
+        ? {
+          status: state.status,
+          value: {
+            createMTFundForm$,
+            approveMTProxy,
+            transactions,
+            redeem,
+            daiPrice,
+            account: state.value.account,
+            mta: state.value.mta,
+            ma: findMarginableAsset(state.tradingPair.base, state.value.mta),
+          },
+        }
+        : {
+          value: state.value,
+          status: state.status,
+          error: state.error,
+        };
+    })
+  );
+}
+
 export class MTMyPositionView extends
   React.Component<MTMyPositionViewProps & ModalOpenerProps>
 {
   public render() {
 
-    const { ma, mta, inDai } = this.props;
+    const { ma, mta, inDai, daiPrice } = this.props;
     const { liquidationPenalty } = ma;
     const leverage = ma.leverage ? ma.leverage : ma.balance.gt(zero) ? one : zero;
     const liquidationPrice = ma.liquidationPrice ? ma.liquidationPrice : zero;
@@ -87,6 +126,12 @@ export class MTMyPositionView extends
       ma.liquidationPrice.times(ma.midpointPrice.div(ma.referencePrice))
       : zero;
 
+    const liquidationPriceDisplay = inDai ?
+      liquidationPriceMarket.gt(zero) ? liquidationPriceMarket : undefined
+      :
+      liquidationPrice.gt(zero) ? liquidationPrice : undefined;
+
+    const markPrice = inDai ? ma.osmPriceNext && ma.osmPriceNext.times(daiPrice) : ma.osmPriceNext;
     return (
       <div>
         <div className={styles.MTPositionPanel}>
@@ -131,67 +176,34 @@ export class MTMyPositionView extends
                 Liquidation Price
               </div>
               <div className={styles.summaryValue}>
-                {
-                 inDai
-                  ? (
-                    <Money
-                      value={liquidationPriceMarket.gt(zero) ? liquidationPriceMarket : undefined}
-                      token="DAI"
-                      fallback="-"
-                      className={
-                        classnames({
-                          [styles.summaryValuePositive]: ma && ma.safe,
-                          [styles.summaryValueNegative]: ma && !ma.safe,
-                        })
-                      }
-                    />
-                  )
-                  : (
-                    <>
-                    ~<Money value={liquidationPrice.gt(zero) ? liquidationPrice : undefined}
-                            token="USD"
-                            fallback="-"
-                            className={
-                              classnames({
-                                [styles.summaryValuePositive]: ma && ma.safe,
-                                [styles.summaryValueNegative]: ma && !ma.safe,
-                              })
-                            }
-                     />
-                  </>
-                  )
-                }
+                { inDai && '~' }
+                <Money
+                  value={liquidationPriceDisplay}
+                  token={ inDai ? 'DAI' : 'USD' }
+                  fallback="-"
+                  className={
+                    classnames({
+                      [styles.summaryValuePositive]: ma && ma.safe,
+                      [styles.summaryValueNegative]: ma && !ma.safe,
+                    })
+                  }
+                />
               </div>
             </div>
-            {
-                inDai
-                  ? (
-                    <div className={styles.summaryRow}>
-                      <div className={styles.summaryLabel}>
-                        Mark Price
-                      </div>
-                      <div className={styles.summaryValue}>
-                        {
-                          ma.osmPriceNext &&
-                          <Money value={ma.osmPriceNext} token="DAI"/>
-                        }
-                      </div>
-                    </div>
-                  )
-                  : (
-                    <div className={styles.summaryRow}>
-                      <div className={styles.summaryLabel}>
-                        Mark Price
-                      </div>
-                      <div className={styles.summaryValue}>
-                        {
-                          ma.osmPriceNext &&
-                          <Money value={ma.osmPriceNext} token="USD"/>
-                        }
-                      </div>
-                    </div>
-                  )
-              }
+              <div className={styles.summaryRow}>
+                <div className={styles.summaryLabel}>
+                  Mark Price
+                </div>
+                <div className={styles.summaryValue}>
+                  {
+                    markPrice &&
+                    <Money
+                      value={markPrice}
+                      token={ inDai ? 'DAI' : 'USD' }
+                    />
+                  }
+                </div>
+              </div>
           </div>
           <div className={styles.MTPositionColumn}>
             <div className={styles.summaryRow}>

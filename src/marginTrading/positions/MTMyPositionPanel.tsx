@@ -34,6 +34,7 @@ interface MTMyPositionPanelInternalProps {
   redeem: (args: {token: string; proxy: any, amount: BigNumber}) => void;
   transactions: TxState[];
   close?: () => void;
+  daiPrice: BigNumber;
 }
 
 export class MTLiquidationNotification
@@ -178,7 +179,8 @@ export class MTMyPositionPanelInternal
             approveMTProxy: this.props.approveMTProxy,
             transactions: this.props.transactions,
             redeem: this.props.redeem,
-            inDai: this.state.blocked
+            inDai: this.state.blocked,
+            daiPrice: this.props.daiPrice,
           }} />}
         </PanelBody>
       </div>
