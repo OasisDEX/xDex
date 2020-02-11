@@ -93,9 +93,7 @@ $historyPanelsHeight: 605px;
 .confirmButton {
   font-size: $font-size-base;
   height: 35px;
-  margin-top: 2px;
   width: 100%;
-  margin-bottom: 30px;
 }
 
 // ---------- horizontal lines
@@ -316,7 +314,10 @@ $historyPanelsHeight: 605px;
 }
 
 .buyFormWrapper {
-  margin: 0 15px 15px 15px;
+  margin: 0 16px 16px 16px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .warningMessage {

@@ -215,13 +215,9 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
   }
 
   public render() {
-    return (<div>
-      {
-        this.props.view === ViewKind.instantTradeForm
+    return this.props.view === ViewKind.instantTradeForm
           ? this.instantOrderForm()
-          : this.advancedSettings()
-      }
-    </div>);
+          : this.advancedSettings();
   }
 
   private handleSetMax = (
@@ -300,6 +296,7 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
         { this.slippageLimitForm() }
       </div>
       <Button
+        style={{ marginTop: 'auto'}}
         className={formStyles.confirmButton}
         type="submit"
         onClick={this.switchToInstantOrderForm}
@@ -886,7 +883,7 @@ export class MtSimpleOrderFormView extends React.Component<
               : 'Advanced Settings'
           }
         </PanelHeader>
-        <PanelBody style={{ minWidth: '455px' }}>
+        <PanelBody style={{ minWidth: '452px', paddingBottom: '16px' }}>
           {
             this.props.view === ViewKind.instantTradeForm
               ? this.MainContent()

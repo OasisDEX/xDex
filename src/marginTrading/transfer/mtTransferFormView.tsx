@@ -18,7 +18,7 @@ import { GasCost } from '../../utils/gasCost/GasCost';
 import { SvgImage } from '../../utils/icons/utils';
 import { BorderBox, Hr } from '../../utils/layout/LayoutHelpers';
 import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
-import { ModalProps } from '../../utils/modal';
+import { ModalProps, ModalOpenerProps } from '../../utils/modal';
 import { Panel, PanelBody, PanelFooter, PanelHeader } from '../../utils/panel/Panel';
 import { Muted } from '../../utils/text/Text';
 import { TransactionStateDescription } from '../../utils/text/TransactionStateDescription';
@@ -228,7 +228,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
                     <theAppContext.Consumer>
                       {
                         // @ts-ignore
-                        ({ MTSimpleOrderBuyPanelRxTx }) => <MTSimpleOrderBuyPanelRxTx /> }
+                        ({ MTSimpleOrderBuyPanelRxTx }) => <MTSimpleOrderBuyPanelRxTx close={this.props.close}/> }
                     </theAppContext.Consumer>
                   </>
                 }
@@ -562,7 +562,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
 }
 
 export class MTSimpleOrderBuyPanel extends React.Component<
-  LoadableWithTradingPair<MTSimpleFormState>
+  LoadableWithTradingPair<MTSimpleFormState> & ModalProps
   > {
   public render() {
     if (this.props.status === 'loaded' && this.props.value && this.props.value.mta) {
@@ -573,6 +573,14 @@ export class MTSimpleOrderBuyPanel extends React.Component<
       if (mta && mta.proxy && ma && (ma.balance.gt(zero) || ma.dai.gt(zero))) {
         return <div className={stylesOrder.buyFormWrapper}>
           <MtSimpleOrderFormBody {...{ ...this.props, ...formState }} />
+          <Button size="md"
+                className={styles.cancelButton}
+                block={true}
+                color="greyOutlined"
+                onClick={() => this.props.close()}
+          >
+            Cancel
+          </Button>
         </div>;
       }
     }

@@ -70,19 +70,16 @@
 .confirmButton {
   font-size: 16px;
   height: 35px;
-  margin-top: 2px;
   width: 100%;
-  margin-bottom: 10px;
 }
 
 .cancelButton {
   font-size: 14px;
   height: 35px;
-  margin-top: 2px;
+  margin-top: 12px;
   background: $another-light-grayish-blue;
   color: $very-dark-desaturated-blue;
   width: 100%;
-  margin-bottom: 10px;
 }
 
 .summaryBox {
@@ -236,7 +233,7 @@
 
 .modalChild {
   width: 450px;
-  height: 575px;
+  height: 622px;
 }
 
 .buttonDone {
