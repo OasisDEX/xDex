@@ -215,13 +215,9 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
   }
 
   public render() {
-    return (<div>
-      {
-        this.props.view === ViewKind.instantTradeForm
+    return this.props.view === ViewKind.instantTradeForm
           ? this.instantOrderForm()
-          : this.advancedSettings()
-      }
-    </div>);
+          : this.advancedSettings();
   }
 
   private handleSetMax = (
@@ -300,6 +296,7 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
         { this.slippageLimitForm() }
       </div>
       <Button
+        style={{ marginTop: 'auto' }}
         className={formStyles.confirmButton}
         type="submit"
         onClick={this.switchToInstantOrderForm}
@@ -566,14 +563,14 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
 
   private accountBalance() {
     const baseTokenAsset = findMarginableAsset(this.props.baseToken, this.props.mta);
-    const { balancePost, daiBalancePost, baseToken, quoteToken } = this.props;
+    const { balancePost, daiBalancePost, baseToken, quoteToken, kind } = this.props;
 
     return (
       <>
         <div className={classnames(
           styles.orderSummaryRow,
           styles.orderSummaryRowDark,
-          balancePost ? styles.visible : styles.hidden)}>
+          balancePost || kind === OfferType.sell ? styles.visible : styles.hidden)}>
           <div className={styles.orderSummaryLabel}>
             Balance
           </div>
@@ -603,7 +600,7 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState> {
         <div className={classnames(
           styles.orderSummaryRow,
           styles.orderSummaryRowDark,
-          daiBalancePost ? styles.visible : styles.hidden
+          daiBalancePost || kind === OfferType.sell ? styles.visible : styles.hidden
         )}>
           <div className={styles.orderSummaryLabel}>
             DAI Balance
@@ -886,7 +883,7 @@ export class MtSimpleOrderFormView extends React.Component<
               : 'Advanced Settings'
           }
         </PanelHeader>
-        <PanelBody style={{ minWidth: '455px' }}>
+        <PanelBody style={{ minWidth: '452px', paddingBottom: '16px' }}>
           {
             this.props.view === ViewKind.instantTradeForm
               ? this.MainContent()

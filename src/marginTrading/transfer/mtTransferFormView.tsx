@@ -227,8 +227,10 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
                   <>
                     <theAppContext.Consumer>
                       {
+                        ({ MTSimpleOrderBuyPanelRxTx }) =>
                         // @ts-ignore
-                        ({ MTSimpleOrderBuyPanelRxTx }) => <MTSimpleOrderBuyPanelRxTx /> }
+                        <MTSimpleOrderBuyPanelRxTx close={this.props.close}/>
+                      }
                     </theAppContext.Consumer>
                   </>
                 }
@@ -548,7 +550,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
   private messageContent(msg: Message) {
     switch (msg.kind) {
       case MessageKind.insufficientAvailableAmount:
-        return  `Your available balance is too low to fund this order`;
+        return  `Your balance is not enough to withdraw that amount`;
       case MessageKind.insufficientAmount:
         return  `Your balance is too low to fund this order`;
       case MessageKind.dustAmount:
@@ -562,7 +564,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
 }
 
 export class MTSimpleOrderBuyPanel extends React.Component<
-  LoadableWithTradingPair<MTSimpleFormState>
+  LoadableWithTradingPair<MTSimpleFormState> & ModalProps
   > {
   public render() {
     if (this.props.status === 'loaded' && this.props.value && this.props.value.mta) {
@@ -573,6 +575,14 @@ export class MTSimpleOrderBuyPanel extends React.Component<
       if (mta && mta.proxy && ma && (ma.balance.gt(zero) || ma.dai.gt(zero))) {
         return <div className={stylesOrder.buyFormWrapper}>
           <MtSimpleOrderFormBody {...{ ...this.props, ...formState }} />
+          <Button size="md"
+                className={styles.cancelButton}
+                block={true}
+                color="greyOutlined"
+                onClick={() => this.props.close()}
+          >
+            Cancel
+          </Button>
         </div>;
       }
     }
