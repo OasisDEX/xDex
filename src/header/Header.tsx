@@ -127,7 +127,7 @@ class Header extends React.Component<HeaderProps> {
                   {REACT_APP_INSTANT_ENABLED === '1' &&
                   <HeaderNavLink to={`${rootUrl}instant`} name="Instant"/>}
                   {
-                    REACT_APP_LT_ENABLED === '1' && 
+                    REACT_APP_LT_ENABLED === '1' &&
                     this.props.walletStatus === 'connected' &&
                     <HeaderNavLink to={`${rootUrl}Leverage`} name="Leverage"/>
                   }
