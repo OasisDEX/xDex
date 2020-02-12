@@ -130,15 +130,26 @@ function argsOfPerformOperations(
   }
 
   const fundArgs = (op: Operation, token: string) => [
-    context.cdpManager, Web3Utils.fromAscii(context.mcd.ilks[op.name]),
+    context.cdpManager,
+    Web3Utils.fromAscii(context.mcd.ilks[op.name]),
     toWei(token, (op as any).amount),
-    context.tokens[token].address, context.mcd.joins[token], context.mcd.vat,
+    context.tokens[token].address,
+    context.mcd.joins[token],
   ];
+
+  const fundDaiArgs = (op: Operation, token:string) =>
+                      [...fundArgs(op, token), context.mcd.vat];
+
   const drawArgs = (op: Operation, token: string) => [
-    context.cdpManager, Web3Utils.fromAscii(context.mcd.ilks[op.name]),
+    context.cdpManager,
+    Web3Utils.fromAscii(context.mcd.ilks[op.name]),
     toWei(token, (op as any).amount),
-    context.mcd.joins[token], context.mcd.vat,
+    context.mcd.joins[token],
   ];
+
+  const drawDaiArgs = (op: Operation, token:string) =>
+                      [...drawArgs(op, token), context.mcd.vat];
+
   const buySellArgs = (op: Operation) => [
     [
       context.tokens[op.name].address, context.mcd.joins[op.name],
@@ -153,11 +164,11 @@ function argsOfPerformOperations(
     [OperationKind.fundGem]: () =>
       context.proxyActions.contract.methods.fundGem(...fundArgs(plan[0], plan[0].name)).encodeABI(),
     [OperationKind.fundDai]: () =>
-      context.proxyActions.contract.methods.fundDai(...fundArgs(plan[0], 'DAI')).encodeABI(),
+      context.proxyActions.contract.methods.fundDai(...fundDaiArgs(plan[0], 'DAI')).encodeABI(),
     [OperationKind.drawGem]: () =>
       context.proxyActions.contract.methods.drawGem(...drawArgs(plan[0], plan[0].name)).encodeABI(),
     [OperationKind.drawDai]: () =>
-      context.proxyActions.contract.methods.drawDai(...drawArgs(plan[0], 'DAI')).encodeABI(),
+      context.proxyActions.contract.methods.drawDai(...drawDaiArgs(plan[0], 'DAI')).encodeABI(),
     [OperationKind.buyRecursively]: () =>
       context.proxyActions.contract.methods.buyLev(...buySellArgs(plan[0])).encodeABI(),
     [OperationKind.sellRecursively]: () =>
