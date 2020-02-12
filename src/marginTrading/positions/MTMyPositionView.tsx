@@ -188,20 +188,23 @@ export class MTMyPositionView extends
                 />
               </div>
             </div>
-              <div className={styles.summaryRow}>
-                <div className={styles.summaryLabel}>
-                  Mark Price
-                </div>
-                <div className={styles.summaryValue}>
-                  {
-                    markPrice &&
+            <div className={styles.summaryRow}>
+              <div className={styles.summaryLabel}>
+                Mark Price
+              </div>
+              <div className={styles.summaryValue}>
+                {
+                  markPrice &&
+                  <>
+                    { inDai && '~' }
                     <Money
                       value={markPrice}
                       token={ inDai ? 'DAI' : 'USD' }
                     />
-                  }
-                </div>
+                  </>
+                }
               </div>
+            </div>
           </div>
           <div className={styles.MTPositionColumn}>
             <div className={styles.summaryRow}>
@@ -313,16 +316,16 @@ export class MTMyPositionView extends
 
               {
                 ma.redeemable.gt(zero) && <RedeemButton
-                redeem={() => this.props.redeem({
-                  token: ma.name,
-                  proxy: mta.proxy,
-                  amount: ma.redeemable
-                })}
+                  redeem={() => this.props.redeem({
+                    token: ma.name,
+                    proxy: mta.proxy,
+                    amount: ma.redeemable
+                  })}
 
-                token={ma.name}
-                disabled={false}
-                transactions={this.props.transactions}
-              />
+                  token={ma.name}
+                  disabled={false}
+                  transactions={this.props.transactions}
+                />
               }
             </div>
           }
