@@ -76,9 +76,13 @@ export function sellable(
   const { minCollRatio, referencePrice } = ma;
   let i = 0;
   const maxI = 10;
-  const log = [];
+  const log: any = [];
 
   const dust = new BigNumber('20');
+
+  if (amount.gt(balance)) {
+    return [false, log, amount, 'Balance too low'];
+  }
 
   while (amount.gt(zero) && i < maxI) {
 

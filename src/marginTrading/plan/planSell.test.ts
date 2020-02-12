@@ -21,7 +21,8 @@ describe('prepareSellAllocationRequest', () => {
       sellOffers,
       'MKR',
       new BigNumber('120'),
-      new BigNumber('200'));
+      new BigNumber('200'),
+      zero);
     expect(request).toEqual(impossible('asset not setup'));
   });
 
@@ -35,7 +36,8 @@ describe('prepareSellAllocationRequest', () => {
       sellOffers,
       'WETH',
       new BigNumber('120'),
-      new BigNumber('200'));
+      new BigNumber('200'),
+      zero);
     expect(request).toEqual(impossible('balance too small'));
   });
 
@@ -49,7 +51,8 @@ describe('prepareSellAllocationRequest', () => {
       sellOffers,
       'WETH',
       new BigNumber('100'),
-      new BigNumber('20000'));
+      new BigNumber('20000'),
+      zero);
     expect(request).toEqual(impossible('price too high'));
   });
 
@@ -65,7 +68,8 @@ describe('prepareSellAllocationRequest', () => {
       sellOffers,
       'WETH',
       new BigNumber('100'),
-      new BigNumber('200'));
+      new BigNumber('200'),
+      zero);
     expect(request).toEqual(impossible('debt at max possible value'));
   });
 });
@@ -88,12 +92,14 @@ describe('planSell', () => {
         delta: zero,
         liquidationPrice: zero,
         currentCollRatio: zero,
-      }]);
+      }],
+      zero);
     expect(plan).toEqual([{
       amount: new BigNumber('10'),
       kind: 'sellLev',
       maxTotal: new BigNumber('2000'),
-      name: 'WETH'
+      name: 'WETH',
+      slippageLimit: zero
     }]);
   });
 
@@ -114,12 +120,14 @@ describe('planSell', () => {
         delta: new BigNumber('-1000'),
         liquidationPrice: zero,
         currentCollRatio: zero,
-      }]);
+      }],
+      zero);
     expect(plan).toEqual([{
       amount: new BigNumber('10'),
       kind: 'sellLev',
       maxTotal: new BigNumber('2000'),
-      name: 'WETH'
+      name: 'WETH',
+      slippageLimit: zero
     }]);
   });
 
@@ -140,13 +148,15 @@ describe('planSell', () => {
         delta: new BigNumber('-200'),
         liquidationPrice: zero,
         currentCollRatio: zero,
-      }]);
+      }],
+      zero);
     expect(plan).toEqual([
       {
         amount: new BigNumber('1'),
         kind: 'sellLev',
         maxTotal: new BigNumber('200'),
-        name: 'WETH'
+        name: 'WETH',
+        slippageLimit: zero
       },
     ]);
   });
@@ -169,14 +179,16 @@ describe('planSell', () => {
         referencePrice: new BigNumber('200'),
         liquidationPrice: zero,
         currentCollRatio: zero,
-      }]);
+      }],
+      zero);
 
     expect(plan).toEqual([
       {
         amount: new BigNumber('1'),
         kind: 'sellLev',
         maxTotal: new BigNumber('200'),
-        name: 'WETH'
+        name: 'WETH',
+        slippageLimit: zero
       },
     ]);
   });
@@ -200,7 +212,8 @@ describe('planSell', () => {
           liquidationPrice: zero,
           currentCollRatio: zero,
         }
-      ]);
+      ],
+      zero);
 
     expect(plan).toEqual([
       {
@@ -208,6 +221,7 @@ describe('planSell', () => {
         kind: 'sellLev',
         maxTotal: new BigNumber('400'),
         name: 'WETH',
+        slippageLimit: zero
       },
     ]);
   });
@@ -217,12 +231,14 @@ describe('planSell', () => {
       'MKR',
       new BigNumber('10'),
       new BigNumber('5000'),
-      []);
+      [],
+      zero);
     expect(plan).toEqual([{
       amount: new BigNumber('10'),
       kind: 'sell',
       maxTotal: new BigNumber('5000'),
-      name: 'MKR'
+      name: 'MKR',
+      slippageLimit: zero
     }]);
   });
 });

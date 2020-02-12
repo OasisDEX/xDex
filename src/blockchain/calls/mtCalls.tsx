@@ -148,17 +148,32 @@ function argsOfPerformOperations(
   ];
 
   const drawDaiArgs = (op: Operation, token:string) =>
-                      [...drawArgs(op, token), context.mcd.vat];
+    [...drawArgs(op, token), context.mcd.vat];
 
-  const buySellArgs = (op: Operation) => [
-    [
-      context.tokens[op.name].address, context.mcd.joins[op.name],
-      context.tokens.DAI.address, context.mcd.joins.DAI,
-      context.cdpManager, context.otc.address, context.mcd.vat,
-    ],
-    Web3Utils.fromAscii(context.mcd.ilks[op.name]),
-    toWei(op.name, (op as any).amount), toWei('DAI', (op as any).maxTotal),
-  ];
+  const buySellArgs = (op: Operation) => {
+    const maxTotalAdjustedWithSlippage = (op as any).maxTotal.times(
+      op.kind === OperationKind.buyRecursively ?
+        one.plus((op as any).slippageLimit) :
+        one.minus((op as any).slippageLimit)
+    );
+    console.log('amount:', (op as any).amount.toString());
+    console.log(
+      `adjusting maxTotal with slippage ${(op as any).slippageLimit.toString()}:`,
+      (op as any).maxTotal.toString(), '->',
+      maxTotalAdjustedWithSlippage.toString()
+    );
+    console.log('price:', maxTotalAdjustedWithSlippage.div((op as any).amount).toString());
+    return [
+      [
+        context.tokens[op.name].address, context.mcd.joins[op.name],
+        context.tokens.DAI.address, context.mcd.joins.DAI,
+        context.cdpManager, context.otc.address, context.mcd.vat,
+      ],
+      Web3Utils.fromAscii(context.mcd.ilks[op.name]),
+      toWei(op.name, (op as any).amount),
+      toWei('DAI', maxTotalAdjustedWithSlippage),
+    ];
+  };
 
   const types = {
     [OperationKind.fundGem]: () =>
@@ -239,6 +254,7 @@ export interface MTBuyData extends PerformPlanData {
   amount: BigNumber;
   price: BigNumber;
   total: BigNumber;
+  slippageLimit: BigNumber;
 }
 
 export const mtBuy = {
@@ -255,6 +271,7 @@ export interface MTSellData extends PerformPlanData {
   amount: BigNumber;
   price: BigNumber;
   total: BigNumber;
+  slippageLimit: BigNumber;
 }
 
 export const mtSell = {

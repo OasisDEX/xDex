@@ -38,7 +38,7 @@ import {
 import { formatPriceDown, formatPriceUp } from '../../utils/formatters/format';
 import { description, Impossible, isImpossible } from '../../utils/impossible';
 import { firstOfOrTrue } from '../../utils/operators';
-import { minusOne, zero } from '../../utils/zero';
+import { minusOne, one, zero } from '../../utils/zero';
 import { EditableDebt } from '../allocate/mtOrderAllocateDebtForm';
 import { prepareBuyAllocationRequest } from '../plan/planBuy';
 import { prepareSellAllocationRequest } from '../plan/planSell';
@@ -537,7 +537,16 @@ function getBuyPlan(
   price: BigNumber,
   total: BigNumber,
   realPurchasingPower: BigNumber,
+  slippageLimit: BigNumber
 ): PlanInfo {
+
+  // maxSlippageLimit:
+  // total * (1 + slippageLimit) <= realPurchasingPower
+
+  const adjustedSlippageLimit = BigNumber.min(
+    slippageLimit,
+    // maxSlppageLimit: total * (1 + slippageLimit) <= realPurchasingPower
+    realPurchasingPower.div(total).minus(one));
 
   const request = prepareBuyAllocationRequest(
     mta,
@@ -545,7 +554,8 @@ function getBuyPlan(
     baseToken,
     amount,
     price,
-    realPurchasingPower
+    realPurchasingPower,
+    adjustedSlippageLimit
   );
 
   if (isImpossible(request)) {
@@ -620,6 +630,7 @@ function getSellPlan(
   amount: BigNumber,
   price: BigNumber,
   total: BigNumber,
+  slippageLimit: BigNumber
 ): PlanInfo {
 
   const request = prepareSellAllocationRequest(
@@ -628,6 +639,7 @@ function getSellPlan(
     baseToken,
     amount,
     price,
+    slippageLimit
   );
 
   if (isImpossible(request)) {
@@ -683,6 +695,7 @@ function addPlan(state: MTSimpleFormState): MTSimpleFormState {
     !state.total ||
     !state.orderbook ||
     !state.realPurchasingPower ||
+    !state.slippageLimit ||
     state.messages.length > 0
   ) {
     return {
@@ -700,6 +713,7 @@ function addPlan(state: MTSimpleFormState): MTSimpleFormState {
       state.price,
       state.total,
       state.realPurchasingPower,
+      state.slippageLimit
     ) :
     getSellPlan(
       state.mta,
@@ -708,6 +722,7 @@ function addPlan(state: MTSimpleFormState): MTSimpleFormState {
       state.amount,
       state.price,
       state.total,
+      state.slippageLimit
     );
 
   const messages: Message[] =
@@ -810,7 +825,8 @@ function prepareSubmit(
       !amount || !price ||
       !total ||
       !slippageLimit ||
-      !plan || isImpossible(plan) || !gasEstimation
+      !plan || isImpossible(plan)
+      || !gasEstimation
     ) {
       return;
     }
@@ -818,10 +834,6 @@ function prepareSubmit(
     const proxy = mta.proxy;
 
     const formResetChange: FormResetChange = { kind: FormChangeKind.formResetChange };
-
-    const totalWithSlippageIncluded = state.kind === OfferType.buy
-      ? amount.times(price).times(slippageLimit.plus(1))
-      : amount.times(price).dividedBy(slippageLimit.plus(1));
 
     const submitCall$ = calls$.pipe(
         first(),
@@ -833,7 +845,8 @@ function prepareSubmit(
             price,
             proxy,
             plan,
-            total: totalWithSlippageIncluded,
+            total,
+            slippageLimit: (plan[0] as any).slippageLimit,
             gas: Math.trunc(gasEstimation * 1.2),
           }).pipe(
             transactionToX<ProgressChange | FormResetChange>(
