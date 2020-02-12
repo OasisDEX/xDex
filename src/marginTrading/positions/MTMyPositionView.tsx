@@ -1,12 +1,15 @@
 import { default as BigNumber } from 'bignumber.js';
 import classnames from 'classnames';
 import * as React from 'react';
+import { combineLatest } from 'rxjs';
 import { Observable } from 'rxjs/index';
 import { first, switchMap } from 'rxjs/internal/operators';
+import { map } from 'rxjs/operators';
 import { CDPHistoryView } from '../../balances/CDPHistoryView';
 import { Calls$ } from '../../blockchain/calls/calls';
+import { approveMTProxy } from '../../blockchain/calls/mtCalls';
 import { TxMetaKind } from '../../blockchain/calls/txMeta';
-import { isDone, TxState } from '../../blockchain/transactions';
+import { isDone, transactions$, TxState } from '../../blockchain/transactions';
 import { formatPrecision } from '../../utils/formatters/format';
 import { FormatPercent, Money } from '../../utils/formatters/Formatters';
 import { Button } from '../../utils/forms/Buttons';
@@ -15,6 +18,7 @@ import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator'
 import { ModalOpenerProps } from '../../utils/modal';
 import { minusOne, one, zero } from '../../utils/zero';
 import {
+  findMarginableAsset,
   MarginableAsset,
   MTAccount
 } from '../state/mtAccount';
@@ -30,6 +34,8 @@ interface MTMyPositionViewProps {
   redeem: (args: {token: string; proxy: any, amount: BigNumber}) => void;
   close?: () => void;
   transactions: TxState[];
+  inDai: boolean;
+  daiPrice: BigNumber;
 }
 
 interface RedeemButtonProps {
@@ -73,19 +79,57 @@ export function createRedeem(calls$: Calls$) {
   };
 }
 
+export function createMTMyPositionView$(
+  mtOrderFormLoadable$: Observable<any>,
+  createMTFundForm$: CreateMTFundForm$,
+  calls$: Calls$,
+  daiPriceUsd$: Observable<BigNumber>
+) {
+  const redeem = createRedeem(calls$);
+  return combineLatest(mtOrderFormLoadable$, transactions$, daiPriceUsd$).pipe(
+    map(([state, transactions, daiPrice]) => {
+      return state.status === 'loaded' && state.value
+        ? {
+          status: state.status,
+          value: {
+            createMTFundForm$,
+            approveMTProxy,
+            transactions,
+            redeem,
+            daiPrice,
+            account: state.value.account,
+            mta: state.value.mta,
+            ma: findMarginableAsset(state.tradingPair.base, state.value.mta),
+          },
+        }
+        : {
+          value: state.value,
+          status: state.status,
+          error: state.error,
+        };
+    })
+  );
+}
+
 export class MTMyPositionView extends
   React.Component<MTMyPositionViewProps & ModalOpenerProps>
 {
   public render() {
 
-    const { ma, mta } = this.props;
+    const { ma, mta, inDai, daiPrice } = this.props;
     const { liquidationPenalty } = ma;
     const leverage = ma.leverage ? ma.leverage : ma.balance.gt(zero) ? one : zero;
     const liquidationPrice = ma.liquidationPrice ? ma.liquidationPrice : zero;
     const liquidationPriceMarket = ma.liquidationPrice && ma.midpointPrice ?
-      ma.liquidationPrice.times(ma.midpointPrice.div(ma.referencePrice))
+      ma.liquidationPrice.times(daiPrice)
       : zero;
 
+    const liquidationPriceDisplay = inDai ?
+      liquidationPriceMarket.gt(zero) ? liquidationPriceMarket : undefined
+      :
+      liquidationPrice.gt(zero) ? liquidationPrice : undefined;
+
+    const markPrice = inDai ? ma.osmPriceNext && ma.osmPriceNext.times(daiPrice) : ma.osmPriceNext;
     return (
       <div>
         <div className={styles.MTPositionPanel}>
@@ -130,60 +174,34 @@ export class MTMyPositionView extends
                 Liquidation Price
               </div>
               <div className={styles.summaryValue}>
-                {
-                  liquidationPrice.gt(zero) ?
+                { inDai && liquidationPriceDisplay && '~' }
+                <Money
+                  value={liquidationPriceDisplay}
+                  token={ inDai ? 'DAI' : 'USD' }
+                  fallback="-"
+                  className={
+                    classnames({
+                      [styles.summaryValuePositive]: ma && ma.safe,
+                      [styles.summaryValueNegative]: ma && !ma.safe,
+                    })
+                  }
+                />
+              </div>
+            </div>
+              <div className={styles.summaryRow}>
+                <div className={styles.summaryLabel}>
+                  Mark Price
+                </div>
+                <div className={styles.summaryValue}>
+                  {
+                    markPrice &&
                     <Money
-                      value={liquidationPrice}
-                      token="USD"
-                      fallback="-"
-                      className={
-                        classnames({
-                          [styles.summaryValuePositive]: ma && ma.safe,
-                          [styles.summaryValueNegative]: ma && !ma.safe,
-                        })
-                      }
-                    /> : <span>-</span>
-                }
-                <br/>
-                {
-                  liquidationPriceMarket.gt(zero) &&
-                  <>~<Money
-                    value={liquidationPriceMarket}
-                    token="DAI"
-                    fallback="-"
-                    className={
-                      classnames({
-                        [styles.summaryValuePositive]: ma && ma.safe,
-                        [styles.summaryValueNegative]: ma && !ma.safe,
-                      })
-                    }
-                  />
-                  </>
-                }
+                      value={markPrice}
+                      token={ inDai ? 'DAI' : 'USD' }
+                    />
+                  }
+                </div>
               </div>
-            </div>
-            <div className={styles.summaryRow}>
-              <div className={styles.summaryLabel}>
-                Current Price (OSM)
-              </div>
-              <div className={styles.summaryValue}>
-                {
-                  ma.referencePrice &&
-                  <Money value={ma.referencePrice} token="USD"/>
-                }
-              </div>
-            </div>
-            <div className={styles.summaryRow}>
-              <div className={styles.summaryLabel}>
-                Current Price (Market)
-              </div>
-              <div className={styles.summaryValue}>
-                {
-                  ma.midpointPrice &&
-                  <Money value={ma.midpointPrice} token="DAI"/>
-                }
-              </div>
-            </div>
           </div>
           <div className={styles.MTPositionColumn}>
             <div className={styles.summaryRow}>
@@ -293,16 +311,19 @@ export class MTMyPositionView extends
                 }
             </span>
 
-              <RedeemButton
+              {
+                ma.redeemable.gt(zero) && <RedeemButton
                 redeem={() => this.props.redeem({
                   token: ma.name,
                   proxy: mta.proxy,
-                  amount: ma.redeemable})}
+                  amount: ma.redeemable
+                })}
 
                 token={ma.name}
-                disabled={ma.redeemable.eq(zero)}
+                disabled={false}
                 transactions={this.props.transactions}
               />
+              }
             </div>
           }
           {
@@ -313,11 +334,19 @@ export class MTMyPositionView extends
                 Please redeem {ma.redeemable.toString()}
                 &nbsp;{ma.name} of collateral.
               </span>
-              <Button
-                size="md"
-                disabled={ma.redeemable.eq(zero)}
-                className={styles.redeemButton}
-              >Redeem</Button>
+              {
+                ma.redeemable.gt(zero) && <RedeemButton
+                  redeem={() => this.props.redeem({
+                    token: ma.name,
+                    proxy: mta.proxy,
+                    amount: ma.redeemable
+                  })}
+
+                  token={ma.name}
+                  disabled={false}
+                  transactions={this.props.transactions}
+                />
+              }
             </div>
           }
         </div>

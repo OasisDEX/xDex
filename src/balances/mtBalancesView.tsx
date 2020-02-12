@@ -65,7 +65,8 @@ export class MTBalancesView
                 transactions: props.transactions,
                 daiAllowance: props.daiAllowance,
                 ma: combinedBalances.ma,
-                mta: combinedBalances.mta
+                mta: combinedBalances.mta,
+                daiPrice: new BigNumber(0)
               }}
             /> :
             <MTBalancesViewInternal

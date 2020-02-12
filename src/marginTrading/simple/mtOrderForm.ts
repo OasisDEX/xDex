@@ -1,7 +1,7 @@
 import { BigNumber } from 'bignumber.js';
 import { curry } from 'lodash';
 import { merge, Observable, of, Subject } from 'rxjs';
-import { shareReplay } from 'rxjs/internal/operators';
+import { share, shareReplay } from 'rxjs/internal/operators';
 import { first, map, scan, switchMap, takeUntil } from 'rxjs/operators';
 import { DustLimits } from '../../balances/balances';
 import { Calls, Calls$, ReadCalls$ } from '../../blockchain/calls/calls';
@@ -144,7 +144,7 @@ export interface MTSimpleFormState extends HasGasEstimation {
   fee?: BigNumber;
   slippageLimit?: BigNumber;
   priceImpact?: BigNumber;
-  submit: (state: MTSimpleFormState) => void;
+  submit: (state: MTSimpleFormState) => any;
   change: (change: ManualChange) => void;
   view: ViewKind;
   account?: string;
@@ -652,7 +652,8 @@ function getSellPlan(
   const postTradeAsset = calculateMarginable(
     {
       ...asset,
-      debt: asset.debt.plus(delta)
+      debt: asset.debt.plus(delta),
+      dai: total.plus(delta)
     } as MarginableAssetCore,
     { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook
   );
@@ -822,11 +823,7 @@ function prepareSubmit(
       ? amount.times(price).times(slippageLimit.plus(1))
       : amount.times(price).dividedBy(slippageLimit.plus(1));
 
-    const changes$ = merge(
-      cancel$.pipe(
-        map(() => progressChange(ProgressStage.canceled))
-      ),
-      calls$.pipe(
+    const submitCall$ = calls$.pipe(
         first(),
         switchMap((calls) => {
           const call = state.kind === OfferType.buy ? calls.mtBuy : calls.mtSell;
@@ -848,10 +845,19 @@ function prepareSubmit(
             takeUntil(cancel$)
           );
         }),
+        share(),
+      );
+
+    const changes$ = merge(
+      cancel$.pipe(
+        map(() => progressChange(ProgressStage.canceled))
       ),
+      submitCall$,
     );
 
     changes$.subscribe(change => progressChange$.next(change));
+
+    return submitCall$;
   }
 
   return [submit, cancel$.next.bind(cancel$), progressChange$];

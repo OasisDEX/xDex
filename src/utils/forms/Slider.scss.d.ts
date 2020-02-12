@@ -9,3 +9,5 @@ export const inProgress: string;
 export const progressIcon: string;
 export const progressBlocked: string;
 export const progressUnblocked: string;
+export const option: string;
+export const highlight: string;

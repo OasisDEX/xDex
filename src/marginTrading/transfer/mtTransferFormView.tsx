@@ -552,9 +552,9 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
       case MessageKind.insufficientAvailableAmount:
         return  `Your balance is not enough to withdraw that amount`;
       case MessageKind.insufficientAmount:
-        return  `Your balance is too low to fund this order`;
+        return  `Your balance is too low to withdraw that amount`;
       case MessageKind.dustAmount:
-        return `Order below token limit`;
+        return `Transfer below token limit`;
       case MessageKind.impossibleToPlan:
         return msg.message;
       case MessageKind.minDebt:
@@ -564,7 +564,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
 }
 
 export class MTSimpleOrderBuyPanel extends React.Component<
-  LoadableWithTradingPair<MTSimpleFormState> & ModalProps
+  LoadableWithTradingPair<MTSimpleFormState> & { close: (() => void) }
   > {
   public render() {
     if (this.props.status === 'loaded' && this.props.value && this.props.value.mta) {
@@ -574,7 +574,7 @@ export class MTSimpleOrderBuyPanel extends React.Component<
 
       if (mta && mta.proxy && ma && (ma.balance.gt(zero) || ma.dai.gt(zero))) {
         return <div className={stylesOrder.buyFormWrapper}>
-          <MtSimpleOrderFormBody {...{ ...this.props, ...formState }} />
+          <MtSimpleOrderFormBody {...{ ...this.props, ...formState, close: this.props.close }} />
           <Button size="md"
                 className={styles.cancelButton}
                 block={true}
