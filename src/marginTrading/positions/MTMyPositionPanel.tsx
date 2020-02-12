@@ -40,7 +40,12 @@ export class MTLiquidationNotification
   extends React.Component<Loadable<MTMyPositionPanelInternalProps>> {
   public render() {
 
-    if (this.props.value && this.props.status === 'loaded' && this.props.value.mta) {
+    if (
+      this.props.value
+      && this.props.status === 'loaded'
+      && this.props.value.mta
+      && this.props.value.account
+    ) {
       const { ma } = this.props.value;
 
       return <>
@@ -69,7 +74,11 @@ export class MTMyPositionPanel
   public render() {
 
     if (this.props.value) {
-      if (this.props.status === 'loaded' && this.props.value.mta) {
+      if (
+        this.props.status === 'loaded'
+        && this.props.value.mta
+        && this.props.value.account
+      ) {
         const { ma } = this.props.value;
 
         const hasHistoryEvents = ma && ma.rawHistory.length > 0;
