@@ -24,6 +24,7 @@ import { Muted } from '../../utils/text/Text';
 import { TransactionStateDescription } from '../../utils/text/TransactionStateDescription';
 import { zero } from '../../utils/zero';
 
+import * as ReactDOM from 'react-dom';
 import { theAppContext } from 'src/AppContext';
 import { LoadableWithTradingPair } from '../../utils/loadable';
 import { MTSimpleFormState } from '../simple/mtOrderForm';
@@ -84,6 +85,7 @@ class StepComponent extends React.Component<StepComponentProps> {
 }
 
 export class MtTransferFormView extends React.Component<MTFundFormProps> {
+  private amountInput?: HTMLElement;
 
   constructor(p: MTFundFormProps) {
     super(p);
@@ -228,8 +230,8 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
                     <theAppContext.Consumer>
                       {
                         ({ MTSimpleOrderBuyPanelRxTx }) =>
-                        // @ts-ignore
-                        <MTSimpleOrderBuyPanelRxTx close={this.props.close}/>
+                          // @ts-ignore
+                          <MTSimpleOrderBuyPanelRxTx close={this.props.close}/>
                       }
                     </theAppContext.Consumer>
                   </>
@@ -239,6 +241,19 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
         </Panel>
       </ReactModal>
     );
+  }
+
+  public handleSetMaxAmount = () => {
+    const { token, balances } = this.props;
+    if (balances) {
+      this.handleSetMax(new BigNumber(balances[token]), FormChangeKind.amountFieldChange);
+    }
+  }
+
+  public handleAmountFocus = () => {
+    if (this.amountInput) {
+      this.amountInput.focus();
+    }
   }
 
   private amountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -523,11 +538,23 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
       </PanelFooter>);
   }
 
+  private handleSetMax = (
+    value: BigNumber,
+    kind: FormChangeKind.amountFieldChange
+  ) => {
+    this.props.change({ kind, value });
+  }
+
   private AmountGroup(disabled: boolean) {
+    const { token } = this.props;
+
     return (
       <InputGroup sizer="md" disabled={disabled}>
         <InputGroupAddon border="right">Amount</InputGroupAddon>
         <BigNumberInput
+          ref={ (el: any) =>
+            this.amountInput = (el && ReactDOM.findDOMNode(el) as HTMLElement) || undefined
+          }
           type="text"
           mask={createNumberMask({
             allowDecimal: true,
@@ -543,6 +570,18 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
           placeholderChar={' '}
           disabled={disabled}
         />
+        <InputGroupAddon
+          className={stylesOrder.setMaxBtnAddon} onClick={ () => this.handleSetMaxAmount() }>
+          <Button size="sm" type="button" className={stylesOrder.setMaxBtn}>
+            Set Max
+          </Button>
+        </InputGroupAddon>
+        <InputGroupAddon
+          className={stylesOrder.inputCurrencyAddon}
+          onClick={ this.handleAmountFocus }
+        >
+          {token}
+        </InputGroupAddon>
       </InputGroup>
     );
   }
@@ -576,10 +615,10 @@ export class MTSimpleOrderBuyPanel extends React.Component<
         return <div className={stylesOrder.buyFormWrapper}>
           <MtSimpleOrderFormBody {...{ ...this.props, ...formState, close: this.props.close }} />
           <Button size="md"
-                className={styles.cancelButton}
-                block={true}
-                color="greyOutlined"
-                onClick={() => this.props.close()}
+                  className={styles.cancelButton}
+                  block={true}
+                  color="greyOutlined"
+                  onClick={() => this.props.close()}
           >
             Cancel
           </Button>
