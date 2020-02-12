@@ -13,10 +13,12 @@ import {
 import {
   cancelAllOffers,
   changePrice,
+  changePriceAndPoke,
   drip,
   makeLinearOffers,
   pokeOsm,
   pokeSpotter,
+  printOsmInfo,
   readPrice,
 } from './devCalls';
 import {
@@ -97,6 +99,8 @@ function calls([context, account]: [NetworkConfig, string]) {
     pokeSpotter: sendTransaction(pokeSpotter),
     mtRedeem: sendTransaction(mtRedeem),
     mtExport: sendTransaction(mtExport),
+    changePriceAndPoke: sendTransaction(changePriceAndPoke),
+    printOsmInfo: printOsmInfo(context)
   };
 }
 
