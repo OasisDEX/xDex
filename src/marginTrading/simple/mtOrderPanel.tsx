@@ -35,7 +35,7 @@ export class MTSimpleOrderPanel extends React.Component<
     }
 
     return <div className={styles.orderPanel}>
-      <PanelHeader>Manage Your Leverage</PanelHeader>
+      <PanelHeader  style={{ width: '100%' }}>Manage Your Leverage</PanelHeader>
       <LoadingIndicator size="lg"/>
     </div>;
   }
