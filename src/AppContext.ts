@@ -129,14 +129,13 @@ import {
 } from './marginTrading/positions/MTMyPositionPanel';
 import {
   createMTMyPositionView$,
-  createRedeem,
 } from './marginTrading/positions/MTMyPositionView';
 import { createMTSetupForm$, MTSetupFormState } from './marginTrading/setup/mtSetupForm';
 import { MTSetupButton } from './marginTrading/setup/mtSetupFormView';
 import { createMTSimpleOrderForm$ } from './marginTrading/simple/mtOrderForm';
 import { MTSimpleOrderPanel } from './marginTrading/simple/mtOrderPanel';
 import {
-  createMTProxyApprove, findMarginableAsset, MTAccount
+  createMTProxyApprove, MTAccount
 } from './marginTrading/state/mtAccount';
 import { createMta$ } from './marginTrading/state/mtAggregate';
 import {
@@ -288,7 +287,7 @@ export function setupAppContext() {
     MTLiquidationNotificationRxTx,
     MTSimpleOrderbookPanelTxRx
   } =
-    mtSimpleOrderForm(mta$, currentOrderbook$, createMTFundForm$, approveMTProxy);
+    mtSimpleOrderForm(mta$, currentOrderbook$, createMTFundForm$);
 
   const MTAccountDetailsRxTx = connect<MTAccount, {}>(MtAccountDetailsView, mta$);
 
@@ -556,7 +555,6 @@ function mtSimpleOrderForm(
   mta$: Observable<MTAccount>,
   orderbook$: Observable<Orderbook>,
   createMTFundForm$: CreateMTFundForm$,
-  approveMTProxy: (args: { token: string; proxyAddress: string }) => Observable<TxState>,
 ) {
   const mtOrderForm$ = currentTradingPair$.pipe(
     switchMap(tradingPair =>

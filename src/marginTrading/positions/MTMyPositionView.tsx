@@ -1,8 +1,8 @@
 import { default as BigNumber } from 'bignumber.js';
 import classnames from 'classnames';
 import * as React from 'react';
-import { Observable } from 'rxjs/index';
 import { combineLatest } from 'rxjs';
+import { Observable } from 'rxjs/index';
 import { first, switchMap } from 'rxjs/internal/operators';
 import { map } from 'rxjs/operators';
 import { CDPHistoryView } from '../../balances/CDPHistoryView';
@@ -14,11 +14,9 @@ import { formatPrecision } from '../../utils/formatters/format';
 import { FormatPercent, Money } from '../../utils/formatters/Formatters';
 import { Button } from '../../utils/forms/Buttons';
 import { SvgImage } from '../../utils/icons/utils';
-import { LoadableWithTradingPair } from '../../utils/loadable';
 import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
 import { ModalOpenerProps } from '../../utils/modal';
 import { minusOne, one, zero } from '../../utils/zero';
-import { MTSimpleOrderFormParams } from '../simple/mtOrderForm';
 import {
   findMarginableAsset,
   MarginableAsset,
@@ -123,7 +121,7 @@ export class MTMyPositionView extends
     const leverage = ma.leverage ? ma.leverage : ma.balance.gt(zero) ? one : zero;
     const liquidationPrice = ma.liquidationPrice ? ma.liquidationPrice : zero;
     const liquidationPriceMarket = ma.liquidationPrice && ma.midpointPrice ?
-      ma.liquidationPrice.times(ma.midpointPrice.div(ma.referencePrice))
+      ma.liquidationPrice.times(daiPrice)
       : zero;
 
     const liquidationPriceDisplay = inDai ?
@@ -176,7 +174,7 @@ export class MTMyPositionView extends
                 Liquidation Price
               </div>
               <div className={styles.summaryValue}>
-                { inDai && '~' }
+                { inDai && liquidationPriceDisplay && '~' }
                 <Money
                   value={liquidationPriceDisplay}
                   token={ inDai ? 'DAI' : 'USD' }

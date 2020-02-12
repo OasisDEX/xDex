@@ -163,52 +163,34 @@ export const tokenPricesInUSD$: Observable<Ticker> = onEveryBlock$.pipe(
                 return of({});
               }),
             )
-          )
+        )
       )
   ),
   map((prices) => prices.reduce((a, e) => ({ ...a, ...e }))),
   shareReplay(1)
 );
 
-export const etherPriceUsd$: Observable<BigNumber> = concat(
-  // context$.pipe(
-  //   filter(context => !!context),
-  //   first(),
-  //   switchMap(context => from(context.ethPip.contract.methods.read().call())),
-  //   map((value: string) => new BigNumber(value).div(new BigNumber(10).pow(18))),
-  // ),
-  onEveryBlock$.pipe(
-    switchMap(() => ajax({
-      url: 'https://api.coinpaprika.com/v1/tickers/eth-ethereum/',
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-      },
-    })),
-    map(({ response }) => new BigNumber(response.quotes.USD.price)),
-    retryWhen(errors => errors.pipe(delayWhen(() => onEveryBlock$.pipe(skip(1))))),
-  ),
-).pipe(
-  distinctUntilChanged((x: BigNumber, y: BigNumber) => x.eq(y)),
-  shareReplay(1),
-);
+function getPriceFeed(ticker: string): Observable<BigNumber> {
+  return concat(
+    onEveryBlock$.pipe(
+      switchMap(() => ajax({
+        url: `https://api.coinpaprika.com/v1/tickers/${ticker}/`,
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+        },
+      })),
+      map(({ response }) => new BigNumber(response.quotes.USD.price)),
+      retryWhen(errors => errors.pipe(delayWhen(() => onEveryBlock$.pipe(skip(1))))),
+    ),
+  ).pipe(
+    distinctUntilChanged((x: BigNumber, y: BigNumber) => x.eq(y)),
+    shareReplay(1),
+  );
+}
 
-export const daiPriceUsd$: Observable<BigNumber> = concat(
-  onEveryBlock$.pipe(
-    switchMap(() => ajax({
-      url: 'https://api.coinpaprika.com/v1/tickers/dai-dai/',
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-      },
-    })),
-    map(({ response }) => new BigNumber(response.quotes.USD.price)),
-    retryWhen(errors => errors.pipe(delayWhen(() => onEveryBlock$.pipe(skip(1))))),
-  ),
-).pipe(
-  distinctUntilChanged((x: BigNumber, y: BigNumber) => x.eq(y)),
-  shareReplay(1),
-);
+export const etherPriceUsd$: Observable<BigNumber> = getPriceFeed('eth-ethereum');
+export const daiPriceUsd$: Observable<BigNumber> = getPriceFeed('dai-dai');
 
 export function waitUntil<T>(
   value: Observable<T>, condition: (v: T) => boolean, maxRetries = 5, generator$ = onEveryBlock$,
