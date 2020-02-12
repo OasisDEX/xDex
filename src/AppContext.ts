@@ -11,7 +11,6 @@ import {
   mergeMap,
   shareReplay,
   switchMap,
-  tap,
 } from 'rxjs/operators';
 import {
   Balances,
@@ -558,8 +557,6 @@ function mtSimpleOrderForm(
   createMTFundForm$: CreateMTFundForm$,
 ) {
   const eventEmitter = combineLatest(currentTradingPair$, user$);
-
-  eventEmitter.pipe(tap(console.log));
 
   const mtOrderForm$ = eventEmitter.pipe(
     switchMap(([tradingPair]) =>
