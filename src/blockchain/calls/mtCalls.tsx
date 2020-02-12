@@ -129,7 +129,6 @@ function argsOfPerformOperations(
     throw new Error('plan must contain a single operation');
   }
 
-  
   const fundArgs = (op: Operation, token: string) => [
     context.cdpManager,
     Web3Utils.fromAscii(context.mcd.ilks[op.name]),
@@ -138,8 +137,8 @@ function argsOfPerformOperations(
     context.mcd.joins[token],
   ];
 
-  const fundDaiArgs = (op: Operation, token:string) => 
-                      [...fundArgs(op, token), context.mcd.vat]
+  const fundDaiArgs = (op: Operation, token:string) =>
+                      [...fundArgs(op, token), context.mcd.vat];
 
   const drawArgs = (op: Operation, token: string) => [
     context.cdpManager,
@@ -148,7 +147,7 @@ function argsOfPerformOperations(
     context.mcd.joins[token],
   ];
 
-  const drawDaiArgs = (op: Operation, token:string) => 
+  const drawDaiArgs = (op: Operation, token:string) =>
                       [...drawArgs(op, token), context.mcd.vat];
 
   const buySellArgs = (op: Operation) => [
