@@ -20,6 +20,7 @@ describe('prepareBuyAllocationRequest', () => {
       'WETH',
       new BigNumber('100'),
       new BigNumber('200'),
+      zero,
       zero);
     expect(request).toEqual(impossible('purchasing power too low'));
   });
@@ -31,7 +32,8 @@ describe('prepareBuyAllocationRequest', () => {
       'WETH',
       new BigNumber('300'),
       new BigNumber('200'),
-      mtaOnlyWeth.marginableAssets[0].dai.times(mtaOnlyWeth.marginableAssets[0].safeCollRatio)
+      mtaOnlyWeth.marginableAssets[0].dai.times(mtaOnlyWeth.marginableAssets[0].safeCollRatio),
+      zero
       );
     expect(request).toEqual(impossible('orderbook too shallow'));
   });
@@ -44,7 +46,8 @@ describe('prepareBuyAllocationRequest', () => {
       'WETH',
       new BigNumber('100'),
       new BigNumber('200'),
-      new BigNumber('20000')
+      new BigNumber('20000'),
+      zero
     );
 
     if (isImpossible(request)) {
@@ -100,7 +103,8 @@ describe('planBuy', () => {
           liquidationPrice: zero,
           currentCollRatio: zero,
         },
-      ]
+      ],
+      zero
     );
     expect(plan).toEqual(
       [
@@ -108,7 +112,8 @@ describe('planBuy', () => {
           kind: OperationKind.buyRecursively,
           amount: new BigNumber('10'),
           maxTotal: new BigNumber('2000'),
-          name: 'WETH'
+          name: 'WETH',
+          slippageLimit: zero
         }
       ]
     );

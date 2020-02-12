@@ -39,6 +39,7 @@ export type Operation = {
   name: string;
   amount: BigNumber;
   maxTotal: BigNumber;
+  slippageLimit: BigNumber;
 };
 
 export enum UserActionKind {
