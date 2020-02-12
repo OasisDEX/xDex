@@ -7,7 +7,6 @@ import { first, switchMap } from 'rxjs/internal/operators';
 import { map } from 'rxjs/operators';
 import { CDPHistoryView } from '../../balances/CDPHistoryView';
 import { Calls$ } from '../../blockchain/calls/calls';
-import { approveMTProxy } from '../../blockchain/calls/mtCalls';
 import { TxMetaKind } from '../../blockchain/calls/txMeta';
 import { isDone, transactions$, TxState } from '../../blockchain/transactions';
 import { formatPrecision } from '../../utils/formatters/format';
@@ -83,7 +82,8 @@ export function createMTMyPositionView$(
   mtOrderFormLoadable$: Observable<any>,
   createMTFundForm$: CreateMTFundForm$,
   calls$: Calls$,
-  daiPriceUsd$: Observable<BigNumber>
+  daiPriceUsd$: Observable<BigNumber>,
+  approveMTProxy: (args: { token: string; proxyAddress: string }) => Observable<TxState>
 ) {
   const redeem = createRedeem(calls$);
   return combineLatest(mtOrderFormLoadable$, transactions$, daiPriceUsd$).pipe(

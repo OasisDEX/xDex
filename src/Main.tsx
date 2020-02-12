@@ -99,6 +99,7 @@ class Routes extends React.Component<{ status: WalletStatus }> {
         }
         {
           REACT_APP_LT_ENABLED === '1' &&
+          this.props.status === 'connected' &&
           <Route path={'/leverage'} component={MarginTradingSimpleTxRx} />
         }        
         <Redirect from={'/balances'} to={'/account'}/>
