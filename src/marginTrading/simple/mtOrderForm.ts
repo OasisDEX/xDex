@@ -313,7 +313,7 @@ function validate(state: MTSimpleFormState): MTSimpleFormState {
 
       const maxToSell = maxSellable(baseAsset, offers);
 
-      console.log(JSON.stringify(log, null, '  '));
+      // console.log(JSON.stringify(log, null, '  '));
 
       if (
         state.kind === OfferType.sell && state.orderbook &&

@@ -531,7 +531,7 @@ function validate(state: MTTransferFormState) {
 }
 
 function validatePurchasingPower(state: MTTransferFormState) {
-  const messages: Message[] = [];
+  const messages: Message[] = [...state.messages];
 
   if (
     state.withOnboarding &&
