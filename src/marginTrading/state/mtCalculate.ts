@@ -293,6 +293,9 @@ export function calculateMarginable(
     MTHistoryEventKind.kick,
   ];
 
+  console.log('liquidationPrice', liquidationPrice && liquidationPrice.toString());
+  console.log('currentCollRatio', currentCollRatio && currentCollRatio.toString());
+
   const history = FullHistory.filter(h => !hiddenEvents.includes(h.kind)).reverse();
 
   const safe = currentCollRatio !== undefined ?

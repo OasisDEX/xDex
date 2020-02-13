@@ -144,6 +144,7 @@ export function aggregateMTAccountState(
         .filter(token => getToken(token).assetKind === AssetKind.marginable)
         .map(token => {
           console.log('Next price', (osmPrices as any)[token].next.toString());
+          console.log('Reference price', balanceResult[token].referencePrice.toString());
           return getMarginableCore({
             name: token,
             assetKind: AssetKind.marginable,
