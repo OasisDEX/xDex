@@ -25,7 +25,8 @@ export function prepareBuyAllocationRequest(
   baseToken: string,
   amount: BigNumber,
   price: BigNumber,
-  realPurchasingPower: BigNumber
+  realPurchasingPower: BigNumber,
+  slippageLimit: BigNumber
 ): AllocationRequestPilot | Impossible {
   const asset = findAsset(baseToken, mta);
 
@@ -78,7 +79,7 @@ export function prepareBuyAllocationRequest(
   const defaultTargetCash = cashBalance; // BigNumber.max(zero, cashBalance.minus(maxTotal));
 
   const createPlan = (debts: Array<Required<EditableDebt>>): Operations =>
-    planBuy(baseToken, amount, maxTotal, debts);
+    planBuy(baseToken, amount, maxTotal, debts, slippageLimit);
 
   const execute = (calls: Calls, proxy: any, plan: Operation[], gas: number): Observable<TxState> =>
     calls.mtBuy({
@@ -88,6 +89,7 @@ export function prepareBuyAllocationRequest(
       proxy,
       plan,
       gas,
+      slippageLimit,
       total: maxTotal,
     });
 
@@ -109,7 +111,8 @@ export function planBuy(
   name: string,
   amount: BigNumber,
   maxTotal: BigNumber,
-  debts: Array<Required<EditableDebt>>
+  debts: Array<Required<EditableDebt>>,
+  slippageLimit: BigNumber
 ): Operation[] {
 
   // console.log(JSON.stringify(debts));
@@ -123,6 +126,7 @@ export function planBuy(
       maxTotal,
       name,
       amount,
+      slippageLimit,
       kind: OperationKind.buyRecursively,
     },
   ];
