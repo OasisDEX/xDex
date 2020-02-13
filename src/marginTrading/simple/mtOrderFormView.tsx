@@ -201,7 +201,6 @@ export class MtSimpleOrderFormBody
           if (this.props.close) {
             this.props.close();
           }
-
         }
       });
     }
