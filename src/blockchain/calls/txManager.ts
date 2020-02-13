@@ -1,6 +1,4 @@
-import Web3 from "web3";
-
-function padBytes(web3: Web3, calldata: string) {
+function padBytes(web3: any, calldata: string) {
   return web3.utils.padRight(calldata, Math.ceil(calldata.length / 32) * 32);
 }
 
@@ -10,7 +8,7 @@ function padBytes(web3: Web3, calldata: string) {
  * is the only way.
  * Also, this forced us to add additional check in tx-manager to skip ill formatted calldata
  */
-export function buildCalls(web3: Web3, calls: Array<{ address: string; calldata: any }>) {
+export function buildCalls(web3: any, calls: Array<{ address: string; calldata: any }>) {
   let finalCalldata = '';
   for (const call of calls) {
     const calldata = call.calldata.encodeABI().slice(2);

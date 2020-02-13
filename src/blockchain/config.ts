@@ -463,8 +463,7 @@ const kovan: NetworkConfig = {
     return load(liquidityProvider, '0x7fb88dae8aaa2904bce126694ed50942e14bb22e');
   },
   get txManager() {
-    throw new Error('TxManager not deployed on mainnnet');
-    return load(txManager, '0x0');
+    return load(txManager, '0x371015546206585d438d0cd655dbee7d86c7d4f2');
   }
 };
 
@@ -497,7 +496,7 @@ const localnet: NetworkConfig =  {
       loadToken('ZRX', erc20, '0x2c60CF08c07C212e21e6E2ee4626c478BACe092a'),
       loadToken('BAT', erc20, '0xd80110E3C107Eb206B556871cFe2532eC7D05E47'),
       loadToken('REP', erc20, '0xE8d4C2Ab5782c697f06f17610cC03068180d0FaC'),
-      loadToken('USDC', erc20, '0xE8d4C2Ab5782c697f06f17610cC03068180d0FaC'), // NOTE: wrong address 
+      loadToken('USDC', erc20, '0xE8d4C2Ab5782c697f06f17610cC03068180d0FaC'), // NOTE: wrong address
     ]);
   },
   mcd: {
