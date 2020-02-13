@@ -93,7 +93,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
 
   public render() {
 
-    const { mta, token, progress, startTab, withOnboarding, actionKind } = this.props;
+    const { mta, token, progress, startTab, withOnboarding } = this.props;
 
     const onModalRef = (node: any) => {
       if (node) {
@@ -105,11 +105,12 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
       }
     };
 
-    let modalTitle = '';
     let currentTab = MTTransferFormTab.transfer;
     let onboardingTabs: string[] = [];
     let startIndex = 0;
 
+    console.log('mta', mta);
+    console.log('mta', mta && mta.state);
     const isLoading = !mta || (progress === ProgressStage.waitingForApproval
       || progress === ProgressStage.waitingForConfirmation);
 
@@ -132,8 +133,6 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
       if (mta && ma && ma.purchasingPower.gt(zero)) {
         currentTab = MTTransferFormTab.buy;
       }
-    } else {
-      modalTitle = actionKind === UserActionKind.fund ? 'Deposit' : 'Withdraw';
     }
 
     return (
@@ -166,7 +165,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
             </div>
             :
             <PanelHeader>
-              {modalTitle}
+              {this.getActionName()}
             </PanelHeader>
           }
           {
@@ -192,7 +191,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
                    This has to be done for each asset type.`}
                       btnLabel="Set allowance"
                       btnAction={() => this.allowance()}
-                      isLoading={isLoading}
+                      isLoading={isLoading || mta.state === MTAccountState.notSetup}
                       btnDisabled={
                         mta.proxy && mta.proxy.options.address === nullAddress
                       }
@@ -281,9 +280,11 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
     const baseAsset = this.getAsset(baseToken) as MarginableAsset;
     const liquidationPriceDisplay = liquidationPrice ? liquidationPrice : zero;
     const liquidationPricePostDisplay = liquidationPricePost ? liquidationPricePost : zero;
-
     return(
       <>
+        <div className={styles.subtitle}>
+          {`${getToken(token).name} (${token}) ${this.getActionName()}`}
+        </div>
         <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
           <div className={styles.orderSummaryLabel}>
             Purchasing Power
@@ -408,7 +409,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
 
         <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
           <div className={styles.orderSummaryLabel}>
-            Wallet Balance
+            Wallet Balance (Available to deposit)
           </div>
           <div className={styles.orderSummaryValue}>
             { balances && formatAmount(balances[token], token) } {token}
@@ -486,15 +487,19 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
     }
   }
 
+  private getActionName() {
+    const { actionKind } = this.props;
+    return actionKind === UserActionKind.fund ? 'Deposit' : 'Withdraw';
+  }
+
   private Buttons() {
-    const { actionKind, progress, readyToProceed, token, ilk } = this.props;
+    const { progress, readyToProceed, token, ilk } = this.props;
     const retry = progress === ProgressStage.fiasco;
     const depositAgain = progress === ProgressStage.done;
     const deposit = !retry && !depositAgain;
     const depositEnabled = readyToProceed && progress === undefined &&
       (token !== 'DAI' || !!ilk);
-    const proceedName = actionKind === UserActionKind.fund ?
-      `Deposit ${token}` : `Withdraw ${token}`;
+    const proceedName = `${this.getActionName()} ${token}`;
 
     return (
       <PanelFooter className={styles.buttons}>
@@ -546,8 +551,9 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
   }
 
   private AmountGroup(disabled: boolean) {
-    const { token } = this.props;
+    const { token, balances } = this.props;
 
+    const maxTotal = balances ? balances[token] : zero;
     return (
       <InputGroup sizer="md" disabled={disabled}>
         <InputGroupAddon border="right">Amount</InputGroupAddon>
@@ -565,6 +571,9 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
           value={
             (this.props.amount || null) &&
             formatAmount(this.props.amount as BigNumber, this.props.token)
+          }
+          placeholder={
+            `Max. ${formatAmount(maxTotal, token)}`
           }
           guide={true}
           placeholderChar={' '}

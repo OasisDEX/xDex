@@ -39,3 +39,4 @@ export const onboardingPanel: string;
 export const onboardingParagraph: string;
 export const onboardingButton: string;
 export const buttonDone: string;
+export const subtitle: string;
