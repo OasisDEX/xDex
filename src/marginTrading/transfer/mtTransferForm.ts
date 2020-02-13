@@ -49,13 +49,15 @@ export enum MessageKind {
   insufficientAvailableAmount = 'insufficientAvailableAmount',
   dustAmount = 'dustAmount',
   impossibleToPlan = 'impossibleToPlan',
-  minDebt = 'minDebt'
+  minDebt = 'minDebt',
+  purchasingPowerEqZero = 'purchasingPowerEqZero',
 }
 
 export type Message = {
   kind: MessageKind.insufficientAmount |
     MessageKind.insufficientAvailableAmount |
-    MessageKind.dustAmount;
+    MessageKind.dustAmount |
+    MessageKind.purchasingPowerEqZero
 } | {
   kind: MessageKind.impossibleToPlan;
   message: string;
@@ -470,7 +472,7 @@ function prepareAllowance(calls$: Calls$, mta$: Observable<MTAccount>)
               return of(change);
             }
             return mta$.pipe(
-              filter(mta => mta.state === MTAccountState.setup),
+              filter(mta => findMarginableAsset(state.token, mta)?.allowance === true),
               first(),
               map(() => change)
             );
@@ -510,11 +512,33 @@ function validate(state: MTTransferFormState) {
       //     kind: MessageKind.insufficientAmount,
       //   });
     } else if (state.actionKind === UserActionKind.fund &&
-      state.balances[state.token].lt(state.amount)) {
-      (null || messages).push({
+      state.balances[state.token].lt(state.amount)
+    ) {
+      messages.push({
         kind: MessageKind.insufficientAmount,
       });
     }
+  }
+
+  if (state.withOnboarding && state.realPurchasingPowerPost?.eq(zero)) {
+    messages.push({ kind: MessageKind.purchasingPowerEqZero, });
+  }
+
+  return {
+    ...state,
+    messages,
+  };
+}
+
+function validatePurchasingPower(state: MTTransferFormState) {
+  const messages: Message[] = [];
+
+  if (
+    state.withOnboarding &&
+    state.amount?.gt(zero) &&
+    state.realPurchasingPowerPost?.eq(zero)
+  ) {
+    messages.push({ kind: MessageKind.purchasingPowerEqZero, });
   }
 
   return {
@@ -614,6 +638,7 @@ export function createMTTransferForm$(
     scan(applyChange, initialState),
     map(validate),
     map(updatePlan),
+    map(validatePurchasingPower),
     switchMap(curry(estimateGasPrice)(calls$, readCalls$)),
     map(checkIfIsReadyToProceed),
     scan(freezeIfInProgress),
