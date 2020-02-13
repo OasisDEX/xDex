@@ -172,6 +172,31 @@ export function pluginDevModeHelpers(
       )
     ).subscribe(identity);
 
+  (window as any).changePriceAndPoke = (
+    token: string,
+    price: number,
+  ) =>
+    calls$.pipe(
+      first(),
+      flatMap(calls =>
+        calls.changePriceAndPoke(
+          { token, price },
+        )
+      )
+    ).subscribe(identity);
+
+  (window as any).printOsmInfo = (
+    token: string,
+  ) =>
+    calls$.pipe(
+      first(),
+      flatMap(calls =>
+        calls.printOsmInfo(
+          { token },
+        )
+      )
+    ).subscribe(identity);
+
   (window as any).readOsm = (
     token: string,
   ) =>

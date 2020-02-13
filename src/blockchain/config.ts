@@ -42,6 +42,7 @@ import * as otcSupport from './abi/otc-support-methods.abi.json';
 import * as proxyActions from './abi/proxy-actions.abi.json';
 import * as proxyCreationAndExecute from './abi/proxy-creation-and-execute.abi.json';
 import * as proxyRegistry from './abi/proxy-registry.abi.json';
+import * as txManager from './abi/tx-manager.abi.json';
 import { web3 } from './web3';
 
 export const tradingPairs: TradingPair[] = [
@@ -317,6 +318,10 @@ const protoMain = {
   get liquidityProvider() {
     return load(liquidityProvider, '');
   },
+  get txManager() {
+    throw new Error('TxManager not deployed on mainnnet');
+    return load(txManager, '0x0');
+  }
 };
 
 export type NetworkConfig = typeof protoMain;
@@ -457,6 +462,9 @@ const kovan: NetworkConfig = {
   get liquidityProvider() {
     return load(liquidityProvider, '0x7fb88dae8aaa2904bce126694ed50942e14bb22e');
   },
+  get txManager() {
+    return load(txManager, '0x371015546206585d438d0cd655dbee7d86c7d4f2');
+  }
 };
 
 const localnet: NetworkConfig =  {
@@ -488,7 +496,7 @@ const localnet: NetworkConfig =  {
       loadToken('ZRX', erc20, '0x2c60CF08c07C212e21e6E2ee4626c478BACe092a'),
       loadToken('BAT', erc20, '0xd80110E3C107Eb206B556871cFe2532eC7D05E47'),
       loadToken('REP', erc20, '0xE8d4C2Ab5782c697f06f17610cC03068180d0FaC'),
-      // loadToken('USDC', erc20, '0x0000000000000000000000000000000000000000'),
+      loadToken('USDC', erc20, '0xE8d4C2Ab5782c697f06f17610cC03068180d0FaC'), // NOTE: wrong address
     ]);
   },
   mcd: {
@@ -590,6 +598,9 @@ const localnet: NetworkConfig =  {
   taxProxyRegistries: [],
   get liquidityProvider() {
     return load(liquidityProvider, '0x64442CACa1f24014e734c057c38e455b106278E0');
+  },
+  get txManager() {
+    return load(txManager, '0xD87be980cC779bAF00ac8eD9F924E2d22A85b357');
   },
 };
 
