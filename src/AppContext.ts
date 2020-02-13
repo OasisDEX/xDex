@@ -130,8 +130,6 @@ import {
 import {
   createMTMyPositionView$,
 } from './marginTrading/positions/MTMyPositionView';
-import { createMTSetupForm$, MTSetupFormState } from './marginTrading/setup/mtSetupForm';
-import { MTSetupButton } from './marginTrading/setup/mtSetupFormView';
 import { createMTSimpleOrderForm$ } from './marginTrading/simple/mtOrderForm';
 import { MTSimpleOrderPanel } from './marginTrading/simple/mtOrderPanel';
 import {
@@ -153,7 +151,7 @@ import { pluginDevModeHelpers } from './utils/devModeHelpers';
 import { OfferMatchType } from './utils/form';
 import { inject } from './utils/inject';
 import { Loadable, LoadableWithTradingPair, loadablifyLight, } from './utils/loadable';
-import { ModalOpenerProps, withModal } from './utils/modal';
+import { withModal } from './utils/modal';
 import { createWrapUnwrapForm$ } from './wrapUnwrap/wrapUnwrapForm';
 export function setupAppContext() {
 
@@ -174,11 +172,6 @@ export function setupAppContext() {
   const loadOrderbook = memoizeTradingPair(curry(loadOrderbook$)(context$, onEveryBlock$));
 
   const mta$ = createMta$(context$, initializedAccount$, onEveryBlock$, readCalls$, loadOrderbook);
-
-  const mtSetupForm$ = createMTSetupForm$(mta$, calls$, gasPrice$, etherPriceUsd$);
-  const MTSetupButtonRxTx =
-    withModal(
-      connect<MTSetupFormState, ModalOpenerProps>(MTSetupButton, mtSetupForm$));
 
   const mtBalances$ = createCombinedBalances(
     etherBalance$,
@@ -545,7 +538,6 @@ export function setupAppContext() {
     MTAccountDetailsRxTx,
     MTBalancesViewRxTx,
     WalletViewRxTx,
-    MTSetupButtonRxTx,
     SAI2DAIMigrationTxRx,
     DAI2SAIMigrationTxRx,
   };
