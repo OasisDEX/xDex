@@ -155,8 +155,6 @@ import { withModal } from './utils/modal';
 import { createWrapUnwrapForm$ } from './wrapUnwrap/wrapUnwrapForm';
 export function setupAppContext() {
 
-  pluginDevModeHelpers(context$, calls$, readCalls$, initializedAccount$, onEveryBlock$);
-
   const balances$ = createBalances$(context$, initializedAccount$, onEveryBlock$).pipe(
     shareReplay(1)
   );
@@ -517,6 +515,8 @@ export function setupAppContext() {
       ),
       { migration$: dai2SAIMigrationForm$ }
     );
+
+  pluginDevModeHelpers(context$, calls$, readCalls$, initializedAccount$, onEveryBlock$, mta$);
 
   return {
     AllTradesTxRx,
