@@ -52,20 +52,6 @@ export class MainContent extends React.Component<RouterProps> {
   public render() {
     return (
       <routerContext.Provider value={{ rootUrl: this.props.match.url }}>
-         <Banner content={
-                  <span>
-                    {/*tslint:disable*/}
-                    The current OasisDEX contract used by Oasis Trade will be closing on 08.02.2020 and replaced with a new contract. 
-                    <br/>
-                    <strong> Please see <a 
-                      href="https://www.reddit.com/r/MakerDAO/comments/euplem/oasisdex_contract_will_be_upgraded_on_8th_feb_2020/" 
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >this announcement</a> for more details</strong>
-                  </span>
-                }
-                theme='warning'
-           />
         <div className={styles.container}>
           <theAppContext.Consumer>
             {({ TransactionNotifierTxRx }) =>
