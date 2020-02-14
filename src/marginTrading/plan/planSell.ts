@@ -26,7 +26,8 @@ export function prepareSellAllocationRequest(
   buyOffers: Offer[],
   baseToken: string,
   amount: BigNumber,
-  price: BigNumber
+  price: BigNumber,
+  slippageLimit: BigNumber,
 ): AllocationRequestPilot | Impossible {
   const asset = findMarginableAsset(baseToken, mta);
 
@@ -90,7 +91,7 @@ export function prepareSellAllocationRequest(
       .minus(BigNumber.max(zero, totalDebt.minus(totalTargetDebt)));
 
   const createPlan = (debts: Array<Required<EditableDebt>>): Operations =>
-    planSell(baseToken, amount, maxTotal, debts);
+    planSell(baseToken, amount, maxTotal, debts, slippageLimit);
 
   const execute = (calls: Calls, proxy: any, plan: Operation[], gas: number): Observable<TxState> =>
     calls.mtSell({
@@ -100,6 +101,7 @@ export function prepareSellAllocationRequest(
       proxy,
       plan,
       gas,
+      slippageLimit,
       total: maxTotal,
     });
 
@@ -121,13 +123,15 @@ export function planSell(
   name: string,
   amount: BigNumber,
   maxTotal: BigNumber,
-  debts: Array<Required<EditableDebt>>
+  debts: Array<Required<EditableDebt>>,
+  slippageLimit: BigNumber
 ): Operation[] {
   return [
     {
       maxTotal,
       amount,
       name,
+      slippageLimit,
       kind: OperationKind.sellRecursively,
     },
     ...flatten(

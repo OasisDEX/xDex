@@ -23,7 +23,7 @@ import {
   tradingTokens
 } from '../../blockchain/config';
 import { MIN_ALLOWANCE } from '../../blockchain/network';
-import { amountFromWei, nullAddress } from '../../blockchain/utils';
+import { amountFromWei, nullAddress, storageHexToBigNumber } from '../../blockchain/utils';
 import { web3 } from '../../blockchain/web3';
 import { Orderbook } from '../../exchange/orderbook/orderbook';
 import { TradingPair } from '../../exchange/tradingPair/tradingPair';
@@ -257,25 +257,13 @@ export function createMta$(
 
 export function readOsm(context: NetworkConfig, token: string):
   Observable<{next: number|undefined}> {
-  const hilo = (uint256: string): [BigNumber, BigNumber] => {
-    const match = uint256.match(/^0x(\w+)$/);
-    if (!match) {
-      throw new Error(`invalid uint256: ${uint256}`);
-    }
-    return (match[0].length <= 32) ?
-      [new BigNumber(0), new BigNumber(uint256)] :
-    [
-      new BigNumber(`0x${match[0].substr(0, match[0].length - 32)}`),
-      new BigNumber(`0x${match[0].substr(match[0].length - 32, 32)}`)
-    ];
-  };
   // const slotCurrent = 3;
   const slotNext = 4;
   return combineLatest(
     bindNodeCallback(web3.eth.getStorageAt)(context.mcd.osms[token].address, slotNext),
   ).pipe(
     map(([nxt]: [string, string]) => {
-      const next = hilo(nxt);
+      const next = storageHexToBigNumber(nxt);
       return {
         // current: current[0].isZero() ? undefined : amountFromWei(current[1], token),
         next: next[0].isZero() ? undefined : amountFromWei(next[1], token),
