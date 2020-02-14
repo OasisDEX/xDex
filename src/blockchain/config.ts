@@ -44,6 +44,7 @@ import * as proxyCreationAndExecute from './abi/proxy-creation-and-execute.abi.j
 import * as proxyRegistry from './abi/proxy-registry.abi.json';
 import * as txManager from './abi/tx-manager.abi.json';
 import { web3 } from './web3';
+import {nullAddress} from "./utils";
 
 export const tradingPairs: TradingPair[] = [
   { base: 'WETH', quote: 'DAI' },
@@ -319,8 +320,8 @@ const protoMain = {
     return load(liquidityProvider, '');
   },
   get txManager() {
-    throw new Error('TxManager not deployed on mainnnet');
-    return load(txManager, '0x0');
+    console.error('TxManager not deployed on mainnnet');
+    return load(txManager, nullAddress);
   }
 };
 
