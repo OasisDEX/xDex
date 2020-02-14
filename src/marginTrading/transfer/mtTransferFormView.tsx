@@ -24,6 +24,7 @@ import { Muted } from '../../utils/text/Text';
 import { TransactionStateDescription } from '../../utils/text/TransactionStateDescription';
 import { zero } from '../../utils/zero';
 
+import * as ReactDOM from 'react-dom';
 import { theAppContext } from 'src/AppContext';
 import { LoadableWithTradingPair } from '../../utils/loadable';
 import { MTSimpleFormState } from '../simple/mtOrderForm';
@@ -84,6 +85,7 @@ class StepComponent extends React.Component<StepComponentProps> {
 }
 
 export class MtTransferFormView extends React.Component<MTFundFormProps> {
+  private amountInput?: HTMLElement;
 
   constructor(p: MTFundFormProps) {
     super(p);
@@ -91,7 +93,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
 
   public render() {
 
-    const { mta, token, progress, startTab, withOnboarding, actionKind } = this.props;
+    const { mta, token, progress, startTab, withOnboarding } = this.props;
 
     const onModalRef = (node: any) => {
       if (node) {
@@ -103,7 +105,6 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
       }
     };
 
-    let modalTitle = '';
     let currentTab = MTTransferFormTab.transfer;
     let onboardingTabs: string[] = [];
     let startIndex = 0;
@@ -130,8 +131,6 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
       if (mta && ma && ma.purchasingPower.gt(zero)) {
         currentTab = MTTransferFormTab.buy;
       }
-    } else {
-      modalTitle = actionKind === UserActionKind.fund ? 'Deposit' : 'Withdraw';
     }
 
     return (
@@ -164,7 +163,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
             </div>
             :
             <PanelHeader>
-              {modalTitle}
+              {this.getActionName()}
             </PanelHeader>
           }
           {
@@ -228,8 +227,8 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
                     <theAppContext.Consumer>
                       {
                         ({ MTSimpleOrderBuyPanelRxTx }) =>
-                        // @ts-ignore
-                        <MTSimpleOrderBuyPanelRxTx close={this.props.close}/>
+                          // @ts-ignore
+                          <MTSimpleOrderBuyPanelRxTx close={this.props.close}/>
                       }
                     </theAppContext.Consumer>
                   </>
@@ -239,6 +238,19 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
         </Panel>
       </ReactModal>
     );
+  }
+
+  public handleSetMaxAmount = () => {
+    const { token, balances } = this.props;
+    if (balances) {
+      this.handleSetMax(new BigNumber(balances[token]), FormChangeKind.amountFieldChange);
+    }
+  }
+
+  public handleAmountFocus = () => {
+    if (this.amountInput) {
+      this.amountInput.focus();
+    }
   }
 
   private amountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -266,9 +278,11 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
     const baseAsset = this.getAsset(baseToken) as MarginableAsset;
     const liquidationPriceDisplay = liquidationPrice ? liquidationPrice : zero;
     const liquidationPricePostDisplay = liquidationPricePost ? liquidationPricePost : zero;
-
     return(
       <>
+        <div className={styles.subtitle}>
+          {`${getToken(token).name} (${token}) ${this.getActionName()}`}
+        </div>
         <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
           <div className={styles.orderSummaryLabel}>
             Purchasing Power
@@ -393,7 +407,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
 
         <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
           <div className={styles.orderSummaryLabel}>
-            Wallet Balance
+            Wallet Balance (Available to deposit)
           </div>
           <div className={styles.orderSummaryValue}>
             { balances && formatAmount(balances[token], token) } {token}
@@ -471,15 +485,19 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
     }
   }
 
+  private getActionName() {
+    const { actionKind } = this.props;
+    return actionKind === UserActionKind.fund ? 'Deposit' : 'Withdraw';
+  }
+
   private Buttons() {
-    const { actionKind, progress, readyToProceed, token, ilk } = this.props;
+    const { progress, readyToProceed, token, ilk } = this.props;
     const retry = progress === ProgressStage.fiasco;
     const depositAgain = progress === ProgressStage.done;
     const deposit = !retry && !depositAgain;
     const depositEnabled = readyToProceed && progress === undefined &&
       (token !== 'DAI' || !!ilk);
-    const proceedName = actionKind === UserActionKind.fund ?
-      `Deposit ${token}` : `Withdraw ${token}`;
+    const proceedName = `${this.getActionName()} ${token}`;
 
     return (
       <PanelFooter className={styles.buttons}>
@@ -523,11 +541,24 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
       </PanelFooter>);
   }
 
+  private handleSetMax = (
+    value: BigNumber,
+    kind: FormChangeKind.amountFieldChange
+  ) => {
+    this.props.change({ kind, value });
+  }
+
   private AmountGroup(disabled: boolean) {
+    const { token, balances } = this.props;
+
+    const maxTotal = balances ? balances[token] : zero;
     return (
       <InputGroup sizer="md" disabled={disabled}>
         <InputGroupAddon border="right">Amount</InputGroupAddon>
         <BigNumberInput
+          ref={ (el: any) =>
+            this.amountInput = (el && ReactDOM.findDOMNode(el) as HTMLElement) || undefined
+          }
           type="text"
           mask={createNumberMask({
             allowDecimal: true,
@@ -539,10 +570,25 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
             (this.props.amount || null) &&
             formatAmount(this.props.amount as BigNumber, this.props.token)
           }
+          placeholder={
+            `Max. ${formatAmount(maxTotal, token)}`
+          }
           guide={true}
           placeholderChar={' '}
           disabled={disabled}
         />
+        <InputGroupAddon
+          className={stylesOrder.setMaxBtnAddon} onClick={ () => this.handleSetMaxAmount() }>
+          <Button size="sm" type="button" className={stylesOrder.setMaxBtn}>
+            Set Max
+          </Button>
+        </InputGroupAddon>
+        <InputGroupAddon
+          className={stylesOrder.inputCurrencyAddon}
+          onClick={ this.handleAmountFocus }
+        >
+          {token}
+        </InputGroupAddon>
       </InputGroup>
     );
   }
@@ -578,10 +624,10 @@ export class MTSimpleOrderBuyPanel extends React.Component<
         return <div className={stylesOrder.buyFormWrapper}>
           <MtSimpleOrderFormBody {...{ ...this.props, ...formState, close: this.props.close }} />
           <Button size="md"
-                className={styles.cancelButton}
-                block={true}
-                color="greyOutlined"
-                onClick={() => this.props.close()}
+                  className={styles.cancelButton}
+                  block={true}
+                  color="greyOutlined"
+                  onClick={() => this.props.close()}
           >
             Cancel
           </Button>

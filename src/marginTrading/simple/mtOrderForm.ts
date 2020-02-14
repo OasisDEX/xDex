@@ -58,8 +58,6 @@ import {
 } from '../state/mtCalculate';
 // import { getBuyPlan, getSellPlan } from './mtOrderPlan';
 
-const SAFE_COLL_RATIO_SELL = 1.65;
-
 export enum MessageKind {
   insufficientAmount = 'insufficientAmount',
   incredibleAmount = 'incredibleAmount',
@@ -149,7 +147,7 @@ export interface MTSimpleFormState extends HasGasEstimation {
   view: ViewKind;
   account?: string;
   isSafePost?: boolean;
-  isSafeCollRatio: boolean;
+  isSafeCollRatio?: boolean;
 }
 
 export type ManualChange =
@@ -307,7 +305,7 @@ function validate(state: MTSimpleFormState): MTSimpleFormState {
 
     if (state.orderbook) {
       const offers = state.kind === OfferType.buy ? state.orderbook.sell : state.orderbook.buy;
-      const [isSellable, log, , reason] = sellable(
+      const [isSellable, , , reason] = sellable(
         baseAsset, offers, state.amount || baseAsset.availableBalance
       );
 
@@ -931,9 +929,7 @@ function addPreTradeInfo(state: MTSimpleFormState): MTSimpleFormState {
   const collRatio = ma && ma.currentCollRatio;
   const liquidationPrice = ma && ma.liquidationPrice;
   const leverage = ma && ma.leverage;
-
-  const isSafeCollRatio =
-    !(ma && ma.currentCollRatio && ma.currentCollRatio.lt(SAFE_COLL_RATIO_SELL));
+  const isSafeCollRatio = ma && ma.isSafeCollRatio;
 
   return {
     ...state,

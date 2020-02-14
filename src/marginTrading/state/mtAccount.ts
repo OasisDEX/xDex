@@ -176,6 +176,7 @@ export interface MarginableAsset extends MarginableAssetCore {
   // maxDebtForOther: BigNumber; // max possible debt for other assets
   maxDebt: BigNumber; // max possible targetDebt for this asset
   liquidationPrice: BigNumber;
+  markPrice: BigNumber;
   leverage: BigNumber;
   availableDebt: BigNumber;
   maxSafeLeverage: BigNumber;
@@ -192,6 +193,7 @@ export interface MarginableAsset extends MarginableAssetCore {
   nextPriceUpdateDelta: string;
   purchasingPower: BigNumber;
   equity: BigNumber;
+  isSafeCollRatio?: boolean;
 }
 
 // export interface NonMarginableAssetCore extends Core {

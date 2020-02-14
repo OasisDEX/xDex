@@ -50,11 +50,11 @@ export class MTLiquidationNotification
           // tslint:disable
           <div className={myPositionStyles.warningMessage}>
             <SvgImage image={warningIconSvg}/>
-            <span>
-              The {ma.name} price&nbsp;
-              ({ma.osmPriceNext && ma.osmPriceNext.toString()} USD)
-              is approaching your Liquidation Price and your position will soon be liquidated.
-              You&nbsp;may rescue your Position by depositing either DAI or {ma.name} in the next {ma.nextPriceUpdateDelta} minutes.
+            <span className={myPositionStyles.warningText}>
+              Your {ma.name} leveraged position has entered the liquidation phase and your collateral will be auctioned in {ma.nextPriceUpdateDelta} minutes.<br/>
+              You can still avoid auction by
+              { ma.isSafeCollRatio ? 'selling, or ' : ' ' }
+              depositing additional {ma.name} or DAI.
               </span>
           </div>
           // tslint:enable
