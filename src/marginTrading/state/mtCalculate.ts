@@ -45,7 +45,6 @@ export function realPurchasingPowerMarginable(
   let first = true;
   const dust = ma.minDebt;
   while ((cash.gt(0.01) || first) && offers.length > 0) {
-    first = false;
     const [bought, cashLeft, offersLeft] = buy(cash, offers);
     offers = offersLeft;
     amount = amount.plus(bought);
@@ -56,13 +55,16 @@ export function realPurchasingPowerMarginable(
     // ergo:
     // availableDebt = amount * referencePrice / safeCollRatio - debt
     const availableDebt = amount.times(ma.referencePrice).div(ma.safeCollRatio).minus(debt);
+
+    if (first && availableDebt.lte(dust)) {
+      return [true, zero];
+    }
+
     debt = debt.plus(availableDebt);
 
     cash = availableDebt;
-  }
 
-  if (debt.lt(dust)) {
-    return [true, zero];
+    first = false;
   }
 
   return [false, purchasingPower];
@@ -299,8 +301,8 @@ export function calculateMarginable(
     MTHistoryEventKind.kick,
   ];
 
-  console.log('liquidationPrice', liquidationPrice && liquidationPrice.toString());
-  console.log('currentCollRatio', currentCollRatio && currentCollRatio.toString());
+  // console.log('liquidationPrice', liquidationPrice && liquidationPrice.toString());
+  // console.log('currentCollRatio', currentCollRatio && currentCollRatio.toString());
 
   const history = FullHistory.filter(h => !hiddenEvents.includes(h.kind)).reverse();
 
