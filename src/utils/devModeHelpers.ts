@@ -1,8 +1,11 @@
+import { BigNumber } from 'bignumber.js';
 import { concat, range } from 'lodash';
+import { Dictionary } from 'ramda';
 import { identity, Observable, of } from 'rxjs';
 import { first, flatMap, tap } from 'rxjs/operators';
 import { Calls$, ReadCalls$ } from '../blockchain/calls/calls';
 import { NetworkConfig } from '../blockchain/config';
+import { MTAccount } from '../marginTrading/state/mtAccount';
 import { createProxyAddress$, readOsm } from '../marginTrading/state/mtAggregate';
 
 export function pluginDevModeHelpers(
@@ -10,7 +13,8 @@ export function pluginDevModeHelpers(
   calls$: Calls$,
   readCalls$: ReadCalls$,
   initializedAccount$: Observable<string>,
-  onEveryBlock$: Observable<number>
+  onEveryBlock$: Observable<number>,
+  mta$: Observable<MTAccount>
 ) {
   (window as any).removeProxy = () =>
     calls$.pipe(
@@ -233,6 +237,27 @@ export function pluginDevModeHelpers(
         )
       )
     ).subscribe(identity);
+
+  (window as any).mtaDetails = () =>
+    mta$.subscribe(mta => {
+      if (mta) {
+        const ma = mta.marginableAssets[0];
+        const maTable: Dictionary<any> = {};
+        maTable.proxy = mta.proxy?._address;
+        maTable.daiAllowance = mta.daiAllowance;
+        if (ma) {
+          for (const [key, value] of Object.entries(ma)) {
+            if (typeof value === 'string' || typeof value === 'boolean') {
+              maTable[key] = value;
+            }
+            if (value instanceof BigNumber) {
+              maTable[key] = value.toString();
+            }
+          }
+          console.table(maTable);
+        }
+      }
+    });
 
   console.log('Dev mode helpers installed!');
 }
