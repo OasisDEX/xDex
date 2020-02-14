@@ -109,8 +109,6 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
     let onboardingTabs: string[] = [];
     let startIndex = 0;
 
-    console.log('mta', mta);
-    console.log('mta', mta && mta.state);
     const isLoading = !mta || (progress === ProgressStage.waitingForApproval
       || progress === ProgressStage.waitingForConfirmation);
 
@@ -191,7 +189,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
                    This has to be done for each asset type.`}
                       btnLabel="Set allowance"
                       btnAction={() => this.allowance()}
-                      isLoading={isLoading || mta.state === MTAccountState.notSetup}
+                      isLoading={isLoading}
                       btnDisabled={
                         mta.proxy && mta.proxy.options.address === nullAddress
                       }

@@ -134,6 +134,7 @@ import { MTSimpleOrderPanelProps } from './mtOrderPanel';
 enum depositMessageType {
   onboarding = 'onboarding',
   collRatioUnsafe = 'collRatioUnsafe',
+  liquidationImminent = 'liquidationImminent',
 }
 
 export class MtSimpleOrderFormBody
@@ -227,8 +228,8 @@ export class MtSimpleOrderFormBody
 
   public render() {
     return this.props.view === ViewKind.instantTradeForm
-          ? this.instantOrderForm()
-          : this.advancedSettings();
+      ? this.instantOrderForm()
+      : this.advancedSettings();
   }
 
   private handleSetMax = (
@@ -820,15 +821,31 @@ export class MtSimpleOrderFormView extends React.Component<
           <>
             <div className={styles.onboardingParagraph}>
               <div className={styles.warningMessage}>
-                Warning - Your Position is currently too close to the Liquidation Price to sell
+                Warning - Your position is currently too close to the liquidation price to sell.
               </div>
               <br/>
               <br/>
-
-              In order to save your Position, you are required to<br/>
-              pay off some debt by depositing more DAI or {baseToken}<br/><br/>
-              Once you have deposited more DAI or {baseToken}, you <br/>
-              will be able to sell the rest of your Position.
+              To sell your position, you must first<br/> deposit DAI or {baseToken}.
+            </div>
+          </>
+        }
+        {
+          messageType === depositMessageType.liquidationImminent &&
+          <>
+            <div className={styles.onboardingParagraph}>
+              <div className={styles.warningMessage}>
+                {
+                  // tslint:disable
+                  <>
+                    Warning - Your position is currently too close to the liquidation price to sell. <br/>
+                    To sell your position, you must first deposit DAI or {baseToken}.
+                  </>
+                  // tslint:enable
+                }
+              </div>
+              <br/>
+              <br/>
+              To sell your position, you must first<br/> deposit DAI or {baseToken}.
             </div>
           </>
         }
@@ -873,6 +890,10 @@ export class MtSimpleOrderFormView extends React.Component<
 
     if (!isSafeCollRatio) {
       return this.CallForDeposit(depositMessageType.collRatioUnsafe, ma);
+    }
+
+    if (ma && ma.liquidationPrice.gt(ma.markPrice)) {
+      return this.CallForDeposit(depositMessageType.liquidationImminent, ma);
     }
 
     const hasHistoryEvents = ma && ma.rawHistory.length > 0;

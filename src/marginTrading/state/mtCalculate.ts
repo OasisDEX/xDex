@@ -16,6 +16,8 @@ import {
 } from './mtAccount';
 import { RawMTHistoryEvent } from './mtHistory';
 
+const SAFE_COLL_RATIO_SELL = 1.65;
+
 function marginableAvailableActions(asset: MarginableAssetCore) {
   const availableActions: UserActionKind[] = [];
 
@@ -336,6 +338,10 @@ export function calculateMarginable(
   const liquidationPenalty = ma.liquidationPenalty.gt(zero) ?
     ma.liquidationPenalty.minus(1).times(100) : zero;
 
+  const isSafeCollRatio = !(currentCollRatio && currentCollRatio.lt(SAFE_COLL_RATIO_SELL));
+
+  const markPrice = ma.osmPriceNext ? ma.osmPriceNext : zero;
+
   return {
     ...ma,
     availableActions,
@@ -348,6 +354,7 @@ export function calculateMarginable(
     currentCollRatio,
     maxSafeLeverage,
     liquidationPrice,
+    markPrice,
     leverage,
     lockedBalance,
     availableBalance,
@@ -362,6 +369,7 @@ export function calculateMarginable(
     equity,
     fee,
     liquidationPenalty,
+    isSafeCollRatio,
   };
 }
 
