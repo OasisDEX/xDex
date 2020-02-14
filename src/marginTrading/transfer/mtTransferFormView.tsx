@@ -24,6 +24,7 @@ import { Muted } from '../../utils/text/Text';
 import { TransactionStateDescription } from '../../utils/text/TransactionStateDescription';
 import { zero } from '../../utils/zero';
 
+import * as mixpanel from 'mixpanel-browser';
 import * as ReactDOM from 'react-dom';
 import { theAppContext } from 'src/AppContext';
 import { LoadableWithTradingPair } from '../../utils/loadable';
@@ -491,7 +492,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
   }
 
   private Buttons() {
-    const { progress, readyToProceed, token, ilk } = this.props;
+    const { progress, readyToProceed, token, ilk, actionKind } = this.props;
     const retry = progress === ProgressStage.fiasco;
     const depositAgain = progress === ProgressStage.done;
     const deposit = !retry && !depositAgain;
@@ -507,7 +508,18 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
                 disabled={!depositEnabled}
                 block={true}
                 color="primary"
-                onClick={() => this.transfer()}
+                onClick={
+                  () => {
+                    this.transfer();
+                    mixpanel.track('btn-click', {
+                      id: `${actionKind}-${token === 'DAI' ? 'dai' : 'collateral'}-submit`,
+                      product: 'oasis-trade',
+                      page: 'Leverage',
+                      section: 'deposit-withdraw-modal',
+                      currency: token
+                    });
+                  }
+                }
         >
           {proceedName}
         </Button>

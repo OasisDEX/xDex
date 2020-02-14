@@ -1,5 +1,6 @@
 import { BigNumber } from 'bignumber.js';
 import * as classnames from 'classnames';
+import * as mixpanel from 'mixpanel-browser';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
@@ -718,6 +719,15 @@ export class MtSimpleOrderFormBody
         value="submit"
         color={ this.props.kind === OfferType.buy ? 'primary' : 'danger' }
         disabled={ !this.props.readyToProceed || !!this.props.progress }
+        onClick={() => {
+          mixpanel.track('btn-click', {
+            id: 'initiate-trade',
+            product: 'oasis-trade',
+            page: 'Leverage',
+            section: 'manage-leverage',
+            kind: this.props.kind
+          });
+        }}
       >
         {label}
       </Button>

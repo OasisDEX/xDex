@@ -1,6 +1,6 @@
+import * as mixpanel from 'mixpanel-browser';
 import * as React from 'react';
 import * as styles from '../../balances/mtBalancesView.scss';
-
 import { SvgImage } from '../../utils/icons/utils';
 import { Loadable } from '../../utils/loadable';
 import { ModalOpenerProps, ModalProps } from '../../utils/modal';
@@ -143,9 +143,20 @@ export class MTMyPositionPanelInternal
           }
           <span>My Position</span>
           <Switch blocked={this.state.blocked}
-                  onClick={() => this.setState(prevState =>
-                    ({ blocked: !prevState.blocked })
-                  )}
+                  onClick={
+                    () => {
+                      this.setState(prevState =>
+                        ({ blocked: !prevState.blocked })
+                      );
+                      mixpanel.track('btn-click', {
+                        id: 'dai-usd-toggle',
+                        product: 'oasis-trade',
+                        page: 'Leverage',
+                        section: 'my-position',
+                        currency: this.state.blocked ? 'usd' : 'dai'
+                      });
+                    }
+                  }
                   optionOne="DAI"
                   optionTwo="USD"
                   className={styles.toggle}
@@ -196,7 +207,17 @@ export class MTMyPositionPanelInternal
         key={ma.name}
         className={styles.actionButton}
         disabled={!ma.availableActions.includes(UserActionKind.fund)}
-        onClick={() => this.transfer(UserActionKind.fund, ma.name, undefined)}
+        onClick={
+          () => {
+            this.transfer(UserActionKind.fund, ma.name, undefined);
+            mixpanel.track('btn-click', {
+              id: 'fund-collateral-open',
+              product: 'oasis-trade',
+              page: 'Leverage',
+              section: 'my-position',
+            });
+          }
+        }
       >
         Deposit {ma.name}
       </Button>);
@@ -206,7 +227,17 @@ export class MTMyPositionPanelInternal
           size="md"
           className={styles.actionButton}
           disabled={!ma.availableActions.includes(UserActionKind.fund)}
-          onClick={() => this.transfer(UserActionKind.fund, 'DAI', ma.name)}
+          onClick={
+            () => {
+              this.transfer(UserActionKind.fund, 'DAI', ma.name);
+              mixpanel.track('btn-click', {
+                id: 'fund-dai-open',
+                product: 'oasis-trade',
+                page: 'Leverage',
+                section: 'my-position',
+              });
+            }
+          }
         >
           Deposit DAI
         </Button>);
@@ -226,29 +257,38 @@ export class MTMyPositionPanelInternal
         size="md"
         key={ma.name}
         className={styles.actionButton}
-        onClick={() => this.transfer(UserActionKind.draw, ma.name, undefined)}
+        onClick={
+          () => {
+            this.transfer(UserActionKind.draw, ma.name, undefined);
+            mixpanel.track('btn-click', {
+              id: 'draw-collateral-open',
+              product: 'oasis-trade',
+              page: 'Leverage',
+              section: 'my-position',
+            });
+          }
+        }
       >
         Withdraw {ma.name}
       </Button>);
 
-      if (mta.daiAllowance) {
-
-        actions.push(<Button
-          size="md"
-          className={styles.actionButton}
-          onClick={() => this.transfer(UserActionKind.draw, 'DAI', ma.name)}
-        >
-          Withdraw DAI
-        </Button>);
-      } else {
-        actions.push(<Button
-          size="md"
-          className={styles.actionButton}
-          onClick={ this.approveMTProxy('DAI')}
-        >
-          Enable DAI
-        </Button>);
-      }
+      actions.push(<Button
+        size="md"
+        className={styles.actionButton}
+        onClick={
+          () => {
+            this.transfer(UserActionKind.draw, 'DAI', ma.name);
+            mixpanel.track('btn-click', {
+              id: 'draw-dai-open',
+              product: 'oasis-trade',
+              page: 'Leverage',
+              section: 'my-position',
+            });
+          }
+        }
+      >
+        Withdraw DAI
+      </Button>);
     }
 
     return actions;
