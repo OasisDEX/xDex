@@ -12,7 +12,6 @@ import { ExchangeViewTxRx } from './exchange/ExchangeView';
 import { HeaderTxRx } from './header/Header';
 import * as styles from './index.scss';
 import { InstantExchange } from './instant/InstantViewPanel';
-import { Banner } from './landingPage/Banner';
 import { MarginTradingSimpleTxRx } from './marginTrading/MarginTradingSimple';
 import { connect } from './utils/connect';
 
@@ -87,7 +86,7 @@ class Routes extends React.Component<{ status: WalletStatus }> {
           REACT_APP_LT_ENABLED === '1' &&
           this.props.status === 'connected' &&
           <Route path={'/leverage'} component={MarginTradingSimpleTxRx} />
-        }        
+        }
         <Redirect from={'/balances'} to={'/account'}/>
         <Redirect from={'/'} to={'/market'}/>
       </Switch>

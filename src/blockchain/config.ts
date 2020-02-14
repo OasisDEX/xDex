@@ -43,8 +43,8 @@ import * as proxyActions from './abi/proxy-actions.abi.json';
 import * as proxyCreationAndExecute from './abi/proxy-creation-and-execute.abi.json';
 import * as proxyRegistry from './abi/proxy-registry.abi.json';
 import * as txManager from './abi/tx-manager.abi.json';
+import { nullAddress } from './utils';
 import { web3 } from './web3';
-import {nullAddress} from "./utils";
 
 export const tradingPairs: TradingPair[] = [
   { base: 'WETH', quote: 'DAI' },
