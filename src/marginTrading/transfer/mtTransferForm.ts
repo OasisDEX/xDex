@@ -472,7 +472,11 @@ function prepareAllowance(calls$: Calls$, mta$: Observable<MTAccount>)
               return of(change);
             }
             return mta$.pipe(
-              filter(mta => findMarginableAsset(state.token, mta)?.allowance === true),
+              filter(mta => {
+                return state.token === 'DAI'
+                  ? mta.daiAllowance
+                  : findMarginableAsset(state.token, mta)!.allowance;
+              }),
               first(),
               map(() => change)
             );
