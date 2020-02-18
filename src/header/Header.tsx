@@ -132,7 +132,7 @@ class Header extends React.Component<HeaderProps> {
                     <HeaderNavLink to={`${rootUrl}Leverage`} name="Leverage"/>
                   }
                   {this.props.walletStatus === 'connected' &&
-                  <HeaderNavLink to={`${rootUrl}account`} name="Account"/>}
+                  <HeaderNavLink to={`${rootUrl}balances`} name="Balances"/>}
                 </div>
               </nav>
             </section>

@@ -29,7 +29,7 @@ function toShorthandNumber(amount: BigNumber, suffix: string = "", precision?: n
     .concat(suffix)
 }
 
-export function formatShorthandNumbers(amount: BigNumber, precision?: number): string {
+export function formatAsShorthandNumbers(amount: BigNumber, precision?: number): string {
   if (amount.gte(billion))
     return toShorthandNumber(amount.dividedBy(billion), "B", precision);
   if (amount.gte(million))
