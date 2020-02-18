@@ -2,7 +2,7 @@ import { BigNumber } from 'bignumber.js';
 import * as moment from 'moment';
 
 import { getToken } from '../../blockchain/config';
-import { billion, million, thousand } from '../zero';
+import { billion, million, one, oneThousandth, ten, thousand } from '../zero';
 
 BigNumber.config({
   FORMAT: {
@@ -15,28 +15,42 @@ BigNumber.config({
   },
 });
 
-function toShorthandNumber(amount: BigNumber, suffix: string = "", precision?: number, ) {
+function toShorthandNumber(amount: BigNumber, suffix: string = '', precision?: number) {
   return new BigNumber(amount.toString()
-    .split(".")
+    .split('.')
     .map((part, index) => {
       if (index === 0) return part;
-      return part.substr(0, precision)
+      return part.substr(0, precision);
     })
     .filter(el => el)
-    .join(".")
+    .join('.')
   )
     .valueOf()
-    .concat(suffix)
+    .concat(suffix);
 }
 
 export function formatAsShorthandNumbers(amount: BigNumber, precision?: number): string {
-  if (amount.gte(billion))
-    return toShorthandNumber(amount.dividedBy(billion), "B", precision);
-  if (amount.gte(million))
-    return toShorthandNumber(amount.dividedBy(million), "M", precision);
-  if (amount.gte(thousand))
-    return toShorthandNumber(amount.dividedBy(thousand), "K", precision);
-  return toShorthandNumber(amount, "" ,precision);
+  if (amount.absoluteValue().gte(billion)) {
+    return toShorthandNumber(amount.dividedBy(billion), 'B', precision);
+  }
+  if (amount.absoluteValue().gte(million)) {
+    return toShorthandNumber(amount.dividedBy(million), 'M', precision);
+  }
+  if (amount.absoluteValue().gte(thousand)) {
+    return toShorthandNumber(amount.dividedBy(thousand), 'K', precision);
+  }
+  return toShorthandNumber(amount, '', precision);
+}
+
+export function formatCryptoBalance(amount: BigNumber): string {
+  if (amount.absoluteValue().lt(oneThousandth)) return formatAsShorthandNumbers(amount);
+  if (amount.absoluteValue().lt(ten)) return formatAsShorthandNumbers(amount, 4);
+  return formatAsShorthandNumbers(amount, 2);
+}
+
+export function formatFiatBalances(amount: BigNumber): string {
+  if (amount.absoluteValue().lt(one)) return formatAsShorthandNumbers(amount, 4);
+  return formatAsShorthandNumbers(amount, 2);
 }
 
 export function formatAmount(amount: BigNumber, token: string): string {

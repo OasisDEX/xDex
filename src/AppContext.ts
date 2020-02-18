@@ -34,7 +34,8 @@ import {
   etherPriceUsd$,
   gasPrice$,
   initializedAccount$,
-  onEveryBlock$
+  onEveryBlock$,
+  tokenPricesInUSD$
 } from './blockchain/network';
 import { user$ } from './blockchain/user';
 import { loadOrderbook$, Orderbook } from './exchange/orderbook/orderbook';
@@ -177,7 +178,8 @@ export function setupAppContext() {
     createAllowances$(context$, initializedAccount$, onEveryBlock$),
     mta$,
     transactions$,
-    onEveryBlock$
+    onEveryBlock$,
+    tokenPricesInUSD$
   );
 
   const wethBalance$ = createTokenBalances$(
