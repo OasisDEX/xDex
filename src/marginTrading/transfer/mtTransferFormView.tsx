@@ -242,9 +242,13 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
   }
 
   public handleSetMaxAmount = () => {
-    const { token, balances } = this.props;
+    const { token, balances, actionKind } = this.props;
+
+    console.log('propssss', this.props);
     if (balances) {
-      this.handleSetMax(new BigNumber(balances[token]), FormChangeKind.amountFieldChange);
+      const maxValue = actionKind === UserActionKind.fund ?
+        new BigNumber(balances[token]) : this.getMaxWithdrawAmount(token);
+      this.handleSetMax(maxValue, FormChangeKind.amountFieldChange);
     }
   }
 
@@ -252,6 +256,17 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
     if (this.amountInput) {
       this.amountInput.focus();
     }
+  }
+
+  private getMaxWithdrawAmount = (token: string): BigNumber => {
+    const { daiBalance, ilk } = this.props;
+    const baseToken = token === 'DAI' && ilk || token;
+    const baseAsset = this.getAsset(baseToken) as MarginableAsset;
+    return token === 'DAI' ?
+      daiBalance && daiBalance.gt(zero) ?
+        daiBalance :
+        zero
+      : baseAsset.availableBalance;
   }
 
   private amountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
