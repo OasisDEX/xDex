@@ -25,7 +25,7 @@ function toShorthandNumber(amount: BigNumber, suffix: string = '', precision?: n
     .filter(el => el)
     .join('.')
   )
-    .valueOf()
+    .toFixed(precision)
     .concat(suffix);
 }
 

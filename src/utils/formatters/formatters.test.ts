@@ -22,20 +22,20 @@ describe('Formatting numbers as shorthand ones', () => {
     expect(formatAsShorthandNumbers(number, 0)).toEqual('123B');
   });
 
-  it('should format billions with custom precision', () => {
+  it('should format billions with custome precision', () => {
     const number = new BigNumber(123.67801).times(billion);
     expect(formatAsShorthandNumbers(number, 5)).toEqual('123.67801B');
   });
 
-  it('should format billions and remove trailing zeroes', () => {
+  it('should format billions and not remove the trailing zeroes', () => {
     const number = new BigNumber(123.6780000).times(billion);
-    expect(formatAsShorthandNumbers(number, 5)).toEqual('123.678B');
+    expect(formatAsShorthandNumbers(number, 5)).toEqual('123.67800B');
   });
 
   // tslint:disable-next-line:max-line-length
-  it('should format billions and remove trailing zeroes if any after precicion format on number with digits after the precision point', () => {
+  it('should format billions and not remove trailing zeroes if any after precicion format on number with digits after the precision point', () => {
     const number = new BigNumber(23.45900002).times(billion);
-    expect(formatAsShorthandNumbers(number, 5)).toEqual('23.459B');
+    expect(formatAsShorthandNumbers(number, 5)).toEqual('23.45900B');
   });
 
   it('should format millions', () => {
@@ -53,20 +53,20 @@ describe('Formatting numbers as shorthand ones', () => {
     expect(formatAsShorthandNumbers(number, 0)).toEqual('999M');
   });
 
-  it('should format millions with custom precision', () => {
+  it('should format millions with custome precision', () => {
     const number = new BigNumber(999.12345).times(million);
     expect(formatAsShorthandNumbers(number, 2)).toEqual('999.12M');
   });
 
-  it('should format millions and remove trailing zeroes', () => {
+  it('should format millions and not remove trailing zeroes', () => {
     const number = new BigNumber(999.6780000).times(million);
-    expect(formatAsShorthandNumbers(number, 5)).toEqual('999.678M');
+    expect(formatAsShorthandNumbers(number, 5)).toEqual('999.67800M');
   });
 
   // tslint:disable-next-line:max-line-length
-  it('should format millions and remove trailing zeroes if any after precicion format on number with digits after the precision point', () => {
+  it('should format millions and not remove trailing zeroes if any after precicion format on number with digits after the precision point', () => {
     const number = new BigNumber(243.45900002).times(million);
-    expect(formatAsShorthandNumbers(number, 5)).toEqual('243.459M');
+    expect(formatAsShorthandNumbers(number, 5)).toEqual('243.45900M');
   });
 
   it('should format thousands', () => {
@@ -84,20 +84,20 @@ describe('Formatting numbers as shorthand ones', () => {
     expect(formatAsShorthandNumbers(number, 0)).toEqual('12K');
   });
 
-  it('should format thousands with custom precision', () => {
+  it('should format thousands with custome precision', () => {
     const number = new BigNumber(12.002).times(thousand);
-    expect(formatAsShorthandNumbers(number, 6)).toEqual('12.002K');
+    expect(formatAsShorthandNumbers(number, 6)).toEqual('12.002000K');
   });
 
-  it('should format thousands and remove trailing zeroes', () => {
+  it('should format thousands and not remove trailing zeroes', () => {
     const number = new BigNumber(23.459000000).times(thousand);
-    expect(formatAsShorthandNumbers(number, 5)).toEqual('23.459K');
+    expect(formatAsShorthandNumbers(number, 4)).toEqual('23.4590K');
   });
 
   // tslint:disable-next-line:max-line-length
-  it('should format thousands and remove trailing zeroes if any after precicion format on number with digits after the precision point', () => {
+  it('should format thousands and not remove trailing zeroes if any after precicion format on number with digits after the precision point', () => {
     const number = new BigNumber(23.45900002).times(thousand);
-    expect(formatAsShorthandNumbers(number, 5)).toEqual('23.459K');
+    expect(formatAsShorthandNumbers(number, 4)).toEqual('23.4590K');
   });
 
   it('should not shorthand the number', () => {
@@ -116,13 +116,13 @@ describe('Formatting numbers as shorthand ones', () => {
   });
 
   // tslint:disable-next-line:max-line-length
-  it('should not shorthand the number but format to precision and remove trailing zeroes if any', () => {
+  it('should not shorthand the number but format to precision and not remove trailing zeroes if any', () => {
     const number = new BigNumber(923.45900002);
-    expect(formatAsShorthandNumbers(number, 4)).toEqual('923.459');
+    expect(formatAsShorthandNumbers(number, 4)).toEqual('923.4590');
   });
 
   it('should format 0', () => {
-    expect(formatAsShorthandNumbers(zero, 4)).toEqual('0');
+    expect(formatAsShorthandNumbers(zero, 4)).toEqual('0.0000');
   });
 
   it('should format numbers bigger than billion', () => {
