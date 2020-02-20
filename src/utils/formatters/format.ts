@@ -43,8 +43,14 @@ export function formatAsShorthandNumbers(amount: BigNumber, precision?: number):
 }
 
 export function formatCryptoBalance(amount: BigNumber): string {
-  if (amount.absoluteValue().lt(oneThousandth)) return formatAsShorthandNumbers(amount);
-  if (amount.absoluteValue().lt(ten)) return formatAsShorthandNumbers(amount, 4);
+  if (amount.absoluteValue().lt(oneThousandth)) {
+    return `${amount.isNegative() ? '-0.000' : '<0.001'}`;
+  }
+
+  if (amount.absoluteValue().lt(ten)) {
+    return formatAsShorthandNumbers(amount, 4);
+  }
+
   return formatAsShorthandNumbers(amount, 2);
 }
 

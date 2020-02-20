@@ -146,12 +146,12 @@ describe('Formatting numbers as shorthand ones', () => {
 describe('Formatting crypto balances according to number formatting spec', () => {
   it('should display number as it is without precision', () => {
     const amount = new BigNumber('0.00002312321');
-    expect(formatCryptoBalance(amount)).toEqual(amount.valueOf());
+    expect(formatCryptoBalance(amount)).toEqual('<0.001');
   });
 
   it('should display  negative number as it is without precision', () => {
     const amount = new BigNumber('-0.00002312321');
-    expect(formatCryptoBalance(amount)).toEqual(amount.valueOf());
+    expect(formatCryptoBalance(amount)).toEqual('-0.000');
   });
 
   it('should have a precision of 4 for lower bound', () => {
