@@ -151,7 +151,7 @@ describe('Formatting crypto balances according to number formatting spec', () =>
 
   it('should display  negative number as it is without precision', () => {
     const amount = new BigNumber('-0.00002312321');
-    expect(formatCryptoBalance(amount)).toEqual('- 0.000');
+    expect(formatCryptoBalance(amount)).toEqual('-0.000');
   });
 
   it('should have a precision of 4 for lower bound', () => {
