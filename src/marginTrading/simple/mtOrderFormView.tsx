@@ -15,7 +15,7 @@ import {
   formatPrecision,
   formatPrice
 } from '../../utils/formatters/format';
-import { FormatPercent, Money } from '../../utils/formatters/Formatters';
+import { CryptoMoney, FormatPercent, Money } from '../../utils/formatters/Formatters';
 import { Button, ButtonGroup } from '../../utils/forms/Buttons';
 import { ErrorMessage } from '../../utils/forms/ErrorMessage';
 import { InputGroup, InputGroupAddon } from '../../utils/forms/InputGroup';
@@ -588,7 +588,7 @@ export class MtSimpleOrderFormBody
           </div>
           <div className={styles.orderSummaryValue}>
             { baseTokenAsset && baseTokenAsset.balance ?
-              <Money
+              <CryptoMoney
                 value={baseTokenAsset.balance}
                 token={baseToken}
                 fallback="-"
@@ -599,7 +599,7 @@ export class MtSimpleOrderFormBody
               <>
                 <span className={styles.transitionArrow} />
                 { balancePost ?
-                  <Money
+                  <CryptoMoney
                     value={balancePost}
                     token={baseToken}
                     fallback="-"
@@ -619,12 +619,12 @@ export class MtSimpleOrderFormBody
           </div>
           <div className={styles.orderSummaryValue}>
             { baseTokenAsset && baseTokenAsset.debt.gt(zero) ?
-              <Money
+              <CryptoMoney
                 value={baseTokenAsset.debt.times(minusOne)}
                 token={quoteToken}
                 fallback="-"
               /> : baseTokenAsset && baseTokenAsset.dai ?
-                <Money
+                <CryptoMoney
                   value={baseTokenAsset.dai}
                   token={quoteToken}
                   fallback="-"
@@ -635,7 +635,7 @@ export class MtSimpleOrderFormBody
               <>
                 <span className={styles.transitionArrow} />
                 { daiBalancePost ?
-                  <Money
+                  <CryptoMoney
                     value={daiBalancePost}
                     token={quoteToken}
                     fallback="-"

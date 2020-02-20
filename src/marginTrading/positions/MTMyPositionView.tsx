@@ -10,7 +10,7 @@ import { Calls$ } from '../../blockchain/calls/calls';
 import { TxMetaKind } from '../../blockchain/calls/txMeta';
 import { isDone, transactions$, TxState } from '../../blockchain/transactions';
 import { formatPrecision } from '../../utils/formatters/format';
-import { FormatPercent, Money } from '../../utils/formatters/Formatters';
+import { CryptoMoney, FormatPercent, Money } from '../../utils/formatters/Formatters';
 import { Button } from '../../utils/forms/Buttons';
 import { SvgImage } from '../../utils/icons/utils';
 import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
@@ -214,7 +214,7 @@ export class MTMyPositionView extends
               <div className={styles.summaryValue}>
                 {
                   ma.balance ?
-                    <Money
+                    <CryptoMoney
                       value={ma.balance}
                       token={ma.name}
                       fallback="-"
@@ -224,7 +224,7 @@ export class MTMyPositionView extends
                 {
                   ma.balanceInDai &&
                   <>
-                    (<Money
+                    (<CryptoMoney
                     value={ma.balanceInDai}
                     token="DAI"
                     fallback="-"
@@ -240,12 +240,12 @@ export class MTMyPositionView extends
               <div className={styles.summaryValue}>
                 {
                   ma && ma.debt.gt(zero) ?
-                    <Money
+                    <CryptoMoney
                       value={ma.debt.times(minusOne)}
                       token="DAI"
                       fallback="-"
                     /> : ma && ma.dai ?
-                    <Money
+                    <CryptoMoney
                       value={ma.dai}
                       token="DAI"
                       fallback="-"
@@ -260,7 +260,7 @@ export class MTMyPositionView extends
               <div className={styles.summaryValue}>
                 {
                   ma.equity &&
-                  <Money
+                  <CryptoMoney
                     value={ma.equity}
                     token="DAI"
                     fallback="-"

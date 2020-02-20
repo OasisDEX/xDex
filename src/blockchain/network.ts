@@ -156,7 +156,7 @@ export const tokenPricesInUSD$: Observable<Ticker> = onEveryBlock$.pipe(
               },
             }).pipe(
               map(({ response }) => ({
-                [token]: new BigNumber(response.quotes.USD.price)
+                [token]: new BigNumber(response.quotes.USD.price),
               })),
               catchError((error) => {
                 console.debug(`Error fetching price data: ${error}`);

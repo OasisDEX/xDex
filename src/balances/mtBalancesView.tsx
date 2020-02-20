@@ -15,7 +15,7 @@ import {
   MarginableAsset, UserActionKind
 } from '../marginTrading/state/mtAccount';
 import { MTTransferFormState } from '../marginTrading/transfer/mtTransferForm';
-import { formatAmount, formatPercent } from '../utils/formatters/format';
+import { formatAmount, formatCryptoBalance, formatPercent } from '../utils/formatters/format';
 import { Loadable } from '../utils/loadable';
 import { WithLoadingIndicator } from '../utils/loadingIndicator/LoadingIndicator';
 import { ModalOpenerProps } from '../utils/modal';
@@ -155,7 +155,7 @@ export class MTBalancesViewInternal
                   {asset.pnl && formatPercent(asset.pnl) || '-'}
                 </td>
                 <td className={styles.amount}>
-                  {formatAmount(asset.balance, asset.name)}
+                  {formatCryptoBalance(asset.balance)}
                 </td>
               </tr>
             );

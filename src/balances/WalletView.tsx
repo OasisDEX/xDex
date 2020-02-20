@@ -5,7 +5,7 @@ import { Slider } from 'src/utils/forms/Slider';
 import { getToken } from '../blockchain/config';
 import { TxState } from '../blockchain/transactions';
 import { connect } from '../utils/connect';
-import { formatPrecision } from '../utils/formatters/format';
+import { formatCryptoBalance, formatFiatBalances } from '../utils/formatters/format';
 import { FormatAmount } from '../utils/formatters/Formatters';
 import { Button } from '../utils/forms/Buttons';
 import { inject } from '../utils/inject';
@@ -15,7 +15,7 @@ import { ModalOpenerProps, ModalProps, } from '../utils/modal';
 import { Panel, PanelHeader } from '../utils/panel/Panel';
 import { Table } from '../utils/table/Table';
 import { Currency } from '../utils/text/Text';
-import { zero } from '../utils/zero';
+import { minusOne, zero } from '../utils/zero';
 import { WrapUnwrapFormKind, WrapUnwrapFormState } from '../wrapUnwrap/wrapUnwrapForm';
 import { WrapUnwrapFormView } from '../wrapUnwrap/WrapUnwrapFormView';
 import { CombinedBalances } from './balances';
@@ -98,14 +98,19 @@ export class WalletViewInternal extends React.Component<CombinedBalances & Walle
                 <div>
                   <FormatAmount data-test-id="amount"
                                 token={combinedBalance.name}
-                                value={combinedBalance.walletBalance}/>
+                                value={combinedBalance.walletBalance}
+                                formatter={(amount, _) => formatCryptoBalance(amount)}/>
                   <div className={styles.amountCurrency}>
                     <Currency value={combinedBalance.name}/>
                   </div>
                 </div>
               </td>
               <td className={classnames(styles.amount, 'hide-md')} >
-                $ {formatPrecision(combinedBalance.mtAssetValueInDAI, 2)}
+                {
+                combinedBalance.walletBalanceInUSD.eq(minusOne)
+                  ? 'N/A'
+                  : `$ ${formatFiatBalances(combinedBalance.walletBalanceInUSD)}`
+                }
               </td>
               <td>
                 <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
