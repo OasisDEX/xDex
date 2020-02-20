@@ -35,6 +35,7 @@
 }
 
 .summaryLabel {
+  display: inline-flex;
   color: $grayish-blue;
   flex-grow: 1;
 }
