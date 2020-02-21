@@ -163,7 +163,7 @@ test('buy with leverage - match exactly one order', () => {
   change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(20) });
 
   expect(unpack(controller).readyToProceed).toEqual(true);
-  expect(unpack(controller).realPurchasingPowerPost).toEqual(new BigNumber(180));
+  expect(unpack(controller).realPurchasingPowerPost).toEqual(new BigNumber(179.98779296875));
 });
 
 test('buy with leverage - match more than one order', () => {

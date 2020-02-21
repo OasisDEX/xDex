@@ -589,7 +589,8 @@ function getBuyPlan(
     {
       ...asset,
       urnBalance: asset.urnBalance.plus(amount),
-      debt: asset.debt.plus(delta)
+      debt: asset.debt.plus(delta),
+      dai: request.targetDaiBalance.gt(zero) ? request.targetDaiBalance : zero,
     } as MarginableAssetCore,
     { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook
   );

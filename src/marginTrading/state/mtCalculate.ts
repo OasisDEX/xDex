@@ -61,9 +61,7 @@ export function realPurchasingPowerMarginable(
     }
 
     debt = debt.plus(availableDebt);
-
     cash = availableDebt;
-
     first = false;
   }
 
@@ -300,9 +298,6 @@ export function calculateMarginable(
     MTHistoryEventKind.deal,
     MTHistoryEventKind.kick,
   ];
-
-  // console.log('liquidationPrice', liquidationPrice && liquidationPrice.toString());
-  // console.log('currentCollRatio', currentCollRatio && currentCollRatio.toString());
 
   const history = FullHistory.filter(h => !hiddenEvents.includes(h.kind)).reverse();
 
