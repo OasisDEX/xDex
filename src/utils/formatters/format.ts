@@ -2,7 +2,7 @@ import { BigNumber } from 'bignumber.js';
 import * as moment from 'moment';
 
 import { getToken } from '../../blockchain/config';
-import { billion, million, one, oneThousandth, ten, thousand } from '../zero';
+import { billion, million, one, oneThousandth, ten, thousand, zero } from '../zero';
 
 BigNumber.config({
   FORMAT: {
@@ -43,11 +43,17 @@ export function formatAsShorthandNumbers(amount: BigNumber, precision?: number):
 }
 
 export function formatCryptoBalance(amount: BigNumber): string {
-  if (amount.absoluteValue().lt(oneThousandth)) {
+  const absAmount = amount.absoluteValue();
+
+  if (absAmount.eq(zero)) {
+    return formatAsShorthandNumbers(amount, 2);
+  }
+
+  if (absAmount.lt(oneThousandth)) {
     return `${amount.isNegative() ? '-0.000' : '<0.001'}`;
   }
 
-  if (amount.absoluteValue().lt(ten)) {
+  if (absAmount.lt(ten)) {
     return formatAsShorthandNumbers(amount, 4);
   }
 
@@ -55,7 +61,10 @@ export function formatCryptoBalance(amount: BigNumber): string {
 }
 
 export function formatFiatBalances(amount: BigNumber): string {
-  if (amount.absoluteValue().lt(one)) return formatAsShorthandNumbers(amount, 4);
+  const absAmount = amount.absoluteValue();
+
+  if (absAmount.eq(zero)) return formatAsShorthandNumbers(amount, 2);
+  if (absAmount.lt(one)) return formatAsShorthandNumbers(amount, 4);
   return formatAsShorthandNumbers(amount, 2);
 }
 
