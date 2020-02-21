@@ -156,7 +156,7 @@ export function aggregateMTAccountState(
             safeCollRatio: new BigNumber(getToken(token).safeCollRatio as number),
             osmPriceNext: (osmPrices as any)[token].next,
             zzz: (osmParams as any)[token] as BigNumber,
-            rawHistory: rawHistories[token].sort((h1, h2) => h1.timestamp - h2.timestamp),
+            rawHistory: rawHistories[token],
             liquidationPenalty: balanceResult[token].liquidationPenalty
           });
         });
