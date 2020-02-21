@@ -246,7 +246,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
 
     if (balances) {
       const maxValue = actionKind === UserActionKind.fund
-        ? new BigNumber(balances[token])
+        ? balances[token]
         : this.getMaxWithdrawAmount();
       this.handleSetMax(maxValue, FormChangeKind.amountFieldChange);
     }
@@ -576,9 +576,14 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
   }
 
   private AmountGroup(disabled: boolean) {
-    const { token, balances } = this.props;
+    const { token, balances, actionKind } = this.props;
 
-    const maxTotal = balances ? balances[token] : zero;
+    const maxTotal = balances
+      ? actionKind === UserActionKind.fund
+        ? balances[token]
+        : this.getMaxWithdrawAmount()
+      : zero;
+    // const maxTotal = balances ? balances[token] : zero;
     return (
       <InputGroup sizer="md" disabled={disabled}>
         <InputGroupAddon border="right">Amount</InputGroupAddon>
