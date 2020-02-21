@@ -39,6 +39,7 @@ export function createRawMTHistoryFromCache(
           ink
           tab
           timestamp
+          price
         }
       }
     }
@@ -64,7 +65,8 @@ export function createRawMTHistoryFromCache(
         bid,
         ink,
         tab,
-        timestamp
+        timestamp,
+        price
       }: any) => ({
         ilk,
         timestamp,
@@ -78,7 +80,8 @@ export function createRawMTHistoryFromCache(
         ink: new BigNumber(ink),
         tab: new BigNumber(tab),
         kind: type,
-        token: ilk
+        token: ilk,
+        price: new BigNumber(price),
       })),
     ),
     // tap(x => console.log(token, context.ilks[token], x))

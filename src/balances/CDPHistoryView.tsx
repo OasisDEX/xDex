@@ -175,6 +175,7 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
                     }>{displayName}</td>
                     <td>{
                       e.priceDai ? e.priceDai.toFixed(2)
+                        : e.price ? <FormatAmount value={e.price} token="DAI" />
                         : <span>-</span>
                     }</td>
                     <td>
