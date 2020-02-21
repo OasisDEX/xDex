@@ -51,8 +51,10 @@
 
 
 .warningIcon {
-  width: 17px;
-  height: 17px;
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+  margin-left: 2px;
   margin-right: auto;
 
   &.grey {

@@ -205,6 +205,7 @@ $historyPanelsHeight: 605px;
 .orderSummaryLabel {
   text-align: left;
   flex-grow: 2;
+  display: inline-flex;
 }
 
 .orderSummaryValue {
