@@ -554,7 +554,7 @@ function allocationInput(
         mask={createNumberMask({
           allowNegative: true,
           allowDecimal: true,
-          decimalLimit: 5,
+          decimalLimit: getToken('DAI').digits,
           prefix: ''
         })}
         onChange={handleAllocationChange}
