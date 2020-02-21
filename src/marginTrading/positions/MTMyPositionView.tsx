@@ -66,8 +66,8 @@ interface MTMyPositionViewProps {
   mta: MTAccount;
   ma: MarginableAsset;
   createMTFundForm$: CreateMTFundForm$;
-  approveMTProxy: (args: {token: string; proxyAddress: string}) => Observable<TxState>;
-  redeem: (args: {token: string; proxy: any, amount: BigNumber}) => void;
+  approveMTProxy: (args: { token: string; proxyAddress: string }) => Observable<TxState>;
+  redeem: (args: { token: string; proxy: any, amount: BigNumber }) => void;
   close?: () => void;
   transactions: TxState[];
   inDai: boolean;
@@ -90,7 +90,8 @@ class RedeemButton extends React.Component<RedeemButtonProps> {
       t.meta.args.token === this.props.token
     ));
 
-    return (<Button
+    return (
+      <Button
         size="md"
         disabled={this.props.disabled || txInProgress}
         className={styles.redeemButton}
@@ -103,7 +104,7 @@ class RedeemButton extends React.Component<RedeemButtonProps> {
 }
 
 export function createRedeem(calls$: Calls$) {
-  return (args: {token: string; proxy: any, amount: BigNumber}): Observable<TxState> => {
+  return (args: { token: string; proxy: any, amount: BigNumber }): Observable<TxState> => {
     const r = calls$.pipe(
       first(),
       switchMap(calls => {
@@ -166,7 +167,11 @@ export class MTMyPositionView extends
       :
       liquidationPrice.gt(zero) ? liquidationPrice : undefined;
 
-    const markPrice = inDai ? ma.markPrice && ma.markPrice.times(daiPrice) : ma.osmPriceNext;
+    const markPrice = inDai
+      ? (ma.markPrice && daiPrice)
+        ? ma.markPrice.times(daiPrice)
+        : undefined
+      : ma.osmPriceNext;
     return (
       <div>
         <div className={styles.MTPositionPanel}>
@@ -176,7 +181,7 @@ export class MTMyPositionView extends
                 Leverage
               </div>
               <div className={styles.summaryValue}>
-                Long - { formatPrecision(leverage, 1) }x
+                Long - {formatPrecision(leverage, 1)}x
               </div>
             </div>
             <div className={styles.summaryRow}>
@@ -215,10 +220,10 @@ export class MTMyPositionView extends
                 <span>Liquidation Price</span>
               </div>
               <div className={styles.summaryValue}>
-                { inDai && liquidationPriceDisplay && '~' }
+                {inDai && liquidationPriceDisplay && '~'}
                 <Money
                   value={liquidationPriceDisplay}
-                  token={ inDai ? 'DAI' : 'USD' }
+                  token={inDai ? 'DAI' : 'USD'}
                   fallback="-"
                   className={
                     classnames({
@@ -237,14 +242,17 @@ export class MTMyPositionView extends
               </div>
               <div className={styles.summaryValue}>
                 {
-                  markPrice &&
-                  <>
-                    { inDai && '~' }
-                    <Money
-                      value={markPrice}
-                      token={ inDai ? 'DAI' : 'USD' }
-                    />
-                  </>
+                  markPrice
+                    ? (
+                      <>
+                        {inDai && '~'}
+                        <Money
+                          value={markPrice}
+                          token={inDai ? 'DAI' : 'USD'}
+                        />
+                      </>
+                    )
+                    : <>N/A</>
                 }
               </div>
             </div>
@@ -265,7 +273,7 @@ export class MTMyPositionView extends
                       fallback="-"
                     /> : <span>-</span>
                 }
-                <br/>
+                <br />
                 {
                   ma.balanceInDai &&
                   <>
@@ -325,11 +333,11 @@ export class MTMyPositionView extends
             ma.bitable === 'imminent' &&
             // tslint:disable
             <div className={styles.warningMessage}>
-              <SvgImage image={warningIconSvg}/>
+              <SvgImage image={warningIconSvg} />
               <span className={styles.warningText}>
-                Your {ma.name} leveraged position has entered the liquidation phase and your collateral will be auctioned in {ma.nextPriceUpdateDelta} minutes.<br/>
-              You can still avoid auction by
-                { ma.isSafeCollRatio ? 'selling, or ' : ' ' }
+                Your {ma.name} leveraged position has entered the liquidation phase and your collateral will be auctioned in {ma.nextPriceUpdateDelta} minutes.<br />
+                You can still avoid auction by
+                {ma.isSafeCollRatio ? 'selling, or ' : ' '}
                 depositing additional {ma.name} or DAI.
               </span>
             </div>
@@ -338,7 +346,7 @@ export class MTMyPositionView extends
           {
             ma.bitable === 'yes' &&
             <div className={styles.warningMessage}>
-              <SvgImage image={warningIconSvg}/>
+              <SvgImage image={warningIconSvg} />
               <span>
                 {
                   // tslint:disable
@@ -347,7 +355,7 @@ export class MTMyPositionView extends
                   </>
                   // tslint:enable
                 }
-            </span>
+              </span>
               {
                 ma.redeemable.gt(zero) && <RedeemButton
                   redeem={() => this.props.redeem({
