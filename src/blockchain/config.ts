@@ -440,7 +440,7 @@ const kovan: NetworkConfig = {
     return load(proxyCreationAndExecute, '0xee419971e63734fed782cfe49110b1544ae8a773');
   },
   get proxyActions() {
-    return load(proxyActions, '0x2591be3225458f97a41ca18ebe5e19054d84c2dd');
+    return load(proxyActions, '0x0581a288451bca7e8e6ced3a5dcd39802493e107');
   },
   get migration() {
     return '0x411b2faa662c8e3e5cf8f01dfdae0aee482ca7b0';
