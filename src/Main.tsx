@@ -12,6 +12,7 @@ import { ExchangeViewTxRx } from './exchange/ExchangeView';
 import { HeaderTxRx } from './header/Header';
 import * as styles from './index.scss';
 import { InstantExchange } from './instant/InstantViewPanel';
+import { Banner } from './landingPage/Banner';
 import { MarginTradingSimpleTxRx } from './marginTrading/MarginTradingSimple';
 import { connect } from './utils/connect';
 
@@ -51,6 +52,33 @@ export class MainContent extends React.Component<RouterProps> {
   public render() {
     return (
       <routerContext.Provider value={{ rootUrl: this.props.match.url }}>
+        <Banner content={
+              <span>
+                {/*tslint:disable*/}
+                The Oasis Trade front-end switched to a new OasisDEX contract on February 7th 2020.<br/>
+                If you had any orders open on the old contract, you will need to close them {' '}
+                <strong>
+                  <a href="https://oasis.app/expired/trade"
+                    rel="noopener noreferrer">
+                    here
+                  </a>
+                </strong>
+                {' '} and move liquidity to the new contract. 
+                <br/>
+                <br/>
+                <strong> Please see { ' ' }
+                  <a href="https://www.reddit.com/r/MakerDAO/comments/euplem/oasisdex_contract_will_be_upgraded_on_8th_feb_2020/" 
+                     target="_blank"
+                     rel="noopener noreferrer"
+                  >
+                    this announcement
+                  </a> 
+                  { ' ' }
+                  for more details
+                </strong>
+                </span>
+              }
+            theme='warning'/>
         <div className={styles.container}>
           <theAppContext.Consumer>
             {({ TransactionNotifierTxRx }) =>
@@ -80,14 +108,14 @@ class Routes extends React.Component<{ status: WalletStatus }> {
           <Route exact={false} path={'/instant'} component={InstantExchange}/>}
         {
           this.props.status === 'connected' &&
-          <Route path={'/account'} component={BalancesView}/>
+          <Route path={'/balances'} component={BalancesView}/>
         }
         {
           REACT_APP_LT_ENABLED === '1' &&
           this.props.status === 'connected' &&
           <Route path={'/leverage'} component={MarginTradingSimpleTxRx} />
         }
-        <Redirect from={'/balances'} to={'/account'}/>
+        <Redirect from={'/account'} to={'/balances'}/>
         <Redirect from={'/'} to={'/market'}/>
       </Switch>
     );

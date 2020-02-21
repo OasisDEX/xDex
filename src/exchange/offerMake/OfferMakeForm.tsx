@@ -116,11 +116,11 @@ export class OfferMakeForm extends React.Component<OfferFormState> {
       this.props.quoteToken === 'SAI' &&
       // this.props.baseToken !== 'WETH' &&
       isDAIEnabled();
-    return this.props.pickerOpen ?
-      this.orderTypePicker() :
-      isSaiMarket ?
-        this.lockedForm() :
-        this.formProper();
+    return this.props.pickerOpen
+    ? this.orderTypePicker()
+    : isSaiMarket
+      ? this.lockedSaiMarket()
+      : this.formProper();
   }
 
   private slippageLimit() {
@@ -213,7 +213,7 @@ export class OfferMakeForm extends React.Component<OfferFormState> {
     </div>;
   }
 
-  private lockedForm() {
+  private lockedSaiMarket() {
     return <div data-test-id="create-order-widget">
       <PanelHeader bordered={true}>
         Create order

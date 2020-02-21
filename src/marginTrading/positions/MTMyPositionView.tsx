@@ -5,12 +5,13 @@ import { combineLatest } from 'rxjs';
 import { Observable } from 'rxjs/index';
 import { first, switchMap } from 'rxjs/internal/operators';
 import { map } from 'rxjs/operators';
+import { WarningTooltip } from 'src/utils/tooltip/Tooltip';
 import { CDPHistoryView } from '../../balances/CDPHistoryView';
 import { Calls$ } from '../../blockchain/calls/calls';
 import { TxMetaKind } from '../../blockchain/calls/txMeta';
 import { isDone, transactions$, TxState } from '../../blockchain/transactions';
 import { formatPrecision } from '../../utils/formatters/format';
-import { FormatPercent, Money } from '../../utils/formatters/Formatters';
+import { CryptoMoney, FormatPercent, Money } from '../../utils/formatters/Formatters';
 import { Button } from '../../utils/forms/Buttons';
 import { SvgImage } from '../../utils/icons/utils';
 import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
@@ -25,12 +26,48 @@ import { CreateMTFundForm$ } from '../transfer/mtTransferForm';
 import * as styles from './MTMyPositionView.scss';
 import warningIconSvg from './warning-icon.svg';
 
+/* tslint:disable */
+const stabilityFeeTooltip = `
+  This is the annualised fee that is charged against your Dai Debt.
+  This fee is variable and is set by MakerDAO Governance.
+`;
+
+const liquidationPenaltyTooltip = `
+  This is additional fee that you will pay on top of your debt when your position is liquidated.
+  There could be also other costs involved depending on the price your collateral is sold for.
+`
+
+const markPriceTooltip = `
+  This is price used to determine if your position is safe from liquidation, and comes from Maker Oracles.
+  If the Mark Price falls below your Liquidation Price, your position becomes at risk of liquidation.
+`
+
+const collateralBalanceTooltip = (collateral: string) => `
+  This the amount of ${collateral} you currently have locked within your Leverage Account.
+  This ${collateral} is used as collateral against any debt you have, and may be sold 
+  if the Mark Price falls below your Liquidation Price.
+`
+
+const daiBalanceTooltip = `
+  This is the amount of Dai you have in your Leverage Account.
+  When negative, this represents your debt, and how much you owe.
+  When positive, this is how much Dai is available for you to withdraw.
+`
+
+const equityTooltip=`
+  This represents the current value of your Leveraged Position.
+  It is calculated as the sum of your WETH and DAI balances.
+  Another way to look at it, is if you were to sell your entire position,
+  this would approximately be the value you could withdraw at the end.
+`
+/* tslint:enable */
+
 interface MTMyPositionViewProps {
   mta: MTAccount;
   ma: MarginableAsset;
   createMTFundForm$: CreateMTFundForm$;
-  approveMTProxy: (args: {token: string; proxyAddress: string}) => Observable<TxState>;
-  redeem: (args: {token: string; proxy: any, amount: BigNumber}) => void;
+  approveMTProxy: (args: { token: string; proxyAddress: string }) => Observable<TxState>;
+  redeem: (args: { token: string; proxy: any, amount: BigNumber }) => void;
   close?: () => void;
   transactions: TxState[];
   inDai: boolean;
@@ -53,7 +90,8 @@ class RedeemButton extends React.Component<RedeemButtonProps> {
       t.meta.args.token === this.props.token
     ));
 
-    return (<Button
+    return (
+      <Button
         size="md"
         disabled={this.props.disabled || txInProgress}
         className={styles.redeemButton}
@@ -66,7 +104,7 @@ class RedeemButton extends React.Component<RedeemButtonProps> {
 }
 
 export function createRedeem(calls$: Calls$) {
-  return (args: {token: string; proxy: any, amount: BigNumber}): Observable<TxState> => {
+  return (args: { token: string; proxy: any, amount: BigNumber }): Observable<TxState> => {
     const r = calls$.pipe(
       first(),
       switchMap(calls => {
@@ -129,7 +167,11 @@ export class MTMyPositionView extends
       :
       liquidationPrice.gt(zero) ? liquidationPrice : undefined;
 
-    const markPrice = inDai ? ma.markPrice && ma.markPrice.times(daiPrice) : ma.osmPriceNext;
+    const markPrice = inDai
+      ? (ma.markPrice && daiPrice)
+        ? ma.markPrice.times(daiPrice)
+        : undefined
+      : ma.osmPriceNext;
     return (
       <div>
         <div className={styles.MTPositionPanel}>
@@ -139,12 +181,14 @@ export class MTMyPositionView extends
                 Leverage
               </div>
               <div className={styles.summaryValue}>
-                Long - { formatPrecision(leverage, 1) }x
+                Long - {formatPrecision(leverage, 1)}x
               </div>
             </div>
             <div className={styles.summaryRow}>
               <div className={styles.summaryLabel}>
-                Stability Fee
+                <span>Stability Fee</span>
+                <WarningTooltip id="stability-fee"
+                                text={stabilityFeeTooltip}/>
               </div>
               <div className={styles.summaryValue}>
                 <FormatPercent
@@ -156,7 +200,9 @@ export class MTMyPositionView extends
             </div>
             <div className={styles.summaryRow}>
               <div className={styles.summaryLabel}>
-                Liquidation Penalty
+                <span>Liquidation Penalty</span>
+                <WarningTooltip id="liquidation-penalty"
+                                text={liquidationPenaltyTooltip}/>
               </div>
               <div className={styles.summaryValue}>
                 <FormatPercent
@@ -171,13 +217,13 @@ export class MTMyPositionView extends
           <div className={styles.MTPositionColumn}>
             <div className={styles.summaryRow}>
               <div className={styles.summaryLabel}>
-                Liquidation Price
+                <span>Liquidation Price</span>
               </div>
               <div className={styles.summaryValue}>
-                { inDai && liquidationPriceDisplay && '~' }
+                {inDai && liquidationPriceDisplay && '~'}
                 <Money
                   value={liquidationPriceDisplay}
-                  token={ inDai ? 'DAI' : 'USD' }
+                  token={inDai ? 'DAI' : 'USD'}
                   fallback="-"
                   className={
                     classnames({
@@ -190,18 +236,23 @@ export class MTMyPositionView extends
             </div>
             <div className={styles.summaryRow}>
               <div className={styles.summaryLabel}>
-                Mark Price
+                <span>Mark Price</span>
+                <WarningTooltip id="mark-price"
+                                text={markPriceTooltip}/>
               </div>
               <div className={styles.summaryValue}>
                 {
-                  markPrice &&
-                  <>
-                    { inDai && '~' }
-                    <Money
-                      value={markPrice}
-                      token={ inDai ? 'DAI' : 'USD' }
-                    />
-                  </>
+                  markPrice
+                    ? (
+                      <>
+                        {inDai && '~'}
+                        <Money
+                          value={markPrice}
+                          token={inDai ? 'DAI' : 'USD'}
+                        />
+                      </>
+                    )
+                    : <>N/A</>
                 }
               </div>
             </div>
@@ -209,22 +260,24 @@ export class MTMyPositionView extends
           <div className={styles.MTPositionColumn}>
             <div className={styles.summaryRow}>
               <div className={styles.summaryLabel}>
-                {ma.name} Bal
+                <span>{ma.name} Bal</span>
+                <WarningTooltip id="col-balance"
+                                text={collateralBalanceTooltip(ma.name)}/>
               </div>
               <div className={styles.summaryValue}>
                 {
                   ma.balance ?
-                    <Money
+                    <CryptoMoney
                       value={ma.balance}
                       token={ma.name}
                       fallback="-"
                     /> : <span>-</span>
                 }
-                <br/>
+                <br />
                 {
                   ma.balanceInDai &&
                   <>
-                    (<Money
+                    (<CryptoMoney
                     value={ma.balanceInDai}
                     token="DAI"
                     fallback="-"
@@ -235,17 +288,19 @@ export class MTMyPositionView extends
             </div>
             <div className={styles.summaryRow}>
               <div className={styles.summaryLabel}>
-                DAI Bal
+                <span>DAI Bal</span>
+                <WarningTooltip id="dai-balance"
+                                text={daiBalanceTooltip}/>
               </div>
               <div className={styles.summaryValue}>
                 {
                   ma && ma.debt.gt(zero) ?
-                    <Money
+                    <CryptoMoney
                       value={ma.debt.times(minusOne)}
                       token="DAI"
                       fallback="-"
                     /> : ma && ma.dai ?
-                    <Money
+                    <CryptoMoney
                       value={ma.dai}
                       token="DAI"
                       fallback="-"
@@ -255,12 +310,14 @@ export class MTMyPositionView extends
             </div>
             <div className={styles.summaryRow}>
               <div className={styles.summaryLabel}>
-                Equity
+                <span>Equity</span>
+                <WarningTooltip id="equity"
+                                text={equityTooltip}/>
               </div>
               <div className={styles.summaryValue}>
                 {
                   ma.equity &&
-                  <Money
+                  <CryptoMoney
                     value={ma.equity}
                     token="DAI"
                     fallback="-"
@@ -276,11 +333,11 @@ export class MTMyPositionView extends
             ma.bitable === 'imminent' &&
             // tslint:disable
             <div className={styles.warningMessage}>
-              <SvgImage image={warningIconSvg}/>
+              <SvgImage image={warningIconSvg} />
               <span className={styles.warningText}>
-                Your {ma.name} leveraged position has entered the liquidation phase and your collateral will be auctioned in {ma.nextPriceUpdateDelta} minutes.<br/>
-              You can still avoid auction by
-                { ma.isSafeCollRatio ? 'selling, or ' : ' ' }
+                Your {ma.name} leveraged position has entered the liquidation phase and your collateral will be auctioned in {ma.nextPriceUpdateDelta} minutes.<br />
+                You can still avoid auction by
+                {ma.isSafeCollRatio ? 'selling, or ' : ' '}
                 depositing additional {ma.name} or DAI.
               </span>
             </div>
@@ -289,7 +346,7 @@ export class MTMyPositionView extends
           {
             ma.bitable === 'yes' &&
             <div className={styles.warningMessage}>
-              <SvgImage image={warningIconSvg}/>
+              <SvgImage image={warningIconSvg} />
               <span>
                 {
                   // tslint:disable
@@ -298,7 +355,7 @@ export class MTMyPositionView extends
                   </>
                   // tslint:enable
                 }
-            </span>
+              </span>
               {
                 ma.redeemable.gt(zero) && <RedeemButton
                   redeem={() => this.props.redeem({

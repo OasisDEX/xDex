@@ -15,14 +15,14 @@ import { Calls$ } from '../blockchain/calls/calls';
 
 import { TxMetaKind } from 'src/blockchain/calls/txMeta';
 import { AssetKind, NetworkConfig, tradingTokens } from '../blockchain/config';
-import { account$, GasPrice$, MIN_ALLOWANCE } from '../blockchain/network';
+import { account$, GasPrice$, MIN_ALLOWANCE, Ticker } from '../blockchain/network';
 import { TxState, TxStatus } from '../blockchain/transactions';
 import { amountFromWei } from '../blockchain/utils';
 import {
   MarginableAsset,
   MTAccount,
 } from '../marginTrading/state/mtAccount';
-import { one, zero } from '../utils/zero';
+import { minusOne, one, zero } from '../utils/zero';
 
 export interface Balances {
   [token: string]: BigNumber;
@@ -66,16 +66,16 @@ export function createBalances$(
     onEveryBlock$
   ).pipe(
     switchMap(([context, account]) =>
-                !account ? of({}) :
-                  forkJoin(
-                    tradingTokens.filter(name => name !== 'ETH').map((token: string) =>
-                      balance$(context, token, account).pipe(
-                        map(balance => ({
-                          [token]: balance
-                        }))
-                      )
-                    )
-                  ).pipe(concatAll(), scan((a, e) => ({ ...a, ...e }), {}), last())
+      !account ? of({}) :
+        forkJoin(
+          tradingTokens.filter(name => name !== 'ETH').map((token: string) =>
+            balance$(context, token, account).pipe(
+              map(balance => ({
+                [token]: balance
+              }))
+            )
+          )
+        ).pipe(concatAll(), scan((a, e) => ({ ...a, ...e }), {}), last())
     ),
     distinctUntilChanged(isEqual)
   );
@@ -84,6 +84,7 @@ export function createBalances$(
 export interface CombinedBalance {
   name: string;
   walletBalance: BigNumber;
+  walletBalanceInUSD: BigNumber;
   asset?: MarginableAsset;
   mtAssetValueInDAI: BigNumber;
   cashBalance?: BigNumber;
@@ -101,11 +102,11 @@ function isAllowanceChangeInProgress(token: string, currentBlock: number) {
     tx.meta.kind === TxMetaKind.approveWallet ||
     tx.meta.kind === TxMetaKind.disapproveWallet
   ) && (
-    tx.status === TxStatus.WaitingForApproval ||
-    tx.status === TxStatus.WaitingForConfirmation ||
-    tx.status === TxStatus.Success && tx.blockNumber > currentBlock ||
-    tx.status === TxStatus.Failure && tx.blockNumber > currentBlock
-  ) && tx.meta.args.token === token;
+      tx.status === TxStatus.WaitingForApproval ||
+      tx.status === TxStatus.WaitingForConfirmation ||
+      tx.status === TxStatus.Success && tx.blockNumber > currentBlock ||
+      tx.status === TxStatus.Failure && tx.blockNumber > currentBlock
+    ) && tx.meta.args.token === token;
 }
 
 export function combineBalances(
@@ -114,7 +115,8 @@ export function combineBalances(
   allowances: Allowances,
   mta: MTAccount,
   transactions: TxState[],
-  currentBlock: number
+  currentBlock: number,
+  pricesInUsd: Ticker,
 ): CombinedBalances {
 
   const balances = tradingTokens
@@ -122,16 +124,20 @@ export function combineBalances(
       const walletBalance = name === 'ETH' ? etherBalance : walletBalances[name];
 
       const asset =
-          mta.marginableAssets.find(ma => ma.name === name);
+        mta.marginableAssets.find(ma => ma.name === name);
 
       const mtAssetValueInDAI = asset ?
         // walletBalance.plus(asset.balance).times(
-          asset.balance.times(
+        asset.balance.times(
           asset.assetKind === AssetKind.marginable ||
-          asset.assetKind === AssetKind.nonMarginable ?
-          asset.referencePrice : one
+            asset.assetKind === AssetKind.nonMarginable ?
+            asset.referencePrice : one
         ) :
         zero;
+
+      const walletBalanceInUSD = pricesInUsd[name]
+        ? pricesInUsd[name].times(walletBalance)
+        : minusOne;
 
       const cashBalance = asset && asset.assetKind === AssetKind.marginable ? asset.dai : zero;
 
@@ -146,6 +152,7 @@ export function combineBalances(
         asset,
         walletBalance,
         mtAssetValueInDAI,
+        walletBalanceInUSD,
         cashBalance,
         allowance,
         allowanceChangeInProgress
@@ -161,7 +168,8 @@ export function createCombinedBalances(
   allowances$: Observable<Allowances>,
   mta$: Observable<MTAccount>,
   transactions$: Observable<TxState[]>,
-  currentBlock$: Observable<number>
+  currentBlock$: Observable<number>,
+  tokenPricesInUSD$: Observable<Ticker>
 ): Observable<CombinedBalances> {
   return combineLatest(
     etherBalance$$,
@@ -169,15 +177,17 @@ export function createCombinedBalances(
     allowances$,
     mta$,
     transactions$,
-    currentBlock$
+    currentBlock$,
+    tokenPricesInUSD$
   ).pipe(
-    map(([etherBalance, balances, allowances, mta, txs, block]) =>
-      combineBalances(etherBalance, balances, allowances, mta, txs, block)),
+    map(([etherBalance, balances, allowances, mta, txs, block, pricesInUSD]) =>
+      // @ts-ignore
+      combineBalances(etherBalance, balances, allowances, mta, txs, block, pricesInUSD)),
     shareReplay(1)
   );
 }
 
-export function  createTokenBalances$(
+export function createTokenBalances$(
   context$: Observable<NetworkConfig>,
   initializedAccount$: Observable<string>,
   onEveryBlock$: Observable<number>,
@@ -189,7 +199,7 @@ export function  createTokenBalances$(
     onEveryBlock$
   ).pipe(
     switchMap(([context, account]) =>
-                balance$(context, token, account)),
+      balance$(context, token, account)),
     distinctUntilChanged(isEqual)
   );
 }
@@ -197,18 +207,18 @@ export function  createTokenBalances$(
 export function createDustLimits$(context$: Observable<NetworkConfig>): Observable<DustLimits> {
   return combineLatest(context$).pipe(
     switchMap(([context]) =>
-                forkJoin(
-                  tradingTokens.filter(name => name !== 'ETH').map((token: string) => {
-                    return from(context.otc.contract.methods.getMinSell(
-                      context.tokens[token].address
-                    ).call()).pipe(
-                      map((x: string) => new BigNumber(x)),
-                      map(dustLimit => ({
-                        [token]: amountFromWei(dustLimit, token)
-                      }))
-                    );
-                  })
-                ).pipe(concatAll(), scan((a, e) => ({ ...a, ...e }), {}), last())
+      forkJoin(
+        tradingTokens.filter(name => name !== 'ETH').map((token: string) => {
+          return from(context.otc.contract.methods.getMinSell(
+            context.tokens[token].address
+          ).call()).pipe(
+            map((x: string) => new BigNumber(x)),
+            map(dustLimit => ({
+              [token]: amountFromWei(dustLimit, token)
+            }))
+          );
+        })
+      ).pipe(concatAll(), scan((a, e) => ({ ...a, ...e }), {}), last())
     ),
     distinctUntilChanged(isEqual),
     shareReplay(1)
@@ -222,18 +232,18 @@ export function createAllowances$(
 ): Observable<Allowances> {
   return combineLatest(context$, initializedAccount$, onEveryBlock$).pipe(
     switchMap(([context, account]) =>
-                forkJoin(
-                  tradingTokens
-                    .filter(token => token !== 'ETH')
-                    .map((token: string) =>
-                           from(context.tokens[token].contract.methods.allowance(
-                             account, context.otc.address
-                           ).call()).pipe(
-                             map((balance: string) => new BigNumber(balance)),
-                             map((x: BigNumber) => ({ [token]: x.gte(MIN_ALLOWANCE) }))
-                           )
-                    )
-                ).pipe(concatAll(), scan((a, e) => ({ ...a, ...e }), {}), last())
+      forkJoin(
+        tradingTokens
+          .filter(token => token !== 'ETH')
+          .map((token: string) =>
+            from(context.tokens[token].contract.methods.allowance(
+              account, context.otc.address
+            ).call()).pipe(
+              map((balance: string) => new BigNumber(balance)),
+              map((x: BigNumber) => ({ [token]: x.gte(MIN_ALLOWANCE) }))
+            )
+          )
+      ).pipe(concatAll(), scan((a, e) => ({ ...a, ...e }), {}), last())
     ),
     distinctUntilChanged(isEqual)
   );
@@ -247,21 +257,21 @@ export function createProxyAllowances$(
 ): Observable<Allowances> {
   return combineLatest(context$, initializedAccount$, proxyAccount$, onEveryBlock$).pipe(
     switchMap(([context, account, proxy]) =>
-                forkJoin(
-                  Object.keys(context.tokens)
-                    .filter(token => token !== 'ETH')
-                    .map((token: string) =>
-                      proxy ?
-                        from(context.tokens[token].contract.methods.allowance(
-                          account, proxy
-                        ).call()).pipe(
-                          map((balance: string) => new BigNumber(balance)),
-                          map((x: BigNumber) => ({ [token]: x.gte(MIN_ALLOWANCE) }))
-                        )
-                      :
-                        of({ [token]: false })
-                    )
-                ).pipe(concatAll(), scan((a, e) => ({ ...a, ...e }), {}), last())
+      forkJoin(
+        Object.keys(context.tokens)
+          .filter(token => token !== 'ETH')
+          .map((token: string) =>
+            proxy ?
+              from(context.tokens[token].contract.methods.allowance(
+                account, proxy
+              ).call()).pipe(
+                map((balance: string) => new BigNumber(balance)),
+                map((x: BigNumber) => ({ [token]: x.gte(MIN_ALLOWANCE) }))
+              )
+              :
+              of({ [token]: false })
+          )
+      ).pipe(concatAll(), scan((a, e) => ({ ...a, ...e }), {}), last())
     ),
     distinctUntilChanged(isEqual)
   );

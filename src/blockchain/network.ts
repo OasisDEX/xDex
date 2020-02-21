@@ -7,14 +7,12 @@ import { takeWhileInclusive } from 'rxjs-take-while-inclusive';
 import { ajax } from 'rxjs/ajax';
 import {
   catchError,
-  delayWhen,
   distinctUntilChanged,
   filter,
   first,
   last,
   map,
   mergeMap,
-  retryWhen,
   shareReplay,
   skip,
   startWith,
@@ -156,7 +154,7 @@ export const tokenPricesInUSD$: Observable<Ticker> = onEveryBlock$.pipe(
               },
             }).pipe(
               map(({ response }) => ({
-                [token]: new BigNumber(response.quotes.USD.price)
+                [token]: new BigNumber(response.quotes.USD.price),
               })),
               catchError((error) => {
                 console.debug(`Error fetching price data: ${error}`);
@@ -171,26 +169,29 @@ export const tokenPricesInUSD$: Observable<Ticker> = onEveryBlock$.pipe(
 );
 
 function getPriceFeed(ticker: string): Observable<BigNumber> {
-  return concat(
-    onEveryBlock$.pipe(
-      switchMap(() => ajax({
-        url: `https://api.coinpaprika.com/v1/tickers/${ticker}/`,
-        method: 'GET',
-        headers: {
-          Accept: 'application/json',
-        },
-      })),
-      map(({ response }) => new BigNumber(response.quotes.USD.price)),
-      retryWhen(errors => errors.pipe(delayWhen(() => onEveryBlock$.pipe(skip(1))))),
-    ),
-  ).pipe(
+  return ajax({
+    url: `https://api.coinpaprika.com/v1/tickers/${ticker}/`,
+    method: 'GET',
+    headers: {
+      Accept: 'application/json',
+    },
+  }).pipe(
+    map(({ response }) => new BigNumber(response.quotes.USD.price)),
+    catchError((error) => {
+      console.debug(`Error fetching price data: ${error}`);
+      return of(undefined);
+    }),
     distinctUntilChanged((x: BigNumber, y: BigNumber) => x.eq(y)),
     shareReplay(1),
   );
 }
 
-export const etherPriceUsd$: Observable<BigNumber> = getPriceFeed('eth-ethereum');
-export const daiPriceUsd$: Observable<BigNumber> = getPriceFeed('dai-dai');
+export const etherPriceUsd$: Observable<BigNumber> = onEveryBlock$.pipe(
+  switchMap(() => getPriceFeed('eth-ethereum'))
+);
+export const daiPriceUsd$: Observable<BigNumber> = onEveryBlock$.pipe(
+  switchMap(() => getPriceFeed('dai-dai'))
+);
 
 export function waitUntil<T>(
   value: Observable<T>, condition: (v: T) => boolean, maxRetries = 5, generator$ = onEveryBlock$,

@@ -3,6 +3,7 @@ import * as classnames from 'classnames';
 import * as mixpanel from 'mixpanel-browser';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import { WarningTooltip } from 'src/utils/tooltip/Tooltip';
 import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
 import * as formStyles from '../../exchange/offerMake/OfferMakeForm.scss';
 import { OfferType } from '../../exchange/orderbook/orderbook';
@@ -15,7 +16,7 @@ import {
   formatPrecision,
   formatPrice
 } from '../../utils/formatters/format';
-import { FormatPercent, Money } from '../../utils/formatters/Formatters';
+import { CryptoMoney, FormatPercent, Money } from '../../utils/formatters/Formatters';
 import { Button, ButtonGroup } from '../../utils/forms/Buttons';
 import { ErrorMessage } from '../../utils/forms/ErrorMessage';
 import { InputGroup, InputGroupAddon } from '../../utils/forms/InputGroup';
@@ -38,6 +39,25 @@ import { MtTransferFormView } from '../transfer/mtTransferFormView';
 import { Message, MessageKind, MTSimpleFormState, ViewKind } from './mtOrderForm';
 import * as styles from './mtOrderFormView.scss';
 import { MTSimpleOrderPanelProps } from './mtOrderPanel';
+
+/* tslint:disable */
+const collateralBalanceTooltip = (collateral: string) => `
+  This the amount of ${collateral} you currently have locked within your Leverage Account.
+  This ${collateral} is used as collateral against any debt you have, and may be sold 
+  if the Mark Price falls below your Liquidation Price.
+`
+
+const daiBalanceTooltip = `
+  This is the amount of Dai you have in your Leverage Account.
+  When negative, this represents your debt, and how much you owe.
+  When positive, this is how much Dai is available for you to withdraw.
+`
+const slippageLimitTooltip = `
+  This is the maximum amount that the final price you are buying or selling your collateral for
+  can change between the point your order is placed and when it is settled.
+  If the final price does exceed this value, your trade will be cancelled.
+`
+/* tslint:enable*/
 
 // const DevInfos = ({ value }: { value: MTSimpleFormState }) => {
 //   //  assetKind: AssetKind.marginable;
@@ -415,6 +435,8 @@ export class MtSimpleOrderFormBody
           <SettingsIcon className={styles.settingsIcon}
                         onClick={this.switchToSettings}
           />
+          <WarningTooltip id="slippage-limit"
+                          text={slippageLimitTooltip}/>
         </div>
         <div className={styles.orderSummaryValue}>
           {
@@ -584,11 +606,13 @@ export class MtSimpleOrderFormBody
           styles.orderSummaryRowDark,
           balancePost || kind === OfferType.sell ? styles.visible : styles.hidden)}>
           <div className={styles.orderSummaryLabel}>
-            Balance
+            <span>Balance</span>
+            <WarningTooltip id="col-balance"
+                            text={collateralBalanceTooltip(baseToken)}/>
           </div>
           <div className={styles.orderSummaryValue}>
             { baseTokenAsset && baseTokenAsset.balance ?
-              <Money
+              <CryptoMoney
                 value={baseTokenAsset.balance}
                 token={baseToken}
                 fallback="-"
@@ -599,7 +623,7 @@ export class MtSimpleOrderFormBody
               <>
                 <span className={styles.transitionArrow} />
                 { balancePost ?
-                  <Money
+                  <CryptoMoney
                     value={balancePost}
                     token={baseToken}
                     fallback="-"
@@ -615,16 +639,18 @@ export class MtSimpleOrderFormBody
           daiBalancePost || kind === OfferType.sell ? styles.visible : styles.hidden
         )}>
           <div className={styles.orderSummaryLabel}>
-            DAI Balance
+            <span>DAI Balance</span>
+            <WarningTooltip id="dai-balance"
+                            text={daiBalanceTooltip}/>
           </div>
           <div className={styles.orderSummaryValue}>
             { baseTokenAsset && baseTokenAsset.debt.gt(zero) ?
-              <Money
+              <CryptoMoney
                 value={baseTokenAsset.debt.times(minusOne)}
                 token={quoteToken}
                 fallback="-"
               /> : baseTokenAsset && baseTokenAsset.dai ?
-                <Money
+                <CryptoMoney
                   value={baseTokenAsset.dai}
                   token={quoteToken}
                   fallback="-"
@@ -635,7 +661,7 @@ export class MtSimpleOrderFormBody
               <>
                 <span className={styles.transitionArrow} />
                 { daiBalancePost ?
-                  <Money
+                  <CryptoMoney
                     value={daiBalancePost}
                     token={quoteToken}
                     fallback="-"
