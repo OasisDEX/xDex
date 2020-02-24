@@ -202,31 +202,39 @@ export class MTMyPositionPanelInternal
     const actions: React.ReactNode[] = [];
 
     if (type === 'deposit') {
-      actions.push(<Button
-        size="md"
-        key={ma.name}
-        className={styles.actionButton}
-        disabled={!ma.availableActions.includes(UserActionKind.fund)}
-        onClick={
-          () => {
-            this.transfer(UserActionKind.fund, ma.name, undefined);
-            mixpanel.track('btn-click', {
-              id: 'fund-collateral-open',
-              product: 'oasis-trade',
-              page: 'Leverage',
-              section: 'my-position',
-            });
+      if (ma.allowance) {
+        actions.push(<Button
+          size="md"
+          key={ma.name}
+          className={styles.actionButton}
+          onClick={
+            () => {
+              this.transfer(UserActionKind.fund, ma.name, undefined);
+              mixpanel.track('btn-click', {
+                id: 'fund-collateral-open',
+                product: 'oasis-trade',
+                page: 'Leverage',
+                section: 'my-position',
+              });
+            }
           }
-        }
-      >
-        Deposit {ma.name}
-      </Button>);
+        >
+          Deposit {ma.name}
+        </Button>);
+      } else {
+        actions.push(<Button
+          size="md"
+          className={styles.actionButton}
+          onClick={this.approveMTProxy(ma.name)}
+        >
+          Enable {ma.name}
+        </Button>);
+      }
 
       if (mta.daiAllowance) {
         actions.push(<Button
           size="md"
           className={styles.actionButton}
-          disabled={!ma.availableActions.includes(UserActionKind.fund)}
           onClick={
             () => {
               this.transfer(UserActionKind.fund, 'DAI', ma.name);

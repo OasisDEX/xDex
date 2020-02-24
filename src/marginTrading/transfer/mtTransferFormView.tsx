@@ -583,7 +583,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
         ? balances[token]
         : this.getMaxWithdrawAmount()
       : zero;
-    // const maxTotal = balances ? balances[token] : zero;
+
     return (
       <InputGroup sizer="md" disabled={disabled}>
         <InputGroupAddon border="right">Amount</InputGroupAddon>
