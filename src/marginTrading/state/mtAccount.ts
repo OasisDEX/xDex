@@ -101,6 +101,7 @@ export type MTHistoryEvent = {
   redeemable?: BigNumber;
   dAmount: BigNumber;
   dDAIAmount: BigNumber;
+  price?: BigNumber;
 } & (MTMarginEvent | MTLiquidationEvent);
 
 export type MTMarginEvent = {
