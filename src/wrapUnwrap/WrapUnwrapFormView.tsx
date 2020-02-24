@@ -4,6 +4,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import * as ReactModal from 'react-modal';
 
+import { getToken } from 'src/blockchain/config';
 import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
 import { BigNumberInput } from '../utils/bigNumberInput/BigNumberInput';
 import { AmountFieldChange, FormChangeKind } from '../utils/form';
@@ -187,7 +188,7 @@ export class WrapUnwrapFormView
               type="text"
               mask={createNumberMask({
                 allowDecimal: true,
-                decimalLimit: 5,
+                decimalLimit: getToken('ETH').digits,
                 prefix: ''
               })}
               onChange={this.handleAmountChange}

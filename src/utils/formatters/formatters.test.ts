@@ -203,6 +203,14 @@ describe('Formatting crypto balances according to number formatting spec', () =>
     const amount = new BigNumber('-10.012').times(billion);
     expect(formatCryptoBalance(amount)).toEqual('-10.01B');
   });
+
+  it('should format zero balance', () => {
+    const amount = new BigNumber('0.000000000000').times(billion);
+    expect(formatCryptoBalance(amount)).toEqual('0.00');
+
+    const negativeAmount = new BigNumber('-0.000000000000').times(billion);
+    expect(formatCryptoBalance(negativeAmount)).toEqual('0.00');
+  });
 });
 
 // **FIAT Balances (USD, EUR etc)**
@@ -262,5 +270,13 @@ describe('Formatting fiat balances according to number formattic spec', () => {
   it('should format number with precision 2 and suffix B (negative number)', () => {
     const amount = new BigNumber(-1234.985623423).times(million);
     expect(formatFiatBalances(amount)).toBe('-1.23B');
+  });
+
+  it('should format zero balance', () => {
+    const amount = new BigNumber('0.000000000000').times(billion);
+    expect(formatFiatBalances(amount)).toEqual('0.00');
+
+    const negativeAmount = new BigNumber('-0.000000000000').times(billion);
+    expect(formatFiatBalances(negativeAmount)).toEqual('0.00');
   });
 });

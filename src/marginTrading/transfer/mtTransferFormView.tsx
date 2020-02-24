@@ -594,7 +594,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
           type="text"
           mask={createNumberMask({
             allowDecimal: true,
-            decimalLimit: 5,
+            decimalLimit: getToken(this.props.token).digits,
             prefix: ''
           })}
           onChange={this.amountChange}

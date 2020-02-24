@@ -3,6 +3,7 @@ import * as classnames from 'classnames';
 import * as mixpanel from 'mixpanel-browser';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import { getToken } from 'src/blockchain/config';
 import { WarningTooltip } from 'src/utils/tooltip/Tooltip';
 import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
 import * as formStyles from '../../exchange/offerMake/OfferMakeForm.scss';
@@ -702,7 +703,7 @@ export class MtSimpleOrderFormBody
               type="text"
               mask={createNumberMask({
                 allowDecimal: true,
-                decimalLimit: 5,
+                decimalLimit: getToken(quoteToken).digits,
                 prefix: ''
               })}
               onChange={this.handleTotalChange}
@@ -777,7 +778,7 @@ export class MtSimpleOrderFormBody
             type="text"
             mask={createNumberMask({
               allowDecimal: true,
-              decimalLimit: 5,
+              decimalLimit: getToken(baseToken).digits,
               prefix: ''
             })}
             onChange={this.handleAmountChange}

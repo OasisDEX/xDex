@@ -72,6 +72,7 @@ export const rawHistoryBuy: RawMTHistoryEvent[] = [
     amount: new BigNumber('1'),
     dAmount: new BigNumber(0),
     dDAIAmount: new BigNumber(0),
+    price: new BigNumber(123),
   },
   {
     timestamp: 1567693285,
@@ -80,6 +81,7 @@ export const rawHistoryBuy: RawMTHistoryEvent[] = [
     amount: new BigNumber('200'),
     dAmount: new BigNumber(0),
     dDAIAmount: new BigNumber(0),
+    price: new BigNumber(123),
   },
   {
     timestamp: 1567693285,
@@ -91,6 +93,7 @@ export const rawHistoryBuy: RawMTHistoryEvent[] = [
     payAmount: new BigNumber('300'),
     dAmount: new BigNumber(0),
     dDAIAmount: new BigNumber(0),
+    price: new BigNumber(123),
   }
 ];
 
@@ -102,6 +105,7 @@ export const rawHistoryBuySell: RawMTHistoryEvent[] = [
     amount: new BigNumber('1'),
     dAmount: new BigNumber(0),
     dDAIAmount: new BigNumber(0),
+    price: new BigNumber(123),
   },
   {
     timestamp: 1567693285,
@@ -110,6 +114,7 @@ export const rawHistoryBuySell: RawMTHistoryEvent[] = [
     amount: new BigNumber('200'),
     dAmount: new BigNumber(0),
     dDAIAmount: new BigNumber(0),
+    price: new BigNumber(123),
   },
   {
     timestamp: 1567693285,
@@ -121,6 +126,7 @@ export const rawHistoryBuySell: RawMTHistoryEvent[] = [
     payAmount: new BigNumber('300'),
     dAmount: new BigNumber(0),
     dDAIAmount: new BigNumber(0),
+    price: new BigNumber(123),
   },
   {
     timestamp: 1567693285,
@@ -132,5 +138,6 @@ export const rawHistoryBuySell: RawMTHistoryEvent[] = [
     payAmount: new BigNumber('250'),
     dAmount: new BigNumber(0),
     dDAIAmount: new BigNumber(0),
+    price: new BigNumber(123),
   }
 ];

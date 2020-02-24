@@ -501,7 +501,7 @@ export class MigrationModal extends React.Component<MigrationFormState & ModalPr
                 className={styles.amountInput}
                 mask={createNumberMask({
                   allowDecimal: true,
-                  decimalLimit: 5,
+                  decimalLimit: getToken(fromToken).digits,
                   prefix: ''
                 })}
                 onChange={this.handleAmountChange}
