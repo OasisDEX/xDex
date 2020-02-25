@@ -35,7 +35,6 @@ import {
   toOrderbookChange$, TotalFieldChange,
   transactionToX
 } from '../../utils/form';
-import { formatPriceDown, formatPriceUp } from '../../utils/formatters/format';
 import { description, Impossible, isImpossible } from '../../utils/impossible';
 import { firstOfOrTrue } from '../../utils/operators';
 import { minusOne, one, zero } from '../../utils/zero';
@@ -422,11 +421,8 @@ function addAmount(total: BigNumber | undefined, state: MTSimpleFormState): MTSi
   return {
     ...state,
     total,
+    amount,
     messages: state.messages.filter(m => m.kind !== MessageKind.impossibleCalculateTotal),
-    amount: amount ?
-      new BigNumber(state.kind === OfferType.buy ?
-        formatPriceDown(amount, state.baseToken) : formatPriceUp(amount, state.baseToken)
-      ) : undefined,
   };
 }
 
