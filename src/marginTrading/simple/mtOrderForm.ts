@@ -305,9 +305,14 @@ function validate(state: MTSimpleFormState): MTSimpleFormState {
 
     if (state.orderbook) {
       const offers = state.kind === OfferType.buy ? state.orderbook.sell : state.orderbook.buy;
-      const [isSellable, , , reason] = sellable(
-        baseAsset, offers, state.amount || baseAsset.availableBalance
-      );
+
+      let isSellable = true;
+      let reason = null;
+      if (baseAsset.debt.lt(zero)) {
+        [isSellable, , , reason] = sellable(
+          baseAsset, offers, state.amount || baseAsset.availableBalance
+        );
+      }
 
       const maxToSell = maxSellable(baseAsset, offers);
 
