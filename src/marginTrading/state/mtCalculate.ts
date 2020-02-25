@@ -56,7 +56,7 @@ export function realPurchasingPowerMarginable(
     // availableDebt = amount * referencePrice / safeCollRatio - debt
     const availableDebt = amount.times(ma.referencePrice).div(ma.safeCollRatio).minus(debt);
 
-    if (first && availableDebt.lte(dust)) {
+    if (first && availableDebt.lte(dust) && (ma.debt.eq(0) || ma.debt.plus(availableDebt).lt(20))) {
       return [true, zero];
     }
 
