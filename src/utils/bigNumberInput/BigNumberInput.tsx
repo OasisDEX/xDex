@@ -45,6 +45,7 @@ export class BigNumberInput extends React.Component<any> {
         onChange={this.changed}
         value={value}
         guide={false}
+        defaultValue=""
         pipe={pipe}
       />
     );
