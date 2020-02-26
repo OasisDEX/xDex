@@ -19,6 +19,12 @@
         "internalType": "uint256",
         "name": "maxPayAmount",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "payAmount",
+        "type": "uint256"
       }
     ],
     "name": "BuyLev",
@@ -188,6 +194,12 @@
         "indexed": false,
         "internalType": "uint256",
         "name": "minPayAmount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "payAmount",
         "type": "uint256"
       }
     ],
@@ -546,7 +558,7 @@
       },
       {
         "internalType": "uint256",
-        "name": "amount",
+        "name": "origSellAmount",
         "type": "uint256"
       },
       {
