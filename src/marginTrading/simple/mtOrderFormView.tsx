@@ -524,11 +524,15 @@ export class MtSimpleOrderFormBody
 
   private leverage() {
     const { leverage, leveragePost } = this.props;
-
-    const leverageDisplay = leverage
+    const leverageDisplay = leverage && leverage.gt(zero)
       ? leverage
       : leveragePost
-        ? zero : minusOne;
+        ? zero
+        : minusOne;
+
+    const leveragePostDisplay = leveragePost && leveragePost.gt(zero)
+      ? leveragePost
+      : minusOne;
     return (
       <div className={classnames(
         styles.orderSummaryRow,
@@ -540,19 +544,21 @@ export class MtSimpleOrderFormBody
         </div>
         <div className={styles.orderSummaryValue}>
           {
-            leverageDisplay.gte(zero) ?
-              <>{ formatPrecision(leverageDisplay, 1) }x</>
+            leverageDisplay.gt(zero)
+              ? <>{ formatPrecision(leverageDisplay, 1) }x</>
               : <span>-</span>
           }
-          { this.props.leveragePost &&
-          <>
-            <span className={styles.transitionArrow}/>
-            { this.props.leveragePost ?
-              <>
-                {formatPrecision(this.props.leveragePost, 1)}x
-              </> : <span>-</span>
-            }
-          </>
+          {
+            leveragePost && <>
+              <span className={styles.transitionArrow}/>
+              {
+                leveragePostDisplay.gte(zero)
+                  ? <>
+                      {formatPrecision(leveragePostDisplay, 1)}x
+                  </>
+                  : <span>-</span>
+              }
+            </>
           }
         </div>
       </div>

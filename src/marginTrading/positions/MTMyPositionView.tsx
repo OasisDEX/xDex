@@ -172,6 +172,7 @@ export class MTMyPositionView extends
         ? ma.markPrice.times(daiPrice)
         : undefined
       : ma.osmPriceNext;
+
     return (
       <div>
         <div className={styles.MTPositionPanel}>
@@ -181,7 +182,11 @@ export class MTMyPositionView extends
                 Leverage
               </div>
               <div className={styles.summaryValue}>
-                Long - {formatPrecision(leverage, 1)}x
+                {
+                  leverage.gt(zero)
+                    ? <> Long - {formatPrecision(leverage, 1)}x</>
+                    : <span>-</span>
+                }
               </div>
             </div>
             <div className={styles.summaryRow}>
