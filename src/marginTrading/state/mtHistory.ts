@@ -31,6 +31,8 @@ export function createRawMTHistoryFromCache(
           ilk
           amount
           payAmount
+          minPayAmount
+          maxPayAmount
           dgem
           ddai
           auctionId
@@ -58,6 +60,8 @@ export function createRawMTHistoryFromCache(
         ilk,
         amount,
         payAmount,
+        minPayAmount,
+        maxPayAmount,
         dgem,
         ddai,
         auctionId,
@@ -71,7 +75,9 @@ export function createRawMTHistoryFromCache(
         ilk,
         timestamp,
         amount: new BigNumber(amount),
-        payAmount: new BigNumber(payAmount),
+        payAmount: payAmount ? new BigNumber(payAmount) : undefined,
+        maxPayAmount: maxPayAmount ? new BigNumber(maxPayAmount) : undefined,
+        minPayAmount: minPayAmount ? new BigNumber(minPayAmount) : undefined,
         dgem:  new BigNumber(dgem),
         ddai:  new BigNumber(ddai),
         auctionId: new BigNumber(auctionId),
@@ -81,9 +87,8 @@ export function createRawMTHistoryFromCache(
         tab: new BigNumber(tab),
         kind: type,
         token: ilk,
-        price: new BigNumber(price),
+        price: price ? new BigNumber(price) : undefined,
       })),
     ),
-    // tap(x => console.log(token, context.ilks[token], x))
   );
 }
