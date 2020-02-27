@@ -72,48 +72,6 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
               </thead>
               <tbody>
               { this.props.history.map((e, i) => {
-                // const liquidationEvents = [
-                //     MTHistoryEventKind.bite,
-                //     MTHistoryEventKind.kick,
-                //     MTHistoryEventKind.dent,
-                //     MTHistoryEventKind.tend,
-                //     MTHistoryEventKind.deal,
-                //     MTHistoryEventKind.redeem,
-                //   ];
-
-                // if (liquidationEvents.indexOf(e.kind) >= 0) {
-                //     const { lot, bid, tab, amount } = e as any;
-                //
-                //     // if (e.kind === MTHistoryEventKind.bite) {
-                //     //   e.dAmount = lot.times(-1);
-                //     // }
-                //
-                //     // return <tr key={i}>
-                //     //   <td className={classnames(styles.eventName, styles.cellLeftAligned)}>
-                //     //     {e.kind}
-                //     //   </td>
-                //     //   <td colSpan={5}>
-                //     //     {lot && <>
-                //     //         lot: <FormatAmount value={lot} token={e.token} fallback={''} />;
-                //     //     </>}
-                //     //     {bid && <>
-                //     //         bid: <FormatAmount value={bid} token={'DAI'} fallback={''} />;
-                //     //     </>}
-                //     //     {tab && <>
-                //     //         tab: <FormatAmount value={tab} token={'DAI'} fallback={''} />;
-                //     //     </>}
-                //     //     {amount && <>
-                //     //         amount:
-                // <FormatAmount value={amount} token={e.token} fallback={''} />;
-                //     //     </>}
-                //     //   </td>
-                //     //   <td>
-                //     //     <InfoLabel>
-                //     //       { formatDateTime(new Date(e.timestamp), true) }
-                //     //     </InfoLabel>
-                //     //   </td>
-                //     // </tr>;
-                //   }
                 let sign = '';
                 let DAIsign = '';
                 const dAmount = e.dAmount ? e.dAmount : zero;
