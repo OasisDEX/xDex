@@ -11,18 +11,14 @@ import { BigNumberInput } from '../../utils/bigNumberInput/BigNumberInput';
 import { FormChangeKind, ProgressStage } from '../../utils/form';
 import { formatAmount } from '../../utils/formatters/format';
 import { Money } from '../../utils/formatters/Formatters';
-import { Button, CloseButton } from '../../utils/forms/Buttons';
+import { Button } from '../../utils/forms/Buttons';
 import { ErrorMessage } from '../../utils/forms/ErrorMessage';
 import { InputGroup, InputGroupAddon } from '../../utils/forms/InputGroup';
 import { GasCost } from '../../utils/gasCost/GasCost';
 import { BorderBox, Hr } from '../../utils/layout/LayoutHelpers';
 import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
 import { ModalProps } from '../../utils/modal';
-<<<<<<< HEAD
 import { Panel, PanelBody, PanelFooter, PanelHeader } from '../../utils/panel/Panel';
-=======
-import { Panel, PanelBody, PanelFooter } from '../../utils/panel/Panel';
->>>>>>> Add basic E2E test scenarios for sellLev and sellBuy
 import { Muted } from '../../utils/text/Text';
 import { TransactionStateDescription } from '../../utils/text/TransactionStateDescription';
 import { zero } from '../../utils/zero';
