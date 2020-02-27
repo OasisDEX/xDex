@@ -638,7 +638,10 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
       case MessageKind.minDebt:
         return `Dai debt below ${msg.message} limit`;
       case MessageKind.purchasingPowerEqZero:
-        return `Postfund purchasing power should be greater than zero`;
+        return <div style={{ marginTop: '8px' }}>
+                  Postfund purchasing power should be greater than zero.<br/>
+                  Min amount to deposit is {msg.minDepositAmount.toPrecision(4, 2)} {msg.token}.
+               </div>;
     }
   }
 }

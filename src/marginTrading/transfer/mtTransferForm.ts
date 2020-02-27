@@ -56,8 +56,7 @@ export enum MessageKind {
 export type Message = {
   kind: MessageKind.insufficientAmount |
     MessageKind.insufficientAvailableAmount |
-    MessageKind.dustAmount |
-    MessageKind.purchasingPowerEqZero
+    MessageKind.dustAmount
 } | {
   kind: MessageKind.impossibleToPlan;
   message: string;
@@ -65,6 +64,10 @@ export type Message = {
   kind: MessageKind.minDebt;
   field?: string;
   message: string;
+} | {
+  kind: MessageKind.purchasingPowerEqZero,
+  minDepositAmount: BigNumber,
+  token: string;
 };
 
 export type ManualChange = TokenChange | AmountFieldChange | IlkFieldChange;
@@ -524,10 +527,6 @@ function validate(state: MTTransferFormState) {
     }
   }
 
-  if (state.withOnboarding && state.realPurchasingPowerPost?.eq(zero)) {
-    messages.push({ kind: MessageKind.purchasingPowerEqZero, });
-  }
-
   return {
     ...state,
     messages,
@@ -535,14 +534,41 @@ function validate(state: MTTransferFormState) {
 }
 
 function validatePurchasingPower(state: MTTransferFormState) {
-  const messages: Message[] = [...state.messages];
+  const {
+    actionKind,
+    amount,
+    realPurchasingPowerPost,
+    token,
+    ilk,
+    mta,
+    messages,
+    orderbook
+  } = state;
+
+  const ma = findMarginableAsset(token === 'DAI' && ilk || token, mta);
+
+  let minDepositAmount  = ma?.minDebt
+    .dividedBy(ma.referencePrice)
+    .times(ma.safeCollRatio) || zero;
+
+  const firstSellOrder = orderbook?.sell[0];
+
+  if (token === 'DAI') {
+    minDepositAmount = firstSellOrder
+      ? minDepositAmount.times(firstSellOrder.price)
+      : zero;
+  }
 
   if (
-    state.withOnboarding &&
-    state.amount?.gt(zero) &&
-    state.realPurchasingPowerPost?.eq(zero)
+    actionKind === UserActionKind.fund &&
+    amount?.gt(zero) &&
+    realPurchasingPowerPost?.eq(zero)
   ) {
-    messages.push({ kind: MessageKind.purchasingPowerEqZero, });
+    messages.push({
+      token,
+      minDepositAmount,
+      kind: MessageKind.purchasingPowerEqZero,
+    });
   }
 
   return {
