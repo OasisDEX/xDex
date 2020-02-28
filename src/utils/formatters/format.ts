@@ -60,11 +60,13 @@ export function formatCryptoBalance(amount: BigNumber): string {
   return formatAsShorthandNumbers(amount, 2);
 }
 
-export function formatFiatBalances(amount: BigNumber): string {
+export function formatFiatBalance(amount: BigNumber): string {
   const absAmount = amount.absoluteValue();
 
   if (absAmount.eq(zero)) return formatAsShorthandNumbers(amount, 2);
   if (absAmount.lt(one)) return formatAsShorthandNumbers(amount, 4);
+  // We don't want to have numbers like 999999 formatted as 999.99k
+  if (absAmount.lt(million)) return toShorthandNumber(amount, '', 2);
   return formatAsShorthandNumbers(amount, 2);
 }
 
