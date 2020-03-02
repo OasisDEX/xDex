@@ -4,7 +4,7 @@ import { setupFakeWeb3ForTesting } from '../../blockchain/web3';
 import { fakeOrderbook } from '../../exchange/depthChart/depthchart.test';
 setupFakeWeb3ForTesting();
 
-import { Orderbook } from '../../exchange/orderbook/orderbook';
+// import { Orderbook } from '../../exchange/orderbook/orderbook';
 import { isImpossible } from '../../utils/impossible';
 import { one, zero } from '../../utils/zero';
 import { CashAssetCore, MarginableAssetCore, MTAccount } from './mtAccount';
@@ -16,7 +16,7 @@ import {
 import {
   dai100,
   rawHistoryBuy,
-  rawHistoryBuySell,
+  rawHistoryBuySell, sell1, sell2, sell3,
   sellOffers,
   sellOffersShort,
   weth1dai100,
@@ -148,50 +148,89 @@ test('weth, dgx and mkr, no debt', () => {
   expect(mta.totalDebt).toEqual(zero);
 });
 
-test('Purchasing power marginable', () => {
-  const [, purchasingPower] = realPurchasingPowerMarginable(
-    calculateMarginable(
-      weth2,
-      { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook),
-    sellOffers
-  );
-  expect(purchasingPower).toEqual(new BigNumber(299.981689453125));
-});
+describe('Purchasing power marginable', () => {
 
-test('Purchasing power marginable - shallow orderbook', () => {
-  const [, purchasingPower] = realPurchasingPowerMarginable(
-    calculateMarginable(
-      weth2,
-      { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook),
-    sellOffersShort
-  );
-  expect(purchasingPower).toEqual(new BigNumber(299.981689453125));
-});
+  test('Collateral only', () => {
+    const [, purchasingPower] = realPurchasingPowerMarginable(
+      calculateMarginable(weth2, fakeOrderbook),
+      sellOffers
+    );
+    expect(purchasingPower).toEqual(new BigNumber(299.981689453125));
+  });
 
-test('Purchasing power marginable - cash only', () => {
-  const [, purchasingPower] = realPurchasingPowerMarginable(
-    calculateMarginable(
-      dai100,
-      { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook),
-    sellOffers
-  );
-  expect(isImpossible(purchasingPower)).toBeFalsy();
-  if (!isImpossible(purchasingPower)) {
-    expect(purchasingPower.toFixed(0)).toEqual(new BigNumber(150).toFixed());
-  }
-});
+  test('Shallow orderbook', () => {
+    const [, purchasingPower] = realPurchasingPowerMarginable(
+      calculateMarginable(weth2, fakeOrderbook),
+      sellOffersShort
+    );
+    expect(purchasingPower).toEqual(new BigNumber(299.981689453125));
+  });
 
-test('Purchasing power marginable - cash + collateral', () => {
-  const [, purchasingPower] = realPurchasingPowerMarginable(
-    calculateMarginable(
-      weth1dai100,
-      { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook),
-    sellOffers
-  );
-  expect(isImpossible(purchasingPower)).toBeFalsy();
-  if (!isImpossible(purchasingPower)) {
-    expect(purchasingPower.toFixed(0)).toEqual(new BigNumber(300).toFixed());
-  }
+  test('Cash only', () => {
+    const [, purchasingPower] = realPurchasingPowerMarginable(
+      calculateMarginable(dai100, fakeOrderbook),
+      sellOffers
+    );
+    expect(isImpossible(purchasingPower)).toBeFalsy();
+    if (!isImpossible(purchasingPower)) {
+      expect(purchasingPower.toFixed(0)).toEqual(new BigNumber(150).toFixed());
+    }
+  });
+
+  test('A bit of cash only', () => {
+    const [, purchasingPower] = realPurchasingPowerMarginable(
+      calculateMarginable(
+      { ...dai100, referencePrice: new BigNumber('300'), dai: new BigNumber('5') },
+      fakeOrderbook
+      ),
+      sellOffers
+    );
+    expect(isImpossible(purchasingPower)).toBeFalsy();
+    if (!isImpossible(purchasingPower)) {
+      expect(purchasingPower.toFixed(0)).toEqual(new BigNumber(5).toFixed());
+    }
+  });
+
+  test('A bit of cash only 2', () => {
+    const [, purchasingPower] = realPurchasingPowerMarginable(
+      calculateMarginable(
+        { ...dai100, referencePrice: new BigNumber('300'), dai: new BigNumber('20') },
+        fakeOrderbook
+      ),
+      sellOffers
+    );
+    expect(isImpossible(purchasingPower)).toBeFalsy();
+    if (!isImpossible(purchasingPower)) {
+      expect(purchasingPower.toFixed(0)).toEqual(new BigNumber(20).toFixed());
+    }
+  });
+
+  test('A bit of cash only 3', () => {
+    const [, purchasingPower] = realPurchasingPowerMarginable(
+      calculateMarginable(
+        { ...dai100, referencePrice: new BigNumber('300'), dai: new BigNumber('31') },
+        fakeOrderbook
+      ),
+      // sellOffers
+      [sell1, sell1, sell1, sell1, sell2, sell3]
+    );
+
+    expect(isImpossible(purchasingPower)).toBeFalsy();
+    if (!isImpossible(purchasingPower)) {
+      expect(purchasingPower.toFixed(0)).toEqual(new BigNumber(62).toFixed());
+    }
+  });
+
+  test('Cash + collateral', () => {
+    const [, purchasingPower] = realPurchasingPowerMarginable(
+      calculateMarginable(weth1dai100, fakeOrderbook),
+      sellOffers
+    );
+    expect(isImpossible(purchasingPower)).toBeFalsy();
+    if (!isImpossible(purchasingPower)) {
+      expect(purchasingPower.toFixed(0)).toEqual(new BigNumber(300).toFixed());
+    }
+  });
 });
 
 test('Events history - BuyLev', () => {

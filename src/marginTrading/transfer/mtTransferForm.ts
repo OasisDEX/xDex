@@ -657,7 +657,6 @@ export function createMTTransferForm$(
   };
 
   return merge(
-    of({ token, stage: FormChangeKind.tokenChange }),
     manualChange$,
     environmentChange$,
     transferProgressChange$,
