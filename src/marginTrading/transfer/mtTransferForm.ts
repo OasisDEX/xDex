@@ -55,9 +55,11 @@ export enum MessageKind {
 
 export type Message = {
   kind: MessageKind.insufficientAmount |
-    MessageKind.insufficientAvailableAmount |
     MessageKind.dustAmount
 } | {
+  kind: MessageKind.insufficientAvailableAmount;
+  message: string;
+}| {
   kind: MessageKind.impossibleToPlan;
   message: string;
 } | {
@@ -511,6 +513,7 @@ function validate(state: MTTransferFormState) {
     ) {
       messages.push({
         kind: MessageKind.insufficientAvailableAmount,
+        message: state.token === 'DAI' ? 'balance' : 'free collateral'
       });
       // } else if (state.actionKind === UserActionKind.draw &&
       //   asset && asset.assetKind === AssetKind.nonMarginable &&
