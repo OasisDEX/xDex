@@ -2,9 +2,9 @@ import * as React from 'react';
 
 import { MTAccount, MTAccountState } from '../marginTrading/state/mtAccount';
 import {
-  CryptoAmount,
-  FiatAmount,
   FormatAmount,
+  FormatCrypto,
+  FormatFiat,
   FormatPercent
 } from '../utils/formatters/Formatters';
 import { Panel, PanelHeader } from '../utils/panel/Panel';
@@ -54,13 +54,13 @@ export class MtAccountDetailsView
                 <td className={styles.left}><Currency value={ma.name} /></td>
                 <td><FormatAmount value={ma.balance} token={ma.name} /></td>
                 <td><FormatAmount value={ma.referencePrice} token="DAI" /></td>
-                <td><FiatAmount value={ma.balanceInCash}
+                <td><FormatFiat value={ma.balanceInCash}
+                                token="DAI"/>
+                </td>
+                <td><FormatCrypto value={ma.debt}
                                   token="DAI"/>
                 </td>
-                <td><CryptoAmount value={ma.debt}
-                                  token="DAI"/>
-                </td>
-                <td><CryptoAmount value={ma.availableDebt}
+                <td><FormatCrypto value={ma.availableDebt}
                                   token="DAI"/>
                 </td>
                 <td><FormatPercent value={ma.currentCollRatio} multiply={true} fallback="-"/></td>

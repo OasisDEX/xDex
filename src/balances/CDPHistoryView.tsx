@@ -4,7 +4,7 @@ import * as ReactModal from 'react-modal';
 import classnames from 'classnames';
 import { MarginableAsset, MTHistoryEventKind } from '../marginTrading/state/mtAccount';
 import { formatDateTime } from '../utils/formatters/format';
-import { CryptoAmount, FiatAmount } from '../utils/formatters/Formatters';
+import { FormatCrypto, FormatFiat } from '../utils/formatters/Formatters';
 import { Button } from '../utils/forms/Buttons';
 import { ModalProps } from '../utils/modal';
 import { Panel, PanelFooter, PanelHeader } from '../utils/panel/Panel';
@@ -135,13 +135,13 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
                     }>{displayName}</td>
                     <td>{
                       price
-                        ? <CryptoAmount value={price}
+                        ? <FormatCrypto value={price}
                                         token="DAI"/>
                         : <span>-</span>
                     }</td>
                     <td>
                       <>
-                        {sign}  <FiatAmount value={dAmount}
+                        {sign}  <FormatFiat value={dAmount}
                                             token={e.token}
                                 />
                       </>
@@ -150,23 +150,23 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
                       {
                         e.redeemable &&
                         <>
-                          <CryptoAmount value={e.redeemable} token={e.token} />
+                          <FormatCrypto value={e.redeemable} token={e.token} />
                         </>
                       }
                     </td>
                     <td>
                       <>
-                        {DAIsign} <FiatAmount value={dDAIAmount} token="DAI" />
+                        {DAIsign} <FormatFiat value={dDAIAmount} token="DAI" />
                       </>
                     </td>
                     <td>
                       <>
-                        <FiatAmount value={debtDelta} token="DAI" />
+                        <FormatFiat value={debtDelta} token="DAI" />
                       </>
                     </td>
                     <td>
                       <>
-                        <FiatAmount value={liquidationPriceDelta}
+                        <FormatFiat value={liquidationPriceDelta}
                                     token="USD"/>
                       </>
                     </td>
