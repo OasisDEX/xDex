@@ -12,7 +12,7 @@ import {
   MTMyPositionPanelInternal
 } from '../marginTrading/positions/MTMyPositionPanel';
 import {
-  MarginableAsset, UserActionKind
+  MarginableAsset, MTAccountState, UserActionKind
 } from '../marginTrading/state/mtAccount';
 import { MTTransferFormState } from '../marginTrading/transfer/mtTransferForm';
 import { formatAmount, formatCryptoBalance, formatPercent } from '../utils/formatters/format';
@@ -53,7 +53,7 @@ export class MTBalancesView
         <PanelHeader>Leverage Account</PanelHeader>
         <WithLoadingIndicator loadable={this.props}>
           {(combinedBalances) => (
-            combinedBalances.ma ?
+            combinedBalances.ma && combinedBalances.mta.state === MTAccountState.setup ?
             <MTMyPositionPanelInternal
               {...{
                 open: props.open,
@@ -127,7 +127,10 @@ export class MTBalancesViewInternal
             const asset: MarginableAsset = combinedBalance.asset!;
             return (
               <tr
-                onClick={() => this.props.selectMa(asset)}
+                onClick={() =>
+                  this.props.mta.state === MTAccountState.setup &&
+                  this.props.selectMa(asset)
+                }
                 data-test-id={`${combinedBalance.name}-overview`}
                 key={combinedBalance.name}
               >
