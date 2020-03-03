@@ -1,6 +1,6 @@
 import { BigNumber } from 'bignumber.js';
 import { billion, million, thousand, zero } from '../zero';
-import { formatAsShorthandNumbers, formatCryptoBalance, formatFiatBalances } from './format';
+import { formatAsShorthandNumbers, formatCryptoBalance, formatFiatBalance } from './format';
 
 describe('Formatting numbers as shorthand ones', () => {
   beforeEach(() => {
@@ -224,59 +224,59 @@ describe('Formatting crypto balances according to number formatting spec', () =>
 describe('Formatting fiat balances according to number formattic spec', () => {
   it('should format number with precision 4', () => {
     const amount = new BigNumber(0.991235);
-    expect(formatFiatBalances(amount)).toBe('0.9912');
+    expect(formatFiatBalance(amount)).toBe('0.9912');
   });
 
   it('should format number with precision 4 (negative number)', () => {
     const amount = new BigNumber(-0.991235);
-    expect(formatFiatBalances(amount)).toBe('-0.9912');
+    expect(formatFiatBalance(amount)).toBe('-0.9912');
   });
 
   it('should format number with precision 2 ', () => {
     const amount = new BigNumber(9.991235);
-    expect(formatFiatBalances(amount)).toBe('9.99');
+    expect(formatFiatBalance(amount)).toBe('9.99');
   });
 
   it('should format number with precision 2 (negative number)', () => {
     const amount = new BigNumber(-9.991235);
-    expect(formatFiatBalances(amount)).toBe('-9.99');
+    expect(formatFiatBalance(amount)).toBe('-9.99');
   });
 
   it('should format number with precision 2 and suffix K', () => {
     const amount = new BigNumber(9.991235).times(thousand);
-    expect(formatFiatBalances(amount)).toBe('9.99K');
+    expect(formatFiatBalance(amount)).toBe('9991.23');
   });
 
   it('should format number with precision 2 and suffix K (negative number)', () => {
     const amount = new BigNumber(-999.991235).times(thousand);
-    expect(formatFiatBalances(amount)).toBe('-999.99K');
+    expect(formatFiatBalance(amount)).toBe('-999991.23');
   });
 
   it('should format number with precision 2 and suffix M', () => {
     const amount = new BigNumber(234.985623423).times(million);
-    expect(formatFiatBalances(amount)).toBe('234.98M');
+    expect(formatFiatBalance(amount)).toBe('234.98M');
   });
 
   it('should format number with precision 2 and suffix M (negative number)', () => {
     const amount = new BigNumber(-234.985623423).times(million);
-    expect(formatFiatBalances(amount)).toBe('-234.98M');
+    expect(formatFiatBalance(amount)).toBe('-234.98M');
   });
 
   it('should format number with precision 2 and suffix B', () => {
     const amount = new BigNumber(1234.12345).times(million);
-    expect(formatFiatBalances(amount)).toBe('1.23B');
+    expect(formatFiatBalance(amount)).toBe('1.23B');
   });
 
   it('should format number with precision 2 and suffix B (negative number)', () => {
     const amount = new BigNumber(-1234.985623423).times(million);
-    expect(formatFiatBalances(amount)).toBe('-1.23B');
+    expect(formatFiatBalance(amount)).toBe('-1.23B');
   });
 
   it('should format zero balance', () => {
     const amount = new BigNumber('0.000000000000').times(billion);
-    expect(formatFiatBalances(amount)).toEqual('0.00');
+    expect(formatFiatBalance(amount)).toEqual('0.00');
 
     const negativeAmount = new BigNumber('-0.000000000000').times(billion);
-    expect(formatFiatBalances(negativeAmount)).toEqual('0.00');
+    expect(formatFiatBalance(negativeAmount)).toEqual('0.00');
   });
 });

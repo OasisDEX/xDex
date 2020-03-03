@@ -4,7 +4,7 @@ import * as ReactModal from 'react-modal';
 import classnames from 'classnames';
 import { MarginableAsset, MTHistoryEventKind } from '../marginTrading/state/mtAccount';
 import { formatDateTime } from '../utils/formatters/format';
-import { FormatAmount } from '../utils/formatters/Formatters';
+import { FormatCrypto, FormatFiat } from '../utils/formatters/Formatters';
 import { Button } from '../utils/forms/Buttons';
 import { ModalProps } from '../utils/modal';
 import { Panel, PanelFooter, PanelHeader } from '../utils/panel/Panel';
@@ -63,7 +63,7 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
                   <span className={styles.headerDark}>Debt</span> DAI
                 </th>
                 <th>
-                  <span className={styles.headerDark}>Liq. Price</span> USD
+                  <span className={styles.headerDark}>Liq. Price</span> (USD)
                 </th>
                 <th>
                   TIME
@@ -126,42 +126,48 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
                     displayName = e.kind;
                 }
 
+                const price = e.priceDai ? e.priceDai : e.price;
+
                 return (
                   <tr key={i}>
                     <td className={
                       classnames(styles.eventName, styles.cellLeftAligned)
                     }>{displayName}</td>
                     <td>{
-                      e.priceDai ? <FormatAmount value={e.priceDai} token="DAI" />
-                        : e.price ? <FormatAmount value={e.price} token="DAI" />
+                      price
+                        ? <FormatCrypto value={price}
+                                        token="DAI"/>
                         : <span>-</span>
                     }</td>
                     <td>
                       <>
-                        {sign} <FormatAmount value={dAmount} token={e.token} />
+                        {sign}  <FormatFiat value={dAmount}
+                                            token={e.token}
+                                />
                       </>
                     </td>
                     <td>
                       {
                         e.redeemable &&
                         <>
-                          <FormatAmount value={e.redeemable} token={e.token} />
+                          <FormatCrypto value={e.redeemable} token={e.token} />
                         </>
                       }
                     </td>
                     <td>
                       <>
-                        {DAIsign} <FormatAmount value={dDAIAmount} token="DAI" />
+                        {DAIsign} <FormatFiat value={dDAIAmount} token="DAI" />
                       </>
                     </td>
                     <td>
                       <>
-                        <FormatAmount value={debtDelta} token="DAI" />
+                        <FormatFiat value={debtDelta} token="DAI" />
                       </>
                     </td>
                     <td>
                       <>
-                        <FormatAmount value={liquidationPriceDelta} token="USD" />
+                        <FormatFiat value={liquidationPriceDelta}
+                                    token="USD"/>
                       </>
                     </td>
                     <td>
