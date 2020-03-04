@@ -140,26 +140,22 @@ export function aggregateMTAccountState(
         orderbooks$(assetNames, loadOrderbook)
       ).pipe(
     map(([balanceResult, rawHistories, osmPrices, osmParams, orderbooks]) => {
-      const marginables = assetNames
-        .filter(token => getToken(token).assetKind === AssetKind.marginable)
-        .map(token => {
-          console.log('Next price', (osmPrices as any)[token].next.toString());
-          console.log('Reference price', balanceResult[token].referencePrice.toString());
-          return getMarginableCore({
-            name: token,
-            assetKind: AssetKind.marginable,
-            balance: balanceResult[token].urnBalance,
-            redeemable: balanceResult[token].marginBalance,
-            ...balanceResult[token],
-            allowance: proxy.options.address !== nullAddress ?
-              balanceResult[token].allowance : false,
-            safeCollRatio: new BigNumber(getToken(token).safeCollRatio as number),
-            osmPriceNext: (osmPrices as any)[token].next,
-            zzz: (osmParams as any)[token] as BigNumber,
-            rawHistory: rawHistories[token],
-            liquidationPenalty: balanceResult[token].liquidationPenalty
-          });
+      const marginables = assetNames.map(token => {
+        return getMarginableCore({
+          name: token,
+          assetKind: AssetKind.marginable,
+          balance: balanceResult[token].urnBalance,
+          redeemable: balanceResult[token].marginBalance,
+          ...balanceResult[token],
+          allowance: proxy.options.address !== nullAddress ?
+            balanceResult[token].allowance : false,
+          safeCollRatio: new BigNumber(getToken(token).safeCollRatio as number),
+          osmPriceNext: (osmPrices as any)[token].next,
+          zzz: (osmParams as any)[token] as BigNumber,
+          rawHistory: rawHistories[token],
+          liquidationPenalty: balanceResult[token].liquidationPenalty
         });
+      });
       return calculateMTAccount(proxy, marginables, daiAllowance, orderbooks);
     })
   );
