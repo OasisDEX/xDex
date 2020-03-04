@@ -513,7 +513,7 @@ function validate(state: MTTransferFormState) {
     ) {
       messages.push({
         kind: MessageKind.insufficientAvailableAmount,
-        token: state.token === 'DAI' ? 'DAI' : 'collateral'
+        token: state.token
       });
       // } else if (state.actionKind === UserActionKind.draw &&
       //   asset && asset.assetKind === AssetKind.nonMarginable &&
