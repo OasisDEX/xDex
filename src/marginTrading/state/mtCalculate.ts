@@ -38,6 +38,9 @@ export function realPurchasingPowerMarginable(
   ma: MarginableAssetCore,
   offers: Offer[]
 ): PurchasingPower {
+
+  // console.log('---------------------------');
+
   let amount = ma.balance;
   let debt = ma.debt;
   let purchasingPower = zero;
@@ -55,12 +58,16 @@ export function realPurchasingPowerMarginable(
     // ergo:
     // availableDebt = amount * referencePrice / safeCollRatio - debt
     let availableDebt = amount.times(ma.referencePrice).div(ma.safeCollRatio).minus(debt);
-    if (first && availableDebt.lte(dust)) {
+    if (first && debt.eq(zero) && availableDebt.lte(dust)) {
       availableDebt = amount.times(ma.referencePrice).div(ma.minCollRatio).minus(debt);
       if (availableDebt.lte(dust)) {
         return [true, purchasingPower];
       }
     }
+    // console.log(
+    //   purchasingPower.toString(), amount.toString(),
+    //   bought.toString(), availableDebt.toString()
+    // );
     debt = debt.plus(availableDebt);
     cash = availableDebt;
     first = false;
