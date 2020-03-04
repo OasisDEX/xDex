@@ -87,7 +87,7 @@ export function sellable(
   const maxI = 10;
   const log: any = [];
 
-  const dust = new BigNumber('20');
+  const dust = ma.minDebt;
 
   if (amount.gt(balance)) {
     return [false, log, amount, 'Balance too low'];
