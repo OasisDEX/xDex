@@ -1,4 +1,7 @@
 import * as React from 'react';
+import { Link } from 'react-router-dom';
+import { AssetKind, getToken, tradingPairs } from '../../blockchain/config';
+import { routerContext } from '../../Main';
 import { LoadableWithTradingPair } from '../../utils/loadable';
 import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
 import { ModalOpenerProps } from '../../utils/modal';
@@ -18,12 +21,34 @@ export class MTSimpleOrderPanel extends React.Component<
   & ModalOpenerProps
 > {
   public render() {
-    if (this.props.tradingPair.quote !== 'DAI') {
+    if (
+      getToken(this.props.tradingPair.base).assetKind !== AssetKind.marginable ||
+      this.props.tradingPair.quote !== 'DAI'
+    ) {
+      const marginablePairs = tradingPairs
+        .filter(
+          ({ base, quote }) => getToken(base).assetKind === AssetKind.marginable && quote === 'DAI'
+        );
+
       return (
         <>
           <PanelHeader>Manage Your Leverage</PanelHeader>
           <PanelBody  className={styles.orderPanel}>
-             Choose a DAI Market to create a position
+            Leverage trading is enabled only on following markets:
+            {marginablePairs.map(({ base, quote }) => (
+              <routerContext.Consumer key={base}>
+                {({ rootUrl }) =>
+                  <>
+                    {marginablePairs.length > 1 && <>, </>}
+                    <Link
+                      to={`${rootUrl}leverage/${base}/${quote}`}
+                      style={{ whiteSpace: 'nowrap' }}>
+                      {base}
+                    </Link>
+                  </>
+                }
+              </routerContext.Consumer>
+            ))}
           </PanelBody>
         </>
       );
