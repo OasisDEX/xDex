@@ -157,8 +157,8 @@ export interface MTSimpleFormState extends HasGasEstimation {
   account?: string;
   isSafePost?: boolean;
   isSafeCollRatio?: boolean;
-  isFirstLevBuy?: boolean;
-  hasRiskCompliance?: boolean;
+  riskComplianceAccepted?: boolean;
+  riskComplianceCurrent?: boolean;
 }
 
 export type ManualChange =
@@ -190,8 +190,8 @@ function applyChange(state: MTSimpleFormState, change: MTFormChange): MTSimpleFo
     case ExternalChangeKind.riskCompliance:
       return {
         ...state,
-        isFirstLevBuy : !change.hasRiskAccepted,
-        hasRiskCompliance: change.hasRiskAccepted
+        riskComplianceAccepted : !change.hasRiskAccepted,
+        riskComplianceCurrent: change.hasRiskAccepted
       };
     case FormChangeKind.amountFieldChange:
       return {
@@ -211,17 +211,17 @@ function applyChange(state: MTSimpleFormState, change: MTFormChange): MTSimpleFo
       };
       return state.amount ? addTotal(state.amount, newState) : newState;
     case FormChangeKind.formResetChange:
-      let isFirstLevBuy = state.isFirstLevBuy;
+      let riskComplianceAccepted = state.riskComplianceAccepted;
 
       if (state.kind === OfferType.buy) {
         localStorage.setItem('ltRiskAccepted', 'true');
-        isFirstLevBuy = true;
+        riskComplianceAccepted = true;
       }
 
       return {
         ...state,
-        isFirstLevBuy,
-        hasRiskCompliance: false,
+        riskComplianceAccepted,
+        riskComplianceCurrent: false,
         price: undefined,
         amount: undefined,
         total: undefined,
@@ -268,7 +268,7 @@ function applyChange(state: MTSimpleFormState, change: MTFormChange): MTSimpleFo
     case FormChangeKind.checkboxChange:
       return {
         ...state,
-        hasRiskCompliance: change.value
+        riskComplianceCurrent: change.value
       };
     default:
       return state;
@@ -911,7 +911,7 @@ function isReadyToProceed(state: MTSimpleFormState): MTSimpleFormState {
     state.plan && !isImpossible(state.plan) && state.plan.length !== 0 &&
     state.gasEstimationStatus === GasEstimationStatus.calculated &&
     state.isSafeCollRatio &&
-    (state.kind === OfferType.buy ? state.hasRiskCompliance : true)
+    (state.kind === OfferType.buy ? state.riskComplianceCurrent : true)
   ) {
     return  { ...state, readyToProceed: true };
   }

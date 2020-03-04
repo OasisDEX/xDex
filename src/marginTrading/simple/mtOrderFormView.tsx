@@ -257,7 +257,7 @@ export class MtSimpleOrderFormBody
   private handlecheckboxChange = () => {
     this.props.change({
       kind: FormChangeKind.checkboxChange,
-      value: !this.props.hasRiskCompliance,
+      value: !this.props.riskComplianceCurrent,
     });
   }
 
@@ -349,26 +349,26 @@ export class MtSimpleOrderFormBody
   )
 
   private riskCompliance = () => {
+    const { riskComplianceAccepted, riskComplianceCurrent , progress, kind } = this.props;
     return (
       <div className={styles.checkbox}>
         {
-          this.props.isFirstLevBuy
-          && this.props.kind === OfferType.buy
+          riskComplianceAccepted
+          && kind === OfferType.buy
           && (
             <Checkbox name="risk-compliance"
-                      checked={this.props.hasRiskCompliance || false}
-                      disabled={ !!this.props.progress }
+                      checked={riskComplianceCurrent || false}
+                      disabled={ !!progress }
                       onChange={this.handlecheckboxChange}
             >
               <span style={{ width: '100%' }}>
                 I understand that this involves the usage of Maker Vaults
-                and the assiciated risks invloved in using the Maker Protocol
+                and the associated risks involved in using the Maker Protocol
               </span>
             </Checkbox>
           )
         }
       </div>
-
     );
   }
   private liquidationPrice() {
