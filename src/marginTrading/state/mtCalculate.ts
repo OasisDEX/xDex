@@ -38,9 +38,6 @@ export function realPurchasingPowerMarginable(
   ma: MarginableAssetCore,
   offers: Offer[]
 ): PurchasingPower {
-
-  // console.log('---------------------------');
-
   let amount = ma.balance;
   let debt = ma.debt;
   let purchasingPower = zero;
@@ -64,10 +61,6 @@ export function realPurchasingPowerMarginable(
         return [true, purchasingPower];
       }
     }
-    // console.log(
-    //   purchasingPower.toString(), amount.toString(),
-    //   bought.toString(), availableDebt.toString()
-    // );
     debt = debt.plus(availableDebt);
     cash = availableDebt;
     first = false;
@@ -250,7 +243,10 @@ export function calculateMTHistoryEvents(
     }
 
     const prevLiquidationPrice = liquidationPrice;
-    liquidationPrice = ma.minCollRatio.times(debt).div(balance);
+
+    liquidationPrice = debt.gt(zero) && balance.gt(zero)
+      ? ma.minCollRatio.times(debt).div(balance)
+      : zero;
 
     if (prevLiquidationPrice.gt(zero) && !liquidationPrice.isEqualTo(prevLiquidationPrice)) {
       const liquidationPriceDelta = prevLiquidationPrice.minus(liquidationPrice).times(minusOne);
