@@ -140,7 +140,7 @@ test('validation -- too big amount for draw DAI', () => {
   expect(unpack(transferForm).gasEstimationStatus).toEqual(GasEstimationStatus.unset);
   expect(unpack(transferForm).messages.length).toEqual(1);
   expect(unpack(transferForm).messages).toEqual([
-    { kind: MessageKind.insufficientAvailableAmount, message: 'balance' },
+    { kind: MessageKind.insufficientAvailableAmount, token: 'balance' },
   ]);
 });
 

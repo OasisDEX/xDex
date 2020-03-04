@@ -58,7 +58,7 @@ export type Message = {
     MessageKind.dustAmount
 } | {
   kind: MessageKind.insufficientAvailableAmount;
-  message: string;
+  token: string;
 }| {
   kind: MessageKind.impossibleToPlan;
   message: string;
@@ -513,7 +513,7 @@ function validate(state: MTTransferFormState) {
     ) {
       messages.push({
         kind: MessageKind.insufficientAvailableAmount,
-        message: state.token === 'DAI' ? 'balance' : 'free collateral'
+        token: state.token === 'DAI' ? 'DAI' : 'collateral'
       });
       // } else if (state.actionKind === UserActionKind.draw &&
       //   asset && asset.assetKind === AssetKind.nonMarginable &&

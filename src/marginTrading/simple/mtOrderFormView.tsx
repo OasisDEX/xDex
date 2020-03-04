@@ -574,7 +574,7 @@ export class MtSimpleOrderFormBody
                   this.props.dustWarning &&
                   <div className={styles.purchasingPowerTooltip}>
                     <WarningTooltip id="purchasing-power-dust"
-                                    text="You don't have purchasing power due to dust limit" />
+                                    text="You don't have purchasing power due to the dust limit" />
                   </div>
                 }
                 {formatPrecision(this.props.realPurchasingPower, 2)}
