@@ -1,8 +1,8 @@
 import { BigNumber } from 'bignumber.js';
 import { curry } from 'lodash';
-import { merge, Observable, of, Subject } from 'rxjs';
+import { interval, merge, Observable, of, Subject } from 'rxjs';
 import { share, shareReplay } from 'rxjs/internal/operators';
-import { first, map, scan, switchMap, takeUntil } from 'rxjs/operators';
+import { distinctUntilChanged, first, map, scan, switchMap, takeUntil } from 'rxjs/operators';
 import { DustLimits } from '../../balances/balances';
 import { Calls, Calls$, ReadCalls$ } from '../../blockchain/calls/calls';
 import { getToken } from '../../blockchain/config';
@@ -12,6 +12,7 @@ import { combineAndMerge } from '../../utils/combineAndMerge';
 import {
   AccountChange,
   AmountFieldChange,
+  CheckboxChange,
   doGasEstimation,
   DustLimitChange,
   EtherPriceUSDChange,
@@ -23,16 +24,16 @@ import {
   KindChange,
   MTAccountChange,
   OrderbookChange,
-  progressChange,
   ProgressChange,
+  progressChange,
   ProgressStage,
-  SetMaxChange,
-  SlippageLimitChange, toAccountChange,
+  SetMaxChange, SlippageLimitChange,
+  toAccountChange,
   toDustLimitChange$,
   toEtherPriceUSDChange,
   toGasPriceChange,
-  toMTAccountChange,
-  toOrderbookChange$, TotalFieldChange,
+  toMTAccountChange, toOrderbookChange$,
+  TotalFieldChange,
   transactionToX
 } from '../../utils/form';
 import { description, Impossible, isImpossible } from '../../utils/impossible';
@@ -105,9 +106,18 @@ export enum ViewKind {
   instantTradeForm = 'instantTradeForm'
 }
 
+export enum ExternalChangeKind {
+  riskCompliance = 'riskCompliance'
+}
+
 export interface ViewChange {
   kind: FormChangeKind.viewChange;
   value: ViewKind;
+}
+
+export interface RiskComplianceChange {
+  kind: ExternalChangeKind.riskCompliance;
+  hasRiskAccepted: boolean;
 }
 
 export interface MTSimpleFormState extends HasGasEstimation {
@@ -147,6 +157,8 @@ export interface MTSimpleFormState extends HasGasEstimation {
   account?: string;
   isSafePost?: boolean;
   isSafeCollRatio?: boolean;
+  isFirstLevBuy?: boolean;
+  hasRiskCompliance?: boolean;
 }
 
 export type ManualChange =
@@ -155,7 +167,8 @@ export type ManualChange =
   SetMaxChange |
   KindChange |
   SlippageLimitChange |
-  ViewChange;
+  ViewChange |
+  CheckboxChange;
 
 export type EnvironmentChange =
   GasPriceChange |
@@ -163,7 +176,8 @@ export type EnvironmentChange =
   OrderbookChange |
   DustLimitChange |
   MTAccountChange |
-  AccountChange;
+  AccountChange |
+  RiskComplianceChange;
 
 export type MTFormChange =
   ManualChange |
@@ -173,6 +187,12 @@ export type MTFormChange =
 
 function applyChange(state: MTSimpleFormState, change: MTFormChange): MTSimpleFormState {
   switch (change.kind) {
+    case ExternalChangeKind.riskCompliance:
+      return {
+        ...state,
+        isFirstLevBuy : !change.hasRiskAccepted,
+        hasRiskCompliance: change.hasRiskAccepted
+      };
     case FormChangeKind.amountFieldChange:
       return {
         ...addTotal(change.value, state),
@@ -191,8 +211,17 @@ function applyChange(state: MTSimpleFormState, change: MTFormChange): MTSimpleFo
       };
       return state.amount ? addTotal(state.amount, newState) : newState;
     case FormChangeKind.formResetChange:
+      let isFirstLevBuy = state.isFirstLevBuy;
+
+      if (state.kind === OfferType.buy) {
+        localStorage.setItem('ltRiskAccepted', 'true');
+        isFirstLevBuy = true;
+      }
+
       return {
         ...state,
+        isFirstLevBuy,
+        hasRiskCompliance: false,
         price: undefined,
         amount: undefined,
         total: undefined,
@@ -235,6 +264,11 @@ function applyChange(state: MTSimpleFormState, change: MTFormChange): MTSimpleFo
       return {
         ...state,
         account: change.value
+      };
+    case FormChangeKind.checkboxChange:
+      return {
+        ...state,
+        hasRiskCompliance: change.value
       };
     default:
       return state;
@@ -876,7 +910,8 @@ function isReadyToProceed(state: MTSimpleFormState): MTSimpleFormState {
     state.messages.length === 0 &&
     state.plan && !isImpossible(state.plan) && state.plan.length !== 0 &&
     state.gasEstimationStatus === GasEstimationStatus.calculated &&
-    state.isSafeCollRatio
+    state.isSafeCollRatio &&
+    (state.kind === OfferType.buy ? state.hasRiskCompliance : true)
   ) {
     return  { ...state, readyToProceed: true };
   }
@@ -946,6 +981,23 @@ export interface MTSimpleOrderFormParams {
   readCalls$: ReadCalls$;
   dustLimits$: Observable<DustLimits>;
   account$: Observable<string|undefined>;
+  riskComplianceCheck$: Observable<boolean>;
+}
+
+export const riskComplianceProbe$ = interval(500).pipe(
+  switchMap(() => of(!!localStorage.getItem('ltRiskAccepted'))),
+  distinctUntilChanged()
+);
+
+function toRiskComplianceChange($riskComplianceCheck$: Observable<boolean>) {
+  return $riskComplianceCheck$.pipe(
+    map(value => (
+      {
+        kind: ExternalChangeKind.riskCompliance,
+        hasRiskAccepted: value
+      }
+    ))
+  );
 }
 
 export function createMTSimpleOrderForm$(
@@ -957,7 +1009,8 @@ export function createMTSimpleOrderForm$(
     calls$,
     readCalls$,
     dustLimits$,
-    account$
+    account$,
+    riskComplianceCheck$
   } : MTSimpleOrderFormParams,
   tradingPair: TradingPair,
   defaults:
@@ -975,6 +1028,7 @@ export function createMTSimpleOrderForm$(
       toOrderbookChange$(orderbook$),
       toDustLimitChange$(dustLimits$, tradingPair.base, tradingPair.quote),
       toAccountChange(account$),
+      toRiskComplianceChange(riskComplianceCheck$)
     ),
     toMTAccountChange(mta$)
   );

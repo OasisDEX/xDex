@@ -26,7 +26,7 @@ export const Checkbox = (props: CheckboxProps) => {
         type="checkbox"
         {...otherProps}
       />
-      <span>{children}</span>
+      <div className={styles.checkboxElement}>{children}</div>
     </label>
   );
 };

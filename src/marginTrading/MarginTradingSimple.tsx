@@ -84,7 +84,7 @@ const Content = (props: any | { parentMatch: string }) => {
         </Panel>
       </FlexLayoutRow>
       <FlexLayoutRow>
-        <Panel style={{ marginRight: '24px', flexGrow: 1, width: '454px', height: '590px' }}>
+        <Panel className={styles.orderFormPanel}>
           <theAppContext.Consumer>
             { ({ MTSimpleOrderPanelRxTx }) => <MTSimpleOrderPanelRxTx /> }
           </theAppContext.Consumer>

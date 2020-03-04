@@ -52,7 +52,8 @@ export enum FormChangeKind {
   slippageLimitChange = 'slippageLimitChange',
   viewChange = 'viewChange',
   accountChange = 'accountChange',
-  ordersChange = 'ordersChange'
+  ordersChange = 'ordersChange',
+  checkboxChange = 'checkboxChange'
 }
 
 export enum OfferMatchType {
@@ -183,6 +184,11 @@ export interface  AccountChange {
 export interface OrdersChange {
   kind: FormChangeKind.ordersChange;
   orders: TradeWithStatus[];
+}
+
+export interface CheckboxChange {
+  kind: FormChangeKind.checkboxChange;
+  value: boolean;
 }
 
 export function progressChange(progress?: ProgressStage): ProgressChange {
