@@ -1,7 +1,7 @@
 import * as React from 'react';
-import {Link} from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { AssetKind, getToken, tradingPairs } from '../../blockchain/config';
-import {routerContext} from '../../Main';
+import { routerContext } from '../../Main';
 import { LoadableWithTradingPair } from '../../utils/loadable';
 import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
 import { ModalOpenerProps } from '../../utils/modal';
@@ -35,7 +35,7 @@ export class MTSimpleOrderPanel extends React.Component<
           <PanelHeader>Manage Your Leverage</PanelHeader>
           <PanelBody  className={styles.orderPanel}>
             Leverage trading is enabled only on following markets:
-            {marginablePairs.map(({ base, quote}) => (
+            {marginablePairs.map(({ base, quote }) => (
               <routerContext.Consumer key={base}>
                 {({ rootUrl }) =>
                   <>
