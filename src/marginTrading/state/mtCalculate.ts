@@ -82,6 +82,11 @@ export function sellable(
 
   const dust = ma.minDebt;
 
+  if (ma.debt.eq(zero)) {
+    const sellResult = sellAll(BigNumber.min(balance, amount), offers);
+    return [true, log, sellResult[0]];
+  }
+
   if (amount.gt(balance)) {
     return [false, log, amount, 'Balance too low'];
   }
@@ -145,8 +150,12 @@ export function maxSellable(ma: MarginableAsset, offers: Offer[]) {
   const result = sellable(ma, offers, max)[0] ? max : min;
 
   // round to the nearest
-  const rounded = new BigNumber(result.times(ma.referencePrice).toFixed(2))
-      .div(ma.referencePrice);
+  const rounded =
+    BigNumber.min(
+      ma.balance,
+      new BigNumber(result.times(ma.referencePrice).toFixed(2))
+        .div(ma.referencePrice)
+    );
 
   return sellable(ma, offers, rounded)[0] ? rounded : result;
 
