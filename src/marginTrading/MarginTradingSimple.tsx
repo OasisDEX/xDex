@@ -11,6 +11,7 @@ import { connect } from '../utils/connect';
 import { FlexLayoutRow } from '../utils/layout/FlexLayoutRow';
 import { Panel } from '../utils/panel/Panel';
 
+import { Banner } from 'src/landingPage/Banner';
 import * as styles from './MarginTradingSimple.scss';
 
 export interface MarginTradingOwnProps {
@@ -19,6 +20,12 @@ export interface MarginTradingOwnProps {
 }
 
 export type MarginTradingProps = RouteComponentProps<any> & MarginTradingOwnProps;
+
+const bannerStyle: React.CSSProperties = {
+  width: '85%',
+  textAlign: 'center',
+  margin: 'auto',
+};
 
 const Content = (props: any | { parentMatch: string }) => {
   const {
@@ -31,6 +38,17 @@ const Content = (props: any | { parentMatch: string }) => {
 
   return (
     <div>
+      <div style={{ marginBottom: '1.75rem' }}>
+        <Banner content={
+                <div style={bannerStyle}>
+                  You are currently accessing a <strong>beta version</strong> of Oasis Trade.
+                  This includes an early access to Leverage Trading, which may
+                  contain bugs and usability issues.
+                  Please use this feature with caution.
+                </div>
+                }
+                theme="warning"/>
+      </div>
       <FlexLayoutRow>
         <Panel className={styles.tradingPairPanel}>
           <theAppContext.Consumer>
@@ -66,7 +84,7 @@ const Content = (props: any | { parentMatch: string }) => {
         </Panel>
       </FlexLayoutRow>
       <FlexLayoutRow>
-        <Panel style={{ marginRight: '24px', flexGrow: 1, width: '454px', height: '590px' }}>
+        <Panel className={styles.orderFormPanel}>
           <theAppContext.Consumer>
             { ({ MTSimpleOrderPanelRxTx }) => <MTSimpleOrderPanelRxTx /> }
           </theAppContext.Consumer>

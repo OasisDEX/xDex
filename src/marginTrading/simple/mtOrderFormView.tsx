@@ -4,6 +4,7 @@ import * as mixpanel from 'mixpanel-browser';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { getToken } from 'src/blockchain/config';
+import { Checkbox } from 'src/utils/forms/Checkbox';
 import { WarningTooltip } from 'src/utils/tooltip/Tooltip';
 import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
 import * as formStyles from '../../exchange/offerMake/OfferMakeForm.scss';
@@ -253,6 +254,13 @@ export class MtSimpleOrderFormBody
       : this.advancedSettings();
   }
 
+  private handlecheckboxChange = () => {
+    this.props.change({
+      kind: FormChangeKind.checkboxChange,
+      value: !this.props.riskComplianceCurrent,
+    });
+  }
+
   private handleSetMax = (
     value: BigNumber,
     kind: FormChangeKind.amountFieldChange | FormChangeKind.totalFieldChange
@@ -305,6 +313,7 @@ export class MtSimpleOrderFormBody
           <Hr color="dark" className={styles.hrMargin}/>
           {this.amount()}
           {this.total()}
+          {this.riskCompliance()}
           {this.proceedButton()}
         </form>
       </>
@@ -339,6 +348,29 @@ export class MtSimpleOrderFormBody
     </>
   )
 
+  private riskCompliance = () => {
+    const { riskComplianceAccepted, riskComplianceCurrent , progress, kind } = this.props;
+    return (
+      <div className={styles.checkbox}>
+        {
+          riskComplianceAccepted
+          && kind === OfferType.buy
+          && (
+            <Checkbox name="risk-compliance"
+                      checked={riskComplianceCurrent || false}
+                      disabled={ !!progress }
+                      onChange={this.handlecheckboxChange}
+            >
+              <span style={{ width: '100%' }}>
+                I understand that this involves the usage of Maker Vaults
+                and the associated risks involved in using the Maker Protocol
+              </span>
+            </Checkbox>
+          )
+        }
+      </div>
+    );
+  }
   private liquidationPrice() {
     const liquidationPrice = this.props.liquidationPrice ?
       this.props.liquidationPrice : zero;
