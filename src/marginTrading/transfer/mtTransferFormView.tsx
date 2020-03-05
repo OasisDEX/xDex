@@ -43,7 +43,6 @@ import {
 } from './mtTransferForm';
 import * as styles from './mtTransferFormView.scss';
 import { SvgImage } from 'src/utils/icons/utils';
-import { hidden } from 'src/exchange/depthChart/DepthChartView.scss';
 
 type MTFundFormProps = MTTransferFormState & ModalProps;
 
@@ -181,6 +180,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
                       title="Deploy proxy"
                       description={`Proxies are used to bundle multiple transactions into one,
                 saving transaction time and gas costs. This only has to be done once.`}
+                      tid="create-proxy"
                       btnLabel="Deploy Proxy"
                       btnAction={() => this.setup()}
                       btnDisabled={mta.proxy && mta.proxy.options.address !== nullAddress}
@@ -192,6 +192,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
                       description={`This permission allows Oasis smart contracts
                    to interact with your ${token}.
                    This has to be done for each asset type.`}
+                      tid="set-allowance"
                       btnLabel="Set allowance"
                       btnAction={() => this.allowance()}
                       isLoading={isLoading}
@@ -522,7 +523,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
         {deposit &&
         <Button size="md"
                 className={styles.confirmButton}
-                data-test-id={`${proceedName.toLowerCase()}-btn`}
+                data-test-id="deposit-btn"
                 disabled={!depositEnabled}
                 block={true}
                 color="primary"

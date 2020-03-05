@@ -11,13 +11,13 @@ import {
 import {
   AmountFieldChange,
   BalancesChange, doGasEstimation, EtherPriceUSDChange,
-  FormChangeKind, FormResetChange,
-  GasEstimationStatus, GasPriceChange,
-  HasGasEstimation, MTAccountChange, MTAccountStateChange,
-  OrderbookChange, ProgressChange, progressChange,
-  ProgressStage, toBalancesChange,
-  toEtherPriceUSDChange, toGasPriceChange,
-  TokenChange, toMTAccountChange, toOrderbookChange$, transactionToX,
+  FormChangeKind, GasEstimationStatus,
+  GasPriceChange, HasGasEstimation,
+  MTAccountChange, MTAccountStateChange, OrderbookChange,
+  progressChange, ProgressChange, ProgressStage,
+  toBalancesChange, toEtherPriceUSDChange,
+  toGasPriceChange, TokenChange,
+  toMTAccountChange, toOrderbookChange$, transactionToX, FormResetChange,
 } from '../../utils/form';
 
 import { curry } from 'ramda';
