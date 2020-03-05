@@ -14,6 +14,7 @@ import {
   MTMyPositionPanelInternal
 } from '../marginTrading/positions/MTMyPositionPanel';
 import {
+  findMarginableAsset,
   MarginableAsset, MTAccountState, UserActionKind
 } from '../marginTrading/state/mtAccount';
 import { MTTransferFormState } from '../marginTrading/transfer/mtTransferForm';
@@ -66,7 +67,7 @@ export class MTBalancesView
                 redeem: props.redeem,
                 transactions: props.transactions,
                 daiAllowance: props.daiAllowance,
-                ma: combinedBalances.ma,
+                ma: findMarginableAsset(combinedBalances.ma.name, combinedBalances.mta)!,
                 mta: combinedBalances.mta,
                 daiPrice: new BigNumber(0)
               }}
