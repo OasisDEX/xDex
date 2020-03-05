@@ -281,25 +281,24 @@ export class MTMyPositionPanelInternal
         Withdraw {ma.name}
       </Button>);
 
-      if (ma.dai.gt(zero)) {
-        actions.push(<Button
-          size="md"
-          className={styles.actionButton}
-          onClick={
-            () => {
-              this.transfer(UserActionKind.draw, 'DAI', ma.name);
-              mixpanel.track('btn-click', {
-                id: 'draw-dai-open',
-                product: 'oasis-trade',
-                page: 'Leverage',
-                section: 'my-position',
-              });
-            }
+      actions.push(<Button
+        size="md"
+        className={styles.actionButton}
+        disabled={ma.dai.eq(zero)}
+        onClick={
+          () => {
+            this.transfer(UserActionKind.draw, 'DAI', ma.name);
+            mixpanel.track('btn-click', {
+              id: 'draw-dai-open',
+              product: 'oasis-trade',
+              page: 'Leverage',
+              section: 'my-position',
+            });
           }
-        >
-          Withdraw DAI
-        </Button>);
-      }
+        }
+      >
+        Withdraw DAI
+      </Button>);
     }
 
     return actions;
