@@ -6,3 +6,5 @@ export const table: string;
 export const headerDark: string;
 export const contentWithScroll: string;
 export const cellLeftAligned: string;
+export const eventPositive: string;
+export const eventNegative: string;

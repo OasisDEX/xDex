@@ -102,6 +102,10 @@ export type MTHistoryEvent = {
   dAmount: BigNumber;
   dDAIAmount: BigNumber;
   price?: BigNumber;
+  auctionId?: BigNumber;
+  balance?: BigNumber;
+  daiBalance?: BigNumber;
+  equity?: BigNumber;
 } & (MTMarginEvent | MTLiquidationEvent);
 
 export type MTMarginEvent = {

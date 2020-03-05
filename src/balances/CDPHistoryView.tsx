@@ -44,83 +44,58 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
           <Table className={styles.table}>
               <thead>
               <tr>
-                <th className={styles.cellLeftAligned}>
-                  TYPE
-                </th>
-                <th>
-                  <span className={styles.headerDark}>Price</span> DAI
-                </th>
-                <th>
-                  <span className={styles.headerDark}>Amount</span> {this.props.name}
-                </th>
-                <th>
-                  <span className={styles.headerDark}>Redeem</span> {this.props.name}
-                </th>
-                <th>
-                  <span className={styles.headerDark}>Total</span> DAI
-                </th>
-                <th>
-                  <span className={styles.headerDark}>Debt</span> DAI
-                </th>
-                <th>
-                  <span className={styles.headerDark}>Liq. Price</span> (USD)
-                </th>
-                <th>
-                  TIME
-                </th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Price</th>
+                <th>Bal</th>
+                <th>DAI Bal</th>
+                <th>Equity (DAI)</th>
+                <th>Liq. Price (USD)</th>
+                <th>Time</th>
               </tr>
               </thead>
               <tbody>
               { this.props.history.map((e, i) => {
-                let sign = '';
-                let DAIsign = '';
                 const dAmount = e.dAmount ? e.dAmount : zero;
                 const dDAIAmount = e.dDAIAmount  ? e.dDAIAmount : zero;
-                const debtDelta = e.debtDelta ? e.debtDelta : zero;
-                const liquidationPriceDelta = e.liquidationPriceDelta ?
-                  e.liquidationPriceDelta : zero;
 
-                if (
-                  e.kind === MTHistoryEventKind.fundGem ||
-                  e.kind === MTHistoryEventKind.drawDai ||
-                  e.kind === MTHistoryEventKind.buyLev ||
-                  e.kind === MTHistoryEventKind.redeem
-                  ) {
-                  sign = '+';
-                  DAIsign = '-';
-                }
-                if (
-                  e.kind === MTHistoryEventKind.drawGem ||
-                  e.kind === MTHistoryEventKind.fundDai ||
-                  e.kind === MTHistoryEventKind.sellLev
-                  ) {
-                  sign = '-';
-                  DAIsign = '+';
-                }
-                if (
-                  e.kind === MTHistoryEventKind.bite
-                ) {
-                  DAIsign = '+';
-                }
-
-                if (dDAIAmount.isEqualTo(zero)) { DAIsign = ''; }
-                if (dAmount.isEqualTo(zero)) { sign = ''; }
-
-                let displayName = '';
+                let displayName: string | React.ReactNode = '';
+                let amount: React.ReactNode = <></>;
                 switch (e.kind) {
                   case MTHistoryEventKind.drawDai:
+                    displayName = 'Withdraw';
+                    amount = <><FormatCrypto value={dDAIAmount} token="DAI" /> DAI</>;
+                    break;
                   case MTHistoryEventKind.drawGem:
+                    amount = <><FormatFiat value={dAmount} token={e.token} /> {e.token}</>;
                     displayName = 'Withdraw';
                     break;
                   case MTHistoryEventKind.fundDai:
+                    amount = <><FormatCrypto value={dDAIAmount} token="DAI" /> DAI</>;
+                    displayName = 'Deposit';
+                    break;
                   case MTHistoryEventKind.fundGem:
+                    amount = <><FormatFiat value={dAmount} token={e.token} /> {e.token}</>;
                     displayName = 'Deposit';
                     break;
                   case MTHistoryEventKind.buyLev:
-                    displayName = 'Buy';
+                    amount = <><FormatFiat value={dAmount} token={e.token} /> {e.token}</>;
+                    displayName = <span className={styles.eventPositive}>Buy</span>;
                     break;
                   case MTHistoryEventKind.sellLev:
-                    displayName = 'Sell';
+                    amount = <><FormatFiat value={dAmount} token={e.token} /> {e.token}</>;
+                    displayName = <span className={styles.eventNegative}>Sell</span>;
+                    break;
+                  case MTHistoryEventKind.bite:
+                    amount = <><FormatFiat value={dAmount} token={e.token} /> {e.token}</>;
+                    displayName = `Grab (#${e.auctionId})`;
+                    break;
+                  case MTHistoryEventKind.deal:
+                    displayName = `Deal (#${e.auctionId})`;
+                    break;
+                  case MTHistoryEventKind.redeem:
+                    amount = <><FormatFiat value={dAmount} token={e.token} /> {e.token}</>;
+                    displayName = `Redeem`;
                     break;
                   default:
                     displayName = e.kind;
@@ -130,44 +105,38 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
 
                 return (
                   <tr key={i}>
-                    <td className={
-                      classnames(styles.eventName, styles.cellLeftAligned)
-                    }>{displayName}</td>
-                    <td>{
-                      price
-                        ? <FormatCrypto value={price}
-                                        token="DAI"/>
-                        : <span>-</span>
-                    }</td>
+                    <td className={classnames(styles.eventName, styles.cellLeftAligned)}>
+                      {displayName}
+                    </td>
                     <td>
-                      <>
-                        {sign}  <FormatFiat value={dAmount}
-                                            token={e.token}
-                                />
-                      </>
+                      {amount}
                     </td>
                     <td>
                       {
-                        e.redeemable &&
-                        <>
-                          <FormatCrypto value={e.redeemable} token={e.token} />
-                        </>
+                      price
+                        ? <FormatCrypto value={price} token="DAI"/>
+                        : <>-</>
+                      }
+                    </td>
+                    <td>{
+                      e.balance &&
+                        <FormatFiat value={e.balance} token={e.token}/>
                       }
                     </td>
                     <td>
-                      <>
-                        {DAIsign} <FormatFiat value={dDAIAmount} token="DAI" />
-                      </>
+                      {e.daiBalance &&
+                        <FormatCrypto value={e.daiBalance} token="DAI"/>
+                      }
                     </td>
                     <td>
-                      <>
-                        <FormatFiat value={debtDelta} token="DAI" />
-                      </>
+                     <FormatCrypto value={e.equity} token="DAI" />
                     </td>
                     <td>
-                      <>
-                        <FormatFiat value={liquidationPriceDelta}
-                                    token="USD"/>
+                      <>{
+                          e.liquidationPrice && e.liquidationPrice.gt(zero)
+                            ? <FormatFiat value={e.liquidationPrice} token="USD"/>
+                            : <>-</>
+                        }
                       </>
                     </td>
                     <td>
@@ -184,21 +153,4 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
       </div>
     );
   }
-
-//   private eventDecription(event: MTHistoryEvent) {
-//     if (event.kind === MTHistoryEventKind.deal) {
-//       return null;
-//     }
-//     return (
-//       <div>
-//       <span>
-//         { (event as any).gem && (event as any).gem.toString() } { event.token }
-//       </span>
-//         <span style={{ marginLeft: '1em' }}>
-//         { (event as any).dai && (event as any).dai.toString() } DAI
-//       </span>
-//       </div>
-//     );
-//   }
-
 }
