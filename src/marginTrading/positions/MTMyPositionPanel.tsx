@@ -5,6 +5,7 @@ import { SvgImage } from '../../utils/icons/utils';
 import { Loadable } from '../../utils/loadable';
 import { ModalOpenerProps, ModalProps } from '../../utils/modal';
 import { Panel, PanelBody, PanelHeader } from '../../utils/panel/Panel';
+import { zero } from '../../utils/zero';
 import {
   MarginableAsset, MTAccount,
   MTAccountState, UserActionKind
@@ -280,23 +281,25 @@ export class MTMyPositionPanelInternal
         Withdraw {ma.name}
       </Button>);
 
-      actions.push(<Button
-        size="md"
-        className={styles.actionButton}
-        onClick={
-          () => {
-            this.transfer(UserActionKind.draw, 'DAI', ma.name);
-            mixpanel.track('btn-click', {
-              id: 'draw-dai-open',
-              product: 'oasis-trade',
-              page: 'Leverage',
-              section: 'my-position',
-            });
+      if (ma.dai.gt(zero)) {
+        actions.push(<Button
+          size="md"
+          className={styles.actionButton}
+          onClick={
+            () => {
+              this.transfer(UserActionKind.draw, 'DAI', ma.name);
+              mixpanel.track('btn-click', {
+                id: 'draw-dai-open',
+                product: 'oasis-trade',
+                page: 'Leverage',
+                section: 'my-position',
+              });
+            }
           }
-        }
-      >
-        Withdraw DAI
-      </Button>);
+        >
+          Withdraw DAI
+        </Button>);
+      }
     }
 
     return actions;
