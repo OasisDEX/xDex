@@ -375,7 +375,7 @@ function addPurchasingPower(state: MTSimpleFormState) {
   return {
     ...state,
     realPurchasingPower,
-    dustWarning: isDust,
+    dustWarning: isDust && baseAsset.debt.eq(zero) && realPurchasingPower.eq(zero)
   };
 }
 

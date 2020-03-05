@@ -55,9 +55,11 @@ export enum MessageKind {
 
 export type Message = {
   kind: MessageKind.insufficientAmount |
-    MessageKind.insufficientAvailableAmount |
     MessageKind.dustAmount
 } | {
+  kind: MessageKind.insufficientAvailableAmount;
+  token: string;
+}| {
   kind: MessageKind.impossibleToPlan;
   message: string;
 } | {
@@ -511,6 +513,7 @@ function validate(state: MTTransferFormState) {
     ) {
       messages.push({
         kind: MessageKind.insufficientAvailableAmount,
+        token: state.token
       });
       // } else if (state.actionKind === UserActionKind.draw &&
       //   asset && asset.assetKind === AssetKind.nonMarginable &&
@@ -525,50 +528,6 @@ function validate(state: MTTransferFormState) {
         kind: MessageKind.insufficientAmount,
       });
     }
-  }
-
-  return {
-    ...state,
-    messages,
-  };
-}
-
-function validatePurchasingPower(state: MTTransferFormState) {
-  const {
-    actionKind,
-    amount,
-    realPurchasingPowerPost,
-    token,
-    ilk,
-    mta,
-    messages,
-    orderbook
-  } = state;
-
-  const ma = findMarginableAsset(token === 'DAI' && ilk || token, mta);
-
-  let minDepositAmount  = ma?.minDebt
-    .dividedBy(ma.referencePrice)
-    .times(ma.safeCollRatio) || zero;
-
-  const firstSellOrder = orderbook?.sell[0];
-
-  if (token === 'DAI') {
-    minDepositAmount = firstSellOrder
-      ? minDepositAmount.times(firstSellOrder.price)
-      : zero;
-  }
-
-  if (
-    actionKind === UserActionKind.fund &&
-    amount?.gt(zero) &&
-    realPurchasingPowerPost?.eq(zero)
-  ) {
-    messages.push({
-      token,
-      minDepositAmount,
-      kind: MessageKind.purchasingPowerEqZero,
-    });
   }
 
   return {
@@ -667,7 +626,6 @@ export function createMTTransferForm$(
     scan(applyChange, initialState),
     map(validate),
     map(updatePlan),
-    map(validatePurchasingPower),
     switchMap(curry(estimateGasPrice)(calls$, readCalls$)),
     map(checkIfIsReadyToProceed),
     scan(freezeIfInProgress),

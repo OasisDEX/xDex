@@ -285,7 +285,7 @@ export class MtSimpleOrderFormBody
     }
 
     return (<div className={styles.summaryBox}>
-      {this.purchasingPower2()}
+      {this.purchasingPower()}
       {this.slippageLimit()}
       {this.stabilityFee()}
       {this.accountBalance()}
@@ -565,7 +565,7 @@ export class MtSimpleOrderFormBody
     );
   }
 
-  private purchasingPower2() {
+  private purchasingPower() {
     return (
       this.props.kind === OfferType.buy ?
         <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
@@ -576,7 +576,13 @@ export class MtSimpleOrderFormBody
             {
               this.props.realPurchasingPower &&
               <>
-                {this.props.dustWarning && <span title="Zero due to dust limit">! </span>}
+                {
+                  this.props.dustWarning &&
+                  <div className={styles.purchasingPowerTooltip}>
+                    <WarningTooltip id="purchasing-power-dust"
+                      text="You don't have purchasing power due to the debt dust limit." />
+                  </div>
+                }
                 {formatPrecision(this.props.realPurchasingPower, 2)}
               </>
             }
