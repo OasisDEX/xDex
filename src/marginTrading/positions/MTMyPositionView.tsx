@@ -181,7 +181,11 @@ export class MTMyPositionView extends
                 Leverage
               </div>
               <div className={styles.summaryValue}>
-                Long - {formatPrecision(leverage, 1)}x
+                {
+                  leverage.gt(zero)
+                    ? <> Long - {formatPrecision(leverage, 1)}x</>
+                    : <span>-</span>
+                }
               </div>
             </div>
             <div className={styles.summaryRow}>

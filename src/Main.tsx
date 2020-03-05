@@ -45,7 +45,7 @@ export class Main extends React.Component {
   }
 }
 
-interface RouterProps extends RouteComponentProps<any> {
+export interface RouterProps extends RouteComponentProps<any> {
 }
 
 export class MainContent extends React.Component<RouterProps> {

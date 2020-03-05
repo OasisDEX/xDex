@@ -1,10 +1,12 @@
 import * as React from 'react';
 
 import { default as BigNumber } from 'bignumber.js';
+import { withRouter } from 'react-router';
 import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
 import { map, switchMap } from 'rxjs/internal/operators';
 import { AssetKind, getToken } from '../blockchain/config';
 import { TxState } from '../blockchain/transactions';
+import { RouterProps } from '../Main';
 import {
   CreateMTAllocateForm$
 } from '../marginTrading/allocate/mtOrderAllocateDebtFormView';
@@ -12,7 +14,7 @@ import {
   MTMyPositionPanelInternal
 } from '../marginTrading/positions/MTMyPositionPanel';
 import {
-  MarginableAsset, UserActionKind
+  MarginableAsset, MTAccountState, UserActionKind
 } from '../marginTrading/state/mtAccount';
 import { MTTransferFormState } from '../marginTrading/transfer/mtTransferForm';
 import { formatAmount, formatCryptoBalance, formatPercent } from '../utils/formatters/format';
@@ -53,7 +55,7 @@ export class MTBalancesView
         <PanelHeader>Leverage Account</PanelHeader>
         <WithLoadingIndicator loadable={this.props}>
           {(combinedBalances) => (
-            combinedBalances.ma ?
+            combinedBalances.ma && combinedBalances.mta.state === MTAccountState.setup ?
             <MTMyPositionPanelInternal
               {...{
                 open: props.open,
@@ -101,8 +103,8 @@ export function createBalancesView$(
   );
 }
 
-export class MTBalancesViewInternal
-  extends React.Component<MTBalancesProps & MTBalancesOwnProps> {
+export class MTBalancesViewInternalImpl
+  extends React.Component<MTBalancesProps & MTBalancesOwnProps & RouterProps> {
 
   public render() {
     return (
@@ -127,7 +129,11 @@ export class MTBalancesViewInternal
             const asset: MarginableAsset = combinedBalance.asset!;
             return (
               <tr
-                onClick={() => this.props.selectMa(asset)}
+                onClick={() =>
+                  this.props.mta.state === MTAccountState.setup ?
+                    this.props.selectMa(asset) :
+                    this.props.history.push(`leverage/${asset.name}/DAI`)
+                }
                 data-test-id={`${combinedBalance.name}-overview`}
                 key={combinedBalance.name}
               >
@@ -165,3 +171,5 @@ export class MTBalancesViewInternal
     );
   }
 }
+
+export const MTBalancesViewInternal = withRouter(MTBalancesViewInternalImpl);

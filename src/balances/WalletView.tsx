@@ -5,7 +5,7 @@ import { Slider } from 'src/utils/forms/Slider';
 import { getToken } from '../blockchain/config';
 import { TxState } from '../blockchain/transactions';
 import { connect } from '../utils/connect';
-import { formatCryptoBalance, formatFiatBalances } from '../utils/formatters/format';
+import { formatCryptoBalance, formatFiatBalance } from '../utils/formatters/format';
 import { FormatAmount } from '../utils/formatters/Formatters';
 import { Button } from '../utils/forms/Buttons';
 import { inject } from '../utils/inject';
@@ -109,7 +109,7 @@ export class WalletViewInternal extends React.Component<CombinedBalances & Walle
                 {
                 combinedBalance.walletBalanceInUSD.eq(minusOne)
                   ? 'N/A'
-                  : `$ ${formatFiatBalances(combinedBalance.walletBalanceInUSD)}`
+                  : `$ ${formatFiatBalance(combinedBalance.walletBalanceInUSD)}`
                 }
               </td>
               <td>

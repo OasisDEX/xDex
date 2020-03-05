@@ -55,7 +55,7 @@ export function realPurchasingPowerMarginable(
     // ergo:
     // availableDebt = amount * referencePrice / safeCollRatio - debt
     let availableDebt = amount.times(ma.referencePrice).div(ma.safeCollRatio).minus(debt);
-    if (first && availableDebt.lte(dust)) {
+    if (first && debt.eq(zero) && availableDebt.lte(dust)) {
       availableDebt = amount.times(ma.referencePrice).div(ma.minCollRatio).minus(debt);
       if (availableDebt.lte(dust)) {
         return [true, purchasingPower];
@@ -80,7 +80,12 @@ export function sellable(
   const maxI = 10;
   const log: any = [];
 
-  const dust = new BigNumber('20');
+  const dust = ma.minDebt;
+
+  if (ma.debt.eq(zero)) {
+    const sellResult = sellAll(BigNumber.min(balance, amount), offers);
+    return [true, log, sellResult[0]];
+  }
 
   if (amount.gt(balance)) {
     return [false, log, amount, 'Balance too low'];
@@ -145,8 +150,12 @@ export function maxSellable(ma: MarginableAsset, offers: Offer[]) {
   const result = sellable(ma, offers, max)[0] ? max : min;
 
   // round to the nearest
-  const rounded = new BigNumber(result.times(ma.referencePrice).toFixed(2))
-      .div(ma.referencePrice);
+  const rounded =
+    BigNumber.min(
+      ma.balance,
+      new BigNumber(result.times(ma.referencePrice).toFixed(2))
+        .div(ma.referencePrice)
+    );
 
   return sellable(ma, offers, rounded)[0] ? rounded : result;
 
@@ -243,7 +252,10 @@ export function calculateMTHistoryEvents(
     }
 
     const prevLiquidationPrice = liquidationPrice;
-    liquidationPrice = debt.gt(zero) ? ma.minCollRatio.times(debt).div(balance) : zero;
+
+    liquidationPrice = debt.gt(zero) && balance.gt(zero)
+      ? ma.minCollRatio.times(debt).div(balance)
+      : zero;
 
     if (prevLiquidationPrice.gte(zero) && !liquidationPrice.isEqualTo(prevLiquidationPrice)) {
       const liquidationPriceDelta = prevLiquidationPrice.minus(liquidationPrice).times(minusOne);

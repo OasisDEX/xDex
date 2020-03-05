@@ -7,6 +7,7 @@ import { zero } from '../zero';
 import {
   formatAmount,
   formatCryptoBalance,
+  formatFiatBalance,
   formatPercent,
   formatPrice,
   formatPriceDown,
@@ -71,6 +72,12 @@ export const FormatPriceOrder: React.SFC<any> = ({ kind, ...props }: any) =>
   kind === 'sell' ?
     <FormatNumber formatter={formatPriceUp} {...props} /> :
     <FormatNumber formatter={formatPriceDown} {...props} />;
+
+export const FormatFiat: React.SFC<any> = ({ ...props }: any) =>
+  <FormatAmount {...props} formatter={amount => formatFiatBalance(amount)}/>;
+
+export const FormatCrypto: React.SFC<any> = ({ ...props }:  any) =>
+  <FormatAmount {...props} formatter={amount => formatCryptoBalance(amount)}/>;
 
 // Format percent
 type FormatPercentProps = React.HTMLAttributes<HTMLSpanElement> & {
