@@ -177,7 +177,6 @@ export function calculateMTHistoryEvents(
   let liquidationPrice = zero;
   let debt = zero;
   let equity = zero;
-  let equityCash = zero;
 
   const events = rawHistory.map(h => {
     let event = { ...h, dAmount: zero, dDAIAmount: zero };
@@ -186,22 +185,18 @@ export function calculateMTHistoryEvents(
     }
     if (h.kind === MTHistoryEventKind.fundDai) {
       cash = cash.plus(h.amount);
-      equityCash = equityCash.plus(h.amount);
       event = { ...h, token: ma.name, dDAIAmount: h.amount };
     }
     if (h.kind === MTHistoryEventKind.fundGem) {
       balance = balance.plus(h.amount);
-      equity = equity.plus(h.amount);
       event = { ...h, token: ma.name, dAmount: h.amount };
     }
     if (h.kind === MTHistoryEventKind.drawGem) {
       balance = balance.minus(h.amount);
-      equity = equity.minus(h.amount);
       event = { ...h, token: ma.name, dAmount: h.amount };
     }
     if (h.kind === MTHistoryEventKind.drawDai) {
       cash = cash.minus(h.amount);
-      equityCash = equityCash.minus(h.amount);
       event = { ...h, token: ma.name, dDAIAmount: h.amount };
     }
     if (h.kind === MTHistoryEventKind.buyLev) {
@@ -216,13 +211,19 @@ export function calculateMTHistoryEvents(
       cash = cash.plus(h.payAmount);
       event = { ...h, priceDai, token: ma.name, dAmount: h.amount, dDAIAmount: h.payAmount };
     }
+    if (h.kind === MTHistoryEventKind.bite) {
+      balance = balance.minus(h.ink);
+      cash = cash.plus(h.tab);
+    }
     if (h.kind === MTHistoryEventKind.dent) {
       const bite: MTLiquidationEvent = findAuctionBite(rawHistory, h.id);
       // @ts-ignore
       event = { ...h, token: ma.name, redeemable: bite.ink.minus(h.lot) };
     }
+
     if (h.kind === MTHistoryEventKind.redeem) {
-      event = { ...h, token: ma.name, redeemable: h.amount.times(minusOne), };
+      balance = balance.plus(h.amount);
+      event = { ...h, token: ma.name, dAmount: h.amount, };
     }
     if (h.kind === MTHistoryEventKind.bite) {
       event = { ...h, token: ma.name, dAmount: h.ink.times(minusOne), dDAIAmount: h.tab };
@@ -259,10 +260,13 @@ export function calculateMTHistoryEvents(
 
     if (prevLiquidationPrice.gte(zero) && !liquidationPrice.isEqualTo(prevLiquidationPrice)) {
       const liquidationPriceDelta = prevLiquidationPrice.minus(liquidationPrice).times(minusOne);
-      event = { ...event, liquidationPriceDelta };
+      event = { ...event, liquidationPriceDelta, liquidationPrice };
     }
 
-    return event;
+    equity = h.price && h.price.gt(zero)
+        ? balance.times(h.price).plus(cash) : zero;
+
+    return { ...event, balance, equity, daiBalance: cash };
   });
 
   return events;
@@ -306,8 +310,8 @@ export function calculateMarginable(
 
   const hiddenEvents = [
     MTHistoryEventKind.adjust,
+    MTHistoryEventKind.dent,
     MTHistoryEventKind.tend,
-    MTHistoryEventKind.deal,
     MTHistoryEventKind.kick,
   ];
 
