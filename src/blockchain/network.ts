@@ -168,7 +168,7 @@ export const tokenPricesInUSD$: Observable<Ticker> = onEveryBlock$.pipe(
   shareReplay(1)
 );
 
-function getPriceFeed(ticker: string): Observable<BigNumber> {
+function getPriceFeed(ticker: string): Observable<BigNumber|undefined> {
   return ajax({
     url: `https://api.coinpaprika.com/v1/tickers/${ticker}/`,
     method: 'GET',
@@ -181,16 +181,20 @@ function getPriceFeed(ticker: string): Observable<BigNumber> {
       console.debug(`Error fetching price data: ${error}`);
       return of(undefined);
     }),
-    distinctUntilChanged((x: BigNumber, y: BigNumber) => x.eq(y)),
-    shareReplay(1),
   );
 }
 
-export const etherPriceUsd$: Observable<BigNumber> = onEveryBlock$.pipe(
-  switchMap(() => getPriceFeed('eth-ethereum'))
+export const etherPriceUsd$: Observable<BigNumber|undefined> = onEveryBlock$.pipe(
+  switchMap(() => getPriceFeed('eth-ethereum')),
+  distinctUntilChanged(
+    (x: BigNumber, y: BigNumber) => x?.eq(y)
+  ),
+  shareReplay(1),
 );
-export const daiPriceUsd$: Observable<BigNumber> = onEveryBlock$.pipe(
-  switchMap(() => getPriceFeed('dai-dai'))
+export const daiPriceUsd$: Observable<BigNumber|undefined> = onEveryBlock$.pipe(
+  switchMap(() => getPriceFeed('dai-dai')),
+  distinctUntilChanged((x: BigNumber, y: BigNumber) => x?.eq(y)),
+  shareReplay(1),
 );
 
 export function waitUntil<T>(

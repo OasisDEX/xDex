@@ -974,7 +974,7 @@ function addPreTradeInfo(state: MTSimpleFormState): MTSimpleFormState {
 
 export interface MTSimpleOrderFormParams {
   gasPrice$: Observable<BigNumber>;
-  etherPriceUsd$: Observable<BigNumber>;
+  etherPriceUsd$: Observable<BigNumber|undefined>;
   orderbook$: Observable<Orderbook>;
   mta$: Observable<MTAccount>;
   calls$: Calls$;
