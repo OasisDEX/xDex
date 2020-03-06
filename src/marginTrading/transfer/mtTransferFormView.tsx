@@ -127,7 +127,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
         currentTab = MTTransferFormTab.transfer;
       }
 
-      const ma = findMarginableAsset((token === 'DAI' && ilk || token)!, mta);
+      const ma = findMarginableAsset((token === 'DAI' && ilk || token), mta);
 
       if (mta && ma && ma.purchasingPower.gt(zero)) {
         currentTab = MTTransferFormTab.buy;
