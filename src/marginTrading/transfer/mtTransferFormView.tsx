@@ -213,15 +213,12 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
                 {
                   currentTab === MTTransferFormTab.transfer &&
                   <>
-                    {allowance(mta, token) && mta.proxy && <>
-                      <PanelBody paddingTop={true} style={{ height: '287px' }}>
+                    <PanelBody paddingTop={true} style={{ height: '287px' }}>
                         {this.AccountSummary()}
                         <Hr color="dark" className={styles.hrBigMargin}/>
                         {this.FormOrTransactionState()}
-                      </PanelBody>
-                      {this.Buttons()}
-                    </>
-                    }
+                    </PanelBody>
+                    {this.Buttons()}
                   </>
                 }
                 {

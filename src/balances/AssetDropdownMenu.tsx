@@ -34,7 +34,7 @@ export class AssetDropdownMenu extends React.Component<AssetDropdownMenuProps,
         className={classnames(styles.dropdownMenu, this.state.isCollapsed && styles.hover)}
         data-test-id={'dropdown'}
         onMouseOver={this.handleOnMouseOver}
-        onMouseOut={this.handleOnMouseOut}
+        onMouseLeave={this.handleOnMouseOut}
       >
         <Button
           size="md"

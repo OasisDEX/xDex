@@ -5,6 +5,7 @@ import { SvgImage } from '../../utils/icons/utils';
 import { Loadable } from '../../utils/loadable';
 import { ModalOpenerProps, ModalProps } from '../../utils/modal';
 import { Panel, PanelBody, PanelHeader } from '../../utils/panel/Panel';
+import { zero } from '../../utils/zero';
 import {
   MarginableAsset, MTAccount,
   MTAccountState, UserActionKind
@@ -283,6 +284,7 @@ export class MTMyPositionPanelInternal
       actions.push(<Button
         size="md"
         className={styles.actionButton}
+        disabled={ma.dai.eq(zero)}
         onClick={
           () => {
             this.transfer(UserActionKind.draw, 'DAI', ma.name);
