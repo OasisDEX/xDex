@@ -94,7 +94,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
 
   public render() {
 
-    const { mta, token, progress, startTab, withOnboarding } = this.props;
+    const { mta, token, progress, startTab, withOnboarding, ilk } = this.props;
 
     const onModalRef = (node: any) => {
       if (node) {
@@ -127,7 +127,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
         currentTab = MTTransferFormTab.transfer;
       }
 
-      const ma = findMarginableAsset(token, mta);
+      const ma = findMarginableAsset((token === 'DAI' && ilk || token), mta);
 
       if (mta && ma && ma.purchasingPower.gt(zero)) {
         currentTab = MTTransferFormTab.buy;
