@@ -271,7 +271,7 @@ function freezeIfInProgress(
 
 export function createWrapUnwrapForm$(
   gasPrice$: Observable<BigNumber>,
-  etherPriceUSD$: Observable<BigNumber>,
+  etherPriceUsd$: Observable<BigNumber|undefined>,
   ethBalance$: Observable<BigNumber>,
   wethBalance$: Observable<BigNumber>,
   calls$: Calls$,
@@ -297,7 +297,7 @@ export function createWrapUnwrapForm$(
 
   const environmentChange$ = combineAndMerge(
     toGasPriceChange(gasPrice$),
-    toEtherPriceUSDChange(etherPriceUSD$),
+    toEtherPriceUSDChange(etherPriceUsd$),
     ethBalanceChange$,
     wethBalanceChange$,
   );

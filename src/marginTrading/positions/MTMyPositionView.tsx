@@ -120,7 +120,7 @@ export function createMTMyPositionView$(
   mtOrderFormLoadable$: Observable<any>,
   createMTFundForm$: CreateMTFundForm$,
   calls$: Calls$,
-  daiPriceUsd$: Observable<BigNumber>,
+  daiPriceUsd$: Observable<BigNumber|undefined>,
   approveMTProxy: (args: { token: string; proxyAddress: string }) => Observable<TxState>
 ) {
   const redeem = createRedeem(calls$);

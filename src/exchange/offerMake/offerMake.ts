@@ -676,7 +676,7 @@ export function createFormController$(
     dustLimits$: Observable<DustLimits>;
     orderbook$: Observable<Orderbook>,
     calls$: Calls$;
-    etherPriceUsd$: Observable<BigNumber>,
+    etherPriceUsd$: Observable<BigNumber|undefined>,
     user$: Observable<User>,
   },
   tradingPair: TradingPair

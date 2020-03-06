@@ -583,7 +583,7 @@ function freezeIfInProgress(
 export function createMTTransferForm$(
   mta$: Observable<MTAccount>,
   gasPrice$: Observable<BigNumber>,
-  etherPriceUSD$: Observable<BigNumber>,
+  etherPriceUsd$: Observable<BigNumber|undefined>,
   balances$: Observable<Balances>,
   orderbook$: Observable<Orderbook>,
   calls$: Calls$,
@@ -602,7 +602,7 @@ export function createMTTransferForm$(
 
   const environmentChange$ = combineAndMerge(
     toGasPriceChange(gasPrice$),
-    toEtherPriceUSDChange(etherPriceUSD$),
+    toEtherPriceUSDChange(etherPriceUsd$),
     toOrderbookChange$(orderbook$),
     toMTAccountChange(mta$),
     toBalancesChange(balances$),
