@@ -152,6 +152,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
                   (_tab: string, index: number) => (index >= startIndex)
                 ).map(_tab => {
                   return (<div
+                    data-test-id={_tab === currentTab && 'active-tab' || ''}
                     className={
                       classnames({
                         [styles.tab]: true,
@@ -200,6 +201,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
                       <Button size="md"
                               className={styles.cancelButton}
                               block={true}
+                              data-test-id="close-modal"
                               color="greyOutlined"
                               onClick={() => this.close()}
                       >
@@ -560,6 +562,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
         <Button size="md"
                 className={styles.cancelButton}
                 block={true}
+                data-test-id="close-modal"
                 color="greyOutlined"
                 onClick={() => this.close()}
         >
@@ -662,6 +665,7 @@ export class MTSimpleOrderBuyPanel extends React.Component<
           <MtSimpleOrderFormBody {...{ ...this.props, ...formState, close: this.props.close }} />
           <Button size="md"
                   className={styles.cancelButton}
+                  data-test-id="close-modal"
                   block={true}
                   color="greyOutlined"
                   onClick={() => this.props.close()}

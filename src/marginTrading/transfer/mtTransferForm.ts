@@ -11,13 +11,13 @@ import {
 import {
   AmountFieldChange,
   BalancesChange, doGasEstimation, EtherPriceUSDChange,
-  FormChangeKind, GasEstimationStatus,
-  GasPriceChange, HasGasEstimation,
-  MTAccountChange, MTAccountStateChange, OrderbookChange,
-  progressChange, ProgressChange, ProgressStage,
-  toBalancesChange, toEtherPriceUSDChange,
-  toGasPriceChange, TokenChange,
-  toMTAccountChange, toOrderbookChange$, transactionToX,
+  FormChangeKind, FormResetChange,
+  GasEstimationStatus, GasPriceChange,
+  HasGasEstimation, MTAccountChange, MTAccountStateChange,
+  OrderbookChange, ProgressChange, progressChange,
+  ProgressStage, toBalancesChange,
+  toEtherPriceUSDChange, toGasPriceChange,
+  TokenChange, toMTAccountChange, toOrderbookChange$, transactionToX,
 } from '../../utils/form';
 
 import { curry } from 'ramda';
@@ -136,9 +136,11 @@ type EnvironmentChange =
 
 // TODO: why not: ManualChange | EnvironmentChange | StageChange?
 type MTSetupFormChange =
-  TokenChange | AmountFieldChange | IlkFieldChange |
+  TokenChange | AmountFieldChange | IlkFieldChange | FormResetChange |
   EnvironmentChange |
   ProgressChange;
+
+const formResetChange: FormResetChange = { kind: FormChangeKind.formResetChange };
 
 function initialTab(mta: MTAccount, name: string) {
   const { proxy, transfer } = MTTransferFormTab;
@@ -156,6 +158,18 @@ function initialTab(mta: MTAccount, name: string) {
 
 function applyChange(state: MTTransferFormState, change: MTSetupFormChange): MTTransferFormState {
   switch (change.kind) {
+    case FormChangeKind.formResetChange:
+      return {
+        ...state,
+        amount: undefined,
+        daiBalancePost: undefined,
+        realPurchasingPowerPost: undefined,
+        liquidationPricePost:undefined,
+        balancePost: undefined,
+        leveragePostPost: undefined,
+        messages: [],
+        progress: undefined,
+      };
     case FormChangeKind.gasPriceChange:
       return { ...state,
         gasPrice: change.value,
@@ -584,7 +598,7 @@ export function createMTTransferForm$(
 
   const { token, ilk, withOnboarding, actionKind } = params;
   const manualChange$ = new Subject<ManualChange>();
-  const resetChange$ = new Subject<ProgressChange>();
+  const resetChange$ = new Subject<FormResetChange>();
 
   const environmentChange$ = combineAndMerge(
     toGasPriceChange(gasPrice$),
@@ -610,7 +624,7 @@ export function createMTTransferForm$(
     token,
     ilk,
     withOnboarding,
-    reset: () => resetChange$.next(progressChange(undefined)),
+    reset: () => resetChange$.next(formResetChange),
     messages: [],
     gasEstimationStatus: GasEstimationStatus.unset,
   };
