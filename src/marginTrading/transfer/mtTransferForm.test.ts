@@ -219,9 +219,9 @@ test('reset after fund DAI success', () => {
   reset();
 
   expect(unpack(transferForm).progress).toBeUndefined();
-  expect(unpack(transferForm).amount).toEqual(new BigNumber(2));
+  expect(unpack(transferForm).amount).toEqual(undefined);
   // expect(unpack(transferForm).stage).toEqual(FormStage.blocked);
-  expect(unpack(transferForm).gasEstimationStatus).toEqual(GasEstimationStatus.calculated);
+  expect(unpack(transferForm).gasEstimationStatus).toEqual(GasEstimationStatus.unset);
 });
 
 test('set amount for fund and cancel', () => {
