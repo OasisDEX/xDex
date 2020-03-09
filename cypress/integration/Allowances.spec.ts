@@ -13,7 +13,6 @@ describe('Setting allowances', () => {
 
   it('should enable allowance on a given token', () => {
     const allowance  = Allowance.of('ZRX');
-
     allowance.shouldBe(ALLOWANCE_STATE.DISABLED);
     allowance.enable();
     allowance.shouldBe(ALLOWANCE_STATE.ENABLED);

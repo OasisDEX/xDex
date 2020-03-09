@@ -14,7 +14,7 @@ import {
 import { Calls$ } from '../blockchain/calls/calls';
 
 import { TxMetaKind } from 'src/blockchain/calls/txMeta';
-import { AssetKind, NetworkConfig, tradingTokens } from '../blockchain/config';
+import { AssetKind, NetworkConfig, tradingTokens as _tradingTokens } from '../blockchain/config';
 import { account$, GasPrice$, MIN_ALLOWANCE, Ticker } from '../blockchain/network';
 import { TxState, TxStatus } from '../blockchain/transactions';
 import { amountFromWei } from '../blockchain/utils';
@@ -23,6 +23,8 @@ import {
   MTAccount,
 } from '../marginTrading/state/mtAccount';
 import { minusOne, one, zero } from '../utils/zero';
+
+const tradingTokens = [..._tradingTokens, 'SAI'];
 
 export interface Balances {
   [token: string]: BigNumber;
