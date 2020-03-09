@@ -998,7 +998,7 @@ export class MtSimpleOrderFormView extends React.Component<
               : 'Advanced Settings'
           }
         </PanelHeader>
-        <PanelBody style={{ minWidth: '452px', paddingBottom: '16px' }}>
+        <PanelBody style={{ paddingBottom: '16px' }}>
           {
             this.props.view === ViewKind.instantTradeForm
               ? this.MainContent()

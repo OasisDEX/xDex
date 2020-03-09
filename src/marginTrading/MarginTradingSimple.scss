@@ -33,3 +33,8 @@ $twoColumnsPanelWidth: 454px;
   width: 454px;
   height: 654px 
 }
+
+.orderBookPanel {
+  flex-basis: 454px;
+  flex-grow: 1;
+}

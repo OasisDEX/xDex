@@ -89,7 +89,7 @@ const Content = (props: any | { parentMatch: string }) => {
             { ({ MTSimpleOrderPanelRxTx }) => <MTSimpleOrderPanelRxTx /> }
           </theAppContext.Consumer>
         </Panel>
-        <Panel>
+        <Panel className={styles.orderBookPanel}>
           <theAppContext.Consumer>
             { ({ MTSimpleOrderbookPanelTxRx }) => <MTSimpleOrderbookPanelTxRx /> }
           </theAppContext.Consumer>
