@@ -114,7 +114,6 @@ $historyPanelsHeight: 605px;
 .input {
   flex-basis: 186px;
   flex-grow: 4;
-  width: 186px;
   padding-left: 3em;
 }
 
@@ -306,8 +305,7 @@ $historyPanelsHeight: 605px;
 
 .orderPanel {
   height: 100%;
-  min-width: 454px;
-  width: auto;
+  width: 454px;
   flex-direction: column;
   justify-content: center;
   align-items: center;
