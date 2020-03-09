@@ -353,7 +353,7 @@ export class MtSimpleOrderFormBody
     return (
       <div className={styles.checkbox}>
         {
-          riskComplianceAccepted
+          !riskComplianceAccepted
           && kind === OfferType.buy
           && (
             <Checkbox name="risk-compliance"

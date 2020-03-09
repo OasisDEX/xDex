@@ -190,8 +190,7 @@ function applyChange(state: MTSimpleFormState, change: MTFormChange): MTSimpleFo
     case ExternalChangeKind.riskCompliance:
       return {
         ...state,
-        riskComplianceAccepted : !change.hasRiskAccepted,
-        riskComplianceCurrent: change.hasRiskAccepted
+        riskComplianceAccepted : change.hasRiskAccepted,
       };
     case FormChangeKind.amountFieldChange:
       return {
@@ -211,17 +210,18 @@ function applyChange(state: MTSimpleFormState, change: MTFormChange): MTSimpleFo
       };
       return state.amount ? addTotal(state.amount, newState) : newState;
     case FormChangeKind.formResetChange:
-      let riskComplianceAccepted = state.riskComplianceAccepted;
+      let  { riskComplianceAccepted, riskComplianceCurrent } = state;
 
       if (state.kind === OfferType.buy) {
         localStorage.setItem('ltRiskAccepted', 'true');
         riskComplianceAccepted = true;
+        riskComplianceCurrent = false;
       }
 
       return {
         ...state,
         riskComplianceAccepted,
-        riskComplianceCurrent: false,
+        riskComplianceCurrent,
         price: undefined,
         amount: undefined,
         total: undefined,
@@ -911,7 +911,8 @@ function isReadyToProceed(state: MTSimpleFormState): MTSimpleFormState {
     state.plan && !isImpossible(state.plan) && state.plan.length !== 0 &&
     state.gasEstimationStatus === GasEstimationStatus.calculated &&
     state.isSafeCollRatio &&
-    (state.kind === OfferType.buy ? state.riskComplianceCurrent : true)
+    state.riskComplianceAccepted
+    || (state.kind === OfferType.buy ? state.riskComplianceCurrent : true)
   ) {
     return  { ...state, readyToProceed: true };
   }
@@ -986,7 +987,7 @@ export interface MTSimpleOrderFormParams {
 
 export const riskComplianceProbe$ = interval(500).pipe(
   switchMap(() => of(!!localStorage.getItem('ltRiskAccepted'))),
-  distinctUntilChanged()
+  distinctUntilChanged(),
 );
 
 function toRiskComplianceChange($riskComplianceCheck$: Observable<boolean>) {
