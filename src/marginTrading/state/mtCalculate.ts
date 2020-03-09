@@ -153,7 +153,7 @@ export function maxSellable(ma: MarginableAsset, offers: Offer[]) {
   const rounded =
     BigNumber.min(
       ma.balance,
-      new BigNumber(result.times(ma.referencePrice).toFixed(2))
+      new BigNumber(result.times(ma.referencePrice))
         .div(ma.referencePrice)
     );
 
