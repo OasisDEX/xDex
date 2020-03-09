@@ -1,5 +1,6 @@
 rm -rf ./build
 
+# This is using `.env.prod` configuration file with feature flags
 PUBLIC_URL='https://oasis.app/trade' yarn build
 
 # Push to ghpages branch
