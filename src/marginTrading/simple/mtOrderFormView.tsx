@@ -351,24 +351,28 @@ export class MtSimpleOrderFormBody
   private riskCompliance = () => {
     const { riskComplianceAccepted, riskComplianceCurrent , progress, kind } = this.props;
     return (
-      <div className={styles.checkbox}>
-        {
           !riskComplianceAccepted
           && kind === OfferType.buy
           && (
-            <Checkbox name="risk-compliance"
-                      checked={riskComplianceCurrent || false}
-                      disabled={ !!progress }
-                      onChange={this.handlecheckboxChange}
-            >
-              <span style={{ width: '100%' }}>
-                I understand that this involves the usage of Maker Vaults
-                and the associated risks involved in using the Maker Protocol
-              </span>
-            </Checkbox>
+            <div className={styles.checkbox}>
+              <Checkbox name="risk-compliance"
+                        checked={riskComplianceCurrent || false}
+                        disabled={ !!progress }
+                        onChange={this.handlecheckboxChange}
+              >
+                <span style={{ width: '100%' }}>
+                  I understand that this involves the usage of
+                  <a href="https://oasis.app/terms"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <strong> Maker Vaults </strong>
+                  </a>
+                  and the associated risks involved in using the Maker Protocol
+                </span>
+              </Checkbox>
+           </div>
           )
-        }
-      </div>
     );
   }
   private liquidationPrice() {
