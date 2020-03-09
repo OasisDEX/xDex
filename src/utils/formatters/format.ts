@@ -15,7 +15,7 @@ BigNumber.config({
   },
 });
 
-function toShorthandNumber(amount: BigNumber, suffix: string = '', precision?: number) {
+export function toShorthandNumber(amount: BigNumber, suffix: string = '', precision?: number) {
   return new BigNumber(amount.toString()
     .split('.')
     .map((part, index) => {
@@ -57,6 +57,8 @@ export function formatCryptoBalance(amount: BigNumber): string {
     return formatAsShorthandNumbers(amount, 4);
   }
 
+  if (absAmount.lt(million)) return toShorthandNumber(amount, '', 2);
+
   return formatAsShorthandNumbers(amount, 2);
 }
 
@@ -66,7 +68,7 @@ export function formatFiatBalance(amount: BigNumber): string {
   if (absAmount.eq(zero)) return formatAsShorthandNumbers(amount, 2);
   if (absAmount.lt(one)) return formatAsShorthandNumbers(amount, 4);
   // We don't want to have numbers like 999999 formatted as 999.99k
-  if (absAmount.lt(million)) return toShorthandNumber(amount, '', 2);
+
   return formatAsShorthandNumbers(amount, 2);
 }
 

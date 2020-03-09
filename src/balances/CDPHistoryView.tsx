@@ -4,7 +4,7 @@ import * as ReactModal from 'react-modal';
 import classnames from 'classnames';
 import { MarginableAsset, MTHistoryEventKind } from '../marginTrading/state/mtAccount';
 import { formatDateTime } from '../utils/formatters/format';
-import { FormatCrypto, FormatFiat } from '../utils/formatters/Formatters';
+import { FormatAmount, FormatCrypto, FormatFiat } from '../utils/formatters/Formatters';
 import { Button } from '../utils/forms/Buttons';
 import { ModalProps } from '../utils/modal';
 import { Panel, PanelFooter, PanelHeader } from '../utils/panel/Panel';
@@ -39,6 +39,7 @@ export class CDPHistoryViewModal extends React.Component<MarginableAsset & Modal
 
 export class CDPHistoryView extends React.Component<MarginableAsset> {
   public render() {
+    const { name } = this.props;
     return (
       <div className={styles.contentWithScroll}>
           <Table className={styles.table}>
@@ -47,7 +48,7 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
                 <th>Type</th>
                 <th>Amount</th>
                 <th>Price</th>
-                <th>Bal</th>
+                <th>{name} Bal</th>
                 <th>DAI Bal</th>
                 <th>Equity (DAI)</th>
                 <th>Liq. Price (USD)</th>
@@ -114,13 +115,13 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
                     <td>
                       {
                       price
-                        ? <FormatCrypto value={price} token="DAI"/>
+                        ? <FormatAmount value={price} token="DAI"/>
                         : <>-</>
                       }
                     </td>
                     <td>{
                       e.balance &&
-                        <FormatFiat value={e.balance} token={e.token}/>
+                        <FormatCrypto value={e.balance} token={e.token}/>
                       }
                     </td>
                     <td>
@@ -134,7 +135,7 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
                     <td>
                       <>{
                           e.liquidationPrice && e.liquidationPrice.gt(zero)
-                            ? <FormatFiat value={e.liquidationPrice} token="USD"/>
+                            ? <FormatAmount value={e.liquidationPrice} token="USD"/>
                             : <>-</>
                         }
                       </>
