@@ -318,7 +318,6 @@ const protoMain = {
   startingBlock: 4751582,
   get otc() { return load(otc, '0x794e6e91555438aFc3ccF1c5076A74F42133d08D'); },
   // get saiTub() { return load(saiTub, '0x448a5065aebb8e423f0896e6c5d525c040f59af3'); },
-  get ethPip() { return load(dsValue, '0x3546C7E3753C0e1D15878EC1C6dC65573864Dab7'); },
   get tokens() {
     return asMap('token', [
       loadToken('WETH', eth, '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'),
@@ -334,8 +333,45 @@ const protoMain = {
       loadToken('WBTC', erc20, '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599'),
     ]);
   },
-  mcd: {} as { [key: string]: any },
-  cdpManager: '',
+  cdpManager: '0x60762005be465901ca18ba34416b35143de72c0c',
+  mcd: {
+    vat: '0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B',
+    get cat() {
+      return load(mcdCat, '0x78F2c2AF65126834c51822F56Be0d7469D7A523E');
+    },
+    get jug() {
+      return load(mcdJug, '0x19c0976f590D67707E62397C87829d896Dc0f1F1');
+    },
+    get spot() {
+      return load(mcdSpotter, '0x65C79fcB50Ca1594B025960e539eD7A9a6D434A3');
+    },
+    dssCdpManager: '0x5ef30b9986345249bc32d8928B7ee64DE9435E39',
+    ilks: {
+      WETH: 'ETH-A',
+    },
+    joins: {
+      WETH: '0x2F0b23f53734252Bda2277357e97e1517d6B042A',
+      DAI: '0x9759A6Ac90977b93B58547b4A71c78317f391A28',
+    },
+    flip: {
+      get WETH() {
+        return load(mcdFlipper, '0xd8a04F5412223F513DC55F839574430f5EC15531');
+      },
+    },
+    prices: {
+      get WETH() {
+        return load(dsValue, '');
+      },
+    },
+    osms: {
+      get WETH() {
+        return load(mcdOsm, '0x81FE72B5A8d1A857d176C3E7d5Bd2679A9B85763');
+      },
+    },
+    xxx: {
+      test: 'aaa'
+    }
+  } as { [key: string]: any },
   get otcSupportMethods() {
     return load(otcSupport, '0x9b3f075b12513afe56ca2ed838613b7395f57839');
   },
@@ -349,7 +385,7 @@ const protoMain = {
     return load(proxyCreationAndExecute, '0x793ebbe21607e4f04788f89c7a9b97320773ec59');
   },
   get proxyActions() {
-    return load(proxyActions, '');
+    return load(proxyActions, '0xb81f7ca8f12c2d433dcde39270de849e2475abb9');
   },
   get migration() {
     return '0xc73e0383F3Aff3215E6f04B0331D58CeCf0Ab849';
@@ -361,7 +397,7 @@ const protoMain = {
     return load(instantMigrationProxyActions, '0x396Ea3C3376cC78864f51ce2FDdb275D3dC0968b');
   },
   oasisDataService: {
-    url: 'https://cache.eth2dai.com/api/v1'
+    url: 'https://staging-cache.eth2dai.com/api/v1'
   },
   etherscan: {
     url: 'https://etherscan.io',
@@ -400,7 +436,6 @@ const kovan: NetworkConfig = {
   startingBlock: 5216718,
   get otc() { return load(otc, '0xe325acB9765b02b8b418199bf9650972299235F4'); },
   // get saiTub() { return load(saiTub, '0xa71937147b55deb8a530c7229c442fd3f31b7db2'); },
-  get ethPip() { return load(dsValue, '0xd44d1823c8839559c2d663e98261e0b193c256ad'); }, // ???
   get tokens() {
     return asMap('token', [
       loadToken('WETH', eth, '0xd0a1e359811322d97991e03f863a0c30c2cf029c'),
@@ -543,7 +578,6 @@ const localnet: NetworkConfig =  {
   startingBlock: 1,
   get otc() { return load(otc, '0x177b74CB6679C145Bb428Cc3E16F4a3d3ED905a3'); },
   // get saiTub() { return { address: '', contract: null }; },
-  get ethPip() { return load(dsValue, '0x8b8B359c33c13b818713570583C8bce2b030AD9A'); },
   get tokens() {
     return asMap('token', [
       loadToken('WETH', eth, '0x200938Bf7fF25EcF2eB7BC08e18b0892ED34c846'),
