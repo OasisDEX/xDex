@@ -68,11 +68,12 @@ export function prepareBuyAllocationRequest(
 
   const baseAsset = findMarginableAsset(baseToken, mta);
 
-  const cashBalance = baseAsset!.dai; // todo: no longer valid!! no cash balance ?
+  const cashBalance = baseAsset!.dai;
+  const debt = baseAsset!.debt;
   const totalDebt = assets.reduce((sum, a) => sum.plus(a.debt), zero);
 
   // const targetDaiBalance = cashBalance.minus(maxTotal).minus(totalDebt); -- old
-  const targetDaiBalance = cashBalance.gt(zero) ?
+  const targetDaiBalance = debt.eq(zero) ?
     cashBalance.minus(maxTotal).minus(totalDebt)
     : maxTotal.times(minusOne);
 
