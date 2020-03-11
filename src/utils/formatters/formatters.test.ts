@@ -184,6 +184,16 @@ describe('Formatting crypto balances according to number formatting spec', () =>
     expect(formatCryptoBalance(amount)).toEqual('-10.01');
   });
 
+  it('should format number with precision 2 and not shorthand thousands', () => {
+    const amount = new BigNumber(9.991235).times(thousand);
+    expect(formatCryptoBalance(amount)).toBe('9991.23');
+  });
+
+  it('should format number with precision 2 and not shorthand thousands (negative number)', () => {
+    const amount = new BigNumber(-999.991235).times(thousand);
+    expect(formatCryptoBalance(amount)).toBe('-999991.23');
+  });
+
   it('should have precision of 2 and suffix M', () => {
     const amount = new BigNumber('10.012').times(million);
     expect(formatCryptoBalance(amount)).toEqual('10.01M');
