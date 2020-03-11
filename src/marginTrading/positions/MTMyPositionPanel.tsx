@@ -78,18 +78,18 @@ export class MTLiquidationNotification
 
       return <>
         {
-            ma.bitable === 'imminent' &&
-            // tslint:disable
-            <div className={myPositionStyles.warningMessage}>
-              <SvgImage image={warningIconSvg} />
-              <span className={myPositionStyles.warningText}>
-                Your {ma.name} leveraged position has entered the liquidation phase and your collateral will be auctioned in {ma.nextPriceUpdateDelta} minutes.<br />
-                You can still avoid auction by
-                {ma.isSafeCollRatio ? 'selling, or ' : ' '}
-                depositing additional {ma.name} or DAI.
-              </span>
-            </div>
-            // tslint:enable
+          ma.bitable === 'imminent' &&
+          // tslint:disable
+          <div className={myPositionStyles.warningMessage}>
+            <SvgImage image={warningIconSvg} />
+            <span className={myPositionStyles.warningText}>
+              Your {ma.name} leveraged position has entered the liquidation phase and your collateral will be auctioned in {ma.nextPriceUpdateDelta} minutes.<br />
+              You can still avoid auction by
+              {ma.isSafeCollRatio ? 'selling, or ' : ' '}
+              depositing additional {ma.name} or DAI.
+            </span>
+          </div>
+          // tslint:enable
           }
           {
             ma.bitable === 'yes' &&
