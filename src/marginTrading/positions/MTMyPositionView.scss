@@ -112,6 +112,7 @@
 .warningMessage {
   @extend .message;
 
+  width: 100%;
   color: $danger-color;
   border: 1px solid $danger-border-color;
   background: $light-grayish-red;
