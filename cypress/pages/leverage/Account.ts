@@ -13,7 +13,7 @@ export class Account {
   public static shouldNotHaveAllowance = () => {
     cy.get(tid('set-allowance', tid('step-completed'))).should('not.exist');
   }
-  
+
   public static setupProxy = () => {
     cy.get(tid('create-proxy')).click();
   }
@@ -27,11 +27,11 @@ export class Account {
     cy.get(tid('deposit-btn')).click();
   }
 
-  public static depositedAmount = ( amount : string | RegExp) => {
+  public static depositedAmount = (amount : string | RegExp) => {
     cy.get(tid('col-balance')).contains(amount);
   }
 /*  */
-  public static depositedDaiAmount = ( amount : string | RegExp) => {
+  public static depositedDaiAmount = (amount : string | RegExp) => {
     cy.get(tid('dai-balance')).contains(amount);
   }
   /* In order to use this method one should:

@@ -277,7 +277,7 @@ export class MTMyPositionView extends
                 <WarningTooltip id="dai-balance"
                                 text={daiBalanceTooltip}/>
               </div>
-              <div className={styles.summaryValue}  
+              <div className={styles.summaryValue}
                    data-test-id="dai-balance">
                 {
                   ma && ma.debt.gt(zero) ?

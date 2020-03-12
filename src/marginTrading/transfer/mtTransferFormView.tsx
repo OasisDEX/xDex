@@ -26,6 +26,7 @@ import { zero } from '../../utils/zero';
 import * as mixpanel from 'mixpanel-browser';
 import * as ReactDOM from 'react-dom';
 import { theAppContext } from '../../AppContext';
+import { SvgImage } from '../../utils/icons/utils';
 import { LoadableWithTradingPair } from '../../utils/loadable';
 import { MTSimpleFormState } from '../simple/mtOrderForm';
 import { MtSimpleOrderFormBody } from '../simple/mtOrderFormView';
@@ -42,7 +43,6 @@ import {
   Message, MessageKind, MTTransferFormState, MTTransferFormTab
 } from './mtTransferForm';
 import * as styles from './mtTransferFormView.scss';
-import { SvgImage } from 'src/utils/icons/utils';
 
 type MTFundFormProps = MTTransferFormState & ModalProps;
 
@@ -217,7 +217,9 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
                 {
                   currentTab === MTTransferFormTab.transfer &&
                   <>
-                    <PanelBody paddingTop={true} style={{ height: '287px' }} data-test-id="transfer">
+                    <PanelBody paddingTop={true}
+                               style={{ height: '287px' }}
+                               data-test-id="transfer">
                         {this.AccountSummary()}
                         <Hr color="dark" className={styles.hrBigMargin}/>
                         {this.FormOrTransactionState()}

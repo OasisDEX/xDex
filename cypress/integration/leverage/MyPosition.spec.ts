@@ -1,10 +1,9 @@
 import { Account } from '../../pages/leverage/Account';
+import { Modal } from '../../pages/leverage/Modal';
 import { Position } from '../../pages/leverage/Position';
 import { Tab } from '../../pages/Tab';
 import { WalletConnection } from '../../pages/WalletConnection';
-import { cypressVisitWithWeb3, tid } from '../../utils';
-import { Modal } from '../../pages/leverage/Modal';
-import { Form } from 'cypress/pages/leverage/Form';
+import { cypressVisitWithWeb3 } from '../../utils';
 
 describe('My Position panel', () => {
 
@@ -21,7 +20,7 @@ describe('My Position panel', () => {
       Modal.open(Position.new('DAI'));
       Account.setupProxy();
       Account.setAllowance();
-      Modal.hasActiveTab('Deposit');  
+      Modal.hasActiveTab('Deposit');
       Account.deposit(100);
       Modal.close();
     });
@@ -70,7 +69,7 @@ describe('My Position panel', () => {
       Modal.open(Position.new('WETH'));
       Account.setupProxy();
       Account.setAllowance();
-      Modal.hasActiveTab('Deposit');  
+      Modal.hasActiveTab('Deposit');
       Account.deposit(5);
       Modal.close();
     });
@@ -102,7 +101,6 @@ describe('My Position panel', () => {
       Position.expectAmountOfCollateral(`7.5`);
     });
 
-
     it('should deposit DAI', () => {
       const amount = 100;
 
@@ -114,11 +112,11 @@ describe('My Position panel', () => {
   });
 
   context('with proxy and DAI/WETH allowance', () => {
-    beforeEach(()=> {
+    beforeEach(() => {
       Modal.open(Position.new('WETH'));
       Account.setupProxy();
       Account.setAllowance();
-      Modal.hasActiveTab('Deposit');  
+      Modal.hasActiveTab('Deposit');
       Account.deposit(5);
       Modal.close();
       Position.enableDAI('deposit');
@@ -158,5 +156,5 @@ describe('My Position panel', () => {
       Position.expectAmountOfCollateral(`5.00`);
       Position.expectAmountOfDAI(`0.00`);
     });
-  });  
+  });
 });

@@ -61,7 +61,7 @@ export class Form {
   public static placeOrderBtn = () =>
     orderForm('place-order')
 
-  public static placeOrder = () => Form.placeOrderBtn().click();  
+  public static placeOrder = () => Form.placeOrderBtn().click();
 
   public static changeSlippageLimitTo = (value: number) => {
     settings();
