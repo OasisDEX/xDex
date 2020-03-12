@@ -360,6 +360,7 @@ export class MtSimpleOrderFormBody
           && (
             <div className={styles.checkbox}>
               <Checkbox name="risk-compliance"
+                        data-test-id="accept-rc"
                         checked={riskComplianceCurrent || false}
                         disabled={ !!progress }
                         onChange={this.handlecheckboxChange}
@@ -679,6 +680,7 @@ export class MtSimpleOrderFormBody
                 <span className={styles.transitionArrow} />
                 { balancePost ?
                   <CryptoMoney
+                    data-test-id="estimated-col-balance"
                     value={balancePost}
                     token={baseToken}
                     fallback="-"
@@ -701,11 +703,13 @@ export class MtSimpleOrderFormBody
           <div className={styles.orderSummaryValue}>
             { baseTokenAsset && baseTokenAsset.debt.gt(zero) ?
               <CryptoMoney
+                data-test-id="dai-balance"
                 value={baseTokenAsset.debt.times(minusOne)}
                 token={quoteToken}
                 fallback="-"
               /> : baseTokenAsset && baseTokenAsset.dai ?
                 <CryptoMoney
+                  data-test-id="dai-balance"
                   value={baseTokenAsset.dai}
                   token={quoteToken}
                   fallback="-"
@@ -717,6 +721,7 @@ export class MtSimpleOrderFormBody
                 <span className={styles.transitionArrow} />
                 { daiBalancePost ?
                   <CryptoMoney
+                    data-test-id="estimated-dai-balance"
                     value={daiBalancePost}
                     token={quoteToken}
                     fallback="-"
@@ -945,6 +950,7 @@ export class MtSimpleOrderFormView extends React.Component<
         <Button
           size="md"
           color="primary"
+          data-test-id="open-position-with-DAI"
           disabled={!ma}
           onClick={
             () => this.transfer(UserActionKind.fund, 'DAI', transferWithOnboarding, ma!.name)
@@ -954,6 +960,7 @@ export class MtSimpleOrderFormView extends React.Component<
         <Button
           size="md"
           color="primary"
+          data-test-id={`open-position-with-${ma?.name}`}
           disabled={!ma}
           onClick={
             () => this.transfer(UserActionKind.fund, ma!.name, transferWithOnboarding, ma!.name)

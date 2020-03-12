@@ -61,10 +61,16 @@ export class Form {
   public static placeOrderBtn = () =>
     orderForm('place-order')
 
+  public static placeOrder = () => Form.placeOrderBtn().click();  
+
   public static changeSlippageLimitTo = (value: number) => {
     settings();
     settings('slippage-limit-input').type(`{selectall}${value}`);
     settings('done').click();
+  }
+
+  public static acceptedRiskCompliance = () => {
+    orderForm('accept-rc').check({ force: true });
   }
 
   public static shouldAskUserToConnect = () =>

@@ -600,11 +600,11 @@ const localnet: NetworkConfig =  {
       loadToken('ZRX', erc20, '0x2c60CF08c07C212e21e6E2ee4626c478BACe092a'),
       loadToken('BAT', erc20, '0xd80110E3C107Eb206B556871cFe2532eC7D05E47'),
       loadToken('REP', erc20, '0xE8d4C2Ab5782c697f06f17610cC03068180d0FaC'),
-      loadToken('USDC', erc20, NO_ADDR),
-      loadToken('TUSD', erc20, NO_ADDR),
-      loadToken('PAX', erc20, NO_ADDR),
-      loadToken('LINK', erc20, NO_ADDR),
-      loadToken('WBTC', erc20, NO_ADDR),
+      loadToken('USDC', erc20, '0xE8d4C2Ab5782c697f06f17610cC03068180d0FaC'),
+      loadToken('TUSD', erc20, '0xE8d4C2Ab5782c697f06f17610cC03068180d0FaC'),
+      loadToken('PAX', erc20, '0xE8d4C2Ab5782c697f06f17610cC03068180d0FaC'),
+      loadToken('LINK', erc20, '0xE8d4C2Ab5782c697f06f17610cC03068180d0FaC'),
+      loadToken('WBTC', erc20, '0xE8d4C2Ab5782c697f06f17610cC03068180d0FaC'),
     ]);
   },
   mcd: {

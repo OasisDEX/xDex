@@ -4,122 +4,112 @@ import { Tab } from '../../pages/Tab';
 import { WalletConnection } from '../../pages/WalletConnection';
 import { cypressVisitWithWeb3, tid } from '../../utils';
 import { Modal } from '../../pages/leverage/Modal';
-
-const format = (number: number) => `${number}.0000`;
+import { Form } from 'cypress/pages/leverage/Form';
 
 describe('My Position panel', () => {
 
   beforeEach(() => {
     cypressVisitWithWeb3();
     WalletConnection.connect();
+    WalletConnection.isConnected();
     Tab.leverage();
   });
 
-  ['WETH', 'DAI'].forEach( asset => {
-    context(`without proxy and allowance set for ${asset}`, () => {    
-      beforeEach(() => {
-        Modal.open(Position.new(asset as 'DAI' | 'WETH'));
-      })
-  
-      it('should create proxy', () => {
-        Account.shouldNotHaveProxy();
-  
-        Account.setupProxy();
-  
-        Account.shouldHaveProxyCreated();
-      });
-  
-      it('should set proxy collateral allowance', () => {
-        Account.shouldNotHaveProxy();
-        Account.shouldNotHaveAllowance();
-  
-        Account.setupProxy();
-        Account.shouldHaveProxyCreated();
-  
-        Account.setAllowance();
-        Account.shouldSeeDepositForm();
-      });
-  
-      it('should see My Position Panel', () => {
-        Account.setupProxy();
-        Account.setAllowance();
-  
-        Account.shouldSeeDepositForm();
-        Account.deposit(10);
-  
-        Account.leveragePositionShouldBeDisplayed();
-      });
-  
-      it('should close the modal window', () => {
-       Modal.close();
-      })
-    }); 
-  })
-
-  context.only('with proxy and allowance', () => {
+  context('with proxy and DAI allowance', () => {
 
     beforeEach(() => {
-      Modal.open(Position.new('WETH'))
+      Modal.open(Position.new('DAI'));
       Account.setupProxy();
-      Account.shouldHaveProxyCreated();
       Account.setAllowance();
-      Account.shouldSeeDepositForm();
-      Account.deposit(10); 
-      Account.depositedAmount(/10.../);
+      Modal.hasActiveTab('Deposit');  
+      Account.deposit(100);
       Modal.close();
-      Account.leveragePositionShouldBeDisplayed();     
-    });
-
-    it('should deposit collateral', () => {
-      const amount = 2;
-      const balance = amount + 10;
-      Position.depositCollateral(amount);
-      Position.expectAmountOfCollateral(format(balance));
     });
 
     it('should deposit DAI', () => {
       const amount = 100;
 
-      Position.enableDAI('deposit');
       Position.depositDAI(amount);
-      Position.expectAmountOfDAI(format(amount));
+      Position.expectAmountOfDAI(`200.00`);
     });
-
-    it('should withdraw collateral', () => {
-      const amount = 1;
-      const balance = 10
-      Position.depositCollateral(amount);
-      Position.expectAmountOfCollateral(format(amount));
-
-      Position.withdrawCollateral(amount);
-
-      Position.expectAmountOfCollateral(format(balance));
-    });
-
-    // Placeholder withdraw all collateral - should display buttons to deposit
 
     it('should withdraw all DAI', () => {
       const amount = 100;
 
-      Position.enableDAI('deposit');
       Position.depositDAI(amount);
-      Position.expectAmountOfDAI(format(amount));
+      Position.expectAmountOfDAI(`200.00`);
 
-      Position.withdrawDAI(amount);
+      Position.withdrawDAI(200);
 
-      Position.expectAmountOfDAI(format(0));
+      Position.expectAmountOfDAI(`0.00`);
     });
 
-    it('should display current price', () => {
-      Position.expectPrice('174.99');
+    it('should partially withdraw DAI', () => {
+      const amount = 100;
+
+      Position.depositDAI(amount);
+      Position.expectAmountOfDAI(`200.00`);
+
+      Position.withdrawDAI(25);
+
+      Position.expectAmountOfDAI(`175.00`);
     });
 
-    it('should display after deposit', () => {
-      Position.expectEquity(/2\,905.../);
+    it('should deposit WETH', () => {
+      Position.enableCollateral('deposit');
 
-      Position.depositCollateral(5);
+      const amount = 1.5;
 
-      Position.expectEquity(/4\,357.5000/);
+      Position.depositCollateral(amount);
+      Position.expectAmountOfCollateral(`1.5`);
     });
   });
+
+  context('with proxy and WETH allowance', () => {
+    beforeEach(() => {
+      Modal.open(Position.new('WETH'));
+      Account.setupProxy();
+      Account.setAllowance();
+      Modal.hasActiveTab('Deposit');  
+      Account.deposit(5);
+      Modal.close();
+    });
+
+    it('should deposit WETH', () => {
+      const amount = 5;
+
+      Position.depositCollateral(amount);
+      Position.expectAmountOfCollateral(`10.00`);
+    });
+
+    it('should withdraw all WETH', () => {
+      const amount = 5;
+
+      Position.depositCollateral(amount);
+      Position.expectAmountOfCollateral(`10.00`);
+
+      Position.withdrawCollateral(10);
+      Position.expectAmountOfCollateral(`0.00`);
+    });
+
+    it('should partially withdraw WETH', () => {
+      const amount = 5;
+
+      Position.depositCollateral(amount);
+      Position.expectAmountOfCollateral(`10.00`);
+
+      Position.withdrawCollateral(2.5);
+      Position.expectAmountOfCollateral(`7.5`);
+    });
+
+
+    it('should deposit DAI', () => {
+      const amount = 100;
+
+      Position.enableDAI('deposit');
+
+      Position.depositDAI(amount);
+      Position.expectAmountOfDAI(`100.00`);
+    });
+  })
 });

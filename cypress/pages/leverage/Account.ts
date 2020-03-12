@@ -13,11 +13,7 @@ export class Account {
   public static shouldNotHaveAllowance = () => {
     cy.get(tid('set-allowance', tid('step-completed'))).should('not.exist');
   }
-
-  public static shouldSeeDepositForm = () => {
-    cy.get(tid('active-tab')).should('have.text', 'Deposit');
-  }
-
+  
   public static setupProxy = () => {
     cy.get(tid('create-proxy')).click();
   }
@@ -27,12 +23,16 @@ export class Account {
   }
 
   public static deposit = (amount: number) => {
-    cy.get(tid('amount-input')).type(amount.toString());
+    cy.get(tid('transfer', tid('amount-input'))).type(amount.toString());
     cy.get(tid('deposit-btn')).click();
   }
 
   public static depositedAmount = ( amount : string | RegExp) => {
     cy.get(tid('col-balance')).contains(amount);
+  }
+/*  */
+  public static depositedDaiAmount = ( amount : string | RegExp) => {
+    cy.get(tid('dai-balance')).contains(amount);
   }
   /* In order to use this method one should:
    * - create proxy
@@ -47,9 +47,5 @@ export class Account {
     .find(tid('set-allowance'))
     .click();
     cy.get(tid('withdraw-dai')).should('be.visible');
-  }
-
-  public static leveragePositionShouldBeDisplayed = () => {
-    cy.get(tid('my-position')).should('be.visible');
   }
 }

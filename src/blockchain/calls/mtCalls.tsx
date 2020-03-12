@@ -18,7 +18,7 @@ export const setupMTProxy = {
   call: (_data: {}, context: NetworkConfig) =>
     context.instantProxyRegistry.contract.methods['build()'],
   prepareArgs: () => [],
-  options: () => ({ gas: DEFAULT_GAS + 2000000 }), // this should be estimated as in setupProxy
+  options: () => ({ gas: DEFAULT_GAS }), // this should be estimated as in setupProxy
   kind: TxMetaKind.setupMTProxy,
   description: () => <React.Fragment>Setup MT proxy</React.Fragment>
 };

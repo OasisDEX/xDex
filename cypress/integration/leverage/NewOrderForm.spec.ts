@@ -8,6 +8,46 @@ import { Modal } from '../../pages/leverage/Modal';
 import { format } from 'path';
 import { formatWithOptions } from 'util';
 
+describe('New Leverage Position', () => {
+  beforeEach(() => {
+    cypressVisitWithWeb3();
+
+    WalletConnection.connect();
+    WalletConnection.isConnected();
+
+    Tab.leverage();
+  });
+
+
+  it('by depositing collateral', () => {
+    Modal.open(Position.new('WETH'));
+    Account.setupProxy();
+    Account.setAllowance();
+    Modal.hasActiveTab('Deposit');  
+    Account.deposit(1);
+  
+    Modal.hasActiveTab('Buy'); 
+    Modal.close();
+
+    Position.widgetShouldBeVisisble();
+    Position.expectAmountOfCollateral(/1../);
+  });
+
+  it('by depositing DAI', () => {
+    Modal.open(Position.new('DAI'));
+    Account.setupProxy();
+    Account.setAllowance();
+    Modal.hasActiveTab('Deposit');  
+    Account.deposit(100);
+    
+    Modal.hasActiveTab('Buy'); 
+    Modal.close();
+ 
+    Position.widgetShouldBeVisisble();
+    Position.expectAmountOfDAI(/100../);
+  })
+});
+
 describe('Leverage form', () => {
   context.skip('without provider', () => {
     beforeEach(() => {
@@ -79,157 +119,223 @@ describe('Leverage form', () => {
   context('with connected wallet', () => {
     beforeEach(() => {
       cypressVisitWithWeb3();
-      Tab.leverage();
-
       WalletConnection.connect();
       WalletConnection.isConnected();
-
-      // TODO: refactor this object. It should return the process with 2 steps , setting proxy, setting allowance.
-      Modal.open(Position.new('WETH'));
-      Account.setupProxy();
-      Account.setAllowance();
-      Account.shouldSeeDepositForm();  
-      Account.deposit(1);
-      
-      Account.depositedAmount(/1.../);
-      Modal.close();
+      Tab.leverage();
     });
 
-    it('should display form params', () => {
-      Form.currentPurchasingPowerIs('123.35');
-      Form.currentBalanceIs('1.00');
-      Form.currentDaiBalanceIs('0.00');
-      Form.currentPriceIs('301.00');
-      Form.currentLiquidationPrice('-');
-    });
-
-    it('should be able to change slippage limi', () => {
-      Form.slippageLimitIs('5.00');
-      Form.changeSlippageLimitTo(3);
-      Form.slippageLimitIs('3.00');
-    });
-
-    context('buying collateral', () => {
+    context('buying collateral using DAI', () => {
       beforeEach(() => {
+        Modal.open(Position.new('DAI'));
+        Account.setupProxy();
+        Account.setAllowance();
+        Modal.hasActiveTab('Deposit');  
+        Account.deposit(301);
+        
+        Modal.hasActiveTab('Buy'); 
+        Modal.close();
         Form.selectOrderType('buy');
       });
 
-      it('entering amount value without sufficied collateral locked', () => {
+      it('without generating debt', () => {
+        Form.amountInput().type('0.5');
+        Form.totalInput().should('have.value', '150.5000');
+        Form.currentPurchasingPowerIs('424.35');
+        Form.estimatedPurchasingPowerIs('273.85');
+        Form.currentBalanceIs('0.00');
+        Form.estimatedBalanceIs('0.5000');
+        Form.currentDaiBalanceIs('301.00');
+        Form.estimatedDaiBalanceIs('150.5');
+        Form.currentPriceIs('301.00');
+        Form.currentLiquidationPrice('-');
+        Form.acceptedRiskCompliance();
+        Form.placeOrder();
+
+        Position.expectAmountOfCollateral(`0.5000`);
+        Position.expectAmountOfDAI(`150.50`);
+      });
+
+      it('for generating debt', () => {
+        Form.amountInput().type('1.40981');
+        Form.totalInput().should('have.value', '424.3528');
+        Form.currentPurchasingPowerIs('424.35');
+        Form.estimatedPurchasingPowerIs('0.00');
+        Form.currentBalanceIs('0.00');
+        Form.estimatedBalanceIs('1.4098');
+        Form.currentDaiBalanceIs('301.00');
+        Form.estimatedDaiBalanceIs('-123.35');
+        Form.currentPriceIs('301.00');
+        Form.currentLiquidationPrice('-');
+        Form.estimatedLiquidationPrice('131.24')
+        Form.acceptedRiskCompliance();
+        Form.placeOrder();
+
+        Position.expectAmountOfCollateral(`1.4098`);
+        Position.expectAmountOfDAI(`-123.35`);
+      });
+
+      it('with generating debt and remaining withdraw DAI', () => {
+        Form.amountInput().type('0.5');
+        Form.totalInput().should('have.value', '150.5000');
+        Form.currentPurchasingPowerIs('424.35');
+        Form.estimatedPurchasingPowerIs('273.85');
+        Form.currentBalanceIs('0.00');
+        Form.estimatedBalanceIs('0.5000');
+        Form.currentDaiBalanceIs('301.00');
+        Form.estimatedDaiBalanceIs('150.5');
+        Form.currentPriceIs('301.00');
+        Form.currentLiquidationPrice('-');
+        Form.acceptedRiskCompliance();
+        Form.placeOrder();
+
+        Position.expectAmountOfCollateral(`0.5000`);
+        Position.expectAmountOfDAI(`150.50`);
+
+        Position.withdrawDAI(150.50);
+        Position.expectAmountOfCollateral(`0.5000`);
+        Position.expectAmountOfDAI(`0.00`);
+      });
+    });
+
+    context('buying collateral using WETH', () => {
+      beforeEach(() => {
+        Modal.open(Position.new('WETH'));
+        Account.setupProxy();
+        Account.setAllowance();
+        Modal.hasActiveTab('Deposit');  
+        Account.deposit(5);
+        
+        Modal.hasActiveTab('Buy'); 
+        Modal.close();
+        Form.selectOrderType('buy');
+      });
+
+      it('should buy more WETH and generate debt', () => {
         Form.amountInput().type('2');
         Form.totalInput().should('have.value', '602.0000');
-        Form.expectTotalInputError('Your DAI balance is too low to fund this order');
-        Form.placeOrderBtn().should('be.disabled');
-      });
+        Form.currentPurchasingPowerIs('616.79');
+        Form.estimatedPurchasingPowerIs('14.79');
+        Form.currentBalanceIs('5.00');
+        Form.estimatedBalanceIs('7.00');
+        Form.currentDaiBalanceIs('0.00');
+        Form.estimatedDaiBalanceIs('-602.00');
+        Form.currentPriceIs('301.00');
+        Form.currentLiquidationPrice('-');
+        Form.estimatedLiquidationPrice('129')
+        Form.acceptedRiskCompliance();
+        Form.placeOrder();
 
-      it('entering value for total without sufficient collateral locked', () => {
-        Form.totalInput().type('602');
-        Form.amountInput().should('have.value', '2.00000');
-        Form.expectTotalInputError('Your DAI balance is too low to fund this order');
-        Form.placeOrderBtn().should('be.disabled');
-      });
-
-      it('entering value for amount exceeding orderbook size', () => {
-        Form.amountInput().type('11');
-        Form.totalInput().should('be.empty');
-        Form.expectAmountInputError('Can\'t calculate: orderbook too shallow. Type smaller amount');
-        Form.placeOrderBtn().should('be.disabled');
-      });
-
-      it('entering value for total exceeding orderbook size', () => {
-        Form.totalInput().type('10000');
-        Form.amountInput().should('be.empty');
-        Form.expectTotalInputError('Can\'t calculate: orderbook too shallow. Type smaller amount');
-        Form.placeOrderBtn().should('be.disabled');
-      });
-
-      it('using leverage', () => {
-        const purchasingPower = new RegExp(/23.34/);
-        const colBalance = new RegExp(/1.33222/);
-        const daiBalance = new RegExp(/-99.9982/);
-        const liquidationPrice = new RegExp(/112.59/);
-
-        Form.amountInput().type('0.33222');
-        Form.totalInput().should('have.value', '99.9982');
-        Form.estimatedPurchasingPowerIs(purchasingPower);
-        Form.estimatedBalanceIs(colBalance);
-        Form.estimatedDaiBalanceIs(daiBalance);
-        Form.estimatedLiquidationPrice(liquidationPrice)
-
-        Form.placeOrderBtn().click();
-        
-        Form.currentPurchasingPowerIs(purchasingPower);
-        Form.currentBalanceIs(colBalance);
-        Form.currentDaiBalanceIs(daiBalance);
-        Form.currentLiquidationPrice(liquidationPrice);
+        Position.expectAmountOfCollateral(`6.9999`);
+        Position.expectAmountOfDAI(`-602.00`);
       })
-    });
 
-    context('selling collateral', () => {
+      it('should buy more WETH, generate debt and withdraw some WETH', () => {
+        Form.amountInput().type('2');
+        Form.totalInput().should('have.value', '602.0000');
+        Form.currentPurchasingPowerIs('616.79');
+        Form.estimatedPurchasingPowerIs('14.79');
+        Form.currentBalanceIs('5.00');
+        Form.estimatedBalanceIs('7.00');
+        Form.currentDaiBalanceIs('0.00');
+        Form.estimatedDaiBalanceIs('-602.00');
+        Form.currentPriceIs('301.00');
+        Form.currentLiquidationPrice('-');
+        Form.estimatedLiquidationPrice('129')
+        Form.acceptedRiskCompliance();
+        Form.placeOrder();
+
+        Position.expectAmountOfCollateral(`6.9999`);
+        Position.expectAmountOfDAI(`-602.00`);
+
+        Position.withdrawCollateral(0.11999);
+        Position.expectAmountOfCollateral(`6.8800`);
+      })
+    })
+
+    context.only('selling collateral using WETH', () => {
 
       beforeEach(() => {
+        Modal.open(Position.new('WETH'));
+        Account.setupProxy();
+        Account.setAllowance();
+        Modal.hasActiveTab('Deposit');  
+        Account.deposit(3);
+        
+        Modal.hasActiveTab('Buy'); 
+        Modal.close();
+
         Form.selectOrderType('sell');
       });
 
-      it('entering amount vlaue without sufficient collateral locked', () => {
+      it('full amount without generated debt', () => {
+        Form.amountInput().type('3');
+        Form.totalInput().should('have.value', '830.0000');
+        Form.currentBalanceIs('3.00');
+        Form.estimatedBalanceIs('0.00')
+        Form.currentDaiBalanceIs('0.00');
+        Form.estimatedDaiBalanceIs('830.00');
+        Form.currentPriceIs('276.6666');
+        Form.currentLiquidationPrice('-');
+        Form.placeOrder();
+
+        Position.expectAmountOfCollateral('0.00');
+        Position.expectAmountOfDAI('830.00');
+        Position.expectLiquidationPrice('-');
+      });
+      
+      it('partial amount without generated debt', () => {
         Form.amountInput().type('2');
         Form.totalInput().should('have.value', '555.0000');
-        Form.expectAmountInputError('Your WETH balance is too low to fund this order');
-        Form.placeOrderBtn().should('be.disabled');
+        Form.currentBalanceIs('3.00');
+        Form.estimatedBalanceIs('1.00')
+        Form.currentDaiBalanceIs('0.00');
+        Form.estimatedDaiBalanceIs('555.00');
+        Form.currentPriceIs('277.5000');
+        Form.currentLiquidationPrice('-');
+        Form.placeOrder();
+
+        Position.expectAmountOfCollateral('1.00');
+        Position.expectAmountOfDAI('555.00');
+        Position.expectLiquidationPrice('-');
       });
 
-      it('entering total vlaue without sufficient collateral locked', () => {
-        Form.totalInput().type('555');
-        Form.amountInput().should('have.value', '2.00000');
-        Form.expectAmountInputError('Your WETH balance is too low to fund this order');
-        Form.placeOrderBtn().should('be.disabled');
-      });
-
-      it('entering value for amount without any collateral locked exceeding orderbook size', () => {
-        Form.amountInput().type('5');
-        Form.totalInput().should('be.empty');
-        Form.expectAmountInputError('Can\'t calculate: orderbook too shallow. Type smaller amount');
-        Form.placeOrderBtn().should('be.disabled');
-      });
-
-      it('entering value for total without any collateral locked exceeding orderbook size', () => {
-        Form.totalInput().type('10000');
-        Form.amountInput().should('be.empty');
-        Form.expectTotalInputError('Can\'t calculate: orderbook too shallow. Type smaller amount');
-        Form.placeOrderBtn().should('be.disabled');
-      });
-
-      it.only('using leverage', () => {
+      it('after generating debt', () => {
         Form.selectOrderType('buy');
-        const purchasingPower = new RegExp(/77.62/);
-        const colBalance = new RegExp(/1.13222/);
-        const daiBalance = new RegExp(/-43.9982/);
-        const liquidationPrice = new RegExp(/58.29/);
+        Form.amountInput().type('0.6');
+        Form.totalInput().should('have.value', '180.6000');
+        Form.currentBalanceIs('3.00');
+        Form.estimatedBalanceIs('3.60')
+        Form.currentDaiBalanceIs('0.00');
+        Form.estimatedDaiBalanceIs('-180.60');
+        Form.currentPriceIs('301');
+        Form.currentLiquidationPrice('-');
+        Form.estimatedLiquidationPrice('75.25');
+        Form.acceptedRiskCompliance();
+        Form.placeOrder();
 
-        Form.amountInput().type('0.33222');
-        Form.totalInput().should('have.value', '99.9982');
-
-        Form.placeOrderBtn().click();        
-        Form.currentPurchasingPowerIs(/23.34/);
-        Form.currentBalanceIs(/1.33222/);
-        Form.currentDaiBalanceIs(/-99.9982/);
+        Position.expectAmountOfCollateral('3.5999');
+        Position.expectAmountOfDAI('-180.60');
+        // IN DAI - will change when default value is USD
+        // Position.expectLiquidationPrice('77.8534');
 
         Form.selectOrderType('sell');
+        Form.amountInput().type('3.5999');
+        Form.totalInput().should('have.value', '979.9750');
+        Form.currentBalanceIs('3.5999');
+        Form.estimatedBalanceIs('0.00')
+        Form.currentDaiBalanceIs('-180.60');
+        Form.estimatedDaiBalanceIs('799.37');
+        Form.currentPriceIs('272.2228');
+        Form.currentLiquidationPrice('75.25');
+        Form.estimatedLiquidationPrice('-');
+        Form.placeOrder();
 
-        Form.amountInput().type('0.2');
-        Form.totalInput().should('have.value', '56.0000');
+        Position.expectAmountOfCollateral('0.00');
+        Position.expectAmountOfDAI('799.37');
+        // IN DAI - will change when default value is USD
+        Position.expectLiquidationPrice('-');
 
-        // Form.estimatedPurchasingPowerIs(purchasingPower);
-        Form.estimatedBalanceIs(colBalance);
-        Form.estimatedDaiBalanceIs(daiBalance);
-        Form.estimatedLiquidationPrice(liquidationPrice)
-
-        Form.placeOrderBtn().click();
-        
-        // Form.currentPurchasingPowerIs(purchasingPower);
-        Form.currentBalanceIs(colBalance);
-        Form.currentDaiBalanceIs(daiBalance);
-        Form.currentLiquidationPrice(liquidationPrice);
-      })
+      });
     });
   });
 });

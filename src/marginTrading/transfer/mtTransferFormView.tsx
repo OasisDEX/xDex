@@ -146,7 +146,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
         overlayRef={onModalRef}
         shouldCloseOnEsc={true}
       >
-        <Panel className={styles.modalChild}>
+        <Panel className={styles.modalChild} data-test-id="modal">
           { withOnboarding ?
             <div className={styles.tabs}>
               {
@@ -166,7 +166,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
               }
             </div>
             :
-            <PanelHeader>
+            <PanelHeader data-test-id="header">
               {this.getActionName()}
             </PanelHeader>
           }
@@ -217,7 +217,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
                 {
                   currentTab === MTTransferFormTab.transfer &&
                   <>
-                    <PanelBody paddingTop={true} style={{ height: '287px' }}>
+                    <PanelBody paddingTop={true} style={{ height: '287px' }} data-test-id="transfer">
                         {this.AccountSummary()}
                         <Hr color="dark" className={styles.hrBigMargin}/>
                         {this.FormOrTransactionState()}
@@ -523,7 +523,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
         {deposit &&
         <Button size="md"
                 className={styles.confirmButton}
-                data-test-id="deposit-btn"
+                data-test-id={`${this.getActionName().toLowerCase()}-btn`}
                 disabled={!depositEnabled}
                 block={true}
                 color="primary"

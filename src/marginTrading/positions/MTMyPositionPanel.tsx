@@ -297,7 +297,7 @@ export class MTMyPositionPanelInternal
           size="md"
           key={ma.name}
           className={styles.actionButton}
-          data-test-id="deposit-collateral"
+          data-test-id="deposit-col"
           onClick={
             () => {
               this.transfer(UserActionKind.fund, ma.name, undefined);
@@ -315,6 +315,7 @@ export class MTMyPositionPanelInternal
       } else {
         actions.push(<Button
           size="md"
+          data-test-id="set-allowance"
           className={styles.actionButton}
           onClick={this.approveMTProxy(ma.name)}
         >
@@ -355,7 +356,7 @@ export class MTMyPositionPanelInternal
 
     if (type === 'withdraw') {
       actions.push(<Button
-        data-test-id="withdraw-collateral"
+        data-test-id="withdraw-col"
         size="md"
         key={ma.name}
         className={styles.actionButton}
