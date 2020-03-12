@@ -11,7 +11,7 @@ import {
   formatPercent,
   formatPrice,
   formatPriceDown,
-  formatPriceUp
+  formatPriceUp, toShorthandNumber
 } from './format';
 
 export type FormatNumberProps = React.HTMLAttributes<HTMLSpanElement> & {
@@ -58,7 +58,8 @@ export const FormatAmount = (props: FormatAmountProps) => {
       {...props}
     />;
   }
-  return <span title={value && value.toString()} {...spanProps}>{
+
+  return <span title={value && toShorthandNumber(value, '', 18)} {...spanProps}>{
     formatter
       ? formatter(value as BigNumber, token)
       : formatAmount(value as BigNumber, token)

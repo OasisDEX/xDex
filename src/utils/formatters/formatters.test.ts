@@ -184,6 +184,16 @@ describe('Formatting crypto balances according to number formatting spec', () =>
     expect(formatCryptoBalance(amount)).toEqual('-10.01');
   });
 
+  it('should format number with precision 2 and not shorthand thousands', () => {
+    const amount = new BigNumber(9.991235).times(thousand);
+    expect(formatCryptoBalance(amount)).toBe('9991.23');
+  });
+
+  it('should format number with precision 2 and not shorthand thousands (negative number)', () => {
+    const amount = new BigNumber(-999.991235).times(thousand);
+    expect(formatCryptoBalance(amount)).toBe('-999991.23');
+  });
+
   it('should have precision of 2 and suffix M', () => {
     const amount = new BigNumber('10.012').times(million);
     expect(formatCryptoBalance(amount)).toEqual('10.01M');
@@ -221,7 +231,7 @@ describe('Formatting crypto balances according to number formatting spec', () =>
 //   and to two decimal places (e.g. 539.39K or 1.54K)
 // - If >1m - Shorted to M (without a space) and to two decimal places (e.g. 23.53M)
 
-describe('Formatting fiat balances according to number formattic spec', () => {
+describe('Formatting fiat balances according to number formatting spec', () => {
   it('should format number with precision 4', () => {
     const amount = new BigNumber(0.991235);
     expect(formatFiatBalance(amount)).toBe('0.9912');
@@ -244,12 +254,12 @@ describe('Formatting fiat balances according to number formattic spec', () => {
 
   it('should format number with precision 2 and suffix K', () => {
     const amount = new BigNumber(9.991235).times(thousand);
-    expect(formatFiatBalance(amount)).toBe('9991.23');
+    expect(formatFiatBalance(amount)).toBe('9.99K');
   });
 
   it('should format number with precision 2 and suffix K (negative number)', () => {
     const amount = new BigNumber(-999.991235).times(thousand);
-    expect(formatFiatBalance(amount)).toBe('-999991.23');
+    expect(formatFiatBalance(amount)).toBe('-999.99K');
   });
 
   it('should format number with precision 2 and suffix M', () => {
