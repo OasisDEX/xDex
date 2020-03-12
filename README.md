@@ -12,9 +12,14 @@ yarn
 yarn start
 ```
 
-## Staging
+## Environments
+[master branch](https://oasis.app/trade/) - uses `.env.production` configuration file
 
-[dev branch](https://staging.oasis.app/trade/)
+[dev branch](https://staging.oasis.app/trade/) - uses `.env.dev` configuration file
+
+[localhost](https://localhost:3000) - uses `.env` configuration file
+
+Configuration files enable different feature switches for each environment.
 
 ### Local development
 

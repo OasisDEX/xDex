@@ -58,21 +58,29 @@ import * as txManager from './abi/tx-manager.abi.json';
 import { nullAddress } from './utils';
 import { web3 } from './web3';
 
+const hasNewMarketsAvailable = process.env.REACT_APP_NEW_MARKETS_ENABLED === '1';
+
 export const tradingPairs: TradingPair[] = [
   { base: 'WETH', quote: 'DAI' },
   { base: 'REP', quote: 'DAI' },
   { base: 'ZRX', quote: 'DAI' },
   { base: 'BAT', quote: 'DAI' },
-  { base: 'LINK', quote: 'DAI' },
-  { base: 'WBTC', quote: 'DAI' },
+  ...(hasNewMarketsAvailable ? [
+    { base: 'LINK', quote: 'DAI' },
+    { base: 'WBTC', quote: 'DAI' },
+  ] : []),
   { base: 'DAI', quote: 'USDC' },
-  { base: 'DAI', quote: 'TUSD' },
-  { base: 'DAI', quote: 'PAX' },
+  ...(hasNewMarketsAvailable ? [
+    { base: 'DAI', quote: 'TUSD' },
+    { base: 'DAI', quote: 'PAX' },
+  ] : []),
   { base: 'REP', quote: 'WETH' },
   { base: 'ZRX', quote: 'WETH' },
   { base: 'BAT', quote: 'WETH' },
-  { base: 'LINK', quote: 'WETH' },
-  { base: 'WBTC', quote: 'WETH' },
+  ...(hasNewMarketsAvailable ? [
+    { base: 'LINK', quote: 'WETH' },
+    { base: 'WBTC', quote: 'WETH' },
+  ] : []),
 ];
 
 function asMap<D>(key: string, data: D[]): { [key: string]: D } {
