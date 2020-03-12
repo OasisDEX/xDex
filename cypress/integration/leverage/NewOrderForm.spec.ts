@@ -7,6 +7,7 @@ import { cypressVisitWithoutProvider, cypressVisitWithWeb3, tid } from '../../ut
 import { Modal } from '../../pages/leverage/Modal';
 import { format } from 'path';
 import { formatWithOptions } from 'util';
+import { fromNode } from 'cypress/types/bluebird';
 
 describe('New Leverage Position', () => {
   beforeEach(() => {
@@ -153,9 +154,13 @@ describe('Leverage form', () => {
 
         Position.expectAmountOfCollateral(`0.5000`);
         Position.expectAmountOfDAI(`150.50`);
+
+        Position.withdrawDAI(150.50);
+        Position.expectAmountOfCollateral(`0.5000`);
+        Position.expectAmountOfDAI(`0.00`);
       });
 
-      it('for generating debt', () => {
+      it('with generating debt', () => {
         Form.amountInput().type('1.40981');
         Form.totalInput().should('have.value', '424.3528');
         Form.currentPurchasingPowerIs('424.35');
@@ -174,27 +179,40 @@ describe('Leverage form', () => {
         Position.expectAmountOfDAI(`-123.35`);
       });
 
-      it('with generating debt and remaining withdraw DAI', () => {
-        Form.amountInput().type('0.5');
-        Form.totalInput().should('have.value', '150.5000');
-        Form.currentPurchasingPowerIs('424.35');
-        Form.estimatedPurchasingPowerIs('273.85');
-        Form.currentBalanceIs('0.00');
-        Form.estimatedBalanceIs('0.5000');
-        Form.currentDaiBalanceIs('301.00');
-        Form.estimatedDaiBalanceIs('150.5');
-        Form.currentPriceIs('301.00');
-        Form.currentLiquidationPrice('-');
-        Form.acceptedRiskCompliance();
-        Form.placeOrder();
+      // it.skip('without generating debt and having WETH deposited', () => {
+      //   Position.enableCollateral('deposit');
+      //   Position.depositCollateral(5);
 
-        Position.expectAmountOfCollateral(`0.5000`);
-        Position.expectAmountOfDAI(`150.50`);
+      //   Form.selectOrderType('sell');
 
-        Position.withdrawDAI(150.50);
-        Position.expectAmountOfCollateral(`0.5000`);
-        Position.expectAmountOfDAI(`0.00`);
-      });
+      //   Form.amountInput().type('1');
+      //   Form.totalInput().should('have.value', '280.0000');
+      //   Form.currentDaiBalanceIs('301.00');
+      //   Form.estimatedDaiBalanceIs('581.00');
+      //   Form.estimatedLiquidationPrice('-');
+      //   Form.currentPriceIs('280.0000');
+      //   Form.placeOrder();
+
+      //   Position.expectAmountOfCollateral(`4.00`);
+      //   Position.expectAmountOfDAI(`581.00`);
+
+      //   Form.selectOrderType('buy');
+
+      //   Form.amountInput().type('1');
+      //   Form.totalInput().should('have.value', '301.0000');
+      //   Form.currentPurchasingPowerIs('1,041.15');
+      //   Form.estimatedPurchasingPowerIs('740.15');
+      //   Form.currentBalanceIs('5.0000');
+      //   Form.estimatedBalanceIs('6.0000');
+      //   Form.currentDaiBalanceIs('301.00');
+      //   Form.estimatedDaiBalanceIs('0.00');
+      //   Form.currentLiquidationPrice('-');
+      //   Form.acceptedRiskCompliance();
+      //   Form.placeOrder();
+
+      //   Position.expectAmountOfCollateral(`6.00`);
+      //   Position.expectAmountOfDAI(`0.00`);
+      // })
     });
 
     context('buying collateral using WETH', () => {
@@ -252,7 +270,7 @@ describe('Leverage form', () => {
       })
     })
 
-    context.only('selling collateral using WETH', () => {
+    context('selling collateral', () => {
 
       beforeEach(() => {
         Modal.open(Position.new('WETH'));

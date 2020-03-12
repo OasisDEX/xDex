@@ -111,5 +111,52 @@ describe('My Position panel', () => {
       Position.depositDAI(amount);
       Position.expectAmountOfDAI(`100.00`);
     });
-  })
+  });
+
+  context('with proxy and DAI/WETH allowance', () => {
+    beforeEach(()=> {
+      Modal.open(Position.new('WETH'));
+      Account.setupProxy();
+      Account.setAllowance();
+      Modal.hasActiveTab('Deposit');  
+      Account.deposit(5);
+      Modal.close();
+      Position.enableDAI('deposit');
+      Position.depositDAI(100);
+    });
+
+    it.only('should deposit more WETH', () => {
+      Position.depositCollateral(10);
+
+      Position.expectAmountOfCollateral(`15.00`);
+    });
+
+    it('should withdraw partially WETH', () => {
+      Position.withdrawCollateral(0.5);
+
+      Position.expectAmountOfCollateral(`4.50`);
+      Position.expectAmountOfDAI(`100`);
+    });
+
+    it('should withdraw full WETH', () => {
+      Position.withdrawCollateral(5);
+
+      Position.expectAmountOfCollateral(`0.00`);
+      Position.expectAmountOfDAI(`100`);
+    });
+
+    it('should withdraw partially DAI', () => {
+      Position.withdrawDAI(45);
+
+      Position.expectAmountOfCollateral(`5.00`);
+      Position.expectAmountOfDAI(`55.00`);
+    });
+
+    it('should withdraw full DAI', () => {
+      Position.withdrawDAI(100);
+
+      Position.expectAmountOfCollateral(`5.00`);
+      Position.expectAmountOfDAI(`0.00`);
+    });
+  });  
 });
