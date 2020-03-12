@@ -694,7 +694,7 @@ function getSellPlan(
     {
       ...asset,
       debt: asset.debt.plus(delta),
-      dai: total.plus(delta)
+      dai: asset.dai.plus(delta).plus(total),
     } as MarginableAssetCore,
     { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook
   );
