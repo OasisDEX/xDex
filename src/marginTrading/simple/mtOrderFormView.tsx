@@ -616,7 +616,7 @@ export class MtSimpleOrderFormBody
                   this.props.dustWarning &&
                   <div className={styles.purchasingPowerTooltip}>
                     <WarningTooltip id="purchasing-power-dust"
-                      text="You don't have purchasing power due to the debt dust limit." />
+                      text="You do not have enough purchasing power to complete this order." />
                   </div>
                 }
                 {formatPrecision(this.props.realPurchasingPower, 2)}
@@ -1140,7 +1140,7 @@ function messageContent(msg: Message) {
     case MessageKind.impossibleCalculateTotal:
       return `Can't calculate: ${msg.message}. Type smaller amount`;
     case MessageKind.minDebt:
-      return `Dai debt below ${msg.message} limit`;
+      return `Dai debt below ${msg.message} DAI limit`;
     case MessageKind.unsellable:
       return `Your position is unsellable. ${msg.message}`;
   }
