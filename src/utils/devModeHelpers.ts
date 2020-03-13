@@ -1,7 +1,7 @@
 import { BigNumber } from 'bignumber.js';
 import { concat, range } from 'lodash';
 import { Dictionary } from 'ramda';
-import { identity, Observable, of } from 'rxjs';
+import { combineLatest, identity, Observable, of } from 'rxjs';
 import { first, flatMap, tap } from 'rxjs/operators';
 import { Calls$, ReadCalls$ } from '../blockchain/calls/calls';
 import { NetworkConfig } from '../blockchain/config';
@@ -260,4 +260,54 @@ export function pluginDevModeHelpers(
     });
 
   console.log('Dev mode helpers installed!');
+
+  (window as any).cancelAllOffers = (
+    baseToken: string, quoteToken: string,
+  ) =>
+    calls$.pipe(
+      first(),
+      flatMap(calls =>
+        createProxyAddress$(context$, initializedAccount$, onEveryBlock$).pipe(
+          first(),
+          tap(proxyAddress => console.log({ proxyAddress })),
+          flatMap(proxyAddress => {
+            if (!proxyAddress) {
+              console.log('Proxy not found!');
+              return of();
+            }
+            return calls.cancelAllOffers(
+              { baseToken, quoteToken, proxyAddress },
+            );
+          }),
+        ),
+      )
+    ).subscribe(identity);
+  (window as any).proxyERC20Balance = (token: string) =>
+    combineLatest(readCalls$, calls$).pipe(
+      flatMap(([readCalls, calls]) =>
+        calls.proxyAddress().pipe(
+          flatMap(proxyAddress => {
+            if (!proxyAddress) {
+              return of();
+            }
+            console.log('proxyAddress:', proxyAddress);
+            return readCalls.proxyERC20Balance({ proxyAddress, token, });
+          }),
+          tap(balance => console.log(balance.toString())),
+        )
+      )
+    ).subscribe(identity);
+  (window as any).recoverERC20 = (token: string) =>
+    calls$.pipe(
+      flatMap(calls =>
+        calls.proxyAddress().pipe(
+          flatMap(proxyAddress => {
+            if (!proxyAddress) {
+              return of();
+            }
+            return calls.recoverERC20({ proxyAddress, token, });
+          })
+        )
+      )
+    ).subscribe(identity);
 }

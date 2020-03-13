@@ -54,6 +54,7 @@ import * as otcSupport from './abi/otc-support-methods.abi.json';
 import * as proxyActions from './abi/proxy-actions.abi.json';
 import * as proxyCreationAndExecute from './abi/proxy-creation-and-execute.abi.json';
 import * as proxyRegistry from './abi/proxy-registry.abi.json';
+import * as tokenRecovery from './abi/token-recovery.abi.json';
 import * as txManager from './abi/tx-manager.abi.json';
 import { nullAddress } from './utils';
 import { web3 } from './web3';
@@ -396,6 +397,9 @@ const protoMain = {
   get instantMigrationProxyActions() {
     return load(instantMigrationProxyActions, '0x396Ea3C3376cC78864f51ce2FDdb275D3dC0968b');
   },
+  get tokenRecovery() {
+    return load(tokenRecovery, '0xc06a269e3370f582df2dbb6cf0271c267badf99d');
+  },
   oasisDataService: {
     url: 'https://staging-cache.eth2dai.com/api/v1'
   },
@@ -543,6 +547,9 @@ const kovan: NetworkConfig = {
   get instantMigrationProxyActions() {
     return load(instantMigrationProxyActions, '0xa623ea3b3219bb59b96c4aff2d26aff0d038af62');
   },
+  get tokenRecovery() {
+    return load(tokenRecovery, '0x225da3848f57248148d3faa1625d0beb66902de3');
+  },
   oasisDataService: {
     url: 'https://kovan-cache.eth2dai.com/api/v1'
   },
@@ -682,6 +689,9 @@ const localnet: NetworkConfig =  {
   },
   get instantMigrationProxyActions() {
     return load(instantMigrationProxyActions, '0x141048f25b24AEfAF1A13fD9C2e8628121A0f1E7');
+  },
+  get tokenRecovery() {
+    return load(tokenRecovery, nullAddress);
   },
   oasisDataService: {
     url: 'http://localhost:3001/v1'
