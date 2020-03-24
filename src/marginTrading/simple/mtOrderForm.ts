@@ -911,8 +911,8 @@ function isReadyToProceed(state: MTSimpleFormState): MTSimpleFormState {
     state.plan && !isImpossible(state.plan) && state.plan.length !== 0 &&
     state.gasEstimationStatus === GasEstimationStatus.calculated &&
     state.isSafeCollRatio &&
-    state.riskComplianceAccepted
-    || (state.kind === OfferType.buy ? state.riskComplianceCurrent : true)
+    (state.riskComplianceAccepted
+    || (state.kind === OfferType.buy ? state.riskComplianceCurrent : true))
   ) {
     return  { ...state, readyToProceed: true };
   }
