@@ -137,7 +137,7 @@ import {
 } from './marginTrading/simple/mtOrderForm';
 import { MTSimpleOrderPanel } from './marginTrading/simple/mtOrderPanel';
 import {
-  createMTProxyApprove, MTAccount
+  createMTProxyApprove, MTAccount, MTAccountState
 } from './marginTrading/state/mtAccount';
 import { createMta$ } from './marginTrading/state/mtAggregate';
 import {
@@ -156,7 +156,13 @@ import { OfferMatchType } from './utils/form';
 import { inject } from './utils/inject';
 import { Loadable, LoadableWithTradingPair, loadablifyLight, } from './utils/loadable';
 import { withModal } from './utils/modal';
+import { zero } from './utils/zero';
 import { createWrapUnwrapForm$ } from './wrapUnwrap/wrapUnwrapForm';
+
+const {
+  REACT_APP_LT_ENABLED,
+} = process.env;
+
 export function setupAppContext() {
 
   const balances$ = createBalances$(context$, initializedAccount$, onEveryBlock$).pipe(
@@ -173,7 +179,23 @@ export function setupAppContext() {
 
   const loadOrderbook = memoizeTradingPair(curry(loadOrderbook$)(context$, onEveryBlock$));
 
-  const mta$ = createMta$(context$, initializedAccount$, onEveryBlock$, readCalls$, loadOrderbook);
+  const mta$ = REACT_APP_LT_ENABLED === '1'
+    ? createMta$(
+      context$,
+      initializedAccount$,
+      onEveryBlock$,
+      readCalls$,
+      loadOrderbook
+    )
+    : of({
+      state: MTAccountState.notSetup,
+      marginableAssets: [],
+      totalAssetValue: zero,
+      totalDebt: zero,
+      totalAvailableDebt: zero,
+      proxy: null,
+      daiAllowance: false,
+    });
 
   const mtBalances$ = createCombinedBalances(
     etherBalance$,
