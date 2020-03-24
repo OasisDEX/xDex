@@ -165,6 +165,7 @@ export class MTMyPositionView extends
                   value={ma.fee}
                   fallback="-"
                   multiply={false}
+                  precision={2}
                 />
               </div>
             </div>
@@ -179,6 +180,7 @@ export class MTMyPositionView extends
                   value={liquidationPenalty}
                   fallback="-"
                   multiply={false}
+                  precision={2}
                 />
               </div>
             </div>
