@@ -68,7 +68,22 @@ $header-media-breakpoint: 880px;
   //  padding-top: 5px;
   //  padding-bottom: 2px;
   //}
+
+  &.leveragedAssets {
+
+    tr, th {
+      border-bottom: 0;
+    }
+    th {
+      text-transform: uppercase;
+      color: $desaturated-dark-blue;
+      font-size: 12px;
+      font-weight: 600;
+    }
+  }
 }
+
+
 
 .centeredAsset {
   display: inline-flex;
