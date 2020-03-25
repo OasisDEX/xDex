@@ -206,11 +206,17 @@ export class MTBalancesViewInternalImpl
                 }
                 </td>
                 <td className={styles.amount}>
-                 ~<Money
-                    value={liquidationPriceDisplay}
-                    token={'DAI'}
-                    fallback="-"
-                  />
+                  {
+                    liquidationPriceDisplay
+                      ? <>
+                        ~<Money
+                          value={liquidationPriceDisplay}
+                          token={'DAI'}
+                          fallback="-"
+                        />
+                      </>
+                      : <>N/A</>
+                  }
                 </td>
                 <td className={styles.amount}>
                   <InfoLabel>
