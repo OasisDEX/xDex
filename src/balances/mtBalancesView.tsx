@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { default as BigNumber } from 'bignumber.js';
+import classnames from 'classnames';
 import { withRouter } from 'react-router';
 import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
 import { map, switchMap } from 'rxjs/internal/operators';
@@ -18,19 +19,25 @@ import {
   MarginableAsset, MTAccountState, UserActionKind
 } from '../marginTrading/state/mtAccount';
 import { MTTransferFormState } from '../marginTrading/transfer/mtTransferForm';
-import { formatAmount, formatCryptoBalance, formatPercent } from '../utils/formatters/format';
+import {
+  formatDateTime,
+  formatPrecision
+} from '../utils/formatters/format';
+import { CryptoMoney, Money } from '../utils/formatters/Formatters';
 import { Loadable } from '../utils/loadable';
 import { WithLoadingIndicator } from '../utils/loadingIndicator/LoadingIndicator';
 import { ModalOpenerProps } from '../utils/modal';
 import { Panel, PanelHeader } from '../utils/panel/Panel';
 import { Table } from '../utils/table/Table';
-import { Currency } from '../utils/text/Text';
+import { Currency, InfoLabel } from '../utils/text/Text';
+import { one, zero } from '../utils/zero';
 import { CombinedBalances } from './balances';
 import * as styles from './mtBalancesView.scss';
 
 export type MTBalancesProps = CombinedBalances & {
   ma?: MarginableAsset;
   selectMa: (ma?: MarginableAsset) => void;
+  daiPrice: BigNumber;
 };
 
 export type MTBalancesOwnProps = ModalOpenerProps &
@@ -87,17 +94,19 @@ export class MTBalancesView
 
 export function createBalancesView$(
   initializedAccount$: Observable<string>,
-  mtBalances$: Observable<CombinedBalances>
+  mtBalances$: Observable<CombinedBalances>,
+  daiPriceUsd$: Observable<BigNumber|undefined>
 ) {
   return initializedAccount$.pipe(
     switchMap(() => {
       const ma$: Subject<MarginableAsset | undefined> =
         new BehaviorSubject<MarginableAsset | undefined>(undefined);
-      return combineLatest(ma$, mtBalances$).pipe(
-        map(([ma, balances]) => ({
+      return combineLatest(ma$, mtBalances$, daiPriceUsd$).pipe(
+        map(([ma, balances, daiPrice]) => ({
           ...balances,
           ma,
-          selectMa: ma$.next.bind(ma$)
+          daiPrice,
+          selectMa: ma$.next.bind(ma$),
         }))
       );
     })
@@ -109,15 +118,15 @@ export class MTBalancesViewInternalImpl
 
   public render() {
     return (
-      <Table className={styles.table} align="left">
+      <Table className={classnames(styles.table, styles.leveragedAssets)} align="left">
         <thead>
         <tr>
           <th>Asset</th>
-          <th className={styles.amount}>Interest Rate</th>
-          <th className={styles.amount}>Market Price</th>
-          <th className={styles.amount}>Liq. Price</th>
-          <th className={styles.amount}>PnL</th>
-          <th className={styles.amount}>Your Balance</th>
+          <th className={styles.amount}>Leverage</th>
+          <th className={styles.amount}>Equity (DAI)</th>
+          <th className={styles.amount}>Mark Price (DAI)</th>
+          <th className={styles.amount}>Liq. Price (DAI)</th>
+          <th className={styles.amount}>Last interaction</th>
         </tr>
         </thead>
         <tbody>
@@ -128,6 +137,24 @@ export class MTBalancesViewInternalImpl
           .filter(b => b.asset && b.asset.assetKind === AssetKind.marginable)
           .map(combinedBalance => {
             const asset: MarginableAsset = combinedBalance.asset!;
+            const lastEvent = asset.rawHistory.slice(-1)[0] || undefined;
+            const daiPrice = this.props.daiPrice;
+            const leverage = asset.leverage
+              ? asset.leverage
+              : asset.balance.gt(zero)
+                ? one
+                : zero;
+            const liquidationPrice = asset.liquidationPrice ? asset.liquidationPrice : zero;
+            const liquidationPriceMarket = liquidationPrice && asset.midpointPrice ?
+              liquidationPrice.times(daiPrice)
+              : zero;
+            const liquidationPriceDisplay =
+              liquidationPriceMarket.gt(zero) ? liquidationPriceMarket : undefined;
+
+            const markPrice = (asset.markPrice && daiPrice)
+                ? asset.markPrice.times(daiPrice)
+                : undefined;
+
             return (
               <tr
                 onClick={() =>
@@ -148,21 +175,53 @@ export class MTBalancesViewInternalImpl
                   </div>
                 </td>
                 <td className={styles.amount}>
-                  {formatPercent(asset.fee, { precision: 2 })}
+                  {
+                    leverage.gt(zero)
+                      ? <> Long - {formatPrecision(leverage, 1)}x</>
+                      : <span>-</span>
+                  }
                 </td>
                 <td className={styles.amount}>
-                  {formatAmount(asset.referencePrice, 'DAI')}
+                  {
+                    asset.equity &&
+                    <CryptoMoney
+                      value={asset.equity}
+                      token="DAI"
+                      fallback="-"
+                    />
+                  }
                 </td>
                 <td className={styles.amount}>
-                  {!asset.liquidationPrice.isNaN() &&
-                  formatAmount(asset.liquidationPrice, 'DAI') ||
-                  '-'}
+                  {
+                  markPrice
+                    ? (
+                      <>
+                        ~<Money
+                          value={markPrice}
+                          token={'DAI'}
+                        />
+                      </>
+                    )
+                    : <>N/A</>
+                }
                 </td>
                 <td className={styles.amount}>
-                  {asset.pnl && formatPercent(asset.pnl) || '-'}
+                  {
+                    liquidationPriceDisplay
+                      ? <>
+                        ~<Money
+                          value={liquidationPriceDisplay}
+                          token={'DAI'}
+                          fallback="-"
+                        />
+                      </>
+                      : <>N/A</>
+                  }
                 </td>
                 <td className={styles.amount}>
-                  {formatCryptoBalance(asset.balance)}
+                  <InfoLabel>
+                    { formatDateTime(new Date(lastEvent.timestamp), true) }
+                  </InfoLabel>
                 </td>
               </tr>
             );

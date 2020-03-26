@@ -258,7 +258,7 @@ export function setupAppContext() {
         connect(
           // @ts-ignore
           MTBalancesView,
-          loadablifyLight(createBalancesView$(initializedAccount$, mtBalances$))
+          loadablifyLight(createBalancesView$(initializedAccount$, mtBalances$, daiPriceUsd$))
         )
       ),
       {
