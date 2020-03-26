@@ -1,0 +1,46 @@
+@import "../utils/Variables";
+@import "../utils/Mixins";
+
+@include modal();
+
+.eventName {
+  text-transform: capitalize;
+}
+
+.table td, .table th {
+  vertical-align: top;
+  padding: 12px 8px 12px 8px;
+  font-size: 14px;
+  line-height: 15px;
+  text-align: left;
+}
+
+.table th {
+  font-size: 12px;
+  line-height: 15px;
+  text-transform: uppercase;
+
+}
+
+.headerDark {
+  color: $grey-lightest;
+  margin-right: 5px;
+}
+
+.contentWithScroll {
+  height: 360px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.table td.cellLeftAligned, .table th.cellLeftAligned {
+  text-align: left;
+}
+
+.eventPositive {
+  color: $green;
+}
+
+.eventNegative {
+  color: $bright-red;
+}

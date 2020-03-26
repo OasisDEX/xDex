@@ -1,9 +1,10 @@
 import { BigNumber } from 'bignumber.js';
-import { combineLatest, Observable, of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { first, flatMap, map, startWith, switchMap } from 'rxjs/operators';
-import { Calls, ReadCalls } from '../blockchain/calls/calls';
-import { GetOffersAmountData, InstantOrderData } from '../blockchain/calls/instant';
-import { allowance$ } from '../blockchain/network';
+import { Calls } from '../blockchain/calls/calls';
+import { InstantOrderData } from '../blockchain/calls/instant';
+import { isDAIEnabled } from '../blockchain/config';
+import { allowance$, waitUntil } from '../blockchain/network';
 import { getTxHash, isDone, isSuccess, TxState, TxStatus } from '../blockchain/transactions';
 import { amountFromWei } from '../blockchain/utils';
 import {
@@ -12,7 +13,7 @@ import {
   InstantFormState,
   Progress,
   ProgressChange,
-  ProgressKind
+  ProgressKind, sai2dai
 } from './instantForm';
 
 function progressChange(progress?: Progress): ProgressChange {
@@ -56,7 +57,7 @@ export function tradePayWithETH(
           ...initialProgress,
           tradeTxStatus: txState.status,
           tradeTxHash: getTxHash(txState),
-          ...extractTradeSummary(txState.receipt.logs),
+          ...extractTradeSummary(state.sellToken, state.buyToken, txState.receipt.logs),
           gasUsed: txState.receipt.gasUsed,
           done: isDone(txState)
         }));
@@ -79,12 +80,29 @@ function doTradePayWithERC20(
   initialProgress: Progress
 ): Observable<Progress> {
 
-  const trade$ = calls.tradePayWithERC20({
+  const gasCall = sai2dai(state.sellToken) !== state.sellToken ?
+    calls.migrateTradePayWithERC20EstimateGas :
+    calls.tradePayWithERC20EstimateGas;
+
+  const trade$ = gasCall({
     ...state,
     proxyAddress,
-    gasEstimation: state.gasEstimation,
-    gasPrice: state.gasPrice
-  } as InstantOrderData);
+    sellToken: sai2dai(state.sellToken),
+  } as InstantOrderData).pipe(
+    switchMap(gasEstimation => {
+      const call = state.sellToken === 'SAI' ?
+        calls.migrateTradePayWithERC20 :
+        calls.tradePayWithERC20;
+
+      return call({
+        ...state,
+        proxyAddress,
+        gasEstimation,
+        gasPrice: state.gasPrice,
+        sellToken: sai2dai(state.sellToken),
+      } as InstantOrderData);
+    })
+  );
 
   return trade$.pipe(
     flatMap((txState: TxState) => {
@@ -97,7 +115,7 @@ function doTradePayWithERC20(
       if (txState.status === TxStatus.Success) {
         return of({
           ...progress,
-          ...extractTradeSummary(txState.receipt.logs),
+          ...extractTradeSummary(state.sellToken, state.buyToken, txState.receipt.logs),
           gasUsed: txState.receipt.gasUsed,
           done: true
         });
@@ -124,13 +142,13 @@ function doApprove(
   state: InstantFormState,
   initialProgress: Progress
 ): Observable<Progress> {
-  return calls.proxyAddress().pipe(
+  return waitUntil(calls.proxyAddress(), proxyAddress => !!proxyAddress).pipe(
     flatMap(proxyAddress => {
       if (!proxyAddress) {
         throw new Error('Proxy not ready!');
       }
-      if (!state.gasEstimation || !state.gasPrice) {
-        throw new Error('No gas estimation!');
+      if (!state.gasPrice) {
+        throw new Error('No gas price!');
       }
       return calls.approveProxy({
         proxyAddress,
@@ -143,6 +161,7 @@ function doApprove(
             return doTradePayWithERC20(calls, proxyAddress, state, {
               ...initialProgress,
               allowanceTxStatus: txState.status,
+              // @ts-ignore
               allowanceTxHash: getTxHash(txState),
             });
           }
@@ -175,8 +194,8 @@ function doSetupProxy(
   calls: Calls,
   state: InstantFormState,
 ): Observable<Progress> {
-  if (!state.gasEstimation || !state.gasPrice) {
-    throw new Error('No gas estimation!');
+  if (!state.gasPrice) {
+    throw new Error('No gas price!');
   }
 
   return calls.setupProxy({
@@ -251,124 +270,33 @@ export function tradePayWithERC20(
 
 export function estimateTradePayWithETH(
   calls: Calls,
-  _readCalls: ReadCalls,
   proxyAddress: string | undefined,
   state: InstantFormState
 ): Observable<number> {
   return proxyAddress ?
     calls.tradePayWithETHWithProxyEstimateGas({ ...state, proxyAddress } as InstantOrderData) :
-    calls.tradePayWithETHNoProxyEstimateGas({ ...state, } as InstantOrderData);
-}
-
-function estimateDoTradePayWithERC20(
-  calls: Calls,
-  proxyAddress: string | undefined,
-  state: InstantFormState,
-): Observable<number> {
-  return calls.tradePayWithERC20EstimateGas({
-    ...state,
-    proxyAddress,
-    gasEstimation: state.gasEstimation,
-    gasPrice: state.gasPrice
-  } as InstantOrderData);
-}
-
-function simulateEstimateDoTradePayWithERC20(
-  calls: ReadCalls,
-  { kind, buyAmount, buyToken, sellAmount, sellToken }: InstantFormState,
-): Observable<number> {
-  return calls.otcGetOffersAmount({ kind, buyAmount, buyToken, sellAmount, sellToken } as GetOffersAmountData).pipe(
-    map(([offersCount, partial]) =>
-      141100 + offersCount.toNumber() * 136500 + (partial ? 70000 : 0)
-    )
-  );
-}
-
-function estimateDoApprove(
-  calls: Calls,
-  readCalls: ReadCalls,
-  state: InstantFormState,
-  proxyAddress: string,
-): Observable<number> {
-  return combineLatest(
-    calls.approveProxyEstimateGas({
-      proxyAddress,
-      token: state.sellToken,
-    }),
-    simulateEstimateDoTradePayWithERC20(readCalls, state),
-  ).pipe(
-    map(([approve, trade]) => approve + trade),
-  );
-}
-
-function simulateEstimateDoApprove(
-  _state: InstantFormState,
-): Observable<number> {
-  // for WETH and single-collateral DAI
-  return of(50000);
-}
-
-function estimateDoSetupProxy(
-  calls: Calls,
-  readCalls: ReadCalls,
-  state: InstantFormState,
-): Observable<number> {
-  return combineLatest(
-    calls.setupProxyEstimateGas({}),
-    simulateEstimateDoApprove(state),
-    simulateEstimateDoTradePayWithERC20(readCalls, state),
-  ).pipe(
-    map(([createProxy, approve, trade]) => createProxy + approve + trade),
-  );
-}
-
-function simulateEstimateDoSetupProxy(
-  _state: InstantFormState,
-) {
-  // based on sample transaction from main
-  return of(600000);
+    calls.tradePayWithETHNoProxyEstimateGas({ ...state } as InstantOrderData);
 }
 
 export function estimateTradePayWithERC20(
   calls: Calls,
-  readCalls: ReadCalls,
   proxyAddress: string | undefined,
-  state: InstantFormState
-): Observable<number> {
-
-  const sellAllowance$ = proxyAddress ?
-    allowance$(state.sellToken, proxyAddress).pipe(first()) :
-    of(false);
-
-  return sellAllowance$.pipe(
-    flatMap(sellAllowance => {
-      if (!proxyAddress) {
-        return estimateDoSetupProxy(calls, readCalls, state);
-      }
-      if (!sellAllowance) {
-        return estimateDoApprove(calls, readCalls, state, proxyAddress);
-      }
-
-      if (state.message) {
-        return simulateEstimateDoTradePayWithERC20(readCalls, state);
-      }
-
-      return estimateDoTradePayWithERC20(calls, proxyAddress, state);
-    }),
-  );
-
-}
-
-export function estimateTradeReadonly(
-  readCalls: ReadCalls,
   state: InstantFormState,
 ): Observable<number> {
-  return combineLatest(simulateEstimateDoSetupProxy(state), simulateEstimateDoApprove(state), simulateEstimateDoTradePayWithERC20(readCalls, state)).pipe(
-    map(([createProxy, approve, trade]) => createProxy + approve + trade),
-  );
+  const gasCall = state.sellToken === 'SAI' && isDAIEnabled() ?
+    calls.migrateTradePayWithERC20EstimateGas :
+    calls.tradePayWithERC20EstimateGas;
+
+  return gasCall({
+    ...state,
+    proxyAddress,
+    sellToken: state.sellToken === 'SAI' ? sai2dai(state.sellToken) : state.sellToken,
+  } as InstantOrderData);
 }
 
-const extractTradeSummary = (logs: any): { sold: BigNumber, bought: BigNumber } => {
+function extractTradeSummary(
+  sellToken: string, buyToken: string, logs: any
+): { sold: BigNumber, bought: BigNumber } {
   let sold = new BigNumber(0);
   let bought = new BigNumber(0);
   logs.map((log: any) => {
@@ -381,5 +309,5 @@ const extractTradeSummary = (logs: any): { sold: BigNumber, bought: BigNumber } 
     }
   });
 
-  return { sold: amountFromWei(sold, 'DAI'), bought: amountFromWei(bought, 'DAI') };
-};
+  return { sold: amountFromWei(sold, sellToken), bought: amountFromWei(bought, buyToken) };
+}

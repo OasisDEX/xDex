@@ -1,0 +1,40 @@
+@import "../utils/Mixins";
+
+.tradingPairPanel {
+  flex-grow: 1;
+  flex-direction: row;
+  border: none;
+  &.pairPickerOpen {
+    border-bottom-left-radius: 0;
+  }
+
+  @include media-breakpoint-down(md-lg){
+    flex-direction: column;
+    border: 1px solid $element-border;
+  }
+}
+
+$historyPanelsHeight: 342px;
+$twoColumnsPanelWidth: 454px;
+
+.priceChartPanel,
+.allTradesPanel {
+  width: $twoColumnsPanelWidth;
+  height: $historyPanelsHeight;
+
+  @include media-breakpoint-down(lg) {
+    width: 100%;
+  }
+}
+
+.orderFormPanel { 
+  margin-right: 24px;
+  flex-grow: 1;
+  width: 454px;
+  min-height: 474px;
+}
+
+.orderBookPanel {
+  flex-basis: 454px;
+  flex-grow: 1;
+}

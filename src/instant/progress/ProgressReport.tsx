@@ -8,7 +8,7 @@ interface Params {
 }
 
 export interface Report {
-  txStatus: TxStatus;
+  txStatus: TxStatus | string;
   txHash: string;
   etherscanURI: string;
 }
@@ -22,17 +22,33 @@ const statuses = new Map<string, (params: Params) => React.ReactNode>([
   )],
   [TxStatus.WaitingForConfirmation, (params: Params) => (
     <>
-      <a href={params.txReport} target="_blank" rel="noreferrer noopener" className={styles.link}><span>View on Etherscan</span></a>
+      <a href={params.txReport} target="_blank" rel="noreferrer noopener" className={styles.link}>
+        <span>View on Etherscan</span>
+      </a>
+      <ProgressIcon className={styles.progressIcon}/>
+    </>
+  )],
+  [TxStatus.Propagating, () => (
+    <>
+      <span className={styles.description}>Pending</span>
       <ProgressIcon className={styles.progressIcon}/>
     </>
   )],
   [TxStatus.Success, (params: Params) => (
     <>
-      <a href={params.txReport} target="_blank" rel="noreferrer noopener" className={styles.link}><span>Confirmed</span></a>
+      <a href={params.txReport} target="_blank" rel="noreferrer noopener" className={styles.link}>
+        <span>Confirmed</span>
+      </a>
     </>
   )],
   [TxStatus.CancelledByTheUser, () => (
     <><span className={styles.failure}>Rejected</span></>
+  )],
+  [TxStatus.Failure, () => (
+    <><span className={styles.failure}>Failed</span></>
+  )],
+  [TxStatus.Error, () => (
+    <><span className={styles.failure}>Unknown transaction result</span></>
   )],
 ]);
 
@@ -45,7 +61,7 @@ export class ProgressReport extends React.Component<{ report: Report }> {
     return (
       <div className={styles.progressReport}>
         {
-          partial && partial({ txReport } as Params)
+          partial ? partial({ txReport } as Params) : txStatus
         }
       </div>
     );

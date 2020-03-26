@@ -1,129 +1,313 @@
-import * as React from 'react';
-import { BehaviorSubject, combineLatest, interval, Observable } from 'rxjs';
-import { distinctUntilChanged, first, flatMap, map, shareReplay, switchMap } from 'rxjs/operators';
-
 import { isEqual } from 'lodash';
 import { curry } from 'ramda';
-import { AssetOverviewView, AssetsOverviewActionProps, AssetsOverviewExtraProps } from './balances/AssetOverviewView';
+import * as React from 'react';
+import { BehaviorSubject, combineLatest, interval, Observable, of } from 'rxjs';
+import {
+  distinctUntilChanged,
+  filter,
+  first,
+  flatMap,
+  map,
+  mergeMap,
+  shareReplay,
+  switchMap,
+} from 'rxjs/operators';
 import {
   Balances,
-  CombinedBalances,
   createAllowances$,
-  createBalances$,
-  createCombinedBalances$,
-  createDustLimits$,
-  createWalletApprove,
-  createWalletDisapprove,
-  createWethBalances$,
+  createBalances$, createCombinedBalances, createDustLimits$, createProxyAllowances$,
+  createTokenBalances$,
+  createWalletApprove, createWalletDisapprove
 } from './balances/balances';
+
+import { MtAccountDetailsView } from './balances/mtAccountDetailsView';
+import { createBalancesView$, MTBalancesView } from './balances/mtBalancesView';
 import { createTaxExport$ } from './balances/taxExporter';
-import { TaxExporterView } from './balances/TaxExporterView';
+import { TaxExporterView, TaxExporterViewProps } from './balances/TaxExporterView';
+import { WalletView } from './balances/WalletView';
 import { calls$, readCalls$ } from './blockchain/calls/calls';
 import {
   account$,
   allowance$,
-  context$,
+  context$, daiPriceUsd$,
   etherBalance$,
   etherPriceUsd$,
   gasPrice$,
   initializedAccount$,
-  onEveryBlock$
+  onEveryBlock$,
+  tokenPricesInUSD$
 } from './blockchain/network';
 import { user$ } from './blockchain/user';
-import { createPickableOrderBookFromOfferMake$, loadOrderbook$, Orderbook } from './exchange/orderbook/orderbook';
+import { loadOrderbook$, Orderbook } from './exchange/orderbook/orderbook';
 import {
   createTradingPair$,
   currentTradingPair$,
   loadablifyPlusTradingPair,
   memoizeTradingPair,
+  TradingPairsProps,
 } from './exchange/tradingPair/tradingPair';
 
-import { transactions$ } from './blockchain/transactions';
+import { BigNumber } from 'bignumber.js';
+import * as mixpanel from 'mixpanel-browser';
+import { transactions$, TxState } from './blockchain/transactions';
 import {
+  AllTradesProps,
   createAllTrades$,
   createTradesBrowser$,
   loadAllTrades,
-  loadPriceOneDayAgo,
+  loadPriceDaysAgo,
   loadVolumeForThePastDay
 } from './exchange/allTrades/allTrades';
 import { AllTrades } from './exchange/allTrades/AllTradesView';
-import { createDepthChartWithLoading$, DepthChartWithLoading } from './exchange/depthChart/DepthChartWithLoading';
+import {
+  createDepthChartWithLoading$,
+  DepthChartProps,
+  DepthChartWithLoading,
+} from './exchange/depthChart/DepthChartWithLoading';
 import {
   createCurrentPrice$,
   createDailyVolume$,
+  createMarketDetails$,
   createYesterdayPrice$,
   createYesterdayPriceChange$,
 } from './exchange/exchange';
 import { createMyClosedTrades$ } from './exchange/myTrades/closedTrades';
-import { createMyCurrentTrades$, createMyTrades$, createMyTradesKind$ } from './exchange/myTrades/myTrades';
+import {
+  createMyCurrentTrades$,
+  createMyTrades$,
+  createMyTradesKind$,
+  MyTradesPropsLoadable,
+} from './exchange/myTrades/myTrades';
 import { MyTrades } from './exchange/myTrades/MyTradesView';
-import { createMyOpenTrades$ } from './exchange/myTrades/openTrades';
+import { aggregateMyOpenTradesFor$, createMyOpenTrades$ } from './exchange/myTrades/openTrades';
 import { createFormController$, OfferFormState } from './exchange/offerMake/offerMake';
 import { OfferMakePanel } from './exchange/offerMake/OfferMakePanel';
-import { OrderbookView } from './exchange/orderbook/OrderbookView';
-import { createOrderbookPanel$, OrderbookPanel, OrderbookPanelProps, SubViewsProps } from './exchange/OrderbookPanel';
-import { GroupMode, loadAggregatedTrades, PriceChartDataPoint } from './exchange/priceChart/pricechart';
-import { createPriceChartLoadable$, PriceChartWithLoading } from './exchange/priceChart/PriceChartWithLoading';
+import {
+  createOrderbookForView,
+  OrderbookView,
+  Props
+} from './exchange/orderbook/OrderbookView';
+import {
+  createOrderbookPanel$,
+  OrderbookPanel,
+  OrderbookPanelProps,
+  SubViewsProps
+} from './exchange/OrderbookPanel';
+import {
+  GroupMode,
+  loadAggregatedTrades,
+  PriceChartDataPoint
+} from './exchange/priceChart/pricechart';
+import {
+  createPriceChartLoadable$,
+  PriceChartProps,
+  PriceChartWithLoading
+} from './exchange/priceChart/PriceChartWithLoading';
 import { TradingPairView } from './exchange/tradingPair/TradingPairView';
-import { createFooter$, TheFooter } from './footer/Footer';
+import { createFooter$, FooterProps, TheFooter } from './footer/Footer';
 import { Network } from './header/Network';
-import { createFormController$ as createInstantFormController$ } from './instant/instantForm';
+import {
+  createFormController$ as createInstantFormController$,
+  InstantFormState
+} from './instant/instantForm';
 import { InstantViewPanel } from './instant/InstantViewPanel';
+import {
+  createExchangeMigration$,
+  createMigrationOps$,
+  ExchangeMigrationState
+} from './migration/migration';
+import {
+  createMigrationForm$,
+  MigrationFormKind,
+  MigrationFormState
+} from './migration/migrationForm';
+import { MigrationButton } from './migration/MigrationFormView';
+
+import { NetworkConfig } from './blockchain/config';
+import {
+  MTLiquidationNotification,
+  MTMyPositionPanel
+} from './marginTrading/positions/MTMyPositionPanel';
+import {
+  createMTMyPositionView$,
+} from './marginTrading/positions/MTMyPositionView';
+import {
+  createMTSimpleOrderForm$,
+  riskComplianceProbe$
+} from './marginTrading/simple/mtOrderForm';
+import { MTSimpleOrderPanel } from './marginTrading/simple/mtOrderPanel';
+import {
+  createMTProxyApprove, MTAccount, MTAccountState
+} from './marginTrading/state/mtAccount';
+import { createMta$ } from './marginTrading/state/mtAggregate';
+import {
+  CreateMTFundForm$,
+  createMTTransferForm$
+} from './marginTrading/transfer/mtTransferForm';
+import { MTSimpleOrderBuyPanel } from './marginTrading/transfer/mtTransferFormView';
 import { createTransactionNotifier$ } from './transactionNotifier/transactionNotifier';
-import { TransactionNotifierView } from './transactionNotifier/TransactionNotifierView';
-import { Authorizable, authorizablify } from './utils/authorizable';
+import {
+  TransactionNotifierPros,
+  TransactionNotifierView
+} from './transactionNotifier/TransactionNotifierView';
 import { connect } from './utils/connect';
+import { pluginDevModeHelpers } from './utils/devModeHelpers';
+import { OfferMatchType } from './utils/form';
 import { inject } from './utils/inject';
 import { Loadable, LoadableWithTradingPair, loadablifyLight, } from './utils/loadable';
 import { withModal } from './utils/modal';
+import { zero } from './utils/zero';
 import { createWrapUnwrapForm$ } from './wrapUnwrap/wrapUnwrapForm';
 
-export function setupAppContext() {
+const {
+  REACT_APP_LT_ENABLED,
+} = process.env;
 
-  const NetworkTxRx = connect(Network, context$);
-  const TheFooterTxRx = connect(TheFooter, createFooter$(context$));
+export function setupAppContext() {
 
   const balances$ = createBalances$(context$, initializedAccount$, onEveryBlock$).pipe(
     shareReplay(1)
   );
 
-  const combinedBalances$ = createCombinedBalances$(
-    context$, initializedAccount$, etherBalance$,
-    balances$, onEveryBlock$, etherPriceUsd$, transactions$
-  ).pipe(
-    shareReplay(1)
+  const proxyAddress$ = onEveryBlock$.pipe(
+    switchMap(() =>
+      calls$.pipe(
+        flatMap(calls => calls.proxyAddress())
+      )),
+    distinctUntilChanged(isEqual)
   );
-  const balancesWithEth$ = combineLatest(balances$, etherBalance$).pipe(
-    map(([balances, etherBalance]) => ({ ...balances, ETH: etherBalance })),
-  );
-
-  const wethBalance$ = createWethBalances$(context$, initializedAccount$, onEveryBlock$);
-
-  const wrapUnwrapForm$ =
-    curry(createWrapUnwrapForm$)(gasPrice$, etherPriceUsd$, etherBalance$, wethBalance$, calls$);
-
-  const approve = createWalletApprove(calls$, gasPrice$);
-  const disapprove = createWalletDisapprove(calls$, gasPrice$);
-
-  const AssetOverviewViewRxTx =
-    inject(
-      withModal<AssetsOverviewActionProps, AssetsOverviewExtraProps>(
-        connect<Authorizable<Loadable<CombinedBalances>>, AssetsOverviewExtraProps>(
-          AssetOverviewView,
-          authorizablify(() => loadablifyLight(combinedBalances$))
-        )
-      ),
-      { approve, disapprove, wrapUnwrapForm$ }
-    );
 
   const loadOrderbook = memoizeTradingPair(curry(loadOrderbook$)(context$, onEveryBlock$));
-  const currentOrderBookWithTradingPair$ = loadablifyPlusTradingPair(
-    currentTradingPair$,
-    loadOrderbook
+
+  const mta$ = REACT_APP_LT_ENABLED === '1'
+    ? createMta$(
+      context$,
+      initializedAccount$,
+      onEveryBlock$,
+      readCalls$,
+      loadOrderbook
+    )
+    : of({
+      state: MTAccountState.notSetup,
+      marginableAssets: [],
+      totalAssetValue: zero,
+      totalDebt: zero,
+      totalAvailableDebt: zero,
+      proxy: null,
+      daiAllowance: false,
+    });
+
+  const mtBalances$ = createCombinedBalances(
+    etherBalance$,
+    balances$,
+    createAllowances$(context$, initializedAccount$, onEveryBlock$),
+    mta$,
+    transactions$,
+    onEveryBlock$,
+    tokenPricesInUSD$
   );
+
+  const wethBalance$ = createTokenBalances$(
+    context$,
+    initializedAccount$,
+    onEveryBlock$,
+    'WETH'
+  );
+
+  const saiBalance$ = createTokenBalances$(
+    context$,
+    initializedAccount$,
+    onEveryBlock$,
+    'SAI'
+  );
+
+  const daiBalance$ = createTokenBalances$(
+    context$,
+    initializedAccount$,
+    onEveryBlock$,
+    'DAI'
+  );
+
+  const wrapUnwrapForm$ =
+    curry(createWrapUnwrapForm$)(
+      gasPrice$,
+      etherPriceUsd$,
+      etherBalance$,
+      wethBalance$,
+      calls$
+    );
+
   const currentOrderbook$ = currentTradingPair$.pipe(
     switchMap(pair => loadOrderbook(pair))
   );
+
+  const createMTFundForm$: CreateMTFundForm$ =
+    curry(createMTTransferForm$)(mta$, gasPrice$, etherPriceUsd$, balances$,
+                                 currentOrderbook$, calls$, readCalls$);
+
+  const approveMTProxy = createMTProxyApprove(calls$);
+
+  const approveWallet = createWalletApprove(calls$, gasPrice$);
+  const disapproveWallet = createWalletDisapprove(calls$, gasPrice$);
+
+  const MTBalancesViewRxTx =
+    inject(
+      // @ts-ignore
+      withModal(
+        // @ts-ignore
+        connect(
+          // @ts-ignore
+          MTBalancesView,
+          loadablifyLight(createBalancesView$(initializedAccount$, mtBalances$, daiPriceUsd$))
+        )
+      ),
+      {
+        createMTFundForm$,
+        approveMTProxy,
+      }
+    );
+
+  const WalletViewRxTx =
+    inject(
+      // @ts-ignore
+      withModal(
+        // @ts-ignore
+        connect(
+          // @ts-ignore
+          WalletView, loadablifyLight(mtBalances$))
+      ),
+      {
+        approveWallet, disapproveWallet, wrapUnwrapForm$
+      }
+    );
+
+  const NetworkTxRx = connect<NetworkConfig, {}>(Network, context$);
+  const TheFooterTxRx = connect<FooterProps, {}>(TheFooter, createFooter$(context$));
+
+  const balancesWithEth$ = combineLatest(balances$, etherBalance$).pipe(
+    // @ts-ignore
+    map(([balances, etherBalance]) => ({
+      ...balances,
+      ETH: etherBalance
+    })),
+  );
+
+  const marketDetails$ = createMarketDetails$(
+    memoizeTradingPair(curry(loadPriceDaysAgo)(0, context$, onEveryBlock$)),
+    memoizeTradingPair(curry(loadPriceDaysAgo)(1, context$, onEveryBlock$)),
+    onEveryBlock$,
+  );
+
+  const {
+    MTSimpleOrderPanelRxTx,
+    MTSimpleOrderBuyPanelRxTx,
+    MTMyPositionPanelRxTx,
+    MTLiquidationNotificationRxTx,
+    MTSimpleOrderbookPanelTxRx
+  } =
+    mtSimpleOrderForm(mta$, currentOrderbook$, createMTFundForm$, approveMTProxy);
+
+  const MTAccountDetailsRxTx = connect<MTAccount, {}>(MtAccountDetailsView, mta$);
 
   const tradeHistory = memoizeTradingPair(
     curry(loadAllTrades)(context$, onEveryBlock$)
@@ -141,7 +325,7 @@ export function setupAppContext() {
 
   const lastDayPriceHistory$ = currentTradingPair$.pipe(
     switchMap(memoizeTradingPair(
-      curry(loadPriceOneDayAgo)(context$, onEveryBlock$)
+      curry(loadPriceDaysAgo)(1, context$, onEveryBlock$)
     )),
   );
 
@@ -151,7 +335,7 @@ export function setupAppContext() {
   );
 
   const allTrades$ = createAllTrades$(currentTradesBrowser$, context$);
-  const AllTradesTxRx = connect(AllTrades, allTrades$);
+  const AllTradesTxRx = connect<AllTradesProps, {}>(AllTrades, allTrades$);
 
   const groupMode$: BehaviorSubject<GroupMode> = new BehaviorSubject<GroupMode>('byHour');
 
@@ -184,15 +368,18 @@ export function setupAppContext() {
     ),
   };
   const priceChartLoadable = createPriceChartLoadable$(groupMode$, dataSources);
-  const PriceChartWithLoadingTxRx = connect(PriceChartWithLoading, priceChartLoadable);
+  const PriceChartWithLoadingTxRx = connect<PriceChartProps, {}>(
+    PriceChartWithLoading,
+    priceChartLoadable
+  );
 
   const { OfferMakePanelTxRx, OrderbookPanelTxRx } =
-    offerMake(currentOrderbook$, currentOrderBookWithTradingPair$, balances$);
+    offerMake(currentOrderbook$, balances$);
 
   const myTradesKind$ = createMyTradesKind$();
   const myOpenTrades$ = loadablifyPlusTradingPair(
     currentTradingPair$,
-    memoizeTradingPair(curry(createMyOpenTrades$)(loadOrderbook, account$, transactions$))
+    memoizeTradingPair(curry(createMyOpenTrades$)(currentOrderbook$, account$, transactions$))
   );
 
   const myClosedTrades$ = loadablifyPlusTradingPair(
@@ -201,8 +388,14 @@ export function setupAppContext() {
   );
 
   const myCurrentTrades$ = createMyCurrentTrades$(myTradesKind$, myOpenTrades$, myClosedTrades$);
-  const myTrades$ = createMyTrades$(myTradesKind$, myCurrentTrades$, calls$, context$, gasPrice$, currentTradingPair$);
-  const MyTradesTxRx = connect(MyTrades, myTrades$);
+  const myTrades$ = createMyTrades$(
+    myTradesKind$,
+    myCurrentTrades$,
+    calls$, context$,
+    gasPrice$,
+    currentTradingPair$
+  );
+  const MyTradesTxRx = connect<MyTradesPropsLoadable, {}>(MyTrades, myTrades$);
 
   const currentPrice$ = createCurrentPrice$(currentTradeHistory$);
   const yesterdayPrice$ = createYesterdayPrice$(lastDayPriceHistory$);
@@ -213,20 +406,36 @@ export function setupAppContext() {
     currentTradingPair$,
     currentPrice$,
     yesterdayPriceChange$,
-    dailyVolume$);
-  const TradingPairsTxRx = connect(TradingPairView, tradingPairView$);
+    dailyVolume$,
+    marketDetails$,
+  );
+  const TradingPairsTxRx = connect<TradingPairsProps, {}>(TradingPairView, tradingPairView$);
 
   const transactionNotifier$ =
-    createTransactionNotifier$(transactions$, interval(5 * 1000));
-  const TransactionNotifierTxRx = connect(TransactionNotifierView, transactionNotifier$);
-
-  const proxyAddress$ = onEveryBlock$.pipe(
-    switchMap(() =>
-      calls$.pipe(
-        flatMap(calls => calls.proxyAddress())
-      )),
-    distinctUntilChanged(isEqual)
+    createTransactionNotifier$(transactions$, interval(5 * 1000), context$);
+  const TransactionNotifierTxRx = connect<TransactionNotifierPros, {}>(
+    TransactionNotifierView,
+    transactionNotifier$
   );
+
+  const transactionsLog: string[] = [];
+  combineLatest(transactionNotifier$, context$).pipe(
+    mergeMap(([transactionsNotifier, network]) => {
+      return of([transactionsNotifier.transactions, network.name]);
+    })
+  ).subscribe(([transactions, network]) => {
+    (transactions as TxState[]).forEach(tx => {
+      const tx_identify = `${tx.account}${tx.networkId}${tx.status}${tx.txNo}`;
+      if (!(transactionsLog.includes(tx_identify))) {
+        transactionsLog.push(tx_identify);
+        mixpanel.track('notification', {
+          network,
+          product: 'oasis-trade',
+          status: tx.status
+        });
+      }
+    });
+  });
 
   const instant$ = createInstantFormController$(
     {
@@ -240,19 +449,104 @@ export function setupAppContext() {
       context$,
       balances$: balancesWithEth$,
       dustLimits$: createDustLimits$(context$),
-      allowances$: createAllowances$(context$, initializedAccount$, onEveryBlock$),
+      allowances$: createProxyAllowances$(
+        context$,
+        initializedAccount$,
+        proxyAddress$.pipe(
+          filter(address => !!address)
+        ),
+        onEveryBlock$
+      ),
     }
   );
 
-  const InstantTxRx = connect(InstantViewPanel, loadablifyLight(instant$));
+  const InstantTxRx = connect<Loadable<InstantFormState>, {}>(
+    InstantViewPanel,
+    loadablifyLight(instant$)
+  );
 
-  const TaxExporterTxRx = inject(TaxExporterView, {
+  const TaxExporterTxRx = inject<{}, TaxExporterViewProps>(TaxExporterView, {
     export: () => createTaxExport$(context$, initializedAccount$)
   });
 
+  const sai2DAIOps$ = curry(createMigrationOps$)(
+    'SAI',
+    createProxyAllowances$(
+      context$,
+      initializedAccount$,
+      proxyAddress$,
+      onEveryBlock$
+    ),
+    proxyAddress$,
+  );
+
+  const dai2SAIOps$ = curry(createMigrationOps$)(
+    'DAI',
+    createProxyAllowances$(
+      context$,
+      initializedAccount$,
+      proxyAddress$,
+      onEveryBlock$
+    ),
+    proxyAddress$,
+  );
+
+  const sai2DAIMigration$ = (amount: BigNumber) => createExchangeMigration$(
+    proxyAddress$,
+    calls$,
+    sai2DAIOps$(amount),
+  );
+
+  const dai2SAIMigration$ = (amount: BigNumber) => createExchangeMigration$(
+    proxyAddress$,
+    calls$,
+    dai2SAIOps$(amount),
+  );
+
+  const sai2DAIMigrationForm$ = createMigrationForm$(
+    context$,
+    saiBalance$,
+    MigrationFormKind.sai2dai,
+    sai2DAIMigration$,
+    calls$,
+    aggregateMyOpenTradesFor$('SAI', account$, transactions$, loadOrderbook)
+  );
+
+  const dai2SAIMigrationForm$ = createMigrationForm$(
+    context$,
+    daiBalance$,
+    MigrationFormKind.dai2sai,
+    dai2SAIMigration$,
+    calls$,
+    aggregateMyOpenTradesFor$('DAI', account$, transactions$, loadOrderbook)
+  );
+
+  const SAI2DAIMigrationTxRx =
+    inject<{ migration$: Observable<ExchangeMigrationState> }, any>(
+      withModal(
+        connect<Loadable<MigrationFormState>, any>(
+          MigrationButton,
+          loadablifyLight<MigrationFormState>(sai2DAIMigrationForm$)
+        )
+      ),
+      { migration$: sai2DAIMigrationForm$ }
+    );
+
+  const DAI2SAIMigrationTxRx =
+    inject<{ migration$: Observable<ExchangeMigrationState> }, any>(
+      withModal(
+        connect<Loadable<MigrationFormState>, any>(
+          MigrationButton,
+          loadablifyLight<MigrationFormState>(dai2SAIMigrationForm$)
+        )
+      ),
+      { migration$: dai2SAIMigrationForm$ }
+    );
+
+  pluginDevModeHelpers(context$, calls$, readCalls$, initializedAccount$, onEveryBlock$, mta$);
+
   return {
     AllTradesTxRx,
-    AssetOverviewViewRxTx,
     MyTradesTxRx,
     OfferMakePanelTxRx,
     OrderbookPanelTxRx,
@@ -262,17 +556,146 @@ export function setupAppContext() {
     TransactionNotifierTxRx,
     NetworkTxRx,
     TheFooterTxRx,
-    TaxExporterTxRx
+    TaxExporterTxRx,
+    MTSimpleOrderPanelRxTx,
+    MTSimpleOrderBuyPanelRxTx,
+    MTMyPositionPanelRxTx,
+    MTLiquidationNotificationRxTx,
+    MTSimpleOrderbookPanelTxRx,
+    MTAccountDetailsRxTx,
+    MTBalancesViewRxTx,
+    WalletViewRxTx,
+    SAI2DAIMigrationTxRx,
+    DAI2SAIMigrationTxRx,
+  };
+}
+
+function mtSimpleOrderForm(
+  mta$: Observable<MTAccount>,
+  orderbook$: Observable<Orderbook>,
+  createMTFundForm$: CreateMTFundForm$,
+  approveMTProxy: (args: { token: string; proxyAddress: string }) => Observable<TxState>,
+) {
+  const mtOrderForm$ = currentTradingPair$.pipe(
+    switchMap(tradingPair =>
+      createMTSimpleOrderForm$(
+        {
+          gasPrice$,
+          etherPriceUsd$,
+          orderbook$,
+          mta$,
+          calls$,
+          readCalls$,
+          account$,
+          riskComplianceCheck$: riskComplianceProbe$,
+          dustLimits$: createDustLimits$(context$),
+        },
+        tradingPair
+      )
+    ),
+    shareReplay(1)
+  );
+
+  const mtOrderFormLoadable$ = currentTradingPair$.pipe(
+    switchMap(tradingPair =>
+      loadablifyLight(mtOrderForm$).pipe(
+        map(mtOrderFormLoadablified => ({
+          tradingPair,
+          ...mtOrderFormLoadablified
+        }))
+      )
+    )
+  );
+
+  const MTSimpleOrderPanelRxTx = inject(
+    // @ts-ignore
+    withModal(
+      // @ts-ignore
+      connect(MTSimpleOrderPanel, mtOrderFormLoadable$)
+    ),
+    { createMTFundForm$ }
+  );
+
+  // @ts-ignore
+  const MTSimpleOrderBuyPanelRxTx =
+    connect(MTSimpleOrderBuyPanel, mtOrderFormLoadable$);
+
+  const MTMyPositionPanel$ = createMTMyPositionView$(
+    mtOrderFormLoadable$,
+    createMTFundForm$,
+    calls$,
+    daiPriceUsd$,
+    approveMTProxy
+  );
+
+  const MTMyPositionPanelRxTx =
+    // @ts-ignore
+    withModal(
+      // @ts-ignore
+      connect(
+        // @ts-ignore
+        MTMyPositionPanel,
+        MTMyPositionPanel$
+      )
+    );
+
+  const MTLiquidationNotificationRxTx =
+    // @ts-ignore
+    connect(
+      // @ts-ignore
+      MTLiquidationNotification,
+      MTMyPositionPanel$
+    );
+
+  const [kindChange, orderbookPanel$] = createOrderbookPanel$();
+
+  const orderbookForView$ = createOrderbookForView(
+    orderbook$,
+    of({
+      change: () => {
+        return;
+      }
+    }),
+    kindChange,
+  );
+  const OrderbookViewTxRx = connect<Props, {}>(OrderbookView, orderbookForView$);
+
+  const depthChartWithLoading$ = createDepthChartWithLoading$(
+    mtOrderForm$
+      .pipe(
+        map(f => ({ ...f, matchType: OfferMatchType.direct }))
+      ),
+    orderbook$,
+    kindChange
+  );
+
+  const DepthChartWithLoadingTxRx = connect<DepthChartProps, {}>(
+    DepthChartWithLoading,
+    depthChartWithLoading$
+  );
+
+  const MTSimpleOrderbookPanelTxRx = connect(
+    inject<OrderbookPanelProps, SubViewsProps>(
+      OrderbookPanel,
+      // @ts-ignore
+      { DepthChartWithLoadingTxRx, OrderbookViewTxRx }),
+    orderbookPanel$);
+
+  return {
+    MTSimpleOrderPanelRxTx,
+    MTSimpleOrderBuyPanelRxTx,
+    MTMyPositionPanelRxTx,
+    MTLiquidationNotificationRxTx,
+    MTSimpleOrderbookPanelTxRx
   };
 }
 
 function offerMake(
   orderbook$: Observable<Orderbook>,
-  orderbookWithTradingPair$: Observable<LoadableWithTradingPair<Orderbook>>,
   balances$: Observable<Balances>
 ) {
   const offerMake$: Observable<OfferFormState> = currentTradingPair$.pipe(
-    flatMap(tp => createFormController$(
+    switchMap(tp => createFormController$(
       {
         gasPrice$,
         allowance$,
@@ -289,31 +712,37 @@ function offerMake(
   );
 
   const offerMakeLoadable$ = loadablifyLight(offerMake$);
-  const OfferMakePanelTxRx = connect(OfferMakePanel, offerMakeLoadable$);
+  const OfferMakePanelTxRx = connect<Loadable<OfferFormState>, {}>(
+    OfferMakePanel,
+    offerMakeLoadable$
+  );
 
   const [kindChange, orderbookPanel$] = createOrderbookPanel$();
 
   const depthChartWithLoading$ = createDepthChartWithLoading$(
     offerMake$,
-    orderbookWithTradingPair$,
-    currentTradingPair$,
+    orderbook$,
     kindChange
   );
-  const DepthChartWithLoadingTxRx = connect(DepthChartWithLoading, depthChartWithLoading$);
+  const DepthChartWithLoadingTxRx = connect<DepthChartProps, {}>(
+    DepthChartWithLoading,
+    depthChartWithLoading$
+  );
 
-  const pickableOrderbook$ = createPickableOrderBookFromOfferMake$(
-    orderbookWithTradingPair$,
-    account$,
+  const orderbookForView$ = createOrderbookForView(
+    orderbook$,
     offerMake$,
-    kindChange
+    kindChange,
   );
-  const OrderbookViewTxRx = connect(OrderbookView, pickableOrderbook$);
+  const OrderbookViewTxRx = connect<Props, {}>(OrderbookView, orderbookForView$);
 
   const OrderbookPanelTxRx = connect(
     inject<OrderbookPanelProps, SubViewsProps>(
-      OrderbookPanel,
-      { DepthChartWithLoadingTxRx, OrderbookViewTxRx }),
-    orderbookPanel$);
+      // @ts-ignore
+      OrderbookPanel, { DepthChartWithLoadingTxRx, OrderbookViewTxRx }
+    ),
+    orderbookPanel$
+  );
 
   return {
     OfferMakePanelTxRx,

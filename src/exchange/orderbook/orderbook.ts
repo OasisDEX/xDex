@@ -1,13 +1,9 @@
 import { BigNumber } from 'bignumber.js';
-import { isEmpty, uniqBy, unzip } from 'lodash';
-import { bindNodeCallback, combineLatest, Observable, of, zip } from 'rxjs';
+import { at, isEmpty, uniqBy, unzip } from 'lodash';
+import { combineLatest, from, Observable, of, zip } from 'rxjs';
 import { expand, map, reduce, retryWhen, scan, shareReplay, switchMap } from 'rxjs/operators';
 import { NetworkConfig } from '../../blockchain/config';
 import { amountFromWei } from '../../blockchain/utils';
-import { PickOfferChange } from '../../utils/form';
-import { LoadableWithTradingPair } from '../../utils/loadable';
-import { OfferFormState } from '../offerMake/offerMake';
-import { OrderbookViewKind } from '../OrderbookPanel';
 import { TradingPair } from '../tradingPair/tradingPair';
 
 export enum OfferType {
@@ -28,60 +24,55 @@ export interface Offer {
 }
 
 export interface Orderbook {
+  tradingPair: TradingPair;
   blockNumber: number;
   sell: Offer[];
   spread?: BigNumber;
+  spreadPercentage?: BigNumber;
   buy: Offer[];
 }
 
-class InconsistentLoadingError extends Error {}
+class InconsistentLoadingError extends Error {
+}
 
 function parseOffers(sellToken: string, buyToken: string, type: OfferType, firstPage: boolean) {
   return (data: any[][]): { lastOfferId: BigNumber, offers: Offer[] } => {
-    if (!firstPage && data[0][0].isZero()) {
+    if (!firstPage && data[0][0] === '0') {
       throw new InconsistentLoadingError('empty orderbook page loaded');
     }
     return {
-      lastOfferId: data[0][data[0].length - 1] as BigNumber,
-      offers: unzip(data)
-        .filter(([id]) => !(id as BigNumber).eq(0))
+      lastOfferId: new BigNumber(data[0][data[0].length - 1]),
+      offers: unzip(at(data, 'ids', 'payAmts', 'buyAmts', 'owners', 'timestamps'))
+        .filter(([id]) => id !== '0')
         .map(([offerId, sellAmt, buyAmt, ownerId, timestamp]) => {
-          const sellAmount = amountFromWei(sellAmt as BigNumber, sellToken);
-          const buyAmount = amountFromWei(buyAmt as BigNumber, buyToken);
-          return {...type === 'sell' ?
-            {
-              price: buyAmount.div(sellAmount),
-              baseAmount: sellAmount,
-              baseToken: sellToken,
-              quoteAmount: buyAmount,
-              quoteToken: buyToken,
-            } :
-            {
-              price: sellAmount.div(buyAmount),
-              baseAmount: buyAmount,
-              baseToken: buyToken,
-              quoteAmount: sellAmount,
-              quoteToken: sellToken,
-            }, ...{
-              type,
-              offerId: offerId as BigNumber,
-              ownerId: ownerId as string,
-              timestamp: new Date(1000 * (timestamp as BigNumber).toNumber())
-            }} as Offer;
+          const sellAmount = amountFromWei(new BigNumber(sellAmt), sellToken);
+          const buyAmount = amountFromWei(new BigNumber(buyAmt), buyToken);
+          return {
+            ...type === 'sell' ?
+              {
+                price: buyAmount.div(sellAmount),
+                baseAmount: sellAmount,
+                baseToken: sellToken,
+                quoteAmount: buyAmount,
+                quoteToken: buyToken,
+              } :
+              {
+                price: sellAmount.div(buyAmount),
+                baseAmount: buyAmount,
+                baseToken: buyToken,
+                quoteAmount: sellAmount,
+                quoteToken: sellToken,
+              }, ...{
+                type,
+                offerId: new BigNumber(offerId),
+                ownerId: ownerId as string,
+                timestamp: new Date(1000 * Number(timestamp)),
+              }
+          } as Offer;
         })
     };
   };
 }
-
-type GetOffersFirst = (
-  address: string, sellToken: string, buyToken: string,
-  callback: (err: any, r: any) => any
-) => any;
-
-type GetOffersNext = (
-  address: string, lastOfferId: string,
-  callback: (err: any, r: any) => any
-) => any;
 
 function loadOffersAllAtOnce(
   context: NetworkConfig,
@@ -89,22 +80,18 @@ function loadOffersAllAtOnce(
   buyToken: string,
   type: OfferType
 ): Observable<Offer[]> {
-  return bindNodeCallback(
-    context.otcSupportMethods.contract.getOffers as GetOffersFirst
-  )(
+  return from(context.otcSupportMethods.contract.methods['getOffers(address,address,address)'](
     context.otc.address,
     context.tokens[sellToken].address,
-    context.tokens[buyToken].address
-  ).pipe(
+    context.tokens[buyToken].address,
+  ).call()).pipe(
     map(parseOffers(sellToken, buyToken, type, true)),
-    expand(({ lastOfferId }) => lastOfferId.isZero() ?
+    expand<{ lastOfferId: BigNumber; offers: Offer[] }>(({ lastOfferId }) => lastOfferId.isZero() ?
       of() :
-      bindNodeCallback(
-        context.otcSupportMethods.contract.getOffers['address,uint256'] as GetOffersNext
-      )(
+      from(context.otcSupportMethods.contract.methods['getOffers(address,uint256)'](
         context.otc.address,
         lastOfferId.toString(),
-      ).pipe(
+      ).call()).pipe(
         map(parseOffers(sellToken, buyToken, type, false)),
       )
     ),
@@ -123,15 +110,15 @@ function loadOffersAllAtOnce(
 }
 
 export function loadOrderbook$(
-  context$:  Observable<NetworkConfig>,
+  context$: Observable<NetworkConfig>,
   onEveryBlock$: Observable<number>,
-  { base, quote }: TradingPair
+  tradingPair: TradingPair
 ): Observable<Orderbook> {
   return combineLatest(context$, onEveryBlock$).pipe(
     switchMap(([context, blockNumber]) =>
       zip(
-        loadOffersAllAtOnce(context, quote, base, OfferType.buy),
-        loadOffersAllAtOnce(context, base, quote, OfferType.sell)
+        loadOffersAllAtOnce(context, tradingPair.quote, tradingPair.base, OfferType.buy),
+        loadOffersAllAtOnce(context, tradingPair.base, tradingPair.quote, OfferType.sell)
       ).pipe(
         map(hideDusts),
         map(([buy, sell]) => ({
@@ -156,40 +143,36 @@ export function loadOrderbook$(
     })),
     map(({ blockNumber, buy, sell }) => {
       // console.log('corrected orderbook length for block:', blockNumber, buy.length, sell.length);
-      const spread =
-        !isEmpty(sell) && !isEmpty(buy)
-          ? sell[0].price.minus(buy[0].price)
-          : undefined;
 
-      return {
+      return addSpread({
+        tradingPair,
         blockNumber,
         buy,
-        spread,
         sell
-      };
+      });
     }),
     shareReplay(1),
   );
 }
 
-export function createPickableOrderBookFromOfferMake$(
-  currentOrderBook$: Observable<LoadableWithTradingPair<Orderbook>>,
-  account$: Observable<string | undefined>,
-  currentOfferForm$: Observable<OfferFormState>,
-  kindChange: (kind: OrderbookViewKind) => void
-) {
-  return combineLatest(
-    currentOrderBook$,
-    account$,
-    currentOfferForm$,
-  ).pipe(
-    map(([currentOrderBook, account, { change }]) => ({
-      ...currentOrderBook,
-      account,
-      kindChange,
-      change: (ch: PickOfferChange) => change(ch)
-    }))
-  );
+export function addSpread({ buy, sell, ...rest }: Orderbook) {
+  if (!isEmpty(sell) && !isEmpty(buy)) {
+    const spread =  sell[0].price.minus(buy[0].price);
+    const midPrice = sell[0].price.plus(buy[0].price).div(2);
+    const spreadPercentage =  spread.div(midPrice);
+    return {
+      buy,
+      sell,
+      ...rest,
+      spread,
+      spreadPercentage
+    };
+  }
+  return {
+    buy,
+    sell,
+    ...rest,
+  };
 }
 
 const DUST_ORDER_THRESHOLD = '0.000000000001'; // 10^15
@@ -201,3 +184,23 @@ function isDustOrder(o: Offer): boolean {
 function hideDusts(dusts: Offer[][]): Offer[][] {
   return dusts.map(offers => offers.filter((o) => !isDustOrder(o)));
 }
+
+// export function createPickableOrderBookFromMTSimpleFormState$(
+//   currentOrderBook$: Observable<LoadableWithTradingPair<Orderbook>>,
+//   account$: Observable<string | undefined>,
+//   currentOfferForm$: Observable<MTSimpleFormState>,
+// ) {
+//   return combineLatest(
+//     currentOrderBook$,
+//     account$,
+//     currentOfferForm$,
+//   ).pipe(
+//     map(([currentOrderBook, account, { change }]) => ({
+//       ...currentOrderBook,
+//       account,
+//       change: (ch: PickOfferChange) => {
+//         console.log('ho change yet!', change, ch);
+//       },
+//     }))
+//   );
+// }

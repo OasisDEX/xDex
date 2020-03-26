@@ -1,36 +1,52 @@
 import { BigNumber } from 'bignumber.js';
 import classnames from 'classnames';
+import * as mixpanel from 'mixpanel-browser';
 import * as React from 'react';
+import { etherscan, EtherscanConfig } from '../../blockchain/etherscan';
 import swapArrowsSvg from '../../icons/swap-arrows.svg';
-import { Approximate } from '../../utils/Approximate';
-import { formatAmount } from '../../utils/formatters/format';
-import { FormatPercent, Money } from '../../utils/formatters/Formatters';
-import { ProgressIcon } from '../../utils/icons/Icons';
+import { formatAmountInstant } from '../../utils/formatters/format';
+import { Button } from '../../utils/forms/Buttons';
+import { AccountIcon, SettingsIcon } from '../../utils/icons/Icons';
 import { SvgImage } from '../../utils/icons/utils';
-import { TradeData } from '../details/TradeData';
+import { TopLeftCorner, TopRightCorner } from '../../utils/panel/TopRightCorner';
+import { TradeDetails } from '../details/TradeDetails';
 import * as styles from '../Instant.scss';
 import {
   InstantFormChangeKind,
   InstantFormState,
+  ManualAllowanceProgress,
   ManualChange,
   Message,
   MessageKind,
-  Position,
+  ProgressKind,
+  TxInProgressMessage,
   ViewKind
 } from '../instantForm';
 import { InstantFormWrapper } from '../InstantFormWrapper';
 import { Buying, Selling } from '../TradingSide';
 
+const inProgressMessages = new Map<ProgressKind, (msg: TxInProgressMessage) => string>(
+  [
+    [ProgressKind.onlyProxy, (_: TxInProgressMessage) =>
+      `Your manual proxy creation is pending...`],
+    [ProgressKind.onlyAllowance, (msg: TxInProgressMessage) => {
+      const progress = msg.progress as ManualAllowanceProgress;
+
+      return `Your ${progress.token.toUpperCase()} ${progress.direction} is pending...`;
+    }]
+  ]
+);
+
 function error(msg: Message | undefined) {
   if (!msg) {
     return <></>;
   }
-
+  // tslint:disable
   switch (msg.kind) {
     case MessageKind.insufficientAmount:
       return (
         <>
-          You don't have {formatAmount(msg.amount, msg.token)} {msg.token.toUpperCase()} in your wallet
+          You don't have {formatAmountInstant(msg.amount, msg.token)} {msg.token.toUpperCase()} in your wallet
         </>);
     case MessageKind.dustAmount:
       return (
@@ -47,7 +63,7 @@ function error(msg: Message | undefined) {
     case MessageKind.orderbookTotalExceeded:
       return (
         <>
-          No orders available to {msg.side} {formatAmount(msg.amount, msg.token)} {msg.token.toUpperCase()}
+          No orders available to {msg.side} {formatAmountInstant(msg.amount, msg.token)} {msg.token.toUpperCase()}
         </>
       );
     case MessageKind.notConnected:
@@ -56,17 +72,32 @@ function error(msg: Message | undefined) {
           Connect wallet to proceed with order
         </>
       );
-  }
-}
+    case MessageKind.txInProgress:
+      let message = 'A transaction is pending...';
+      const customize = inProgressMessages.get(msg.progress.kind);
 
-const priceImpactTooltip = {
-  id: 'price-impact',
-  text: 'The difference between the best current price on the Eth2Dai order book and the estimated price of your order.'
-};
-const slippageLimitTooltip = {
-  id: 'slippage-limit',
-  text: 'The maximum allowed difference between the estimated price of the order and the actual price. The two may differ if the order book changes before your trade executes.'
-};
+      if (customize) {
+        message = customize(msg)
+      }
+
+      const txHash = (msg.progress as { txHash?: string }).txHash;
+      return txHash
+        ? (
+          <a href={etherscan(msg.etherscan || {} as EtherscanConfig).transaction(txHash).url}
+             rel='noreferrer noopener'
+             target='_blank'
+             style={{
+               color: '#80D8FF'
+             }}
+          >
+            {message}
+          </a>
+        )
+        : <> {message} </>
+
+  }
+// tslint:enable
+}
 
 export class NewTradeView extends React.Component<InstantFormState> {
 
@@ -80,9 +111,6 @@ export class NewTradeView extends React.Component<InstantFormState> {
       etherBalance,
       message,
       price,
-      priceImpact,
-      gasEstimationUsd,
-      quotation,
       user,
       kind,
     } = this.props;
@@ -94,82 +122,31 @@ export class NewTradeView extends React.Component<InstantFormState> {
                           btnDisabled={!this.props.readyToProceed}
                           btnDataTestId="initiate-trade"
       >
-        {
-          /*
-          We plan to release basic instant version so people can trade with a single click
-          There are some design concerns that must be discussed so those two options are postponed
-
-          <TopRightCorner>
-            <ButtonIcon
-              className={classnames(styles.cornerIcon, styles.settingsIcon)}
-              disabled={!price}
-              onClick={this.showTradeSettings}
-              image={cogWheelSvg}/>
-          </TopRightCorner>
-          <TopLeftCorner>
-            <ButtonIcon
-              className={styles.cornerIcon}
-              onClick={this.showAccountSettings}
-              image={accountSvg}/>
-          </TopLeftCorner>
-          */
-        }
-
-        <div
-          className={classnames(
-            styles.details,
-            price || message && message.placement === Position.TOP ? '' : styles.hidden,
-            message && message.placement === Position.TOP ? styles.errors : ''
-          )}>
+        <TopRightCorner>
+          <SettingsIcon
+            disabled={!price}
+            data-test-id="trade-settings"
+            onClick={this.showTradeSettings}
+          />
+        </TopRightCorner>
+        <TopLeftCorner>
+          <AccountIcon
+            disabled={!(user && user.account)}
+            data-test-id="account-settings"
+            onClick={this.showAccountSettings}
+          />
+        </TopLeftCorner>
+        <div className={styles.tradeDetails}>
           {
-            price &&
-            <>
-              <TradeData label="Price"
-                         data-test-id="trade-price"
-                         value={
-                           <Approximate>
-                             {formatAmount(price, 'USD')} {quotation || ''}
-                           </Approximate>
-                         }
-                         style={{ marginBottom: '2px' }}
+            message && message.top
+              ? <TradeDetails.Error dataTestId={'top-error'}
+                                    message={error(message.top)}
               />
-              <TradeData label="Slippage Limit"
-                         data-test-id="trade-slippage-limit"
-                         tooltip={slippageLimitTooltip}
-                         value={<FormatPercent value={new BigNumber(2.5)} precision={1}/>}
-                         style={{ marginBottom: '2px' }}
-              />
-              <TradeData label="Gas cost"
-                         data-test-id="trade-gas-cost"
-                         value={
-                           gasEstimationUsd
-                             ? (
-                               <Approximate data-vis-reg-hide={true}>
-                                 <Money value={gasEstimationUsd} token="USD"/>
-                               </Approximate>
-                             )
-                             : <ProgressIcon data-vis-reg-hide={true} size="sm"/>
-                         }/>
-              <TradeData label="Price Impact"
-                         data-test-id="trade-price-impact"
-                         tooltip={priceImpactTooltip}
-                         value={
-                           <FormatPercent
-                             className={priceImpact && priceImpact.gt(new BigNumber(5)) ? 'danger' : ''}
-                             fallback={'N/A'}
-                             value={priceImpact}
-                             precision={2}
-                           />
-                         }
-              />
-            </>
-          }
-
-          {
-            message && message.placement === Position.TOP &&
-            <>
-              {error(message)}
-            </>
+              : (
+                price
+                  ? <TradeDetails {...this.props}/>
+                  : null
+              )
           }
         </div>
         <div className={styles.assets}>
@@ -183,9 +160,15 @@ export class NewTradeView extends React.Component<InstantFormState> {
                    }
                    user={user}
                    approx={sellAmount && kind === 'buy'}/>
-          <div data-test-id="swap" className={styles.swapIcon} onClick={this.swap}>
+          <Button data-test-id="swap"
+                  className={
+                    classnames(
+                      styles.swapBtn
+                    )}
+                  disabled={this.props.sellToken === 'SAI'}
+                  onClick={this.swap}>
             <SvgImage image={swapArrowsSvg}/>
-          </div>
+          </Button>
           <Buying asset={buyToken}
                   amount={buyAmount}
                   onAmountChange={this.updateBuyingAmount}
@@ -197,12 +180,18 @@ export class NewTradeView extends React.Component<InstantFormState> {
                   user={user}
                   approx={buyAmount && kind === 'sell'}/>
         </div>
-        <div data-test-id="error"
+        <div data-test-id="bottom-error"
              className={classnames(
-               message && message.kind === MessageKind.notConnected ? styles.warnings : styles.errors,
-               message && message.placement === Position.BOTTOM ? '' : styles.hidden,
+               message && message.bottom &&
+               (message.bottom.kind === MessageKind.notConnected
+                 || message.bottom.kind === MessageKind.txInProgress)
+                 ? styles.warnings
+                 : styles.errors,
+               message && message.bottom
+                 ? ''
+                 : styles.hidden,
              )}>
-          {error(message)}
+          {message && message.bottom && error(message.bottom)}
         </div>
       </InstantFormWrapper>
     );
@@ -241,6 +230,12 @@ export class NewTradeView extends React.Component<InstantFormState> {
         view: ViewKind.priceImpactWarning
       });
     } else {
+      mixpanel.track('btn-click', {
+        id: 'initiate-trade',
+        product: 'oasis-trade',
+        page: 'Instant',
+        section: 'order-details'
+      });
       this.props.submit(this.props);
       this.props.change({
         kind: InstantFormChangeKind.viewChange,

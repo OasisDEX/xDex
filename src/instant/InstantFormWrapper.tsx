@@ -17,7 +17,9 @@ export class InstantFormWrapper extends React.Component<InstantFormProps> {
     const { heading, btnLabel, btnAction, btnDisabled, btnDataTestId, children } = this.props;
 
     return (
-      <section className={classnames(styles.panel, panelStyling.panel)}>
+      <section className={classnames(styles.panel, panelStyling.panel)}
+               data-test-id="instant-form"
+      >
         <header className={styles.header}>
           <h1>{heading}</h1>
         </header>
@@ -29,8 +31,8 @@ export class InstantFormWrapper extends React.Component<InstantFormProps> {
             <footer className={styles.footer}>
               <Button
                 data-test-id={btnDataTestId}
-                size="lg"
-                color="white"
+                size="md"
+                color="primary"
                 onClick={btnAction}
                 className={styles.button}
                 disabled={btnDisabled}

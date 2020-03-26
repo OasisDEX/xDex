@@ -1,8 +1,7 @@
-import { BigNumber } from 'bignumber.js';
 import * as moment from 'moment';
 import * as React from 'react';
 import { default as MediaQuery } from 'react-responsive';
-import { bindNodeCallback, Observable } from 'rxjs';
+import { from, Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { NetworkConfig } from '../blockchain/config';
 import { Github, Reddit, RocketChat } from '../utils/icons/SocialIcons';
@@ -10,7 +9,7 @@ import { Loadable, loadablifyLight } from '../utils/loadable';
 import { WithLoadingIndicatorInline } from '../utils/loadingIndicator/LoadingIndicator';
 import * as styles from './Footer.scss';
 
-interface FooterProps {
+export interface FooterProps {
   etherscan: any;
   address: string;
   expirationDate: Loadable<Date>;
@@ -27,25 +26,36 @@ export class TheFooter extends React.Component<FooterProps> {
             <div className={styles.links}>
               <span>
               Market Closing Time - <WithLoadingIndicatorInline loadable={expirationDate}>
-                {(expDate) => <span data-vis-reg-hide={true}>{moment(expDate).format('DD.MM.YYYY')}</span>}
+                {
+                  (expDate) => (
+                    <span data-vis-reg-hide={true}>
+                      {
+                        moment(expDate).format('DD.MM.YYYY')
+                      }
+                    </span>
+                  )
+                }
               </WithLoadingIndicatorInline>
             </span>
               <a target="_blank" rel="noopener noreferrer"
                  href={`${etherscan.url}/address/${address}`}>
                 Market Contract
               </a>
-              <a target="_blank" rel="noopener noreferrer" href="/tos.pdf">
+              <a target="_blank" rel="noopener noreferrer" href="/terms">
                 Legal
+              </a>
+              <a target="_blank" rel="noopener noreferrer" href="/privacy">
+                Privacy
               </a>
               <a target="_blank"
                  rel="noopener noreferrer"
-                 href="https://github.com/OasisDEX/eth2dai/issues">
+                 href="https://github.com/OasisDEX/oasis-market/issues">
                 Report Issues
               </a>
               <span>
               <a target="_blank" className={styles.iconLink}
                  rel="noopener noreferrer"
-                 href="https://chat.makerdao.com/channel/eth2dai">
+                 href="https://chat.makerdao.com/channel/oasis">
                 <RocketChat/>
               </a>
               <a target="_blank" className={styles.iconLink}
@@ -55,17 +65,17 @@ export class TheFooter extends React.Component<FooterProps> {
               </a>
               <a target="_blank" className={styles.iconLink}
                  rel="noopener noreferrer"
-                 href="https://github.com/OasisDEX/eth2dai">
+                 href="https://github.com/OasisDEX/oasis-market">
                 <Github/>
               </a>
             </span>
             </div>
             <div data-vis-reg-hide={true}>
               <span>
-            <a href={`https://github.com/OasisDEX/eth2dai/commit/${process.env.__HASH__}`}
+            <a href={`https://github.com/OasisDEX/oasis-market/commit/${process.env.__HASH__}`}
                target="_blank"
                rel="noopener noreferrer">
-              {process.env.__NAME__} Version {process.env.__VERSION__} ({process.env.__HASH__})
+              {process.env.__NAME__} Commit {process.env.__HASH__}
             </a> - Build Date {moment(process.env.__DATE__).format('DD.MM.YYYY HH:MM')}
           </span>
             </div>
@@ -73,7 +83,15 @@ export class TheFooter extends React.Component<FooterProps> {
           <MediaQuery maxWidth={768}>
             <div>
               Market Closing Time - <WithLoadingIndicatorInline loadable={expirationDate}>
-                {(expDate) => <span data-vis-reg-hide={true}>{moment(expDate).format('DD.MM.YYYY')}</span>}
+                {
+                  (expDate) => (
+                    <span data-vis-reg-hide={true}>
+                      {
+                        moment(expDate).format('DD.MM.YYYY')
+                      }
+                    </span>
+                  )
+                }
               </WithLoadingIndicatorInline>
             </div>
             <div className={styles.links}>
@@ -81,19 +99,22 @@ export class TheFooter extends React.Component<FooterProps> {
                  href={`${etherscan.url}/address/${address}`}>
                 Market Contract
               </a>
-              <a target="_blank" rel="noopener noreferrer" href="/tos.pdf">
+              <a target="_blank" rel="noopener noreferrer" href="/terms">
                 Legal
+              </a>
+              <a target="_blank" rel="noopener noreferrer" href="/privacy">
+                Privacy
               </a>
               <a target="_blank"
                  rel="noopener noreferrer"
-                 href="https://github.com/OasisDEX/eth2dai/issues">
+                 href="https://github.com/OasisDEX/oasis-market/issues">
                 Report Issues
               </a>
             </div>
             <div>
               <a target="_blank" className={styles.iconLink}
                  rel="noopener noreferrer"
-                 href="https://chat.makerdao.com/channel/eth2dai">
+                 href="https://chat.makerdao.com/channel/oasis-market">
                 <RocketChat/>
               </a>
               <a target="_blank" className={styles.iconLink}
@@ -103,15 +124,15 @@ export class TheFooter extends React.Component<FooterProps> {
               </a>
               <a target="_blank" className={styles.iconLink}
                  rel="noopener noreferrer"
-                 href="https://github.com/OasisDEX/eth2dai">
+                 href="https://github.com/OasisDEX/oasis-market">
                 <Github/>
               </a>
             </div>
             <div data-vis-reg-hide={true}>
-              <a href={`https://github.com/OasisDEX/eth2dai/commit/${process.env.__HASH__}`}
+              <a href={`https://github.com/OasisDEX/oasis-market/commit/${process.env.__HASH__}`}
                  target="_blank"
                  rel="noopener noreferrer">
-                {process.env.__NAME__} Version {process.env.__VERSION__} ({process.env.__HASH__})
+                {process.env.__NAME__} Commit {process.env.__HASH__}
               </a>
             </div>
             <div data-vis-reg-hide={true}>
@@ -124,20 +145,18 @@ export class TheFooter extends React.Component<FooterProps> {
   }
 }
 
-type CloseTimeType = (callback: (err: any, r: BigNumber) => any) => any;
-
 export function createFooter$(context$: Observable<NetworkConfig>): Observable<FooterProps> {
   return context$.pipe(
     switchMap(context =>
-      loadablifyLight(
-        bindNodeCallback(context.otc.contract.close_time as CloseTimeType)().pipe(
-          map(closeTime => moment.unix(closeTime.toNumber()).toDate())
+      loadablifyLight<Date>(
+        from(context.otc.contract.methods.close_time().call()).pipe(
+          map((closeTime: string) => moment.unix(Number(closeTime)).toDate()),
         )
       ).pipe(
-        map((expirationDate) => ({
+        map(expirationDate => ({
           expirationDate,
           etherscan: context.etherscan,
-          address: context.otc.contract.address as string,
+          address: context.otc.contract.options.address,
         }))
       )
     ),

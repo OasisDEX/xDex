@@ -1,0 +1,107 @@
+@import "../../utils/Variables";
+@import "../../utils/Mixins";
+
+@include modal();
+
+.daiColor {
+  color: $vivid-orange;
+}
+
+.errorColor {
+  color: $errors;
+}
+
+.tokenIcon {
+  margin-right: 0.5em;
+}
+
+// ---------- horizontal lines
+.hrMargin {
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+// ---------- dictionarylike
+.dict {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+
+  font-size: 15px;
+}
+
+.dictName {
+  @include fontSemiBold;
+}
+
+.dictDescription {
+  margin-left: auto;
+}
+
+.dictDescriptionMainFont {
+  @include fontBold;
+  font-size: 15px;
+}
+
+// ---------- input group modifiers
+.inputGroup {
+  width: 136px;
+}
+
+.input {
+  @include fontBold;
+  font-size: 15px;
+
+  padding-left: 0.5em;
+  padding-right: 0.5em;
+}
+
+.inputCurrencyAddon {
+  flex-grow: 0;
+  flex-shrink: 0;
+  justify-content: start;
+  padding: 10px 0.5em;
+  white-space: nowrap;
+}
+
+// buttons
+
+.buttons {
+  display: flex;
+  justify-content: space-between;
+}
+
+.button {
+  @include fontBold;
+  font-size: 14px;
+}
+
+// ----------------- finalize transaction ----------------
+.finalizeMarginable {
+  margin-top: 1em;
+  align-items: start;
+}
+
+.superSmallFont {
+  font-size: 12px;
+}
+
+.green {
+  color: $green;
+}
+
+.spaceLeft {
+  margin-left: 0.5em;
+}
+
+.tokenDescriptionLine {
+  display: flex;
+  align-items: center;
+  height: 26px;
+}
+
+.hideDoubleHr {
+  hr + hr {
+    display: none;
+  }
+}

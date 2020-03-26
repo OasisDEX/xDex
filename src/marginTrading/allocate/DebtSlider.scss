@@ -1,0 +1,43 @@
+@import "../../utils/Variables";
+
+@mixin track() {
+  stroke-width: 6px;
+  stroke-linecap: round;
+}
+
+.trackBg {
+  @include track;
+  stroke: $grey-light;
+}
+
+.trackOriginal {
+  @include track;
+  stroke: $vivid-orange;
+}
+
+.trackAvailable {
+  @include track;
+  stroke: white;
+}
+
+.trackModified {
+  @include track;
+  stroke: #777;
+  opacity: 0.5;
+}
+
+.trackOverlay {
+  stroke-width: 20px;
+  stroke-linecap: round;
+  stroke: transparent;
+  opacity: 0.5;
+}
+
+.handler {
+  fill: $white;
+  stroke: black;
+  stroke-opacity: 0.25;
+  stroke-width: 1;
+  //stroke-linecap: round;
+  //opacity: 0.3;
+}

@@ -1,15 +1,13 @@
 import { from, Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
-import * as Web3 from 'web3';
+// tslint:disable:import-name
+import Web3 from 'web3';
 
-import coinbaseSvg from '../icons/providers/coinbase.svg';
-import ethereumSvg from '../icons/providers/ethereum.svg';
-import imTokenSvg from '../icons/providers/im-token.svg';
-import metamaskSvg from '../icons/providers/metamask.svg';
-import paritySvg from '../icons/providers/parity.svg';
-import statusSvg from '../icons/providers/status.svg';
-import trustSvg from '../icons/providers/trust.svg';
-import { SvgImageSimple } from '../utils/icons/utils';
+const infuraProjectId = 'd96fcc7c667e4a03abf1cecd266ade2d';
+const infuraUrl = `https://mainnet.infura.io/v3/${infuraProjectId}`;
+const ethereum = {
+  url: infuraUrl,
+};
 
 export let web3 : Web3;
 
@@ -20,12 +18,6 @@ export interface Web3Window {
   ethereum?: any;
 }
 
-export interface ProviderMetaData {
-  alias: string;
-  fullName: string;
-  icon: JSX.Element | string;
-}
-
 export const web3Status$: Observable<Web3Status> = from(['initializing']).pipe(
   map(() => {
     const win = window as Web3Window;
@@ -33,7 +25,7 @@ export const web3Status$: Observable<Web3Status> = from(['initializing']).pipe(
       web3 = new Web3(win.web3.currentProvider);
       return 'ready';
     }
-    web3 = new Web3(new Web3.providers.HttpProvider('https://mainnet.infura.io'));
+    web3 = new Web3(new Web3.providers.HttpProvider(ethereum.url));
     return 'readonly';
   }),
   shareReplay(1),
@@ -41,85 +33,7 @@ export const web3Status$: Observable<Web3Status> = from(['initializing']).pipe(
 web3Status$.subscribe();
 
 export function setupFakeWeb3ForTesting() {
-  web3 = new Web3();
+  // This is a temporary workaround
+  const Web3Mock = require('web3');
+  web3 = new Web3Mock();
 }
-
-export const getCurrentProviderName = (provider = ((window as Web3Window).web3 ? (window as Web3Window).web3.currentProvider : null)): ProviderMetaData => {
-  if (!provider) {
-    return {
-      alias: 'other',
-      fullName: 'Other',
-      icon: SvgImageSimple(ethereumSvg)
-    };
-  }
-
-  if (provider.isMetaMask) {
-    return {
-      alias: 'metamask',
-      fullName: 'Metamask',
-      icon: SvgImageSimple(metamaskSvg),
-    };
-  }
-
-  if (provider.isTrust) {
-    return {
-      alias: 'trust',
-      fullName: 'Trust Wallet',
-      icon: SvgImageSimple(trustSvg),
-    };
-  }
-
-  if (provider.isStatus) {
-    return {
-      alias: 'status',
-      fullName: 'Status',
-      icon: SvgImageSimple(statusSvg),
-    };
-  }
-
-  if (typeof (window as any).SOFA !== 'undefined') {
-    return {
-      alias: 'coinbase',
-      fullName: 'Coinbase Wallet',
-      icon: SvgImageSimple(coinbaseSvg),
-    };
-  }
-
-  if (provider.constructor && provider.constructor.name === 'Web3FrameProvider') {
-    return {
-      alias: 'parity',
-      fullName: 'Parity',
-      icon: SvgImageSimple(paritySvg),
-    };
-  }
-
-  if (provider.isImToken) {
-    return {
-      alias: 'imToken',
-      fullName: 'imToken',
-      icon: SvgImageSimple(imTokenSvg),
-    };
-  }
-
-  if (provider.host && provider.host.indexOf('infura') !== -1) {
-    return {
-      alias: 'infura',
-      fullName: 'Infura',
-      icon: SvgImageSimple(ethereumSvg),
-    };
-  }
-
-  if (provider.host && provider.host.indexOf('localhost') !== -1) {
-    return {
-      alias: 'self',
-      fullName: 'Private Wallet',
-      icon: SvgImageSimple(ethereumSvg)
-    };
-  }
-
-  return {
-    alias: 'other',
-    fullName: 'Other',
-    icon: SvgImageSimple(ethereumSvg)
-  };
-};

@@ -1,7 +1,8 @@
 @import "../utils/Mixins";
 @import "../utils/Variables";
+@import "../utils/forms/Buttons";
 
-$header-media-breakpoint: 800px;
+$header-media-breakpoint: 880px;
 
 :global(.paper) {
   @include media-breakpoint-down($header-media-breakpoint) {
@@ -15,15 +16,19 @@ $header-media-breakpoint: 800px;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  margin-top: 1em;
-  margin-bottom: 0.75em;
+  margin: 1.75rem 0;
 
   .logo {
     width: 132px;
     max-height: 37px;
     margin: auto 1.5em auto auto;
+
     svg:hover :global(#bg) {
       fill-opacity: 0.35;
+    }
+
+    @include media-breakpoint-down(sm) {
+      margin: 0;
     }
   }
 }
@@ -41,6 +46,7 @@ $header-media-breakpoint: 800px;
   }
 
   &Status {
+    align-items: center;
     @include media-breakpoint-down($header-media-breakpoint) {
       flex: 1 1 auto;
       justify-content: flex-end;
@@ -55,57 +61,59 @@ $header-media-breakpoint: 800px;
 }
 
 .list {
-    display: flex;
-    list-style-type: none;
-    padding: 0;
+  display: flex;
+  list-style-type: none;
+  padding: 0;
 
   @include media-breakpoint-down($header-media-breakpoint) {
-      margin-top: 24px;
+    margin-top: 24px;
+  }
+
+  .item + .item {
+    margin-left: -1px;
+
+    .navLink {
+      border-left-color: transparent;
     }
+  }
 
-    .item + .item {
-        margin-left: -1px;
-
-      .navLink {
-        border-left-color: transparent;
-      }
-    }
-
-    // left and right item border radius
+  // left and right item border radius
   .item:first-child, .item:first-child > * {
-        border-bottom-left-radius: $border-radius;
-        border-top-left-radius: $border-radius;
-    }
+    border-bottom-left-radius: $border-radius;
+    border-top-left-radius: $border-radius;
+  }
 
   .item:last-child, .item:last-child > * {
-        border-bottom-right-radius: $border-radius;
-        border-top-right-radius: $border-radius;
-    }
+    border-bottom-right-radius: $border-radius;
+    border-top-right-radius: $border-radius;
+  }
 
-    .item:last-child {
-      margin-right: 0;
-    }
+  .item:last-child {
+    margin-right: 0;
+  }
 }
 
 .navElement {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
-    height: 40px;
+  height: 40px;
 
-    border: 1px solid rgba($white, 0.1);
-    color: $white;
-    border-radius: 0;
+  border: 1px solid $element-border;
+  background: $white;
+  border-radius: 0;
 }
 
 .navLink {
   @extend .navElement;
   text-decoration: none;
   width: 108px;
-  color: $grey-lightest;
+  color: $desaturated-dark-blue;
+
   &:hover {
-    background-color: rgba($white, 0.1);
+    background-clip: padding-box;
+    background-color: $background-on-hover;
     cursor: pointer;
   }
 
@@ -113,35 +121,53 @@ $header-media-breakpoint: 800px;
     width: 100%;
   }
 }
+
 .activeNavLink {
-    &,
-    &:hover {
-        color: white;
-      border: 1px solid $grey-lightest !important;
-        background: initial;
-    }
+  &,
+  &:hover {
+    z-index: 2;
+    color: white;
+  }
+
+  & {
+    border: 1px solid $green ;
+    background: $green;
+  }
+
+  &:hover {
+    border: 1px solid darken($green, 5%);
+    background: darken($green, 5%);
+  }
 }
 
 .account {
+  color: $desaturated-dark-blue;
+  font-size: 14px;
   width: 196px;
   border-radius: $border-radius;
-  margin-right: 0px;
+  margin-right: 0;
+
+  &:hover {
+    background-color: $background-on-hover;
+    cursor: pointer;
+  }
 
   @include media-breakpoint-down($header-media-breakpoint) {
     width: 32px;
     height: 32px;
   }
 
-  & span {
+  & span, & .arrowDown {
     @include media-breakpoint-down($header-media-breakpoint) {
-      display: none
+      display: none !important;
     }
   }
 }
+
 .accountLoader {
   display: flex;
-  margin-right: 12px;
 }
+
 .login {
   display: inline-flex;
   align-items: center;
@@ -155,53 +181,71 @@ $header-media-breakpoint: 800px;
   }
 }
 
-.connectButton {
-  text-transform: none;
-  font-size: 16px;
-}
-:global(.Popover.noWallet) {
-  & :global(.Popover-tip) {
-    fill: $white;
-  }
-  & :global(.Popover-body) {
-    background-color: $white;
-    border-color: $white;
-    border-radius: 2px;
-    color: black;
-    padding: 1em;
-  }
-}
-
-.networkIndicator {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  width: 79px;
-  height: 40px;
-
-  background: transparent;
-  border-radius: $border-radius;
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 500;
-  font-size: 16px;
-  letter-spacing: 1.4px;
-
-  text-transform: capitalize;
+.connectWalletButton {
+  width: 196px;
+  height: 38px;
+  font-size: 16px !important;
+  background: white;
 
   @include media-breakpoint-down($header-media-breakpoint) {
-    max-width: 68px;
-    font-size: 14px;
+    width: 32px;
     height: 32px;
   }
 }
 
-.networkIndicator.kovan {
-  color: $moderate-violet;
-  border: 1px solid $moderate-violet;;
+:global(.Popover.noWallet) {
+  z-index: 20;
+  padding-top: 8px;
+  & :global(.Popover-tip) {
+    display: none;
+  }
 }
 
-.networkIndicator.main{
-  color: $soft-cyan;
-  border: 1px solid $soft-cyan;
+.networkIndicator {
+  width: 12px;
+  height: 12px;
+  margin-right: 1rem;
+  border-radius: 100%;
+
+  @include media-breakpoint-down(sm){
+    margin-right: .5rem;
+  }
+}
+
+.networkIndicator.kovan {
+  background-color: $light-violet;
+  border: 1px solid $light-violet;;
+}
+
+.networkIndicator.main {
+  background-color: $green;
+  border: 1px solid $green;
+}
+
+.arrowDown {
+  width: 12px;
+  height: 7px;
+  margin-left: .875rem;
+  display: inherit;
+
+  &.dark svg path {
+    fill: $very-dark-grayish-blue;
+  }
+
+  &.mild svg path {
+    fill: $grayish-blue;
+  }
+
+  &.light svg path {
+    fill: $white;
+  }
+}
+
+.walletConnection {
+  display: inline-flex;
+  align-items: center;
+}
+
+.redeemBtn {
+  height: 40px;
 }

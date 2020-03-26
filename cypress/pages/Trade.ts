@@ -1,4 +1,4 @@
-import { tid } from '../utils';
+import { tid, timeout } from '../utils';
 import { Finalization } from './Finalization';
 
 const input = (side: 'sellInput' | 'buyInput') => ({
@@ -17,7 +17,33 @@ const input = (side: 'sellInput' | 'buyInput') => ({
 
 });
 
+export enum TradingSide {
+  BUY = 'buy',
+  SELL = 'sell'
+}
+
+export  const instantForm = () => cy.get(tid('instant-form'));
+
 export class Trade {
+
+  public static swapTokens = () => cy.get(tid('swap')).click();
+
+  public static shouldHaveSwapDisabled = () => cy.get(tid('swap')).should('be.disabled');
+
+  public static openAssetSelectorFor = (side: TradingSide) => {
+    if (side === TradingSide.BUY) {
+      cy.get(tid('buying-token', tid('balance')))
+        .click();
+    } else {
+      cy.get(tid('selling-token', tid('balance')))
+        .click();
+    }
+  }
+
+  public static expectAssetLocked = (asset: string) => {
+    cy.get(tid(asset.toLowerCase(), tid('asset-button'))).should('be.disabled');
+  }
+
   public expectPriceImpact = (priceImpact: string | RegExp, aboveThreshold: boolean) => {
     cy.get(tid('trade-price-impact', tid('value')))
       .contains(`${priceImpact}`);
@@ -49,32 +75,28 @@ export class Trade {
 
   public sell = (token: string = '') => {
     if (token) {
-      cy.get(tid('selling-token', tid('balance')));
-
-      cy.get(tid('selling-token'))
+      cy.get(tid('selling-token', tid('balance')), timeout(2000))
         .click();
 
-      cy.get(tid(token.toLowerCase()))
+      cy.get(tid(token.toLowerCase()), timeout(2000))
         .click();
     }
 
-    cy.get(tid('selling-token', tid('amount'))).as('sellInput');
+    cy.get(tid('selling-token', tid('amount')), timeout(2000)).as('sellInput');
 
     return input('sellInput');
   }
 
   public buy = (token: string = '') => {
     if (token) {
-      cy.get(tid('buying-token', tid('balance')));
-
-      cy.get(tid('buying-token'))
+      cy.get(tid('buying-token', tid('balance')), timeout(2000))
         .click();
 
-      cy.get(tid(token.toLowerCase()))
+      cy.get(tid(token.toLowerCase()), timeout(2000))
         .click();
     }
 
-    cy.get(tid('buying-token', tid('amount'))).as('buyInput');
+    cy.get(tid('buying-token', tid('amount')), timeout(2000)).as('buyInput');
 
     return input('buyInput');
   }
@@ -84,7 +106,7 @@ export class Trade {
     return new Finalization();
   }
 
-  public resultsInError = (error: string | RegExp) => {
-    cy.get(tid('error')).contains(error);
+  public resultsInError = (error: string | RegExp, position: 'bottom' | 'top') => {
+    cy.get(tid(`${position}-error`)).contains(error);
   }
 }

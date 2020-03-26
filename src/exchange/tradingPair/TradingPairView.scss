@@ -1,14 +1,27 @@
 @import "../../utils/Variables";
 @import "../../utils/Mixins";
 
-.container {
-    display: flex;
-    flex-wrap: wrap;
-    //justify-content: space-between;
-    align-items: center;
+$sm: 400px;
 
+.container {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    z-index: 15;
+    height: 48px;
+    border-top-right-radius: $border-radius;
+    border-bottom-right-radius: $border-radius;
+    background: inherit;
+    padding: 0 16px;
     width: 100%;
-    padding: 0 30px 0 0;
+
+    @include media-breakpoint-down(md-lg) {
+      border: 0;
+      z-index: 0;
+      border-top: 1px solid $element-border;
+      border-top-right-radius: unset;
+      border-bottom-left-radius: $border-radius;
+    }
 
     @include media-breakpoint-down(md){
       padding: 0;
@@ -19,6 +32,7 @@
 // ---------- dropdown ---------------
 .dropdown {
     position: relative;
+    display: inline-flex;
 
     @include media-breakpoint-down(md) {
       width: 100%;
@@ -26,7 +40,7 @@
 }
 
 .mobileWrapper {
-  @include media-breakpoint-down(md) {
+  @include media-breakpoint-down(560px) {
     display: flex;
     flex-direction: column-reverse;
     margin: auto;
@@ -34,11 +48,20 @@
   }
 }
 
+.dropdownIcon {
+  margin: 0 16px 0 12px;
+  width: 20px;
+  padding: 0 4px;
+  content: url("../../icons/chevron-down.svg");
+
+  @include media-breakpoint-down(md-lg) {
+    margin-left: auto;
+  }
+}
+
 .dropdownBtn {
-    $width: 220px;
     height: 48px;
-    width: $width;
-    border-right: 1px solid rgba(white, 0.1);
+    border-right: 1px solid $element-border;
     border-top-left-radius: $border-radius;
     border-bottom-left-radius: $border-radius;
 
@@ -47,56 +70,82 @@
     align-items: center;
 
     cursor: pointer;
-    background: url("../../icons/chevron-down.svg") no-repeat ($width - 34px) center;
+    background-size: 16px;
 
-    @include media-breakpoint-down(md){
+    @include media-breakpoint-down(md-lg) {
+      border-radius: $border-radius;
       border-right: none;
+      width: 100%;
     }
+
+    &:focus {
+      outline: none;
+    }
+    user-select: none;
 }
 
 .dropdownBtnDisabled {
     cursor: default;
-    background-image: none;
+    .dropdownIcon {
+      content: "";
+    }
 }
 
 .dropdownBtnActive {
-    box-shadow: inset 1px 1px 7px 2px rgba(0, 0, 0, 0.3);
+    background-color: white;
+    z-index: 15;
+
+    .dropdownIcon {
+      content: url("../../icons/chevron-up.svg");
+    }
+}
+
+.dropdownListWrapper {
+    position: absolute;
+    top: 48px;
+    z-index: 5;
+    overflow: hidden;
+    //box-shadow: 0 0px 4px  rgba(0, 0, 0, .25);
+
+
+    margin-top: 6px;
+    margin-left: -1px;
+    border-radius: 4px;
+    border: 1px solid $element-border;
+
+    @include media-breakpoint-down(md-lg){
+      width: calc(100% + 2px);
+      margin-top: 0;
+      border-top-left-radius: unset;
+      border-top-right-radius: unset;
+    }
 }
 
 .dropdownList {
-    position: absolute;
-    z-index: 10;
-    width: 100%;
-    top: 48px;
+    width: 344px;
+    display: table;
     list-style: none;
-    padding: 0;
+    padding: 14px 0;
     margin: 0;
 
-    background-color: $grey-darkest;
-    border: 1px solid $grey-darken-darkest;
+    background-color: white;
     border-top: none;
-    box-shadow: 0 0 4px 1px rgba(black, 0.20);
+
     border-bottom-left-radius: $border-radius;
     border-bottom-right-radius: $border-radius;
+
+    @include media-breakpoint-down(md-lg){
+      width: 100%;
+      margin-left: 0;
+    }
 }
 
 .dropdownItem {
-    display: block;
-}
-
-.dropdownItem:not(:last-child) {
-    border-bottom: 1px solid $grey-darken-darkest;
+  display: flex;
 }
 
 .dropdownItemLink {
-    display: flex;
-    color: white;
     text-decoration: none;
-
-    &:hover {
-        background-color: $grey-dark;
-        cursor: pointer;
-    }
 }
 
 
@@ -104,52 +153,133 @@
 
 
 
-// ------------ Pair view -----------------
+// ------------ Active pair view -----------------
 
-.pairView {
+.activePairView {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 12px 26px 12px 12px;
     width: 100%;
 }
 
-.pairViewCurrency {
-    flex-basis: 50px;
-    flex-grow: 1;
+.activePairViewIcon {
+    height: 26px;
+    width: 26px;
+    margin:0 12px;
 }
 
-.pairViewIcon {
-  height: 26px;
-  width: 26px;
-  margin-right: 20px;
-  display: flex;
-  align-items: center;
+.activePairViewTokenBase {
+  margin-right: 12px;
+}
+
+.activePairViewTokenBase, .activePairViewTokenQuote {
+    width: 55px;
+    text-align: left;
+    line-height: 19px;
+}
+
+.activePairViewTokenBase {
+    @include media-breakpoint-down(md){
+        flex-basis: 4em;
+        flex-grow: 0;
+    }
+}
+
+// ------------ Pair view -----------------
+
+.pairView {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 0;
+    width: 100%;
+    background-color: white;
+    font-size: 14px;
+
+    @include media-breakpoint-down($sm) {
+      font-size: 12px;
+    }
+
+    &:hover {
+      background-color: $background-on-hover;
+      cursor: pointer;
+    }
+
+    @include media-breakpoint-down($sm) {
+      padding: 4px 8px;
+      line-height: 1.5;
+    }
+
+    .iconQuote {
+      margin-right: 8px;
+      padding: 0;
+    }
+
+    .iconBase {
+      padding: 0 0 0 8px;
+
+      @include media-breakpoint-down($sm) {
+        padding: 0;
+      }
+    }
+
+    .iconBase, .iconQuote {
+      height: 26px;
+      width: 26px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: content-box;
+    }
+
+    .tokenBase, .tokenQuote {
+      padding-left: 4px;
+      width: 58px;
+
+      @include media-breakpoint-down($sm) {
+        width: 48px;
+      }
+    }
+
+    .price {
+      width: 120px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-start;
+
+      &.center {
+        justify-content: center;
+      }
+
+      @include media-breakpoint-down(md-lg){
+        margin: auto;
+      }
+
+      @include media-breakpoint-down($sm){
+        width: 90px;
+      }
+    }
+
+    .priceDiff {
+      width: 58px;
+      text-align: right;
+      padding-right: 10px;
+    }
+}
+
+.active, .active:hover {
+  background-color: $background-on-hover;
 }
 
 // ---------------------
 
-
-.active {
-    font-weight: bold;
-}
-.passive {
-    font-weight: normal;
-}
-
-
 // style of box with info like current or yesterday price
 .pairInfo {
-    padding: 0 16px;
     flex-grow: 1;
-    display: flex;
+    display: inline-flex;
     align-items: center;
 
     @include media-breakpoint-down(md){
-      padding: 10px 16px;
       flex-direction: column-reverse;
       align-items: flex-end;
-      border-top: 1px solid $grey-darken-darkest;
     }
 }
 
@@ -157,13 +287,13 @@
     margin-left: 7px;
 
     @include media-breakpoint-down(md){
-      font-size: 10px;
+      font-size: 11px;
       margin-left: 0;
     }
 }
 
 .pairInfoValue {
     @include media-breakpoint-down(md){
-      font-size: 14px;
+      font-size: 15px;
     }
 }

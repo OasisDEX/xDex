@@ -1,0 +1,341 @@
+@import "../../utils/Variables";
+@import "../../utils/Mixins";
+@import "../../utils/Form";
+
+// panel header
+.settingsIcon {
+  margin-left: 4px;
+  height: 18px;
+  width: 18px;
+  padding: 2px;
+}
+
+.visible {
+  visibility: visible;
+}
+
+.hidden {
+  visibility: hidden;
+}
+
+.btn {
+  font-size: 13px;
+  width: 68px;
+}
+
+.setMaxBtn {
+  padding: 0;
+  font-size: 14px;
+  border: 0;
+  background: transparent;
+  color: $bright-blue;
+
+  &:hover:enabled:not(:disabled) {
+    background: transparent;
+    color: $bright-blue;
+  }
+}
+
+// form
+
+$twoColumnsPanelWidth: 454px;
+$historyPanelsHeight: 605px;
+
+.InstantOrderPanel {
+  display: inline-flex;
+  flex-direction: column;
+
+  width: $twoColumnsPanelWidth;
+  height: $historyPanelsHeight;
+
+  @include media-breakpoint-down(lg) {
+    width: 100%;
+  }
+}
+
+.marginBottom {
+  margin-bottom: 20px;
+}
+
+.flexContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.balanceBtn {
+  align-items: center;
+  display: flex;
+  @include fontBold;
+  justify-content: center;
+  letter-spacing: 0.4px;
+  width: 150px;
+  flex-basis: 150px;
+  flex-grow: 1;
+
+  &:disabled,
+  &:disabled:hover {
+    background-color: transparent;
+    border-color: rgba($grey-light, 0.2);
+    color: $font-color-base;
+    opacity: 1;
+  }
+
+  &:first-child {
+    margin-right: 10px;
+  }
+
+  &:last-child {
+    margin-left: 10px;
+  }
+}
+
+.confirmButton {
+  font-size: $font-size-base;
+  height: 35px;
+  width: 100%;
+}
+
+// ---------- horizontal lines
+.hrMargin {
+  margin-top: 0;
+  margin-bottom: 18px;
+}
+
+// ---------- input group modifiers
+.inputHeader {
+  flex-basis: 94px;
+  flex-grow: 2;
+  flex-shrink: 0;
+  padding: 10px 16px;
+  //color: $grey-light-mid;
+}
+
+.input {
+  flex-basis: 186px;
+  flex-grow: 4;
+  padding-left: 3em;
+}
+
+.inputCurrencyAddon {
+  flex-basis: 82px;
+  flex-grow: 1;
+  flex-shrink: 0;
+  justify-content: start;
+  padding: 10px 16px;
+  white-space: nowrap;
+}
+
+.setMaxBtnAddon {
+  padding: 0;
+  flex-basis: 36px;
+  flex-grow: 0;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+// errors
+.errors {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  color: $red;
+  font-size: 11px;
+  height: 24px;
+  text-align: right;
+}
+
+// border box with infos inside, f.e. purchasing power or order type
+
+// ----------- sizes
+@include formInputHeights('lg');
+
+// style purchasing power box
+.purchasingPowerTitle {
+  @include fontSemiBold;
+  font-size: 15px;
+}
+
+.purchasingPowerAmount {
+  @include fontBold;
+}
+
+// style order type box
+.orderType {
+  text-align: center;
+}
+
+.summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.transitionArrow {
+  display: inline-block;
+  height: 8px;
+  width: 16px;
+  margin: 0 12px;
+  background: url("./icon_arrow_right.svg") no-repeat center;
+}
+
+.summaryBox {
+  min-height: 284px;
+  margin-top: 16px;
+  border: 1px solid $element-border;
+  padding: 16px 12px;
+}
+
+.orderSummaryRow {
+  @include formRow;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.orderSummaryRowDark {
+  .orderSummaryLabel {
+    @include formLabelDark;
+  }
+}
+
+.orderSummaryLabel {
+  text-align: left;
+  flex-grow: 2;
+  display: inline-flex;
+}
+
+.orderSummaryValue {
+  text-align: right;
+}
+
+.orderSummaryValuePositive {
+  color: $green;
+}
+
+.orderSummaryValueNegative {
+  color: $orange;
+}
+
+// ---------- horizontal lines spaces
+.hrSmallMargin {
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+.hrMargin {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.settingsFooter {
+  margin-top: auto;
+}
+
+
+.InfoRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid $element-border;
+  font-size: 15px;
+  line-height: 18px;
+  margin-bottom: 28px;
+}
+
+.InfoBox {
+  flex-grow:1;
+  flex-shrink: 1;
+  text-align: center;
+  box-sizing: border-box;
+  border-radius: 2px;
+  padding: 10px;
+  border-left: 1px solid $element-border;
+
+  &:first-child {
+    border-left: none;
+  }
+}
+
+.InfoRowLabel {
+  @include formLabelDark;
+
+  margin-bottom: 5px;
+}
+
+.notSetupBorder {
+  text-align: center;
+  border: 1px dashed rgba(88, 88, 95, 0.4);
+  border-radius: 2px;
+  padding: 30px 0;
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+.onboardingPanel {
+  padding: 90px 30px;
+  flex-direction: column;
+  justify-content: center;
+  display: flex;
+
+  color: #48495F;
+
+  h3 {
+    font-style: normal;
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 24px;
+    text-align: center;
+    letter-spacing: 0.3px;
+    width: 100%;
+  }
+}
+
+.onboardingParagraph {
+  margin-bottom: 22px;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 15px;
+  line-height: 22px;
+  width: 100%;
+  text-align: center;
+}
+
+.orderPanel {
+  height: 100%;
+  width: 454px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+}
+
+.buyFormWrapper {
+  margin: 0 16px 16px 16px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.warningMessage {
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 24px;
+  text-align: center;
+  letter-spacing: 0.3px;
+  color: #DC5D00;
+}
+
+.purchasingPowerTooltip {
+  display: inline-block;
+  position: relative;
+  top: 4px;
+  right: 5px;
+}
+
+.checkbox {
+  height: 50px;
+  margin-bottom: 16px;
+}

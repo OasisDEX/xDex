@@ -1,7 +1,7 @@
 import { BigNumber } from 'bignumber.js';
 import * as React from 'react';
 import { Money } from '../../utils/formatters/Formatters';
-import { NetworkConfig, tokens } from '../config';
+import { getToken, NetworkConfig } from '../config';
 import { amountToWei } from '../utils';
 import { TransactionDef } from './callsHelpers';
 import { TxMetaKind } from './txMeta';
@@ -14,7 +14,7 @@ export interface WrapUnwrapData {
 
 export const wrap: TransactionDef<WrapUnwrapData> = {
   call: (_: WrapUnwrapData, context: NetworkConfig) =>
-    context.tokens.WETH.contract.deposit,
+    context.tokens.WETH.contract.methods.deposit,
   options: ({ amount, gasPrice, gas }: WrapUnwrapData) => ({
     gas,
     gasPrice: gasPrice.toString(),
@@ -26,12 +26,12 @@ export const wrap: TransactionDef<WrapUnwrapData> = {
     <React.Fragment>
       Wrap <Money value={amount} token={'ETH'}/>
     </React.Fragment>,
-  descriptionIcon: () => tokens.ETH.iconCircle,
+  descriptionIcon: () => getToken('ETH').iconCircle,
 };
 
 export const unwrap: TransactionDef<WrapUnwrapData> = {
   call: (_: WrapUnwrapData, context: NetworkConfig) =>
-    context.tokens.WETH.contract.withdraw,
+    context.tokens.WETH.contract.methods.withdraw,
   options: ({ gasPrice, gas }) => ({ gas, gasPrice: gasPrice.toString() }),
   kind: TxMetaKind.unwrap,
   prepareArgs: ({ amount }: WrapUnwrapData) =>
@@ -40,5 +40,5 @@ export const unwrap: TransactionDef<WrapUnwrapData> = {
     <React.Fragment>
       Unwrap <Money value={amount} token={'WETH'}/>
     </React.Fragment>,
-  descriptionIcon: () => tokens.ETH.iconCircle,
+  descriptionIcon: () => getToken('ETH').iconCircle,
 };

@@ -2,9 +2,10 @@ import { BigNumber } from 'bignumber.js';
 import * as React from 'react';
 import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
 
-import { tokens } from '../blockchain/config';
+import { getToken } from '../blockchain/config';
 import { User } from '../blockchain/user';
 import { OfferType } from '../exchange/orderbook/orderbook';
+import { ApproximateInputValue } from '../utils/Approximate';
 import { BigNumberInput } from '../utils/bigNumberInput/BigNumberInput';
 import { formatAmountInstant } from '../utils/formatters/format';
 import { Asset } from './asset/Asset';
@@ -27,14 +28,14 @@ interface TradingSideProps {
 class TradingSide extends React.Component<TradingSideProps> {
   public render() {
     const { amount, asset, balance, placeholder, onAmountChange, user, approx } = this.props;
-    const decimalLimit = tokens[asset] ? tokens[asset].digitsInstant : 3;
+    const decimalLimit = getToken(asset) ? getToken(asset).digitsInstant : 3;
     return (
       <div className={styles.tradingSide} data-test-id={this.props.dataTestId}>
         <div className={styles.tradingAsset}>
           <Asset currency={asset} balance={balance} user={user} onClick={this.changeToken}/>
         </div>
         {/* TODO: Make it parameterized like the tokens in offerMakeForm.*/}
-        <span className={styles.inputWrapper}>
+        <ApproximateInputValue shouldApproximate={approx}>
           <BigNumberInput
             data-test-id={'amount'}
             type="text"
@@ -52,8 +53,7 @@ class TradingSide extends React.Component<TradingSideProps> {
             guide={true}
             placeholder={placeholder}
           />
-          { approx && <span className={styles.inputApprox}>~</span> }
-        </span>
+        </ApproximateInputValue>
       </div>
     );
   }
@@ -61,14 +61,24 @@ class TradingSide extends React.Component<TradingSideProps> {
   private changeToken = () => {
     this.props.change({
       kind: InstantFormChangeKind.viewChange,
-      view: this.props.side === OfferType.buy ? ViewKind.buyAssetSelector : ViewKind.sellAssetSelector,
+      view: this.props.side === OfferType.buy
+        ? ViewKind.buyAssetSelector
+        : ViewKind.sellAssetSelector,
     });
   }
 }
 
 export const Selling = (props: any) => (
-  <TradingSide dataTestId="selling-token" side={OfferType.sell} placeholder="Deposit Amount" {...props}/>
+  <TradingSide dataTestId="selling-token"
+               side={OfferType.sell}
+               placeholder="Deposit Amount"
+               {...props}
+  />
 );
 export const Buying = (props: any) => (
-  <TradingSide dataTestId="buying-token" side={OfferType.buy} placeholder="Receive Amount" {...props}/>
+  <TradingSide dataTestId="buying-token"
+               side={OfferType.buy}
+               placeholder="Receive Amount"
+               {...props}
+  />
 );

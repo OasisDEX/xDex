@@ -1,0 +1,103 @@
+@import '../utils/Variables.scss';
+@import '../utils/Mixins.scss';
+@import '../utils/forms/Buttons.scss';
+
+$successBackground:#FFF9ED;
+$successBorder: #2DC1B1;
+$successColor: #44655E;
+
+$warningBackground:#FFF9ED;
+$warningBorder: #FFBCC5;
+$warningColor: #826318;
+
+$dangerBackground:#FDEDE8;
+$dangerBorder: #F77249;
+$dangerColor: #994126;
+
+$btnBorder: #9FAFB9;
+$btnColor: #708390;
+
+.section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  position: relative;
+  top: 0;
+  width: 100%;
+  margin-top: 12px;
+
+  h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+    font-weight: 500;
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid #3c3c46;
+  }
+
+  a {
+    text-decoration: underline;
+  }
+
+  font-size: 14px;
+}
+
+.success {
+  background-color: $successBackground;
+  border: 1px solid $successBorder;
+  color: $successColor;
+}
+
+.warning {
+  background-color: $warningBackground;
+  border: 1px solid $warningBorder;
+  color: $warningColor;
+}
+
+.danger {
+  background-color: $dangerBackground;
+  border: 1px solid $dangerBorder;
+  color: $dangerColor;
+}
+
+.panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 932px;
+  font-size: 14px;
+  padding: 5px 10px;
+  line-height: 22px;
+  
+  box-sizing: border-box;
+  border-radius: 6px;
+
+  @include media-breakpoint-down(1000px) {
+    margin-left: -8px;
+  }
+}
+
+.btn {
+  display: inline-flex;
+  font-size: 11px;
+  line-height: 12px;
+  font-weight: 600;
+  max-width: 140px;
+  margin-left: 16px;
+  padding: 0px 8px;
+
+  @include button((
+    color: $btnColor,
+    bg: $white,
+    border-color: $btnBorder,
+  ));
+
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+}
+

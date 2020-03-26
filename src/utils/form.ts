@@ -1,13 +1,17 @@
 import { BigNumber } from 'bignumber.js';
 import { combineLatest, Observable, of } from 'rxjs';
 import { takeWhileInclusive } from 'rxjs-take-while-inclusive';
-import { catchError, first, flatMap, map, startWith, switchMap } from 'rxjs/operators';
+import {
+  catchError, distinctUntilChanged, first, flatMap, map, startWith, switchMap
+} from 'rxjs/operators';
 import { Balances, DustLimits } from '../balances/balances';
 import { Calls, Calls$, ReadCalls, ReadCalls$ } from '../blockchain/calls/calls';
 import { TxState, TxStatus } from '../blockchain/transactions';
 import { User } from '../blockchain/user';
 import { amountFromWei } from '../blockchain/utils';
+import { TradeWithStatus } from '../exchange/myTrades/openTrades';
 import { Offer, OfferType, Orderbook } from '../exchange/orderbook/orderbook';
+import { MTAccount, MTAccountState } from '../marginTrading/state/mtAccount';
 
 export enum FormStage {
   idle = 'idle',
@@ -26,6 +30,7 @@ export enum FormChangeKind {
   kindChange = 'kind',
   priceFieldChange = 'price',
   amountFieldChange = 'amount',
+  totalFieldChange = 'total',
   setMaxChange = 'setMax',
   gasPriceChange = 'gasPrice',
   etherPriceUSDChange = 'etherPriceUSDChange',
@@ -34,18 +39,27 @@ export enum FormChangeKind {
   formStageChange = 'stage',
   formResetChange = 'reset',
   orderbookChange = 'orderbook',
+  marginTradingAccountChange = 'marginTradingAccount',
   balancesChange = 'balancesChange',
   tokenChange = 'tokenChange',
+  marginTradingAccountStateChange = 'marginTradingAccountStateChange',
   dustLimitChange = 'dustLimitChange',
   userChange = 'userChange',
   matchTypeChange = 'matchType',
   pickOfferChange = 'pickOffer',
   progress = 'progress',
   etherBalanceChange = 'etherBalanceChange',
+  slippageLimitChange = 'slippageLimitChange',
+  viewChange = 'viewChange',
+  accountChange = 'accountChange',
+  ordersChange = 'ordersChange',
+  checkboxChange = 'checkboxChange'
 }
 
 export enum OfferMatchType {
   limitOrder = 'limitOrder',
+  immediateOrCancel = 'immediateOrCancel',
+  fillOrKill = 'fillOrKill',
   direct = 'direct',
 }
 
@@ -65,6 +79,11 @@ export interface PriceFieldChange {
 
 export interface AmountFieldChange {
   kind: FormChangeKind.amountFieldChange;
+  value?: BigNumber;
+}
+
+export interface TotalFieldChange {
+  kind: FormChangeKind.totalFieldChange;
   value?: BigNumber;
 }
 
@@ -116,6 +135,16 @@ export interface OrderbookChange {
   orderbook: Orderbook;
 }
 
+export interface MTAccountChange {
+  kind: FormChangeKind.marginTradingAccountChange;
+  mta: MTAccount;
+}
+
+export interface MTAccountStateChange {
+  kind: FormChangeKind.marginTradingAccountStateChange;
+  mtaState: MTAccountState;
+}
+
 export interface BalancesChange {
   kind: FormChangeKind.balancesChange;
   balances: Balances;
@@ -142,6 +171,26 @@ export interface EtherBalanceChange {
   etherBalance: BigNumber;
 }
 
+export interface  SlippageLimitChange {
+  kind: FormChangeKind.slippageLimitChange;
+  value: BigNumber;
+}
+
+export interface  AccountChange {
+  kind: FormChangeKind.accountChange;
+  value: string;
+}
+
+export interface OrdersChange {
+  kind: FormChangeKind.ordersChange;
+  orders: TradeWithStatus[];
+}
+
+export interface CheckboxChange {
+  kind: FormChangeKind.checkboxChange;
+  value: boolean;
+}
+
 export function progressChange(progress?: ProgressStage): ProgressChange {
   return { progress, kind: FormChangeKind.progress };
 }
@@ -164,9 +213,9 @@ export function toGasPriceChange(gasPrice$: Observable<BigNumber>): Observable<G
   );
 }
 
-export function toEtherPriceUSDChange(etherPriceUSD$: Observable<BigNumber>):
+export function toEtherPriceUSDChange(etherPriceUsd$: Observable<BigNumber|undefined>):
   Observable<EtherPriceUSDChange> {
-  return etherPriceUSD$.pipe(
+  return etherPriceUsd$.pipe(
     map(value => ({
       value,
       kind: FormChangeKind.etherPriceUSDChange,
@@ -207,6 +256,29 @@ export function toDustLimitChange$(
     ));
 }
 
+export function toMTAccountChange(mta$: Observable<MTAccount>) {
+
+  return mta$.pipe(
+    map(mta => {
+      return ({
+        mta,
+        kind: FormChangeKind.marginTradingAccountChange,
+      } as MTAccountChange);
+
+    })
+  );
+}
+
+export function toMTAccountStateChange(mta$: Observable<MTAccount>) {
+  return mta$.pipe(
+    map(mta => ({
+      mtaState: mta.state,
+      kind: FormChangeKind.marginTradingAccountStateChange,
+    } as MTAccountStateChange)),
+    distinctUntilChanged()
+  );
+}
+
 export function toBalancesChange(balances$: Observable<Balances>) {
   return balances$.pipe(
     map(balances => ({
@@ -222,6 +294,22 @@ export function toUserChange(user$: Observable<User>) {
       user,
       kind: FormChangeKind.userChange
     } as UserChange))
+  );
+}
+export function toAccountChange(account$: Observable<string|undefined>) {
+  return account$.pipe(
+    map(value => ({
+      value,
+      kind: FormChangeKind.accountChange
+    } as AccountChange))
+  );
+}
+
+export function toOrdersChange(
+  orders$: Observable<TradeWithStatus[]>
+) {
+  return orders$.pipe(
+    map(orders => ({ orders, kind: FormChangeKind.ordersChange }))
   );
 }
 
@@ -246,6 +334,7 @@ export function transactionToX<X>(
           case TxStatus.Failure:
           case TxStatus.Error:
             return of(fiascoX);
+          case TxStatus.Propagating:
           case TxStatus.WaitingForConfirmation:
             return of(waitingForConfirmationX);
           case TxStatus.Success:
@@ -283,7 +372,11 @@ export function doGasEstimation<S extends HasGasEstimation>(
   calls$: Calls$,
   readCalls$: ReadCalls$ | undefined,
   state: S,
-  call: (calls: Calls, readCalls: ReadCalls | undefined, state: S) => Observable<number> | undefined,
+  call: (
+    calls: Calls,
+    readCalls: ReadCalls | undefined,
+    state: S
+  ) => Observable<number> | undefined,
 ): Observable<S>;
 
 export function doGasEstimation<S extends HasGasEstimation>(
@@ -297,7 +390,11 @@ export function doGasEstimation<S extends HasGasEstimation>(
   calls$: Calls$ | undefined,
   readCalls$: ReadCalls$,
   state: S,
-  call: (calls: Calls | undefined, readCalls: ReadCalls, state: S) => Observable<number> | undefined,
+  call: (
+    calls: Calls | undefined,
+    readCalls: ReadCalls,
+    state: S
+  ) => Observable<number> | undefined,
 ): Observable<S>;
 
 export function doGasEstimation<S extends HasGasEstimation>(
@@ -305,8 +402,18 @@ export function doGasEstimation<S extends HasGasEstimation>(
   readCalls$: ReadCalls$ | undefined,
   state: S,
   call:
-    ((calls: Calls | undefined, readCalls: ReadCalls | undefined, state: S) => Observable<number> | undefined) |
-    ((calls: Calls, readCalls: ReadCalls, state: S) => Observable<number> | undefined),
+    (
+      (
+        calls: Calls | undefined,
+        readCalls: ReadCalls | undefined,
+        state: S) => Observable<number> | undefined
+      ) |
+    (
+      (
+        calls: Calls,
+        readCalls: ReadCalls,
+        state: S
+      ) => Observable<number> | undefined),
 ): Observable<S> {
   return combineLatest(calls$ || of(undefined), readCalls$ || of(undefined)).pipe(
     first(),
@@ -323,11 +430,12 @@ export function doGasEstimation<S extends HasGasEstimation>(
         ...stateWithoutGasEstimation
       } = state as object;
 
+      // @ts-ignore
       const gasCall = call(calls, readCalls, state);
       const gasPrice = state.gasPrice;
       const etherPriceUsd = state.etherPriceUsd;
 
-      if (!gasPrice || !etherPriceUsd || !gasCall) {
+      if (!gasPrice || !gasCall) {
         return of({
           ...(stateWithoutGasEstimation as object),
           gasEstimationStatus: GasEstimationStatus.unset,
@@ -342,13 +450,13 @@ export function doGasEstimation<S extends HasGasEstimation>(
             gasEstimation,
             gasEstimationStatus: GasEstimationStatus.calculated,
             gasEstimationEth: gasCost,
-            gasEstimationUsd: gasCost.times(etherPriceUsd),
+            gasEstimationUsd: etherPriceUsd ? gasCost.times(etherPriceUsd) : undefined,
           };
         })
       );
     }),
     catchError((error) => {
-      console.warn('Error while estimating gas:', error);
+      console.warn('Error while estimating gas:', error.toString());
       return of({
         ...(state as object),
         error,
@@ -361,7 +469,10 @@ export function doGasEstimation<S extends HasGasEstimation>(
   );
 }
 
-export function calculateTotal(amount: BigNumber | undefined, orders: Offer[]): BigNumber | undefined {
+export function calculateTotal(
+  amount: BigNumber | undefined,
+  orders: Offer[]
+): BigNumber | undefined {
   if (!amount) return undefined;
   let base = amount;
   let quote = new BigNumber(0);
@@ -380,25 +491,4 @@ export function calculateTotal(amount: BigNumber | undefined, orders: Offer[]): 
     }
   }
   return !base.isZero() ? undefined : quote;
-}
-
-export function calculateAmount(total: BigNumber | undefined, orders: Offer[]): BigNumber | undefined {
-  if (!total) return undefined;
-  let base = new BigNumber(0);
-  let quote = total;
-  for (const offer of orders) {
-    if (quote.lte(new BigNumber(0))) {
-      break;
-    }
-    if (quote.gte(offer.quoteAmount)) {
-      quote = quote.minus(offer.quoteAmount);
-      base = base.plus(offer.baseAmount);
-    } else {
-      base = base.plus(
-        offer.baseAmount.times(quote).dividedBy(offer.quoteAmount)
-      );
-      quote = new BigNumber(0);
-    }
-  }
-  return !quote.isZero() ? undefined : base;
 }

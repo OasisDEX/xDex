@@ -18,18 +18,18 @@ class Trade {
   }
 
   public cancel() {
-    cy.get('@trade').find(tid('cancel'), { timeout: 10000 }).click();
+    cy.get('@trade').find(tid('cancel')).click();
   }
 }
 
 export class Trades {
 
   public static countIs(number: number) {
-    cy.get(tid('my-trades'), { timeout: 10000 }).should('have.length', number);
+    cy.get(tid('my-trades')).should('have.length', number);
   }
 
   public static first() {
-    cy.get(tid('my-trades'), { timeout: 10000 }).first().as('trade');
+    cy.get(tid('my-trades')).first().as('trade');
 
     return new Trade();
   }

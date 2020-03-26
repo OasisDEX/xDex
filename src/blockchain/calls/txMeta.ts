@@ -13,7 +13,25 @@ export enum TxMetaKind {
   tradePayWithERC20 = 'tradePayWithERC20',
   setupProxy = 'setupProxy',
   approveProxy = 'approveProxy',
-  disapproveProxy = 'disapproveProxy'
+  disapproveProxy = 'disapproveProxy',
+  setupMTProxy = 'setupMTProxy',
+  approveMTProxy = 'approveMTProxy',
+  fundMTAccount = 'fundMTAccount',
+  drawMTAccount = 'drawMTAccount',
+  buyMTAccount = 'buyMTAccount',
+  sellMTAccount = 'sellMTAccount',
+  reallocateMTAccount = 'reallocateMTAccount',
+  makeLinearOffers = 'makeLinearOffers',
+  cancelAllOffers = 'cancelAllOffers',
+  swapSai = 'swapSai',
+  swapDai = 'swapDai',
+  devDrip = 'devDrip',
+  devChangePrice = 'devChangePrice',
+  devChangePriceAndPoke = 'devChangePriceAndPoke',
+  devPokeOsm = 'devPokeOsm',
+  devPokeSpotter = 'devPokeSpotter',
+  redeem = 'redeem',
+  export = 'export',
 }
 
 export type TxMeta = {
@@ -48,4 +66,29 @@ export type TxMeta = {
   sellAmount: BigNumber,
   buyToken: string,
   sellToken: string,
+} | {
+  kind: TxMetaKind.setupMTProxy,
+} | {
+  kind: TxMetaKind.approveMTProxy,
+  token: string
+} | {
+  kind: TxMetaKind.fundMTAccount,
+  amount: BigNumber,
+  token: string
+} | {
+  kind: TxMetaKind.drawMTAccount,
+  amount: BigNumber,
+  token: string
+} | {
+  kind: TxMetaKind.buyMTAccount,
+  amount: BigNumber,
+  price: BigNumber,
+  token: string
+} | {
+  kind: TxMetaKind.sellMTAccount,
+  amount: BigNumber,
+  price: BigNumber,
+  token: string
+} | {
+  kind: TxMetaKind.reallocateMTAccount
 });

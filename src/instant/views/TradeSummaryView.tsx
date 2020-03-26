@@ -1,34 +1,31 @@
 import { BigNumber } from 'bignumber.js';
 import * as React from 'react';
-import { NetworkConfig } from '../../blockchain/config';
 import { amountFromWei } from '../../blockchain/utils';
 import { OfferType } from '../../exchange/orderbook/orderbook';
+import { formatPriceInstant } from '../../utils/formatters/format';
 import { calculateTradePrice } from '../../utils/price';
 import { CurrentPrice } from '../CurrentPrice';
 import { TradeSummary } from '../details/TradeSummary';
-import { InstantFormChangeKind, ManualChange, Progress, ProgressKind, ViewKind } from '../instantForm';
+import {
+  InstantFormChangeKind,
+  InstantFormState,
+  ProgressKind,
+  ViewKind
+} from '../instantForm';
 import { InstantFormWrapper } from '../InstantFormWrapper';
 
-interface ViewProps {
-  change: (change: ManualChange) => void;
-  progress: Progress;
-  price: BigNumber;
-  gasPrice: BigNumber;
-  etherPriceUsd: BigNumber;
-  sellToken: string;
-  buyToken: string;
-  kind: OfferType;
-  context: NetworkConfig;
-}
-
-export class TradeSummaryView extends React.Component<ViewProps> {
+export class TradeSummaryView extends React.Component<InstantFormState> {
   public render() {
     const { progress, kind, sellToken, buyToken, context, gasPrice, etherPriceUsd } = this.props;
+    if (!progress || !context || !gasPrice || !etherPriceUsd) {
+      return <div/>;
+    }
+
     const { sold, bought, gasUsed } = progress;
     let calcPrice = new BigNumber(0);
     let quotation = '';
     if (sold && bought) {
-      const quote = calculateTradePrice(sellToken, sold, buyToken, bought);
+      const quote = calculateTradePrice(sellToken, sold, buyToken, bought, formatPriceInstant);
       calcPrice = quote.price;
       quotation = quote.quotation;
     }
@@ -57,7 +54,11 @@ export class TradeSummaryView extends React.Component<ViewProps> {
                         }
                         txHash={(progress as { tradeTxHash: string }).tradeTxHash}
                         etherscanURI={context.etherscan.url}
-                        gasCost={new BigNumber(gasUsed).times(amountFromWei(gasPrice, 'ETH')).times(etherPriceUsd)}
+                        gasCost={
+                          new BigNumber(gasUsed)
+                            .times(amountFromWei(gasPrice, 'ETH'))
+                            .times(etherPriceUsd)
+                        }
           />
         }
       </InstantFormWrapper>

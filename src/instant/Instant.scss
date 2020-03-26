@@ -11,11 +11,8 @@
 
   padding: 1.5em;
 
-  letter-spacing: 1.2px;
-
   h1, h2, h3, h4, h5, h6 {
-    @include fontMontserratMedium;
-    font-size: 1em;
+    font-size: 18px;
     margin: 0 0;
   }
 }
@@ -27,11 +24,16 @@
 
   h1, h2, h3, h4, h5, h6 {
     text-align: center;
+    font-weight: 500;
   }
 }
 
 .footer {
   margin-top: auto;
+}
+
+.tradeDetails {
+  min-height: 6.5rem;
 }
 
 // Particular view ( Step 1 )
@@ -40,39 +42,17 @@
   flex-wrap: wrap;
   justify-content: space-between;
   width: 100%;
-  min-height: 4.25rem;
-  border: 1px solid $button-border-disabled;
+  border: 1px solid $element-border;
   border-radius: .25rem;
 
   margin-top: 1.25rem;
   margin-bottom: 1rem;
-
-  padding: .75rem 1rem;
-
-  @include media-breakpoint-down(md) {
-    min-height: 98px;
-  }
-
-  &.hidden {
-    visibility: hidden;
-  }
-
-  &.errors {
-    align-items: center;
-    justify-content: center;
-
-    @include media-breakpoint-down(sm) {
-      text-align: center;
-    }
-  }
-
 
   &.finalization {
     font-size: 0.75rem;
     min-height: 2rem;
     align-items: center;
     justify-content: center;
-    letter-spacing: 1px;
     margin-bottom: 1rem;
     padding: 0;
 
@@ -99,6 +79,10 @@
       padding-bottom: 3rem;
     }
   }
+
+  &.account {
+    padding: 1rem;
+  }
 }
 
 .assets {
@@ -117,9 +101,7 @@
   border-radius: .25rem;
   margin-top: 1rem;
 
-  @include fontMontserratMedium;
   font-size: 12px;
-  letter-spacing: 1.10px;
 
   @include media-breakpoint-down(md) {
     margin: 1rem 0;
@@ -138,11 +120,13 @@
 .errors {
   @extend %errors-base;
   color: $errors;
+  border-color: $errors;
 }
 
 .warnings {
   @extend %errors-base;
   color: #828287;
+  border: rgba(88, 88, 95, 0.4) dashed 1px;
 }
 
 // Asset Picker
@@ -155,47 +139,48 @@
 }
 
 
-.swapIcon {
+.swapBtn {
   position: relative;
   bottom: 1.5rem;
   margin: auto .5rem;
+  border: 0;
 
-  cursor: pointer;
+  &:hover, :active {
+    background: none !important;
+  }
+
+  &:disabled {
+    :global(.swap-icon) {
+      fill: $disabled;
+    }
+  }
 }
 
 .cornerIcon {
   height: 28px;
   width: 28px;
-  border: 1px solid $button-border-disabled;
   border-radius: 100%;
-
-  &.settingsIcon {
-    padding: .25rem;
-  }
 }
 
 .input {
   height: 2rem;
 
-  @include fontMontserratMedium;
   font-size: .75rem;
 
   @include media-breakpoint-down(md) {
     font-size: .625rem;
   }
 
-  border: 1px solid $grey-light;
+  border: 1px solid $element-border;
   border-radius: .125rem;
 
   padding: .5rem;
 
   text-align: center;
-  letter-spacing: 1.1px;
-  color: $white;
 
   &::placeholder {
     text-transform: uppercase;
-    color: $input-number-color;
+    color: #708390;
   }
 
   &:hover {
@@ -208,19 +193,27 @@
   color: $white;
 }
 
-.inputApprox {
+%inputSuffixPrefix {
   position: absolute;
-  left: 1em;
-  top: 0.5em;
-  color: $grey-light;
+  font-weight: 700;
+  top: 50%;
+  transform: translateY(-50%);
+  color: $dark-grayish-blue-2;
+}
+
+.inputApprox {
+  @extend %inputSuffixPrefix;
+  left: 1rem;
+}
+
+.inputPercentage {
+  @extend %inputSuffixPrefix;
+  font-size: 12px;
+  right: 1rem;
 }
 
 .button {
   width: 100%;
-
-  &:disabled {
-    color: $grey-light
-  }
 }
 
 .tradingAsset {

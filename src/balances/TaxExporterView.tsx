@@ -1,3 +1,4 @@
+import * as mixpanel from 'mixpanel-browser';
 import * as React from 'react';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/internal/operators';
@@ -8,11 +9,11 @@ import { Muted } from '../utils/text/Text';
 import { TradeExport } from './taxExporter';
 import * as styles from './TaxExporter.scss';
 
-interface TaxExporterViewProps {
+export interface TaxExporterViewProps {
   export: () => Observable<any[]>;
 }
 
-interface TaxExporterState {
+export interface TaxExporterState {
   inProgress: boolean;
 }
 
@@ -28,11 +29,20 @@ export class TaxExporterView extends React.Component<TaxExporterViewProps, TaxEx
         <PanelBody paddingVertical={true} className={styles.taxExporterPanelBody}>
         <Muted className={styles.taxExporterDescription}>
           <span>Export your trades from Oasis Contracts (2018-2019)</span>
-          From eth2dai.com, oasis.direct, oasisdex.com and cdp.makerdao.com
+          From oasis.app/trade, oasis.direct, oasisdex.com and cdp.makerdao.com
         </Muted>
         <Button
           size="sm"
-          onClick={this.exportTrades}
+          color="secondaryOutlined"
+          onClick={() => {
+            mixpanel.track('btn-click', {
+              id: 'export-trades',
+              product: 'oasis-trade',
+              page: 'Account',
+              section: 'history-export'
+            });
+            this.exportTrades();
+          }}
           className={styles.taxExporterButton}
         >
           {this.state.inProgress ? <ProgressIcon className={styles.progressIcon}/> : 'Export'}
@@ -47,6 +57,7 @@ export class TaxExporterView extends React.Component<TaxExporterViewProps, TaxEx
       this.props.export().pipe(take(1))
         .subscribe({
           next: (trades: TradeExport[]) => {
+            trades = trades.filter(trade => trade.exchange !== '');
             const url = 'data:text/csv;charset=utf-8,' + encodeURIComponent(toCSV(trades));
             downloadCSV(url);
           },
@@ -61,13 +72,16 @@ function toCSVRow(trade: any): string {
 }
 
 function toCSV(trades: any[]) {
-  const header = '"Buy amount";"Buy currency";"Sell amount";"Sell currency";"Date";"Address";"Tx";"Exchange"';
+  const header =
+    '"Buy amount";"Buy currency";"Sell amount";"Sell currency";"Date";"Address";"Tx";"Exchange"';
   return `${header}\r\n${trades.map(trade => `${toCSVRow(trade)}\r\n`).join('')}`;
 }
 
 function downloadCSV(url: string) {
   const currentDate = new Date();
-  const fileName = `trades-report-${currentDate.getFullYear()}-${ (currentDate.getMonth() + 1) <= 9 ? `0 ${(currentDate.getMonth() + 1)}` : (currentDate.getMonth() + 1) }-${currentDate.getDate()}`;
+  const fileName = `trades-report-${currentDate.getFullYear()}-${(currentDate.getMonth() + 1) <= 9
+    ? `0 ${(currentDate.getMonth() + 1)}`
+    : (currentDate.getMonth() + 1)}-${currentDate.getDate()}`;
 
   const link = document.createElement('a');
   link.href = url;

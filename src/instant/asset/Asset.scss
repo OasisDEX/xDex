@@ -7,7 +7,7 @@
   justify-content: space-evenly;
   align-items: center;
 
-  border: 1px solid $grey-light;
+  border: 1px solid $element-border;
   border-radius: .325rem;
 
   width: 100%;
@@ -15,12 +15,25 @@
 
   cursor: pointer;
 
-  @include fontMontserratMedium;
+  color: $very-dark-violet;
+  background: transparent;
+
   font-size: .75rem;
-  letter-spacing: 1px;
 
   &:hover {
-    border-color: $button-border-hover;
+    border-color: $dark-grayish-blue;
+  }
+
+  &.locked {
+    pointer-events: none;
+
+    border-color: $disabled;
+    color: $disabled;
+
+    @include iconsDisabled(
+        $disabled,
+        $white
+    )
   }
 }
 

@@ -1,20 +1,35 @@
-# Eth2Dai
+# Oasis Trade
 
-[![CircleCI](https://circleci.com/gh/OasisDEX/eth2dai.svg?style=svg)](https://circleci.com/gh/OasisDEX/eth2dai)
+[![CircleCI](https://circleci.com/gh/OasisDEX/oasis-market.svg?style=svg)](https://circleci.com/gh/OasisDEX/oasis-market)
 
-**Eth2Dai** is a marketplace that allows fully on-chain exchange of **ETH** and **DAI** tokens. It uses the [**matching_market**](https://etherscan.io/address/0xb7ac09c2c0217b07d7c103029b4918a2c401eecb) smart contract on the Ethereum blockchain.
+**Oasis Trade** is a marketplace that allows fully on-chain exchange of **ETH** and **DAI** tokens. It uses the [**matching_market**](https://etherscan.io/address/0xb7ac09c2c0217b07d7c103029b4918a2c401eecb) smart contract on the Ethereum blockchain.
 
 ## Installation
 
-To run `eth2dai` locally, clone the respository and then run from the command line:
+To run `oasis-market` locally, clone the respository and then run from the command line:
 ```
 yarn
 yarn start
 ```
 
-## Development
+## Environments
+[master branch](https://oasis.app/trade/) - uses `.env.production` configuration file
 
-[dev branch](http://eth2dai-dev.surge.sh/)
+[dev branch](https://staging.oasis.app/trade/) - uses `.env.dev` configuration file
+
+[localhost](https://localhost:3000) - uses `.env` configuration file
+
+Configuration files enable different feature switches for each environment.
+
+### Local development
+
+To start localnode (ganache) with oasis-cache do:
+
+```
+./scripts/dev.sh
+```
+
+NOTE: you need to have access to private docker images from oasisdexorg.
 
 ### Unit tests
 
@@ -72,3 +87,9 @@ REACT_APP_TAX_EXPORTER_ENABLED
 ```
 
 Enables Tax Exporter button on Account page. Feature allows user to export trade history into CSV format.
+
+```
+REACT_APP_MARKET_CLOSED
+```
+
+Disables the possibility to place new offers on the market.

@@ -1,36 +1,41 @@
 // tslint:disable:no-console
 import { BigNumber } from 'bignumber.js';
-import { bindNodeCallback, combineLatest, concat, interval, Observable } from 'rxjs';
+import {
+  bindNodeCallback, combineLatest, concat, forkJoin, from, interval, Observable, of
+} from 'rxjs';
+import { takeWhileInclusive } from 'rxjs-take-while-inclusive';
 import { ajax } from 'rxjs/ajax';
 import {
   catchError,
-  delayWhen,
   distinctUntilChanged,
   filter,
   first,
+  last,
   map,
-  retryWhen,
+  mergeMap,
   shareReplay,
   skip,
   startWith,
   switchMap,
 } from 'rxjs/operators';
 
-import * as dsValue from './abi/ds-value.abi.json';
-import { NetworkConfig, networks } from './config';
+import * as mixpanel from 'mixpanel-browser';
+import { mixpanelIdentify } from '../analytics';
+import { getToken, NetworkConfig, networks, tradingTokens } from './config';
 import { amountFromWei } from './utils';
 import { web3 } from './web3';
 
+export const maxGasPerBlock = 8e6;
 export const every3Seconds$ = interval(3000).pipe(startWith(0));
 export const every5Seconds$ = interval(5000).pipe(startWith(0));
 export const every10Seconds$ = interval(10000).pipe(startWith(0));
 export const every30Seconds$ = interval(30000).pipe(startWith(0));
 
-export const version$ = web3 && bindNodeCallback(web3.version.getNode)();
+export const version$ = web3 && bindNodeCallback(web3.eth.getNodeInfo)();
 
 export const networkId$ = every3Seconds$.pipe(
   startWith(0),
-  switchMap(() => bindNodeCallback(web3.version.getNetwork)()),
+  switchMap(() => bindNodeCallback(web3.eth.net.getId)()),
   distinctUntilChanged(),
   shareReplay(1)
 );
@@ -51,6 +56,20 @@ export const context$: Observable<NetworkConfig> = networkId$.pipe(
   map((id: string) => networks[id]),
   shareReplay(1)
 );
+
+combineLatest(account$, context$).pipe(
+  mergeMap(([account, network]) => {
+    return of([account, network.name]);
+  })
+).subscribe(([account, network]) => {
+  mixpanelIdentify(account!, { wallet: 'metamask' });
+  mixpanel.track('account-change', {
+    account,
+    network,
+    product: 'oasis-trade',
+    wallet: 'metamask'
+  });
+});
 
 export const onEveryBlock$ = combineLatest(every5Seconds$, context$).pipe(
   switchMap(() => bindNodeCallback(web3.eth.getBlockNumber)()),
@@ -75,6 +94,7 @@ export const etherBalance$: Observable<BigNumber> = initializedAccount$.pipe(
     onEveryBlock$.pipe(
       switchMap((): Observable<BigNumber> =>
         bindNodeCallback(web3.eth.getBalance as GetBalanceType)(address).pipe(
+          map((x: string) => new BigNumber(x)),
           map(balance => {
             return amountFromWei(balance, 'ETH');
           })
@@ -91,53 +111,98 @@ export const etherBalance$: Observable<BigNumber> = initializedAccount$.pipe(
 
 export const MIN_ALLOWANCE = new BigNumber('0xffffffffffffffffffffffffffffffff');
 
-type Allowance = (
-  account: string,
-  contract: string,
-  callback: (err: any, r: BigNumber) => any
-) => any;
-
 export function allowance$(token: string, guy?: string): Observable<boolean> {
   return combineLatest(context$, initializedAccount$, onEveryBlock$).pipe(
     switchMap(([context, account]) =>
-      bindNodeCallback(context.tokens[token].contract.allowance as Allowance)(
-        account, guy ? guy : context.otc.address)
+      from(context.tokens[token].contract.methods.allowance(
+        account, guy ? guy : context.otc.address
+      ).call())
     ),
+    map((x: string) => new BigNumber(x)),
     map((x: BigNumber) => x.gte(MIN_ALLOWANCE)),
-   );
+  );
 }
 
 export type GasPrice$ = Observable<BigNumber>;
 
 export const gasPrice$: GasPrice$ = onEveryBlock$.pipe(
   switchMap(() => bindNodeCallback(web3.eth.getGasPrice)()),
-  map(x => x.mul(1.25)),
+  map(x => new BigNumber(x)),
+  map(x => x.multipliedBy(1.25)),
   distinctUntilChanged((x: BigNumber, y: BigNumber) => x.eq(y)),
   shareReplay(1),
 );
 
-export const etherPriceUsd$: Observable<BigNumber> = concat(
-  context$.pipe(
-    filter(context => !!context),
-    first(),
-    filter(context => context.saiTub.address !== ''),
-    switchMap(context => bindNodeCallback(context.saiTub.contract.pip)()),
-    map((address: string) => web3.eth.contract(dsValue as any).at(address)),
-    switchMap(pip => bindNodeCallback(pip.read)()),
-    map((value: string) => new BigNumber(value).div(new BigNumber(10).pow(18))),
+export interface Ticker {
+  [label: string]: BigNumber;
+}
+
+// TODO: This should be unified with fetching price for ETH.
+// Either this logic should contain only fetching from 3rd party endpoint
+// or we wait until all of the tokens have PIP deployed.
+export const tokenPricesInUSD$: Observable<Ticker> = onEveryBlock$.pipe(
+  switchMap(
+    () =>
+      forkJoin(
+        tradingTokens.map(
+          (token) =>
+            ajax({
+              url: `https://api.coinpaprika.com/v1/tickers/${getToken(token).ticker}/`,
+              method: 'GET',
+              headers: {
+                Accept: 'application/json',
+              },
+            }).pipe(
+              map(({ response }) => ({
+                [token]: new BigNumber(response.quotes.USD.price),
+              })),
+              catchError((error) => {
+                console.debug(`Error fetching price data: ${error}`);
+                return of({});
+              }),
+            )
+        )
+      )
   ),
-  onEveryBlock$.pipe(
-    switchMap(() => ajax({
-      url: 'https://api.coinmarketcap.com/v1/ticker/ethereum/',
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-      },
-    })),
-    retryWhen(errors => errors.pipe(delayWhen(() => onEveryBlock$.pipe(skip(1))))),
-    map(({ response }) => new BigNumber(response[0].price_usd)),
+  map((prices) => prices.reduce((a, e) => ({ ...a, ...e }))),
+  shareReplay(1)
+);
+
+function getPriceFeed(ticker: string): Observable<BigNumber|undefined> {
+  return ajax({
+    url: `https://api.coinpaprika.com/v1/tickers/${ticker}/`,
+    method: 'GET',
+    headers: {
+      Accept: 'application/json',
+    },
+  }).pipe(
+    map(({ response }) => new BigNumber(response.quotes.USD.price)),
+    catchError((error) => {
+      console.debug(`Error fetching price data: ${error}`);
+      return of(undefined);
+    }),
+  );
+}
+
+export const etherPriceUsd$: Observable<BigNumber|undefined> = onEveryBlock$.pipe(
+  switchMap(() => getPriceFeed('eth-ethereum')),
+  distinctUntilChanged(
+    (x: BigNumber, y: BigNumber) => x?.eq(y)
   ),
-).pipe(
-  distinctUntilChanged((x: BigNumber, y: BigNumber) => x.eq(y)),
   shareReplay(1),
 );
+export const daiPriceUsd$: Observable<BigNumber|undefined> = onEveryBlock$.pipe(
+  switchMap(() => getPriceFeed('dai-dai')),
+  distinctUntilChanged((x: BigNumber, y: BigNumber) => x?.eq(y)),
+  shareReplay(1),
+);
+
+export function waitUntil<T>(
+  value: Observable<T>, condition: (v: T) => boolean, maxRetries = 5, generator$ = onEveryBlock$,
+): Observable<T> {
+  return generator$.pipe(
+    switchMap(() => value),
+    takeWhileInclusive((v, i) => i < maxRetries && !condition(v)),
+    last(),
+  );
+}

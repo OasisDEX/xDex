@@ -19,29 +19,12 @@ import { MyTradesKind, MyTradesPropsLoadable } from './myTrades';
 import * as styles from './MyTradesView.scss';
 import { TradeWithStatus } from './openTrades';
 
-export class MyTrades extends React.Component<MyTradesPropsLoadable> {
+export class MyTradesTable extends React.Component<MyTradesPropsLoadable> {
   public render() {
-    const { value, kind, changeKind, tradingPair } = this.props;
+    const { kind, tradingPair } = this.props;
+
     return (
       <>
-        <PanelHeader bordered={value && value.status === 'error'}>
-          <span>My Orders</span>
-          <ButtonGroup style={{ marginLeft: 'auto' }}>
-            <Button
-              size="sm"
-              color={kind === MyTradesKind.open ? 'whiteOutlined' : 'grey'}
-              className={styles.orderTypeBtn}
-              onClick={() => changeKind && changeKind(MyTradesKind.open)}
-            >Open</Button>
-            <Button
-              size="sm"
-              color={kind === MyTradesKind.closed ? 'whiteOutlined' : 'grey'}
-              className={styles.orderTypeBtn}
-              onClick={() => changeKind && changeKind(MyTradesKind.closed)}
-            >Closed</Button>
-          </ButtonGroup>
-        </PanelHeader>
-
         <Table align="left"
                className={classnames(styles.myTradesTable, {
                  [styles.myOpenTradesTable]: kind === MyTradesKind.open,
@@ -59,7 +42,11 @@ export class MyTrades extends React.Component<MyTradesPropsLoadable> {
             <th className={styles.right}>
               <InfoLabel>Total</InfoLabel> {tradingPair.quote}
             </th>
-            <th className={classnames(this.props.kind === MyTradesKind.open ? 'hide-md' : '', styles.right)}>Time</th>
+            <th className={
+              classnames(this.props.kind === MyTradesKind.open ? 'hide-md' : '', styles.right)
+            }>
+              Time
+            </th>
             {this.props.kind === MyTradesKind.open &&
             <th className={styles.right}>Status</th>
             }
@@ -90,7 +77,9 @@ export class MyTrades extends React.Component<MyTradesPropsLoadable> {
                               <SellBuySpan type={trade.act}>{trade.act}</SellBuySpan>
                             </td>
                             <td data-test-id="price" className={styles.right}>
-                              <FormatPriceOrder value={trade.price} token={trade.quoteToken} kind={trade.kind}/>
+                              <FormatPriceOrder value={trade.price} token={trade.quoteToken}
+                                                kind={trade.kind}
+                              />
                             </td>
                             <td data-test-id="amount" className={styles.right}>
                               <FormatAmount value={trade.baseAmount} token={trade.baseToken}/>
@@ -98,18 +87,28 @@ export class MyTrades extends React.Component<MyTradesPropsLoadable> {
                             <td data-test-id="total" className={styles.right}>
                               <FormatAmount value={trade.quoteAmount} token={trade.quoteToken}/>
                             </td>
-                            <td
-                              className={classnames(kind === MyTradesKind.open ? 'hide-md' : '', styles.right)}>
+                            <td className={
+                              classnames(kind === MyTradesKind.open ? 'hide-md' : '', styles.right)
+                            }>
                               <Muted data-vis-reg-mask={true}>{formatDateTime(trade.time)}</Muted>
                             </td>
                             {kind === MyTradesKind.open &&
                             trade.status === undefined &&
                             <td className={styles.right}>
-                          <span className={classnames('hide-md', styles.statusText)}>
+                          <span className={classnames('hide-lg', styles.statusText)}>
                             Open
                           </span>
-                              <CloseButton data-test-id="cancel"
-                                           onClick={this.cancelOffer(trade.offerId, trade.act, trade.baseAmount, trade.baseToken)}
+                              <CloseButton theme="danger"
+                                           className={styles.closeButton}
+                                           data-test-id="cancel"
+                                           onClick={
+                                             this.cancelOffer(
+                                               trade.offerId,
+                                               trade.act,
+                                               trade.baseAmount,
+                                               trade.baseToken
+                                             )
+                                           }
                               />
                             </td>
                             }
@@ -146,5 +145,33 @@ export class MyTrades extends React.Component<MyTradesPropsLoadable> {
     return (): void => {
       etherscan(this.props.etherscan).transaction(trade.tx as string).open();
     };
+  }
+}
+
+export class MyTrades extends React.Component<MyTradesPropsLoadable> {
+  public render() {
+    const { value, kind, changeKind } = this.props;
+    return (
+      <>
+        <PanelHeader bordered={value && value.status === 'error'}>
+          <span>My Orders</span>
+          <ButtonGroup style={{ marginLeft: 'auto' }}>
+            <Button
+              size="sm"
+              color={kind === MyTradesKind.open ? 'primary' : 'greyOutlined'}
+              className={styles.orderTypeBtn}
+              onClick={() => changeKind && changeKind(MyTradesKind.open)}
+            >Open</Button>
+            <Button
+              size="sm"
+              color={kind === MyTradesKind.closed ? 'primary' : 'greyOutlined'}
+              className={styles.orderTypeBtn}
+              onClick={() => changeKind && changeKind(MyTradesKind.closed)}
+            >Closed</Button>
+          </ButtonGroup>
+        </PanelHeader>
+        <MyTradesTable {...this.props}/>
+      </>
+    );
   }
 }

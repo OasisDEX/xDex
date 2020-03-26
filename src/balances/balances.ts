@@ -2,23 +2,29 @@
 
 import { BigNumber } from 'bignumber.js';
 import { isEqual } from 'lodash';
-import { bindNodeCallback, combineLatest, forkJoin, Observable, of } from 'rxjs';
+import { combineLatest, forkJoin, from, Observable, of } from 'rxjs';
 import {
   concatAll,
-  distinctUntilChanged, first,
+  distinctUntilChanged,
+  first,
   last,
   map,
-  scan,
-  switchMap
+  scan, shareReplay, switchMap,
 } from 'rxjs/operators';
-
-import { shareReplay } from 'rxjs/internal/operators';
-import { GasPrice$ } from 'src/blockchain/network';
 import { Calls$ } from '../blockchain/calls/calls';
-import { TxMetaKind } from '../blockchain/calls/txMeta';
-import { NetworkConfig, tokens } from '../blockchain/config';
+
+import { TxMetaKind } from 'src/blockchain/calls/txMeta';
+import { AssetKind, NetworkConfig, tradingTokens as _tradingTokens } from '../blockchain/config';
+import { account$, GasPrice$, MIN_ALLOWANCE, Ticker } from '../blockchain/network';
 import { TxState, TxStatus } from '../blockchain/transactions';
 import { amountFromWei } from '../blockchain/utils';
+import {
+  MarginableAsset,
+  MTAccount,
+} from '../marginTrading/state/mtAccount';
+import { minusOne, one, zero } from '../utils/zero';
+
+const tradingTokens = [..._tradingTokens, 'SAI'];
 
 export interface Balances {
   [token: string]: BigNumber;
@@ -32,19 +38,22 @@ export interface DustLimits {
   [token: string]: BigNumber;
 }
 
-type BalanceOf = (account: string, callback: (err: any, r: BigNumber) => any) => any;
-
 export function balance$(
   context: NetworkConfig,
   token: string,
-  account: string,
+  account?: string
 ): Observable<BigNumber> {
-  return bindNodeCallback(context.tokens[token].contract.balanceOf as BalanceOf)(
-    account
-  ).pipe(
+  if (account === undefined) {
+    return account$.pipe(
+      switchMap(theAccount => balance$(context, token, theAccount)),
+      first(),
+    );
+  }
+  return from(context.tokens[token].contract.methods.balanceOf(account).call()).pipe(
+    map((x: string) => new BigNumber(x)),
     map(balance => {
       return amountFromWei(balance, token);
-    })
+    }),
   );
 }
 
@@ -61,7 +70,7 @@ export function createBalances$(
     switchMap(([context, account]) =>
       !account ? of({}) :
         forkJoin(
-          Object.keys(context.tokens).map((token: string) =>
+          tradingTokens.filter(name => name !== 'ETH').map((token: string) =>
             balance$(context, token, account).pipe(
               map(balance => ({
                 [token]: balance
@@ -74,10 +83,117 @@ export function createBalances$(
   );
 }
 
-export function createWethBalances$(
+export interface CombinedBalance {
+  name: string;
+  walletBalance: BigNumber;
+  walletBalanceInUSD: BigNumber;
+  asset?: MarginableAsset;
+  mtAssetValueInDAI: BigNumber;
+  cashBalance?: BigNumber;
+  allowance: boolean;
+  allowanceChangeInProgress: boolean;
+}
+
+export interface CombinedBalances {
+  balances: CombinedBalance[];
+  mta: MTAccount;
+}
+
+function isAllowanceChangeInProgress(token: string, currentBlock: number) {
+  return (tx: TxState) => (
+    tx.meta.kind === TxMetaKind.approveWallet ||
+    tx.meta.kind === TxMetaKind.disapproveWallet
+  ) && (
+      tx.status === TxStatus.WaitingForApproval ||
+      tx.status === TxStatus.WaitingForConfirmation ||
+      tx.status === TxStatus.Success && tx.blockNumber > currentBlock ||
+      tx.status === TxStatus.Failure && tx.blockNumber > currentBlock
+    ) && tx.meta.args.token === token;
+}
+
+export function combineBalances(
+  etherBalance: BigNumber,
+  walletBalances: Balances,
+  allowances: Allowances,
+  mta: MTAccount,
+  transactions: TxState[],
+  currentBlock: number,
+  pricesInUsd: Ticker,
+): CombinedBalances {
+
+  const balances = tradingTokens
+    .map(name => {
+      const walletBalance = name === 'ETH' ? etherBalance : walletBalances[name];
+
+      const asset =
+        mta.marginableAssets.find(ma => ma.name === name);
+
+      const mtAssetValueInDAI = asset ?
+        // walletBalance.plus(asset.balance).times(
+        asset.balance.times(
+          asset.assetKind === AssetKind.marginable ||
+            asset.assetKind === AssetKind.nonMarginable ?
+            asset.referencePrice : one
+        ) :
+        zero;
+
+      const walletBalanceInUSD = pricesInUsd[name]
+        ? pricesInUsd[name].times(walletBalance)
+        : minusOne;
+
+      const cashBalance = asset && asset.assetKind === AssetKind.marginable ? asset.dai : zero;
+
+      const allowance = allowances[name];
+
+      const allowanceChangeInProgress = !!transactions.find(
+        isAllowanceChangeInProgress(name, currentBlock)
+      );
+
+      return {
+        name,
+        asset,
+        walletBalance,
+        mtAssetValueInDAI,
+        walletBalanceInUSD,
+        cashBalance,
+        allowance,
+        allowanceChangeInProgress
+      };
+    });
+
+  return { mta, balances };
+}
+
+export function createCombinedBalances(
+  etherBalance$$: Observable<BigNumber>,
+  balances$$: Observable<Balances>,
+  allowances$: Observable<Allowances>,
+  mta$: Observable<MTAccount>,
+  transactions$: Observable<TxState[]>,
+  currentBlock$: Observable<number>,
+  tokenPricesInUSD$: Observable<Ticker>
+): Observable<CombinedBalances> {
+  return combineLatest(
+    etherBalance$$,
+    balances$$,
+    allowances$,
+    mta$,
+    transactions$,
+    currentBlock$,
+    tokenPricesInUSD$
+  ).pipe(
+    map(([etherBalance, balances, allowances, mta, txs, block, pricesInUSD]) =>
+      // @ts-ignore
+      combineBalances(etherBalance, balances, allowances, mta, txs, block, pricesInUSD)),
+    shareReplay(1)
+  );
+}
+
+export function createTokenBalances$(
   context$: Observable<NetworkConfig>,
   initializedAccount$: Observable<string>,
   onEveryBlock$: Observable<number>,
+  token: string
 ) {
   return combineLatest(
     context$,
@@ -85,40 +201,31 @@ export function createWethBalances$(
     onEveryBlock$
   ).pipe(
     switchMap(([context, account]) =>
-      balance$(context, 'WETH', account)),
+      balance$(context, token, account)),
     distinctUntilChanged(isEqual)
   );
 }
-
-type Dust = (token: string, callback: (err: any, r: BigNumber) => any) => any;
 
 export function createDustLimits$(context$: Observable<NetworkConfig>): Observable<DustLimits> {
   return combineLatest(context$).pipe(
     switchMap(([context]) =>
       forkJoin(
-        Object.keys(context.tokens).map((token: string) =>
-          bindNodeCallback(context.otc.contract.getMinSell as Dust)(
+        tradingTokens.filter(name => name !== 'ETH').map((token: string) => {
+          return from(context.otc.contract.methods.getMinSell(
             context.tokens[token].address
-          ).pipe(
+          ).call()).pipe(
+            map((x: string) => new BigNumber(x)),
             map(dustLimit => ({
               [token]: amountFromWei(dustLimit, token)
             }))
-          )
-        )
+          );
+        })
       ).pipe(concatAll(), scan((a, e) => ({ ...a, ...e }), {}), last())
     ),
     distinctUntilChanged(isEqual),
     shareReplay(1)
   );
 }
-
-export const MIN_ALLOWANCE = new BigNumber('0xffffffffffffffffffffffffffffffff');
-
-type Allowance = (
-  account: string,
-  contract: string,
-  callback: (err: any, r: BigNumber) => any
-) => any;
 
 export function createAllowances$(
   context$: Observable<NetworkConfig>,
@@ -128,98 +235,52 @@ export function createAllowances$(
   return combineLatest(context$, initializedAccount$, onEveryBlock$).pipe(
     switchMap(([context, account]) =>
       forkJoin(
-        Object.keys(context.tokens)
-        .filter(token => token !== 'ETH')
-        .map((token: string) =>
-              bindNodeCallback(context.tokens[token].contract.allowance as Allowance)(
-                account, context.otc.address
-              ).pipe(
-                map((x: BigNumber) => ({ [token]: x.gte(MIN_ALLOWANCE) }))
-              )
-        )
+        tradingTokens
+          .filter(token => token !== 'ETH')
+          .map((token: string) =>
+            from(context.tokens[token].contract.methods.allowance(
+              account, context.otc.address
+            ).call()).pipe(
+              map((balance: string) => new BigNumber(balance)),
+              map((x: BigNumber) => ({ [token]: x.gte(MIN_ALLOWANCE) }))
+            )
+          )
       ).pipe(concatAll(), scan((a, e) => ({ ...a, ...e }), {}), last())
     ),
     distinctUntilChanged(isEqual)
   );
 }
 
-export interface CombinedBalance {
-  name: string;
-  balance: BigNumber;
-  allowance: boolean;
-  allowanceChangeInProgress: boolean;
-  valueInUsd?: BigNumber;
-}
-
-export interface CombinedBalances {
-  etherBalance: BigNumber;
-  etherValueInUsd: BigNumber;
-  balances: CombinedBalance[];
-}
-
-function isAllowanceChangeInProgress(token: string, currentBlock: number) {
-  return (tx: TxState) => (
-    tx.meta.kind === TxMetaKind.approveWallet ||
-    tx.meta.kind === TxMetaKind.disapproveWallet
-  ) && (
-    tx.status === TxStatus.WaitingForApproval ||
-    tx.status === TxStatus.WaitingForConfirmation ||
-    tx.status === TxStatus.Success && tx.blockNumber > currentBlock ||
-    tx.status === TxStatus.Failure && tx.blockNumber > currentBlock
-  ) && tx.meta.args.token === token;
-}
-
-export function combineBalances(
-  balances: Balances, allowances: Allowances,
-  etherPriceUsd: BigNumber, transactions: TxState[],
-  currentBlock: number
-) {
-
-  return Object.keys(tokens)
-  .filter(name => name !== 'ETH')
-  .map(name => {
-    return {
-      name,
-      balance: balances[name],
-      allowance: allowances[name],
-      allowanceChangeInProgress:
-        !!transactions.find(isAllowanceChangeInProgress(name, currentBlock)),
-      valueInUsd: name === 'DAI' ? balances[name] :
-        name === 'WETH' ? etherPriceUsd.times(balances[name]) : undefined,
-    };
-  });
-}
-
-export function createCombinedBalances$(
+export function createProxyAllowances$(
   context$: Observable<NetworkConfig>,
   initializedAccount$: Observable<string>,
-  etherBalance$: Observable<BigNumber>,
-  balances$: Observable<Balances>,
+  proxyAccount$: Observable<string | undefined>,
   onEveryBlock$: Observable<number>,
-  etherPriceUsd$: Observable<BigNumber>,
-  transactions$: Observable<TxState[]>
-): Observable<CombinedBalances> {
-
-  return combineLatest(
-    etherBalance$,
-    balances$,
-    createAllowances$(context$, initializedAccount$, onEveryBlock$),
-    etherPriceUsd$,
-    transactions$, onEveryBlock$
-  ).pipe(
-    map(([etherBalance, balances, allowances, etherPriceUsd, transactions, currentBlock]) =>
-      ({
-        etherBalance,
-        etherValueInUsd: etherBalance && etherPriceUsd && etherBalance.times(etherPriceUsd),
-        balances: combineBalances(balances, allowances, etherPriceUsd, transactions, currentBlock),
-      })
-    )
+): Observable<Allowances> {
+  return combineLatest(context$, initializedAccount$, proxyAccount$, onEveryBlock$).pipe(
+    switchMap(([context, account, proxy]) =>
+      forkJoin(
+        Object.keys(context.tokens)
+          .filter(token => token !== 'ETH')
+          .map((token: string) =>
+            proxy ?
+              from(context.tokens[token].contract.methods.allowance(
+                account, proxy
+              ).call()).pipe(
+                map((balance: string) => new BigNumber(balance)),
+                map((x: BigNumber) => ({ [token]: x.gte(MIN_ALLOWANCE) }))
+              )
+              :
+              of({ [token]: false })
+          )
+      ).pipe(concatAll(), scan((a, e) => ({ ...a, ...e }), {}), last())
+    ),
+    distinctUntilChanged(isEqual)
   );
 }
 
 export function createWalletApprove(calls$: Calls$, gasPrice$: GasPrice$) {
   return (token: string): Observable<TxState> => {
-    console.log('approve');
     const r = calls$.pipe(
       first(),
       switchMap(calls => {
@@ -233,7 +294,6 @@ export function createWalletApprove(calls$: Calls$, gasPrice$: GasPrice$) {
 
 export function createWalletDisapprove(calls$: Calls$, gasPrice$: GasPrice$) {
   return (token: string): Observable<TxState> => {
-    console.log('disapprove');
     const r = calls$.pipe(
       first(),
       switchMap(calls => {

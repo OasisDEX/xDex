@@ -2,7 +2,7 @@ import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ObservableItem } from '../../utils/observableItem';
 import { NetworkConfig } from '../config';
-import { context$, initializedAccount$ } from '../network';
+import { account$, context$, initializedAccount$ } from '../network';
 import { approveProxy, approveWallet, disapproveProxy, disapproveWallet } from './approveCalls';
 import {
   callCurried,
@@ -11,24 +11,44 @@ import {
   sendTransactionWithGasConstraintsCurried
 } from './callsHelpers';
 import {
+  cancelAllOffers,
+  changePrice,
+  changePriceAndPoke,
+  drip,
+  makeLinearOffers,
+  pokeOsm,
+  pokeSpotter,
+  printOsmInfo,
+  readPrice,
+} from './devCalls';
+import {
   getBestOffer,
   getBuyAmount,
   getOffersAmount,
-  getPayAmount,
+  getPayAmount, migrateTradePayWithERC20,
   offers,
   proxyAddress$, setOwner, setupProxy, tradePayWithERC20,
   tradePayWithETHNoProxy, tradePayWithETHWithProxy
 } from './instant';
-import { cancelOffer, offerMake, offerMakeDirect } from './offerMake';
+import {
+  approveMTProxy, mtBalance, mtBuy, mtDraw, mtExport, mtFund, mtReallocate,
+  mtRedeem, mtSell, osmParams, setupMTProxy
+} from './mtCalls';
+import {
+  cancelOffer, offerMake, offerMakeDirect
+} from './offerMake';
+import { swapDaiToSai, swapSaiToDai } from './swapCalls';
 import { unwrap, wrap } from './wrapUnwrapCalls';
 
 function calls([context, account]: [NetworkConfig, string]) {
   const estimateGas = estimateGasCurried(context, account);
   const sendTransaction = sendTransactionCurried(context, account);
-  const sendTransactionWithGasConstraints = sendTransactionWithGasConstraintsCurried(context, account);
+  const sendTransactionWithGasConstraints =
+    sendTransactionWithGasConstraintsCurried(context, account);
 
   return {
     cancelOffer: sendTransactionWithGasConstraints(cancelOffer),
+    cancelOffer2: sendTransaction(cancelOffer),
     offerMake: sendTransaction(offerMake),
     offerMakeDirect: sendTransaction(offerMakeDirect),
     offerMakeEstimateGas: estimateGas(offerMake),
@@ -42,28 +62,60 @@ function calls([context, account]: [NetworkConfig, string]) {
     tradePayWithETHNoProxy: sendTransaction(tradePayWithETHNoProxy),
     tradePayWithETHWithProxy: sendTransaction(tradePayWithETHWithProxy),
     tradePayWithERC20: sendTransaction(tradePayWithERC20),
+    tradePayWithERC20EstimateGas: estimateGas(tradePayWithERC20),
+    migrateTradePayWithERC20: sendTransaction(migrateTradePayWithERC20),
+    migrateTradePayWithERC20EstimateGas: estimateGas(migrateTradePayWithERC20),
     tradePayWithETHNoProxyEstimateGas: estimateGas(tradePayWithETHNoProxy),
     tradePayWithETHWithProxyEstimateGas: estimateGas(tradePayWithETHWithProxy),
-    tradePayWithERC20EstimateGas: estimateGas(tradePayWithERC20),
     proxyAddress: () => proxyAddress$(context, account),
     setupProxy: sendTransaction(setupProxy),
     setupProxyEstimateGas: estimateGas(setupProxy),
     approveProxy: sendTransaction(approveProxy),
     approveProxyEstimateGas: estimateGas(approveProxy),
+    approveMTProxy: sendTransaction(approveMTProxy),
     disapproveProxy: sendTransaction(disapproveProxy),
+    swapSaiToDai : sendTransaction(swapSaiToDai),
+    swapSaiToDaiEstimateGas: estimateGas(swapSaiToDai),
+    swapDaiToSai : sendTransaction(swapDaiToSai),
+    swapDaiToSaiEstimateGas: estimateGas(swapDaiToSai),
     setOwner: sendTransaction(setOwner),
+    setupMTProxy: sendTransaction(setupMTProxy),
+    setupMTProxyEstimateGas: estimateGas(setupMTProxy),
+    mtDraw: sendTransaction(mtDraw),
+    mtDrawEstimateGas: estimateGas(mtDraw),
+    mtFund: sendTransaction(mtFund),
+    mtFundEstimateGas: estimateGas(mtFund),
+    mtBuy: sendTransaction(mtBuy),
+    mtBuyEstimateGas: estimateGas(mtBuy),
+    mtSell: sendTransaction(mtSell),
+    mtSellEstimateGas: estimateGas(mtSell),
+    mtReallocate: sendTransaction(mtReallocate),
+    mtReallocateEstimateGas: estimateGas(mtReallocate),
+    makeLinearOffers: sendTransaction(makeLinearOffers),
+    cancelAllOffers: sendTransaction(cancelAllOffers),
+    drip: sendTransaction(drip),
+    changePrice: sendTransaction(changePrice),
+    pokeOsm: sendTransaction(pokeOsm),
+    pokeSpotter: sendTransaction(pokeSpotter),
+    mtRedeem: sendTransaction(mtRedeem),
+    mtExport: sendTransaction(mtExport),
+    changePriceAndPoke: sendTransaction(changePriceAndPoke),
+    printOsmInfo: printOsmInfo(context)
   };
 }
 
-function readCalls(context: NetworkConfig) {
-  const call = callCurried(context);
+function readCalls([context, account]: [NetworkConfig, string | undefined]) {
+  const call = callCurried(context, account);
 
   return {
+    mtBalance: call(mtBalance),
     otcGetBuyAmount: call(getBuyAmount),
     otcGetPayAmount: call(getPayAmount),
     otcGetOffersAmount: call(getOffersAmount),
     otcGetBestOffer: call(getBestOffer),
     otcOffers: call(offers),
+    readPrice: call(readPrice),
+    osmParams: call(osmParams),
   };
 }
 
@@ -71,7 +123,7 @@ export const calls$ = combineLatest(context$, initializedAccount$).pipe(
   map(calls),
 );
 
-export const readCalls$ = context$.pipe(
+export const readCalls$ = combineLatest(context$, account$).pipe(
   map(readCalls),
 );
 

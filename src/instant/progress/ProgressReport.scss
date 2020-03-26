@@ -10,11 +10,15 @@
 }
 
 .success, .link {
-  color: $very-light-blue;
+  color: $green;
 }
 
 .link {
   text-decoration: none;
+}
+
+.description {
+ color: $grey-light
 }
 
 .failure {

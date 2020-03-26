@@ -1,6 +1,6 @@
 import { BigNumber } from 'bignumber.js';
 import { of } from 'rxjs/index';
-import { Offer, OfferType, Orderbook } from '../orderbook/orderbook';
+import { addSpread, Offer, OfferType, Orderbook } from '../orderbook/orderbook';
 import { currentTradingPair$, loadablifyPlusTradingPair } from '../tradingPair/tradingPair';
 
 const buy = [
@@ -61,28 +61,28 @@ const sell = [
   // { price: 0.001, amount: 1.80740079125783 }
 ];
 
-function priceAmountToOffer({ price, amount }: {price: number, amount: number}): Offer {
+function priceAmountToOffer(
+  { price, amount, quoteToken, baseToken }:
+    { price: number, amount: number, quoteToken: string, baseToken: string  }): Offer {
   return {
+    baseToken,
+    quoteToken,
     offerId: new BigNumber(0),
     baseAmount: new BigNumber(amount),
-    baseToken: '',
     quoteAmount: new BigNumber(amount * price),
-    quoteToken: '',
     price: new BigNumber(price),
     ownerId: '',
-    timestamp: new Date(),
+    timestamp: new Date('2019-10-01 00:00:00Z'),
     type: OfferType.buy
   };
 }
 
 export const createFakeOrderbook = (buys: any, sells: any): Orderbook => {
-  return {
+  return addSpread({
     sell: sells.map(priceAmountToOffer),
-    spread: buys.length > 0 && sells.length > 0 ?
-      new BigNumber(sells[0].price - buys[buys.length - 1].price) : undefined,
     buy: buys.map(priceAmountToOffer),
     blockNumber: 1
-  } as Orderbook;
+  } as Orderbook);
 };
 
 export const fakeOrderBook: Orderbook = createFakeOrderbook(buy, sell);

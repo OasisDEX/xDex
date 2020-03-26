@@ -1,7 +1,6 @@
-import { BigNumber } from 'bignumber.js';
 import classnames from 'classnames';
 import * as React from 'react';
-import { NetworkConfig, tokens } from '../../blockchain/config';
+import { getToken } from '../../blockchain/config';
 import { TxStatus } from '../../blockchain/transactions';
 import accountSvg from '../../icons/account.svg';
 import doneSvg from '../../icons/done.svg';
@@ -9,39 +8,35 @@ import { Approximate } from '../../utils/Approximate';
 import { formatAmountInstant } from '../../utils/formatters/format';
 import { Money } from '../../utils/formatters/Formatters';
 import { SvgImage } from '../../utils/icons/utils';
-import { Tooltip } from '../../utils/tooltip/Tooltip';
+import { WarningTooltipType } from '../../utils/tooltip/Tooltip';
 import { CurrentPrice } from '../CurrentPrice';
 import { TradeData } from '../details/TradeData';
 import { TxStatusRow } from '../details/TxStatusRow';
 import * as styles from '../Instant.scss';
-import { InstantFormChangeKind, ManualChange, Progress, ProgressKind, ViewKind } from '../instantForm';
+import {
+  InstantFormChangeKind,
+  InstantFormState,
+  ProgressKind, sai2dai,
+  ViewKind
+} from '../instantForm';
 import { InstantFormWrapper } from '../InstantFormWrapper';
 import { ProgressReport } from '../progress/ProgressReport';
 
-interface ViewProps {
-  change: (change: ManualChange) => void;
-  progress: Progress;
-  sellToken: string;
-  buyToken: string;
-  sellAmount: BigNumber;
-  buyAmount: BigNumber;
-  price: BigNumber;
-  quotation: string;
-  context: NetworkConfig;
-}
-
+// tslint:disable
 const proxyTooltip = {
   id: 'proxy-tooltip',
   text: 'Proxy is a supporting contract owned by you that groups different actions as one Ethereum transaction.',
-  iconColor: 'white'
-} as Tooltip;
+  iconColor: 'grey'
+} as WarningTooltipType;
+
 const allowanceTooltip = {
   id: 'allowance-tooltip',
   text: 'Enabling token trading allows your Proxy to take tokens from you and trade them on the exchange.',
-  iconColor: 'white'
-} as Tooltip;
+  iconColor: 'grey'
+} as WarningTooltipType;
+// tslint:enable
 
-export class FinalizationView extends React.Component<ViewProps> {
+export class FinalizationView extends React.Component<InstantFormState> {
 
   public render() {
     const {
@@ -98,9 +93,13 @@ export class FinalizationView extends React.Component<ViewProps> {
 
     const { sellToken, buyToken, sellAmount, buyAmount, progress } = this.props;
 
+    if (!progress) {
+      return <div />;
+    }
+
     return (
       <>
-        <div className={classnames(styles.details, styles.transaction)}>
+        <div className={classnames(styles.details, styles.transaction)} data-test-id="trade-tx">
           {
             progress && progress.kind === ProgressKind.noProxyPayWithETH &&
             <TxStatusRow icon={<SvgImage image={accountSvg}/>}
@@ -113,7 +112,23 @@ export class FinalizationView extends React.Component<ViewProps> {
                            />}
                          status={<ProgressReport report={this._tradeProgress()}/>}/>
           }
-          <TxStatusRow icon={tokens[sellToken].iconColor}
+          {sai2dai(sellToken) !== sellToken &&
+          <TxStatusRow icon={getToken(sellToken).iconColor}
+            label={
+              <TradeData
+                data-test-id="upgrade"
+                theme="reversed"
+                label="Upgrade"
+                value={
+                  <Money formatter={formatAmountInstant} value={sellAmount}
+                         token={sellToken}/>
+                }
+              />}
+            status={progress.kind !== ProgressKind.noProxyPayWithETH &&
+            <ProgressReport report={this._tradeProgress()}/>}
+          />}
+
+          <TxStatusRow icon={getToken(sellToken).iconColor}
                        label={
                          <TradeData
                            data-test-id="pay-token"
@@ -125,8 +140,9 @@ export class FinalizationView extends React.Component<ViewProps> {
                            }
                          />}
                        status={progress.kind !== ProgressKind.noProxyPayWithETH &&
+                       sai2dai(sellToken) === sellToken &&
                        <ProgressReport report={this._tradeProgress()}/>}/>
-          <TxStatusRow icon={tokens[buyToken].iconColor}
+          <TxStatusRow icon={getToken(buyToken).iconColor}
                        label={
                          <TradeData
                            data-test-id="buy-token"
@@ -207,6 +223,6 @@ export class FinalizationView extends React.Component<ViewProps> {
   private _createReport = (txStatus: TxStatus, txHash: string) => ({
     txStatus,
     txHash,
-    etherscanURI: this.props.context.etherscan.url
+    etherscanURI: this.props.context!.etherscan.url
   })
 }

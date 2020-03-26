@@ -1,5 +1,5 @@
 import { BigNumber }from 'bignumber.js';
-import { Observable, of, throwError } from 'rxjs/index';
+import { Observable, of, throwError } from 'rxjs';
 import { shareReplay } from 'rxjs/internal/operators';
 
 import { setupFakeWeb3ForTesting } from '../blockchain/web3';
@@ -21,7 +21,7 @@ const defaultCalls = {
 } as any;
 
 const gasPrice$ = of(new BigNumber(0.01));
-const etherPriceUSD$ = of(new BigNumber(1));
+const etherPriceUsd$ = of(new BigNumber(1));
 const ethBalance$ = of(new BigNumber(1000));
 const wethBalance$ = of(new BigNumber(1000));
 const calls$ = of(defaultCalls) as Calls$;
@@ -33,8 +33,14 @@ describe('Wrapping' , () => {
 
   beforeEach(() => {
     controller =
-        createWrapUnwrapForm$(gasPrice$, etherPriceUSD$, ethBalance$, wethBalance$, calls$, wrap)
-            .pipe(shareReplay(1));
+        createWrapUnwrapForm$(
+          gasPrice$,
+          etherPriceUsd$,
+          ethBalance$,
+          wethBalance$,
+          calls$,
+          wrap
+        ).pipe(shareReplay(1));
   });
 
   test('initial state', () => {
@@ -54,7 +60,8 @@ describe('Wrapping' , () => {
 
     expect(unpack(controller).readyToProceed).toBeFalsy();
     expect(unpack(controller).messages.length).toBe(1);
-    expect(unpack(controller).messages[0]).toEqual({ kind: MessageKind.insufficientAmount, token: 'ETH' });
+    expect(unpack(controller).messages[0])
+      .toEqual({ kind: MessageKind.insufficientAmount, token: 'ETH' });
   });
 
   test('negative amount', () => {
@@ -80,7 +87,7 @@ describe('Wrapping' , () => {
         throwError(new Error('Kurcze'))}) as Calls$;
     controller = createWrapUnwrapForm$(
         gasPrice$,
-        etherPriceUSD$,
+        etherPriceUsd$,
         ethBalance$,
         wethBalance$,
         callsCopy,
@@ -101,7 +108,7 @@ describe('Unwrapping', () => {
     controller =
         createWrapUnwrapForm$(
             gasPrice$,
-            etherPriceUSD$,
+            etherPriceUsd$,
             ethBalance$,
             wethBalance$,
             calls$,
@@ -126,7 +133,8 @@ describe('Unwrapping', () => {
 
     expect(unpack(controller).readyToProceed).toBeFalsy();
     expect(unpack(controller).messages.length).toBe(1);
-    expect(unpack(controller).messages[0]).toEqual({ kind: MessageKind.insufficientAmount, token: 'WETH' });
+    expect(unpack(controller).messages[0])
+      .toEqual({ kind: MessageKind.insufficientAmount, token: 'WETH' });
   });
 
   test('negative amount', () => {
@@ -152,7 +160,7 @@ describe('Unwrapping', () => {
             throwError(new Error('Kurcze'))}) as Calls$;
     controller = createWrapUnwrapForm$(
             gasPrice$,
-            etherPriceUSD$,
+            etherPriceUsd$,
             ethBalance$,
             wethBalance$,
             callsCopy,

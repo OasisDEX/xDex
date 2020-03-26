@@ -1,7 +1,12 @@
 import * as React from 'react';
 
-export function SvgImage({ image, ...props }: React.HTMLAttributes<HTMLSpanElement> & { image: string }) {
-  return <div dangerouslySetInnerHTML={{ __html: loadDataUrl(image) }} {...props} />;
+interface SvgImageProps extends React.HTMLAttributes<HTMLSpanElement> {
+  image: string;
+}
+
+export function SvgImage({ image, ...props }: SvgImageProps) {
+  return <span style={{ fontSize: '0' }}
+               dangerouslySetInnerHTML={{ __html: loadDataUrl(image) }} {...props} />;
 }
 
 export function SvgImageSimple(image: string) {

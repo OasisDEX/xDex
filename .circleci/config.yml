@@ -12,7 +12,7 @@ jobs:
       - checkout
       - restore_cache:
             keys:
-            - v3-dependencies-{{ checksum "package.json" }}
+            - v7-dependencies-{{ checksum "package.json" }}
 
       - run: yarn install --frozen-lockfile
 
@@ -20,7 +20,7 @@ jobs:
           paths:
             - node_modules
             - ~/.cache
-          key: v3-dependencies-{{ checksum "package.json" }}
+          key: v7-dependencies-{{ checksum "package.json" }}
 
   test:
     docker:
@@ -29,7 +29,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-          - v3-dependencies-{{ checksum "package.json" }}
+          - v7-dependencies-{{ checksum "package.json" }}
       - run: 
           name: Run linting & tests
           command: yarn test
@@ -37,25 +37,25 @@ jobs:
   test-e2e:
     machine:
       enabled: true
-      image: circleci/classic:201710-01
+      image: circleci/classic:201808-01
       docker_layer_caching: true
     parallelism: 3
     steps:
       - checkout
       - restore_cache:
           keys:
-          - v3-dependencies-{{ checksum "package.json" }}
+          - v7-dependencies-{{ checksum "package.json" }}
       - run: .circleci/install-yarn.sh
       - run: 
-          name: Get & run localnode image
+          name: Get & run locanode and cache image
           command: |
-            LOCALNODE_SHA=8e36f81989cd0e17c9e6de035c4dde58f0f12bd5
-            docker login -u $DOCKER_USER -p $DOCKER_PASS && docker pull oasisdex/localnode:$LOCALNODE_SHA
-            docker run -d -p 8545:8545 oasisdex/localnode:$LOCALNODE_SHA master
+            docker login -u $DOCKER_USER -p $DOCKER_PASS && ./scripts/dev.sh
       - run: 
           name: Wait for localnode to be up
           command: |
             ./.circleci/wait-for-it.sh localhost:8545 -t 10
+            ./.circleci/wait-for-it.sh localhost:5432 -t 10
+            ./.circleci/wait-for-it.sh localhost:3001 -t 10
             sleep 10
       - run: 
           name: Run build & e2e tests
@@ -95,9 +95,9 @@ jobs:
       - checkout
       - restore_cache:
             keys:
-            - v3-dependencies-{{ checksum "package.json" }}
+            - v7-dependencies-{{ checksum "package.json" }}
       - run: PUBLIC_URL=. ENV=dev yarn build
-      - run: yarn codechecks
+      - run: DEBUG=codechecks:* yarn codechecks
 
   codechecks-e2e:
     docker:
@@ -125,7 +125,7 @@ jobs:
       - checkout
       - restore_cache:
             keys:
-            - v3-dependencies-{{ checksum "package.json" }}
+            - v7-dependencies-{{ checksum "package.json" }}
       - attach_workspace:
           at: /tmp/workspace
       - run:
@@ -144,18 +144,8 @@ jobs:
       - checkout
       - restore_cache:
             keys:
-            - v3-dependencies-{{ checksum "package.json" }}
+            - v7-dependencies-{{ checksum "package.json" }}
       - run: yarn run deploy:dev
-
-  deploy_stage:
-    docker:
-      - image: circleci/node:8.11.2-stretch
-    steps:
-      - checkout
-      - restore_cache:
-            keys:
-            - v3-dependencies-{{ checksum "package.json" }}
-      - run: yarn run deploy:stage
 
   deploy_prod:
     docker:
@@ -163,11 +153,11 @@ jobs:
     steps:
       - add_ssh_keys:
           fingerprints:
-            - "2d:ec:2f:f5:b6:10:8c:8a:e7:9f:f3:c9:77:25:b7:0b"
+            - "d2:4f:e3:c0:5d:8e:2b:14:6b:67:74:e2:2f:f2:a8:43"
       - checkout
       - restore_cache:
             keys:
-            - v3-dependencies-{{ checksum "package.json" }}
+            - v7-dependencies-{{ checksum "package.json" }}
       - run:
           name: Configure git defaults
           command:  git config user.email "circleci@makerdao.com" && git config user.name "CircleCI"
@@ -181,7 +171,6 @@ workflows:
   mainflow:
     jobs:
       - install
-
       - test:
           requires: 
             - install
@@ -190,7 +179,7 @@ workflows:
               ignore:
                 - gh-pages
       - test-e2e:
-          requires: 
+          requires:
             - install
           filters:
             branches:
@@ -211,25 +200,16 @@ workflows:
             branches:
               ignore:
                 - gh-pages
-
       - deploy_dev:
           requires:
             - test
-            - test-e2e
           filters:
             branches:
               only: dev
-      - deploy_stage:
-          requires:
-            - test
-            - test-e2e
-          filters:
-            branches:
-              only: staging
       - deploy_prod:
           requires:
             - test
-            - test-e2e
+            # - test-e2e
           filters:
             branches:
               only: master

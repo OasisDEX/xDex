@@ -1,7 +1,14 @@
-import { ApplicationState } from '../../pages/Application';
 import { Tab } from '../../pages/Tab';
-import { Trade } from '../../pages/Trade';
-import { cypressVisitWithWeb3, tid } from '../../utils';
+import { instantForm, Trade } from '../../pages/Trade';
+import { WalletConnection } from '../../pages/WalletConnection';
+import {
+  // ACCOUNT_3_PUBLIC,
+  cypressVisitWithWeb3,
+  // INSTANT_PROXY_CREATE_AND_EXECUTE_ADDRESS,
+  tid,
+  // toHex,
+  // verifySendTxs
+} from '../../utils';
 
 const nextTrade = () => {
   cy.get(tid('new-trade')).click();
@@ -10,8 +17,10 @@ const nextTrade = () => {
 describe('Buying', () => {
   beforeEach(() => {
     cypressVisitWithWeb3();
-    ApplicationState.acceptToS();
+    WalletConnection.connect();
+    WalletConnection.isConnected();
     Tab.instant();
+    instantForm();
   });
 
   context('ETH for ERC20', () => {
@@ -36,7 +45,13 @@ describe('Buying', () => {
       summary.expectProxyBeingCreated();
       summary.expectBought(willReceive, to);
       summary.expectSold(willPay, from);
-      summary.expectPriceOf(price);
+      summary.expectPriceOf(price); /* TODO .then(() => {
+        verifySendTxs([{
+          from: ACCOUNT_3_PUBLIC,
+          to: INSTANT_PROXY_CREATE_AND_EXECUTE_ADDRESS,
+          value: toHex('374999999999999999'),
+        }]);
+      });*/
     });
 
     it('with proxy', () => {
@@ -81,6 +96,8 @@ describe('Buying', () => {
       const willReceive = '0.123';
       const price = '301 ETH/DAI';
 
+      Trade.swapTokens();
+
       const trade = new Trade();
       trade.buy(to).amount(willReceive);
 
@@ -109,6 +126,8 @@ describe('Buying', () => {
       trade.execute();
 
       nextTrade();
+
+      Trade.swapTokens();
 
       const nextFrom = 'DAI';
       const nextTo = 'ETH';
@@ -145,6 +164,8 @@ describe('Buying', () => {
       const willReceive = '0.123';
       const price = '301 ETH/DAI';
 
+      Trade.swapTokens();
+
       const trade = new Trade();
       trade.sell(from);
       trade.buy(to).amount(willReceive);
@@ -177,6 +198,8 @@ describe('Buying', () => {
       const willReceive = '0.5';
       const price = '301 WETH/DAI';
 
+      Trade.swapTokens();
+
       const trade = new Trade();
       trade.sell(from);
       trade.buy(to).amount(willReceive);
@@ -206,6 +229,8 @@ describe('Buying', () => {
       trade.execute();
 
       nextTrade();
+
+      Trade.swapTokens();
 
       const nextFrom = 'DAI';
       const nextTo = 'WETH';
@@ -239,6 +264,8 @@ describe('Buying', () => {
       const to = 'WETH';
       const willReceive = '0.3';
       const price = '301 WETH/DAI';
+
+      Trade.swapTokens();
 
       const trade = new Trade();
       trade.sell(from);

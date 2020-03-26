@@ -1,15 +1,18 @@
 import { isEqual } from 'lodash';
 import 'normalize.css';
+import * as Raven from 'raven-js';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { combineLatest, interval, Observable, of } from 'rxjs/index';
+import { combineLatest, Observable, of } from 'rxjs';
 import { distinctUntilChanged, startWith, switchMap, tap } from 'rxjs/internal/operators';
 import { map } from 'rxjs/operators';
+import { mixpanelInit } from './analytics';
 import { networks } from './blockchain/config';
 import { account$, networkId$ } from './blockchain/network';
 import { Web3Status, web3Status$ } from './blockchain/web3';
 import { LoadingState } from './landingPage/LandingPage';
 import { Main } from './Main';
+import { NavigationTxRx } from './Navigation';
 import { connect } from './utils/connect';
 import { UnreachableCaseError } from './utils/UnreachableCaseError';
 
@@ -19,6 +22,8 @@ interface Props {
   tosAccepted?: boolean;
   hasSeenAnnouncement?: boolean;
 }
+
+mixpanelInit();
 
 class App extends React.Component<Props> {
 
@@ -33,32 +38,12 @@ class App extends React.Component<Props> {
         if (this.props.network !== undefined && !networks[this.props.network]) {
           return LoadingState.UNSUPPORTED;
         }
-
-        if (!this.props.tosAccepted) {
-          return LoadingState.ACCEPT_TOS;
-        }
-
-        /*
-        * The way to present announcement before loading the app is:
-        * <Announcement
-        *     id="<unique_id">  - shouldn't change with each component rendering
-        *     visibility="always | once"
-        *     headline="string" - heading of the announcement
-        *     buttonLabel="string" - the label of the button that user clicks to continue to next view
-        *     content={ string | React.ReactNode } - this is the announcement itself
-        *     nextView={<Main/>}/>
-        * */
-        return <Main/>;
+        return <NavigationTxRx><Main/></NavigationTxRx>;
       default:
         throw new UnreachableCaseError(this.props.status);
     }
   }
 }
-
-const accepted$: Observable<boolean> = interval(500).pipe(
-  startWith(false),
-  map(() => localStorage.getItem('tosAccepted') === 'true')
-);
 
 const web3StatusResolve$: Observable<Props> = web3Status$.pipe(
   switchMap(status =>
@@ -72,18 +57,24 @@ const web3StatusResolve$: Observable<Props> = web3Status$.pipe(
   startWith({ status: 'initializing' as Web3Status })
 );
 
-const props$: Observable<Props> = combineLatest(accepted$, web3StatusResolve$).pipe(
-  map(([tosAccepted, web3Status]) => {
+const props$: Observable<Props> = web3StatusResolve$.pipe(
+  map((web3Status) => {
     return {
-      tosAccepted,
       ...web3Status
     } as Props;
   }),
   distinctUntilChanged(isEqual)
 );
 
-const AppTxRx = connect(App, props$);
+const AppTxRx = connect<Props, {}>(App, props$);
 
 const root: HTMLElement = document.getElementById('root')!;
 
-ReactDOM.render(<AppTxRx/>, root);
+if (process.env.NODE_ENV === 'production' && process.env.REACT_APP_SENTRY_DNS) {
+  Raven.config(
+    process.env.REACT_APP_SENTRY_DNS
+  ).install();
+  Raven.context(() => ReactDOM.render(<AppTxRx/>, root));
+} else {
+  ReactDOM.render(<AppTxRx/>, root);
+}

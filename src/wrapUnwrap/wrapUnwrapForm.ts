@@ -1,8 +1,12 @@
 import { BigNumber } from 'bignumber.js';
 import { curry } from 'ramda';
-import { merge, Observable, of, Subject } from 'rxjs/index';
+import { merge, Observable, of, Subject } from 'rxjs';
 import { first, map, scan, switchMap, takeUntil } from 'rxjs/operators';
 import { Calls, Calls$ } from '../blockchain/calls/calls';
+import {
+  ProxyChange
+} from '../instant/instantForm';
+import { MTAccount } from '../marginTrading/state/mtAccount';
 import { combineAndMerge } from '../utils/combineAndMerge';
 import {
   AmountFieldChange, doGasEstimation,
@@ -17,6 +21,7 @@ import { zero } from '../utils/zero';
 export enum MessageKind {
   insufficientAmount = 'insufficientAmount',
   dustAmount = 'dustAmount',
+  cannotPayForGas = 'cannotPayForGas'
 }
 
 export type Message = {
@@ -24,11 +29,13 @@ export type Message = {
   token: string,
 } | {
   kind: MessageKind.dustAmount,
+} | {
+  kind: MessageKind.cannotPayForGas
 };
 
 export enum WrapUnwrapFormKind {
   wrap = 'wrap',
-  unwrap = 'unwrap'
+  unwrap = 'unwrap',
 }
 
 enum BalanceChangeKind {
@@ -40,6 +47,7 @@ export type ManualChange = AmountFieldChange;
 
 type EnvironmentChange =
   GasPriceChange |
+  ProxyChange |
   EtherPriceUSDChange |
   { kind: BalanceChangeKind, balance: BigNumber };
 
@@ -56,6 +64,7 @@ export interface WrapUnwrapFormState extends HasGasEstimation {
   change: (change: ManualChange) => void;
   proceed: (state: WrapUnwrapFormState) => void;
   cancel: () => void;
+  mta?:MTAccount;
 }
 
 function applyChange(
@@ -85,7 +94,6 @@ function applyChange(
         gasEstimationStatus: GasEstimationStatus.unset };
     case FormChangeKind.progress:
       return { ...state, progress: change.progress };
-    // default:
     //   const _exhaustiveCheck: never = change; // tslint:disable-line
   }
   return state;
@@ -93,20 +101,34 @@ function applyChange(
 
 function validate(state: WrapUnwrapFormState) {
   const messages: Message[] = [];
-  const balance = state.kind === WrapUnwrapFormKind.wrap ? state.ethBalance : state.wethBalance;
-  const insufficientTest = state.amount && (state.kind === WrapUnwrapFormKind.wrap ? state.amount.gte : state.amount.gt).bind(state.amount);
+
+  const balance = ((kind: WrapUnwrapFormKind) => {
+    switch (kind) {
+      case WrapUnwrapFormKind.wrap:
+        return state.ethBalance;
+      case WrapUnwrapFormKind.unwrap:
+        return state.wethBalance;
+    }
+  })(state.kind);
 
   if (state.amount && state.amount.lte(zero)) {
     messages.push({
       kind: MessageKind.dustAmount
     });
   }
-  if (balance && insufficientTest && insufficientTest(balance)) {
+
+  if (state.amount && balance && state.amount.gt(balance)) {
     messages.push({
       kind: MessageKind.insufficientAmount,
-      token: state.kind === WrapUnwrapFormKind.wrap ? 'ETH' : 'WETH'
+      token: ((kind: WrapUnwrapFormKind) => {
+        switch (kind) {
+          case WrapUnwrapFormKind.wrap: return 'ETH';
+          case WrapUnwrapFormKind.unwrap: return 'WETH';
+        }
+      })(state.kind)
     });
   }
+
   return {
     ...state,
     messages,
@@ -117,20 +139,57 @@ function estimateGasPrice(
   calls$: Calls$, state: WrapUnwrapFormState
 ): Observable<WrapUnwrapFormState> {
   return doGasEstimation(calls$, undefined, state, (calls: Calls) => {
-    if (!state.amount || !state.gasPrice) {
+
+    if (!state.amount || !state.gasPrice || state.messages.length > 0) {
+
       return undefined;
     }
-    const call = state.kind === WrapUnwrapFormKind.wrap ?
-      calls.wrapEstimateGas :
-      calls.unwrapEstimateGas;
-    return call({ amount: state.amount, gasPrice: state.gasPrice });
+
+    const call: any = ((kind: WrapUnwrapFormKind) => {
+      switch (kind) {
+        case WrapUnwrapFormKind.wrap:
+          return calls.wrapEstimateGas;
+        case WrapUnwrapFormKind.unwrap:
+          return calls.unwrapEstimateGas;
+      }
+    })(state.kind);
+
+    const args: any = { amount: state.amount, gasPrice: state.gasPrice };
+    return call(args);
   });
+}
+
+function checkIfCanPayGas(state: WrapUnwrapFormState) {
+  const { kind, messages, ethBalance: balance, amount, gasEstimationEth } = state;
+
+  if (!gasEstimationEth) {
+    return state;
+  }
+
+  const wrapDelta = gasEstimationEth && balance
+    ? balance.minus(gasEstimationEth)
+    : new BigNumber(0.001);
+
+  if (balance
+    && amount
+    && kind === WrapUnwrapFormKind.wrap
+    && amount.gte(wrapDelta)
+    && amount.lt(balance)
+  ) {
+    messages.push({
+      kind: MessageKind.cannotPayForGas
+    });
+  }
+
+  return {
+    ...state,
+    messages
+  };
 }
 
 function checkIfIsReadyToProceed(state: WrapUnwrapFormState) {
   const readyToProceed = state.amount &&
-    state.messages.length === 0 &&
-    state.gasEstimationStatus === GasEstimationStatus.calculated;
+    state.messages.length === 0 && state.gasEstimationStatus === GasEstimationStatus.calculated;
   return {
     ...state,
     readyToProceed,
@@ -148,7 +207,6 @@ function prepareProceed(calls$: Calls$): [
 
   function proceed(state: WrapUnwrapFormState) {
 
-    const kind = state.kind;
     const amount = state.amount;
     const gasPrice = state.gasPrice;
     const gas = state.gasEstimation;
@@ -164,20 +222,24 @@ function prepareProceed(calls$: Calls$): [
       calls$.pipe(
         first(),
         switchMap((calls): Observable<ProgressChange> => {
-          const call =
-            kind === WrapUnwrapFormKind.wrap ?
-              calls.wrap :
-              calls.unwrap;
+          const call: any = ((kind: WrapUnwrapFormKind) => {
+            switch (kind) {
+              case WrapUnwrapFormKind.wrap:
+                return calls.wrap;
+              case WrapUnwrapFormKind.unwrap:
+                return calls.unwrap;
+            }
+          })(state.kind);
           return call({ amount, gasPrice, gas })
-          .pipe(
-            transactionToX(
-              progressChange(ProgressStage.waitingForApproval),
-              progressChange(ProgressStage.waitingForConfirmation),
-              progressChange(ProgressStage.fiasco),
-              () => of(progressChange(ProgressStage.done))
-            ),
-            takeUntil(cancel$)
-          );
+            .pipe(
+              transactionToX(
+                progressChange(ProgressStage.waitingForApproval),
+                progressChange(ProgressStage.waitingForConfirmation),
+                progressChange(ProgressStage.fiasco),
+                () => of(progressChange(ProgressStage.done))
+              ),
+              takeUntil(cancel$)
+            );
         }),
       ),
     );
@@ -209,7 +271,7 @@ function freezeIfInProgress(
 
 export function createWrapUnwrapForm$(
   gasPrice$: Observable<BigNumber>,
-  etherPriceUSD$: Observable<BigNumber>,
+  etherPriceUsd$: Observable<BigNumber|undefined>,
   ethBalance$: Observable<BigNumber>,
   wethBalance$: Observable<BigNumber>,
   calls$: Calls$,
@@ -223,19 +285,19 @@ export function createWrapUnwrapForm$(
     map(balance => ({
       balance,
       kind: BalanceChangeKind.ethBalanceChange
-    })
-  ));
+    }))
+  );
 
   const wethBalanceChange$ = wethBalance$.pipe(
     map(balance => ({
       balance,
       kind: BalanceChangeKind.wethBalanceChange
-    })
-  ));
+    }))
+  );
 
   const environmentChange$ = combineAndMerge(
     toGasPriceChange(gasPrice$),
-    toEtherPriceUSDChange(etherPriceUSD$),
+    toEtherPriceUSDChange(etherPriceUsd$),
     ethBalanceChange$,
     wethBalanceChange$,
   );
@@ -253,7 +315,6 @@ export function createWrapUnwrapForm$(
     wethBalance: zero,
     messages: [],
     gasEstimationStatus: GasEstimationStatus.unset,
-
   };
 
   return merge(
@@ -262,11 +323,12 @@ export function createWrapUnwrapForm$(
     resetChange$,
     proceedProgressChange$
   ).pipe(
-  scan(applyChange, initialState),
-  map(validate),
-  switchMap(curry(estimateGasPrice)(calls$)),
-  map(checkIfIsReadyToProceed),
-  scan(freezeIfInProgress),
-  firstOfOrTrue(s => s.gasEstimationStatus === GasEstimationStatus.calculating)
+    scan(applyChange, initialState),
+    map(validate),
+    switchMap(curry(estimateGasPrice)(calls$)),
+    map(checkIfCanPayGas),
+    map(checkIfIsReadyToProceed),
+    scan(freezeIfInProgress),
+    firstOfOrTrue(s => s.gasEstimationStatus === GasEstimationStatus.calculating)
   );
 }

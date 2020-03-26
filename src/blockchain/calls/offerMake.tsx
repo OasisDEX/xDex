@@ -12,7 +12,7 @@ import { TransactionDef } from './callsHelpers';
 import { TxMetaKind } from './txMeta';
 
 export interface CancelData {
-  offerId:BigNumber;
+  offerId: BigNumber;
   type: TradeAct;
   amount: BigNumber;
   token: string;
@@ -21,15 +21,20 @@ export interface CancelData {
 }
 
 export const cancelOffer: TransactionDef<CancelData> = {
-  call: (_data: CancelData, context: NetworkConfig) => context.otc.contract.cancel.uint256,
+  call: (_data: CancelData, context: NetworkConfig) =>
+    context.otc.contract.methods['cancel(uint256)'],
   prepareArgs: ({ offerId }: CancelData) => [
-    offerId
+    offerId.toFixed()
   ],
   options: () => ({ gas: 500000 }),
   kind: TxMetaKind.cancel,
   description: ({ type, amount, token }: CancelData) =>
     <React.Fragment>
-      Cancel <span style={{ textTransform: 'capitalize' }}>{type}</span> Order <Money value={amount} token={token}/>
+      Cancel
+      <span style={{ textTransform: 'capitalize' }}>
+        &nbsp;{type}&nbsp;
+      </span>
+      Order <Money value={amount} token={token}/>
     </React.Fragment>,
 };
 
@@ -46,18 +51,19 @@ export interface OfferMakeData {
 }
 
 export const offerMake: TransactionDef<OfferMakeData> = {
-  call: (data: OfferMakeData, context: NetworkConfig) => ({
-    [OfferMatchType.limitOrder]: context.otc.contract.offer
-      ['uint256,address,uint256,address,uint256,bool'],
-    [OfferMatchType.direct]: () => { throw new Error('should not be here'); },
-  }[data.matchType]),
+  call: (data: OfferMakeData, context: NetworkConfig) => {
+    if (data.matchType === OfferMatchType.limitOrder) {
+      return context.otc.contract.methods['offer(uint256,address,uint256,address,uint256,bool)'];
+    }
+    throw new Error('should not be here');
+  },
   prepareArgs: (
     { buyAmount, buyToken, sellAmount, sellToken, matchType, position }: OfferMakeData,
     context: NetworkConfig
   ) => [
     amountToWei(sellAmount, sellToken).toFixed(0), context.tokens[sellToken].address,
     amountToWei(buyAmount, buyToken).toFixed(0), context.tokens[buyToken].address,
-    ...matchType === OfferMatchType.limitOrder ? [position || 0] : [],
+    ...matchType === OfferMatchType.limitOrder ? [position ? position.toFixed() : 0] : [],
     true,
   ],
   options: ({ gasPrice, gasEstimation }: OfferMakeData) => ({
@@ -67,12 +73,12 @@ export const offerMake: TransactionDef<OfferMakeData> = {
   kind: TxMetaKind.offerMake,
   description: ({ buyAmount, buyToken, sellAmount, sellToken, kind }: OfferMakeData) => (
     kind === OfferType.sell ?
-    <>
-      Create Sell Order <Money value={sellAmount} token={sellToken}/>
-    </> :
-    <>
-      Create Buy Order <Money value={buyAmount} token={buyToken}/>
-    </>
+      <>
+        Create Sell Order <Money value={sellAmount} token={sellToken}/>
+      </> :
+      <>
+        Create Buy Order <Money value={buyAmount} token={buyToken}/>
+      </>
   )
 
 };
@@ -91,8 +97,8 @@ export interface OfferMakeDirectData {
 
 export const offerMakeDirect: TransactionDef<OfferMakeDirectData> = {
   call: ({ kind }: OfferMakeDirectData, context: NetworkConfig) => kind === OfferType.buy ?
-    context.otc.contract.buyAllAmount['address,uint256,address,uint256'] :
-    context.otc.contract.sellAllAmount['address,uint256,address,uint256'],
+    context.otc.contract.methods['buyAllAmount(address,uint256,address,uint256)'] :
+    context.otc.contract.methods['sellAllAmount(address,uint256,address,uint256)'],
   prepareArgs: (
     { baseAmount, baseToken, quoteAmount, quoteToken }: OfferMakeDirectData,
     context: NetworkConfig
@@ -108,11 +114,11 @@ export const offerMakeDirect: TransactionDef<OfferMakeDirectData> = {
   }),
   kind: TxMetaKind.offerMake,
   description: ({ baseAmount, baseToken, quoteAmount, quoteToken, kind }: OfferMakeDirectData) =>
-  kind === OfferType.sell ?
-  <>
-    Create Sell Order <Money value={baseAmount} token={baseToken}/>
-  </> :
-  <>
-    Create Buy Order <Money value={quoteAmount} token={quoteToken}/>
-  </>,
+    kind === OfferType.sell ?
+      <>
+        Create Sell Order <Money value={baseAmount} token={baseToken}/>
+      </> :
+      <>
+        Create Buy Order <Money value={quoteAmount} token={quoteToken}/>
+      </>,
 };

@@ -25,9 +25,8 @@
       @include media-breakpoint-down($breakpoint-down) {
         @include tableColumnWidth($i, $width);
       }
-    }
-    @else {
-        @include tableColumnWidth($i, $width);
+    } @else {
+      @include tableColumnWidth($i, $width);
     }
   }
 }
@@ -55,6 +54,12 @@ $inputHeight: (
   unsized: auto,
 );
 
+$buttonHeight: (
+  sm: 22px,
+  md: 34px,
+  lg: 48px,
+);
+
 $inputFontSize: (
   xs: 14px,
   sm: 14px,
@@ -69,12 +74,13 @@ $inputFontSize: (
     font-size: map-get($inputFontSize, $name);
   }
 }
+
 // generate class for input heights
 // If $name is given, generate only this one given class (f.e. .lg)
 // otherwise generate all possible classes.
 // Generation base on $inputHeight map
 @mixin formInputSizes($sizeName: null) {
-  @if($sizeName) {
+  @if ($sizeName) {
     // generate only for one given size
     @include formInputSize($sizeName);
   } @else {
@@ -109,7 +115,7 @@ $inputFontSize: (
       width: 100%;
       position: fixed;
       bottom: 0;
-      background: linear-gradient(to bottom, rgba(#1f1f27,0) 0%, #1f1f27 25%);
+      background: linear-gradient(to bottom, rgba(#1f1f27, 0) 0%, #1f1f27 25%);
     }
 
     &:before {
@@ -134,6 +140,7 @@ $inputFontSize: (
     right: 0;
     bottom: 0;
     background-color: rgba(#15151d, 0.8);
+    z-index: 100;
   }
 }
 
@@ -151,13 +158,11 @@ $inputFontSize: (
   }
 
   .checklistTitle {
-    font-weight: 600; // semi bold
-    letter-spacing: 0.1px;
+    font-weight: 600;
   }
 
   .checklistSummary {
     font-weight: 500; // medium
-    letter-spacing: 0.4px;
   }
 
   .checklistHrMargin {
@@ -168,25 +173,14 @@ $inputFontSize: (
 
 
 // Fonts standard sets helpers
-@mixin fontMontserratSemibold() {
-  font-family: $font-main;
+@mixin fontSemiBold() {
+  font-family: system-ui,-apple-system,BlinkMacSystemFont,Helvetica Neue,Roboto,Segoe UI,sans-serif;
   font-weight: 600;
 }
 
-@mixin fontMontserratMedium() {
-  font-family: $font-main;
-  font-weight: 500;
-}
-
-@mixin fontLatoBold() {
-  font-family: $font-additional;
-  font-size: 14px;
+@mixin fontBold() {
+  font-family: system-ui,-apple-system,BlinkMacSystemFont,Helvetica Neue,Roboto,Segoe UI,sans-serif;
   font-weight: 700;
-}
-
-@mixin fontLatoMedium() {
-  font-family: $font-additional;
-  font-weight: 500;
 }
 
 
@@ -227,4 +221,34 @@ $inputFontSize: (
   overflow: hidden;
   -ms-text-overflow: ellipsis;
   text-overflow: ellipsis;
+}
+
+// generate class for input heights
+// If $name is given, generate only this one given class (f.e. .lg)
+// otherwise generate all possible classes.
+// Generation base on $inputHeight map
+@mixin formInputHeights($name: null) {
+  @if ($name) {
+    @if map-has-key($inputHeight, $name) {
+      .#{$name} {
+        height: map-get($inputHeight, $name);
+      }
+    }
+  } @else {
+    @each $name, $value in $inputHeight {
+      .#{$name} {
+        height: $value;
+      }
+    }
+  }
+}
+
+@mixin iconsDisabled($background, $content) {
+  :global(.icon-background){
+    fill :$background;
+  }
+
+  :global(.icon-content) {
+    fill: $content;
+  }
 }

@@ -1,0 +1,134 @@
+@import "../../utils/Variables";
+
+.MTPositionPanel {
+  display: flex;
+  border-bottom: 1px solid $element-border;
+  margin-bottom: 24px;
+}
+
+.MTPositionColumn {
+  width: 33.33%;
+  padding: 20px;
+  flex-shrink: 0;
+  flex-grow: 0;
+  border-left: 1px solid $element-border;
+
+  &:first-child {
+    border-left: 0;
+  }
+}
+
+.MTPositionColumnNarrow {
+  display: flex;
+  height: 100%;
+  width: 18%;
+  padding: 20px 8px;
+  flex-shrink: 0;
+  flex-grow: 0;
+  flex-direction: column;
+}
+
+.summaryRow {
+  display: flex;
+  width: 100%;
+  margin-bottom: 18px;
+}
+
+.summaryLabel {
+  display: inline-flex;
+  color: $grayish-blue;
+  flex-grow: 1;
+}
+
+.summaryValue {
+  color: $desaturated-dark-blue;
+  flex-grow: 1;
+  text-align: right;
+}
+
+.summaryValuePositive {
+  color: $green;
+}
+
+.summaryValueNegative {
+  color: $red;
+}
+
+.statsBox {
+  border: 1px solid $element-border;
+  border-radius: 4px;
+  padding: 6px 10px;
+  margin: 0 0 16px 0;
+
+  .summaryValue {
+    text-align: center;
+  }
+
+  .summaryLabel {
+    margin-top: 5px;
+  }
+}
+
+.actionButton {
+  flex-grow: 1;
+  flex-shrink: 0;
+  margin-bottom: 12px;
+  font-size: 13px;
+}
+
+.message {
+  display: flex;
+  border-radius: 4px;
+  padding: 20px;
+  margin: 25px 20px;
+  font-size: 14px;
+  line-height: 22px;
+
+  div {
+    margin: 0 20px 0 0;
+    align-self: center;
+  }
+
+  span {
+    align-self: center;
+    flex-grow: 1;
+  }
+
+  .redeemButton {
+    align-self: center;
+    margin-left: 35px;
+    align-content: right;
+    flex-grow: 0;
+  }
+}
+
+.infoMessage {
+  @extend .message;
+
+  color: #828288;
+  border: 1px solid $another-light-grayish-blue-3;
+}
+
+.warningMessage {
+  @extend .message;
+
+  width: 100%;
+  color: $danger-color;
+  border: 1px solid $danger-border-color;
+  background: $light-grayish-red;
+}
+
+.warningText {
+  margin-left: 10px;
+}
+
+.redeemButton {
+  &:disabled {
+    color: #58585F !important;
+  }
+
+  .buttonLoading {
+    margin: 0 0 0 20px;
+    min-height: 25px;
+  }
+}

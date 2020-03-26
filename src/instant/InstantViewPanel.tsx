@@ -12,18 +12,20 @@ import { BuyAssetSelectorView, SellAssetSelectorView } from './views/AssetSelect
 import { FinalizationView } from './views/FinalizationView';
 import { NewTradeView } from './views/NewTradeView';
 import { PriceImpactWarningView } from './views/PriceImpactWarningView';
+import { TradeSettingsView } from './views/TradeSettingsView';
 import { TradeSummaryView } from './views/TradeSummaryView';
 
-const views = new Map<ViewKind, any>([
-  [ViewKind.buyAssetSelector, BuyAssetSelectorView],
-  [ViewKind.sellAssetSelector, SellAssetSelectorView],
-  [ViewKind.priceImpactWarning, PriceImpactWarningView],
-  [ViewKind.account, AccountView],
-  [ViewKind.allowances, AllowancesView],
-  [ViewKind.finalization, FinalizationView],
-  [ViewKind.new, NewTradeView],
-  [ViewKind.summary, TradeSummaryView],
-]);
+const views: Record<ViewKind, React.ComponentType<InstantFormState>> = {
+  [ViewKind.buyAssetSelector]: BuyAssetSelectorView,
+  [ViewKind.sellAssetSelector]: SellAssetSelectorView,
+  [ViewKind.priceImpactWarning]: PriceImpactWarningView,
+  [ViewKind.account]: AccountView,
+  [ViewKind.allowances]: AllowancesView,
+  [ViewKind.finalization]: FinalizationView,
+  [ViewKind.new]: NewTradeView,
+  [ViewKind.summary]: TradeSummaryView,
+  [ViewKind.settings]: TradeSettingsView,
+};
 
 export class InstantViewPanel extends React.Component<Loadable<InstantFormState>> {
 
@@ -32,7 +34,7 @@ export class InstantViewPanel extends React.Component<Loadable<InstantFormState>
 
     if (status === 'loaded') {
       const formState = value as InstantFormState;
-      const View = views.get(formState.view);
+      const View = views[formState.view];
       return (<View {...formState}/>);
     }
 
