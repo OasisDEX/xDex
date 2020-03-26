@@ -38,7 +38,7 @@ const markPriceTooltip = `
 `
 
 const collateralBalanceTooltip = (collateral: string) => `
-  This the amount of ${collateral} you currently have locked within your Leverage Account.
+  This is the amount of ${collateral} you currently have locked within your Leverage Account.
   This ${collateral} is used as collateral against any debt you have, and may be sold 
   if the Mark Price falls below your Liquidation Price.
 `
@@ -165,6 +165,7 @@ export class MTMyPositionView extends
                   value={ma.fee}
                   fallback="-"
                   multiply={false}
+                  precision={2}
                 />
               </div>
             </div>
@@ -179,6 +180,7 @@ export class MTMyPositionView extends
                   value={liquidationPenalty}
                   fallback="-"
                   multiply={false}
+                  precision={2}
                 />
               </div>
             </div>

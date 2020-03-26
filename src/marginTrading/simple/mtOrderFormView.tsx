@@ -44,7 +44,7 @@ import { MTSimpleOrderPanelProps } from './mtOrderPanel';
 
 /* tslint:disable */
 const collateralBalanceTooltip = (collateral: string) => `
-  This the amount of ${collateral} you currently have locked within your Leverage Account.
+  This is the amount of ${collateral} you currently have locked within your Leverage Account.
   This ${collateral} is used as collateral against any debt you have, and may be sold 
   if the Mark Price falls below your Liquidation Price.
 `
