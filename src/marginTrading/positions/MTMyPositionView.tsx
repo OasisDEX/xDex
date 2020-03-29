@@ -133,11 +133,15 @@ export class MTMyPositionView extends
       :
       liquidationPrice.gt(zero) ? liquidationPrice : undefined;
 
-    const markPrice = inDai
-      ? (ma.markPrice && daiPrice)
-        ? ma.markPrice.times(daiPrice)
+    const markPrice = ma.markPrice.gt(liquidationPrice) && liquidationPrice.gt(ma.referencePrice)
+      ? ma.referencePrice
+      : ma.markPrice;
+
+    const markPriceDisplay = inDai
+      ? (markPrice && daiPrice)
+        ? markPrice.times(daiPrice)
         : undefined
-      : ma.osmPriceNext;
+      : markPrice;
     return (
       <div>
         <div className={styles.MTPositionPanel}>
@@ -214,12 +218,12 @@ export class MTMyPositionView extends
               </div>
               <div className={styles.summaryValue}>
                 {
-                  markPrice
+                  markPriceDisplay
                     ? (
                       <>
                         {inDai && '~'}
                         <Money
-                          value={markPrice}
+                          value={markPriceDisplay}
                           token={inDai ? 'DAI' : 'USD'}
                         />
                       </>
