@@ -4,8 +4,8 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import * as ReactModal from 'react-modal';
 
-import { getToken } from 'src/blockchain/config';
 import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
+import { getToken } from '../blockchain/config';
 import { BigNumberInput } from '../utils/bigNumberInput/BigNumberInput';
 import { AmountFieldChange, FormChangeKind } from '../utils/form';
 import { formatAmount } from '../utils/formatters/format';

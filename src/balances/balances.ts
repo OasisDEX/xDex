@@ -13,7 +13,7 @@ import {
 } from 'rxjs/operators';
 import { Calls$ } from '../blockchain/calls/calls';
 
-import { TxMetaKind } from 'src/blockchain/calls/txMeta';
+import { TxMetaKind } from '../blockchain/calls/txMeta';
 import { AssetKind, NetworkConfig, tradingTokens as _tradingTokens } from '../blockchain/config';
 import { account$, GasPrice$, MIN_ALLOWANCE, Ticker } from '../blockchain/network';
 import { TxState, TxStatus } from '../blockchain/transactions';

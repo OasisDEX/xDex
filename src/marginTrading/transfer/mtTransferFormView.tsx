@@ -26,7 +26,7 @@ import { zero } from '../../utils/zero';
 
 import * as mixpanel from 'mixpanel-browser';
 import * as ReactDOM from 'react-dom';
-import { theAppContext } from 'src/AppContext';
+import { theAppContext } from '../../AppContext';
 import { LoadableWithTradingPair } from '../../utils/loadable';
 import { MTSimpleFormState } from '../simple/mtOrderForm';
 import { MtSimpleOrderFormBody } from '../simple/mtOrderFormView';

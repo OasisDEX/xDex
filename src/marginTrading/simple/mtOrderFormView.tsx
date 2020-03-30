@@ -3,10 +3,8 @@ import * as classnames from 'classnames';
 import * as mixpanel from 'mixpanel-browser';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { getToken } from 'src/blockchain/config';
-import { Checkbox } from 'src/utils/forms/Checkbox';
-import { WarningTooltip } from 'src/utils/tooltip/Tooltip';
 import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
+import { getToken } from '../../blockchain/config';
 import * as formStyles from '../../exchange/offerMake/OfferMakeForm.scss';
 import { OfferType } from '../../exchange/orderbook/orderbook';
 import { ApproximateInputValue } from '../../utils/Approximate';
@@ -20,6 +18,7 @@ import {
 } from '../../utils/formatters/format';
 import { CryptoMoney, FormatPercent, Money } from '../../utils/formatters/Formatters';
 import { Button, ButtonGroup } from '../../utils/forms/Buttons';
+import { Checkbox } from '../../utils/forms/Checkbox';
 import { ErrorMessage } from '../../utils/forms/ErrorMessage';
 import { InputGroup, InputGroupAddon } from '../../utils/forms/InputGroup';
 import { Radio } from '../../utils/forms/Radio';
@@ -29,6 +28,7 @@ import { LoggedOut } from '../../utils/loadingIndicator/LoggedOut';
 import { ModalOpenerProps, ModalProps } from '../../utils/modal';
 import { PanelBody, PanelFooter, PanelHeader } from '../../utils/panel/Panel';
 import { Muted } from '../../utils/text/Text';
+import { WarningTooltip } from '../../utils/tooltip/Tooltip';
 import { minusOne, zero } from '../../utils/zero';
 import {
   findMarginableAsset,
