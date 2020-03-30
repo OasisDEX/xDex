@@ -212,7 +212,7 @@ export class MTMyPositionPanelInternal
     super(props);
     // TODO: this should come from the pipeline;
     this.state = {
-      blocked: true
+      blocked: false
     };
   }
 
