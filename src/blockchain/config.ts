@@ -376,9 +376,6 @@ const protoMain = {
       get WETH() {
         return load(mcdOsm, '0x81FE72B5A8d1A857d176C3E7d5Bd2679A9B85763');
       },
-    },
-    xxx: {
-      test: 'aaa'
     }
   } as { [key: string]: any },
   get otcSupportMethods() {
