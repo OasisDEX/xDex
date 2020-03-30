@@ -32,6 +32,7 @@ export enum TxMetaKind {
   devPokeSpotter = 'devPokeSpotter',
   redeem = 'redeem',
   export = 'export',
+  recoverERC20 = 'recoverERC20',
 }
 
 export type TxMeta = {

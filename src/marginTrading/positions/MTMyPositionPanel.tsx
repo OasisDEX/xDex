@@ -17,14 +17,45 @@ import { default as BigNumber } from 'bignumber.js';
 import { Observable } from 'rxjs';
 import { Switch } from 'src/utils/forms/Slider';
 import { AssetDropdownMenu } from '../../balances/AssetDropdownMenu';
-import { TxState } from '../../blockchain/transactions';
+import { TxMetaKind } from '../../blockchain/calls/txMeta';
+import { isDone, TxState } from '../../blockchain/transactions';
 import { connect } from '../../utils/connect';
 import { Button } from '../../utils/forms/Buttons';
+import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
 import { LoggedOut } from '../../utils/loadingIndicator/LoggedOut';
 import { MtTransferFormView } from '../transfer/mtTransferFormView';
 import backArrowSvg from './back-arrow.svg';
 import * as myPositionStyles from './MTMyPositionView.scss';
 import warningIconSvg from './warning-icon.svg';
+
+interface RedeemButtonProps {
+  disabled: boolean;
+  redeem: () => void;
+  token: string;
+  transactions: TxState[];
+}
+
+class RedeemButton extends React.Component<RedeemButtonProps> {
+
+  public render() {
+    const txInProgress = Boolean(this.props.transactions.find((t: TxState) =>
+      t.meta.kind === TxMetaKind.redeem &&
+      !isDone(t) &&
+      t.meta.args.token === this.props.token
+    ));
+
+    return (
+      <Button
+        size="md"
+        disabled={this.props.disabled || txInProgress}
+        className={myPositionStyles.redeemButton}
+        onClick={this.props.redeem}
+      >
+        {txInProgress ? <LoadingIndicator className={myPositionStyles.buttonLoading} /> : 'Reclaim'}
+      </Button>
+    );
+  }
+}
 
 interface MTMyPositionPanelInternalProps {
   account: string | undefined;
@@ -43,23 +74,79 @@ export class MTLiquidationNotification
   public render() {
 
     if (this.props.value && this.props.status === 'loaded' && this.props.value.mta) {
-      const { ma } = this.props.value;
+      const { mta, ma, redeem, transactions } = this.props.value;
 
       return <>
         {
-          ma?.bitable === 'imminent' &&
+          ma.bitable === 'imminent' &&
           // tslint:disable
           <div className={myPositionStyles.warningMessage}>
-            <SvgImage image={warningIconSvg}/>
+            <SvgImage image={warningIconSvg} />
             <span className={myPositionStyles.warningText}>
-              Your {ma.name} leveraged position has entered the liquidation phase and your collateral will be auctioned in {ma.nextPriceUpdateDelta} minutes.<br/>
+              Your {ma.name} leveraged position has entered the liquidation phase and your collateral will be auctioned in {ma.nextPriceUpdateDelta} minutes.<br />
               You can still avoid auction by
-              { ma.isSafeCollRatio ? 'selling, or ' : ' ' }
+              {ma.isSafeCollRatio ? 'selling, or ' : ' '}
               depositing additional {ma.name} or DAI.
-              </span>
+            </span>
           </div>
           // tslint:enable
-        }
+          }
+          {
+            ma.bitable === 'yes' &&
+            <div className={myPositionStyles.warningMessage}>
+              <SvgImage image={warningIconSvg} />
+              <span className={myPositionStyles.warningText}>
+                {
+                  // tslint:disable
+                  <>Your {ma.name} leveraged position has been liquidated and your assets are currently being sold at
+                    auction to cover your debt. Check back soon for further details for the auction result.
+                  </>
+                  // tslint:enable
+                }
+              </span>
+              {
+                ma.redeemable.gt(zero) && <RedeemButton
+                  redeem={() => redeem({
+                    token: ma.name,
+                    proxy: mta.proxy,
+                    amount: ma.redeemable
+                  })}
+
+                  token={ma.name}
+                  disabled={false}
+                  transactions={transactions}
+                />
+              }
+            </div>
+          }
+          {
+            ma.bitable === 'no' && ma.redeemable.gt(zero) &&
+            <div className={myPositionStyles.infoMessage}>
+              <span>
+                {
+                  // tslint:disable
+                  <>
+                    Your {ma.name} leveraged position has been liquidated and sold to cover your debt.
+                    You have {ma.redeemable.toString()} {ma.name} that was not sold and can now be reclaimed.
+                  </>
+                  // tslint:enable
+                }
+              </span>
+              {
+                ma.redeemable.gt(zero) && <RedeemButton
+                  redeem={() => redeem({
+                    token: ma.name,
+                    proxy: mta.proxy,
+                    amount: ma.redeemable
+                  })}
+
+                  token={ma.name}
+                  disabled={false}
+                  transactions={transactions}
+                />
+              }
+            </div>
+          }
       </>;
     }
     return null;
@@ -125,7 +212,7 @@ export class MTMyPositionPanelInternal
     super(props);
     // TODO: this should come from the pipeline;
     this.state = {
-      blocked: true
+      blocked: false
     };
   }
 

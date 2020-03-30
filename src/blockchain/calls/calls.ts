@@ -38,6 +38,7 @@ import {
   cancelOffer, offerMake, offerMakeDirect
 } from './offerMake';
 import { swapDaiToSai, swapSaiToDai } from './swapCalls';
+import { proxyERC20Balance, recoverERC20 } from './tokenRecovery';
 import { unwrap, wrap } from './wrapUnwrapCalls';
 
 function calls([context, account]: [NetworkConfig, string]) {
@@ -100,11 +101,14 @@ function calls([context, account]: [NetworkConfig, string]) {
     mtRedeem: sendTransaction(mtRedeem),
     mtExport: sendTransaction(mtExport),
     changePriceAndPoke: sendTransaction(changePriceAndPoke),
-    printOsmInfo: printOsmInfo(context)
+    printOsmInfo: printOsmInfo(context),
+    recoverERC20: sendTransaction(recoverERC20)
   };
 }
 
-function readCalls([context, account]: [NetworkConfig, string | undefined]) {
+function readCalls(
+  [context, account]: [NetworkConfig, string | undefined]
+) {
   const call = callCurried(context, account);
 
   return {
@@ -116,6 +120,7 @@ function readCalls([context, account]: [NetworkConfig, string | undefined]) {
     otcOffers: call(offers),
     readPrice: call(readPrice),
     osmParams: call(osmParams),
+    proxyERC20Balance: call(proxyERC20Balance),
   };
 }
 

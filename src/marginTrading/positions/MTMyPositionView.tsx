@@ -8,13 +8,9 @@ import { map } from 'rxjs/operators';
 import { WarningTooltip } from 'src/utils/tooltip/Tooltip';
 import { CDPHistoryView } from '../../balances/CDPHistoryView';
 import { Calls$ } from '../../blockchain/calls/calls';
-import { TxMetaKind } from '../../blockchain/calls/txMeta';
-import { isDone, transactions$, TxState } from '../../blockchain/transactions';
+import { transactions$, TxState } from '../../blockchain/transactions';
 import { formatPrecision } from '../../utils/formatters/format';
 import { CryptoMoney, FormatPercent, Money } from '../../utils/formatters/Formatters';
-import { Button } from '../../utils/forms/Buttons';
-import { SvgImage } from '../../utils/icons/utils';
-import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
 import { ModalOpenerProps } from '../../utils/modal';
 import { minusOne, one, zero } from '../../utils/zero';
 import {
@@ -24,7 +20,6 @@ import {
 } from '../state/mtAccount';
 import { CreateMTFundForm$ } from '../transfer/mtTransferForm';
 import * as styles from './MTMyPositionView.scss';
-import warningIconSvg from './warning-icon.svg';
 
 /* tslint:disable */
 const stabilityFeeTooltip = `
@@ -43,7 +38,7 @@ const markPriceTooltip = `
 `
 
 const collateralBalanceTooltip = (collateral: string) => `
-  This the amount of ${collateral} you currently have locked within your Leverage Account.
+  This is the amount of ${collateral} you currently have locked within your Leverage Account.
   This ${collateral} is used as collateral against any debt you have, and may be sold 
   if the Mark Price falls below your Liquidation Price.
 `
@@ -72,35 +67,6 @@ interface MTMyPositionViewProps {
   transactions: TxState[];
   inDai: boolean;
   daiPrice: BigNumber;
-}
-
-interface RedeemButtonProps {
-  disabled: boolean;
-  redeem: () => void;
-  token: string;
-  transactions: TxState[];
-}
-
-class RedeemButton extends React.Component<RedeemButtonProps> {
-
-  public render() {
-    const txInProgress = Boolean(this.props.transactions.find((t: TxState) =>
-      t.meta.kind === TxMetaKind.redeem &&
-      !isDone(t) &&
-      t.meta.args.token === this.props.token
-    ));
-
-    return (
-      <Button
-        size="md"
-        disabled={this.props.disabled || txInProgress}
-        className={styles.redeemButton}
-        onClick={this.props.redeem}
-      >
-        {txInProgress ? <LoadingIndicator className={styles.buttonLoading} /> : 'Reclaim'}
-      </Button>
-    );
-  }
 }
 
 export function createRedeem(calls$: Calls$) {
@@ -154,7 +120,7 @@ export class MTMyPositionView extends
 {
   public render() {
 
-    const { ma, mta, inDai, daiPrice } = this.props;
+    const { ma, inDai, daiPrice } = this.props;
     const { liquidationPenalty } = ma;
     const leverage = ma.leverage ? ma.leverage : ma.balance.gt(zero) ? one : zero;
     const liquidationPrice = ma.liquidationPrice ? ma.liquidationPrice : zero;
@@ -167,11 +133,15 @@ export class MTMyPositionView extends
       :
       liquidationPrice.gt(zero) ? liquidationPrice : undefined;
 
-    const markPrice = inDai
-      ? (ma.markPrice && daiPrice)
-        ? ma.markPrice.times(daiPrice)
+    const markPrice = ma.markPrice.gt(liquidationPrice) && liquidationPrice.gt(ma.referencePrice)
+      ? ma.referencePrice
+      : ma.markPrice;
+
+    const markPriceDisplay = inDai
+      ? (markPrice && daiPrice)
+        ? markPrice.times(daiPrice)
         : undefined
-      : ma.osmPriceNext;
+      : markPrice;
     return (
       <div>
         <div className={styles.MTPositionPanel}>
@@ -199,6 +169,7 @@ export class MTMyPositionView extends
                   value={ma.fee}
                   fallback="-"
                   multiply={false}
+                  precision={2}
                 />
               </div>
             </div>
@@ -213,6 +184,7 @@ export class MTMyPositionView extends
                   value={liquidationPenalty}
                   fallback="-"
                   multiply={false}
+                  precision={2}
                 />
               </div>
             </div>
@@ -246,12 +218,12 @@ export class MTMyPositionView extends
               </div>
               <div className={styles.summaryValue}>
                 {
-                  markPrice
+                  markPriceDisplay
                     ? (
                       <>
                         {inDai && '~'}
                         <Money
-                          value={markPrice}
+                          value={markPriceDisplay}
                           token={inDai ? 'DAI' : 'USD'}
                         />
                       </>
@@ -331,78 +303,6 @@ export class MTMyPositionView extends
               </div>
             </div>
           </div>
-        </div>
-        <div>
-          {
-            ma.bitable === 'imminent' &&
-            // tslint:disable
-            <div className={styles.warningMessage}>
-              <SvgImage image={warningIconSvg} />
-              <span className={styles.warningText}>
-                Your {ma.name} leveraged position has entered the liquidation phase and your collateral will be auctioned in {ma.nextPriceUpdateDelta} minutes.<br />
-                You can still avoid auction by
-                {ma.isSafeCollRatio ? 'selling, or ' : ' '}
-                depositing additional {ma.name} or DAI.
-              </span>
-            </div>
-            // tslint:enable
-          }
-          {
-            ma.bitable === 'yes' &&
-            <div className={styles.warningMessage}>
-              <SvgImage image={warningIconSvg} />
-              <span>
-                {
-                  // tslint:disable
-                  <>Your {ma.name} leveraged position has been liquidated and your assets are currently being sold at
-                    auction to cover your debt. Check back soon for further details for the auction result.
-                  </>
-                  // tslint:enable
-                }
-              </span>
-              {
-                ma.redeemable.gt(zero) && <RedeemButton
-                  redeem={() => this.props.redeem({
-                    token: ma.name,
-                    proxy: mta.proxy,
-                    amount: ma.redeemable
-                  })}
-
-                  token={ma.name}
-                  disabled={false}
-                  transactions={this.props.transactions}
-                />
-              }
-            </div>
-          }
-          {
-            ma.bitable === 'no' && ma.redeemable.gt(zero) &&
-            <div className={styles.infoMessage}>
-              <span>
-                {
-                  // tslint:disable
-                  <>
-                    Your {ma.name} leveraged position has been liquidated and sold to cover your debt.
-                    You have {ma.redeemable.toString()} {ma.name} that was not sold and can now be reclaimed.
-                  </>
-                  // tslint:enable
-                }
-              </span>
-              {
-                ma.redeemable.gt(zero) && <RedeemButton
-                  redeem={() => this.props.redeem({
-                    token: ma.name,
-                    proxy: mta.proxy,
-                    amount: ma.redeemable
-                  })}
-
-                  token={ma.name}
-                  disabled={false}
-                  transactions={this.props.transactions}
-                />
-              }
-            </div>
-          }
         </div>
         <CDPHistoryView {...ma} />
       </div>);

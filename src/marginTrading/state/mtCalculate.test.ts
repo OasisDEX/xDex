@@ -342,7 +342,7 @@ describe('Calculate maxSellable', () => {
       fakeOrderbook
     );
     const result = maxSellable(ma, sellOffers);
-    expect(result).toEqual(new BigNumber('0.01'));
+    expect(result).toEqual(new BigNumber('0.009998626708984375'));
   });
 
   test('Partially sellable, too many iterations', () => {
