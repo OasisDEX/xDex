@@ -5,13 +5,13 @@ import { combineLatest } from 'rxjs';
 import { Observable } from 'rxjs/index';
 import { first, switchMap } from 'rxjs/internal/operators';
 import { map } from 'rxjs/operators';
-import { WarningTooltip } from 'src/utils/tooltip/Tooltip';
 import { CDPHistoryView } from '../../balances/CDPHistoryView';
 import { Calls$ } from '../../blockchain/calls/calls';
 import { transactions$, TxState } from '../../blockchain/transactions';
 import { formatPrecision } from '../../utils/formatters/format';
 import { CryptoMoney, FormatPercent, Money } from '../../utils/formatters/Formatters';
 import { ModalOpenerProps } from '../../utils/modal';
+import { WarningTooltip } from '../../utils/tooltip/Tooltip';
 import { minusOne, one, zero } from '../../utils/zero';
 import {
   findMarginableAsset,

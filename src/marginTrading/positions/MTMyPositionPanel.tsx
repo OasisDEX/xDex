@@ -15,12 +15,12 @@ import { MTMyPositionView } from './MTMyPositionView';
 
 import { default as BigNumber } from 'bignumber.js';
 import { Observable } from 'rxjs';
-import { Switch } from 'src/utils/forms/Slider';
 import { AssetDropdownMenu } from '../../balances/AssetDropdownMenu';
 import { TxMetaKind } from '../../blockchain/calls/txMeta';
 import { isDone, TxState } from '../../blockchain/transactions';
 import { connect } from '../../utils/connect';
 import { Button } from '../../utils/forms/Buttons';
+import { Switch } from '../../utils/forms/Slider';
 import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
 import { LoggedOut } from '../../utils/loadingIndicator/LoggedOut';
 import { MtTransferFormView } from '../transfer/mtTransferFormView';
