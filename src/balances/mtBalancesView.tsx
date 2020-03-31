@@ -220,7 +220,11 @@ export class MTBalancesViewInternalImpl
                 </td>
                 <td className={styles.amount}>
                   <InfoLabel>
-                    { formatDateTime(new Date(lastEvent.timestamp), true) }
+                    {
+                      lastEvent
+                      ? formatDateTime(new Date(lastEvent.timestamp), true)
+                      : <>-</>
+                    }
                   </InfoLabel>
                 </td>
               </tr>
