@@ -982,7 +982,7 @@ export class MtSimpleOrderFormView extends React.Component<
 
     const hasHistoryEvents = ma && ma.rawHistory.length > 0;
 
-    if (hasHistoryEvents) {
+    if (hasHistoryEvents || ma!.balance.gt(zero) || ma!.dai.gt(zero)) {
       return <MtSimpleOrderFormBody {...this.props} />;
     }
 
