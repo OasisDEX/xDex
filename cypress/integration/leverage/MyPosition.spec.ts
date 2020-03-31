@@ -123,7 +123,7 @@ describe('My Position panel', () => {
       Position.depositDAI(100);
     });
 
-    it.only('should deposit more WETH', () => {
+    it('should deposit more WETH', () => {
       Position.depositCollateral(10);
 
       Position.expectAmountOfCollateral(`15.00`);

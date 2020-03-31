@@ -8,7 +8,7 @@ export class Tab {
   }
 
   public static balances = () => {
-    cy.get(tid('Account'), { ...defaultTimeout }).click();
+    cy.get(tid('Balances'), { ...defaultTimeout }).click();
   }
 
   public static instant = () => {

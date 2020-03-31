@@ -175,7 +175,7 @@ describe('Leverage form', () => {
         Position.expectAmountOfDAI(`-123.35`);
       });
 
-      it.only('without generating debt and having WETH deposited', () => {
+      it('without generating debt and having WETH deposited', () => {
         Position.enableCollateral('deposit');
         Position.depositCollateral(5);
 
