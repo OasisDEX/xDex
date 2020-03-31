@@ -179,7 +179,7 @@ export class MTMyPositionPanel
 
         const hasHistoryEvents = ma && ma.rawHistory.length > 0;
 
-        if (hasHistoryEvents) {
+        if (hasHistoryEvents || ma.balance.gt(zero) || ma .dai.gt(zero)) {
           return (
             <Panel style={{ flexGrow: 1 }}>
               <MTMyPositionPanelInternal {...this.props.value} {...{ open: this.props.open }} />
