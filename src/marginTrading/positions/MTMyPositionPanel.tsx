@@ -92,7 +92,35 @@ export class MTLiquidationNotification
           // tslint:enable
           }
           {
-            ma.bitable === 'yes' &&
+            ma.bitable === 'yes' && ma.runningAuctions === 0 &&
+            <div className={myPositionStyles.warningMessage}>
+              <SvgImage image={warningIconSvg} />
+              <span className={myPositionStyles.warningText}>
+                {
+                  // tslint:disable
+                  <>
+                    Your {ma.name} leveraged position is now at risk of being liquidated. You can still avoid auction by depositing WETH or DAI.
+                  </>
+                  // tslint:enable
+                }
+              </span>
+              {
+                ma.redeemable.gt(zero) && <RedeemButton
+                  redeem={() => redeem({
+                    token: ma.name,
+                    proxy: mta.proxy,
+                    amount: ma.redeemable
+                  })}
+
+                  token={ma.name}
+                  disabled={false}
+                  transactions={transactions}
+                />
+              }
+            </div>
+          }
+          {
+            ma.runningAuctions > 0 &&
             <div className={myPositionStyles.warningMessage}>
               <SvgImage image={warningIconSvg} />
               <span className={myPositionStyles.warningText}>

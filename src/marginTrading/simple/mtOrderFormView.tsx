@@ -921,8 +921,9 @@ export class MtSimpleOrderFormView extends React.Component<
                 {
                   // tslint:disable
                   <>
-                    Warning - Your position is currently too close to the liquidation price to sell. <br/>
-                    To sell your position, you must first deposit DAI or {baseToken}.
+                    Warning - Your position will be liquidated in {ma && ma.nextPriceUpdateDelta} minutes and cannot currently be sold.
+                    <br/>
+                    To rescue your position, you must deposit additional {baseToken} or DAI
                   </>
                   // tslint:enable
                 }
@@ -972,17 +973,17 @@ export class MtSimpleOrderFormView extends React.Component<
     const { mta, baseToken, isSafeCollRatio } = this.props;
     const ma = findMarginableAsset(baseToken, mta);
 
-    if (!isSafeCollRatio) {
-      return this.CallForDeposit(depositMessageType.collRatioUnsafe, ma);
-    }
-
     if (ma && ma.liquidationPrice.gt(ma.markPrice)) {
       return this.CallForDeposit(depositMessageType.liquidationImminent, ma);
     }
 
+    if (!isSafeCollRatio) {
+      return this.CallForDeposit(depositMessageType.collRatioUnsafe, ma);
+    }
+
     const hasHistoryEvents = ma && ma.rawHistory.length > 0;
 
-    if (hasHistoryEvents) {
+    if (ma && (hasHistoryEvents || ma.dai.gt(zero) || ma.balance.gt(zero))) {
       return <MtSimpleOrderFormBody {...this.props} />;
     }
 
