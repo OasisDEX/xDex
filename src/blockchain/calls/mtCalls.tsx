@@ -1,6 +1,7 @@
 import { BigNumber } from 'bignumber.js';
 import * as React from 'react';
-import * as Web3Utils from 'web3-utils';
+// @ts-ignore
+import Web3Utils from 'web3-utils';
 
 import { Operation, OperationKind } from '../../marginTrading/state/mtAccount';
 import { Money } from '../../utils/formatters/Formatters';

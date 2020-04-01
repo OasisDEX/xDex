@@ -13,6 +13,7 @@ import {
   shareReplay, startWith,
   switchMap,
 } from 'rxjs/operators';
+// @ts-ignore
 import { Contract } from 'web3-eth-contract';
 import * as dsProxy from '../../blockchain/abi/ds-proxy.abi.json';
 import { ReadCalls, readCalls$, ReadCalls$ } from '../../blockchain/calls/calls';
