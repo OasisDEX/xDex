@@ -437,7 +437,7 @@ function addAmount(total: BigNumber | undefined, state: MTSimpleFormState): MTSi
         ...state.messages,
         {
           kind: MessageKind.impossibleCalculateTotal,
-          message: 'orderbook to shallow',
+          message: 'orderbook too shallow',
           priority: 1,
           field: 'total'
         }
@@ -698,7 +698,7 @@ function getSellPlan(
     {
       ...asset,
       debt: asset.debt.plus(delta),
-      dai: total.plus(delta)
+      dai: asset.dai.plus(delta).plus(total)
     } as MarginableAssetCore,
     { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook
   );

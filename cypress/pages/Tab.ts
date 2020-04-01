@@ -8,10 +8,14 @@ export class Tab {
   }
 
   public static balances = () => {
-    cy.get(tid('Account'), { ...defaultTimeout }).click();
+    cy.get(tid('Balances'), { ...defaultTimeout }).click();
   }
 
   public static instant = () => {
     cy.get(tid('Instant'), { ...defaultTimeout }).click();
+  }
+
+  public static leverage = () => {
+    cy.get(tid('Leverage'), { ...defaultTimeout }).click();
   }
 }
