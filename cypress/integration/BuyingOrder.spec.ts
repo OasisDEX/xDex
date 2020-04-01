@@ -84,7 +84,7 @@ describe('Buy Order', () => {
 
     Tab.balances();
 
-    Balance.of('DAI').shouldBe('7,815.5000');
+    Balance.of('DAI').shouldBe('7815.50');
   });
 
   it('should fill first buy order and place a new sell order with remainings', () => {
