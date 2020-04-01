@@ -40,7 +40,7 @@ describe('Selecting an asset', () => {
 
     // tslint:disable-next-line:max-line-length
     it('should not be able to select receive token that do not form a market with the deposit one', () => {
-      const token = 'SAI';
+      const token = 'USDC';
 
       Trade.openAssetSelectorFor(TradingSide.BUY);
 

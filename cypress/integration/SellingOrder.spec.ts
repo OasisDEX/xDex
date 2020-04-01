@@ -80,7 +80,7 @@ describe('Sell Order', () => {
 
     Tab.balances();
 
-    Balance.of('DAI').shouldBe(/9.45K.../);
+    Balance.of('DAI').shouldBe(/9450\.00.../);
   });
 
   it('should fill first buy order and place a new sell order with remainings', () => {
@@ -112,7 +112,7 @@ describe('Sell Order', () => {
 
     Tab.balances();
 
-    Balance.of('DAI').shouldBe(/9.45K.../);
+    Balance.of('DAI').shouldBe(/9450\.00.../);
   });
 
   it('should fill first buy order completely and second buy order partially', () => {
@@ -141,7 +141,7 @@ describe('Sell Order', () => {
 
     Tab.balances();
 
-    Balance.of('DAI').shouldBe(/9.72K.../);
+    Balance.of('DAI').shouldBe(/9720\.00.../);
   });
 
   it('should be displayed in my trades panel', () => {

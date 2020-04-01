@@ -14,9 +14,9 @@ describe('Balances', () => {
   it('should display all token balances', () => {
     Tab.balances();
 
-    Balance.of('ETH').shouldBe(/8.99K.../);
-    Balance.of('WETH').shouldBe(/1.00K.../);
-    Balance.of('DAI').shouldBe(/9.17K.../);
+    Balance.of('ETH').shouldBe(/8999\.96.../);
+    Balance.of('WETH').shouldBe(/1001\.00.../);
+    Balance.of('DAI').shouldBe(/9170\.00.../);
 
     makeScreenshots('balances');
   });
