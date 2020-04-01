@@ -132,8 +132,7 @@ import {
   createMTMyPositionView$,
 } from './marginTrading/positions/MTMyPositionView';
 import {
-  createMTSimpleOrderForm$,
-  riskComplianceProbe$
+  createMTSimpleOrderForm$, createRiskComplianceProbe$
 } from './marginTrading/simple/mtOrderForm';
 import { MTSimpleOrderPanel } from './marginTrading/simple/mtOrderPanel';
 import {
@@ -587,7 +586,7 @@ function mtSimpleOrderForm(
           calls$,
           readCalls$,
           account$,
-          riskComplianceCheck$: riskComplianceProbe$,
+          riskComplianceCheck$: createRiskComplianceProbe$(mta$),
           dustLimits$: createDustLimits$(context$),
         },
         tradingPair
