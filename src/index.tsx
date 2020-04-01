@@ -29,12 +29,12 @@ class App extends React.Component<Props> {
 
   public render() {
     switch (this.props.status) {
-      case 'initializing':
+      case Web3Status.initializing:
         return LoadingState.INITIALIZATION;
-      case 'missing':
+      case Web3Status.missing:
         return LoadingState.MISSING_PROVIDER;
-      case 'ready':
-      case 'readonly':
+      case Web3Status.ready:
+      case Web3Status.readonly:
         if (this.props.network !== undefined && !networks[this.props.network]) {
           return LoadingState.UNSUPPORTED;
         }
@@ -47,14 +47,14 @@ class App extends React.Component<Props> {
 
 const web3StatusResolve$: Observable<Props> = web3Status$.pipe(
   switchMap(status =>
-    status === 'ready' || status === 'readonly' ?
+    status === Web3Status.ready || status === Web3Status.readonly ?
       combineLatest(networkId$, account$).pipe(
         tap(([network, account]) =>
           console.log(`status: ${status}, network: ${network}, account: ${account}`)),
         map(([network, _account]) => ({ status, network })),
       ) : of({ status })
   ),
-  startWith({ status: 'initializing' as Web3Status })
+  startWith({ status: Web3Status.initializing })
 );
 
 const props$: Observable<Props> = web3StatusResolve$.pipe(

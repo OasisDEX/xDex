@@ -67,9 +67,9 @@ const walletConnectionView$: Observable<WalletConnectionViewKind> =
           return manualViewChange;
         }
 
-        if (web3Status === 'readonly') {
-          return WalletConnectionViewKind.noClient;
-        }
+        // if (web3Status === 'readonly') {
+        //   return WalletConnectionViewKind.noClient;
+        // }
 
         if (walletStatus === 'connected') {
           return WalletConnectionViewKind.connected;

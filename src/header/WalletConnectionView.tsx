@@ -171,6 +171,13 @@ class NotConnected extends React.Component<{}, { isChecked: boolean, selectedWal
           >
             Connect
           </Button>
+          <Button size="md"
+                  color="secondaryOutlined"
+                  className={classnames(item)}
+                  onClick={() => connectToWallet('walletlink')}
+          >
+            Connect WalletLink
+          </Button>
         </div>
       </Panel>
     );
@@ -188,7 +195,7 @@ class NotConnected extends React.Component<{}, { isChecked: boolean, selectedWal
   }
 
   private _connect = () => {
-    connectToWallet();
+    connectToWallet('browser');
   }
 
   private _canConnect = () => {
@@ -244,6 +251,7 @@ class NoClient extends React.Component<{}, { isChecked: boolean, selectedWallet:
         </a>
         </Checkbox>
         <div className={buttonPlaceholder}>
+
           <Button size="md"
                   color="secondaryOutlined"
                   className={classnames(item)}
@@ -252,6 +260,13 @@ class NoClient extends React.Component<{}, { isChecked: boolean, selectedWallet:
                   data-test-id="connect-wallet"
           >
             Connect
+          </Button>
+          <Button size="md"
+                  color="secondaryOutlined"
+                  className={classnames(item)}
+                  onClick={() => connectToWallet('walletlink')}
+          >
+            Connect WalletLink
           </Button>
         </div>
       </Panel>
@@ -266,7 +281,7 @@ class NoClient extends React.Component<{}, { isChecked: boolean, selectedWallet:
   }
 
   private _connect = () => {
-    connectToWallet();
+    connectToWallet('browser');
   }
 
   private _canConnect = () => {
