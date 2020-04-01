@@ -56,6 +56,8 @@ jobs:
             ./.circleci/wait-for-it.sh localhost:8545 -t 10
             ./.circleci/wait-for-it.sh localhost:5432 -t 10
             ./.circleci/wait-for-it.sh localhost:3001 -t 10
+
+            ./.circleci/wait-for-docker-log.sh scripts_localnode_1 "All done"
             sleep 10
       - run: 
           name: Run build & e2e tests
