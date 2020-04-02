@@ -88,6 +88,8 @@ stories.add('CDP 1 - no liquidation', () => (
       open: () => null,
       transactions: [],
       approveMTProxy: (_args: {token: string; proxyAddress: string}) => of({} as TxState),
+      inDai: false,
+      daiPrice: new BigNumber(1)
     }
     } />
 ));
@@ -116,6 +118,8 @@ stories.add('CDP 1 - liquidation imminent', () => (
       open: () => null,
       transactions: [],
       approveMTProxy: (_args: {token: string; proxyAddress: string}) => of({} as TxState),
+      inDai: false,
+      daiPrice: new BigNumber(1)
     }
     } />
 ));
@@ -142,6 +146,8 @@ stories.add('CDP 1 - liquidation ongoing', () => (
       open: () => null,
       transactions: [],
       approveMTProxy: (_args: {token: string; proxyAddress: string}) => of({} as TxState),
+      inDai: false,
+      daiPrice: new BigNumber(1)
     }
     } />
 ));
@@ -185,6 +191,8 @@ stories.add('CDP 1 - liquidation ongoing 2', () => (
       open: () => null,
       transactions: [],
       approveMTProxy: (_args: {token: string; proxyAddress: string}) => of({} as TxState),
+      inDai: false,
+      daiPrice: new BigNumber(1)
     }
     } />
 ));
@@ -212,6 +220,8 @@ stories.add('CDP 1 - liquidation ended with redeem', () => (
       open: () => null,
       transactions: [],
       approveMTProxy: (_args: {token: string; proxyAddress: string}) => of({} as TxState),
+      inDai: false,
+      daiPrice: new BigNumber(1)
     }
     } />
 ));
@@ -247,6 +257,8 @@ stories.add('CDP 1 - liquidation ended. After redeem', () => (
       open: () => null,
       transactions: [],
       approveMTProxy: (_args: {token: string; proxyAddress: string}) => of({} as TxState),
+      inDai: false,
+      daiPrice: new BigNumber(1)
     }
     } />
 ));
@@ -265,6 +277,7 @@ stories.add('Not connected', () => (
       ma: ethMarginableAsset,
       transactions: [],
       redeem: () => null,
+      daiPrice: new BigNumber(1)
     }}
     status="loaded"
     open={ () => null}
@@ -280,6 +293,7 @@ stories.add('Not setup', () => (
       ma: ethMarginableAsset,
       transactions: [],
       redeem: () => null,
+      daiPrice: new BigNumber(1)
     }}
     status="loaded"
     open={ () => null }

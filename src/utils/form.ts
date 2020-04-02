@@ -52,7 +52,8 @@ export enum FormChangeKind {
   slippageLimitChange = 'slippageLimitChange',
   viewChange = 'viewChange',
   accountChange = 'accountChange',
-  ordersChange = 'ordersChange'
+  ordersChange = 'ordersChange',
+  checkboxChange = 'checkboxChange'
 }
 
 export enum OfferMatchType {
@@ -185,6 +186,11 @@ export interface OrdersChange {
   orders: TradeWithStatus[];
 }
 
+export interface CheckboxChange {
+  kind: FormChangeKind.checkboxChange;
+  value: boolean;
+}
+
 export function progressChange(progress?: ProgressStage): ProgressChange {
   return { progress, kind: FormChangeKind.progress };
 }
@@ -207,9 +213,9 @@ export function toGasPriceChange(gasPrice$: Observable<BigNumber>): Observable<G
   );
 }
 
-export function toEtherPriceUSDChange(etherPriceUSD$: Observable<BigNumber>):
+export function toEtherPriceUSDChange(etherPriceUsd$: Observable<BigNumber|undefined>):
   Observable<EtherPriceUSDChange> {
-  return etherPriceUSD$.pipe(
+  return etherPriceUsd$.pipe(
     map(value => ({
       value,
       kind: FormChangeKind.etherPriceUSDChange,
@@ -429,7 +435,7 @@ export function doGasEstimation<S extends HasGasEstimation>(
       const gasPrice = state.gasPrice;
       const etherPriceUsd = state.etherPriceUsd;
 
-      if (!gasPrice || !etherPriceUsd || !gasCall) {
+      if (!gasPrice || !gasCall) {
         return of({
           ...(stateWithoutGasEstimation as object),
           gasEstimationStatus: GasEstimationStatus.unset,
@@ -444,7 +450,7 @@ export function doGasEstimation<S extends HasGasEstimation>(
             gasEstimation,
             gasEstimationStatus: GasEstimationStatus.calculated,
             gasEstimationEth: gasCost,
-            gasEstimationUsd: gasCost.times(etherPriceUsd),
+            gasEstimationUsd: etherPriceUsd ? gasCost.times(etherPriceUsd) : undefined,
           };
         })
       );

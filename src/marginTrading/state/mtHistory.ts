@@ -31,6 +31,8 @@ export function createRawMTHistoryFromCache(
           ilk
           amount
           payAmount
+          minPayAmount
+          maxPayAmount
           dgem
           ddai
           auctionId
@@ -39,6 +41,7 @@ export function createRawMTHistoryFromCache(
           ink
           tab
           timestamp
+          price
         }
       }
     }
@@ -46,7 +49,7 @@ export function createRawMTHistoryFromCache(
 
   const variables = {
     // devMode: config.devMode,
-    proxy,
+    proxy: proxy.toLowerCase(),
     token: context.mcd.ilks[token],
   };
 
@@ -57,6 +60,8 @@ export function createRawMTHistoryFromCache(
         ilk,
         amount,
         payAmount,
+        minPayAmount,
+        maxPayAmount,
         dgem,
         ddai,
         auctionId,
@@ -64,12 +69,15 @@ export function createRawMTHistoryFromCache(
         bid,
         ink,
         tab,
-        timestamp
+        timestamp,
+        price
       }: any) => ({
         ilk,
         timestamp,
         amount: new BigNumber(amount),
-        payAmount: new BigNumber(payAmount),
+        payAmount: payAmount ? new BigNumber(payAmount) : undefined,
+        maxPayAmount: maxPayAmount ? new BigNumber(maxPayAmount) : undefined,
+        minPayAmount: minPayAmount ? new BigNumber(minPayAmount) : undefined,
         dgem:  new BigNumber(dgem),
         ddai:  new BigNumber(ddai),
         auctionId: new BigNumber(auctionId),
@@ -78,9 +86,9 @@ export function createRawMTHistoryFromCache(
         ink: new BigNumber(ink),
         tab: new BigNumber(tab),
         kind: type,
-        token: ilk
+        token: ilk,
+        price: price ? new BigNumber(price) : undefined,
       })),
     ),
-    // tap(x => console.log(token, context.ilks[token], x))
   );
 }

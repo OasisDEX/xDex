@@ -1121,7 +1121,7 @@ export function createFormController$(
     proxyAddress$: Observable<string>;
     calls$: Calls$;
     readCalls$: ReadCalls$;
-    etherPriceUsd$: Observable<BigNumber>;
+    etherPriceUsd$: Observable<BigNumber|undefined>;
     user$: Observable<User>;
     context$: Observable<NetworkConfig>
   }

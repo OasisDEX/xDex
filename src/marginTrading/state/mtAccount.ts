@@ -39,6 +39,7 @@ export type Operation = {
   name: string;
   amount: BigNumber;
   maxTotal: BigNumber;
+  slippageLimit: BigNumber;
 };
 
 export enum UserActionKind {
@@ -100,6 +101,11 @@ export type MTHistoryEvent = {
   redeemable?: BigNumber;
   dAmount: BigNumber;
   dDAIAmount: BigNumber;
+  price?: BigNumber;
+  auctionId?: BigNumber;
+  balance?: BigNumber;
+  daiBalance?: BigNumber;
+  equity?: BigNumber;
 } & (MTMarginEvent | MTLiquidationEvent);
 
 export type MTMarginEvent = {
@@ -168,11 +174,14 @@ export interface MarginableAssetCore extends Core {
 export interface MarginableAsset extends MarginableAssetCore {
   // balance: BigNumber;
   balanceInCash: BigNumber;
+  balanceInDai: BigNumber;
+  midpointPrice: BigNumber;
   currentCollRatio?: BigNumber;
   cash: BigNumber;
   // maxDebtForOther: BigNumber; // max possible debt for other assets
   maxDebt: BigNumber; // max possible targetDebt for this asset
   liquidationPrice: BigNumber;
+  markPrice: BigNumber;
   leverage: BigNumber;
   availableDebt: BigNumber;
   maxSafeLeverage: BigNumber;
@@ -189,6 +198,7 @@ export interface MarginableAsset extends MarginableAssetCore {
   nextPriceUpdateDelta: string;
   purchasingPower: BigNumber;
   equity: BigNumber;
+  isSafeCollRatio?: boolean;
 }
 
 // export interface NonMarginableAssetCore extends Core {

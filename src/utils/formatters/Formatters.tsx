@@ -4,7 +4,15 @@ import * as React from 'react';
 import { Omit } from '../omit';
 import { Currency } from '../text/Text';
 import { zero } from '../zero';
-import { formatAmount, formatPercent, formatPrice, formatPriceDown, formatPriceUp } from './format';
+import {
+  formatAmount,
+  formatCryptoBalance,
+  formatFiatBalance,
+  formatPercent,
+  formatPrice,
+  formatPriceDown,
+  formatPriceUp, toShorthandNumber
+} from './format';
 
 export type FormatNumberProps = React.HTMLAttributes<HTMLSpanElement> & {
   value: BigNumber;
@@ -12,7 +20,7 @@ export type FormatNumberProps = React.HTMLAttributes<HTMLSpanElement> & {
   formatter?: (v: BigNumber, t: string) => string;
   dontGroup?: boolean;
 };
-const FormatNumber = (props: FormatNumberProps)  => {
+const FormatNumber = (props: FormatNumberProps) => {
   const { value, token, formatter, dontGroup, ...spanProps } = props;
   const formatted: string = formatter ? formatter(value, token) : value.toString();
   const match = formatted.match(/^-?([\d,]+)((\.)(\d+?\d+?)(0*))?$/);
@@ -46,24 +54,31 @@ export const FormatAmount = (props: FormatAmountProps) => {
   }
   if (greyed) {
     return <FormatNumber formatter={formatter || formatAmount}
-                         value={value as BigNumber}
-                         {...props}
+      value={value as BigNumber}
+      {...props}
     />;
   }
-  return <span title={value && value.toString()} {...spanProps}>{
+
+  return <span title={value && toShorthandNumber(value, '', 18)} {...spanProps}>{
     formatter
       ? formatter(value as BigNumber, token)
       : formatAmount(value as BigNumber, token)
   }</span>;
 };
 
-export const FormatPrice: React.SFC<any> = ({ ...props } : any) =>
+export const FormatPrice: React.SFC<any> = ({ ...props }: any) =>
   <FormatNumber formatter={formatPrice} {...props} />;
 
-export const FormatPriceOrder: React.SFC<any> = ({ kind, ...props } : any) =>
+export const FormatPriceOrder: React.SFC<any> = ({ kind, ...props }: any) =>
   kind === 'sell' ?
     <FormatNumber formatter={formatPriceUp} {...props} /> :
     <FormatNumber formatter={formatPriceDown} {...props} />;
+
+export const FormatFiat: React.SFC<any> = ({ ...props }: any) =>
+  <FormatAmount {...props} formatter={amount => formatFiatBalance(amount)}/>;
+
+export const FormatCrypto: React.SFC<any> = ({ ...props }:  any) =>
+  <FormatAmount {...props} formatter={amount => formatCryptoBalance(amount)}/>;
 
 // Format percent
 type FormatPercentProps = React.HTMLAttributes<HTMLSpanElement> & {
@@ -85,8 +100,8 @@ export const FormatPercent = (props: FormatPercentProps) => {
   const v = (fallback && value === undefined) ?
     fallback :
     formatPercent(multiply ?
-                            (value as BigNumber).times(new BigNumber('100')) :
-                            value as BigNumber,
+      (value as BigNumber).times(new BigNumber('100')) :
+      value as BigNumber,
                   { precision, plus }
     );
   return (<span {...spanProps} >{v}</span>);
@@ -97,8 +112,13 @@ export const Money = (props: FormatAmountProps) => {
   return (<span className={className} style={style}>
     <FormatAmount data-test-id="amount" {...otherProps} />
     {' '}
-    <Currency value={otherProps.token}/>
+    <Currency value={otherProps.token} />
   </span>);
+};
+
+export const CryptoMoney = (props: FormatAmountProps) => {
+  return <Money {...props} formatter={(amount) =>
+    formatCryptoBalance(amount)} />;
 };
 
 export const FormatQuoteToken = (props: { token: string }) => {
@@ -106,7 +126,10 @@ export const FormatQuoteToken = (props: { token: string }) => {
     SAI: 'darkgrey',
     DAI: '#FFAC13',
     WETH: '#B15DFF',
+    // treat pegcoins in the same way
     USDC: 'green',
+    TUSD: 'green',
+    PAX: 'green',
   };
   return <span style={{ color: colors[props.token] }}>{props.token}</span>;
 };

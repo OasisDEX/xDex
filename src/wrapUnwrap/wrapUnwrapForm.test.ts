@@ -21,7 +21,7 @@ const defaultCalls = {
 } as any;
 
 const gasPrice$ = of(new BigNumber(0.01));
-const etherPriceUSD$ = of(new BigNumber(1));
+const etherPriceUsd$ = of(new BigNumber(1));
 const ethBalance$ = of(new BigNumber(1000));
 const wethBalance$ = of(new BigNumber(1000));
 const calls$ = of(defaultCalls) as Calls$;
@@ -35,7 +35,7 @@ describe('Wrapping' , () => {
     controller =
         createWrapUnwrapForm$(
           gasPrice$,
-          etherPriceUSD$,
+          etherPriceUsd$,
           ethBalance$,
           wethBalance$,
           calls$,
@@ -87,7 +87,7 @@ describe('Wrapping' , () => {
         throwError(new Error('Kurcze'))}) as Calls$;
     controller = createWrapUnwrapForm$(
         gasPrice$,
-        etherPriceUSD$,
+        etherPriceUsd$,
         ethBalance$,
         wethBalance$,
         callsCopy,
@@ -108,7 +108,7 @@ describe('Unwrapping', () => {
     controller =
         createWrapUnwrapForm$(
             gasPrice$,
-            etherPriceUSD$,
+            etherPriceUsd$,
             ethBalance$,
             wethBalance$,
             calls$,
@@ -160,7 +160,7 @@ describe('Unwrapping', () => {
             throwError(new Error('Kurcze'))}) as Calls$;
     controller = createWrapUnwrapForm$(
             gasPrice$,
-            etherPriceUSD$,
+            etherPriceUsd$,
             ethBalance$,
             wethBalance$,
             callsCopy,

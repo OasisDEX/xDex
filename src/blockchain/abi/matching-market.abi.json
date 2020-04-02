@@ -152,52 +152,6 @@
     "constant": false,
     "inputs": [
       {
-        "name": "baseToken",
-        "type": "address"
-      },
-      {
-        "name": "quoteToken",
-        "type": "address"
-      }
-    ],
-    "name": "addTokenPairWhitelist",
-    "outputs": [
-      {
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "name": "baseToken",
-        "type": "address"
-      },
-      {
-        "name": "quoteToken",
-        "type": "address"
-      }
-    ],
-    "name": "remTokenPairWhitelist",
-    "outputs": [
-      {
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
         "name": "pay_amt",
         "type": "uint256"
       },
@@ -399,6 +353,20 @@
       {
         "name": "",
         "type": "uint64"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "dustId",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
       }
     ],
     "payable": false,
@@ -654,29 +622,6 @@
   },
   {
     "constant": true,
-    "inputs": [
-      {
-        "name": "baseToken",
-        "type": "address"
-      },
-      {
-        "name": "quoteToken",
-        "type": "address"
-      }
-    ],
-    "name": "isTokenPairWhitelisted",
-    "outputs": [
-      {
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
     "inputs": [],
     "name": "owner",
     "outputs": [
@@ -740,25 +685,6 @@
       {
         "name": "",
         "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      {
-        "name": "",
-        "type": "bytes32"
-      }
-    ],
-    "name": "_menu",
-    "outputs": [
-      {
-        "name": "",
-        "type": "bool"
       }
     ],
     "payable": false,
@@ -1434,40 +1360,6 @@
       }
     ],
     "name": "LogSortedOffer",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "name": "baseToken",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "name": "quoteToken",
-        "type": "address"
-      }
-    ],
-    "name": "LogAddTokenPairWhitelist",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "name": "baseToken",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "name": "quoteToken",
-        "type": "address"
-      }
-    ],
-    "name": "LogRemTokenPairWhitelist",
     "type": "event"
   },
   {

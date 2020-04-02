@@ -4,7 +4,7 @@ import * as ReactModal from 'react-modal';
 import classnames from 'classnames';
 import { MarginableAsset, MTHistoryEventKind } from '../marginTrading/state/mtAccount';
 import { formatDateTime } from '../utils/formatters/format';
-import { FormatAmount } from '../utils/formatters/Formatters';
+import { FormatAmount, FormatCrypto, FormatFiat } from '../utils/formatters/Formatters';
 import { Button } from '../utils/forms/Buttons';
 import { ModalProps } from '../utils/modal';
 import { Panel, PanelFooter, PanelHeader } from '../utils/panel/Panel';
@@ -39,170 +39,105 @@ export class CDPHistoryViewModal extends React.Component<MarginableAsset & Modal
 
 export class CDPHistoryView extends React.Component<MarginableAsset> {
   public render() {
+    const { name } = this.props;
     return (
       <div className={styles.contentWithScroll}>
           <Table className={styles.table}>
               <thead>
               <tr>
-                <th className={styles.cellLeftAligned}>
-                  TYPE
-                </th>
-                <th>
-                  <span className={styles.headerDark}>Price</span> DAI
-                </th>
-                <th>
-                  <span className={styles.headerDark}>Amount</span> {this.props.name}
-                </th>
-                <th>
-                  <span className={styles.headerDark}>Redeem</span> {this.props.name}
-                </th>
-                <th>
-                  <span className={styles.headerDark}>Total</span> DAI
-                </th>
-                <th>
-                  <span className={styles.headerDark}>Debt</span> DAI
-                </th>
-                <th>
-                  <span className={styles.headerDark}>Liq. Price</span> USD
-                </th>
-                <th>
-                  TIME
-                </th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Price</th>
+                <th>{name} Bal</th>
+                <th>DAI Bal</th>
+                <th>Equity (DAI)</th>
+                <th>Liq. Price (USD)</th>
+                <th>Time</th>
               </tr>
               </thead>
               <tbody>
               { this.props.history.map((e, i) => {
-                // const liquidationEvents = [
-                //     MTHistoryEventKind.bite,
-                //     MTHistoryEventKind.kick,
-                //     MTHistoryEventKind.dent,
-                //     MTHistoryEventKind.tend,
-                //     MTHistoryEventKind.deal,
-                //     MTHistoryEventKind.redeem,
-                //   ];
-
-                // if (liquidationEvents.indexOf(e.kind) >= 0) {
-                //     const { lot, bid, tab, amount } = e as any;
-                //
-                //     // if (e.kind === MTHistoryEventKind.bite) {
-                //     //   e.dAmount = lot.times(-1);
-                //     // }
-                //
-                //     // return <tr key={i}>
-                //     //   <td className={classnames(styles.eventName, styles.cellLeftAligned)}>
-                //     //     {e.kind}
-                //     //   </td>
-                //     //   <td colSpan={5}>
-                //     //     {lot && <>
-                //     //         lot: <FormatAmount value={lot} token={e.token} fallback={''} />;
-                //     //     </>}
-                //     //     {bid && <>
-                //     //         bid: <FormatAmount value={bid} token={'DAI'} fallback={''} />;
-                //     //     </>}
-                //     //     {tab && <>
-                //     //         tab: <FormatAmount value={tab} token={'DAI'} fallback={''} />;
-                //     //     </>}
-                //     //     {amount && <>
-                //     //         amount:
-                // <FormatAmount value={amount} token={e.token} fallback={''} />;
-                //     //     </>}
-                //     //   </td>
-                //     //   <td>
-                //     //     <InfoLabel>
-                //     //       { formatDateTime(new Date(e.timestamp), true) }
-                //     //     </InfoLabel>
-                //     //   </td>
-                //     // </tr>;
-                //   }
-                let sign = '';
-                let DAIsign = '';
                 const dAmount = e.dAmount ? e.dAmount : zero;
                 const dDAIAmount = e.dDAIAmount  ? e.dDAIAmount : zero;
-                const debtDelta = e.debtDelta ? e.debtDelta : zero;
-                const liquidationPriceDelta = e.liquidationPriceDelta ?
-                  e.liquidationPriceDelta : zero;
 
-                if (
-                  e.kind === MTHistoryEventKind.fundGem ||
-                  e.kind === MTHistoryEventKind.drawDai ||
-                  e.kind === MTHistoryEventKind.buyLev ||
-                  e.kind === MTHistoryEventKind.redeem
-                  ) {
-                  sign = '+';
-                  DAIsign = '-';
-                }
-                if (
-                  e.kind === MTHistoryEventKind.drawGem ||
-                  e.kind === MTHistoryEventKind.fundDai ||
-                  e.kind === MTHistoryEventKind.sellLev
-                  ) {
-                  sign = '-';
-                  DAIsign = '+';
-                }
-                if (
-                  e.kind === MTHistoryEventKind.bite
-                ) {
-                  DAIsign = '+';
-                }
-
-                if (dDAIAmount.isEqualTo(zero)) { DAIsign = ''; }
-                if (dAmount.isEqualTo(zero)) { sign = ''; }
-
-                let displayName = '';
+                let displayName: string | React.ReactNode = '';
+                let amount: React.ReactNode = <></>;
                 switch (e.kind) {
                   case MTHistoryEventKind.drawDai:
+                    displayName = 'Withdraw';
+                    amount = <><FormatCrypto value={dDAIAmount} token="DAI" /> DAI</>;
+                    break;
                   case MTHistoryEventKind.drawGem:
+                    amount = <><FormatFiat value={dAmount} token={e.token} /> {e.token}</>;
                     displayName = 'Withdraw';
                     break;
                   case MTHistoryEventKind.fundDai:
+                    amount = <><FormatCrypto value={dDAIAmount} token="DAI" /> DAI</>;
+                    displayName = 'Deposit';
+                    break;
                   case MTHistoryEventKind.fundGem:
+                    amount = <><FormatFiat value={dAmount} token={e.token} /> {e.token}</>;
                     displayName = 'Deposit';
                     break;
                   case MTHistoryEventKind.buyLev:
-                    displayName = 'Buy';
+                    amount = <><FormatFiat value={dAmount} token={e.token} /> {e.token}</>;
+                    displayName = <span className={styles.eventPositive}>Buy</span>;
                     break;
                   case MTHistoryEventKind.sellLev:
-                    displayName = 'Sell';
+                    amount = <><FormatFiat value={dAmount} token={e.token} /> {e.token}</>;
+                    displayName = <span className={styles.eventNegative}>Sell</span>;
+                    break;
+                  case MTHistoryEventKind.bite:
+                    amount = <><FormatFiat value={dAmount} token={e.token} /> {e.token}</>;
+                    displayName = `Grab (#${e.auctionId})`;
+                    break;
+                  case MTHistoryEventKind.deal:
+                    displayName = `Deal (#${e.auctionId})`;
+                    break;
+                  case MTHistoryEventKind.redeem:
+                    amount = <><FormatFiat value={dAmount} token={e.token} /> {e.token}</>;
+                    displayName = `Redeem`;
                     break;
                   default:
                     displayName = e.kind;
                 }
 
+                const price = e.priceDai ? e.priceDai : e.price;
+
                 return (
                   <tr key={i}>
-                    <td className={
-                      classnames(styles.eventName, styles.cellLeftAligned)
-                    }>{displayName}</td>
-                    <td>{
-                      e.priceDai ? e.priceDai.toFixed(2)
-                        : <span>-</span>
-                    }</td>
+                    <td className={classnames(styles.eventName, styles.cellLeftAligned)}>
+                      {displayName}
+                    </td>
                     <td>
-                      <>
-                        {sign} <FormatAmount value={dAmount} token={e.token} />
-                      </>
+                      {amount}
                     </td>
                     <td>
                       {
-                        e.redeemable &&
-                        <>
-                          <FormatAmount value={e.redeemable} token={e.token} />
-                        </>
+                      price
+                        ? <FormatAmount value={price} token="DAI"/>
+                        : <>-</>
+                      }
+                    </td>
+                    <td>{
+                      e.balance &&
+                        <FormatCrypto value={e.balance} token={e.token}/>
                       }
                     </td>
                     <td>
-                      <>
-                        {DAIsign} <FormatAmount value={dDAIAmount} token="DAI" />
-                      </>
+                      {e.daiBalance &&
+                        <FormatCrypto value={e.daiBalance} token="DAI"/>
+                      }
                     </td>
                     <td>
-                      <>
-                        <FormatAmount value={debtDelta} token="DAI" />
-                      </>
+                     <FormatCrypto value={e.equity} token="DAI" />
                     </td>
                     <td>
-                      <>
-                        <FormatAmount value={liquidationPriceDelta} token="USD" />
+                      <>{
+                          e.liquidationPrice && e.liquidationPrice.gt(zero)
+                            ? <FormatAmount value={e.liquidationPrice} token="USD"/>
+                            : <>-</>
+                        }
                       </>
                     </td>
                     <td>
@@ -219,21 +154,4 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
       </div>
     );
   }
-
-//   private eventDecription(event: MTHistoryEvent) {
-//     if (event.kind === MTHistoryEventKind.deal) {
-//       return null;
-//     }
-//     return (
-//       <div>
-//       <span>
-//         { (event as any).gem && (event as any).gem.toString() } { event.token }
-//       </span>
-//         <span style={{ marginLeft: '1em' }}>
-//         { (event as any).dai && (event as any).dai.toString() } DAI
-//       </span>
-//       </div>
-//     );
-//   }
-
 }

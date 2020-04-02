@@ -1,10 +1,13 @@
 import * as React from 'react';
 
 import { default as BigNumber } from 'bignumber.js';
+import classnames from 'classnames';
+import { withRouter } from 'react-router';
 import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
-import { map } from 'rxjs/internal/operators';
+import { map, switchMap } from 'rxjs/internal/operators';
 import { AssetKind, getToken } from '../blockchain/config';
 import { TxState } from '../blockchain/transactions';
+import { RouterProps } from '../Main';
 import {
   CreateMTAllocateForm$
 } from '../marginTrading/allocate/mtOrderAllocateDebtFormView';
@@ -12,28 +15,36 @@ import {
   MTMyPositionPanelInternal
 } from '../marginTrading/positions/MTMyPositionPanel';
 import {
-  MarginableAsset, UserActionKind
+  findMarginableAsset,
+  MarginableAsset, MTAccountState, UserActionKind
 } from '../marginTrading/state/mtAccount';
 import { MTTransferFormState } from '../marginTrading/transfer/mtTransferForm';
-import { formatAmount, formatPercent } from '../utils/formatters/format';
+import {
+  formatDateTime,
+  formatPrecision
+} from '../utils/formatters/format';
+import { CryptoMoney, Money } from '../utils/formatters/Formatters';
 import { Loadable } from '../utils/loadable';
 import { WithLoadingIndicator } from '../utils/loadingIndicator/LoadingIndicator';
 import { ModalOpenerProps } from '../utils/modal';
 import { Panel, PanelHeader } from '../utils/panel/Panel';
 import { Table } from '../utils/table/Table';
-import { Currency } from '../utils/text/Text';
+import { Currency, InfoLabel } from '../utils/text/Text';
+import { one, zero } from '../utils/zero';
 import { CombinedBalances } from './balances';
 import * as styles from './mtBalancesView.scss';
 
 export type MTBalancesProps = CombinedBalances & {
   ma?: MarginableAsset;
   selectMa: (ma?: MarginableAsset) => void;
+  daiPrice: BigNumber;
 };
 
 export type MTBalancesOwnProps = ModalOpenerProps &
   {
     createMTFundForm$:
-      (actionKind: UserActionKind, token: string) => Observable<MTTransferFormState>,
+      (params: { actionKind: UserActionKind, token: string }) =>
+        Observable<MTTransferFormState>,
     approveMTProxy: (args: {token: string; proxyAddress: string}) => Observable<TxState>,
     redeem: (args: {token: string; proxy: any, amount: BigNumber}) => void,
     transactions: TxState[],
@@ -46,13 +57,13 @@ export class MTBalancesView
 {
   public render() {
     const { status, value, error, ...props } = this.props;
-    console.log('balances view', JSON.stringify(props), status, value, error);
+
     return (
       <Panel className={styles.balancesPanel}>
         <PanelHeader>Leverage Account</PanelHeader>
         <WithLoadingIndicator loadable={this.props}>
           {(combinedBalances) => (
-            combinedBalances.ma ?
+            combinedBalances.ma && combinedBalances.mta.state === MTAccountState.setup ?
             <MTMyPositionPanelInternal
               {...{
                 open: props.open,
@@ -63,8 +74,9 @@ export class MTBalancesView
                 redeem: props.redeem,
                 transactions: props.transactions,
                 daiAllowance: props.daiAllowance,
-                ma: combinedBalances.ma,
-                mta: combinedBalances.mta
+                ma: findMarginableAsset(combinedBalances.ma.name, combinedBalances.mta)!,
+                mta: combinedBalances.mta,
+                daiPrice: new BigNumber(0)
               }}
             /> :
             <MTBalancesViewInternal
@@ -80,33 +92,41 @@ export class MTBalancesView
   }
 }
 
-export function createBalancesView$(mtBalances$: Observable<CombinedBalances>) {
-  const ma$: Subject<MarginableAsset | undefined> =
-    new BehaviorSubject<MarginableAsset | undefined>(undefined);
-
-  return combineLatest(ma$, mtBalances$).pipe(
-    map(([ma, balances]) => ({
-      ...balances,
-      ma,
-      selectMa: ma$.next.bind(ma$)
-    }))
+export function createBalancesView$(
+  initializedAccount$: Observable<string>,
+  mtBalances$: Observable<CombinedBalances>,
+  daiPriceUsd$: Observable<BigNumber|undefined>
+) {
+  return initializedAccount$.pipe(
+    switchMap(() => {
+      const ma$: Subject<MarginableAsset | undefined> =
+        new BehaviorSubject<MarginableAsset | undefined>(undefined);
+      return combineLatest(ma$, mtBalances$, daiPriceUsd$).pipe(
+        map(([ma, balances, daiPrice]) => ({
+          ...balances,
+          ma,
+          daiPrice,
+          selectMa: ma$.next.bind(ma$),
+        }))
+      );
+    })
   );
 }
 
-export class MTBalancesViewInternal
-  extends React.Component<MTBalancesProps & MTBalancesOwnProps> {
+export class MTBalancesViewInternalImpl
+  extends React.Component<MTBalancesProps & MTBalancesOwnProps & RouterProps> {
 
   public render() {
     return (
-      <Table className={styles.table} align="left">
+      <Table className={classnames(styles.table, styles.leveragedAssets)} align="left">
         <thead>
         <tr>
           <th>Asset</th>
-          <th className={styles.amount}>Interest Rate</th>
-          <th className={styles.amount}>Market Price</th>
-          <th className={styles.amount}>Liq. Price</th>
-          <th className={styles.amount}>PnL</th>
-          <th className={styles.amount}>Your Balance</th>
+          <th className={styles.amount}>Leverage</th>
+          <th className={styles.amount}>Equity (DAI)</th>
+          <th className={styles.amount}>Mark Price (DAI)</th>
+          <th className={styles.amount}>Liq. Price (DAI)</th>
+          <th className={styles.amount}>Last interaction</th>
         </tr>
         </thead>
         <tbody>
@@ -117,9 +137,31 @@ export class MTBalancesViewInternal
           .filter(b => b.asset && b.asset.assetKind === AssetKind.marginable)
           .map(combinedBalance => {
             const asset: MarginableAsset = combinedBalance.asset!;
+            const lastEvent = asset.rawHistory.slice(-1)[0] || undefined;
+            const daiPrice = this.props.daiPrice;
+            const leverage = asset.leverage
+              ? asset.leverage
+              : asset.balance.gt(zero)
+                ? one
+                : zero;
+            const liquidationPrice = asset.liquidationPrice ? asset.liquidationPrice : zero;
+            const liquidationPriceMarket = liquidationPrice && asset.midpointPrice ?
+              liquidationPrice.times(daiPrice)
+              : zero;
+            const liquidationPriceDisplay =
+              liquidationPriceMarket.gt(zero) ? liquidationPriceMarket : undefined;
+
+            const markPrice = (asset.markPrice && daiPrice)
+                ? asset.markPrice.times(daiPrice)
+                : undefined;
+
             return (
               <tr
-                onClick={() => this.props.selectMa(asset)}
+                onClick={() =>
+                  this.props.mta.state === MTAccountState.setup ?
+                    this.props.selectMa(asset) :
+                    this.props.history.push(`leverage/${asset.name}/DAI`)
+                }
                 data-test-id={`${combinedBalance.name}-overview`}
                 key={combinedBalance.name}
               >
@@ -133,21 +175,57 @@ export class MTBalancesViewInternal
                   </div>
                 </td>
                 <td className={styles.amount}>
-                  {formatPercent(asset.fee, { precision: 2 })}
+                  {
+                    leverage.gt(zero)
+                      ? <> Long - {formatPrecision(leverage, 1)}x</>
+                      : <span>-</span>
+                  }
                 </td>
                 <td className={styles.amount}>
-                  {formatAmount(asset.referencePrice, 'DAI')}
+                  {
+                    asset.equity &&
+                    <CryptoMoney
+                      value={asset.equity}
+                      token="DAI"
+                      fallback="-"
+                    />
+                  }
                 </td>
                 <td className={styles.amount}>
-                  {!asset.liquidationPrice.isNaN() &&
-                  formatAmount(asset.liquidationPrice, 'DAI') ||
-                  '-'}
+                  {
+                  markPrice
+                    ? (
+                      <>
+                        ~<Money
+                          value={markPrice}
+                          token={'DAI'}
+                        />
+                      </>
+                    )
+                    : <>N/A</>
+                }
                 </td>
                 <td className={styles.amount}>
-                  {asset.pnl && formatPercent(asset.pnl) || '-'}
+                  {
+                    liquidationPriceDisplay
+                      ? <>
+                        ~<Money
+                          value={liquidationPriceDisplay}
+                          token={'DAI'}
+                          fallback="-"
+                        />
+                      </>
+                      : <>N/A</>
+                  }
                 </td>
                 <td className={styles.amount}>
-                  {formatAmount(asset.balance, asset.name)}
+                  <InfoLabel>
+                    {
+                      lastEvent
+                      ? formatDateTime(new Date(lastEvent.timestamp), true)
+                      : <>-</>
+                    }
+                  </InfoLabel>
                 </td>
               </tr>
             );
@@ -157,3 +235,5 @@ export class MTBalancesViewInternal
     );
   }
 }
+
+export const MTBalancesViewInternal = withRouter(MTBalancesViewInternalImpl);

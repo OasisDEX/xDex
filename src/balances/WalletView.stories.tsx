@@ -33,21 +33,27 @@ const balance1: CombinedBalance = {
   name: 'WETH',
   walletBalance: new BigNumber(100),
   mtAssetValueInDAI: new BigNumber(20000),
-  allowance: true
+  allowance: true,
+  walletBalanceInUSD: new BigNumber(1000),
+  allowanceChangeInProgress: false
 };
 
 const balance2: CombinedBalance = {
   name: 'DAI',
   walletBalance: new BigNumber(1000),
   mtAssetValueInDAI: new BigNumber(1000),
-  allowance: false
+  walletBalanceInUSD: new BigNumber(1000),
+  allowance: false,
+  allowanceChangeInProgress: false
 };
 
 const balance3: CombinedBalance = {
   name: 'DGD',
   walletBalance: new BigNumber(100),
   mtAssetValueInDAI: new BigNumber(1500),
-  allowance: false
+  walletBalanceInUSD: new BigNumber(1000),
+  allowance: false,
+  allowanceChangeInProgress: false
 };
 
 const walletViewParams = {

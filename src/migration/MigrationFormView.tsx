@@ -493,7 +493,7 @@ function MigrationModalInternal(
                 className={styles.amountInput}
                 mask={createNumberMask({
                   allowDecimal: true,
-                  decimalLimit: 5,
+                  decimalLimit: getToken(fromToken).digits,
                   prefix: ''
                 })}
                 onChange={handleAmountChange}

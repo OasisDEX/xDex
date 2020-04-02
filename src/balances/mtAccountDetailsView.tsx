@@ -1,7 +1,12 @@
 import * as React from 'react';
 
 import { MTAccount, MTAccountState } from '../marginTrading/state/mtAccount';
-import { FormatAmount, FormatPercent } from '../utils/formatters/Formatters';
+import {
+  FormatAmount,
+  FormatCrypto,
+  FormatFiat,
+  FormatPercent
+} from '../utils/formatters/Formatters';
 import { Panel, PanelHeader } from '../utils/panel/Panel';
 import { Table } from '../utils/table/Table';
 import { Currency } from '../utils/text/Text';
@@ -49,9 +54,15 @@ export class MtAccountDetailsView
                 <td className={styles.left}><Currency value={ma.name} /></td>
                 <td><FormatAmount value={ma.balance} token={ma.name} /></td>
                 <td><FormatAmount value={ma.referencePrice} token="DAI" /></td>
-                <td><FormatAmount value={ma.balanceInCash} token="DAI" /></td>
-                <td><FormatAmount value={ma.debt} token="DAI" /></td>
-                <td><FormatAmount value={ma.availableDebt} token="DAI" /></td>
+                <td><FormatFiat value={ma.balanceInCash}
+                                token="DAI"/>
+                </td>
+                <td><FormatCrypto value={ma.debt}
+                                  token="DAI"/>
+                </td>
+                <td><FormatCrypto value={ma.availableDebt}
+                                  token="DAI"/>
+                </td>
                 <td><FormatPercent value={ma.currentCollRatio} multiply={true} fallback="-"/></td>
                 <td><FormatPercent value={ma.minCollRatio} multiply={true}/></td>
                 <td><FormatPercent value={ma.safeCollRatio} multiply={true}/></td>

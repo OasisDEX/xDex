@@ -1,17 +1,20 @@
 import { BigNumber } from 'bignumber.js';
 import { curry } from 'lodash';
-import { merge, Observable, of, Subject } from 'rxjs';
-import { shareReplay } from 'rxjs/internal/operators';
-import { first, map, scan, switchMap, takeUntil } from 'rxjs/operators';
+import { Dictionary } from 'ramda';
+import { interval, merge, Observable, of, Subject } from 'rxjs';
+import { share, shareReplay } from 'rxjs/internal/operators';
+import { distinctUntilChanged, first, map, scan, switchMap, takeUntil } from 'rxjs/operators';
 import { DustLimits } from '../../balances/balances';
 import { Calls, Calls$, ReadCalls$ } from '../../blockchain/calls/calls';
 import { getToken } from '../../blockchain/config';
+import { localStorageGetDict, localStorageStoreDict } from '../../blockchain/utils';
 import { Offer, OfferType, Orderbook } from '../../exchange/orderbook/orderbook';
 import { TradingPair } from '../../exchange/tradingPair/tradingPair';
 import { combineAndMerge } from '../../utils/combineAndMerge';
 import {
   AccountChange,
   AmountFieldChange,
+  CheckboxChange,
   doGasEstimation,
   DustLimitChange,
   EtherPriceUSDChange,
@@ -23,22 +26,21 @@ import {
   KindChange,
   MTAccountChange,
   OrderbookChange,
-  progressChange,
   ProgressChange,
+  progressChange,
   ProgressStage,
-  SetMaxChange,
-  SlippageLimitChange, toAccountChange,
+  SetMaxChange, SlippageLimitChange,
+  toAccountChange,
   toDustLimitChange$,
   toEtherPriceUSDChange,
   toGasPriceChange,
-  toMTAccountChange,
-  toOrderbookChange$, TotalFieldChange,
+  toMTAccountChange, toOrderbookChange$,
+  TotalFieldChange,
   transactionToX
 } from '../../utils/form';
-import { formatPriceDown, formatPriceUp } from '../../utils/formatters/format';
 import { description, Impossible, isImpossible } from '../../utils/impossible';
 import { firstOfOrTrue } from '../../utils/operators';
-import { minusOne, zero } from '../../utils/zero';
+import { minusOne, one, zero } from '../../utils/zero';
 import { EditableDebt } from '../allocate/mtOrderAllocateDebtForm';
 import { prepareBuyAllocationRequest } from '../plan/planBuy';
 import { prepareSellAllocationRequest } from '../plan/planSell';
@@ -53,7 +55,7 @@ import {
   Operation
 } from '../state/mtAccount';
 import {
-  calculateMarginable,
+  calculateMarginable, maxSellable,
   realPurchasingPowerMarginable, sellable,
 } from '../state/mtCalculate';
 // import { getBuyPlan, getSellPlan } from './mtOrderPlan';
@@ -98,6 +100,7 @@ export type Message = {
   kind: MessageKind.unsellable;
   field?: string;
   priority: number;
+  message: string;
 };
 
 export enum ViewKind {
@@ -105,9 +108,18 @@ export enum ViewKind {
   instantTradeForm = 'instantTradeForm'
 }
 
+export enum ExternalChangeKind {
+  riskCompliance = 'riskCompliance'
+}
+
 export interface ViewChange {
   kind: FormChangeKind.viewChange;
   value: ViewKind;
+}
+
+export interface RiskComplianceChange {
+  kind: ExternalChangeKind.riskCompliance;
+  hasRiskAccepted: boolean;
 }
 
 export interface MTSimpleFormState extends HasGasEstimation {
@@ -117,8 +129,10 @@ export interface MTSimpleFormState extends HasGasEstimation {
   progress?: ProgressStage;
   readyToProceed?: boolean;
   amount?: BigNumber;
+  maxAmount: BigNumber;
   price?: BigNumber;
   total?: BigNumber;
+  maxTotal: BigNumber;
   messages: Message[];
   orderbook?: Orderbook;
   dustLimitQuote?: BigNumber;
@@ -139,11 +153,14 @@ export interface MTSimpleFormState extends HasGasEstimation {
   fee?: BigNumber;
   slippageLimit?: BigNumber;
   priceImpact?: BigNumber;
-  submit: (state: MTSimpleFormState) => void;
+  submit: (state: MTSimpleFormState) => any;
   change: (change: ManualChange) => void;
   view: ViewKind;
   account?: string;
   isSafePost?: boolean;
+  isSafeCollRatio?: boolean;
+  riskComplianceAccepted?: boolean;
+  riskComplianceCurrent?: boolean;
 }
 
 export type ManualChange =
@@ -152,7 +169,8 @@ export type ManualChange =
   SetMaxChange |
   KindChange |
   SlippageLimitChange |
-  ViewChange;
+  ViewChange |
+  CheckboxChange;
 
 export type EnvironmentChange =
   GasPriceChange |
@@ -160,7 +178,8 @@ export type EnvironmentChange =
   OrderbookChange |
   DustLimitChange |
   MTAccountChange |
-  AccountChange;
+  AccountChange |
+  RiskComplianceChange;
 
 export type MTFormChange =
   ManualChange |
@@ -170,6 +189,11 @@ export type MTFormChange =
 
 function applyChange(state: MTSimpleFormState, change: MTFormChange): MTSimpleFormState {
   switch (change.kind) {
+    case ExternalChangeKind.riskCompliance:
+      return {
+        ...state,
+        riskComplianceAccepted : change.hasRiskAccepted,
+      };
     case FormChangeKind.amountFieldChange:
       return {
         ...addTotal(change.value, state),
@@ -180,47 +204,28 @@ function applyChange(state: MTSimpleFormState, change: MTFormChange): MTSimpleFo
         ...addAmount(change.value, state),
         gasEstimationStatus: GasEstimationStatus.unset
       };
-    case FormChangeKind.setMaxChange:
-      const baseAsset = findAsset(state.baseToken, state.mta);
-      switch (state.kind) {
-        case OfferType.sell:
-          const baseBalance = (baseAsset && baseAsset.balance) || new BigNumber(0);
-          if (state.price) {
-            return {
-              ...state,
-              amount: baseBalance,
-              total: baseBalance.times(state.price),
-              gasEstimationStatus: GasEstimationStatus.unset
-            };
-          }
-          return {
-            ...state,
-            amount: baseBalance,
-            gasEstimationStatus: GasEstimationStatus.unset
-          };
-        case OfferType.buy:
-          const basePurchasingPower = state.realPurchasingPower || new BigNumber(0);
-          if (state.price) {
-            return {
-              ...state,
-              amount: basePurchasingPower.dividedBy(state.price),
-              total: basePurchasingPower,
-              gasEstimationStatus: GasEstimationStatus.unset
-            };
-          }
-      }
-      return {
-        ...state,
-      };
     case FormChangeKind.kindChange:
-      return {
+      const newState = {
         ...state,
         kind: change.newKind,
         gasEstimationStatus: GasEstimationStatus.unset
       };
+      return state.amount ? addTotal(state.amount, newState) : newState;
     case FormChangeKind.formResetChange:
+      let  { riskComplianceAccepted, riskComplianceCurrent } = state;
+
+      if (state.kind === OfferType.buy) {
+        const dict: Dictionary<boolean> = localStorageGetDict('ltRiskAcceptedDict');
+        dict[state?.mta?.proxy._address] = true;
+        localStorageStoreDict(dict, 'ltRiskAcceptedDict');
+        riskComplianceAccepted = true;
+        riskComplianceCurrent = false;
+      }
+
       return {
         ...state,
+        riskComplianceAccepted,
+        riskComplianceCurrent,
         price: undefined,
         amount: undefined,
         total: undefined,
@@ -264,6 +269,13 @@ function applyChange(state: MTSimpleFormState, change: MTFormChange): MTSimpleFo
         ...state,
         account: change.value
       };
+    case FormChangeKind.checkboxChange:
+      return {
+        ...state,
+        riskComplianceCurrent: change.value
+      };
+    default:
+      return state;
   }
 }
 
@@ -276,7 +288,7 @@ function validate(state: MTSimpleFormState): MTSimpleFormState {
   const baseAsset = findAsset(state.baseToken, state.mta) as MarginableAsset;
   // const quoteAsset = findAsset(state.quoteToken, state.mta);
   if (
-    state.price && state.amount && state.total &&
+    state.amount && state.total &&
     baseAsset && state.realPurchasingPower
   ) {
     const [spendAmount, spendAssetAvailBalance, spendAssetName, spendField, spendDustLimit,
@@ -330,12 +342,13 @@ function validate(state: MTSimpleFormState): MTSimpleFormState {
 
     if (state.orderbook) {
       const offers = state.kind === OfferType.buy ? state.orderbook.sell : state.orderbook.buy;
-      const [isSellable, log] = sellable(
+      const [isSellable, , , reason] = sellable(
         baseAsset, offers, state.amount || baseAsset.availableBalance
       );
 
-      console.log('isSellable', isSellable);
-      console.log(JSON.stringify(log, null, '  '));
+      const maxToSell = maxSellable(baseAsset, offers);
+
+      // console.log(JSON.stringify(log, null, '  '));
 
       if (
         state.kind === OfferType.sell && state.orderbook &&
@@ -345,6 +358,7 @@ function validate(state: MTSimpleFormState): MTSimpleFormState {
           kind: MessageKind.unsellable,
           field: 'total',
           priority: 1,
+          message: reason ? reason + `, max to sell: ${maxToSell}. Deposit now` : ''
         });
       }
     }
@@ -399,7 +413,7 @@ function addPurchasingPower(state: MTSimpleFormState) {
   return {
     ...state,
     realPurchasingPower,
-    dustWarning: isDust,
+    dustWarning: isDust && baseAsset.debt.eq(zero) && realPurchasingPower.eq(zero)
   };
 }
 
@@ -423,7 +437,7 @@ function addAmount(total: BigNumber | undefined, state: MTSimpleFormState): MTSi
         ...state.messages,
         {
           kind: MessageKind.impossibleCalculateTotal,
-          message: 'orderbook to shallow',
+          message: 'orderbook too shallow',
           priority: 1,
           field: 'total'
         }
@@ -440,11 +454,8 @@ function addAmount(total: BigNumber | undefined, state: MTSimpleFormState): MTSi
   return {
     ...state,
     total,
+    amount,
     messages: state.messages.filter(m => m.kind !== MessageKind.impossibleCalculateTotal),
-    amount: amount ?
-      new BigNumber(state.kind === OfferType.buy ?
-        formatPriceDown(amount, state.baseToken) : formatPriceUp(amount, state.baseToken)
-      ) : undefined,
   };
 }
 
@@ -503,7 +514,7 @@ function addPrice(state: MTSimpleFormState) {
     };
   }
 
-  if (!state.total || ! state.amount) {
+  if (!state.total || ! state.amount || state.total.eq(zero) || state.amount.eq(zero)) {
     return state;
   }
 
@@ -558,7 +569,16 @@ function getBuyPlan(
   price: BigNumber,
   total: BigNumber,
   realPurchasingPower: BigNumber,
+  slippageLimit: BigNumber
 ): PlanInfo {
+
+  // maxSlippageLimit:
+  // total * (1 + slippageLimit) <= realPurchasingPower
+
+  const adjustedSlippageLimit = BigNumber.min(
+    slippageLimit,
+    // maxSlppageLimit: total * (1 + slippageLimit) <= realPurchasingPower
+    realPurchasingPower.div(total).minus(one));
 
   const request = prepareBuyAllocationRequest(
     mta,
@@ -566,7 +586,8 @@ function getBuyPlan(
     baseToken,
     amount,
     price,
-    realPurchasingPower
+    realPurchasingPower,
+    adjustedSlippageLimit
   );
 
   if (isImpossible(request)) {
@@ -602,7 +623,8 @@ function getBuyPlan(
     {
       ...asset,
       urnBalance: asset.urnBalance.plus(amount),
-      debt: asset.debt.plus(delta)
+      debt: asset.debt.plus(delta),
+      dai: request.targetDaiBalance.gt(zero) ? request.targetDaiBalance : zero,
     } as MarginableAssetCore,
     { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook
   );
@@ -641,6 +663,7 @@ function getSellPlan(
   amount: BigNumber,
   price: BigNumber,
   total: BigNumber,
+  slippageLimit: BigNumber
 ): PlanInfo {
 
   const request = prepareSellAllocationRequest(
@@ -649,6 +672,7 @@ function getSellPlan(
     baseToken,
     amount,
     price,
+    slippageLimit
   );
 
   if (isImpossible(request)) {
@@ -673,7 +697,8 @@ function getSellPlan(
   const postTradeAsset = calculateMarginable(
     {
       ...asset,
-      debt: asset.debt.plus(delta)
+      debt: asset.debt.plus(delta),
+      dai: asset.dai.plus(delta).plus(total)
     } as MarginableAssetCore,
     { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook
   );
@@ -703,6 +728,7 @@ function addPlan(state: MTSimpleFormState): MTSimpleFormState {
     !state.total ||
     !state.orderbook ||
     !state.realPurchasingPower ||
+    !state.slippageLimit ||
     state.messages.length > 0
   ) {
     return {
@@ -720,6 +746,7 @@ function addPlan(state: MTSimpleFormState): MTSimpleFormState {
       state.price,
       state.total,
       state.realPurchasingPower,
+      state.slippageLimit
     ) :
     getSellPlan(
       state.mta,
@@ -728,6 +755,7 @@ function addPlan(state: MTSimpleFormState): MTSimpleFormState {
       state.amount,
       state.price,
       state.total,
+      state.slippageLimit
     );
 
   const messages: Message[] =
@@ -813,7 +841,6 @@ function prepareSubmit(
   const cancel$ = new Subject<void>();
 
   function submit(state: MTSimpleFormState) {
-
     const {
       mta,
       plan,
@@ -831,7 +858,8 @@ function prepareSubmit(
       !amount || !price ||
       !total ||
       !slippageLimit ||
-      !plan || isImpossible(plan) || !gasEstimation
+      !plan || isImpossible(plan)
+      || !gasEstimation
     ) {
       return;
     }
@@ -840,40 +868,42 @@ function prepareSubmit(
 
     const formResetChange: FormResetChange = { kind: FormChangeKind.formResetChange };
 
-    const totalWithSlippageIncluded = state.kind === OfferType.buy
-      ? amount.times(price).times(slippageLimit.plus(1))
-      : amount.times(price).dividedBy(slippageLimit.plus(1));
+    const submitCall$ = calls$.pipe(
+      first(),
+      switchMap((calls) => {
+        const call = state.kind === OfferType.buy ? calls.mtBuy : calls.mtSell;
+        return call({
+          amount,
+          baseToken,
+          price,
+          proxy,
+          plan,
+          total,
+          slippageLimit: (plan[0] as any).slippageLimit,
+          gas: Math.trunc(gasEstimation * 1.2),
+        }).pipe(
+          transactionToX<ProgressChange | FormResetChange>(
+            progressChange(ProgressStage.waitingForApproval),
+            progressChange(ProgressStage.waitingForConfirmation),
+            progressChange(undefined), // (ProgressStage.fiasco),
+            () => of(formResetChange) // (ProgressStage.done)
+          ),
+          takeUntil(cancel$)
+        );
+      }),
+      share(),
+    );
 
     const changes$ = merge(
       cancel$.pipe(
         map(() => progressChange(ProgressStage.canceled))
       ),
-      calls$.pipe(
-        first(),
-        switchMap((calls) => {
-          const call = state.kind === OfferType.buy ? calls.mtBuy : calls.mtSell;
-          return call({
-            amount,
-            baseToken,
-            price,
-            proxy,
-            plan,
-            total: totalWithSlippageIncluded,
-            gas: Math.trunc(gasEstimation * 1.2),
-          }).pipe(
-            transactionToX<ProgressChange | FormResetChange>(
-              progressChange(ProgressStage.waitingForApproval),
-              progressChange(ProgressStage.waitingForConfirmation),
-              progressChange(undefined), // (ProgressStage.fiasco),
-              () => of(formResetChange) // (ProgressStage.done)
-            ),
-            takeUntil(cancel$)
-          );
-        }),
-      ),
+      submitCall$,
     );
 
     changes$.subscribe(change => progressChange$.next(change));
+
+    return submitCall$;
   }
 
   return [submit, cancel$.next.bind(cancel$), progressChange$];
@@ -883,11 +913,51 @@ function isReadyToProceed(state: MTSimpleFormState): MTSimpleFormState {
   if (
     state.messages.length === 0 &&
     state.plan && !isImpossible(state.plan) && state.plan.length !== 0 &&
-    state.gasEstimationStatus === GasEstimationStatus.calculated
+    state.gasEstimationStatus === GasEstimationStatus.calculated &&
+    state.isSafeCollRatio &&
+    (state.riskComplianceAccepted
+      || (state.kind === OfferType.buy ? state.riskComplianceCurrent : true))
   ) {
     return  { ...state, readyToProceed: true };
   }
   return { ...state, readyToProceed: false };
+}
+
+function calculateMaxAmount(state: MTSimpleFormState): MTSimpleFormState {
+  const { baseToken, realPurchasingPower, orderbook, kind, mta } = state;
+  const ma = findMarginableAsset(baseToken, mta);
+
+  let maxAmount: BigNumber | undefined;
+
+  if (realPurchasingPower && orderbook && ma) {
+    maxAmount = kind === OfferType.buy
+      ? buy(realPurchasingPower, orderbook.sell)[0]
+      : maxSellable(ma, orderbook.buy);
+  }
+
+  return {
+    ...state,
+    maxAmount: maxAmount ? maxAmount : zero
+  };
+}
+
+function calculateMaxTotal(state: MTSimpleFormState): MTSimpleFormState {
+  const { baseToken, realPurchasingPower, orderbook, mta, kind } = state;
+  const ma = findMarginableAsset(baseToken, mta);
+
+  let maxTotal: BigNumber | undefined | Impossible;
+
+  if (realPurchasingPower && orderbook && ma) {
+    const maxSellableAmount = maxSellable(ma, orderbook.buy);
+    maxTotal = kind === OfferType.buy
+      ? realPurchasingPower
+      : getTotal(maxSellableAmount, orderbook.buy);
+  }
+
+  return {
+    ...state,
+    maxTotal: isImpossible(maxTotal) || !maxTotal ? zero : maxTotal
+  };
 }
 
 function addPreTradeInfo(state: MTSimpleFormState): MTSimpleFormState {
@@ -896,10 +966,12 @@ function addPreTradeInfo(state: MTSimpleFormState): MTSimpleFormState {
   const collRatio = ma && ma.currentCollRatio;
   const liquidationPrice = ma && ma.liquidationPrice;
   const leverage = ma && ma.leverage;
+  const isSafeCollRatio = ma && ma.isSafeCollRatio;
 
   return {
     ...state,
     collRatio,
+    isSafeCollRatio,
     liquidationPrice,
     leverage
   };
@@ -907,13 +979,39 @@ function addPreTradeInfo(state: MTSimpleFormState): MTSimpleFormState {
 
 export interface MTSimpleOrderFormParams {
   gasPrice$: Observable<BigNumber>;
-  etherPriceUsd$: Observable<BigNumber>;
+  etherPriceUsd$: Observable<BigNumber|undefined>;
   orderbook$: Observable<Orderbook>;
   mta$: Observable<MTAccount>;
   calls$: Calls$;
   readCalls$: ReadCalls$;
   dustLimits$: Observable<DustLimits>;
   account$: Observable<string|undefined>;
+  riskComplianceCheck$: Observable<boolean>;
+}
+
+export const createRiskComplianceProbe$ = (mta$: Observable<MTAccount>) => {
+  return mta$.pipe(
+    switchMap((mta) => {
+      return interval(500).pipe(
+        switchMap(() => {
+          const dict: Dictionary<boolean> = localStorageGetDict('ltRiskAcceptedDict');
+          return of(!!dict[mta.proxy._address]);
+        }),
+        distinctUntilChanged(),
+      );
+    })
+  );
+};
+
+function toRiskComplianceChange($riskComplianceCheck$: Observable<boolean>) {
+  return $riskComplianceCheck$.pipe(
+    map(value => (
+      {
+        kind: ExternalChangeKind.riskCompliance,
+        hasRiskAccepted: value
+      }
+    ))
+  );
 }
 
 export function createMTSimpleOrderForm$(
@@ -925,7 +1023,8 @@ export function createMTSimpleOrderForm$(
     calls$,
     readCalls$,
     dustLimits$,
-    account$
+    account$,
+    riskComplianceCheck$
   } : MTSimpleOrderFormParams,
   tradingPair: TradingPair,
   defaults:
@@ -943,6 +1042,7 @@ export function createMTSimpleOrderForm$(
       toOrderbookChange$(orderbook$),
       toDustLimitChange$(dustLimits$, tradingPair.base, tradingPair.quote),
       toAccountChange(account$),
+      toRiskComplianceChange(riskComplianceCheck$)
     ),
     toMTAccountChange(mta$)
   );
@@ -956,8 +1056,11 @@ export function createMTSimpleOrderForm$(
     quoteToken: tradingPair.quote,
     gasEstimationStatus: GasEstimationStatus.unset,
     messages: [],
+    maxAmount: zero,
+    maxTotal: zero,
     change: manualChange$.next.bind(manualChange$),
     view: ViewKind.instantTradeForm,
+    isSafeCollRatio: true,
     ...defaults
   };
 
@@ -973,6 +1076,8 @@ export function createMTSimpleOrderForm$(
     map(addPriceImpact),
     map(addPreTradeInfo),
     map(addPurchasingPower),
+    map(calculateMaxAmount),
+    map(calculateMaxTotal),
     map(validate),
     map(addPlan),
     switchMap(curry(estimateGasPrice)(calls$, readCalls$)),
@@ -980,7 +1085,7 @@ export function createMTSimpleOrderForm$(
     map(isReadyToProceed),
     firstOfOrTrue(s => s.gasEstimationStatus === GasEstimationStatus.calculating),
     shareReplay(1),
-    // tap(state => state.plan && console.log('plan:', JSON.stringify(state.plan))),
+    // tap(state => console.log('MTA:', state && console.log('state.mta', state.mta))),
     // ),
     // catchError(e => {
     //   console.log(e);

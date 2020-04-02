@@ -64,6 +64,7 @@ function createForm(props?: {}): Observable<MTTransferFormState> {
     kind: UserActionKind.fund,
     token: 'WETH',
     ilk: 'WETH',
+    withOnboarding: false,
     ...props,
   };
 
@@ -78,9 +79,12 @@ function createForm(props?: {}): Observable<MTTransferFormState> {
     params.calls,
     // @ts-ignore
     of({}),
-    params.kind as UserActionKind.fund | UserActionKind.draw,
-    params.token,
-    params.ilk
+    {
+      actionKind: params.kind as UserActionKind.fund | UserActionKind.draw,
+      token: params.token,
+      ilk: params.ilk,
+      withOnboarding: params.withOnboarding,
+    }
   ).pipe(
     shareReplay(1)
   );
@@ -136,7 +140,7 @@ test('validation -- too big amount for draw DAI', () => {
   expect(unpack(transferForm).gasEstimationStatus).toEqual(GasEstimationStatus.unset);
   expect(unpack(transferForm).messages.length).toEqual(1);
   expect(unpack(transferForm).messages).toEqual([
-    { kind: MessageKind.insufficientAvailableAmount },
+    { kind: MessageKind.insufficientAvailableAmount, token: 'DAI' },
   ]);
 });
 
@@ -161,9 +165,9 @@ test('proceed fund DAI confirmed', () => {
     calls: of({
       ...defaultCalls,
       mtFund: () => of(
-          { status: TxStatus.WaitingForApproval } as TxState,
-          { status: TxStatus.WaitingForConfirmation } as TxState,
-        ),
+        { status: TxStatus.WaitingForApproval } as TxState,
+        { status: TxStatus.WaitingForConfirmation } as TxState,
+      ),
     })
   });
   const { change, transfer } = unpack(transferForm);
@@ -180,10 +184,10 @@ test('proceed fund DAI success', () => {
     calls: of({
       ...defaultCalls,
       mtFund: () => of(
-          { status: TxStatus.WaitingForApproval } as TxState,
-          { status: TxStatus.WaitingForConfirmation } as TxState,
-          { status: TxStatus.Success } as TxState,
-        ),
+        { status: TxStatus.WaitingForApproval } as TxState,
+        { status: TxStatus.WaitingForConfirmation } as TxState,
+        { status: TxStatus.Success } as TxState,
+      ),
     })
   });
   const { change, transfer } = unpack(transferForm);
@@ -200,10 +204,10 @@ test('reset after fund DAI success', () => {
     calls: of({
       ...defaultCalls,
       mtFund: () => of(
-          { status: TxStatus.WaitingForApproval } as TxState,
-          { status: TxStatus.WaitingForConfirmation } as TxState,
-          { status: TxStatus.Success } as TxState,
-        ),
+        { status: TxStatus.WaitingForApproval } as TxState,
+        { status: TxStatus.WaitingForConfirmation } as TxState,
+        { status: TxStatus.Success } as TxState,
+      ),
     })
   });
   const { change, transfer, reset } = unpack(transferForm);
@@ -215,9 +219,9 @@ test('reset after fund DAI success', () => {
   reset();
 
   expect(unpack(transferForm).progress).toBeUndefined();
-  expect(unpack(transferForm).amount).toEqual(new BigNumber(2));
+  expect(unpack(transferForm).amount).toEqual(undefined);
   // expect(unpack(transferForm).stage).toEqual(FormStage.blocked);
-  expect(unpack(transferForm).gasEstimationStatus).toEqual(GasEstimationStatus.calculated);
+  expect(unpack(transferForm).gasEstimationStatus).toEqual(GasEstimationStatus.unset);
 });
 
 test('set amount for fund and cancel', () => {

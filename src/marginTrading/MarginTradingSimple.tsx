@@ -11,6 +11,7 @@ import { connect } from '../utils/connect';
 import { FlexLayoutRow } from '../utils/layout/FlexLayoutRow';
 import { Panel } from '../utils/panel/Panel';
 
+import { Banner } from '../landingPage/Banner';
 import * as styles from './MarginTradingSimple.scss';
 import { TradingPairViewHook } from 'src/exchange/tradingPair/TradingPairView';
 
@@ -20,6 +21,12 @@ export interface MarginTradingOwnProps {
 }
 
 export type MarginTradingProps = RouteComponentProps<any> & MarginTradingOwnProps;
+
+const bannerStyle: React.CSSProperties = {
+  width: '85%',
+  textAlign: 'center',
+  margin: 'auto',
+};
 
 const Content = (props: any | { parentMatch: string }) => {
   const {
@@ -32,8 +39,27 @@ const Content = (props: any | { parentMatch: string }) => {
 
   return (
     <div>
+      <div style={{ marginBottom: '1.75rem' }}>
+        <Banner content={
+                <div style={bannerStyle}>
+                  You are currently accessing a <strong>beta version</strong> of Oasis Trade.
+                  This includes an early access to Leverage Trading, which may
+                  contain bugs and usability issues.
+                  Please use this feature with caution.
+                </div>
+                }
+                theme="warning"/>
+      </div>
       <FlexLayoutRow>
         <TradingPairViewHook parentMatch={parentMatch} />
+      </FlexLayoutRow>
+      <FlexLayoutRow>
+          <theAppContext.Consumer>
+            { ({ MTLiquidationNotificationRxTx }) =>
+              // @ts-ignore
+              <MTLiquidationNotificationRxTx />
+            }
+          </theAppContext.Consumer>
       </FlexLayoutRow>
       <FlexLayoutRow>
         <Panel className={styles.priceChartPanel} footerBordered={true}>
@@ -52,26 +78,24 @@ const Content = (props: any | { parentMatch: string }) => {
         </Panel>
       </FlexLayoutRow>
       <FlexLayoutRow>
-        <Panel style={{ marginRight: '24px', flexGrow: 1, width: '454px' }}>
+        <Panel className={styles.orderFormPanel}>
           <theAppContext.Consumer>
             { ({ MTSimpleOrderPanelRxTx }) => <MTSimpleOrderPanelRxTx /> }
           </theAppContext.Consumer>
         </Panel>
-        <Panel>
+        <Panel className={styles.orderBookPanel}>
           <theAppContext.Consumer>
             { ({ MTSimpleOrderbookPanelTxRx }) => <MTSimpleOrderbookPanelTxRx /> }
           </theAppContext.Consumer>
         </Panel>
       </FlexLayoutRow>
       <FlexLayoutRow>
-        <Panel style={{ flexGrow: 1 }}>
-          <theAppContext.Consumer>
-            { ({ MTMyPositionPanelRxTx }) =>
-              // @ts-ignore
-              <MTMyPositionPanelRxTx/>
-            }
-          </theAppContext.Consumer>
-        </Panel>
+        <theAppContext.Consumer>
+          { ({ MTMyPositionPanelRxTx }) =>
+            // @ts-ignore
+            <MTMyPositionPanelRxTx/>
+          }
+        </theAppContext.Consumer>
       </FlexLayoutRow>
     </div>
   );

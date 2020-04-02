@@ -46,6 +46,10 @@ $header-media-breakpoint: 880px;
     text-align: right;
   }
 
+  .symbol {
+    text-align: left;
+  }
+
   //// align tokens icons so they look like they
   //// aligned to left with column name "Asset"
   //td:nth-child(2) {
@@ -64,7 +68,22 @@ $header-media-breakpoint: 880px;
   //  padding-top: 5px;
   //  padding-bottom: 2px;
   //}
+
+  &.leveragedAssets {
+
+    tr, th {
+      border-bottom: 0;
+    }
+    th {
+      text-transform: uppercase;
+      color: $desaturated-dark-blue;
+      font-size: 12px;
+      font-weight: 600;
+    }
+  }
 }
+
+
 
 .centeredAsset {
   display: inline-flex;
@@ -100,14 +119,33 @@ $header-media-breakpoint: 880px;
 }
 
 .dropdownButton {
+  width: 130px;
   border: 0;
-  padding: 8px 0.833em;
   margin-left: 10px;
-  font-size: 15px;
+  font-size: 13px;
 
 
   :global(.dotted-menu-body) {
     fill: $desaturated-dark-blue;
+  }
+}
+
+.arrowDown {
+  width: 12px;
+  height: 7px;
+  margin-left: .875rem;
+  display: inherit;
+
+  &.dark svg path {
+    fill: $dark-grayish-blue;
+  }
+
+  &.mild svg path {
+    fill: $grayish-blue;
+  }
+
+  &.light svg path {
+    fill: $white;
   }
 }
 
@@ -117,7 +155,7 @@ $header-media-breakpoint: 880px;
   display: none;
   position: absolute;
   right: 0;
-  top: 28px;
+  top: 38px;
   background: $white;
   box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
   border-radius: 8px;
@@ -179,11 +217,10 @@ $header-media-breakpoint: 880px;
 }
 
 button.actionButton {
+  width: 100%;
   font-size: 14px;
   font-weight: 400;
   text-transform: none;
-  margin-left: 10px;
-  padding: 6px 20px;
 }
 
 .backButton {
@@ -199,6 +236,44 @@ button.actionButton {
   font-size: 14px;
   font-weight: 600;
 }
+
+.toggle {
+  display: flex;
+  width: 90px !important;
+  height: 40px !important;
+  border-radius: 90px !important;
+  margin-left: 8px !important;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  justify-content: space-between;
+  padding: 0 12px !important;
+  background: #F6F6F6 !important;
+  border: 1px solid #D8D8D8 !important;
+}
+
+.togglePointerBlocked {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 3px !important;
+  width: 44px !important;
+  height: 32px !important;
+  border-radius: 90px !important;
+  background-color: $green !important;
+}
+
+.togglePointerUnblocked {
+  position: absolute;
+  top:0;
+  left: 38px;
+  margin: 3px !important;
+  width: 44px !important;
+  height: 32px !important;
+  border-radius: 90px !important;
+  background-color: $green !important;
+}
+
 
 .buttonCheck {
   min-width: 115px;
@@ -261,4 +336,10 @@ button.actionButton {
   &:first-child {
     margin-right: 12px;
   }
+}
+
+.amountCurrency {
+  display: inline-block;
+  min-width: 48px;
+  text-align: right;
 }

@@ -23,7 +23,7 @@ import {
   tradingTokens
 } from '../../blockchain/config';
 import { MIN_ALLOWANCE } from '../../blockchain/network';
-import { amountFromWei, nullAddress } from '../../blockchain/utils';
+import { amountFromWei, nullAddress, storageHexToBigNumber } from '../../blockchain/utils';
 import { web3 } from '../../blockchain/web3';
 import { Orderbook } from '../../exchange/orderbook/orderbook';
 import { TradingPair } from '../../exchange/tradingPair/tradingPair';
@@ -140,22 +140,22 @@ export function aggregateMTAccountState(
         orderbooks$(assetNames, loadOrderbook)
       ).pipe(
     map(([balanceResult, rawHistories, osmPrices, osmParams, orderbooks]) => {
-      const marginables = assetNames
-        .filter(token => getToken(token).assetKind === AssetKind.marginable)
-        .map(token => {
-          return getMarginableCore({
-            name: token,
-            assetKind: AssetKind.marginable,
-            balance: balanceResult[token].urnBalance,
-            redeemable: balanceResult[token].marginBalance,
-            ...balanceResult[token],
-            safeCollRatio: new BigNumber(getToken(token).safeCollRatio as number),
-            osmPriceNext: (osmPrices as any)[token].next,
-            zzz: (osmParams as any)[token] as BigNumber,
-            rawHistory: rawHistories[token].sort((h1, h2) => h1.timestamp - h2.timestamp),
-            liquidationPenalty: balanceResult[token].liquidationPenalty
-          });
+      const marginables = assetNames.map(token => {
+        return getMarginableCore({
+          name: token,
+          assetKind: AssetKind.marginable,
+          balance: balanceResult[token].urnBalance,
+          redeemable: balanceResult[token].marginBalance,
+          ...balanceResult[token],
+          allowance: proxy.options.address !== nullAddress ?
+            balanceResult[token].allowance : false,
+          safeCollRatio: new BigNumber(getToken(token).safeCollRatio as number),
+          osmPriceNext: (osmPrices as any)[token].next,
+          zzz: (osmParams as any)[token] as BigNumber,
+          rawHistory: rawHistories[token],
+          liquidationPenalty: balanceResult[token].liquidationPenalty
         });
+      });
       return calculateMTAccount(proxy, marginables, daiAllowance, orderbooks);
     })
   );
@@ -253,25 +253,13 @@ export function createMta$(
 
 export function readOsm(context: NetworkConfig, token: string):
   Observable<{next: number|undefined}> {
-  const hilo = (uint256: string): [BigNumber, BigNumber] => {
-    const match = uint256.match(/^0x(\w+)$/);
-    if (!match) {
-      throw new Error(`invalid uint256: ${uint256}`);
-    }
-    return (match[0].length <= 32) ?
-      [new BigNumber(0), new BigNumber(uint256)] :
-    [
-      new BigNumber(`0x${match[0].substr(0, match[0].length - 32)}`),
-      new BigNumber(`0x${match[0].substr(match[0].length - 32, 32)}`)
-    ];
-  };
   // const slotCurrent = 3;
   const slotNext = 4;
   return combineLatest(
     bindNodeCallback(web3.eth.getStorageAt)(context.mcd.osms[token].address, slotNext),
   ).pipe(
     map(([nxt]: [string, string]) => {
-      const next = hilo(nxt);
+      const next = storageHexToBigNumber(nxt);
       return {
         // current: current[0].isZero() ? undefined : amountFromWei(current[1], token),
         next: next[0].isZero() ? undefined : amountFromWei(next[1], token),

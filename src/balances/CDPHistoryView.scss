@@ -12,13 +12,14 @@
   padding: 12px 8px 12px 8px;
   font-size: 14px;
   line-height: 15px;
-  text-align: right;
+  text-align: left;
 }
 
 .table th {
   font-size: 12px;
   line-height: 15px;
-  text-transform: none;
+  text-transform: uppercase;
+
 }
 
 .headerDark {
@@ -34,4 +35,12 @@
 
 .table td.cellLeftAligned, .table th.cellLeftAligned {
   text-align: left;
+}
+
+.eventPositive {
+  color: $green;
+}
+
+.eventNegative {
+  color: $bright-red;
 }

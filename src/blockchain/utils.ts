@@ -1,5 +1,6 @@
 import { BigNumber } from 'bignumber.js';
 
+import { Dictionary } from 'ramda';
 import { getToken } from './config';
 
 export function amountFromWei(amount: BigNumber, token: string): BigNumber {
@@ -15,3 +16,25 @@ export const padLeft = (string: string, chars: number, sign?: string) =>
   Array(chars - string.length + 1).join(sign ? sign : '0') + string;
 
 export const nullAddress = '0x0000000000000000000000000000000000000000';
+
+export const storageHexToBigNumber = (uint256: string): [BigNumber, BigNumber] => {
+  const match = uint256.match(/^0x(\w+)$/);
+  if (!match) {
+    throw new Error(`invalid uint256: ${uint256}`);
+  }
+  return (match[0].length <= 32) ?
+    [new BigNumber(0), new BigNumber(uint256)] :
+  [
+    new BigNumber(`0x${match[0].substr(0, match[0].length - 32)}`),
+    new BigNumber(`0x${match[0].substr(match[0].length - 32, 32)}`)
+  ];
+};
+
+export const localStorageStoreDict = (dict: Dictionary<boolean>, key: string) => {
+  localStorage.setItem(key, JSON.stringify(dict));
+};
+
+export const localStorageGetDict = (key: string) => {
+  const dict = localStorage.getItem(key) || '{}';
+  return JSON.parse(dict);
+};

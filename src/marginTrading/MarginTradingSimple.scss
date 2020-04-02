@@ -12,3 +12,15 @@ $twoColumnsPanelWidth: 454px;
     width: 100%;
   }
 }
+
+.orderFormPanel { 
+  margin-right: 24px;
+  flex-grow: 1;
+  width: 454px;
+  min-height: 474px;
+}
+
+.orderBookPanel {
+  flex-basis: 454px;
+  flex-grow: 1;
+}

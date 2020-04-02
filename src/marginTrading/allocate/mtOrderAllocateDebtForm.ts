@@ -405,7 +405,7 @@ function autoAllocate(state: MTAllocateState): void {
 
 export function createMTAllocateForm$(
   gasPrice$: Observable<BigNumber>,
-  etherPriceUSD$: Observable<BigNumber>,
+  etherPriceUsd$: Observable<BigNumber|undefined>,
   theCalls$: Calls$,
   readCalls$: ReadCalls$,
   proxy: any,
@@ -415,7 +415,7 @@ export function createMTAllocateForm$(
 
   const environmentChange$ = combineAndMerge(
     toGasPriceChange(gasPrice$),
-    toEtherPriceUSDChange(etherPriceUSD$),
+    toEtherPriceUSDChange(etherPriceUsd$),
   );
 
   const [submit, cancel, stageChange$] = prepareSubmit(theCalls$);

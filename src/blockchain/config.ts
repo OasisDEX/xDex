@@ -12,15 +12,27 @@ import ethCircleSvg from '../icons/coins/eth-circle.svg';
 import ethColorSvg from '../icons/coins/eth-color.svg';
 // import ethInverseSvg from '../icons/coins/eth-inverse.svg';
 import ethSvg from '../icons/coins/eth.svg';
+import linkCircleSvg from '../icons/coins/link-circle.svg';
+import linkColorSvg from '../icons/coins/link-color.svg';
+import linkSvg from '../icons/coins/link.svg';
+import paxCircleSvg from '../icons/coins/pax-circle.svg';
+import paxColorSvg from '../icons/coins/pax-color.svg';
+import paxSvg from '../icons/coins/pax.svg';
 import repCircleSvg from '../icons/coins/rep-circle.svg';
 import repColorSvg from '../icons/coins/rep-color.svg';
 import repSvg from '../icons/coins/rep.svg';
 import saiCircleSvg from '../icons/coins/sai-circle.svg';
 import saiColorSvg from '../icons/coins/sai-color.svg';
 import saiSvg from '../icons/coins/sai.svg';
-// import wbtcCircleSvg from '../icons/coins/wbtc-circle.svg';
-// import wbtcColorSvg from '../icons/coins/wbtc-color.svg';
-// import wbtcSvg from '../icons/coins/wbtc.svg';
+import tusdCircleSvg from '../icons/coins/tusd-circle.svg';
+import tusdColorSvg from '../icons/coins/tusd-color.svg';
+import tusdSvg from '../icons/coins/tusd.svg';
+import usdcCircleSvg from '../icons/coins/usdc-circle.svg';
+import usdcColorSvg from '../icons/coins/usdc-color.svg';
+import usdcSvg from '../icons/coins/usdc.svg';
+import wbtcCircleSvg from '../icons/coins/wbtc-circle.svg';
+import wbtcColorSvg from '../icons/coins/wbtc-color.svg';
+import wbtcSvg from '../icons/coins/wbtc.svg';
 import zrxCircleSvg from '../icons/coins/zrx-circle.svg';
 import zrxColorSvg from '../icons/coins/zrx-color.svg';
 import zrxSvg from '../icons/coins/zrx.svg';
@@ -42,22 +54,34 @@ import * as otcSupport from './abi/otc-support-methods.abi.json';
 import * as proxyActions from './abi/proxy-actions.abi.json';
 import * as proxyCreationAndExecute from './abi/proxy-creation-and-execute.abi.json';
 import * as proxyRegistry from './abi/proxy-registry.abi.json';
+import * as tokenRecovery from './abi/token-recovery.abi.json';
+import * as txManager from './abi/tx-manager.abi.json';
+import { nullAddress } from './utils';
 import { web3 } from './web3';
+
+const hasNewMarketsAvailable = process.env.REACT_APP_NEW_MARKETS_ENABLED === '1';
 
 export const tradingPairs: TradingPair[] = [
   { base: 'WETH', quote: 'DAI' },
   { base: 'REP', quote: 'DAI' },
   { base: 'ZRX', quote: 'DAI' },
   { base: 'BAT', quote: 'DAI' },
-  // { base: 'DAI', quote: 'USDC' },
-  // { base: 'SAI', quote: 'USDC' },
+  ...(hasNewMarketsAvailable ? [
+    { base: 'LINK', quote: 'DAI' },
+    { base: 'WBTC', quote: 'DAI' },
+  ] : []),
+  { base: 'DAI', quote: 'USDC' },
+  ...(hasNewMarketsAvailable ? [
+    { base: 'DAI', quote: 'TUSD' },
+    { base: 'DAI', quote: 'PAX' },
+  ] : []),
   { base: 'REP', quote: 'WETH' },
   { base: 'ZRX', quote: 'WETH' },
   { base: 'BAT', quote: 'WETH' },
-  { base: 'WETH', quote: 'SAI' },
-  { base: 'REP', quote: 'SAI' },
-  { base: 'ZRX', quote: 'SAI' },
-  { base: 'BAT', quote: 'SAI' },
+  ...(hasNewMarketsAvailable ? [
+    { base: 'LINK', quote: 'WETH' },
+    { base: 'WBTC', quote: 'WETH' },
+  ] : []),
 ];
 
 function asMap<D>(key: string, data: D[]): { [key: string]: D } {
@@ -71,6 +95,7 @@ export enum AssetKind {
   nonMarginable = 'nonMarginable'
 }
 
+// ticker comes from coinpaprika api https://api.coinpaprika.com/v1/tickers
 const tokens = asMap('symbol', [
   {
     symbol: 'ETH',
@@ -175,40 +200,75 @@ const tokens = asMap('symbol', [
       ticker: 'bat-basic-attention-token',
       assetKind: AssetKind.nonMarginable,
     },
-      // {
-      //   symbol: 'USDC',
-      //   precision: 6,
-      //   digits: 6,
-      //   digitsInstant: 2,
-      //   safeCollRatio: 1.5,
-      //   maxSell: '1000000000000000',
-      //   name: 'USD Coin',
-      //   icon: SvgImageSimple(usdcSvg),
-      //   // iconInverse: SvgImageSimple(usdcInverseSvg),
-      //   iconCircle: SvgImageSimple(usdcCircleSvg),
-      //   iconColor: SvgImageSimple(usdcColorSvg),
-      //   ticker: 'usdc-usd-coin',
-      //   assetKind: AssetKind.marginable,
-      //   // address: 0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48
-      // },
-  // {
-  //   symbol: 'WBTC',
-  //   precision: 8,
-  //   digits: 5,
-  //   digitsInstant: 3,
-  //   safeCollRatio: 1.5,
-  //   maxSell: '1000000000000000',
-  //   name: 'Wrapped Bitcoin',
-  //   icon: SvgImageSimple(wbtcSvg),
-  //   // iconInverse: SvgImageSimple(wbtcInverseSvg),
-  //   iconCircle: SvgImageSimple(wbtcCircleSvg),
-  //   iconColor: SvgImageSimple(wbtcColorSvg),
-  //   ticker: 'wbtc-wrapped-bitcoin',
-  //   assetKind: AssetKind.marginable,
-  //   address: 0x2260fac5e5542a773aa44fbcfedf7c193bc2c599
-  // }]
-  ]
-]);
+    {
+      symbol: 'USDC',
+      precision: 6,
+      digits: 6,
+      digitsInstant: 2,
+      safeCollRatio: 1.5,
+      maxSell: '1000000000000000',
+      name: 'USD Coin',
+      icon: SvgImageSimple(usdcSvg),
+        // iconInverse: SvgImageSimple(usdcInverseSvg),
+      iconCircle: SvgImageSimple(usdcCircleSvg),
+      iconColor: SvgImageSimple(usdcColorSvg),
+      ticker: 'usdc-usd-coin',
+      assetKind: AssetKind.unknown,
+        // address: 0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48
+    },
+    {
+      symbol: 'TUSD',
+      precision: 18,
+      digits: 5,
+      digitsInstant: 3,
+      safeCollRatio: 1.5,
+      maxSell: '1000000000000000',
+      name: 'True USD',
+      icon: SvgImageSimple(tusdSvg),
+      iconCircle: SvgImageSimple(tusdCircleSvg),
+      iconColor: SvgImageSimple(tusdColorSvg),
+      ticker: 'tusd-trueusd'
+    },
+    {
+      symbol: 'PAX',
+      precision: 18,
+      digits: 5,
+      digitsInstant: 3,
+      safeCollRatio: 1.5,
+      maxSell: '1000000000000000',
+      name: 'Paxos Standard',
+      icon: SvgImageSimple(paxSvg),
+      iconCircle: SvgImageSimple(paxCircleSvg),
+      iconColor: SvgImageSimple(paxColorSvg),
+      ticker: 'pax-paxos-standard-token'
+    },
+    {
+      symbol: 'LINK',
+      precision: 18,
+      digits: 5,
+      digitsInstant: 3,
+      safeCollRatio: 1.5,
+      maxSell: '1000000000000000',
+      name: 'Chainlink',
+      icon: SvgImageSimple(linkSvg),
+      iconCircle: SvgImageSimple(linkCircleSvg),
+      iconColor: SvgImageSimple(linkColorSvg),
+      ticker: 'link-chainlink'
+    },
+    {
+      symbol: 'WBTC',
+      precision: 8,
+      digits: 5,
+      digitsInstant: 3,
+      safeCollRatio: 1.5,
+      maxSell: '1000000000000000',
+      name: 'Wrapped Bitcoin',
+      icon: SvgImageSimple(wbtcSvg),
+      iconCircle: SvgImageSimple(wbtcCircleSvg),
+      iconColor: SvgImageSimple(wbtcColorSvg),
+      ticker: 'wbtc-wrapped-bitcoin'
+    }
+  ]]);
 
 export function isDAIEnabled() {
   return tradingTokens.indexOf('DAI') >= 0;
@@ -265,9 +325,8 @@ const protoMain = {
   safeConfirmations: 0,
   avgBlocksPerDay: 5760 * 1.05,
   startingBlock: 4751582,
-  get otc() { return load(otc, '0x39755357759ce0d7f32dc8dc45414cca409ae24e'); },
+  get otc() { return load(otc, '0x794e6e91555438aFc3ccF1c5076A74F42133d08D'); },
   // get saiTub() { return load(saiTub, '0x448a5065aebb8e423f0896e6c5d525c040f59af3'); },
-  get ethPip() { return load(dsValue, '0x3546C7E3753C0e1D15878EC1C6dC65573864Dab7'); },
   get tokens() {
     return asMap('token', [
       loadToken('WETH', eth, '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'),
@@ -277,10 +336,48 @@ const protoMain = {
       loadToken('ZRX', erc20, '0xe41d2489571d322189246dafa5ebde1f4699f498'),
       loadToken('BAT', erc20, '0x0d8775f648430679a709e98d2b0cb6250d2887ef'),
       loadToken('USDC', erc20, '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'),
+      loadToken('TUSD', erc20, '0x0000000000085d4780B73119b644AE5ecd22b376'),
+      loadToken('PAX', erc20, '0x8e870d67f660d95d5be530380d0ec0bd388289e1'),
+      loadToken('LINK', erc20, '0x514910771af9ca656af840dff83e8264ecf986ca'),
+      loadToken('WBTC', erc20, '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599'),
     ]);
   },
-  mcd: {} as { [key: string]: any },
-  cdpManager: '',
+  cdpManager: '0x60762005be465901ca18ba34416b35143de72c0c',
+  mcd: {
+    vat: '0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B',
+    get cat() {
+      return load(mcdCat, '0x78F2c2AF65126834c51822F56Be0d7469D7A523E');
+    },
+    get jug() {
+      return load(mcdJug, '0x19c0976f590D67707E62397C87829d896Dc0f1F1');
+    },
+    get spot() {
+      return load(mcdSpotter, '0x65C79fcB50Ca1594B025960e539eD7A9a6D434A3');
+    },
+    dssCdpManager: '0x5ef30b9986345249bc32d8928B7ee64DE9435E39',
+    ilks: {
+      WETH: 'ETH-A',
+    },
+    joins: {
+      WETH: '0x2F0b23f53734252Bda2277357e97e1517d6B042A',
+      DAI: '0x9759A6Ac90977b93B58547b4A71c78317f391A28',
+    },
+    flip: {
+      get WETH() {
+        return load(mcdFlipper, '0xd8a04F5412223F513DC55F839574430f5EC15531');
+      },
+    },
+    prices: {
+      get WETH() {
+        return load(dsValue, '');
+      },
+    },
+    osms: {
+      get WETH() {
+        return load(mcdOsm, '0x81FE72B5A8d1A857d176C3E7d5Bd2679A9B85763');
+      },
+    }
+  } as { [key: string]: any },
   get otcSupportMethods() {
     return load(otcSupport, '0x9b3f075b12513afe56ca2ed838613b7395f57839');
   },
@@ -294,7 +391,7 @@ const protoMain = {
     return load(proxyCreationAndExecute, '0x793ebbe21607e4f04788f89c7a9b97320773ec59');
   },
   get proxyActions() {
-    return load(proxyActions, '');
+    return load(proxyActions, '0xb81f7ca8f12c2d433dcde39270de849e2475abb9');
   },
   get migration() {
     return '0xc73e0383F3Aff3215E6f04B0331D58CeCf0Ab849';
@@ -305,8 +402,11 @@ const protoMain = {
   get instantMigrationProxyActions() {
     return load(instantMigrationProxyActions, '0x396Ea3C3376cC78864f51ce2FDdb275D3dC0968b');
   },
+  get tokenRecovery() {
+    return load(tokenRecovery, '0xc06a269e3370f582df2dbb6cf0271c267badf99d');
+  },
   oasisDataService: {
-    url: 'https://cache.eth2dai.com/api/v1'
+    url: 'https://staging-cache.eth2dai.com/api/v1'
   },
   etherscan: {
     url: 'https://etherscan.io',
@@ -317,6 +417,10 @@ const protoMain = {
   get liquidityProvider() {
     return load(liquidityProvider, '');
   },
+  get txManager() {
+    console.error('TxManager not deployed on mainnnet');
+    return load(txManager, nullAddress);
+  }
 };
 
 export type NetworkConfig = typeof protoMain;
@@ -339,88 +443,91 @@ const kovan: NetworkConfig = {
   safeConfirmations: 0,
   avgBlocksPerDay: 21600 * 0.55,
   startingBlock: 5216718,
-  get otc() { return load(otc, '0x4a6bc4e803c62081ffebcc8d227b5a87a58f1f8f'); },
+  get otc() { return load(otc, '0xe325acB9765b02b8b418199bf9650972299235F4'); },
   // get saiTub() { return load(saiTub, '0xa71937147b55deb8a530c7229c442fd3f31b7db2'); },
-  get ethPip() { return load(dsValue, '0x3546C7E3753C0e1D15878EC1C6dC65573864Dab7'); },
   get tokens() {
     return asMap('token', [
       loadToken('WETH', eth, '0xd0a1e359811322d97991e03f863a0c30c2cf029c'),
       loadToken('SAI', erc20, '0xc4375b7de8af5a38a93548eb8453a498222c4ff2'),
-      loadToken('DAI', erc20, '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa'),
+      loadToken('DAI', erc20, '0x08ae34860fbfe73e223596e65663683973c72dd3'),
       loadToken('REP', erc20, '0xc7aa227823789e363f29679f23f7e8f6d9904a9b'),
       loadToken('ZRX', erc20, '0x18392097549390502069c17700d21403ea3c721a'),
       loadToken('BAT', erc20, '0x9f8cfb61d3b2af62864408dd703f9c3beb55dff7'),
       loadToken('USDC', erc20, '0x198419c5c340e8De47ce4C0E4711A03664d42CB2'),
+      loadToken('TUSD', erc20, '0x18C06d61007Cbeb072F84C28aB7698F2bfd145B5'),
+      loadToken('PAX', erc20, '0x7ac82C960d70A9f62a645eb57f446985Bf23e224'),
+      loadToken('LINK', erc20, '0x046acb204091d5296461c66cfd911114de5c6a4c'),
+      loadToken('WBTC', erc20, '0xA08d982C2deBa0DbE433a9C6177a219E96CeE656'),
     ]);
   },
   mcd: {
-    vat: '0xba987bdb501d131f766fee8180da5d81b34b69d9',
+    vat: '0x8a08a09dbe85018cb1a36c344a629b43f983b66c',
     get cat() {
-      return load(mcdCat, '0x0511674a67192fe51e86fe55ed660eb4f995bdd6');
+      return load(mcdCat, '0xa9fa5837eea55f3038a2ca755ce4b5dfac599c37');
     },
     get jug() {
-      return load(mcdJug, '0xcbb7718c9f39d05aeede1c472ca8bf804b2f1ead');
+      return load(mcdJug, '0x01e87d5fdcb506c0b8062502d551e04474354f0d');
     },
     get spot() {
-      return load(mcdSpotter, '0x3a042de6413edb15f2784f2f97cc68c7e9750b2d');
+      return load(mcdSpotter, '0x65b2cd8c3d90fb1dd94965073bf5798d94489e04');
     },
-    dssCdpManager: '0x1476483dd8c35f25e568113c5f70249d3976ba21',
+    dssCdpManager: '0x7a35ea756a9f1fc5d8a1c8013ade80e036c5f8bb',
     ilks: {
       WETH: 'ETH-A',
-      REP: 'REP-A',
-      ZRX: 'ZRX-A',
-      BAT: 'BAT-A',
-      DGD: 'DGD-A',
+      // REP: 'REP-A',
+      // ZRX: 'ZRX-A',
+      // BAT: 'BAT-A',
+      // DGD: 'DGD-A',
     },
     joins: {
-      WETH: '0x775787933e92b709f2a3c70aa87999696e74a9f8',
-      DAI: '0x5aa71a3ae1c0bd6ac27a1f28e1415fffb6f15b8c',
-      REP: '0xebbd300bb527f1d50abd937f8ca11d7fd0e5b68b',
-      ZRX: '0x79f15b0da982a99b7bcf602c8f384c56f0b0e8cd',
-      BAT: '0x2a4c485b1b8dfb46accfbecaf75b6188a59dbd0a',
-      DGD: '0x92a3b1c0882e6e17aa41c5116e01b0b9cf117cf2',
+      WETH: '0x5028243160c4e650bde9646d22395a60fdcb6e67',
+      DAI: '0x259494bdd124b75d622755c181b457ae0283257d',
+      // REP: '0x0',
+      // ZRX: '0x0',
+      // BAT: '0x0',
+      // DGD: '0x0',
     },
     flip: {
       get WETH() {
-        return load(mcdFlipper, '0xb40139ea36d35d0c9f6a2e62601b616f1ffbbd1b');
+        return load(mcdFlipper, '0x2024c9c3772543081352d72bda936240afa43bd5');
       },
-      get REP() {
-        return load(mcdFlipper, '0xc94014a032ca5fcc01271f4519add7e87a16b94c');
-      },
-      get ZRX() {
-        return load(mcdFlipper, '0x2f5979b27cdc809a85300e1902827c2bd2dcc155');
-      },
-      get BAT() {
-        return load(mcdFlipper, '0xc94014a032ca5fcc01271f4519add7e87a16b94c');
-      },
-      get DGD() {
-        return load(mcdFlipper, '0x6ee776b367191fad854df97ef267462053af283d');
-      },
+      // get REP() {
+      //   return load(mcdFlipper, '0x0');
+      // },
+      // get ZRX() {
+      //   return load(mcdFlipper, '0x0');
+      // },
+      // get BAT() {
+      //   return load(mcdFlipper, '0x0');
+      // },
+      // get DGD() {
+      //   return load(mcdFlipper, '0x0');
+      // },
     },
     prices: {
       get WETH() {
-        return load(dsValue, '0x75dd74e8afe8110c8320ed397cccff3b8134d981');
+        return load(dsValue, '0xd44d1823c8839559c2d663e98261e0b193c256ad');
       },
-      get BAT() {
-        return load(dsValue, '0x5c40c9eb35c76069fa4c3a00ea59fac6ffa9c113');
-      },
+      // get BAT() {
+      //   return load(dsValue, '0x5c40c9eb35c76069fa4c3a00ea59fac6ffa9c113');
+      // },
     },
     osms: {
       get WETH() {
-        return load(mcdOsm, '0x75dd74e8afe8110c8320ed397cccff3b8134d981');
+        return load(mcdOsm, '0x19342077d07a578c49421e5656c8de5c3e718f92');
       },
-      get BAT() {
-        return load(mcdOsm, '0x5c40c9eb35c76069fa4c3a00ea59fac6ffa9c113');
-      },
-      get REP() {
-        return load(mcdOsm, '0x5c40c9eb35c76069fa4c3a00ea59fac6ffa9c113');
-      },
-      get ZRX() {
-        return load(mcdOsm, '0x5c40c9eb35c76069fa4c3a00ea59fac6ffa9c113');
-      },
+      // get BAT() {
+      //   return load(mcdOsm, '0x0');
+      // },
+      // get REP() {
+      //   return load(mcdOsm, '0x0');
+      // },
+      // get ZRX() {
+      //   return load(mcdOsm, '0x0');
+      // },
     },
   } as { [key: string]: any },
-  cdpManager: '0xa07b43edc82a09f6657523aeeffd2db3a2f68986', // fill
+  cdpManager: '0x1a4a0603d8ba90571b1e95d996588b205edfb0fd', // Oasis CDP Manager
   get otcSupportMethods() {
     return load(otcSupport, '0x303f2bf24d98325479932881657f45567b3e47a8');
   },
@@ -434,7 +541,7 @@ const kovan: NetworkConfig = {
     return load(proxyCreationAndExecute, '0xee419971e63734fed782cfe49110b1544ae8a773');
   },
   get proxyActions() {
-    return load(proxyActions, '0x724d8450e38822409be595318802eac384ed186a');
+    return load(proxyActions, '0x9cbb4e9de5024bf702bc83f00a0dd22953531f77');
   },
   get migration() {
     return '0x411b2faa662c8e3e5cf8f01dfdae0aee482ca7b0';
@@ -444,6 +551,9 @@ const kovan: NetworkConfig = {
   },
   get instantMigrationProxyActions() {
     return load(instantMigrationProxyActions, '0xa623ea3b3219bb59b96c4aff2d26aff0d038af62');
+  },
+  get tokenRecovery() {
+    return load(tokenRecovery, '0x225da3848f57248148d3faa1625d0beb66902de3');
   },
   oasisDataService: {
     url: 'https://kovan-cache.eth2dai.com/api/v1'
@@ -457,6 +567,9 @@ const kovan: NetworkConfig = {
   get liquidityProvider() {
     return load(liquidityProvider, '0x7fb88dae8aaa2904bce126694ed50942e14bb22e');
   },
+  get txManager() {
+    return load(txManager, '0x371015546206585d438d0cd655dbee7d86c7d4f2');
+  }
 };
 
 const localnet: NetworkConfig =  {
@@ -477,7 +590,6 @@ const localnet: NetworkConfig =  {
   startingBlock: 1,
   get otc() { return load(otc, '0x177b74CB6679C145Bb428Cc3E16F4a3d3ED905a3'); },
   // get saiTub() { return { address: '', contract: null }; },
-  get ethPip() { return load(dsValue, '0x8b8B359c33c13b818713570583C8bce2b030AD9A'); },
   get tokens() {
     return asMap('token', [
       loadToken('WETH', eth, '0x200938Bf7fF25EcF2eB7BC08e18b0892ED34c846'),
@@ -488,7 +600,11 @@ const localnet: NetworkConfig =  {
       loadToken('ZRX', erc20, '0x2c60CF08c07C212e21e6E2ee4626c478BACe092a'),
       loadToken('BAT', erc20, '0xd80110E3C107Eb206B556871cFe2532eC7D05E47'),
       loadToken('REP', erc20, '0xE8d4C2Ab5782c697f06f17610cC03068180d0FaC'),
-      // loadToken('USDC', erc20, '0x0000000000000000000000000000000000000000'),
+      loadToken('USDC', erc20, '0x25f50Ea441836ae39b54a9DcBbd57d7048d977CF'),
+      loadToken('TUSD', erc20, '0x83eF880aE7e9155Cf8Ad2CE5ba75019376C0B7F8'),
+      loadToken('PAX', erc20, '0xb02048C28D9BEE6989E8D48e3972F283D3B7822c'),
+      loadToken('LINK', erc20, '0x54729948EbD535aBC2492FdAAabb4153E9aC28f7'),
+      loadToken('WBTC', erc20, '0x85a91f61feA8f173434424F9758a12fEA11B613c'),
     ]);
   },
   mcd: {
@@ -579,6 +695,9 @@ const localnet: NetworkConfig =  {
   get instantMigrationProxyActions() {
     return load(instantMigrationProxyActions, '0x141048f25b24AEfAF1A13fD9C2e8628121A0f1E7');
   },
+  get tokenRecovery() {
+    return load(tokenRecovery, nullAddress);
+  },
   oasisDataService: {
     url: 'http://localhost:3001/v1'
   },
@@ -590,6 +709,9 @@ const localnet: NetworkConfig =  {
   taxProxyRegistries: [],
   get liquidityProvider() {
     return load(liquidityProvider, '0x64442CACa1f24014e734c057c38e455b106278E0');
+  },
+  get txManager() {
+    return load(txManager, '0xD87be980cC779bAF00ac8eD9F924E2d22A85b357');
   },
 };
 

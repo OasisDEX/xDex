@@ -15,14 +15,22 @@ import { Button } from '../../utils/forms/Buttons';
 import { ErrorMessage } from '../../utils/forms/ErrorMessage';
 import { InputGroup, InputGroupAddon } from '../../utils/forms/InputGroup';
 import { GasCost } from '../../utils/gasCost/GasCost';
-import { SvgImage } from '../../utils/icons/utils';
 import { BorderBox, Hr } from '../../utils/layout/LayoutHelpers';
 import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
 import { ModalProps } from '../../utils/modal';
-import { Panel, PanelBody, PanelFooter } from '../../utils/panel/Panel';
+import { Panel, PanelBody, PanelFooter, PanelHeader } from '../../utils/panel/Panel';
 import { Muted } from '../../utils/text/Text';
 import { TransactionStateDescription } from '../../utils/text/TransactionStateDescription';
 import { zero } from '../../utils/zero';
+
+import * as mixpanel from 'mixpanel-browser';
+import * as ReactDOM from 'react-dom';
+import { theAppContext } from '../../AppContext';
+import { SvgImage } from '../../utils/icons/utils';
+import { LoadableWithTradingPair } from '../../utils/loadable';
+import { MTSimpleFormState } from '../simple/mtOrderForm';
+import { MtSimpleOrderFormBody } from '../simple/mtOrderFormView';
+import * as stylesOrder from '../simple/mtOrderFormView.scss';
 import {
   CashAsset,
   findAsset, findMarginableAsset,
@@ -41,6 +49,7 @@ type MTFundFormProps = MTTransferFormState & ModalProps;
 const tabLabels: Dictionary<string> = {
   [MTTransferFormTab.proxy]: 'Deploy proxy',
   [MTTransferFormTab.transfer]: 'Deposit',
+  [MTTransferFormTab.buy]: 'Buy',
 };
 
 interface StepComponentProps {
@@ -51,24 +60,26 @@ interface StepComponentProps {
   btnDisabled: boolean;
   stepCompleted: boolean;
   isLoading: boolean;
+  tid?: string;
 }
 
 class StepComponent extends React.Component<StepComponentProps> {
   public render() {
     const { title, description, btnLabel, btnAction,
-      stepCompleted, btnDisabled, isLoading } = this.props;
+      stepCompleted, btnDisabled, isLoading, tid } = this.props;
 
     return (<div className={styles.onboardingPanel}>
       <h3 className={styles.onboardingHeader}>{title}</h3>
       <div className={styles.onboardingParagraph}>{description}</div>
       <Button
         size="md"
+        data-test-id={tid}
         color={stepCompleted ? 'primaryOutlinedDone' : 'primary'}
         disabled={btnDisabled || isLoading || stepCompleted}
         onClick={() => btnAction()}
         className={classnames({ [styles.buttonDone]: stepCompleted })}
       >{
-        stepCompleted ? <SvgImage image={checkIconSvg}/> :
+        stepCompleted ? <SvgImage data-test-id="step-completed" image={checkIconSvg}/> :
           isLoading && !btnDisabled ?  <LoadingIndicator inline={true} /> : btnLabel
       }</Button>
 
@@ -77,12 +88,15 @@ class StepComponent extends React.Component<StepComponentProps> {
 }
 
 export class MtTransferFormView extends React.Component<MTFundFormProps> {
+  private amountInput?: HTMLElement;
 
   constructor(p: MTFundFormProps) {
     super(p);
   }
 
   public render() {
+
+    const { mta, token, progress, startTab, withOnboarding, ilk } = this.props;
 
     const onModalRef = (node: any) => {
       if (node) {
@@ -94,21 +108,33 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
       }
     };
 
-    const allowance = (_mta: MTAccount, _token: string) =>  _token === 'DAI' ? _mta.daiAllowance :
-      findMarginableAsset(_token, _mta)!.allowance;
+    let currentTab = MTTransferFormTab.transfer;
+    let onboardingTabs: string[] = [];
+    let startIndex = 0;
 
-    const onboardingTabs = Object.keys(MTTransferFormTab);
-
-    const startIndex = this.props.startTab ? onboardingTabs.indexOf(this.props.startTab) : 0;
-
-    const { mta, token, progress } = this.props;
-
-    const isLoading = (progress === ProgressStage.waitingForApproval
+    const isLoading = !mta || (progress === ProgressStage.waitingForApproval
       || progress === ProgressStage.waitingForConfirmation);
 
-    const currentTab = mta &&
-    (mta.proxy && mta.proxy.options.address !== nullAddress && allowance(mta, token)) ?
-      MTTransferFormTab.transfer : MTTransferFormTab.proxy;
+    const allowance = (_mta: MTAccount, _token: string) => _token === 'DAI' ? _mta.daiAllowance :
+      findMarginableAsset(_token, _mta)!.allowance;
+
+    if (withOnboarding) {
+      onboardingTabs = Object.keys(MTTransferFormTab);
+      startIndex = startTab ? onboardingTabs.indexOf(startTab) : 0;
+      currentTab = MTTransferFormTab.proxy;
+
+      if (
+        mta && (mta.proxy && mta.proxy.options.address !== nullAddress && allowance(mta, token))
+      ) {
+        currentTab = MTTransferFormTab.transfer;
+      }
+
+      const ma = findMarginableAsset((token === 'DAI' && ilk || token), mta);
+
+      if (mta && ma && ma.purchasingPower.gt(zero)) {
+        currentTab = MTTransferFormTab.buy;
+      }
+    }
 
     return (
       <ReactModal
@@ -120,69 +146,132 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
         overlayRef={onModalRef}
         shouldCloseOnEsc={true}
       >
-        <Panel className={styles.modalChild}>
-          <div className={styles.tabs}>
-            {
-              onboardingTabs.filter(
-                (_tab: string, index: number) => (index >= startIndex)
-              ).map(_tab => {
-                return (<div
-                  className={
-                    classnames({
-                      [styles.tab]: true,
-                      [styles.tabActive]: (_tab === currentTab)
-                    })
-                  }
-                  key={_tab}>{tabLabels[_tab]}</div>);
-              })
-            }
-          </div>
-
-          {mta ?
-            <>
-              {currentTab === MTTransferFormTab.proxy ?
-                <>
-                  <StepComponent
-                    title="Deploy proxy"
-                    description={`Proxies are used to bundle multiple transactions into one,
+        <Panel className={styles.modalChild} data-test-id="modal">
+          { withOnboarding ?
+            <div className={styles.tabs}>
+              {
+                onboardingTabs.filter(
+                  (_tab: string, index: number) => (index >= startIndex)
+                ).map(_tab => {
+                  return (<div
+                    data-test-id={_tab === currentTab && 'active-tab' || ''}
+                    className={
+                      classnames({
+                        [styles.tab]: true,
+                        [styles.tabActive]: (_tab === currentTab)
+                      })
+                    }
+                    key={_tab}>{tabLabels[_tab]}</div>);
+                })
+              }
+            </div>
+            :
+            <PanelHeader data-test-id="header">
+              {this.getActionName()}
+            </PanelHeader>
+          }
+          {
+            mta ?
+              <>
+                {
+                  currentTab === MTTransferFormTab.proxy &&
+                  <>
+                    <StepComponent
+                      title="Deploy proxy"
+                      description={`Proxies are used to bundle multiple transactions into one,
                 saving transaction time and gas costs. This only has to be done once.`}
-                    btnLabel="Deploy Proxy"
-                    btnAction={() => this.setup()}
-                    btnDisabled={mta.proxy && mta.proxy.options.address !== nullAddress}
-                    isLoading={isLoading}
-                    stepCompleted={mta.proxy && mta.proxy.options.address !== nullAddress}
-                  />
-                  <StepComponent
-                    title="Set allowance"
-                    description={`This permission allows Oasis smart contracts
+                      tid="create-proxy"
+                      btnLabel="Deploy Proxy"
+                      btnAction={() => this.setup()}
+                      btnDisabled={mta.proxy && mta.proxy.options.address !== nullAddress}
+                      isLoading={isLoading}
+                      stepCompleted={mta.proxy && mta.proxy.options.address !== nullAddress}
+                    />
+                    <StepComponent
+                      title="Set allowance"
+                      description={`This permission allows Oasis smart contracts
                    to interact with your ${token}.
                    This has to be done for each asset type.`}
-                    btnLabel="Set allowance"
-                    btnAction={() => this.allowance()}
-                    isLoading={isLoading}
-                    btnDisabled={
-                      mta.proxy && mta.proxy.options.address === nullAddress
-                    }
-                    stepCompleted={mta && allowance(mta, token)}
-                  />
-                </> :
-                <>
-                  {allowance(mta, token) && mta.proxy && <>
-                    <PanelBody paddingTop={true} style={{ height: '287px' }}>
-                      {this.AccountSummary()}
-                      <Hr color="dark" className={styles.hrBigMargin}/>
-                      {this.FormOrTransactionState()}
+                      tid="set-allowance"
+                      btnLabel="Set allowance"
+                      btnAction={() => this.allowance()}
+                      isLoading={isLoading}
+                      btnDisabled={
+                        mta.proxy && mta.proxy.options.address === nullAddress
+                      }
+                      stepCompleted={mta && allowance(mta, token)}
+                    />
+                    <div className={styles.onboardingPanel}>
+                      <Button size="md"
+                              className={styles.cancelButton}
+                              block={true}
+                              data-test-id="close-modal"
+                              color="greyOutlined"
+                              onClick={() => this.close()}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </>
+                }
+                {
+                  currentTab === MTTransferFormTab.transfer &&
+                  <>
+                    <PanelBody paddingTop={true}
+                               style={{ height: '287px' }}
+                               data-test-id="transfer">
+                        {this.AccountSummary()}
+                        <Hr color="dark" className={styles.hrBigMargin}/>
+                        {this.FormOrTransactionState()}
                     </PanelBody>
                     {this.Buttons()}
                   </>
-                  }
-                </>
-              }
-            </> : <LoadingIndicator/>
+                }
+                {
+                  currentTab === MTTransferFormTab.buy &&
+                  <>
+                    <theAppContext.Consumer>
+                      {
+                        ({ MTSimpleOrderBuyPanelRxTx }) =>
+                          // @ts-ignore
+                          <MTSimpleOrderBuyPanelRxTx close={this.props.close}/>
+                      }
+                    </theAppContext.Consumer>
+                  </>
+                }
+              </> : <LoadingIndicator/>
           }
         </Panel>
       </ReactModal>
     );
+  }
+
+  public handleSetMaxAmount = () => {
+    const { token, balances, actionKind } = this.props;
+
+    if (balances) {
+      const maxValue = actionKind === UserActionKind.fund
+        ? balances[token]
+        : this.getMaxWithdrawAmount();
+      this.handleSetMax(maxValue, FormChangeKind.amountFieldChange);
+    }
+  }
+
+  public handleAmountFocus = () => {
+    if (this.amountInput) {
+      this.amountInput.focus();
+    }
+  }
+
+  private getMaxWithdrawAmount = (): BigNumber => {
+    const { daiBalance, ilk , token } = this.props;
+    const baseToken = token === 'DAI' && ilk || token;
+    const baseAsset = this.getAsset(baseToken) as MarginableAsset;
+    return token === 'DAI'
+      ? daiBalance && daiBalance.gt(zero)
+        ? daiBalance
+        : zero
+      : baseAsset.availableBalance;
   }
 
   private amountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -203,146 +292,146 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
   }
 
   private AccountSummary = () => {
-    const asset = this.getAsset(this.props.token);
-    const baseToken = this.props.token === 'DAI' && this.props.ilk || this.props.token;
+    const { token, ilk, liquidationPrice, liquidationPricePost,
+      realPurchasingPower, realPurchasingPowerPost, balancePost,
+      isSafePost, daiBalance, daiBalancePost, balances} = this.props;
+    const baseToken = token === 'DAI' && ilk || token;
     const baseAsset = this.getAsset(baseToken) as MarginableAsset;
-
-    const liquidationPrice = this.props.liquidationPrice ?
-      this.props.liquidationPrice : zero;
-
-    const liquidationPricePost = this.props.liquidationPricePost ?
-      this.props.liquidationPricePost : zero;
-
+    const liquidationPriceDisplay = liquidationPrice ? liquidationPrice : zero;
+    const liquidationPricePostDisplay = liquidationPricePost ? liquidationPricePost : zero;
     return(
       <>
-          <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
-            <div className={styles.orderSummaryLabel}>
-              Purchasing Power
-            </div>
-            <div className={styles.orderSummaryValue}>
-              {
-                this.props.realPurchasingPower &&
-                <Money
-                  value={ this.props.realPurchasingPower}
-                  token={'DAI'}
-                  fallback="-"
-                />
-              }
-              { this.props.realPurchasingPowerPost &&
-              <>
-                <span className={styles.transitionArrow} />
-                { this.props.realPurchasingPowerPost ?
-                  <Money
-                    value={ this.props.realPurchasingPowerPost}
-                    token={'DAI'}
-                    fallback="-"
-                  />
-                  : <span>-</span>
-                }
-              </>
-              }
-            </div>
+        <div className={styles.subtitle}>
+          {`${getToken(token).name} (${token}) ${this.getActionName()}`}
+        </div>
+        <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
+          <div className={styles.orderSummaryLabel}>
+            Purchasing Power
           </div>
-          <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
-            <div className={styles.orderSummaryLabel}>
-              Account Balance
-            </div>
-            <div className={styles.orderSummaryValue}>
-              { baseAsset && baseAsset.balance ?
-                <Money
-                  value={baseAsset.balance}
-                  token={baseToken}
-                  fallback="-"
-                /> : <span>-</span>
-              }
-              {
-                baseAsset && baseAsset.balance && this.props.balancePost &&
-                !this.props.balancePost.isEqualTo(baseAsset.balance) &&
-                <>
-                  <span className={styles.transitionArrow} />
-                  { this.props.balancePost ?
-                    <Money
-                      value={this.props.balancePost}
-                      token={baseToken}
-                      fallback="-"
-                    /> : <span>-</span>
-                  }
-                </>
-              }
-            </div>
-          </div>
-          <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
-            <div className={styles.orderSummaryLabel}>
-              Liquidation Price
-            </div>
-            <div className={styles.orderSummaryValue}>
+          <div className={styles.orderSummaryValue}>
+            {
+              realPurchasingPower &&
               <Money
-                value={liquidationPrice}
-                token="USD"
-                fallback="-"
-                className={
-                  classnames({
-                    [styles.orderSummaryValuePositive]: baseAsset && baseAsset.safe,
-                    [styles.orderSummaryValueNegative]: baseAsset && !baseAsset.safe
-                  })
-                }
-              />
-              {
-                this.props.liquidationPricePost &&
-                this.props.liquidationPrice &&
-                !this.props.liquidationPrice.isEqualTo(this.props.liquidationPricePost) &&
-                <>
-                  <span className={styles.transitionArrow} />
-                  <Money
-                    value={liquidationPricePost}
-                    token="USD"
-                    fallback="-"
-                    className={
-                      classnames({
-                        [styles.orderSummaryValuePositive]: this.props.isSafePost,
-                        [styles.orderSummaryValueNegative]: !this.props.isSafePost,
-                      })
-                    }
-                  />
-                </>
-              }
-            </div>
-          </div>
-          <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
-            <div className={styles.orderSummaryLabel}>
-              DAI Balance
-            </div>
-            <div className={styles.orderSummaryValue}>
-              { this.props.daiBalance &&
-              <Money
-                value={this.props.daiBalance}
+                value={ realPurchasingPower}
                 token={'DAI'}
                 fallback="-"
               />
+            }
+            { realPurchasingPowerPost &&
+            <>
+              <span className={styles.transitionArrow} />
+              { realPurchasingPowerPost ?
+                <Money
+                  value={realPurchasingPowerPost}
+                  token={'DAI'}
+                  fallback="-"
+                />
+                : <span>-</span>
               }
-              {
-                this.props.daiBalancePost && this.props.daiBalance &&
-                !this.props.daiBalance.isEqualTo(this.props.daiBalancePost) &&
-                <>
-                  <span className={styles.transitionArrow} />
-                  { this.props.daiBalancePost ?
-                    <Money
-                      value={this.props.daiBalancePost}
-                      token={'DAI'}
-                      fallback="-"
-                    /> : <span>-</span>
-                  }
-                </>
-              }
-            </div>
+            </>
+            }
           </div>
+        </div>
+        <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
+          <div className={styles.orderSummaryLabel}>
+            Account Balance
+          </div>
+          <div className={styles.orderSummaryValue}>
+            { baseAsset && baseAsset.balance ?
+              <Money
+                value={baseAsset.balance}
+                token={baseToken}
+                fallback="-"
+              /> : <span>-</span>
+            }
+            {
+              baseAsset && baseAsset.balance && balancePost &&
+              !balancePost.isEqualTo(baseAsset.balance) &&
+              <>
+                <span className={styles.transitionArrow} />
+                { balancePost ?
+                  <Money
+                    value={balancePost}
+                    token={baseToken}
+                    fallback="-"
+                  /> : <span>-</span>
+                }
+              </>
+            }
+          </div>
+        </div>
+        <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
+          <div className={styles.orderSummaryLabel}>
+            Liquidation Price
+          </div>
+          <div className={styles.orderSummaryValue}>
+            <Money
+              value={liquidationPriceDisplay}
+              token="USD"
+              fallback="-"
+              className={
+                classnames({
+                  [styles.orderSummaryValuePositive]: baseAsset && baseAsset.safe,
+                  [styles.orderSummaryValueNegative]: baseAsset && !baseAsset.safe
+                })
+              }
+            />
+            {
+              liquidationPricePost &&
+              liquidationPrice &&
+              !liquidationPrice.isEqualTo(liquidationPricePost) &&
+              <>
+                <span className={styles.transitionArrow} />
+                <Money
+                  value={liquidationPricePostDisplay}
+                  token="USD"
+                  fallback="-"
+                  className={
+                    classnames({
+                      [styles.orderSummaryValuePositive]: isSafePost,
+                      [styles.orderSummaryValueNegative]: !isSafePost,
+                    })
+                  }
+                />
+              </>
+            }
+          </div>
+        </div>
+        <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
+          <div className={styles.orderSummaryLabel}>
+            DAI Balance
+          </div>
+          <div className={styles.orderSummaryValue}>
+            { daiBalance &&
+            <Money
+              value={daiBalance}
+              token={'DAI'}
+              fallback="-"
+            />
+            }
+            {
+              daiBalancePost && daiBalance &&
+              !daiBalance.isEqualTo(daiBalancePost) &&
+              <>
+                <span className={styles.transitionArrow} />
+                { daiBalancePost ?
+                  <Money
+                    value={daiBalancePost}
+                    token={'DAI'}
+                    fallback="-"
+                  /> : <span>-</span>
+                }
+              </>
+            }
+          </div>
+        </div>
 
         <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
           <div className={styles.orderSummaryLabel}>
-            Wallet Balance
+            Wallet Balance (Available to deposit)
           </div>
           <div className={styles.orderSummaryValue}>
-            {asset && formatAmount(asset.walletBalance, asset.name)} {this.props.token}
+            { balances && formatAmount(balances[token], token) } {token}
           </div>
         </div>
       </>
@@ -370,7 +459,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
           <span className={styles.checklistTitle}>
             {getToken(this.props.token).name} deposit
           </span>
-          <div className={styles.checklistSummary}>
+          <div className={styles.checklistSummary} data-test-id="tx-status">
             <TransactionStateDescription progress={this.props.progress}/>
           </div>
         </div>
@@ -417,27 +506,49 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
     }
   }
 
+  private getActionName() {
+    const { actionKind } = this.props;
+    return actionKind === UserActionKind.fund ? 'Deposit' : 'Withdraw';
+  }
+
   private Buttons() {
-    const retry = this.props.progress === ProgressStage.fiasco;
-    const depositAgain = this.props.progress === ProgressStage.done;
+    const { progress, readyToProceed, token, ilk, actionKind } = this.props;
+    const retry = progress === ProgressStage.fiasco;
+    const depositAgain = progress === ProgressStage.done;
     const deposit = !retry && !depositAgain;
-    const depositEnabled = this.props.readyToProceed && this.props.progress === undefined &&
-      (this.props.token !== 'DAI' || !!this.props.ilk);
-    const proceedName = this.props.actionKind === UserActionKind.fund ? 'Deposit' : 'Withdraw';
+    const depositEnabled = readyToProceed && progress === undefined &&
+      (token !== 'DAI' || !!ilk);
+    const proceedName = `${this.getActionName()} ${token}`;
+
     return (
       <PanelFooter className={styles.buttons}>
         {deposit &&
         <Button size="md"
-                className={styles.button}
+                className={styles.confirmButton}
+                data-test-id={`${this.getActionName().toLowerCase()}-btn`}
                 disabled={!depositEnabled}
-                onClick={() => this.transfer()}
+                block={true}
+                color="primary"
+                onClick={
+                  () => {
+                    this.transfer();
+                    mixpanel.track('btn-click', {
+                      id: `${actionKind}-${token === 'DAI' ? 'dai' : 'collateral'}-submit`,
+                      product: 'oasis-trade',
+                      page: 'Leverage',
+                      section: 'deposit-withdraw-modal',
+                      currency: token
+                    });
+                  }
+                }
         >
           {proceedName}
         </Button>
         }
         {retry  &&
         <Button size="md"
-                className={styles.button}
+                className={styles.confirmButton}
+                block={true}
                 onClick={() => this.transfer()}
         >
           Retry
@@ -445,24 +556,52 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
         }
         {depositAgain &&
         <Button size="md"
-                className={styles.button}
+                className={styles.confirmButton}
+                block={true}
                 onClick={() => this.props.reset()}
         >
           {proceedName} again
         </Button>
         }
+        <Button size="md"
+                className={styles.cancelButton}
+                block={true}
+                data-test-id="close-modal"
+                color="greyOutlined"
+                onClick={() => this.close()}
+        >
+          Cancel
+        </Button>
       </PanelFooter>);
   }
 
+  private handleSetMax = (
+    value: BigNumber,
+    kind: FormChangeKind.amountFieldChange
+  ) => {
+    this.props.change({ kind, value });
+  }
+
   private AmountGroup(disabled: boolean) {
+    const { token, balances, actionKind } = this.props;
+
+    const maxTotal = balances
+      ? actionKind === UserActionKind.fund
+        ? balances[token]
+        : this.getMaxWithdrawAmount()
+      : zero;
+
     return (
       <InputGroup sizer="md" disabled={disabled}>
         <InputGroupAddon border="right">Amount</InputGroupAddon>
         <BigNumberInput
+          ref={ (el: any) =>
+            this.amountInput = (el && ReactDOM.findDOMNode(el) as HTMLElement) || undefined
+          }
           type="text"
           mask={createNumberMask({
             allowDecimal: true,
-            decimalLimit: 5,
+            decimalLimit: getToken(this.props.token).digits,
             prefix: ''
           })}
           onChange={this.amountChange}
@@ -470,10 +609,26 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
             (this.props.amount || null) &&
             formatAmount(this.props.amount as BigNumber, this.props.token)
           }
+          placeholder={
+            `Max. ${formatAmount(maxTotal, token)}`
+          }
           guide={true}
           placeholderChar={' '}
           disabled={disabled}
+          data-test-id="amount-input"
         />
+        <InputGroupAddon
+          className={stylesOrder.setMaxBtnAddon} onClick={ () => this.handleSetMaxAmount() }>
+          <Button size="sm" type="button" className={stylesOrder.setMaxBtn}>
+            Set Max
+          </Button>
+        </InputGroupAddon>
+        <InputGroupAddon
+          className={stylesOrder.inputCurrencyAddon}
+          onClick={ this.handleAmountFocus }
+        >
+          {token}
+        </InputGroupAddon>
       </InputGroup>
     );
   }
@@ -481,14 +636,54 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
   private messageContent(msg: Message) {
     switch (msg.kind) {
       case MessageKind.insufficientAvailableAmount:
-        return  `Your available balance is too low to fund this order`;
+        return  msg.token === 'DAI'
+          ? `Your balance is too low to withdraw that amount`
+          : `You don't have enough free collateral to withdraw that amount`;
       case MessageKind.insufficientAmount:
-        return  `Your balance is too low to fund this order`;
+        return  `Your balance is too low to deposit that amount`;
       case MessageKind.dustAmount:
-        return `Order below token limit`;
+        return `Transfer below token limit`;
       case MessageKind.impossibleToPlan:
         return msg.message;
+      case MessageKind.minDebt:
+        return `Dai debt below ${msg.message} DAI limit`;
+      case MessageKind.purchasingPowerEqZero:
+        return <div style={{ marginTop: '8px' }}>
+                  Postfund purchasing power should be greater than zero.<br/>
+                  Min amount to deposit is {msg.minDepositAmount.toPrecision(4, 2)} {msg.token}.
+               </div>;
     }
   }
+}
 
+export class MTSimpleOrderBuyPanel extends React.Component<
+  LoadableWithTradingPair<MTSimpleFormState> & { close: (() => void) }
+  > {
+  public render() {
+    if (this.props.status === 'loaded' && this.props.value && this.props.value.mta) {
+      const formState = this.props.value;
+      const { mta } = formState;
+      const ma = findMarginableAsset(formState.baseToken, mta);
+
+      if (mta && mta.proxy && ma && (ma.balance.gt(zero) || ma.dai.gt(zero))) {
+        return <div className={stylesOrder.buyFormWrapper}>
+          <MtSimpleOrderFormBody {...{ ...this.props, ...formState, close: this.props.close }} />
+          <Button size="md"
+                  className={styles.cancelButton}
+                  data-test-id="close-modal"
+                  block={true}
+                  color="greyOutlined"
+                  onClick={() => this.props.close()}
+          >
+            Cancel
+          </Button>
+        </div>;
+      }
+    }
+
+    return <div className={stylesOrder.orderPanel}>
+      <PanelHeader>Manage Your Leverage</PanelHeader>
+      <LoadingIndicator size="lg"/>
+    </div>;
+  }
 }

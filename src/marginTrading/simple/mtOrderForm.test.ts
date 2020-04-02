@@ -10,7 +10,12 @@ import { unpack } from '../../utils/testHelpers';
 import { noCash, wethEmpty } from '../plan/planFixtures';
 import { CashAssetCore, MTAccount } from '../state/mtAccount';
 import { getMTAccount } from '../state/mtTestUtils';
-import { createMTSimpleOrderForm$, MessageKind, MTSimpleOrderFormParams } from './mtOrderForm';
+import {
+  createMTSimpleOrderForm$,
+  ExternalChangeKind,
+  MessageKind,
+  MTSimpleOrderFormParams
+} from './mtOrderForm';
 setupFakeWeb3ForTesting();
 
 function snapshotify(object: any): any {
@@ -39,6 +44,7 @@ const defParams = {
   readCalls$: of(defaultReadCalls) as ReadCalls$,
   dustLimits$: of({ DAI: new BigNumber(0.1), WETH: new BigNumber(0.1) }),
   account$: of(defaultUser),
+  riskComplianceCheck$: of(true)
 };
 
 const controllerWithFakeOrderBook = (
@@ -83,6 +89,10 @@ test('set price and amount', () => {
   const { change } = unpack(controller);
 
   change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(1) });
+  change({
+    kind: ExternalChangeKind.riskCompliance,
+    hasRiskAccepted: true
+  });
 
   expect(unpack(controller).amount).toEqual(new BigNumber(1));
   expect(unpack(controller).price).toEqual(new BigNumber(1));
@@ -161,15 +171,18 @@ test('buy with leverage - match exactly one order', () => {
 
   expect(unpack(controller).realPurchasingPower).toEqual(new BigNumber(199.98779296875));
   change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(20) });
-
+  change({
+    kind: ExternalChangeKind.riskCompliance,
+    hasRiskAccepted: true
+  });
   expect(unpack(controller).readyToProceed).toEqual(true);
-  expect(unpack(controller).realPurchasingPowerPost).toEqual(new BigNumber(180));
+  expect(unpack(controller).realPurchasingPowerPost).toEqual(new BigNumber(179.98779296875));
 });
 
 test('buy with leverage - match more than one order', () => {
   const weth = {
     ...wethEmpty,
-    referencePrice: new BigNumber(2),
+    referencePrice: new BigNumber(10),
     balance: new BigNumber(30),
     debt: new BigNumber(0)
   };
@@ -187,8 +200,10 @@ test('buy with leverage - match more than one order', () => {
 
   change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(2.5) });
 
-  expect(unpack(controller).readyToProceed).toEqual(true);
-  expect(unpack(controller).realPurchasingPowerPost).toEqual(new BigNumber(8.325));
+  const s = unpack(controller);
+  expect(s.readyToProceed).toEqual(true);
+  expect(s.realPurchasingPowerPost.toFixed(0))
+    .toEqual(new BigNumber('275').toFixed());
 });
 
 test('buy with leverage - purchasing power too low', () => {

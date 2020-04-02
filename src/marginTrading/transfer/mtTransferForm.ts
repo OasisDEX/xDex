@@ -11,13 +11,13 @@ import {
 import {
   AmountFieldChange,
   BalancesChange, doGasEstimation, EtherPriceUSDChange,
-  FormChangeKind, GasEstimationStatus,
-  GasPriceChange, HasGasEstimation,
-  MTAccountChange, MTAccountStateChange, OrderbookChange,
-  progressChange, ProgressChange, ProgressStage,
-  toBalancesChange, toEtherPriceUSDChange,
-  toGasPriceChange, TokenChange,
-  toMTAccountChange, toOrderbookChange$, transactionToX,
+  FormChangeKind, FormResetChange,
+  GasEstimationStatus, GasPriceChange,
+  HasGasEstimation, MTAccountChange, MTAccountStateChange,
+  OrderbookChange, ProgressChange, progressChange,
+  ProgressStage, toBalancesChange,
+  toEtherPriceUSDChange, toGasPriceChange,
+  TokenChange, toMTAccountChange, toOrderbookChange$, transactionToX,
 } from '../../utils/form';
 
 import { curry } from 'ramda';
@@ -48,16 +48,28 @@ export enum MessageKind {
   insufficientAmount = 'insufficientAmount',
   insufficientAvailableAmount = 'insufficientAvailableAmount',
   dustAmount = 'dustAmount',
-  impossibleToPlan = 'impossibleToPlan'
+  impossibleToPlan = 'impossibleToPlan',
+  minDebt = 'minDebt',
+  purchasingPowerEqZero = 'purchasingPowerEqZero',
 }
 
 export type Message = {
   kind: MessageKind.insufficientAmount |
-    MessageKind.insufficientAvailableAmount |
-    MessageKind.dustAmount;
+    MessageKind.dustAmount
 } | {
+  kind: MessageKind.insufficientAvailableAmount;
+  token: string;
+}| {
   kind: MessageKind.impossibleToPlan;
   message: string;
+} | {
+  kind: MessageKind.minDebt;
+  field?: string;
+  message: string;
+} | {
+  kind: MessageKind.purchasingPowerEqZero,
+  minDepositAmount: BigNumber,
+  token: string;
 };
 
 export type ManualChange = TokenChange | AmountFieldChange | IlkFieldChange;
@@ -65,6 +77,7 @@ export type ManualChange = TokenChange | AmountFieldChange | IlkFieldChange;
 export enum MTTransferFormTab {
   proxy = 'proxy',
   transfer = 'transfer',
+  buy = 'buy',
 }
 
 export interface MTTransferFormState extends HasGasEstimation {
@@ -97,10 +110,15 @@ export interface MTTransferFormState extends HasGasEstimation {
   allowance: (state: MTTransferFormState) => void;
   cancel: () => void;
   reset: () => void;
+  withOnboarding?: boolean;
 }
 
 export type CreateMTFundForm$ =
-  (actionKind: UserActionKind, token: string, ilk: string | undefined)
+  (params: {
+    actionKind: UserActionKind,
+    token: string, ilk: string | undefined,
+    withOnboarding: boolean
+  })
     => Observable<MTTransferFormState>;
 
 export enum TransferFormChangeKind {
@@ -118,17 +136,19 @@ type EnvironmentChange =
 
 // TODO: why not: ManualChange | EnvironmentChange | StageChange?
 type MTSetupFormChange =
-  TokenChange | AmountFieldChange | IlkFieldChange |
+  TokenChange | AmountFieldChange | IlkFieldChange | FormResetChange |
   EnvironmentChange |
   ProgressChange;
+
+const formResetChange: FormResetChange = { kind: FormChangeKind.formResetChange };
 
 function initialTab(mta: MTAccount, name: string) {
   const { proxy, transfer } = MTTransferFormTab;
 
   if (mta.proxy.options.address !==  nullAddress) {
     const isAllowance = name === 'DAI'
-              ? mta.daiAllowance
-              : findMarginableAsset(name, mta)!.allowance;
+      ? mta.daiAllowance
+      : findMarginableAsset(name, mta)!.allowance;
     return isAllowance ? transfer : proxy;
     return isAllowance ? transfer : proxy;
   }
@@ -138,6 +158,18 @@ function initialTab(mta: MTAccount, name: string) {
 
 function applyChange(state: MTTransferFormState, change: MTSetupFormChange): MTTransferFormState {
   switch (change.kind) {
+    case FormChangeKind.formResetChange:
+      return {
+        ...state,
+        amount: undefined,
+        daiBalancePost: undefined,
+        realPurchasingPowerPost: undefined,
+        liquidationPricePost:undefined,
+        balancePost: undefined,
+        leveragePostPost: undefined,
+        messages: [],
+        progress: undefined,
+      };
     case FormChangeKind.gasPriceChange:
       return { ...state,
         gasPrice: change.value,
@@ -171,7 +203,7 @@ function applyChange(state: MTTransferFormState, change: MTSetupFormChange): MTT
       return {
         ...state,
         progress: change.progress === ProgressStage.done &&
-          state.tab !== MTTransferFormTab.transfer ? undefined : change.progress
+        state.tab !== MTTransferFormTab.transfer ? undefined : change.progress
       };
     // default:
     //   const _exhaustiveCheck: never = change; // tslint:disable-line
@@ -285,6 +317,16 @@ function updatePlan(state: MTTransferFormState): MTTransferFormState {
   const [, realPurchasingPowerPost] = realPurchasingPowerMarginable(
     postTradeAsset,
     state.orderbook.sell);
+
+  if (
+    daiBalancePost.lt(zero) &&
+    daiBalancePost.times(minusOne).lt(postTradeAsset.minDebt)
+  ) {
+    messages.push({
+      kind: MessageKind.minDebt,
+      message: postTradeAsset.minDebt.toFixed(5)
+    });
+  }
 
   return { ...state,
     messages,
@@ -449,7 +491,11 @@ function prepareAllowance(calls$: Calls$, mta$: Observable<MTAccount>)
               return of(change);
             }
             return mta$.pipe(
-              filter(mta => mta.state === MTAccountState.setup),
+              filter(mta => {
+                return state.token === 'DAI'
+                  ? mta.daiAllowance
+                  : findMarginableAsset(state.token, mta)!.allowance;
+              }),
               first(),
               map(() => change)
             );
@@ -481,6 +527,7 @@ function validate(state: MTTransferFormState) {
     ) {
       messages.push({
         kind: MessageKind.insufficientAvailableAmount,
+        token: state.token
       });
       // } else if (state.actionKind === UserActionKind.draw &&
       //   asset && asset.assetKind === AssetKind.nonMarginable &&
@@ -489,8 +536,9 @@ function validate(state: MTTransferFormState) {
       //     kind: MessageKind.insufficientAmount,
       //   });
     } else if (state.actionKind === UserActionKind.fund &&
-      state.balances[state.token].lt(state.amount)) {
-      (null || messages).push({
+      state.balances[state.token].lt(state.amount)
+    ) {
+      messages.push({
         kind: MessageKind.insufficientAmount,
       });
     }
@@ -535,22 +583,26 @@ function freezeIfInProgress(
 export function createMTTransferForm$(
   mta$: Observable<MTAccount>,
   gasPrice$: Observable<BigNumber>,
-  etherPriceUSD$: Observable<BigNumber>,
+  etherPriceUsd$: Observable<BigNumber|undefined>,
   balances$: Observable<Balances>,
   orderbook$: Observable<Orderbook>,
   calls$: Calls$,
   readCalls$: ReadCalls$,
-  actionKind: UserActionKind.fund | UserActionKind.draw,
-  token: string,
-  ilk: string,
+  params: {
+    actionKind: UserActionKind.fund | UserActionKind.draw,
+    token: string,
+    ilk: string,
+    withOnboarding: boolean,
+  }
 ): Observable<MTTransferFormState> {
 
+  const { token, ilk, withOnboarding, actionKind } = params;
   const manualChange$ = new Subject<ManualChange>();
-  const resetChange$ = new Subject<ProgressChange>();
+  const resetChange$ = new Subject<FormResetChange>();
 
   const environmentChange$ = combineAndMerge(
     toGasPriceChange(gasPrice$),
-    toEtherPriceUSDChange(etherPriceUSD$),
+    toEtherPriceUSDChange(etherPriceUsd$),
     toOrderbookChange$(orderbook$),
     toMTAccountChange(mta$),
     toBalancesChange(balances$),
@@ -571,13 +623,13 @@ export function createMTTransferForm$(
     cancel,
     token,
     ilk,
-    reset: () => resetChange$.next(progressChange(undefined)),
+    withOnboarding,
+    reset: () => resetChange$.next(formResetChange),
     messages: [],
     gasEstimationStatus: GasEstimationStatus.unset,
   };
 
   return merge(
-    of({ token, stage: FormChangeKind.tokenChange }),
     manualChange$,
     environmentChange$,
     transferProgressChange$,

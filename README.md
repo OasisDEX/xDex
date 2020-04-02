@@ -12,9 +12,14 @@ yarn
 yarn start
 ```
 
-## Development
+## Environments
+[master branch](https://oasis.app/trade/) - uses `.env.production` configuration file
 
-[dev branch](http://oasis-market-dev.surge.sh/)
+[dev branch](https://staging.oasis.app/trade/) - uses `.env.dev` configuration file
+
+[localhost](https://localhost:3000) - uses `.env` configuration file
+
+Configuration files enable different feature switches for each environment.
 
 ### Local development
 
@@ -82,3 +87,9 @@ REACT_APP_TAX_EXPORTER_ENABLED
 ```
 
 Enables Tax Exporter button on Account page. Feature allows user to export trade history into CSV format.
+
+```
+REACT_APP_MARKET_CLOSED
+```
+
+Disables the possibility to place new offers on the market.

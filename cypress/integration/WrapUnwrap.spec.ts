@@ -15,68 +15,68 @@ describe('Wrapping ETH', () => {
   it('should succeed', () => {
     Tab.balances();
 
-    Balance.of('ETH').shouldBe(/8,999.../);
-    Balance.of('WETH').shouldBe(/1,001.../);
+    Balance.of('ETH').shouldBe(/8999.../);
+    Balance.of('WETH').shouldBe(/1001.../);
 
     wrapping('100').shouldProceed();
 
-    Balance.of('ETH').shouldBe(/8,899.../);
-    Balance.of('WETH').shouldBe(/1,101.../);
+    Balance.of('ETH').shouldBe(/8899.../);
+    Balance.of('WETH').shouldBe(/1101.../);
   });
 
   it('should not proceed when trying to wrap more than the balance', () => {
     Tab.balances();
 
-    Balance.of('ETH').shouldBe(/8,999.../);
-    Balance.of('WETH').shouldBe(/1,001.../);
+    Balance.of('ETH').shouldBe(/8999.../);
+    Balance.of('WETH').shouldBe(/1001.../);
 
    // extract constants from the WrapUnwrapFromView
     wrapping('10000').shouldFailWith(`Your ETH balance is too low`);
 
-    Balance.of('ETH').shouldBe(/8,999.../);
-    Balance.of('WETH').shouldBe(/1,001.../);
+    Balance.of('ETH').shouldBe(/8999.../);
+    Balance.of('WETH').shouldBe(/1001.../);
   });
 
   it('should not proceed when trying to wrap 0', () => {
     Tab.balances();
 
-    Balance.of('ETH').shouldBe(/8,999.../);
-    Balance.of('WETH').shouldBe(/1,001.../);
+    Balance.of('ETH').shouldBe(/8999.../);
+    Balance.of('WETH').shouldBe(/1001.../);
 
     // extract constants from the WrapUnwrapFromView
     wrapping('0').shouldFailWith(`Amount is too low`);
 
-    Balance.of('ETH').shouldBe(/8,999.../);
-    Balance.of('WETH').shouldBe(/1,001.../);
+    Balance.of('ETH').shouldBe(/8999.../);
+    Balance.of('WETH').shouldBe(/1001.../);
   });
 
   // tslint:disable-next-line:max-line-length
   it('should not proceed when trying to wrap ETH and gas cost amount',  () => {
     const gasCost = 0.00092;
-    const amountToWrap = 8999.94267 - gasCost + 0.00001 ;
+    const amountToWrap = 8999.96703 - gasCost + 0.00001 ;
 
     Tab.balances();
 
-    Balance.of('ETH').shouldBe(/8,999\.94267/);
-    Balance.of('WETH').shouldBe(/1,001.../);
+    Balance.of('ETH').shouldBe(/8999.96/);
+    Balance.of('WETH').shouldBe(/1001.../);
 
     wrapping(`${amountToWrap}`).shouldFailWith(`You will not be able to pay the gas cost`);
 
-    Balance.of('ETH').shouldBe(/8,999\.94267/);
-    Balance.of('WETH').shouldBe(/1,001.../);
+    Balance.of('ETH').shouldBe(/8999.96/);
+    Balance.of('WETH').shouldBe(/1001.../);
   });
 
   it('should not proceed when trying to wrap exact ETH balance',  () => {
-    const amountToWrap = 8999.94267;
+    const amountToWrap = 8999.96703;
     Tab.balances();
 
-    Balance.of('ETH').shouldBe(/8,999\.94267/);
-    Balance.of('WETH').shouldBe(/1,001.../);
+    Balance.of('ETH').shouldBe(/8999\.96/);
+    Balance.of('WETH').shouldBe(/1001.../);
 
     wrapping(`${amountToWrap}`).shouldFailWith(`You will not be able to pay the gas cost`);
 
-    Balance.of('ETH').shouldBe(/8,999\.94267/);
-    Balance.of('WETH').shouldBe(/1,001.../);
+    Balance.of('ETH').shouldBe(/8999\.96/);
+    Balance.of('WETH').shouldBe(/1001.../);
   });
 });
 
@@ -91,50 +91,50 @@ describe('Unwrapping ETH', () => {
   it('should succeeed', () => {
     Tab.balances();
 
-    Balance.of('ETH').shouldBe(/8,999.../);
-    Balance.of('WETH').shouldBe(/1,001.../);
+    Balance.of('ETH').shouldBe(/8999.../);
+    Balance.of('WETH').shouldBe(/1001.../);
 
     unwrapping('100').shouldProceed();
 
-    Balance.of('ETH').shouldBe(/9,099.../);
+    Balance.of('ETH').shouldBe(/9099.../);
     Balance.of('WETH').shouldBe(/901.../);
   });
 
   it('should succeed when unwrapping whole balance ',  () => {
     Tab.balances();
 
-    Balance.of('ETH').shouldBe(/8,999.../);
-    Balance.of('WETH').shouldBe(/1,001.../);
+    Balance.of('ETH').shouldBe(/8999.../);
+    Balance.of('WETH').shouldBe(/1001.../);
 
     unwrapping('1001').shouldProceed();
 
-    Balance.of('ETH').shouldBe(/10,000.../);
+    Balance.of('ETH').shouldBe(/10000.../);
     Balance.of('WETH').shouldBe(/0.../);
   });
 
   it('should not proceed when trying to unwrap more than the balance', () => {
     Tab.balances();
 
-    Balance.of('ETH').shouldBe(/8,999.../);
-    Balance.of('WETH').shouldBe(/1,001.../);
+    Balance.of('ETH').shouldBe(/8999.../);
+    Balance.of('WETH').shouldBe(/1001.../);
 
     // extract constants from the WrapUnwrapFromView
     unwrapping('10000').shouldFailWith(`Your WETH balance is too low`);
 
-    Balance.of('ETH').shouldBe(/8,999.../);
-    Balance.of('WETH').shouldBe(/1,001.../);
+    Balance.of('ETH').shouldBe(/8999.../);
+    Balance.of('WETH').shouldBe(/1001.../);
   });
 
   it('should not proceed when trying to unwrap 0', () => {
     Tab.balances();
 
-    Balance.of('ETH').shouldBe(/8,999.../);
-    Balance.of('WETH').shouldBe(/1,001.../);
+    Balance.of('ETH').shouldBe(/8999.../);
+    Balance.of('WETH').shouldBe(/1001.../);
 
     // extract constants from the WrapUnwrapFromView
     unwrapping('0').shouldFailWith(`Amount is too low`);
 
-    Balance.of('ETH').shouldBe(/8,999.../);
-    Balance.of('WETH').shouldBe(/1,001.../);
+    Balance.of('ETH').shouldBe(/8999.../);
+    Balance.of('WETH').shouldBe(/1001.../);
   });
 });

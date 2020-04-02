@@ -18,7 +18,7 @@ export const setupMTProxy = {
   call: (_data: {}, context: NetworkConfig) =>
     context.instantProxyRegistry.contract.methods['build()'],
   prepareArgs: () => [],
-  options: () => ({ gas: DEFAULT_GAS + 2000000 }), // this should be estimated as in setupProxy
+  options: () => ({ gas: DEFAULT_GAS }), // this should be estimated as in setupProxy
   kind: TxMetaKind.setupMTProxy,
   description: () => <React.Fragment>Setup MT proxy</React.Fragment>
 };
@@ -130,34 +130,60 @@ function argsOfPerformOperations(
   }
 
   const fundArgs = (op: Operation, token: string) => [
-    context.cdpManager, Web3Utils.fromAscii(context.mcd.ilks[op.name]),
-    toWei(token, (op as any).amount),
-    context.tokens[token].address, context.mcd.joins[token], context.mcd.vat,
-  ];
-  const drawArgs = (op: Operation, token: string) => [
-    context.cdpManager, Web3Utils.fromAscii(context.mcd.ilks[op.name]),
-    toWei(token, (op as any).amount),
-    context.mcd.joins[token], context.mcd.vat,
-  ];
-  const buySellArgs = (op: Operation) => [
-    [
-      context.tokens[op.name].address, context.mcd.joins[op.name],
-      context.tokens.DAI.address, context.mcd.joins.DAI,
-      context.cdpManager, context.otc.address, context.mcd.vat,
-    ],
+    context.cdpManager,
     Web3Utils.fromAscii(context.mcd.ilks[op.name]),
-    toWei(op.name, (op as any).amount), toWei('DAI', (op as any).maxTotal),
+    toWei(token, (op as any).amount),
+    context.tokens[token].address,
+    context.mcd.joins[token],
   ];
+
+  const fundDaiArgs = (op: Operation, token:string) =>
+                      [...fundArgs(op, token), context.mcd.vat];
+
+  const drawArgs = (op: Operation, token: string) => [
+    context.cdpManager,
+    Web3Utils.fromAscii(context.mcd.ilks[op.name]),
+    toWei(token, (op as any).amount),
+    context.mcd.joins[token],
+  ];
+
+  const drawDaiArgs = (op: Operation, token:string) =>
+    [...drawArgs(op, token), context.mcd.vat];
+
+  const buySellArgs = (op: Operation) => {
+    const maxTotalAdjustedWithSlippage = (op as any).maxTotal.times(
+      op.kind === OperationKind.buyRecursively ?
+        one.plus((op as any).slippageLimit) :
+        one.minus((op as any).slippageLimit)
+    );
+    console.log('amount:', (op as any).amount.toString());
+    console.log(
+      `adjusting maxTotal with slippage ${(op as any).slippageLimit.toString()}:`,
+      (op as any).maxTotal.toString(), '->',
+      maxTotalAdjustedWithSlippage.toString()
+    );
+    console.log('price:', maxTotalAdjustedWithSlippage.div((op as any).amount).toString());
+    return [
+      [
+        context.tokens[op.name].address, context.mcd.joins[op.name],
+        context.tokens.DAI.address, context.mcd.joins.DAI,
+        context.cdpManager, context.otc.address, context.mcd.vat,
+      ],
+      Web3Utils.fromAscii(context.mcd.ilks[op.name]),
+      toWei(op.name, (op as any).amount),
+      toWei('DAI', maxTotalAdjustedWithSlippage),
+    ];
+  };
 
   const types = {
     [OperationKind.fundGem]: () =>
       context.proxyActions.contract.methods.fundGem(...fundArgs(plan[0], plan[0].name)).encodeABI(),
     [OperationKind.fundDai]: () =>
-      context.proxyActions.contract.methods.fundDai(...fundArgs(plan[0], 'DAI')).encodeABI(),
+      context.proxyActions.contract.methods.fundDai(...fundDaiArgs(plan[0], 'DAI')).encodeABI(),
     [OperationKind.drawGem]: () =>
       context.proxyActions.contract.methods.drawGem(...drawArgs(plan[0], plan[0].name)).encodeABI(),
     [OperationKind.drawDai]: () =>
-      context.proxyActions.contract.methods.drawDai(...drawArgs(plan[0], 'DAI')).encodeABI(),
+      context.proxyActions.contract.methods.drawDai(...drawDaiArgs(plan[0], 'DAI')).encodeABI(),
     [OperationKind.buyRecursively]: () =>
       context.proxyActions.contract.methods.buyLev(...buySellArgs(plan[0])).encodeABI(),
     [OperationKind.sellRecursively]: () =>
@@ -196,6 +222,7 @@ interface MTFundData extends PerformPlanData {
 export const mtFund = {
   ...mtPerformPlan,
   kind: TxMetaKind.fundMTAccount,
+  options: () => ({ gas: DEFAULT_GAS }),
   description: ({ token, amount }: MTFundData) =>
     <React.Fragment>
       Fund margin account with <Money value={amount} token={token} />
@@ -205,6 +232,7 @@ export const mtFund = {
 export const mtReallocate = {
   ...mtPerformPlan,
   kind: TxMetaKind.reallocateMTAccount,
+  options: () => ({ gas: DEFAULT_GAS }),
   description: () =>
     <React.Fragment>Reallocate margin account</React.Fragment>
 };
@@ -217,6 +245,7 @@ export interface MTDrawData extends PerformPlanData {
 export const mtDraw = {
   ...mtPerformPlan,
   kind: TxMetaKind.drawMTAccount,
+  options: () => ({ gas: DEFAULT_GAS }),
   description: ({ token, amount }: MTDrawData) =>
     <React.Fragment>
       Draw <Money value={amount} token={token} /> from margin account
@@ -228,11 +257,13 @@ export interface MTBuyData extends PerformPlanData {
   amount: BigNumber;
   price: BigNumber;
   total: BigNumber;
+  slippageLimit: BigNumber;
 }
 
 export const mtBuy = {
   ...mtPerformPlan,
   kind: TxMetaKind.buyMTAccount,
+  options: () => ({ gas: DEFAULT_GAS }),
   description: ({ baseToken, amount, total }: MTBuyData) =>
     <React.Fragment>
       Buy <Money value={amount} token={baseToken}/> for <Money value={total} token={'DAI'}/>
@@ -244,11 +275,13 @@ export interface MTSellData extends PerformPlanData {
   amount: BigNumber;
   price: BigNumber;
   total: BigNumber;
+  slippageLimit: BigNumber;
 }
 
 export const mtSell = {
   ...mtPerformPlan,
   kind: TxMetaKind.sellMTAccount,
+  options: () => ({ gas: DEFAULT_GAS }),
   description: ({ baseToken, amount, total }: MTSellData) =>
     <React.Fragment>
       Sell <Money value={amount} token={baseToken}/> for <Money value={total} token={'DAI'}/>
@@ -263,7 +296,7 @@ interface MTRedeemData {
 
 export const mtRedeem = {
   call: ({ proxy }: MTRedeemData) => {
-    return proxy['execute(address,bytes)'];
+    return proxy.methods['execute(address,bytes)'];
   },
   prepareArgs: ({ token, amount }: MTRedeemData, context: NetworkConfig) => {
     return [
@@ -277,6 +310,7 @@ export const mtRedeem = {
     ];
   },
   kind: TxMetaKind.redeem,
+  options: () => ({ gas: DEFAULT_GAS }),
   description: ({ token, amount }: MTRedeemData) =>
     <React.Fragment>
       Redeem <Money value={amount} token={token} /> from Vat

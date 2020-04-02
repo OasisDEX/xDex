@@ -23,6 +23,7 @@ export const ButtonIcon = (props: ButtonProps & { image: any }) => {
     <Button
       size="unsized"
       className={className}
+      type="button"
       {...otherProps}>
       <SvgImage className={styles.btnIcon} image={image}/>
     </Button>
@@ -53,6 +54,7 @@ export const SettingsIcon = (props: ButtonProps) => {
   return (
     <ButtonIcon
       color="secondaryOutlined"
+      type="button"
       className={classnames(styles.settingsIcon, className)}
       image={cogWheelSvg}
       {...other}

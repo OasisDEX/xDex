@@ -2,6 +2,7 @@ import { BigNumber } from 'bignumber.js';
 import * as moment from 'moment';
 
 import { getToken } from '../../blockchain/config';
+import { billion, million, one, oneThousandth, ten, thousand, zero } from '../zero';
 
 BigNumber.config({
   FORMAT: {
@@ -13,6 +14,63 @@ BigNumber.config({
     fractionGroupSize: 0,
   },
 });
+
+export function toShorthandNumber(amount: BigNumber, suffix: string = '', precision?: number) {
+  return new BigNumber(amount.toString()
+    .split('.')
+    .map((part, index) => {
+      if (index === 0) return part;
+      return part.substr(0, precision);
+    })
+    .filter(el => el)
+    .join('.')
+  )
+    .toFixed(precision)
+    .concat(suffix);
+}
+
+export function formatAsShorthandNumbers(amount: BigNumber, precision?: number): string {
+  if (amount.absoluteValue().gte(billion)) {
+    return toShorthandNumber(amount.dividedBy(billion), 'B', precision);
+  }
+  if (amount.absoluteValue().gte(million)) {
+    return toShorthandNumber(amount.dividedBy(million), 'M', precision);
+  }
+  if (amount.absoluteValue().gte(thousand)) {
+    return toShorthandNumber(amount.dividedBy(thousand), 'K', precision);
+  }
+  return toShorthandNumber(amount, '', precision);
+}
+
+export function formatCryptoBalance(amount: BigNumber): string {
+  const absAmount = amount.absoluteValue();
+
+  if (absAmount.eq(zero)) {
+    return formatAsShorthandNumbers(amount, 2);
+  }
+
+  if (absAmount.lt(oneThousandth)) {
+    return `${amount.isNegative() ? '-0.000' : '<0.001'}`;
+  }
+
+  if (absAmount.lt(ten)) {
+    return formatAsShorthandNumbers(amount, 4);
+  }
+
+  if (absAmount.lt(million)) return toShorthandNumber(amount, '', 2);
+
+  return formatAsShorthandNumbers(amount, 2);
+}
+
+export function formatFiatBalance(amount: BigNumber): string {
+  const absAmount = amount.absoluteValue();
+
+  if (absAmount.eq(zero)) return formatAsShorthandNumbers(amount, 2);
+  if (absAmount.lt(one)) return formatAsShorthandNumbers(amount, 4);
+  // We don't want to have numbers like 999999 formatted as 999.99k
+
+  return formatAsShorthandNumbers(amount, 2);
+}
 
 export function formatAmount(amount: BigNumber, token: string): string {
   const digits = token === 'USD' ? 2 : getToken(token).digits;

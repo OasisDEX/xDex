@@ -12,6 +12,7 @@ describe('Buy Order', () => {
   beforeEach(() => {
     cypressVisitWithWeb3();
     WalletConnection.connect();
+    WalletConnection.isConnected();
   });
 
   it('should place a new order', () => {
@@ -68,6 +69,7 @@ describe('Buy Order', () => {
     sellOrders.countIs(4);
 
     const buyOrders = Orderbook.list(OrderType.BUY);
+    buyOrders.countIs(3);
 
     new Order()
       .buy()
@@ -82,7 +84,7 @@ describe('Buy Order', () => {
 
     Tab.balances();
 
-    Balance.of('DAI').shouldBe(/7,815\.5000.../);
+    Balance.of('DAI').shouldBe('7815.50');
   });
 
   it('should fill first buy order and place a new sell order with remainings', () => {

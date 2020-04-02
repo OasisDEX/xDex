@@ -25,15 +25,18 @@ export function cypressVisitWithoutProvider(path = '') {
   });
 }
 
-export function cypressVisitWithWeb3(path = '') {
+export function cypressVisitWithWeb3(path = '', shouldRevert: boolean = true) {
   web3 = createWeb3Provider(ACCOUNT_3_PRIV, Cypress.env('ETH_PROVIDER'));
 
   cy.spy(web3._requestManager.provider, 'sendAsync');
 
   return cy
     .then(() => {
-      cy.log(`Reverting blockchain to snapshot #${lastSnapshotId}`);
-      return restoreBlockchain(web3)(lastSnapshotId);
+      if (shouldRevert) {
+        cy.log(`Reverting blockchain to snapshot #${lastSnapshotId}`);
+        return restoreBlockchain(web3)(lastSnapshotId);
+      }
+      return;
     })
     .then(() => saveBlockchain(web3)())
     .then((r: any) => {
@@ -79,7 +82,10 @@ export function tid(id: string, rest = '') {
 
 export const promisify = (func: any) => async (...args: any[]) =>
   new Promise<any>((accept: any, reject: any) =>
-    func(...args, (error: any, result: any) => (error ? reject(error) : accept(result))),
+                     func(
+                       ...args,
+                       (error: any, result: any) => (error ? reject(error) : accept(result))
+                      ),
   );
 
 export const rpcCommand = (method: any) => (web3Instance: any) => (...params: any[]) => {

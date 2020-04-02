@@ -27,10 +27,12 @@ export enum TxMetaKind {
   swapDai = 'swapDai',
   devDrip = 'devDrip',
   devChangePrice = 'devChangePrice',
+  devChangePriceAndPoke = 'devChangePriceAndPoke',
   devPokeOsm = 'devPokeOsm',
   devPokeSpotter = 'devPokeSpotter',
   redeem = 'redeem',
   export = 'export',
+  recoverERC20 = 'recoverERC20',
 }
 
 export type TxMeta = {
