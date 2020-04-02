@@ -714,6 +714,3 @@ const localnet: NetworkConfig =  {
 };
 
 export const networks = asMap('id', [main, kovan, localnet]);
-
-// use when contract is not deployed / not available on a given network
-// const NO_ADDR = '0x0000000000000000000000000000000000000000';
