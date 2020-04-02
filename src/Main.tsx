@@ -50,33 +50,6 @@ export class Main extends React.Component {
 export interface RouterProps extends RouteComponentProps<any> {
 }
 
-// class ComponentTest extends React.Component<any , {counter: number}> {
-
-//   constructor(props: any) {
-//     super(props);
-//     this.state = {
-//       counter: 0
-//     }
-//   }
-
-//   public componentWillMount() {
-//     console.log("Will Mount", new Date());
-
-//     setTimeout(() => 
-//     this.setState({counter: 2}), 1000);
-//   }
-
-//   public componentDidMount() {
-//     console.log("Did mount", new Date());
-//     setTimeout(() => 
-//     this.setState({counter: 1}), 1000);
-//   }
-
-//   public render() {
-//     return <div> THIS IS A MOCKED COMPONENT { this.state.counter } </div>
-//   }
-// }
-
 export class MainContent extends React.Component<RouterProps> {
   public render() {
     return (
