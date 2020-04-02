@@ -12,6 +12,7 @@ import * as styles from './ExchangeView.scss';
 import { OfferMakePanelHooked } from './offerMake/OfferMakePanelHooked';
 import { currentTradingPair$, TradingPair } from './tradingPair/tradingPair';
 import { TradingPairViewHook } from './tradingPair/TradingPairView';
+import { PriceChartWithLoading } from './priceChart/PriceChartWithLoading';
 
 export interface ExchangeViewOwnProps {
   setTradingPair: (tp: TradingPair) => void;
@@ -41,17 +42,11 @@ export const Content  = (props: ContentProps) => {
   return (
     <div>
       <FlexLayoutRow>
-        <TradingPairViewHook
-          parentMatch={parentMatch}
-        />
+        <TradingPairViewHook parentMatch={parentMatch}/>
       </FlexLayoutRow>
       <FlexLayoutRow>
         <Panel className={styles.priceChartPanel} footerBordered={true}>
-          <theAppContext.Consumer>
-            { ({ PriceChartWithLoadingTxRx }) =>
-              <PriceChartWithLoadingTxRx />
-            }
-          </theAppContext.Consumer>
+          <PriceChartWithLoading/>
         </Panel>
         <Panel className={styles.allTradesPanel} footerBordered={true}>
           <theAppContext.Consumer>
@@ -63,11 +58,6 @@ export const Content  = (props: ContentProps) => {
       </FlexLayoutRow>
       <FlexLayoutRow>
         <Panel className={styles.offerMakePanel}>
-          {/*<theAppContext.Consumer>*/}
-          {/*  { ({ OfferMakePanelTxRx }) =>*/}
-          {/*    <OfferMakePanelTxRx />*/}
-          {/*  }*/}
-          {/*</theAppContext.Consumer>*/}
           <OfferMakePanelHooked/>
         </Panel>
         <Panel footerBordered={true} className={styles.orderbookPanel}>

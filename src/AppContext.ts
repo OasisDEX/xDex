@@ -366,11 +366,7 @@ export function setupAppContext() {
       )
     ),
   };
-  const priceChartLoadable = createPriceChartLoadable$(groupMode$, dataSources);
-  const PriceChartWithLoadingTxRx = connect<PriceChartProps, {}>(
-    PriceChartWithLoading,
-    priceChartLoadable
-  );
+  const priceChartLoadable$ = createPriceChartLoadable$(groupMode$, dataSources);
 
   const { offerMakeLoadable$, OfferMakePanelTxRx, OrderbookPanelTxRx } =
     offerMake(currentOrderbook$, balances$);
@@ -550,7 +546,6 @@ export function setupAppContext() {
     OfferMakePanelTxRx,
     OrderbookPanelTxRx,
     InstantTxRx,
-    PriceChartWithLoadingTxRx,
     TransactionNotifierTxRx,
     NetworkTxRx,
     TheFooterTxRx,
@@ -565,6 +560,7 @@ export function setupAppContext() {
     WalletViewRxTx,
     sai2DAIMigrationForm$,
     tradingPairView$,
+    priceChartLoadable$,
   };
 }
 
