@@ -9,6 +9,8 @@ import { Muted } from '../../utils/text/Text';
 import { GroupMode, groupModeMapper, PriceChartDataPoint } from './pricechart';
 import * as styles from './PriceChartView.scss';
 
+const { useState , useEffect } = React;
+
 interface ChartParams {
   width: number;
   height: number;
@@ -65,129 +67,155 @@ export interface PriceChartInternalProps {
   groupMode: GroupMode;
 }
 
-export class PriceChartView extends React.Component<PriceChartInternalProps, {
-  hoverId: number,
-  hoverData: any,
-  chartParams: ChartParams,
-}> {
+export const PriceChartView = ({
+  data: dataFromProps,
+  groupMode
+}: PriceChartInternalProps) => {
+  const [chartParams, updateChartParams] = useState(
+    calculateChartParams(undefined)
+  );
+  const [hoverInfo, updateHoverInfo] = useState({ id: -1, data: {} } as {
+    id: number;
+    data: any;
+  });
 
-  public constructor(props: PriceChartInternalProps) {
-    super(props);
+  const updateWindowDimensions = () =>
+    updateChartParams(calculateChartParams(window.innerWidth));
 
-    this.state = {
-      hoverId: -1,
-      hoverData: {},
-      chartParams: calculateChartParams(undefined),
-    };
-    this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
+  useEffect(() => {
+    console.log("called");
+    const { addEventListener, removeEventListener } = window;
+    updateWindowDimensions();
+    addEventListener("resize", updateWindowDimensions);
+    return () => removeEventListener("resize", updateWindowDimensions);
+  }, []);
+
+  const {
+    maxDataLength,
+    width,
+    height,
+    margin,
+    bothChartSize,
+    volumeChartSize,
+    candleChartSize
+  } = chartParams;
+  const data = dataFromProps.slice(-maxDataLength);
+  const groupModeMap = groupModeMapper[groupMode];
+  const chart = createElement("div");
+
+  const svgMainGraphic = d3
+    .select(chart)
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .append("g")
+    .attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+  const addUnit = groupModeMap.addUnit as moment.unitOfTime.DurationConstructor;
+  const minimalDate =
+    data.length === 0
+      ? moment()
+          .startOf(addUnit)
+          .subtract(4, addUnit)
+          .toDate()
+      : moment(data[0].timestamp)
+          .subtract(1, addUnit)
+          .toDate();
+  const maximalDate =
+    data.length === 0
+      ? moment()
+          .startOf(addUnit)
+          .toDate()
+      : moment(data[data.length - 1].timestamp)
+          .add(1, addUnit)
+          .toDate();
+  const xScale = d3
+    .scaleTime()
+    .domain([minimalDate, maximalDate])
+    // .nice(d3.timeDay)
+    .range([0, bothChartSize.width]);
+
+  let minimal: number = d3.min(data, d => d.low) || 0;
+  let maximal: number = d3.max(data, d => d.high) || 100;
+  const minMaxDiff = maximal - minimal;
+  minimal = minimal - minMaxDiff * 0.1; // make bottom margin
+  maximal = Math.max(maximal + minMaxDiff * 0.1, minimal); // make top margin
+  // degenerated data -- expand domain a little
+  if (minimal === maximal) {
+    minimal *= 0.9;
+    maximal *= 1.1;
   }
+  const yCandleScale = d3
+    .scaleLinear()
+    .domain([minimal, maximal])
+    .range([candleChartSize.height, 0])
+    .nice();
 
-  public componentDidMount() {
-    this.updateWindowDimensions();
-    window.addEventListener('resize', this.updateWindowDimensions);
-  }
+  const volumeMaximal = Math.ceil((d3.max(data, d => d.turnover) || 10) * 1.1);
+  const yVolumeScale = d3
+    .scaleLinear()
+    .domain([0, volumeMaximal * 1.4]) // multiply to add space at top of volume
+    // in case the candle label is at the bottom
+    .range([volumeChartSize.height, 0]);
 
-  public componentWillUnmount() {
-    window.removeEventListener('resize', this.updateWindowDimensions);
-  }
+  axes(
+    chartParams,
+    data,
+    svgMainGraphic,
+    xScale,
+    yCandleScale,
+    yVolumeScale,
+    volumeMaximal,
+    groupModeMap.format
+  );
+  volumeChart(
+    chartParams,
+    data,
+    svgMainGraphic,
+    xScale,
+    yVolumeScale,
+    hoverInfo.id
+  );
+  candleChart(
+    chartParams,
+    data,
+    svgMainGraphic,
+    xScale,
+    yCandleScale,
+    hoverInfo.id
+  );
+  hoverBarChart(chartParams, data, svgMainGraphic, xScale);
 
-  public updateWindowDimensions() {
-    this.setState({ chartParams: calculateChartParams(window.innerWidth) });
-  }
+  svgMainGraphic
+    .select(".hoverbar")
+    .selectAll("rect")
+    .on("mouseover", (d, i) => {
+      updateHoverInfo({ id: i, data: d });
+    })
+    .on("mouseout", () => {
+      updateHoverInfo({ id: -1, data: hoverInfo.data });
+    });
 
-  public render() {
-    const p = this.state.chartParams;
-    const {
-      maxDataLength,
-      width,
-      height,
-      margin,
-      bothChartSize,
-      volumeChartSize,
-      candleChartSize
-    } = p;
-    const data = this.props.data
-      .slice(-maxDataLength);
-    const groupModeMap = groupModeMapper[this.props.groupMode];
-    const chart = createElement('div');
-
-    const svgMainGraphic = d3.select(chart)
-      .append('svg')
-      .attr('width', width)
-      .attr('height', height)
-      .append('g')
-      .attr('transform', `translate(${margin.left}, ${margin.top})`);
-
-    const addUnit = groupModeMap.addUnit as moment.unitOfTime.DurationConstructor;
-    const minimalDate = data.length === 0 ?
-      moment().startOf(addUnit).subtract(4, addUnit).toDate() :
-      moment(data[0].timestamp).subtract(1, addUnit).toDate();
-    const maximalDate = data.length === 0 ?
-      moment().startOf(addUnit).toDate() :
-      moment(data[data.length - 1].timestamp).add(1, addUnit).toDate();
-    const xScale = d3.scaleTime()
-      .domain([minimalDate, maximalDate])
-      // .nice(d3.timeDay)
-      .range([0, bothChartSize.width]);
-
-    let minimal: number  = d3.min(data, d => d.low) || 0;
-    let maximal: number  = d3.max(data, d => d.high) || 100;
-    const minMaxDiff = maximal - minimal;
-    minimal = minimal - minMaxDiff * 0.1; // make bottom margin
-    maximal = Math.max(maximal + minMaxDiff * 0.1, minimal); // make top margin
-    // degenerated data -- expand domain a little
-    if (minimal === maximal) {
-      minimal *= 0.9;
-      maximal *= 1.1;
-    }
-    const yCandleScale = d3.scaleLinear()
-      .domain([minimal, maximal])
-      .range([candleChartSize.height, 0])
-      .nice();
-
-    const volumeMaximal = Math.ceil((d3.max(data, d => d.turnover) || 10) * 1.1);
-    const yVolumeScale = d3.scaleLinear()
-      .domain([0, volumeMaximal * 1.4]) // multiply to add space at top of volume
-                                                // in case the candle label is at the bottom
-      .range([volumeChartSize.height, 0]);
-
-    axes(p,
-         data,
-         svgMainGraphic,
-         xScale,
-         yCandleScale,
-         yVolumeScale,
-         volumeMaximal,
-         groupModeMap.format
-    );
-    volumeChart(p, data, svgMainGraphic, xScale, yVolumeScale, this.state.hoverId);
-    candleChart(p, data, svgMainGraphic, xScale, yCandleScale, this.state.hoverId);
-    hoverBarChart(p, data, svgMainGraphic, xScale);
-
-    svgMainGraphic.select('.hoverbar').selectAll('rect')
-      .on('mouseover', (d, i) => {
-        this.setState({ hoverId: i, hoverData: d });
-      })
-      .on('mouseout', () => {
-        this.setState({ hoverId: -1 });
-      });
-
-    return (<div style={{
-      position: 'relative',
-      display: 'flex',
-      justifyContent: 'center',
-      minHeight: `${height}px`,
-    }}>
-        {chart.toReact()}
-        <DataDetails data={this.state.hoverData}
-                     timestampFormat={groupModeMap.format}
-                     defaultData={data.length > 0 ?
-                       data[data.length - 1] :
-                       {} as PriceChartDataPoint}
-        />
-      </div>);
-  }
-}
+  return (
+    <div
+      style={{
+        position: "relative",
+        display: "flex",
+        justifyContent: "center",
+        minHeight: `${height}px`
+      }}
+    >
+      {chart.toReact()}
+      <DataDetails
+        data={hoverInfo.data}
+        timestampFormat={groupModeMap.format}
+        defaultData={
+          data.length > 0 ? data[data.length - 1] : ({} as PriceChartDataPoint)
+        }
+      />
+    </div>
+  );
+};
 
 // bars created only to bind hover on them
 // no styles, noe view, full-height
