@@ -4,36 +4,21 @@ interface TimerProps {
   start: Date;
 }
 
-export class Timer extends React.Component<TimerProps, { elapsed: number }> {
-  private timer: any;
+export const Timer = ({ start }: TimerProps) => {
+  const [accu, tick] = React.useState(0);
 
-  public constructor(props: TimerProps) {
-    super(props);
-    this.state = {
-      elapsed: 0,
-    };
-    this.tick = this.tick.bind(this);
-  }
+  React.useEffect(() => {
+    const timerId = setInterval(
+      () => tick(new Date().valueOf() - start.valueOf()),
+      50
+    );
 
-  public componentDidMount() {
-    this.timer = setInterval(this.tick, 50);
-  }
+    return () => clearInterval(timerId);
+  }, []);
 
-  public componentWillUnmount() {
-    clearInterval(this.timer);
-  }
+  const elapsed = Math.round(accu / 1000);
+  const minutes = Math.floor(elapsed / 60).toFixed(0);
+  const seconds = (elapsed % 60).toFixed(0).padStart(2, '0');
 
-  public render() {
-    const elapsed = Math.round(this.state.elapsed / 1000);
-    const minutes = Math.floor(elapsed / 60).toFixed(0);
-    const seconds = (elapsed % 60).toFixed(0).padStart(2, '0');
-
-    return <span>{minutes}:{seconds}</span>;
-  }
-
-  private tick() {
-    this.setState({
-      elapsed: new Date().valueOf() - this.props.start.valueOf()
-    });
-  }
-}
+  return <span>{minutes}:{seconds}</span>
+};
