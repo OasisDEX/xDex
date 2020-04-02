@@ -380,6 +380,7 @@ export class MTMyPositionPanelInternal
         className={styles.actionButton}
         disabled={ma.dai.eq(zero)}
         data-test-id="withdraw-dai"
+        title={ma.dai.eq(zero) ? `You don't have any DAI to withdraw` : ''}
         onClick={
           () => {
             this.transfer(UserActionKind.draw, 'DAI', ma.name);
