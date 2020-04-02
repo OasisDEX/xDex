@@ -1971,12 +1971,13 @@
     bignumber.js "^8.1.1"
     rxjs "^6.5.4"
 
-"@makerdao/dai-plugin-walletlink@^0.0.4":
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/@makerdao/dai-plugin-walletlink/-/dai-plugin-walletlink-0.0.4.tgz#2d1510e32abf6ff35df6793a26d74c21a4620b85"
-  integrity sha512-pChRrQHmTJY6LjCxGZ2J1cXq6gZmYDfMGuWLounyBDqaGiv0QO9SCNQ6hh1yptJ0OooEqlKa8OrYp0GcV/W5Fg==
+"@makerdao/dai-plugin-walletlink@^0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@makerdao/dai-plugin-walletlink/-/dai-plugin-walletlink-0.0.5.tgz#f109fbd5adc41a824c7dd9b2bdc833f181be77cd"
+  integrity sha512-JGf/o0iO9KtmFncKCUCJkvk2+LI0VXZNYbjyM4XTOPfFjdPTBW2tHox0SjasmyxBxhR8D/8G78d/xwh+/drA5A==
   dependencies:
     babel-runtime "^6.26.0"
+    debug "^4.1.1"
     walletlink "^2.0.1"
 
 "@makerdao/dai@^0.28.3":

@@ -63,7 +63,7 @@ export async function connect(type: WaletType): Promise<string | undefined> {
   const config = {
     log: false,
     plugins: [
-      [walletLinkPlugin, { rpcUrl: 'https://kovan.infura.io/v3/58073b4a32df4105906c702f167b91d2' }]
+      [walletLinkPlugin, { rpcUrl: 'https://kovan.infura.io/v3/58073b4a32df4105906c702f167b91d2', appName: 'Oasis' }]
     ],
     provider: {
       url: rpcUrl,
@@ -77,6 +77,10 @@ export async function connect(type: WaletType): Promise<string | undefined> {
 
   const maker = await Maker.create('http', config);
   window.maker = maker;
+
+  // On new block (uses the websocket-based 'newBlockHeaders')
+  // maker.service('web3').onNewBlock(blockNumber => {
+  // });
 
   // maker.service('transactionManager')
   //   .onTransactionUpdate((tx: any, state: any) => {
