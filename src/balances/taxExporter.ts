@@ -95,9 +95,9 @@ export function createTaxExport$(
   address$: Observable<string>
 ): Observable<TradeExport[]> {
   return combineLatest(context$, address$).pipe(
-    switchMap(([context, address]) => {
-      return of(address).pipe(
-        flatMap(() => {
+    switchMap(([context, addressChecksum]) => {
+      return of(addressChecksum.toLowerCase()).pipe(
+        flatMap((address) => {
           return queryTrades(context, [address])
             .pipe(
             mergeMap((trades): Array<Observable<any>> => {
