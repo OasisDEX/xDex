@@ -60,6 +60,7 @@ import {
 import {
   createDepthChartWithLoading$,
   DepthChartProps,
+  DepthChartWithLoadingHooked,
   DepthChartWithLoading,
 } from './exchange/depthChart/DepthChartWithLoading';
 import {
@@ -82,8 +83,8 @@ import { createFormController$, OfferFormState } from './exchange/offerMake/offe
 import { OfferMakePanel } from './exchange/offerMake/OfferMakePanel';
 import {
   createOrderbookForView,
-  OrderbookView,
-  Props
+  Props,
+  OrderbookView
 } from './exchange/orderbook/OrderbookView';
 import {
   createOrderbookPanel$,
@@ -365,8 +366,12 @@ export function setupAppContext() {
   };
   const priceChartLoadable$ = createPriceChartLoadable$(groupMode$, dataSources);
 
-  const { offerMakeLoadable$, OfferMakePanelTxRx, OrderbookPanelTxRx } =
-    offerMake(currentOrderbook$, balances$);
+  const { 
+    offerMakeLoadable$,
+    orderbookForView$,
+    orderbookPanel$,
+    depthChartWithLoading$,
+  } = offerMake(currentOrderbook$, balances$);
 
   const myTradesKind$ = createMyTradesKind$();
   const myOpenTrades$ = loadablifyPlusTradingPair(
@@ -538,10 +543,11 @@ export function setupAppContext() {
 
   return {
     offerMakeLoadable$,
+    orderbookForView$,
+    orderbookPanel$,
+    depthChartWithLoading$,
     allTrades$,
     MyTradesTxRx,
-    OfferMakePanelTxRx,
-    OrderbookPanelTxRx,
     InstantTxRx,
     TransactionNotifierTxRx,
     NetworkTxRx,
@@ -703,10 +709,6 @@ function offerMake(
   );
 
   const offerMakeLoadable$ = loadablifyLight(offerMake$);
-  const OfferMakePanelTxRx = connect<Loadable<OfferFormState>, {}>(
-    OfferMakePanel,
-    offerMakeLoadable$
-  );
 
   const [kindChange, orderbookPanel$] = createOrderbookPanel$();
 
@@ -715,30 +717,18 @@ function offerMake(
     orderbook$,
     kindChange
   );
-  const DepthChartWithLoadingTxRx = connect<DepthChartProps, {}>(
-    DepthChartWithLoading,
-    depthChartWithLoading$
-  );
 
   const orderbookForView$ = createOrderbookForView(
     orderbook$,
     offerMake$,
     kindChange,
   );
-  const OrderbookViewTxRx = connect<Props, {}>(OrderbookView, orderbookForView$);
-
-  const OrderbookPanelTxRx = connect(
-    inject<OrderbookPanelProps, SubViewsProps>(
-      // @ts-ignore
-      OrderbookPanel, { DepthChartWithLoadingTxRx, OrderbookViewTxRx }
-    ),
-    orderbookPanel$
-  );
 
   return {
     offerMakeLoadable$,
-    OfferMakePanelTxRx,
-    OrderbookPanelTxRx
+    orderbookForView$,
+    orderbookPanel$,
+    depthChartWithLoading$,
   };
 }
 

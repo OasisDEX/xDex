@@ -1,8 +1,16 @@
 import * as React from 'react';
+import { useObservable } from "../utils/observableHook";
 import { Observable } from 'rxjs';
 
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
 import { map } from 'rxjs/operators';
+import { theAppContext } from 'src/AppContext';
+import { inject } from 'src/utils/inject';
+
+import { OrderbookViewHooked } from '../exchange/orderbook/OrderbookView';
+import { DepthChartWithLoadingHooked } from '../exchange/depthChart/DepthChartWithLoading';
+
+const { useContext } = React;
 
 export enum OrderbookViewKind {
   depthChart = 'depthChart',
@@ -14,17 +22,30 @@ export interface OrderbookPanelProps {
 }
 
 export interface SubViewsProps {
-  DepthChartWithLoadingTxRx : React.ComponentType;
-  OrderbookViewTxRx: React.ComponentType;
+  DepthChartWithLoadingHooked : React.ComponentType;
+  OrderbookViewHooked: React.ComponentType;
 }
 
 export class OrderbookPanel extends React.Component<OrderbookPanelProps & SubViewsProps> {
   public render() {
     if (this.props.kind === OrderbookViewKind.depthChart) {
-      return (<this.props.DepthChartWithLoadingTxRx/>);
+      return (<this.props.DepthChartWithLoadingHooked/>);
     }
-    return (<this.props.OrderbookViewTxRx/>);
+    return (<this.props.OrderbookViewHooked/>);
   }
+}
+
+export const OrderbookHooked = () => {
+  const { orderbookPanel$ } = useContext(theAppContext);
+  const state = useObservable(orderbookPanel$);
+
+  if(!state) return null;
+
+  const Wrapper = inject<OrderbookPanelProps, SubViewsProps>(
+    OrderbookPanel, { DepthChartWithLoadingHooked, OrderbookViewHooked }
+  );
+
+  return <Wrapper {...state}/>;
 }
 
 export function createOrderbookPanel$(): [

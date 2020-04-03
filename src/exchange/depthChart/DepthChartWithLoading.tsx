@@ -1,5 +1,6 @@
 import { BigNumber } from 'bignumber.js';
 import * as React from 'react';
+import { useObservable } from "../../utils/observableHook";
 import { combineLatest, Observable } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 
@@ -12,6 +13,9 @@ import { OrderbookViewKind } from '../OrderbookPanel';
 import { createZoom$, ZoomChange } from './depthchart';
 import { DepthChartView } from './DepthChartView';
 import * as styles from './DepthChartView.scss';
+import { theAppContext } from 'src/AppContext';
+
+const { useContext } = React;
 
 export type DepthChartProps = Loadable<Orderbook> & {
   kind: OfferType;
@@ -55,7 +59,6 @@ export class DepthChartWithLoading extends React.Component<DepthChartProps> {
       </div>
     );
   }
-
 }
 
 export interface FormState {
@@ -65,6 +68,16 @@ export interface FormState {
   price?: BigNumber;
   // change: ()
 }
+
+export const DepthChartWithLoadingHooked = () => {
+  const { depthChartWithLoading$ } = useContext(theAppContext);
+  const state = useObservable(depthChartWithLoading$);
+
+  if(!state) return null;
+
+  return <DepthChartWithLoading {...state}/>
+}
+
 
 export function createDepthChartWithLoading$(
   currentOfferForm$: Observable<FormState>,

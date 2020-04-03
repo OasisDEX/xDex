@@ -14,6 +14,7 @@ import { currentTradingPair$, TradingPair } from './tradingPair/tradingPair';
 import { TradingPairViewHook } from './tradingPair/TradingPairView';
 import { PriceChartWithLoading } from './priceChart/PriceChartWithLoading';
 import AllTradesHooked from './allTrades/AllTradesView';
+import { OrderbookHooked } from './OrderbookPanel';
 
 export interface ExchangeViewOwnProps {
   setTradingPair: (tp: TradingPair) => void;
@@ -58,11 +59,7 @@ export const Content  = (props: ContentProps) => {
           <OfferMakePanelHooked/>
         </Panel>
         <Panel footerBordered={true} className={styles.orderbookPanel}>
-          <theAppContext.Consumer>
-            { ({ OrderbookPanelTxRx }) =>
-              <OrderbookPanelTxRx />
-            }
-          </theAppContext.Consumer>
+          <OrderbookHooked/>
         </Panel>
       </FlexLayoutRow>
       <FlexLayoutRow>

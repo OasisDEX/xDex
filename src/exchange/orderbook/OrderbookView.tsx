@@ -1,9 +1,10 @@
 // tslint:disable:no-console
 import { equals } from 'ramda';
 import * as React from 'react';
+import { useObservable } from "../../utils/observableHook";
 import { default as MediaQuery } from 'react-responsive';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
-import { combineLatest, Observable } from 'rxjs';
+import { combineLatest, Observable, observable } from 'rxjs';
 import { distinctUntilKeyChanged, map, startWith } from 'rxjs/operators';
 
 import * as mixpanel from 'mixpanel-browser';
@@ -23,6 +24,9 @@ import { TradingPair, tradingPairResolver } from '../tradingPair/tradingPair';
 import depthChartSvg from './depth-chart.svg';
 import { Offer, Orderbook } from './orderbook';
 import * as styles from './OrderbookView.scss';
+import { theAppContext } from 'src/AppContext';
+
+const { useContext } = React;
 
 export function createOrderbookForView(
   currentOrderBook$: Observable<Orderbook>,
@@ -286,4 +290,13 @@ export class OrderbookView extends React.Component<Props> {
     }
   }
 
+}
+
+export const OrderbookViewHooked = () => {
+  const { orderbookForView$ } = useContext(theAppContext);
+  const state = useObservable(orderbookForView$);
+
+  if(!state) return null;
+
+  return <OrderbookView {...state}/>
 }
