@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { theAppContext } from '../AppContext';
 import { FlexLayoutRow } from '../utils/layout/FlexLayoutRow';
+import { TaxExporterHooked } from './TaxExporterView';
 
 const {
   REACT_APP_TAX_EXPORTER_ENABLED,
@@ -14,7 +15,6 @@ export class BalancesView extends React.Component<{}> {
       <div>
         <theAppContext.Consumer>
           { ({ MTBalancesViewRxTx,
-               TaxExporterTxRx,
                WalletViewRxTx
           }) =>
             <div>
@@ -30,7 +30,7 @@ export class BalancesView extends React.Component<{}> {
               {
                 REACT_APP_TAX_EXPORTER_ENABLED === '1' &&
                 <FlexLayoutRow>
-                    <TaxExporterTxRx/>
+                    <TaxExporterHooked/>
                 </FlexLayoutRow>
               }
             </div>

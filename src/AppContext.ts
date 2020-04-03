@@ -23,7 +23,6 @@ import {
 import { MtAccountDetailsView } from './balances/mtAccountDetailsView';
 import { createBalancesView$, MTBalancesView } from './balances/mtBalancesView';
 import { createTaxExport$ } from './balances/taxExporter';
-import { TaxExporterView, TaxExporterViewProps } from './balances/TaxExporterView';
 import { WalletView } from './balances/WalletView';
 import { calls$, readCalls$ } from './blockchain/calls/calls';
 import {
@@ -442,9 +441,7 @@ export function setupAppContext() {
     loadablifyLight(instant$)
   );
 
-  const TaxExporterTxRx = inject<{}, TaxExporterViewProps>(TaxExporterView, {
-    export: () => createTaxExport$(context$, initializedAccount$)
-  });
+  const exportTax$ = createTaxExport$(context$, initializedAccount$);
 
   const sai2DAIOps$ = curry(createMigrationOps$)(
     'SAI',
@@ -485,7 +482,6 @@ export function setupAppContext() {
     TransactionNotifierTxRx,
     NetworkTxRx,
     TheFooterTxRx,
-    TaxExporterTxRx,
     MTSimpleOrderPanelRxTx,
     MTSimpleOrderBuyPanelRxTx,
     MTMyPositionPanelRxTx,
@@ -497,6 +493,7 @@ export function setupAppContext() {
     sai2DAIMigrationForm$,
     tradingPairView$,
     priceChartLoadable$,
+    exportTax$,
   };
 }
 

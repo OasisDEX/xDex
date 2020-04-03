@@ -2,6 +2,7 @@ import * as mixpanel from 'mixpanel-browser';
 import * as React from 'react';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/internal/operators';
+import { theAppContext } from 'src/AppContext';
 import { Button } from '../utils/forms/Buttons';
 import { ProgressIcon } from '../utils/icons/Icons';
 import { Panel, PanelBody, PanelHeader } from '../utils/panel/Panel';
@@ -9,63 +10,54 @@ import { Muted } from '../utils/text/Text';
 import { TradeExport } from './taxExporter';
 import * as styles from './TaxExporter.scss';
 
-export interface TaxExporterViewProps {
-  export: () => Observable<any[]>;
-}
+const { useState, useContext } = React;
 
-export interface TaxExporterState {
-  inProgress: boolean;
-}
+export const TaxExporterHooked = () => {
+  const { exportTax$ } = useContext(theAppContext);
+  const [state, updateState] = useState({ inProgress: false });
 
-export class TaxExporterView extends React.Component<TaxExporterViewProps, TaxExporterState> {
-  public state = {
-    inProgress: false
-  };
-
-  public render(): React.ReactNode {
-    return (
-      <Panel footerBordered={true} style={{ width: '100%' }}>
-        <PanelHeader>History export</PanelHeader>
-        <PanelBody paddingVertical={true} className={styles.taxExporterPanelBody}>
-        <Muted className={styles.taxExporterDescription}>
-          <span>Export your trades from Oasis Contracts (2018-2019)</span>
-          From oasis.app/trade, oasis.direct, oasisdex.com and cdp.makerdao.com
-        </Muted>
-        <Button
-          size="sm"
-          color="secondaryOutlined"
-          onClick={() => {
-            mixpanel.track('btn-click', {
-              id: 'export-trades',
-              product: 'oasis-trade',
-              page: 'Account',
-              section: 'history-export'
-            });
-            this.exportTrades();
-          }}
-          className={styles.taxExporterButton}
-        >
-          {this.state.inProgress ? <ProgressIcon className={styles.progressIcon}/> : 'Export'}
-        </Button>
-        </PanelBody>
-      </Panel>);
-  }
-
-  private exportTrades = () => {
-    if (!this.state.inProgress) {
-      this.setState({ ...this.state, inProgress: true });
-      this.props.export().pipe(take(1))
+  const exportTrades = () => {
+    if (!state.inProgress) {
+      updateState({ ...state, inProgress: true });
+      exportTax$.pipe(take(1))
         .subscribe({
           next: (trades: TradeExport[]) => {
             trades = trades.filter(trade => trade.exchange !== '');
             const url = 'data:text/csv;charset=utf-8,' + encodeURIComponent(toCSV(trades));
             downloadCSV(url);
           },
-          complete: () => this.setState({ ...this.state, inProgress: false })
+          complete: () => updateState({ ...state, inProgress: false })
         });
     }
-  }
-}
+  };
+
+  return (
+    <Panel footerBordered={true} style={{ width: '100%' }}>
+      <PanelHeader>History export</PanelHeader>
+      <PanelBody paddingVertical={true} className={styles.taxExporterPanelBody}>
+      <Muted className={styles.taxExporterDescription}>
+        <span>Export your trades from Oasis Contracts (2018-2019)</span>
+        From oasis.app/trade, oasis.direct, oasisdex.com and cdp.makerdao.com
+      </Muted>
+      <Button
+        size="sm"
+        color="secondaryOutlined"
+        onClick={() => {
+          mixpanel.track('btn-click', {
+            id: 'export-trades',
+            product: 'oasis-trade',
+            page: 'Account',
+            section: 'history-export'
+          });
+          exportTrades();
+        }}
+        className={styles.taxExporterButton}
+      >
+        {state.inProgress ? <ProgressIcon className={styles.progressIcon}/> : 'Export'}
+      </Button>
+      </PanelBody>
+    </Panel>);
+};
 
 function toCSVRow(trade: any): string {
   return `"${Object.keys(trade).map(key => trade[key]).join('";"')}"`;
