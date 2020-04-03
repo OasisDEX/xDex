@@ -1,8 +1,8 @@
 import classnames from 'classnames';
 import * as React from 'react';
 
-import { useObservable } from "../../utils/observableHook";
 import { BigNumber } from 'bignumber.js';
+import { theAppContext } from 'src/AppContext';
 import { etherscan } from '../../blockchain/etherscan';
 import { formatDateTime } from '../../utils/formatters/format';
 import { FormatAmount, FormatPriceOrder } from '../../utils/formatters/Formatters';
@@ -11,6 +11,7 @@ import { ProgressIcon } from '../../utils/icons/Icons';
 import { Authorization } from '../../utils/loadingIndicator/Authorization';
 import { WithLoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
 import { ServerUnreachable } from '../../utils/loadingIndicator/ServerUnreachable';
+import { useObservable } from '../../utils/observableHook';
 import { PanelHeader } from '../../utils/panel/Panel';
 import { Scrollbar } from '../../utils/Scrollbar/Scrollbar';
 import { RowClickable, Table } from '../../utils/table/Table';
@@ -19,7 +20,6 @@ import { Trade, TradeAct } from '../trades';
 import { MyTradesKind, MyTradesPropsLoadable } from './myTrades';
 import * as styles from './MyTradesView.scss';
 import { TradeWithStatus } from './openTrades';
-import { theAppContext } from 'src/AppContext';
 
 const { useContext } = React;
 
@@ -186,5 +186,5 @@ export const MyTradesHooked = () => {
 
   if (!state) return null;
 
-  return <MyTrades {...state}/>
-}
+  return <MyTrades {...state}/>;
+};

@@ -1,8 +1,7 @@
 import * as React from 'react';
 import { Observable } from 'rxjs';
-import { useLayoutEffect } from 'react';
 
-const { useEffect, useState } = React;
+const { useLayoutEffect, useState } = React;
 
 export function useObservable<O>(o$: Observable<O>): O|undefined {
   const [value, setValue] = useState<O|undefined>(undefined);

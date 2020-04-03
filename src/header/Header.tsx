@@ -18,7 +18,7 @@ import { WalletStatus, walletStatus$ } from '../blockchain/wallet';
 import { web3Status$ } from '../blockchain/web3';
 import chevronDownSvg from '../icons/chevron-down.svg';
 import { routerContext } from '../Main';
-import {SAI2DAIMigrationTxRx} from '../migration/MigrationFormView';
+import { SAI2DAIMigrationTxRx } from '../migration/MigrationFormView';
 import { connect } from '../utils/connect';
 import { Button } from '../utils/forms/Buttons';
 import { SvgImage } from '../utils/icons/utils';

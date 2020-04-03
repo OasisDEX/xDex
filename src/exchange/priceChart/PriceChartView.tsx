@@ -83,12 +83,12 @@ export const PriceChartView = ({
     updateChartParams(calculateChartParams(window.innerWidth));
 
   useEffect(() => {
-    console.log("called");
+    console.log('called');
     const { addEventListener, removeEventListener } = window;
     updateWindowDimensions();
-    addEventListener("resize", updateWindowDimensions);
-    return () => removeEventListener("resize", updateWindowDimensions);
-  }, []);
+    addEventListener('resize', updateWindowDimensions);
+    return () => removeEventListener('resize', updateWindowDimensions);
+  },        []);
 
   const {
     maxDataLength,
@@ -101,15 +101,15 @@ export const PriceChartView = ({
   } = chartParams;
   const data = dataFromProps.slice(-maxDataLength);
   const groupModeMap = groupModeMapper[groupMode];
-  const chart = createElement("div");
+  const chart = createElement('div');
 
   const svgMainGraphic = d3
     .select(chart)
-    .append("svg")
-    .attr("width", width)
-    .attr("height", height)
-    .append("g")
-    .attr("transform", `translate(${margin.left}, ${margin.top})`);
+    .append('svg')
+    .attr('width', width)
+    .attr('height', height)
+    .append('g')
+    .attr('transform', `translate(${margin.left}, ${margin.top})`);
 
   const addUnit = groupModeMap.addUnit as moment.unitOfTime.DurationConstructor;
   const minimalDate =
@@ -187,21 +187,21 @@ export const PriceChartView = ({
   hoverBarChart(chartParams, data, svgMainGraphic, xScale);
 
   svgMainGraphic
-    .select(".hoverbar")
-    .selectAll("rect")
-    .on("mouseover", (d, i) => {
+    .select('.hoverbar')
+    .selectAll('rect')
+    .on('mouseover', (d, i) => {
       updateHoverInfo({ id: i, data: d });
     })
-    .on("mouseout", () => {
+    .on('mouseout', () => {
       updateHoverInfo({ id: -1, data: hoverInfo.data });
     });
 
   return (
     <div
       style={{
-        position: "relative",
-        display: "flex",
-        justifyContent: "center",
+        position: 'relative',
+        display: 'flex',
+        justifyContent: 'center',
         minHeight: `${height}px`
       }}
     >

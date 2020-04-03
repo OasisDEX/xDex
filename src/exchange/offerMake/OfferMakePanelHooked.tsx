@@ -1,9 +1,5 @@
 import * as React from 'react';
-import * as ReactModal from 'react-modal';
-import { Observable } from 'rxjs';
 import { theAppContext } from '../../AppContext';
-import {Button} from '../../utils/forms/Buttons';
-import {Modal, useModal} from '../../utils/modalHook';
 import { useObservable } from '../../utils/observableHook';
 import { OfferMakePanel } from './OfferMakePanel';
 

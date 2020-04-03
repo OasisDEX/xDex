@@ -1,17 +1,16 @@
-import { FunctionComponent, ReactNode } from 'react';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 const { useContext, useState } = React;
 
 export interface ModalProps { close: () => void; }
-export type Modal = FunctionComponent<ModalProps>;
+export type Modal = React.FunctionComponent<ModalProps>;
 export type ModalOpener = (modal: Modal) => void;
 
 const ModalContext = React.createContext<ModalOpener>(() => {
   console.warn('ModalContext not setup properly ');
 });
 
-export function SetupModal(props: { children?: ReactNode }) {
+export function SetupModal(props: { children?: React.ReactNode }) {
 
   const [TheModal, setModal] = useState<Modal>();
 

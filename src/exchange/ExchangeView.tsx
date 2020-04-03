@@ -1,21 +1,19 @@
-import classnames from 'classnames';
 import * as React from 'react';
 import { Redirect, Route, RouteComponentProps, Switch } from 'react-router';
 import { map } from 'rxjs/operators';
 
-import { theAppContext } from '../AppContext';
 import { tradingPairs } from '../blockchain/config';
 import { connect } from '../utils/connect';
 import { FlexLayoutRow } from '../utils/layout/FlexLayoutRow';
 import { Panel } from '../utils/panel/Panel';
+import { AllTradesHooked } from './allTrades/AllTradesView';
 import * as styles from './ExchangeView.scss';
+import { MyTradesHooked } from './myTrades/MyTradesView';
 import { OfferMakePanelHooked } from './offerMake/OfferMakePanelHooked';
+import { OrderbookHooked } from './OrderbookPanel';
+import { PriceChartWithLoading } from './priceChart/PriceChartWithLoading';
 import { currentTradingPair$, TradingPair } from './tradingPair/tradingPair';
 import { TradingPairViewHook } from './tradingPair/TradingPairView';
-import { PriceChartWithLoading } from './priceChart/PriceChartWithLoading';
-import AllTradesHooked from './allTrades/AllTradesView';
-import { OrderbookHooked } from './OrderbookPanel';
-import { MyTradesHooked } from './myTrades/MyTradesView';
 
 export interface ExchangeViewOwnProps {
   setTradingPair: (tp: TradingPair) => void;
@@ -30,7 +28,7 @@ interface ContentProps extends RouteComponentProps<any> {
   setTradingPair: (tp: TradingPair) => void;
 }
 
-export const Content  = (props: ContentProps) => { 
+export const Content  = (props: ContentProps) => {
   const {
     match: { params },
     parentMatch,
@@ -70,7 +68,7 @@ export const Content  = (props: ContentProps) => {
       </FlexLayoutRow>
     </div>
   );
-}
+};
 
 export class ExchangeView extends React.Component<ExchangeViewProps> {
   public render() {

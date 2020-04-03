@@ -1,7 +1,7 @@
 import { BigNumber } from 'bignumber.js';
 import { first, memoize } from 'lodash';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { map, switchMap, shareReplay } from 'rxjs/operators';
+import { map, shareReplay, switchMap } from 'rxjs/operators';
 
 import { tradingPairs } from '../../blockchain/config';
 import {

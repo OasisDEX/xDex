@@ -14,7 +14,13 @@ interface AssetDropdownMenuProps {
   tid?: string;
 }
 
-export const AssetDropdownMenu = ({asset, actions, withIcon, label, tid}: AssetDropdownMenuProps) => {
+export const AssetDropdownMenu = ({
+  asset,
+  actions,
+  withIcon,
+  label,
+  tid
+}: AssetDropdownMenuProps) => {
   const [isCollapsed, collapse] = React.useState(false);
 
   return (
@@ -29,28 +35,24 @@ export const AssetDropdownMenu = ({asset, actions, withIcon, label, tid}: AssetD
         color="secondaryOutlined"
         className={styles.dropdownButton}
       >
-        { withIcon && <SvgImage image={dottedMenuSvg}/> }
-        {
-          label &&
+        {withIcon && <SvgImage image={dottedMenuSvg} />}
+        {label && (
           <>
             <span>{label}</span>
-            <SvgImage image={chevronDownSvg}
-                      className={classnames(styles.arrowDown, styles.dark)
-            }/>
+            <SvgImage
+              image={chevronDownSvg}
+              className={classnames(styles.arrowDown, styles.dark)}
+            />
           </>
-        }
+        )}
       </Button>
       <div className={styles.dropdownList}>
-        {
-          actions.map((actionBtn, index) =>
-            <div key={`${asset}-${index}`}
-                 className={styles.actionButton}
-            >
-              {actionBtn}
-            </div>
-          )
-        }
+        {actions.map((actionBtn, index) => (
+          <div key={`${asset}-${index}`} className={styles.actionButton}>
+            {actionBtn}
+          </div>
+        ))}
       </div>
     </div>
   );
-}
+};

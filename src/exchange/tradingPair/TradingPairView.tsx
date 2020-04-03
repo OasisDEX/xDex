@@ -3,26 +3,25 @@ import classnames from 'classnames';
 import * as mixpanel from 'mixpanel-browser';
 import * as React from 'react';
 import { NavLink } from 'react-router-dom';
-
+import { theAppContext } from 'src/AppContext';
+import { useObservable } from 'src/utils/observableHook';
+import { Panel } from 'src/utils/panel/Panel';
 import { getToken, tradingPairs } from '../../blockchain/config';
 import {
   FormatAmount, FormatPercent, FormatPrice, FormatQuoteToken
 } from '../../utils/formatters/Formatters';
 import { Loadable } from '../../utils/loadable';
-import { WithLoadingIndicatorInline, LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
+import { WithLoadingIndicatorInline } from '../../utils/loadingIndicator/LoadingIndicator';
 import { ServerUnreachableInline } from '../../utils/loadingIndicator/ServerUnreachable';
 import { Scrollbar } from '../../utils/Scrollbar/Scrollbar';
 import { BoundarySpan, InfoLabel } from '../../utils/text/Text';
 import { MarketsDetails } from '../exchange';
 import { TradingPair, tradingPairResolver, TradingPairsProps } from './tradingPair';
 import * as styles from './TradingPairView.scss';
-import { useState, useEffect, useContext } from 'react';
-import { theAppContext } from 'src/AppContext';
-import { useObservable } from 'src/utils/observableHook';
-import { Panel } from 'src/utils/panel/Panel';
-import { observable } from 'rxjs';
 
-interface PairInfoVP {
+const { useContext, useEffect, useState } = React;
+
+interface PairInfoVPProps {
   value: any;
   label: string;
   dataTestId ?: string;
@@ -30,31 +29,30 @@ interface PairInfoVP {
 
 export const TradingPairView = (props: TradingPairsProps) => {
 
-  const [ showMenu, toggleMenu ] = useState(false);
+  const [showMenu, toggleMenu] = useState(false);
 
   useEffect(() => {
     showMenu
       ? document.addEventListener('click', closeMenu)
       : document.removeEventListener('click', closeMenu);
-  }, [showMenu]);
+  },        [showMenu]);
 
   const toggle = () => {
     toggleMenu(!showMenu);
-  }
+  };
 
   const closeMenu = (_event: any) => {
     if (_event.path.filter((p: any) => p.className === styles.dropdown).length === 0) {
       toggleMenu(false);
     }
-  }
+  };
 
-  const PairVP = (props: {
+  const PairVP = ({ pair, parentMatch, marketsDetailsLoadable, clickHandler }: {
     pair: TradingPair,
     parentMatch?: string,
     marketsDetailsLoadable: Loadable<MarketsDetails>,
     clickHandler: () => void,
   }) => {
-    const { pair, parentMatch, marketsDetailsLoadable, clickHandler } = props;
     const pathname = `${parentMatch}/${pair.base}/${pair.quote}`;
 
     return (
@@ -79,8 +77,8 @@ export const TradingPairView = (props: TradingPairsProps) => {
         </NavLink>
       </li>
     );
-    
-  }
+
+  };
 
   const PairView = ({ pair, marketsDetailsLoadable }: {
     pair: TradingPair,
@@ -117,7 +115,7 @@ export const TradingPairView = (props: TradingPairsProps) => {
         </WithLoadingIndicatorInline>
       </>
     );
-  }
+  };
 
   const ActivePairView = ({ base, quote }: any) => (
       <div  data-test-id="active-pair" className={styles.activePairView}>
@@ -138,28 +136,20 @@ export const TradingPairView = (props: TradingPairsProps) => {
         <FormatPercent value={yesterdayPriceChange} plus={true} fallback=""/>
       </BoundarySpan>
     );
-  }
+  };
 
-  const PairInfoVP = ({ value, label, dataTestId }: PairInfoVP) => (
-      <div className={styles.pairInfo}>
+  const PairInfoVP = ({ value, label, dataTestId }: PairInfoVPProps) => (
+    <div className={styles.pairInfo}>
         <div data-test-id={dataTestId} className={styles.mobileWrapper}>
           <span data-test-id="value" className={styles.pairInfoValue}>{value}</span>
           <InfoLabel className={styles.pairInfoLabel}>{label}</InfoLabel>
         </div>
       </div>
-    );
+  );
 
-    const {
-      parentMatch = '/',
-      base,
-      currentPrice,
-      quote,
-      weeklyVolume,
-      yesterdayPriceChange
-    } = props;
-    const dropdownDisabled = tradingPairs.length <= 1;
+  const dropdownDisabled = tradingPairs.length <= 1;
 
-    return (
+  return (
       <>
         <div className={styles.dropdown}>
           <div tabIndex={dropdownDisabled ? undefined : -1}
@@ -169,7 +159,7 @@ export const TradingPairView = (props: TradingPairsProps) => {
                  [styles.dropdownBtnDisabled]: dropdownDisabled,
                  [styles.dropdownBtnActive]: showMenu
                })}>
-            <ActivePairView base={base} quote={quote}/>
+            <ActivePairView base={props.base} quote={props.quote}/>
           </div>
           {
             showMenu && (
@@ -179,7 +169,7 @@ export const TradingPairView = (props: TradingPairsProps) => {
                     {tradingPairs.map((pair, i) => (
                       <PairVP
                         key={i}
-                        parentMatch={parentMatch}
+                        parentMatch={props.parentMatch}
                         pair={pair}
                         marketsDetailsLoadable={props.marketsDetails}
                         clickHandler={toggle}
@@ -195,12 +185,12 @@ export const TradingPairView = (props: TradingPairsProps) => {
           <PairInfoVP dataTestId="last-price" label="Last price" value={
             <WithLoadingIndicatorInline
               error={<ServerUnreachableInline fallback="-"/>}
-              loadable={currentPrice}
+              loadable={props.currentPrice}
               className={styles.pairInfo}
             >
               {(currentPriceLoaded?: BigNumber) => (
                 currentPriceLoaded ?
-                  <FormatPrice value={currentPriceLoaded} token={quote}/> :
+                  <FormatPrice value={currentPriceLoaded} token={props.quote}/> :
                   <span>?</span>
               )}
             </WithLoadingIndicatorInline>
@@ -208,7 +198,7 @@ export const TradingPairView = (props: TradingPairsProps) => {
           <PairInfoVP dataTestId="24h-price" label="24h price" value={
             <WithLoadingIndicatorInline
               error={<ServerUnreachableInline fallback="-"/>}
-              loadable={yesterdayPriceChange}
+              loadable={props.yesterdayPriceChange}
               className={styles.pairInfo}
             >
               {(yesterdayPriceChangeLoaded?: BigNumber) => (
@@ -222,20 +212,20 @@ export const TradingPairView = (props: TradingPairsProps) => {
           }/>
           <PairInfoVP dataTestId="24h-volume" label="24h volume" value={
             <WithLoadingIndicatorInline
-              loadable={weeklyVolume}
+              loadable={props.weeklyVolume}
               className={styles.pairInfo}
               error={<ServerUnreachableInline fallback="-"/>}
             >
               {(weeklyVolumeLoaded: BigNumber) => (
-                <FormatAmount value={weeklyVolumeLoaded} token={quote}/>
+                <FormatAmount value={weeklyVolumeLoaded} token={props.quote}/>
               )}
             </WithLoadingIndicatorInline>
           }/>
         </div>
       </>
-    );
+  );
 
-}
+};
 
 export const TradingPairViewHook = (props: {
   parentMatch?: string;
@@ -243,15 +233,15 @@ export const TradingPairViewHook = (props: {
   const { tradingPairView$ } = useContext(theAppContext);
   const observableProps = useObservable<TradingPairsProps>(tradingPairView$);
 
-  if(observableProps){
+  if (observableProps) {
     return (
       <Panel className={classnames(
         styles.tradingPairPanel,
       )}>
-        <TradingPairView { ...{...observableProps, ...props} }/>
+        <TradingPairView { ...{ ...observableProps, ...props } }/>
       </Panel>
-    )
+    );
   }
-  
+
   return null;
-}
+};

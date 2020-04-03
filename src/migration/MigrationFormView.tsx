@@ -1,5 +1,4 @@
 import * as classnames from 'classnames';
-import { useContext, useState } from 'react';
 import * as React from 'react';
 import * as ReactModal from 'react-modal';
 import { Observable } from 'rxjs';
@@ -44,6 +43,8 @@ import { zero } from '../utils/zero';
 import { CallForAction } from './CallForAction';
 import * as styles from './Migration.scss';
 import { Message, MessageKind, MigrationFormKind, MigrationFormState } from './migrationForm';
+
+const { useContext, useState } = React;
 
 export interface MigrationButtonProps {
   label: string;

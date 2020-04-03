@@ -1,14 +1,14 @@
 import * as React from 'react';
-import { useObservable } from "../utils/observableHook";
 import { Observable } from 'rxjs';
+import { useObservable } from '../utils/observableHook';
 
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
 import { map } from 'rxjs/operators';
 import { theAppContext } from 'src/AppContext';
 import { inject } from 'src/utils/inject';
 
-import { OrderbookViewHooked } from '../exchange/orderbook/OrderbookView';
 import { DepthChartWithLoadingHooked } from '../exchange/depthChart/DepthChartWithLoading';
+import { OrderbookViewHooked } from '../exchange/orderbook/OrderbookView';
 
 const { useContext } = React;
 
@@ -39,14 +39,14 @@ export const OrderbookHooked = () => {
   const { orderbookPanel$ } = useContext(theAppContext);
   const state = useObservable(orderbookPanel$);
 
-  if(!state) return null;
+  if (!state) return null;
 
   const Wrapper = inject<OrderbookPanelProps, SubViewsProps>(
     OrderbookPanel, { DepthChartWithLoadingHooked, OrderbookViewHooked }
   );
 
   return <Wrapper {...state}/>;
-}
+};
 
 export function createOrderbookPanel$(): [
   (kind: OrderbookViewKind) => void,

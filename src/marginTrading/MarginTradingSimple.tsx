@@ -3,19 +3,16 @@ import { Redirect, Route, RouteComponentProps, Switch } from 'react-router';
 import { map } from 'rxjs/operators';
 
 import { theAppContext } from '../AppContext';
-// import { MyTradesTxRx } from '../exchange/myTrades/MyTradesView';
-// import { OrderbookPanelTxRx } from '../exchange/OrderbookPanel';
-// import { PriceChartWithLoadingTxRx } from '../exchange/priceChart/PriceChartWithLoading';
 import { currentTradingPair$, TradingPair } from '../exchange/tradingPair/tradingPair';
 import { connect } from '../utils/connect';
 import { FlexLayoutRow } from '../utils/layout/FlexLayoutRow';
 import { Panel } from '../utils/panel/Panel';
 
+import { AllTradesHooked } from 'src/exchange/allTrades/AllTradesView';
+import { PriceChartWithLoading } from 'src/exchange/priceChart/PriceChartWithLoading';
+import { TradingPairViewHook } from 'src/exchange/tradingPair/TradingPairView';
 import { Banner } from '../landingPage/Banner';
 import * as styles from './MarginTradingSimple.scss';
-import { TradingPairViewHook } from 'src/exchange/tradingPair/TradingPairView';
-import { PriceChartWithLoading } from 'src/exchange/priceChart/PriceChartWithLoading';
-import AllTradesHooked from 'src/exchange/allTrades/AllTradesView';
 
 export interface MarginTradingOwnProps {
   setTradingPair: (tp: TradingPair) => void;

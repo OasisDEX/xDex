@@ -23,8 +23,8 @@ import { TradingPair } from '../tradingPair/tradingPair';
 import { AllTradesProps } from './allTrades';
 import * as styles from './AllTradesView.scss';
 
-import { useObservable } from "../../utils/observableHook";
 import { theAppContext } from 'src/AppContext';
+import { useObservable } from '../../utils/observableHook';
 
 const { useContext } = React;
 
@@ -131,13 +131,11 @@ class AllTrades extends React.Component<AllTradesProps> {
   }
 }
 
-const AllTradesHooked = () => {
+export const AllTradesHooked = () => {
   const { allTrades$ } = useContext(theAppContext);
   const state = useObservable(allTrades$);
 
-  if(!state) return null;
+  if (!state) return null;
 
-  return <AllTrades {...state}/>
-}
-
-export default AllTradesHooked;
+  return <AllTrades {...state}/>;
+};

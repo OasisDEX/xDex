@@ -1,17 +1,17 @@
-import * as React from "react";
-import { BehaviorSubject, Observable } from "rxjs";
-import { map, switchMap } from "rxjs/operators";
-import { useObservable } from "../../utils/observableHook";
-import classnames from "classnames";
-import { Button, ButtonGroup } from "../../utils/forms/Buttons";
-import { LoadableWithTradingPair } from "../../utils/loadable";
-import { WithLoadingIndicator } from "../../utils/loadingIndicator/LoadingIndicator";
-import { ServerUnreachable } from "../../utils/loadingIndicator/ServerUnreachable";
-import { PanelHeader } from "../../utils/panel/Panel";
-import { GroupMode, PriceChartDataPoint } from "./pricechart";
-import { PriceChartView } from "./PriceChartView";
-import * as styles from "./PriceChartWithLoading.scss";
-import { theAppContext } from "src/AppContext";
+import classnames from 'classnames';
+import * as React from 'react';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
+import { theAppContext } from 'src/AppContext';
+import { Button, ButtonGroup } from '../../utils/forms/Buttons';
+import { LoadableWithTradingPair } from '../../utils/loadable';
+import { WithLoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
+import { ServerUnreachable } from '../../utils/loadingIndicator/ServerUnreachable';
+import { useObservable } from '../../utils/observableHook';
+import { PanelHeader } from '../../utils/panel/Panel';
+import { GroupMode, PriceChartDataPoint } from './pricechart';
+import { PriceChartView } from './PriceChartView';
+import * as styles from './PriceChartWithLoading.scss';
 
 export interface PriceChartProps
   extends LoadableWithTradingPair<PriceChartDataPoint[]> {
@@ -32,7 +32,7 @@ export const PriceChartWithLoading = () => {
   const button = (label: string, groupMode: GroupMode) => (
     <Button
       color={
-        loadableState?.groupMode === groupMode ? "primary" : "greyOutlined"
+        loadableState?.groupMode === groupMode ? 'primary' : 'greyOutlined'
       }
       size="sm"
       className={classnames(styles.btn)}
@@ -46,11 +46,11 @@ export const PriceChartWithLoading = () => {
     <>
       <PanelHeader bordered={true}>
         Price chart
-        <ButtonGroup style={{ marginLeft: "auto" }}>
-          {button("1M", "byMonth")}
-          {button("1W", "byWeek")}
-          {button("1D", "byDay")}
-          {button("1H", "byHour")}
+        <ButtonGroup style={{ marginLeft: 'auto' }}>
+          {button('1M', 'byMonth')}
+          {button('1W', 'byWeek')}
+          {button('1D', 'byDay')}
+          {button('1H', 'byHour')}
         </ButtonGroup>
       </PanelHeader>
       <WithLoadingIndicator

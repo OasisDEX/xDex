@@ -14,7 +14,7 @@ import * as styles from './index.scss';
 import { InstantExchange } from './instant/InstantViewPanel';
 import { MarginTradingSimpleTxRx } from './marginTrading/MarginTradingSimple';
 import { connect } from './utils/connect';
-import {SetupModal} from './utils/modalHook';
+import { SetupModal } from './utils/modalHook';
 
 const {
   REACT_APP_INSTANT_ENABLED,

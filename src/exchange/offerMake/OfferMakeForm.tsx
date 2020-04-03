@@ -5,10 +5,9 @@ import { Link } from 'react-router-dom';
 import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
 
 import * as mixpanel from 'mixpanel-browser';
-import { theAppContext } from '../../AppContext';
 import { getToken, isDAIEnabled } from '../../blockchain/config';
 import { routerContext } from '../../Main';
-import {SAI2DAIMigrationTxRx} from '../../migration/MigrationFormView';
+import { SAI2DAIMigrationTxRx } from '../../migration/MigrationFormView';
 import { BigNumberInput, lessThanOrEqual } from '../../utils/bigNumberInput/BigNumberInput';
 import { FormChangeKind, OfferMatchType } from '../../utils/form';
 import { formatAmount, formatPrice } from '../../utils/formatters/format';

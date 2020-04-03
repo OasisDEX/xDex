@@ -1,13 +1,14 @@
 // tslint:disable:no-console
 import { equals } from 'ramda';
 import * as React from 'react';
-import { useObservable } from "../../utils/observableHook";
 import { default as MediaQuery } from 'react-responsive';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
-import { combineLatest, Observable, observable } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 import { distinctUntilKeyChanged, map, startWith } from 'rxjs/operators';
+import { useObservable } from '../../utils/observableHook';
 
 import * as mixpanel from 'mixpanel-browser';
+import { theAppContext } from 'src/AppContext';
 import { FormChangeKind, PickOfferChange } from '../../utils/form';
 import { FormatAmount, FormatPercent, FormatPriceOrder } from '../../utils/formatters/Formatters';
 import { Button } from '../../utils/forms/Buttons';
@@ -24,7 +25,6 @@ import { TradingPair, tradingPairResolver } from '../tradingPair/tradingPair';
 import depthChartSvg from './depth-chart.svg';
 import { Offer, Orderbook } from './orderbook';
 import * as styles from './OrderbookView.scss';
-import { theAppContext } from 'src/AppContext';
 
 const { useContext } = React;
 
@@ -296,7 +296,7 @@ export const OrderbookViewHooked = () => {
   const { orderbookForView$ } = useContext(theAppContext);
   const state = useObservable(orderbookForView$);
 
-  if(!state) return null;
+  if (!state) return null;
 
-  return <OrderbookView {...state}/>
-}
+  return <OrderbookView {...state}/>;
+};

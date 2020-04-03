@@ -44,7 +44,6 @@ import {
   currentTradingPair$,
   loadablifyPlusTradingPair,
   memoizeTradingPair,
-  TradingPairsProps,
 } from './exchange/tradingPair/tradingPair';
 
 import { BigNumber } from 'bignumber.js';
@@ -60,7 +59,6 @@ import {
 import {
   createDepthChartWithLoading$,
   DepthChartProps,
-  DepthChartWithLoadingHooked,
   DepthChartWithLoading,
 } from './exchange/depthChart/DepthChartWithLoading';
 import {
@@ -75,16 +73,13 @@ import {
   createMyCurrentTrades$,
   createMyTrades$,
   createMyTradesKind$,
-  MyTradesPropsLoadable,
 } from './exchange/myTrades/myTrades';
-import { MyTrades } from './exchange/myTrades/MyTradesView';
 import { aggregateMyOpenTradesFor$, createMyOpenTrades$ } from './exchange/myTrades/openTrades';
 import { createFormController$, OfferFormState } from './exchange/offerMake/offerMake';
-import { OfferMakePanel } from './exchange/offerMake/OfferMakePanel';
 import {
   createOrderbookForView,
-  Props,
-  OrderbookView
+  OrderbookView,
+  Props
 } from './exchange/orderbook/OrderbookView';
 import {
   createOrderbookPanel$,
@@ -98,11 +93,8 @@ import {
   PriceChartDataPoint
 } from './exchange/priceChart/pricechart';
 import {
-  createPriceChartLoadable$,
-  PriceChartProps,
-  PriceChartWithLoading
+  createPriceChartLoadable$
 } from './exchange/priceChart/PriceChartWithLoading';
-import { TradingPairView } from './exchange/tradingPair/TradingPairView';
 import { createFooter$, FooterProps, TheFooter } from './footer/Footer';
 import { Network } from './header/Network';
 import {
@@ -112,15 +104,12 @@ import {
 import { InstantViewPanel } from './instant/InstantViewPanel';
 import {
   createExchangeMigration$,
-  createMigrationOps$,
-  ExchangeMigrationState
+  createMigrationOps$
 } from './migration/migration';
 import {
   createMigrationForm$,
-  MigrationFormKind,
-  MigrationFormState
+  MigrationFormKind
 } from './migration/migrationForm';
-import { MigrationButton } from './migration/MigrationFormView';
 
 import { NetworkConfig } from './blockchain/config';
 import {
@@ -217,13 +206,6 @@ export function setupAppContext() {
     initializedAccount$,
     onEveryBlock$,
     'SAI'
-  );
-
-  const daiBalance$ = createTokenBalances$(
-    context$,
-    initializedAccount$,
-    onEveryBlock$,
-    'DAI'
   );
 
   const wrapUnwrapForm$ =
@@ -366,7 +348,7 @@ export function setupAppContext() {
   };
   const priceChartLoadable$ = createPriceChartLoadable$(groupMode$, dataSources);
 
-  const { 
+  const {
     offerMakeLoadable$,
     orderbookForView$,
     orderbookPanel$,
@@ -475,28 +457,11 @@ export function setupAppContext() {
     proxyAddress$,
   );
 
-  const dai2SAIOps$ = curry(createMigrationOps$)(
-    'DAI',
-    createProxyAllowances$(
-      context$,
-      initializedAccount$,
-      proxyAddress$,
-      onEveryBlock$
-    ),
-    proxyAddress$,
-  );
-
   const sai2DAIMigration$ = (amount: BigNumber) => createExchangeMigration$(
     proxyAddress$,
     calls$,
     sai2DAIOps$(amount),
   );
-  //
-  // const dai2SAIMigration$ = (amount: BigNumber) => createExchangeMigration$(
-  //   proxyAddress$,
-  //   calls$,
-  //   dai2SAIOps$(amount),
-  // );
 
   const sai2DAIMigrationForm$ = loadablifyLight(createMigrationForm$(
     context$,
@@ -506,37 +471,6 @@ export function setupAppContext() {
     calls$,
     aggregateMyOpenTradesFor$('SAI', account$, transactions$, loadOrderbook)
   ));
-
-  // const dai2SAIMigrationForm$ = loadablifyLight(createMigrationForm$(
-  //   context$,
-  //   daiBalance$,
-  //   MigrationFormKind.dai2sai,
-  //   dai2SAIMigration$,
-  //   calls$,
-  //   aggregateMyOpenTradesFor$('DAI', account$, transactions$, loadOrderbook)
-  // ));
-
-  // const SAI2DAIMigrationTxRx =
-  //   inject<{ migration$: Observable<ExchangeMigrationState> }, any>(
-  //     withModal(
-  //       connect<Loadable<MigrationFormState>, any>(
-  //         MigrationButton,
-  //         loadablifyLight<MigrationFormState>(sai2DAIMigrationForm$)
-  //       )
-  //     ),
-  //     { migration$: sai2DAIMigrationForm$ }
-  //   );
-  //
-  // const DAI2SAIMigrationTxRx =
-  //   inject<{ migration$: Observable<ExchangeMigrationState> }, any>(
-  //     withModal(
-  //       connect<Loadable<MigrationFormState>, any>(
-  //         MigrationButton,
-  //         loadablifyLight<MigrationFormState>(dai2SAIMigrationForm$)
-  //       )
-  //     ),
-  //     { migration$: dai2SAIMigrationForm$ }
-  //   );
 
   pluginDevModeHelpers(context$, calls$, readCalls$, initializedAccount$, onEveryBlock$, mta$);
 
@@ -648,10 +582,10 @@ function mtSimpleOrderForm(
   const orderbookForView$ = createOrderbookForView(
     orderbook$,
     of({
-         change: () => {
-           return;
-         }
-       }),
+      change: () => {
+        return;
+      }
+    }),
     kindChange,
   );
   const OrderbookViewTxRx = connect<Props, {}>(OrderbookView, orderbookForView$);
@@ -691,18 +625,20 @@ function offerMake(
   balances$: Observable<Balances>
 ) {
   const offerMake$: Observable<OfferFormState> = currentTradingPair$.pipe(
-    switchMap(tp => createFormController$(
-      {
-        gasPrice$,
-        allowance$,
-        calls$,
-        etherPriceUsd$,
-        orderbook$,
-        balances$,
-        user$,
-        dustLimits$: createDustLimits$(context$),
-      },
-      tp)
+    switchMap(tp =>
+      createFormController$(
+        {
+          gasPrice$,
+          allowance$,
+          calls$,
+          etherPriceUsd$,
+          orderbook$,
+          balances$,
+          user$,
+          dustLimits$: createDustLimits$(context$)
+        },
+        tp
+      )
     ),
     shareReplay(1)
   );
@@ -720,14 +656,14 @@ function offerMake(
   const orderbookForView$ = createOrderbookForView(
     orderbook$,
     offerMake$,
-    kindChange,
+    kindChange
   );
 
   return {
     offerMakeLoadable$,
     orderbookForView$,
     orderbookPanel$,
-    depthChartWithLoading$,
+    depthChartWithLoading$
   };
 }
 
