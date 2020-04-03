@@ -13,6 +13,7 @@ import { HeaderTxRx } from './header/Header';
 import * as styles from './index.scss';
 import { InstantExchange } from './instant/InstantViewPanel';
 import { MarginTradingSimpleTxRx } from './marginTrading/MarginTradingSimple';
+import { TransactionNotifierHooked } from './transactionNotifier/TransactionNotifierView';
 import { connect } from './utils/connect';
 import { SetupModal } from './utils/modalHook';
 
@@ -55,11 +56,7 @@ export class MainContent extends React.Component<RouterProps> {
     return (
       <routerContext.Provider value={{ rootUrl: this.props.match.url }}>
         <div className={styles.container}>
-          <theAppContext.Consumer>
-            {({ TransactionNotifierTxRx }) =>
-              <TransactionNotifierTxRx/>
-            }
-          </theAppContext.Consumer>
+          <TransactionNotifierHooked/>
           <HeaderTxRx/>
           <RoutesRx/>
           <theAppContext.Consumer>

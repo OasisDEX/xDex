@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 
+import { theAppContext } from 'src/AppContext';
 import {
   transactionObserver,
   TxRebroadcastStatus,
@@ -8,9 +9,12 @@ import {
   TxStatus
 } from '../blockchain/transactions';
 import { CloseButton } from '../utils/forms/Buttons';
+import { useObservable } from '../utils/observableHook';
 import { Timer } from '../utils/Timer';
 import { UnreachableCaseError } from '../utils/UnreachableCaseError';
 import * as styles from './TransactionNotifier.scss';
+
+const { useContext } = React;
 
 const VISIBILITY_TIMEOUT: number = 5;
 
@@ -52,6 +56,15 @@ export class TransactionNotifierView extends React.Component<TransactionNotifier
     );
   }
 }
+
+export const TransactionNotifierHooked = () => {
+  const { transactionNotifier$ } = useContext(theAppContext);
+  const state = useObservable(transactionNotifier$);
+
+  if (!state) return null;
+
+  return <TransactionNotifierView {...state}/>;
+};
 
 export type NotificationProps = TxState & {etherscan: { url: string }, onDismiss: () => void};
 

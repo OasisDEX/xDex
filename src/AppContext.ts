@@ -132,10 +132,6 @@ import {
 } from './marginTrading/transfer/mtTransferForm';
 import { MTSimpleOrderBuyPanel } from './marginTrading/transfer/mtTransferFormView';
 import { createTransactionNotifier$ } from './transactionNotifier/transactionNotifier';
-import {
-  TransactionNotifierPros,
-  TransactionNotifierView
-} from './transactionNotifier/TransactionNotifierView';
 import { connect } from './utils/connect';
 import { pluginDevModeHelpers } from './utils/devModeHelpers';
 import { OfferMatchType } from './utils/form';
@@ -389,10 +385,6 @@ export function setupAppContext() {
 
   const transactionNotifier$ =
     createTransactionNotifier$(transactions$, interval(5 * 1000), context$);
-  const TransactionNotifierTxRx = connect<TransactionNotifierPros, {}>(
-    TransactionNotifierView,
-    transactionNotifier$
-  );
 
   const transactionsLog: string[] = [];
   combineLatest(transactionNotifier$, context$).pipe(
@@ -479,7 +471,7 @@ export function setupAppContext() {
     allTrades$,
     myTrades$,
     InstantTxRx,
-    TransactionNotifierTxRx,
+    transactionNotifier$,
     NetworkTxRx,
     TheFooterTxRx,
     MTSimpleOrderPanelRxTx,

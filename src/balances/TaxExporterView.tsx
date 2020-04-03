@@ -1,6 +1,5 @@
 import * as mixpanel from 'mixpanel-browser';
 import * as React from 'react';
-import { Observable } from 'rxjs';
 import { take } from 'rxjs/internal/operators';
 import { theAppContext } from 'src/AppContext';
 import { Button } from '../utils/forms/Buttons';
