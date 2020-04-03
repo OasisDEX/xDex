@@ -1,6 +1,7 @@
 import classnames from 'classnames';
 import * as React from 'react';
 
+import { useObservable } from "../../utils/observableHook";
 import { BigNumber } from 'bignumber.js';
 import { etherscan } from '../../blockchain/etherscan';
 import { formatDateTime } from '../../utils/formatters/format';
@@ -18,6 +19,9 @@ import { Trade, TradeAct } from '../trades';
 import { MyTradesKind, MyTradesPropsLoadable } from './myTrades';
 import * as styles from './MyTradesView.scss';
 import { TradeWithStatus } from './openTrades';
+import { theAppContext } from 'src/AppContext';
+
+const { useContext } = React;
 
 export class MyTradesTable extends React.Component<MyTradesPropsLoadable> {
   public render() {
@@ -174,4 +178,13 @@ export class MyTrades extends React.Component<MyTradesPropsLoadable> {
       </>
     );
   }
+}
+
+export const MyTradesHooked = () => {
+  const { myTrades$ } = useContext(theAppContext);
+  const state = useObservable(myTrades$);
+
+  if (!state) return null;
+
+  return <MyTrades {...state}/>
 }

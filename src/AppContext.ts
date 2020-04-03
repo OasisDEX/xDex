@@ -392,7 +392,6 @@ export function setupAppContext() {
     gasPrice$,
     currentTradingPair$
   );
-  const MyTradesTxRx = connect<MyTradesPropsLoadable, {}>(MyTrades, myTrades$);
 
   const currentPrice$ = createCurrentPrice$(currentTradeHistory$);
   const yesterdayPrice$ = createYesterdayPrice$(lastDayPriceHistory$);
@@ -547,7 +546,7 @@ export function setupAppContext() {
     orderbookPanel$,
     depthChartWithLoading$,
     allTrades$,
-    MyTradesTxRx,
+    myTrades$,
     InstantTxRx,
     TransactionNotifierTxRx,
     NetworkTxRx,
