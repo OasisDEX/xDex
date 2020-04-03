@@ -404,7 +404,7 @@ const protoMain = {
     return load(tokenRecovery, '0xc06a269e3370f582df2dbb6cf0271c267badf99d');
   },
   oasisDataService: {
-    url: 'https://staging-cache.eth2dai.com/api/v1'
+    url: 'https://cache.eth2dai.com/api/v1'
   },
   etherscan: {
     url: 'https://etherscan.io',
