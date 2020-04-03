@@ -15,6 +15,7 @@ import { Banner } from '../landingPage/Banner';
 import * as styles from './MarginTradingSimple.scss';
 import { TradingPairViewHook } from 'src/exchange/tradingPair/TradingPairView';
 import { PriceChartWithLoading } from 'src/exchange/priceChart/PriceChartWithLoading';
+import AllTradesHooked from 'src/exchange/allTrades/AllTradesView';
 
 export interface MarginTradingOwnProps {
   setTradingPair: (tp: TradingPair) => void;
@@ -67,11 +68,7 @@ const Content = (props: any | { parentMatch: string }) => {
           <PriceChartWithLoading/>
         </Panel>
         <Panel className={styles.allTradesPanel} footerBordered={true}>
-          <theAppContext.Consumer>
-            { ({ AllTradesTxRx }) =>
-              <AllTradesTxRx />
-            }
-          </theAppContext.Consumer>
+          <AllTradesHooked/>
         </Panel>
       </FlexLayoutRow>
       <FlexLayoutRow>

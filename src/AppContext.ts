@@ -51,14 +51,12 @@ import { BigNumber } from 'bignumber.js';
 import * as mixpanel from 'mixpanel-browser';
 import { transactions$, TxState } from './blockchain/transactions';
 import {
-  AllTradesProps,
   createAllTrades$,
   createTradesBrowser$,
   loadAllTrades,
   loadPriceDaysAgo,
   loadVolumeForThePastDay
 } from './exchange/allTrades/allTrades';
-import { AllTrades } from './exchange/allTrades/AllTradesView';
 import {
   createDepthChartWithLoading$,
   DepthChartProps,
@@ -334,7 +332,6 @@ export function setupAppContext() {
   );
 
   const allTrades$ = createAllTrades$(currentTradesBrowser$, context$);
-  const AllTradesTxRx = connect<AllTradesProps, {}>(AllTrades, allTrades$);
 
   const groupMode$: BehaviorSubject<GroupMode> = new BehaviorSubject<GroupMode>('byHour');
 
@@ -541,7 +538,7 @@ export function setupAppContext() {
 
   return {
     offerMakeLoadable$,
-    AllTradesTxRx,
+    allTrades$,
     MyTradesTxRx,
     OfferMakePanelTxRx,
     OrderbookPanelTxRx,
