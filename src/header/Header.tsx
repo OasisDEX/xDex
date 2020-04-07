@@ -1,11 +1,11 @@
 import classnames from 'classnames';
 import { isEqual } from 'lodash';
-import * as React from 'react';
+import React, { Component } from 'react';
 // @ts-ignore
 // tslint:disable:import-name
 import Jazzicon, { jsNumberForAddress } from 'react-jazzicon';
 // @ts-ignore
-import * as ReactPopover from 'react-popover';
+import ReactPopover from 'react-popover';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 
@@ -23,7 +23,7 @@ import { Button } from '../utils/forms/Buttons';
 import { SvgImage } from '../utils/icons/utils';
 import { Loadable } from '../utils/loadable';
 import { WithLoadingIndicatorInline } from '../utils/loadingIndicator/LoadingIndicator';
-import * as styles from './Header.scss';
+import styles from './Header.scss';
 import OasisDexLogo from './OasisDexLogo.svg';
 import {
   WalletConnectionViewKind,
@@ -106,7 +106,7 @@ walletStatus$.pipe().subscribe(
   }
 );
 
-class Header extends React.Component<HeaderProps> {
+class Header extends Component<HeaderProps> {
   public render() {
     return (
       <routerContext.Consumer>
@@ -159,7 +159,7 @@ interface WalletConnectionStatusProps {
   view: any;
 }
 
-class WalletConnectionStatus extends React.Component<WalletConnectionStatusProps> {
+class WalletConnectionStatus extends Component<WalletConnectionStatusProps> {
 
   public render(): JSX.Element {
     const { open, close, view, isConnected, isConnecting, isOpen } = this.props;
@@ -239,7 +239,7 @@ interface StatusProps extends Loadable
   <Account> {
 }
 
-class Status extends React.Component<StatusProps> {
+class Status extends Component<StatusProps> {
 
   public render() {
     return (
