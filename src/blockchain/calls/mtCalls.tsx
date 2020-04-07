@@ -148,7 +148,7 @@ function argsOfPerformOperations(
   ];
 
   const drawDaiArgs = (op: Operation, token:string) =>
-    [...drawArgs(op, token), context.mcd.vat];
+    [...drawArgs(op, token), context.mcd.vat, context.mcd.jug.address];
 
   const buySellArgs = (op: Operation) => {
     const maxTotalAdjustedWithSlippage = (op as any).maxTotal.times(
@@ -168,6 +168,7 @@ function argsOfPerformOperations(
         context.tokens[op.name].address, context.mcd.joins[op.name],
         context.tokens.DAI.address, context.mcd.joins.DAI,
         context.cdpManager, context.otc.address, context.mcd.vat,
+        ...(op.kind === OperationKind.buyRecursively ? [context.mcd.jug.address] : []),
       ],
       Web3Utils.fromAscii(context.mcd.ilks[op.name]),
       toWei(op.name, (op as any).amount),
@@ -304,8 +305,7 @@ export const mtRedeem = {
       context.proxyActions.contract.methods.redeem(
         context.cdpManager,
         Web3Utils.fromAscii(context.mcd.ilks[token]),
-        amountToWei(amount, token).toFixed(),
-        context.mcd.joins[token]
+        amountToWei(amount, token).toFixed()
       ).encodeABI(),
     ];
   },
