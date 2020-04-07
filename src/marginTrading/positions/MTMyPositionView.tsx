@@ -124,21 +124,20 @@ export class MTMyPositionView extends
     const { liquidationPenalty } = ma;
     const leverage = ma.leverage ? ma.leverage : ma.balance.gt(zero) ? one : zero;
     const liquidationPrice = ma.liquidationPrice ? ma.liquidationPrice : zero;
-    const liquidationPriceMarket = ma.liquidationPrice && ma.midpointPrice ?
-      ma.liquidationPrice.div(daiPrice)
+    const liquidationPriceMarket = ma.liquidationPrice && ma.midpointPrice && daiPrice.gt(zero)
+      ? ma.liquidationPrice.div(daiPrice)
       : zero;
 
-    const liquidationPriceDisplay = inDai ?
-      liquidationPriceMarket.gt(zero) ? liquidationPriceMarket : undefined
-      :
-      liquidationPrice.gt(zero) ? liquidationPrice : undefined;
+    const liquidationPriceDisplay = inDai
+      ? liquidationPriceMarket.gt(zero) ? liquidationPriceMarket : undefined
+      : liquidationPrice.gt(zero) ? liquidationPrice : undefined;
 
     const markPrice = ma.markPrice.gt(liquidationPrice) && liquidationPrice.gt(ma.referencePrice)
       ? ma.referencePrice
       : ma.markPrice;
 
     const markPriceDisplay = inDai
-      ? (markPrice && daiPrice)
+      ? (markPrice && daiPrice && daiPrice.gt(zero))
         ? markPrice.div(daiPrice)
         : undefined
       : markPrice;
