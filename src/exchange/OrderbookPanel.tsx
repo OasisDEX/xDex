@@ -20,15 +20,15 @@ export interface OrderbookPanelProps {
 }
 
 export interface SubViewsProps {
-  DepthChartWithLoadingHooked : React.ComponentType;
-  OrderbookViewHooked: React.ComponentType;
+  DepthChartWithLoading : React.ComponentType;
+  OrderbookView: React.ComponentType;
 }
 
 export const OrderbookPanel = (props: OrderbookPanelProps & SubViewsProps) => {
   if (props.kind === OrderbookViewKind.depthChart) {
-    return (<props.DepthChartWithLoadingHooked/>);
+    return (<props.DepthChartWithLoading/>);
   }
-  return (<props.OrderbookViewHooked/>);
+  return (<props.OrderbookView/>);
 };
 
 export const OrderbookHooked = () => {
@@ -38,7 +38,10 @@ export const OrderbookHooked = () => {
   if (!state) return null;
 
   const Wrapper = inject<OrderbookPanelProps, SubViewsProps>(
-    OrderbookPanel, { DepthChartWithLoadingHooked, OrderbookViewHooked }
+    OrderbookPanel, {
+      DepthChartWithLoading: DepthChartWithLoadingHooked,
+      OrderbookView: OrderbookViewHooked
+    }
   );
 
   return <Wrapper {...state}/>;

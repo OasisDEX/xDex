@@ -107,7 +107,6 @@ import {
   MigrationFormKind
 } from './migration/migrationForm';
 
-import { NetworkConfig } from './blockchain/config';
 import {
   MTLiquidationNotification,
   MTMyPositionPanel
@@ -578,7 +577,11 @@ function mtSimpleOrderForm(
     inject<OrderbookPanelProps, SubViewsProps>(
       OrderbookPanel,
       // @ts-ignore
-      { DepthChartWithLoadingTxRx, OrderbookViewTxRx }),
+      {
+        DepthChartWithLoading: DepthChartWithLoadingTxRx,
+        OrderbookView: OrderbookViewTxRx
+      }
+      ),
     orderbookPanel$);
 
   return {

@@ -1,7 +1,6 @@
 import React, { useContext } from 'react';
 import { theAppContext } from 'src/AppContext';
 import { useObservable } from 'src/utils/observableHook';
-import { NetworkConfig } from '../blockchain/config';
 import { Tooltip } from '../utils/tooltip/Tooltip';
 import * as styles from './Header.scss';
 
