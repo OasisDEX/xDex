@@ -11,6 +11,7 @@
     "variable-name": false,
     "trailing-comma": false,
     "interface-name": [true, "never-prefix"],
+    "import-name": [true, { "react": "React" }],
     "object-literal-sort-keys": false,
     "no-console": false,
     "no-debugger": false,

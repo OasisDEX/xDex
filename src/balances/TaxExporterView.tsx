@@ -1,5 +1,5 @@
 import * as mixpanel from 'mixpanel-browser';
-import * as React from 'react';
+import React, { useContext, useState } from 'react';
 import { take } from 'rxjs/internal/operators';
 import { theAppContext } from 'src/AppContext';
 import { Button } from '../utils/forms/Buttons';
@@ -8,8 +8,6 @@ import { Panel, PanelBody, PanelHeader } from '../utils/panel/Panel';
 import { Muted } from '../utils/text/Text';
 import { TradeExport } from './taxExporter';
 import * as styles from './TaxExporter.scss';
-
-const { useState, useContext } = React;
 
 export const TaxExporterHooked = () => {
   const { exportTax$ } = useContext(theAppContext);

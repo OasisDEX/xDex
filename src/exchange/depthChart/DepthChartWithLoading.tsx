@@ -1,5 +1,5 @@
 import { BigNumber } from 'bignumber.js';
-import * as React from 'react';
+import React, { useContext } from 'react';
 import { combineLatest, Observable } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 import { useObservable } from '../../utils/observableHook';
@@ -14,8 +14,6 @@ import { OrderbookViewKind } from '../OrderbookPanel';
 import { createZoom$, ZoomChange } from './depthchart';
 import { DepthChartView } from './DepthChartView';
 import * as styles from './DepthChartView.scss';
-
-const { useContext } = React;
 
 export type DepthChartProps = Loadable<Orderbook> & {
   kind: OfferType;

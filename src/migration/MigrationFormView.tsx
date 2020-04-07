@@ -1,5 +1,5 @@
 import * as classnames from 'classnames';
-import * as React from 'react';
+import React, { useContext, useState } from 'react';
 import * as ReactModal from 'react-modal';
 import { Observable } from 'rxjs';
 import { theAppContext } from '../AppContext';
@@ -43,8 +43,6 @@ import { zero } from '../utils/zero';
 import { CallForAction } from './CallForAction';
 import * as styles from './Migration.scss';
 import { Message, MessageKind, MigrationFormKind, MigrationFormState } from './migrationForm';
-
-const { useContext, useState } = React;
 
 export interface MigrationButtonProps {
   label: string;
@@ -133,7 +131,7 @@ export function MigrationButton(props: MigrationButtonProps) {
 
 }
 
-export function SAI2DAIMigrationTxRx(props: Omit<MigrationButtonProps, 'migration$'>) {
+export function SAI2DAIMigrationHooked(props: Omit<MigrationButtonProps, 'migration$'>) {
   const { sai2DAIMigrationForm$ } = useContext(theAppContext);
 
   return MigrationButton({ ...props, migration$: sai2DAIMigrationForm$ });

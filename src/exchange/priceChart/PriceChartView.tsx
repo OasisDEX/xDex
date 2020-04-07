@@ -3,13 +3,11 @@ import { ScaleLinear, ScaleTime } from 'd3-scale';
 import { BaseType, Selection } from 'd3-selection';
 import { isEmpty } from 'lodash';
 import * as moment from 'moment';
-import * as React from 'react';
+import React, { useEffect, useState } from 'react';
 import { createElement } from 'react-faux-dom';
 import { Muted } from '../../utils/text/Text';
 import { GroupMode, groupModeMapper, PriceChartDataPoint } from './pricechart';
 import * as styles from './PriceChartView.scss';
-
-const { useState , useEffect } = React;
 
 interface ChartParams {
   width: number;

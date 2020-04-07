@@ -1,4 +1,6 @@
-import * as React from 'react';
+import React, { useContext } from 'react';
+import { theAppContext } from 'src/AppContext';
+import { useObservable } from 'src/utils/observableHook';
 import { NetworkConfig } from '../blockchain/config';
 import { Tooltip } from '../utils/tooltip/Tooltip';
 import * as styles from './Header.scss';
@@ -8,18 +10,20 @@ const Networks = {
   main: 'Main'
 };
 
-export class Network extends React.Component<NetworkConfig, any> {
+export const NetworkHooked = () => {
+  const { context$ } = useContext(theAppContext);
+  const state = useObservable(context$);
 
-  public render() {
-    const network = this.props.name as 'kovan' || 'main';
-    const id = 'status';
-    return (
-      <Tooltip id={id} text={`${Networks[network]} Network`}>
-        <span data-tip={true}
-              data-for={id}
-              className={`${styles.networkIndicator} ${styles[network]}`}
-        />
-      </Tooltip>
-    );
-  }
-}
+  if (!state) return null;
+  const network = (state.name as 'kovan') || 'main';
+  const id = 'status';
+  return (
+    <Tooltip id={id} text={`${Networks[network]} Network`}>
+      <span
+        data-tip={true}
+        data-for={id}
+        className={`${styles.networkIndicator} ${styles[network]}`}
+      />
+    </Tooltip>
+  );
+};

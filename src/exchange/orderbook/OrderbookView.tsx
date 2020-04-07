@@ -1,6 +1,6 @@
 // tslint:disable:no-console
 import { equals } from 'ramda';
-import * as React from 'react';
+import React, { useContext } from 'react';
 import { default as MediaQuery } from 'react-responsive';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import { combineLatest, Observable } from 'rxjs';
@@ -25,8 +25,6 @@ import { TradingPair, tradingPairResolver } from '../tradingPair/tradingPair';
 import depthChartSvg from './depth-chart.svg';
 import { Offer, Orderbook } from './orderbook';
 import * as styles from './OrderbookView.scss';
-
-const { useContext } = React;
 
 export function createOrderbookForView(
   currentOrderBook$: Observable<Orderbook>,

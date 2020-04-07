@@ -60,15 +60,14 @@ export const walletStatus$: Observable<WalletStatus> = combineLatest(
   connecting$
 ).pipe(
   map(([account, hasAcceptedToS, connecting]) =>
-    connecting ? connecting :
-      account && hasAcceptedToS ?
-        'connected' :
-        (window as Web3Window).ethereum ?
-          'disconnected' :
-          'missing'
+    connecting
+      ? connecting
+      : account && hasAcceptedToS
+        ? 'connected'
+        : (window as Web3Window).ethereum
+          ? 'disconnected'
+          : 'missing'
   ),
   tap(console.log),
-  shareReplay(1),
+  shareReplay(1)
 );
-
-// walletStatus$.subscribe(console.log);

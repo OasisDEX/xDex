@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useContext } from 'react';
 import { Observable } from 'rxjs';
 import { useObservable } from '../utils/observableHook';
 
@@ -9,8 +9,6 @@ import { inject } from 'src/utils/inject';
 
 import { DepthChartWithLoadingHooked } from '../exchange/depthChart/DepthChartWithLoading';
 import { OrderbookViewHooked } from '../exchange/orderbook/OrderbookView';
-
-const { useContext } = React;
 
 export enum OrderbookViewKind {
   depthChart = 'depthChart',
@@ -26,14 +24,12 @@ export interface SubViewsProps {
   OrderbookViewHooked: React.ComponentType;
 }
 
-export class OrderbookPanel extends React.Component<OrderbookPanelProps & SubViewsProps> {
-  public render() {
-    if (this.props.kind === OrderbookViewKind.depthChart) {
-      return (<this.props.DepthChartWithLoadingHooked/>);
-    }
-    return (<this.props.OrderbookViewHooked/>);
+export const OrderbookPanel = (props: OrderbookPanelProps & SubViewsProps) => {
+  if (props.kind === OrderbookViewKind.depthChart) {
+    return (<props.DepthChartWithLoadingHooked/>);
   }
-}
+  return (<props.OrderbookViewHooked/>);
+};
 
 export const OrderbookHooked = () => {
   const { orderbookPanel$ } = useContext(theAppContext);

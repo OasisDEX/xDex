@@ -1,7 +1,7 @@
 import { BigNumber } from 'bignumber.js';
 import classnames from 'classnames';
 import * as mixpanel from 'mixpanel-browser';
-import * as React from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { theAppContext } from 'src/AppContext';
 import { useObservable } from 'src/utils/observableHook';
@@ -18,8 +18,6 @@ import { BoundarySpan, InfoLabel } from '../../utils/text/Text';
 import { MarketsDetails } from '../exchange';
 import { TradingPair, tradingPairResolver, TradingPairsProps } from './tradingPair';
 import * as styles from './TradingPairView.scss';
-
-const { useContext, useEffect, useState } = React;
 
 interface PairInfoVPProps {
   value: any;

@@ -13,37 +13,33 @@ import { Web3Status, web3Status$ } from './blockchain/web3';
 import { LoadingState } from './landingPage/LandingPage';
 import { Main } from './Main';
 import { NavigationTxRx } from './Navigation';
-import { connect } from './utils/connect';
+import { useObservable } from './utils/observableHook';
 import { UnreachableCaseError } from './utils/UnreachableCaseError';
 
 interface Props {
   status: Web3Status;
   network?: string;
-  tosAccepted?: boolean;
-  hasSeenAnnouncement?: boolean;
 }
 
 mixpanelInit();
 
-class App extends React.Component<Props> {
+const App = ({ network, status }: Props) => {
 
-  public render() {
-    switch (this.props.status) {
-      case 'initializing':
-        return LoadingState.INITIALIZATION;
-      case 'missing':
-        return LoadingState.MISSING_PROVIDER;
-      case 'ready':
-      case 'readonly':
-        if (this.props.network !== undefined && !networks[this.props.network]) {
-          return LoadingState.UNSUPPORTED;
-        }
-        return <NavigationTxRx><Main/></NavigationTxRx>;
-      default:
-        throw new UnreachableCaseError(this.props.status);
-    }
+  switch (status) {
+    case 'initializing':
+      return LoadingState.INITIALIZATION;
+    case 'missing':
+      return LoadingState.MISSING_PROVIDER;
+    case 'ready':
+    case 'readonly':
+      if (network !== undefined && !networks[network]) {
+        return LoadingState.UNSUPPORTED;
+      }
+      return <NavigationTxRx><Main/></NavigationTxRx>;
+    default:
+      throw new UnreachableCaseError(status);
   }
-}
+};
 
 const web3StatusResolve$: Observable<Props> = web3Status$.pipe(
   switchMap(status =>
@@ -66,7 +62,13 @@ const props$: Observable<Props> = web3StatusResolve$.pipe(
   distinctUntilChanged(isEqual)
 );
 
-const AppTxRx = connect<Props, {}>(App, props$);
+const AppHooked = () => {
+  const state = useObservable(props$);
+
+  if (!state) return null;
+
+  return <App {...state}/>;
+};
 
 const root: HTMLElement = document.getElementById('root')!;
 
@@ -74,7 +76,7 @@ if (process.env.NODE_ENV === 'production' && process.env.REACT_APP_SENTRY_DNS) {
   Raven.config(
     process.env.REACT_APP_SENTRY_DNS
   ).install();
-  Raven.context(() => ReactDOM.render(<AppTxRx/>, root));
+  Raven.context(() => ReactDOM.render(<AppHooked/>, root));
 } else {
-  ReactDOM.render(<AppTxRx/>, root);
+  ReactDOM.render(<AppHooked/>, root);
 }

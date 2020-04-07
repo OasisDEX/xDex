@@ -1,5 +1,5 @@
 import { equals } from 'ramda';
-import * as React from 'react';
+import React, { useContext } from 'react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import { Subject } from 'rxjs';
 
@@ -25,8 +25,6 @@ import * as styles from './AllTradesView.scss';
 
 import { theAppContext } from 'src/AppContext';
 import { useObservable } from '../../utils/observableHook';
-
-const { useContext } = React;
 
 class AllTrades extends React.Component<AllTradesProps> {
   private lastTradingPair?: TradingPair;

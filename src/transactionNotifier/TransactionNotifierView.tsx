@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useContext } from 'react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 
 import { theAppContext } from 'src/AppContext';
@@ -14,8 +14,6 @@ import { Timer } from '../utils/Timer';
 import { UnreachableCaseError } from '../utils/UnreachableCaseError';
 import * as styles from './TransactionNotifier.scss';
 
-const { useContext } = React;
-
 const VISIBILITY_TIMEOUT: number = 5;
 
 export interface TransactionNotifierPros{
@@ -23,12 +21,11 @@ export interface TransactionNotifierPros{
   etherscan: { url: string, apiUrl: string, apiKey: string };
 }
 
-export class TransactionNotifierView extends React.Component<TransactionNotifierPros> {
-  public render() {
-    const now = new Date().getTime();
-    return (
+export const TransactionNotifierView = ({ transactions, etherscan }: TransactionNotifierPros) => {
+  const now = new Date().getTime();
+  return (
       <TransitionGroup className={styles.main}>
-        {this.props.transactions
+        {transactions
           .filter(
             transaction => !transaction.dismissed && (
               (transaction.status === TxStatus.Success &&
@@ -41,7 +38,7 @@ export class TransactionNotifierView extends React.Component<TransactionNotifier
               <CSSTransition key={transaction.txNo} classNames="transaction" timeout={1000}>
                 <Notification
                   {...transaction}
-                  etherscan={this.props.etherscan}
+                  etherscan={etherscan}
                   onDismiss={
                     () => transactionObserver.next({
                       kind: 'dismissed',
@@ -53,9 +50,8 @@ export class TransactionNotifierView extends React.Component<TransactionNotifier
             )
           )}
       </TransitionGroup>
-    );
-  }
-}
+  );
+};
 
 export const TransactionNotifierHooked = () => {
   const { transactionNotifier$ } = useContext(theAppContext);

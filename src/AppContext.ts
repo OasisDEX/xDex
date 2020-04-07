@@ -23,7 +23,6 @@ import {
 import { MtAccountDetailsView } from './balances/mtAccountDetailsView';
 import { createBalancesView$, MTBalancesView } from './balances/mtBalancesView';
 import { createTaxExport$ } from './balances/taxExporter';
-import { WalletView } from './balances/WalletView';
 import { calls$, readCalls$ } from './blockchain/calls/calls';
 import {
   account$,
@@ -94,8 +93,6 @@ import {
 import {
   createPriceChartLoadable$
 } from './exchange/priceChart/PriceChartWithLoading';
-import { createFooter$, FooterProps, TheFooter } from './footer/Footer';
-import { Network } from './header/Network';
 import {
   createFormController$ as createInstantFormController$,
   InstantFormState
@@ -203,15 +200,6 @@ export function setupAppContext() {
     'SAI'
   );
 
-  const wrapUnwrapForm$ =
-    curry(createWrapUnwrapForm$)(
-      gasPrice$,
-      etherPriceUsd$,
-      etherBalance$,
-      wethBalance$,
-      calls$
-    );
-
   const currentOrderbook$ = currentTradingPair$.pipe(
     switchMap(pair => loadOrderbook(pair))
   );
@@ -221,9 +209,15 @@ export function setupAppContext() {
                                  currentOrderbook$, calls$, readCalls$);
 
   const approveMTProxy = createMTProxyApprove(calls$);
-
-  const approveWallet = createWalletApprove(calls$, gasPrice$);
-  const disapproveWallet = createWalletDisapprove(calls$, gasPrice$);
+  const wrapUnwrapForm$ = curry(createWrapUnwrapForm$)(
+    gasPrice$,
+    etherPriceUsd$,
+    etherBalance$,
+    wethBalance$,
+    calls$
+  );
+  const approveWallet$ = createWalletApprove(calls$, gasPrice$);
+  const disapproveWallet$ = createWalletDisapprove(calls$, gasPrice$);
 
   const MTBalancesViewRxTx =
     inject(
@@ -242,22 +236,7 @@ export function setupAppContext() {
       }
     );
 
-  const WalletViewRxTx =
-    inject(
-      // @ts-ignore
-      withModal(
-        // @ts-ignore
-        connect(
-          // @ts-ignore
-          WalletView, loadablifyLight(mtBalances$))
-      ),
-      {
-        approveWallet, disapproveWallet, wrapUnwrapForm$
-      }
-    );
-
-  const NetworkTxRx = connect<NetworkConfig, {}>(Network, context$);
-  const TheFooterTxRx = connect<FooterProps, {}>(TheFooter, createFooter$(context$));
+  const walletView$ = loadablifyLight(mtBalances$);
 
   const balancesWithEth$ = combineLatest(balances$, etherBalance$).pipe(
     // @ts-ignore
@@ -468,12 +447,13 @@ export function setupAppContext() {
     orderbookForView$,
     orderbookPanel$,
     depthChartWithLoading$,
+    wrapUnwrapForm$,
+    approveWallet$,
+    disapproveWallet$,
     allTrades$,
     myTrades$,
     InstantTxRx,
     transactionNotifier$,
-    NetworkTxRx,
-    TheFooterTxRx,
     MTSimpleOrderPanelRxTx,
     MTSimpleOrderBuyPanelRxTx,
     MTMyPositionPanelRxTx,
@@ -481,11 +461,12 @@ export function setupAppContext() {
     MTSimpleOrderbookPanelTxRx,
     MTAccountDetailsRxTx,
     MTBalancesViewRxTx,
-    WalletViewRxTx,
+    walletView$,
     sai2DAIMigrationForm$,
     tradingPairView$,
     priceChartLoadable$,
     exportTax$,
+    context$
   };
 }
 

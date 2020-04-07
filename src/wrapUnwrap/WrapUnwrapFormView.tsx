@@ -1,9 +1,11 @@
 import { BigNumber } from 'bignumber.js';
 import classnames from 'classnames';
-import * as React from 'react';
+import React, { useContext } from 'react';
 import * as ReactDOM from 'react-dom';
 import * as ReactModal from 'react-modal';
 
+import { theAppContext } from 'src/AppContext';
+import { useObservable } from 'src/utils/observableHook';
 import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
 import { getToken } from '../blockchain/config';
 import { BigNumberInput } from '../utils/bigNumberInput/BigNumberInput';
@@ -16,7 +18,7 @@ import { InputGroup, InputGroupAddon } from '../utils/forms/InputGroup';
 import { GasCost } from '../utils/gasCost/GasCost';
 import { InfoIcon } from '../utils/icons/Icons';
 import { BorderBox, Hr } from '../utils/layout/LayoutHelpers';
-import { Loadable } from '../utils/loadable';
+import { loadablifyLight } from '../utils/loadable';
 import { WithLoadingIndicator } from '../utils/loadingIndicator/LoadingIndicator';
 import { ModalProps } from '../utils/modal';
 import { Panel, PanelBody, PanelFooter, PanelHeader } from '../utils/panel/Panel';
@@ -25,64 +27,29 @@ import { TransactionStateDescription } from '../utils/text/TransactionStateDescr
 import { Message, MessageKind, WrapUnwrapFormKind, WrapUnwrapFormState } from './wrapUnwrapForm';
 import * as styles from './WrapUnwrapFormView.scss';
 
-type WrapUnwrapFormProps =
-  { kind: WrapUnwrapFormKind } &
-  Loadable<WrapUnwrapFormState> &
-  ModalProps;
+type WrapUnwrapFormProps = { kind: WrapUnwrapFormKind } & ModalProps;
 
-export class WrapUnwrapFormView
-  extends React.Component<WrapUnwrapFormProps> {
+export const WrapUnwrapFormView = ({ kind, close }: WrapUnwrapFormProps) => {
+  const { wrapUnwrapForm$ } = useContext(theAppContext);
+  const loadableState = useObservable(loadablifyLight(wrapUnwrapForm$(kind)));
 
-  private amountInput?: HTMLElement;
+  let amountInput: HTMLElement | undefined;
 
-  public render() {
-    return <ReactModal
-      ariaHideApp={false}
-      isOpen={true}
-      className={styles.modal}
-      overlayClassName={styles.modalOverlay}
-      closeTimeoutMS={250}
-    >
-      <Panel className={classnames(styles.panel, styles.modalChild)}
-             onClick={event => event.stopPropagation()}>
-        <PanelHeader bordered={true}>
-          <div>
-            {this.props.kind === WrapUnwrapFormKind.wrap && 'Wrap Ether'}
-            {this.props.kind === WrapUnwrapFormKind.unwrap && 'Unwrap Ether'}
-          </div>
-        </PanelHeader>
-        <WithLoadingIndicator loadable={this.props}>
-        { state =>
-          (<React.Fragment>
-            <PanelBody className={styles.panelBody}>
-              { this.summary(state) }
-              <Hr color="light" className={styles.hrMargin}/>
-              {this.formOrTransactionState(state)}
-            </PanelBody>
-            { this.footerWithButtons(state)}
-          </React.Fragment>)
-        }
-        </WithLoadingIndicator>
-      </Panel>
-    </ReactModal>;
-  }
-
-  public handleAmountFocus = () => {
-    if (this.amountInput) {
-      this.amountInput.focus();
+  const handleAmountFocus = () => {
+    if (amountInput) {
+      amountInput.focus();
     }
-  }
+  };
 
-  public handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/,/g, '');
-    this.props.value!.change({
+    loadableState?.value!.change({
       kind: FormChangeKind.amountFieldChange,
       value: value === '' ? null : new BigNumber(value)
     } as AmountFieldChange);
-  }
+  };
 
-  private summary(state: WrapUnwrapFormState) {
-
+  const summary = (state: WrapUnwrapFormState) => {
     return <> {
       (state.kind === WrapUnwrapFormKind.wrap || state.kind === WrapUnwrapFormKind.unwrap) &&
       (
@@ -99,14 +66,14 @@ export class WrapUnwrapFormView
       )
     }
     </>;
-  }
+  };
 
-  private formOrTransactionState(state: WrapUnwrapFormState) {
-    return state.progress ? this.transactionState(state) : this.form(state);
-  }
+  const formOrTransactionState = (state: WrapUnwrapFormState) => {
+    return state.progress ? transactionState(state) : form(state);
+  };
 
-  private transactionState(state: WrapUnwrapFormState) {
-    const amount = state.amount || new BigNumber(0);
+  const transactionState = (state: WrapUnwrapFormState) => {
+    const currentAmount = state.amount || new BigNumber(0);
     return (
       <BorderBox>
         <div className={styles.checklistLine} >
@@ -125,7 +92,7 @@ export class WrapUnwrapFormView
             {
               [WrapUnwrapFormKind.unwrap, WrapUnwrapFormKind.wrap]
               .includes(state.kind)
-              && <Money value={amount} token="ETH" />
+              && <Money value={currentAmount} token="ETH" />
             }
           </Muted>
         </div>
@@ -141,26 +108,26 @@ export class WrapUnwrapFormView
         </div>
       </BorderBox>
     );
-  }
+  };
 
-  private form(state: WrapUnwrapFormState) {
+  const form = (state: WrapUnwrapFormState) => {
     return (
       <div>
         <div className={classnames(styles.warning, styles.infoRowMargin)}>
           <div className={styles.warningIcon}><InfoIcon /></div>
-          <Muted className={styles.warningText}>{this.info(state.kind)}</Muted>
+          <Muted className={styles.warningText}>{info(state.kind)}</Muted>
         </div>
-        { this.amount(state) }
+        { amount(state) }
         <div className={classnames(styles.infoRow)}>
           <Muted>Gas cost</Muted>
           <GasCost {...state} />
         </div>
       </div>
     );
-  }
+  };
 
-  private info(kind: WrapUnwrapFormKind) {
-    switch (kind) {
+  const info = (formKind: WrapUnwrapFormKind) => {
+    switch (formKind) {
       case WrapUnwrapFormKind.wrap:
         return 'Wrapped Ether (WETH) is a tradeable version of regular Ether. ' +
           'Be sure to keep some Ether to pay for transactions';
@@ -169,10 +136,10 @@ export class WrapUnwrapFormView
           'Any WETH you convert back to ETH will no longer be usable on Oasis Trade';
       default: return '';
     }
-  }
+  };
 
-  private amount(state: WrapUnwrapFormState) {
-    const errorMessages = (state.messages || []).map(this.messageContent);
+  const amount = (state: WrapUnwrapFormState) => {
+    const errorMessages = (state.messages || []).map(messageContent);
     return (
       <div>
         <InputGroup hasError={ (state.messages || []).length > 0}>
@@ -183,7 +150,7 @@ export class WrapUnwrapFormView
             <BigNumberInput
               data-test-id="type-amount"
               ref={(el: any) =>
-                this.amountInput = (el && ReactDOM.findDOMNode(el) as HTMLElement) || undefined
+                amountInput = (el && ReactDOM.findDOMNode(el) as HTMLElement) || undefined
               }
               type="text"
               mask={createNumberMask({
@@ -191,7 +158,7 @@ export class WrapUnwrapFormView
                 decimalLimit: getToken('ETH').digits,
                 prefix: ''
               })}
-              onChange={this.handleAmountChange}
+              onChange={handleAmountChange}
               value={
                 (state.amount || null) &&
                 formatAmount(state.amount as BigNumber, 'ETH')
@@ -202,10 +169,10 @@ export class WrapUnwrapFormView
             />
             <InputGroupAddon
               className={styles.inputCurrencyAddon}
-              onClick={this.handleAmountFocus}
+              onClick={handleAmountFocus}
             >
-              {(this.props.kind === WrapUnwrapFormKind.wrap && 'ETH')}
-              {(this.props.kind === WrapUnwrapFormKind.unwrap && 'WETH')}
+              {(kind === WrapUnwrapFormKind.wrap && 'ETH')}
+              {(kind === WrapUnwrapFormKind.unwrap && 'WETH')}
             </InputGroupAddon>
           </div>
         </InputGroup>
@@ -214,9 +181,9 @@ export class WrapUnwrapFormView
 
       </div>
     );
-  }
+  };
 
-  private messageContent(msg: Message) {
+  const messageContent = (msg: Message) => {
     switch (msg.kind) {
       case MessageKind.insufficientAmount:
         return `Your ${msg.token} balance is too low`;
@@ -225,13 +192,13 @@ export class WrapUnwrapFormView
       case MessageKind.cannotPayForGas:
         return `You will not be able to pay the gas cost`;
     }
-  }
+  };
 
-  private footerWithButtons(state: WrapUnwrapFormState) {
+  const footerWithButtons = (state: WrapUnwrapFormState) => {
     return (
       <PanelFooter className={styles.buttons}>
         <Button
-          onClick={this.props.close}
+          onClick={close}
           size="md"
           color="dangerOutlined"
         >
@@ -248,5 +215,37 @@ export class WrapUnwrapFormView
         </Button>
       </PanelFooter>
     );
-  }
-}
+  };
+
+  if (!loadableState) return null;
+
+  return <ReactModal
+      ariaHideApp={false}
+      isOpen={true}
+      className={styles.modal}
+      overlayClassName={styles.modalOverlay}
+      closeTimeoutMS={250}
+    >
+      <Panel className={classnames(styles.panel, styles.modalChild)}
+             onClick={event => event.stopPropagation()}>
+        <PanelHeader bordered={true}>
+          <div>
+            {kind === WrapUnwrapFormKind.wrap && 'Wrap Ether'}
+            {kind === WrapUnwrapFormKind.unwrap && 'Unwrap Ether'}
+          </div>
+        </PanelHeader>
+        <WithLoadingIndicator loadable={loadableState}>
+        { state =>
+          (<React.Fragment>
+            <PanelBody className={styles.panelBody}>
+              { summary(state) }
+              <Hr color="light" className={styles.hrMargin}/>
+              {formOrTransactionState(state)}
+            </PanelBody>
+            { footerWithButtons(state)}
+          </React.Fragment>)
+        }
+        </WithLoadingIndicator>
+      </Panel>
+    </ReactModal>;
+};

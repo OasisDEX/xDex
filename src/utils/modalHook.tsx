@@ -1,6 +1,5 @@
-import * as React from 'react';
+import React, { useContext, useState } from 'react';
 import * as ReactDOM from 'react-dom';
-const { useContext, useState } = React;
 
 export interface ModalProps { close: () => void; }
 export type Modal = React.FunctionComponent<ModalProps>;

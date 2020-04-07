@@ -2,8 +2,8 @@ import * as React from 'react';
 import { Redirect, Route, RouteComponentProps, Switch } from 'react-router';
 import { map } from 'rxjs/operators';
 
+import { useObservable } from 'src/utils/observableHook';
 import { tradingPairs } from '../blockchain/config';
-import { connect } from '../utils/connect';
 import { FlexLayoutRow } from '../utils/layout/FlexLayoutRow';
 import { Panel } from '../utils/panel/Panel';
 import { AllTradesHooked } from './allTrades/AllTradesView';
@@ -70,49 +70,54 @@ export const Content  = (props: ContentProps) => {
   );
 };
 
-export class ExchangeView extends React.Component<ExchangeViewProps> {
-  public render() {
-    const {
-      match: { url: matchUrl },
-      tp,
-    } = this.props;
-
-    return (
-      <div>
-        <Switch>
-          <Route
-            path={`${matchUrl}/:base/:quote`}
-            render={props => {
-
-              const valid = tradingPairs.find(t =>
-                t.base === tp.base && t.quote === tp.quote);
-
-              if (!valid) {
-                // It should be a redirect, but I can't make it work!
-                window.location.href =
-                  `${matchUrl}/${tradingPairs[0].base}/${tradingPairs[0].quote}`;
-                return;
-              }
-
-              return <Content
-                {...props}
-                tp={tp}
-                parentMatch={matchUrl}
-                setTradingPair={this.props.setTradingPair}
-              />;
-            }}
-          />
-          <Redirect push={false} from={'/market'} to={`/market/${tp.base}/${tp.quote}`} />
-        </Switch>
-      </div>
-    );
-  }
-}
-
-export const ExchangeViewTxRx = connect<ExchangeViewOwnProps, RouteComponentProps<any>>(
-  ExchangeView,
-  currentTradingPair$.pipe(map((tp: TradingPair) => ({
+export const ExchangeView = (props: ExchangeViewProps) => {
+  const {
+    match: { url: matchUrl },
     tp,
-    setTradingPair: currentTradingPair$.next.bind(currentTradingPair$),
-  })))
-);
+    setTradingPair
+  } = props;
+
+  return (
+    <div>
+      <Switch>
+        <Route
+          path={`${matchUrl}/:base/:quote`}
+          render={localProps => {
+
+            const valid = tradingPairs.find(t =>
+              t.base === tp.base && t.quote === tp.quote);
+
+            if (!valid) {
+              // It should be a redirect, but I can't make it work!
+              window.location.href =
+                `${matchUrl}/${tradingPairs[0].base}/${tradingPairs[0].quote}`;
+              return;
+            }
+
+            return <Content
+              {...localProps}
+              tp={tp}
+              parentMatch={matchUrl}
+              setTradingPair={setTradingPair}
+            />;
+          }}
+        />
+        <Redirect push={false} from={'/market'} to={`/market/${tp.base}/${tp.quote}`} />
+      </Switch>
+    </div>
+  );
+};
+
+export const ExchangeViewHooked = (props: RouteComponentProps<any>) => {
+  const state:ExchangeViewOwnProps | undefined = useObservable(
+    currentTradingPair$.pipe(
+      map((tp: TradingPair) => ({
+        tp,
+        setTradingPair: currentTradingPair$.next.bind(currentTradingPair$)
+      }))
+    )
+  );
+  if (!state) return null;
+
+  return <ExchangeView {...{ ...state, ...props }} />;
+};

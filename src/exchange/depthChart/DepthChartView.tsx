@@ -182,144 +182,164 @@ const btnStyles = {
   background: 'white',
 };
 
-export class DepthChartView extends React.Component<DepthChartInternalProps> {
+export const DepthChartView = (props: DepthChartInternalProps) => {
+  const chart = createElement('div');
 
-  public render() {
+  // console.log('zoom', this.props.zoom);
 
-    const chart = createElement('div');
+  const data = getDepthChartData(
+    props.orderbook.buy,
+    props.orderbook.sell,
+    props.kind,
+    props.matchType,
+    props.amount,
+    props.price,
+    props.zoom
+  );
 
-    // console.log('zoom', this.props.zoom);
-
-    const data = getDepthChartData(
-      this.props.orderbook.buy,
-      this.props.orderbook.sell,
-      this.props.kind,
-      this.props.matchType,
-      this.props.amount,
-      this.props.price,
-      this.props.zoom
-    );
-
-    const svgContainer = d3.select(chart)
+  const svgContainer = d3
+    .select(chart)
     .append('svg')
     .attr('width', totalWidth)
     .attr('height', totalHeight)
     .append('g')
     .classed('depthchart', true);
 
-    const x = d3.scaleLinear()
+  const x = d3
+    .scaleLinear()
     .domain([data.minPrice, data.maxPrice])
     .range([chartCoords.left, chartCoords.right]);
 
-    const minYVolume = 1e-1;
-    const minYVolumePlus = 1e-1 + 1e-2;
+  const minYVolume = 1e-1;
+  const minYVolumePlus = 1e-1 + 1e-2;
 
-    const yBuy = d3.scaleLog()
+  const yBuy = d3
+    .scaleLog()
     .nice()
     .domain([minYVolume, data.maxVolume])
     .range([chartCoords.verticalHalf, chartCoords.bottom]);
 
-    const ySell = d3.scaleLog()
+  const ySell = d3
+    .scaleLog()
     .nice()
     .domain([data.maxVolume, minYVolume])
     .range([chartCoords.top, chartCoords.verticalHalf]);
 
-    const buyArea = d3.area<PriceVolume>()
+  const buyArea = d3
+    .area<PriceVolume>()
     .x(o => x(o.price))
     .y1(o => yBuy(o.volume < minYVolume ? minYVolumePlus : o.volume))
     .curve(d3.curveStepAfter)
     .y0(chartCoords.verticalHalf);
 
-    const sellArea = d3.area<PriceVolume>()
+  const sellArea = d3
+    .area<PriceVolume>()
     .x(o => x(o.price))
     .y1(o => ySell(o.volume < minYVolume ? minYVolumePlus : o.volume))
     .curve(d3.curveStepAfter)
     .y0(chartCoords.verticalHalf);
 
-    axes(svgContainer, x, ySell, yBuy, this.props.base);
+  axes(svgContainer, x, ySell, yBuy, props.base);
 
-    const chartMode = (!this.props.price || !this.props.amount) ? 'none' : this.props.kind;
+  const chartMode = !props.price || !props.amount ? 'none' : props.kind;
 
-    ([[data.buysBefore, buyArea,
-      chartMode === 'buy' ? styles.hidden : styles.buyChart],
-      [data.buysAfter, buyArea,
-        chartMode === 'sell' ? styles.buyChartDark : styles.buyChart],
-      [data.buysExtra, buyArea, styles.buyChartDark],
-      [data.sellsBefore, sellArea,
-        chartMode === 'sell' ? styles.hidden : styles.sellChartDark],
-      [data.sellsAfter, sellArea, styles.sellChart],
-      [data.sellsExtra, sellArea, styles.sellChartDark]]
-    .filter(([volumes]) => volumes !== undefined && volumes.length > 0) as any)
-    .forEach(([volumes, area, style]: any) => {
-      return svgContainer
+  ([
+    [
+      data.buysBefore,
+      buyArea,
+      chartMode === 'buy' ? styles.hidden : styles.buyChart
+    ],
+    [
+      data.buysAfter,
+      buyArea,
+      chartMode === 'sell' ? styles.buyChartDark : styles.buyChart
+    ],
+    [data.buysExtra, buyArea, styles.buyChartDark],
+    [
+      data.sellsBefore,
+      sellArea,
+      chartMode === 'sell' ? styles.hidden : styles.sellChartDark
+    ],
+    [data.sellsAfter, sellArea, styles.sellChart],
+    [data.sellsExtra, sellArea, styles.sellChartDark]
+  ].filter(
+    ([volumes]) => volumes !== undefined && volumes.length > 0
+  ) as any).forEach(([volumes, area, style]: any) => {
+    return svgContainer
       .append('g')
       .append('path')
       .attr('d', area(volumes))
       .classed(style, true);
-    });
+  });
 
-    drawDotsAndLine(svgContainer, chartMode, x, yBuy, ySell, data);
+  drawDotsAndLine(svgContainer, chartMode, x, yBuy, ySell, data);
 
-    const hasBuys = [data.buysBefore, data.buysAfter]
-      .filter(vol => vol !== undefined && vol.length > 0).length > 0;
+  const hasBuys =
+    [data.buysBefore, data.buysAfter].filter(
+      vol => vol !== undefined && vol.length > 0
+    ).length > 0;
 
-    const hasSells = [data.sellsBefore, data.sellsAfter]
-      .filter(vol => vol !== undefined && vol.length > 0).length > 0;
+  const hasSells =
+    [data.sellsBefore, data.sellsAfter].filter(
+      vol => vol !== undefined && vol.length > 0
+    ).length > 0;
 
-    return (
-      <>
-        <PanelHeader bordered={true}>
-            <span>Depth chart</span>
-            <div style={{ marginLeft: 'auto', display: 'flex' }}>
-                <Button
-                  style={btnStyles}
-                  onClick={this.zoomOut}
-                  disabled={!data.zoomOutEnabled}
-                >
-                  <SvgImage image={minusSvg} />
-                </Button>
-                <Button
-                  style={btnStyles}
-                  onClick={this.zoomIn}
-                  disabled={!data.zoomInEnabled}
-                >
-                  <SvgImage image={plusSvg} />
-                </Button>
-                <Button
-                  style={{ ...btnStyles, marginRight:'0' }}
-                  onClick={this.changeChartListView}
-                  data-test-id="orderbook-type-depthChart"
-                >
-                  <SvgImage image={orderbookSvg} />
-                </Button>
-            </div>
-        </PanelHeader>
+  const zoomIn = () => {
+    props.zoomChange('zoomIn');
+  };
 
-        <div className={styles.depthChart}>
-          {chart.toReact()}
-          { hasSells && <SellersLegend /> }
-          { hasBuys && <BuyersLegend /> }
-          { data.summary && drawSummaryInfoBox(data.summary)
-          && <Legend summary={data.summary}
-                     fromCurrency={this.props.base || ''}
-                     toCurrency={this.props.quote || ''} /> }
+  const zoomOut = () => {
+    props.zoomChange('zoomOut');
+  };
+
+  const changeChartListView = () => {
+    props.kindChange(OrderbookViewKind.list);
+  };
+
+  return (
+    <>
+      <PanelHeader bordered={true}>
+        <span>Depth chart</span>
+        <div style={{ marginLeft: 'auto', display: 'flex' }}>
+          <Button
+            style={btnStyles}
+            onClick={zoomOut}
+            disabled={!data.zoomOutEnabled}
+          >
+            <SvgImage image={minusSvg} />
+          </Button>
+          <Button
+            style={btnStyles}
+            onClick={zoomIn}
+            disabled={!data.zoomInEnabled}
+          >
+            <SvgImage image={plusSvg} />
+          </Button>
+          <Button
+            style={{ ...btnStyles, marginRight: '0' }}
+            onClick={changeChartListView}
+            data-test-id="orderbook-type-depthChart"
+          >
+            <SvgImage image={orderbookSvg} />
+          </Button>
         </div>
-      </>);
-  }
+      </PanelHeader>
 
-  private zoomIn = () => {
-    this.props.zoomChange('zoomIn');
-  }
-
-  private zoomOut = () => {
-    this.props.zoomChange('zoomOut');
-  }
-
-  private changeChartListView = () => {
-    this.props.kindChange(OrderbookViewKind.list);
-  }
-
-}
+      <div className={styles.depthChart}>
+        {chart.toReact()}
+        {hasSells && <SellersLegend />}
+        {hasBuys && <BuyersLegend />}
+        {data.summary && drawSummaryInfoBox(data.summary) && (
+          <Legend
+            summary={data.summary}
+            fromCurrency={props.base || ''}
+            toCurrency={props.quote || ''}
+          />
+        )}
+      </div>
+    </>
+  );
+};
 
 function drawSummaryInfoBox(summary?: Summary) {
   if (!summary) {

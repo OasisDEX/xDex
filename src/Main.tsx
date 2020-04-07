@@ -8,14 +8,15 @@ import { map } from 'rxjs/operators';
 import { setupAppContext, theAppContext } from './AppContext';
 import { BalancesView } from './balances/BalancesView';
 import { WalletStatus, walletStatus$ } from './blockchain/wallet';
-import { ExchangeViewTxRx } from './exchange/ExchangeView';
-import { HeaderTxRx } from './header/Header';
+import { ExchangeViewHooked } from './exchange/ExchangeView';
+import { TheFooterHooked } from './footer/Footer';
+import { HeaderHooked } from './header/Header';
 import * as styles from './index.scss';
 import { InstantExchange } from './instant/InstantViewPanel';
 import { MarginTradingSimpleTxRx } from './marginTrading/MarginTradingSimple';
 import { TransactionNotifierHooked } from './transactionNotifier/TransactionNotifierView';
-import { connect } from './utils/connect';
 import { SetupModal } from './utils/modalHook';
+import { useObservable } from './utils/observableHook';
 
 const {
   REACT_APP_INSTANT_ENABLED,
@@ -34,72 +35,64 @@ browserHistoryInstance.listen(location => {
   });
 });
 
-export class Main extends React.Component {
-  public render() {
-    return (
-      <theAppContext.Provider value={setupAppContext()}>
-        <SetupModal>
-          <Router history={browserHistoryInstance}>
-            <MainContentWithRouter/>
-          </Router>
-        </SetupModal>
-      </theAppContext.Provider>
-    );
-  }
-}
+export const Main = () => {
+  return (
+    <theAppContext.Provider value={setupAppContext()}>
+      <SetupModal>
+        <Router history={browserHistoryInstance}>
+          <MainContentWithRouter/>
+        </Router>
+      </SetupModal>
+    </theAppContext.Provider>
+  );
+};
 
 export interface RouterProps extends RouteComponentProps<any> {
 }
 
-export class MainContent extends React.Component<RouterProps> {
-  public render() {
-    return (
-      <routerContext.Provider value={{ rootUrl: this.props.match.url }}>
-        <div className={styles.container}>
-          <TransactionNotifierHooked/>
-          <HeaderTxRx/>
-          <RoutesRx/>
-          <theAppContext.Consumer>
-            {({ TheFooterTxRx }) =>
-              <TheFooterTxRx/>
-            }
-          </theAppContext.Consumer>
-        </div>
-      </routerContext.Provider>
-    );
-  }
-}
+export const MainContent = (props: RouterProps) => {
+  const routesState = useObservable(walletStatus$
+    .pipe(
+      map(status => ({
+        status
+      }))
+    ));
 
-class Routes extends React.Component<{ status: WalletStatus }> {
-  public render() {
-    return (
-      <Switch>
-        <Route exact={false} path={'/market'} component={ExchangeViewTxRx}/>
-        {
-          REACT_APP_INSTANT_ENABLED === '1' &&
-          <Route exact={false} path={'/instant'} component={InstantExchange}/>}
-        {
-          this.props.status === 'connected' &&
-          <Route path={'/balances'} component={BalancesView}/>
-        }
-        {
-          REACT_APP_LT_ENABLED === '1' &&
-          this.props.status === 'connected' &&
-          <Route path={'/leverage'} component={MarginTradingSimpleTxRx} />
-        }
-        <Redirect from={'/account'} to={'/balances'}/>
-        <Redirect from={'/'} to={'/market'}/>
-      </Switch>
-    );
-  }
-}
+  if (!routesState) return null;
 
-const RoutesRx = connect<{status: WalletStatus}, {}>(Routes, walletStatus$
-  .pipe(
-    map(status => ({
-      status
-    }))
-  ));
+  return (
+    <routerContext.Provider value={{ rootUrl: props.match.url }}>
+      <div className={styles.container}>
+        <TransactionNotifierHooked />
+        <HeaderHooked />
+        <Routes {...routesState}/>
+        <TheFooterHooked/>
+      </div>
+    </routerContext.Provider>
+  );
+};
+
+const Routes = ({ status }: { status: WalletStatus }) => {
+  return (
+    <Switch>
+      <Route exact={false} path={'/market'} component={ExchangeViewHooked}/>
+      {
+        REACT_APP_INSTANT_ENABLED === '1' &&
+        <Route exact={false} path={'/instant'} component={InstantExchange}/>}
+      {
+        status === 'connected' &&
+        <Route path={'/balances'} component={BalancesView}/>
+      }
+      {
+        REACT_APP_LT_ENABLED === '1' &&
+        status === 'connected' &&
+        <Route path={'/leverage'} component={MarginTradingSimpleTxRx} />
+      }
+      <Redirect from={'/account'} to={'/balances'}/>
+      <Redirect from={'/'} to={'/market'}/>
+    </Switch>
+  );
+};
 
 const MainContentWithRouter = withRouter(MainContent);
 
