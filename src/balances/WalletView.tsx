@@ -1,13 +1,13 @@
 import * as classnames from 'classnames';
 import * as React from 'react';
 import { Observable } from 'rxjs';
-import { Slider } from 'src/utils/forms/Slider';
 import { getToken } from '../blockchain/config';
 import { TxState } from '../blockchain/transactions';
 import { connect } from '../utils/connect';
 import { formatCryptoBalance, formatFiatBalance } from '../utils/formatters/format';
 import { FormatAmount } from '../utils/formatters/Formatters';
 import { Button } from '../utils/forms/Buttons';
+import { Slider } from '../utils/forms/Slider';
 import { inject } from '../utils/inject';
 import { Loadable, loadablifyLight } from '../utils/loadable';
 import { WithLoadingIndicator } from '../utils/loadingIndicator/LoadingIndicator';

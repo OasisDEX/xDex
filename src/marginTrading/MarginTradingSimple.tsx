@@ -11,7 +11,7 @@ import { connect } from '../utils/connect';
 import { FlexLayoutRow } from '../utils/layout/FlexLayoutRow';
 import { Panel } from '../utils/panel/Panel';
 
-import { Banner } from 'src/landingPage/Banner';
+import { Banner } from '../landingPage/Banner';
 import * as styles from './MarginTradingSimple.scss';
 
 export interface MarginTradingOwnProps {

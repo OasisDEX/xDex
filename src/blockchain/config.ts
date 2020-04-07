@@ -8,9 +8,7 @@ import daiCircleSvg from '../icons/coins/dai-circle.svg';
 import daiColorSvg from '../icons/coins/dai-color.svg';
 import daiSvg from '../icons/coins/dai.svg';
 import ethCircleSvg from '../icons/coins/eth-circle.svg';
-// import ethColorInverseSvg from '../icons/coins/eth-color-inverse.svg';
 import ethColorSvg from '../icons/coins/eth-color.svg';
-// import ethInverseSvg from '../icons/coins/eth-inverse.svg';
 import ethSvg from '../icons/coins/eth.svg';
 import linkCircleSvg from '../icons/coins/link-circle.svg';
 import linkColorSvg from '../icons/coins/link-color.svg';
@@ -406,7 +404,7 @@ const protoMain = {
     return load(tokenRecovery, '0xc06a269e3370f582df2dbb6cf0271c267badf99d');
   },
   oasisDataService: {
-    url: 'https://staging-cache.eth2dai.com/api/v1'
+    url: 'https://cache.eth2dai.com/api/v1'
   },
   etherscan: {
     url: 'https://etherscan.io',
@@ -600,11 +598,11 @@ const localnet: NetworkConfig =  {
       loadToken('ZRX', erc20, '0x2c60CF08c07C212e21e6E2ee4626c478BACe092a'),
       loadToken('BAT', erc20, '0xd80110E3C107Eb206B556871cFe2532eC7D05E47'),
       loadToken('REP', erc20, '0xE8d4C2Ab5782c697f06f17610cC03068180d0FaC'),
-      loadToken('USDC', erc20, NO_ADDR),
-      loadToken('TUSD', erc20, NO_ADDR),
-      loadToken('PAX', erc20, NO_ADDR),
-      loadToken('LINK', erc20, NO_ADDR),
-      loadToken('WBTC', erc20, NO_ADDR),
+      loadToken('USDC', erc20, '0x25f50Ea441836ae39b54a9DcBbd57d7048d977CF'),
+      loadToken('TUSD', erc20, '0x83eF880aE7e9155Cf8Ad2CE5ba75019376C0B7F8'),
+      loadToken('PAX', erc20, '0xb02048C28D9BEE6989E8D48e3972F283D3B7822c'),
+      loadToken('LINK', erc20, '0x54729948EbD535aBC2492FdAAabb4153E9aC28f7'),
+      loadToken('WBTC', erc20, '0x85a91f61feA8f173434424F9758a12fEA11B613c'),
     ]);
   },
   mcd: {
@@ -716,6 +714,3 @@ const localnet: NetworkConfig =  {
 };
 
 export const networks = asMap('id', [main, kovan, localnet]);
-
-// use when contract is not deployed / not available on a given network
-const NO_ADDR = '0x0000000000000000000000000000000000000000';
