@@ -2,7 +2,7 @@ import * as d3 from 'd3';
 import { ScaleLinear, ScaleTime } from 'd3-scale';
 import { BaseType, Selection } from 'd3-selection';
 import { isEmpty } from 'lodash';
-import * as moment from 'moment';
+import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { createElement } from 'react-faux-dom';
 import { Muted } from '../../utils/text/Text';

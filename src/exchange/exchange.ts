@@ -1,5 +1,5 @@
 import { BigNumber } from 'bignumber.js';
-import * as moment from 'moment';
+import moment from 'moment';
 import { combineLatest, forkJoin, Observable } from 'rxjs';
 import { concatAll, first, map, reduce, switchMap } from 'rxjs/operators';
 

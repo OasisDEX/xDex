@@ -1,4 +1,4 @@
-import * as moment from 'moment';
+import moment from 'moment';
 import { combineLatest, Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 

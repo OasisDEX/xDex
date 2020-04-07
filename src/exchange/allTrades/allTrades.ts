@@ -1,6 +1,6 @@
 // tslint:disable:no-console
 
-import * as moment from 'moment';
+import moment from 'moment';
 import { equals } from 'ramda';
 import { combineLatest, Observable, Subject } from 'rxjs';
 import {

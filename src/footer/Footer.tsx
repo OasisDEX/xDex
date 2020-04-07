@@ -1,4 +1,4 @@
-import * as moment from 'moment';
+import moment from 'moment';
 import React, { useContext } from 'react';
 import { default as MediaQuery } from 'react-responsive';
 import { from, Observable } from 'rxjs';

@@ -1,4 +1,4 @@
-import * as moment from 'moment';
+import moment from 'moment';
 import { GroupMode, groupModeMapper, PriceChartDataPoint } from './pricechart';
 
 export const fakeDailyData = [
