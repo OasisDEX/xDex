@@ -67,13 +67,14 @@ export function prepareBuyAllocationRequest(
   });
 
   const baseAsset = findMarginableAsset(baseToken, mta);
-
   const cashBalance = baseAsset!.dai;
-  const totalDebt = assets.reduce((sum, a) => sum.plus(a.debt), zero);
+  const debt = baseAsset!.debt;
 
-  const targetDaiBalance = cashBalance.minus(maxTotal).minus(totalDebt);
+  const targetDaiBalance = debt.eq(zero)
+    ? cashBalance.minus(maxTotal)
+    : maxTotal.times(minusOne);
 
-  const defaultTargetCash = cashBalance; // BigNumber.max(zero, cashBalance.minus(maxTotal));
+  const defaultTargetCash = cashBalance;
 
   const createPlan = (debts: Array<Required<EditableDebt>>): Operations =>
     planBuy(baseToken, amount, maxTotal, debts, slippageLimit);
