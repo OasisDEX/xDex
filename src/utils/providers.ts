@@ -11,6 +11,8 @@ import statusSvg from '../icons/providers/status.svg';
 import trezorSvg from '../icons/providers/trezor.svg';
 import trustBlackSvg from '../icons/providers/trust-black.svg';
 import trustSvg from '../icons/providers/trust.svg';
+import walletConnectSvg from '../icons/providers/wallet-connect.svg';
+import walletLinkSvg from '../icons/providers/wallet-link.svg';
 import webWalletSvg from '../icons/providers/web-wallet.svg';
 import { SvgImage } from './icons/utils';
 
@@ -44,6 +46,26 @@ export const Metamask = {
   iconWhite: SvgImageSimple(metamaskBlackSvg),
   alias: 'metamask',
   name: 'Metamask',
+  supported: true,
+  website: 'https://metamask.io/'
+};
+
+export const WalletConnect = {
+  id: 2,
+  icon: SvgImageSimple(walletConnectSvg),
+  iconWhite: SvgImageSimple(metamaskBlackSvg),
+  alias: 'walletConnect',
+  name: 'WalletConnect',
+  supported: true,
+  website: 'https://metamask.io/'
+};
+
+export const WalletLink = {
+  id: 2,
+  icon: SvgImageSimple(walletLinkSvg),
+  iconWhite: SvgImageSimple(walletLinkSvg),
+  alias: 'walletLink',
+  name: 'WalletLink',
   supported: true,
   website: 'https://metamask.io/'
 };

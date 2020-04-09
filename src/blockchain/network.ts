@@ -31,17 +31,26 @@ export const every5Seconds$ = interval(5000).pipe(startWith(0));
 export const every10Seconds$ = interval(10000).pipe(startWith(0));
 export const every30Seconds$ = interval(30000).pipe(startWith(0));
 
-export const version$ = web3 && bindNodeCallback(web3.eth.getNodeInfo)();
-
 export const networkId$ = every3Seconds$.pipe(
   startWith(0),
-  switchMap(() => bindNodeCallback(web3.eth.net.getId)()),
+  switchMap(() => {
+    // if (!web3) {
+    //   return of();
+    // }
+    return bindNodeCallback(web3.eth.net.getId)();
+  }),
   distinctUntilChanged(),
   shareReplay(1)
 );
 
 export const account$: Observable<string | undefined> = every3Seconds$.pipe(
-  switchMap(() => bindNodeCallback(web3.eth.getAccounts)()),
+  switchMap(() => {
+    // debugger;
+    // if (!web3) {
+    //   return of();
+    // }
+    return bindNodeCallback(web3.eth.getAccounts)();
+  }),
   map(([account]) => account),
   distinctUntilChanged(),
   shareReplay(1)

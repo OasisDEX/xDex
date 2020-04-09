@@ -1,7 +1,7 @@
 import classnames from 'classnames';
 import * as React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { connectToWallet } from '../blockchain/wallet';
+import { executeWeb3StatusCommand, WalletType, Web3StatusCommandKind } from '../blockchain/web3';
 import { Button } from '../utils/forms/Buttons';
 import { Checkbox } from '../utils/forms/Checkbox';
 import { LoadingIndicator } from '../utils/loadingIndicator/LoadingIndicator';
@@ -9,12 +9,9 @@ import {
   getCurrentProviderName,
   Ledger,
   Metamask,
-  Parity,
   Provider,
-  Status,
-  Trezor,
-  Trust,
-  WebWallet
+  Trezor, WalletConnect,
+  WalletLink
 } from '../utils/providers';
 import * as styles from './WalletConnection.scss';
 
@@ -76,54 +73,12 @@ const Panel = (props: { heading?: string | React.ReactNode, children?: any }) =>
   );
 };
 
-class SuggestedClients extends React.Component {
-  public render() {
-    return (
-      <Panel heading="Get a Wallet">
-        <ul className={classnames(single, list)} data-test-id="suggested-clients">
-          {
-            [Metamask, Parity, Status, Trust].map((provider) => {
-              return (
-                <a key={provider.id}
-                   href={provider.website}
-                   rel="noreferrer noopener"
-                   target="_blank"
-                >
-                  <ListItem id={provider.id}
-                            icon={provider.iconWhite}
-                            name={provider.name}
-                            supported={provider.supported}
-                  />
-                </a>
-              );
-            })
-          }
-        </ul>
-        <div className={buttonPlaceholder}>
-          <Button size="md"
-                  color="secondaryOutlined"
-                  className={classnames(item)}
-                  data-test-id="go-back"
-                  onClick={this._goBack}
-          >
-            Back
-          </Button>
-        </div>
-      </Panel>
-    );
-  }
-
-  private _goBack = () => {
-    walletConnectionViewManual$.next(WalletConnectionViewKind.noClient);
-  }
-}
-
-class NotConnected extends React.Component<{}, { isChecked: boolean, selectedWallet: Provider }> {
+class NotConnected extends React.Component<{}, { isChecked: boolean, walletType?: WalletType }> {
   public constructor(props: any) {
     super(props);
     this.state = {
       isChecked: false,
-      selectedWallet: {} as Provider
+      walletType: undefined
     };
   }
 
@@ -132,22 +87,27 @@ class NotConnected extends React.Component<{}, { isChecked: boolean, selectedWal
     return (
       <Panel heading="Connect Wallet">
         <ul className={classnames(single, list)}>
-          <ListItem icon={provider.icon}
-                    name={provider.name}
-                    supported={provider.supported}
-                    isSelected={this.state.selectedWallet.id === provider.id}
-                    onSelect={() => this._selectWallet(provider)}
+          <ListItem icon={Metamask.icon}
+                    name={Metamask.name}
+                    supported={true}
+                    isSelected={this.state.walletType === WalletType.browser}
+                    onSelect={() => this._selectWallet(WalletType.browser)}
                     tid="web-wallet"
           />
-          {
-            [...hwWallets].map((hwWallet) =>
-              <ListItem key={hwWallet.id}
-                        icon={hwWallet.icon}
-                        name={hwWallet.name}
-                        supported={hwWallet.supported}
-                        isSelected={this.state.selectedWallet.id === hwWallet.id}/>
-            )
-          }
+          <ListItem icon={WalletLink.icon}
+                    name={WalletLink.name}
+                    supported={true}
+                    isSelected={this.state.walletType === WalletType.walletLink}
+                    onSelect={() => this._selectWallet(WalletType.walletLink)}
+                    tid="web-wallet"
+          />
+          <ListItem icon={WalletConnect.icon}
+                    name={WalletConnect.name}
+                    supported={true}
+                    isSelected={this.state.walletType === WalletType.walletConnect}
+                    onSelect={() => this._selectWallet(WalletType.walletConnect)}
+                    tid="web-wallet"
+          />
         </ul>
         <Checkbox name="tos"
                   data-test-id="accept-tos"
@@ -171,13 +131,6 @@ class NotConnected extends React.Component<{}, { isChecked: boolean, selectedWal
           >
             Connect
           </Button>
-          <Button size="md"
-                  color="secondaryOutlined"
-                  className={classnames(item)}
-                  onClick={() => connectToWallet('walletlink')}
-          >
-            Connect WalletLink
-          </Button>
         </div>
       </Panel>
     );
@@ -190,112 +143,20 @@ class NotConnected extends React.Component<{}, { isChecked: boolean, selectedWal
     });
   }
 
-  private _selectWallet = (selectedWallet: Provider) => {
-    this.setState({ selectedWallet });
+  private _selectWallet = (walletType: WalletType) => {
+    this.setState({ walletType });
   }
 
   private _connect = () => {
-    connectToWallet('browser');
-  }
-
-  private _canConnect = () => {
-    const selectedWallet = this.state.selectedWallet;
-    return this.state.isChecked &&
-      selectedWallet && (
-        selectedWallet.id !== undefined &&
-        selectedWallet.id !== null
-      );
-  }
-}
-
-class NoClient extends React.Component<{}, { isChecked: boolean, selectedWallet: Provider }> {
-  public constructor(props: any) {
-    super(props);
-    this.state = {
-      isChecked: false,
-      selectedWallet: {} as Provider
-    };
-  }
-
-  public render() {
-    return (
-      <Panel heading="Connect Wallet">
-        <ul className={classnames(single, list)}>
-          <ListItem icon={WebWallet.icon}
-                    name={WebWallet.name}
-                    supported={WebWallet.supported}
-                    isSelected={this.state.selectedWallet.id === WebWallet.id}
-                    onSelect={this._suggestClients}
-                    tid="web-wallet"
-          />
-          {
-            [...hwWallets].map((hwWallet) =>
-              <ListItem key={hwWallet.id}
-                        icon={hwWallet.icon}
-                        name={hwWallet.name}
-                        supported={hwWallet.supported}
-                        isSelected={this.state.selectedWallet.id === hwWallet.id}/>
-            )
-          }
-        </ul>
-        <Checkbox name="tos"
-                  data-test-id="accept-tos"
-                  onChange={this._toggle}
-                  className={termsAndConditions}
-        >
-          I accept&nbsp;<a target="_blank"
-                           rel="noopener noreferrer"
-                           href="/terms"
-        >
-          Terms of Service
-        </a>
-        </Checkbox>
-        <div className={buttonPlaceholder}>
-
-          <Button size="md"
-                  color="secondaryOutlined"
-                  className={classnames(item)}
-                  disabled={!this._canConnect()}
-                  onClick={this._connect}
-                  data-test-id="connect-wallet"
-          >
-            Connect
-          </Button>
-          <Button size="md"
-                  color="secondaryOutlined"
-                  className={classnames(item)}
-                  onClick={() => connectToWallet('walletlink')}
-          >
-            Connect WalletLink
-          </Button>
-        </div>
-      </Panel>
-    );
-  }
-
-  private _toggle = () => {
-    this.setState((state: any) => {
-      const isChecked = !state.isChecked;
-      return { isChecked };
+    executeWeb3StatusCommand({
+      kind: Web3StatusCommandKind.connect,
+      type: this.state.walletType!,
+      network: 'main'
     });
   }
 
-  private _connect = () => {
-    connectToWallet('browser');
-  }
-
   private _canConnect = () => {
-    const selectedWallet = this.state.selectedWallet;
-    return this.state.isChecked &&
-      selectedWallet && (
-        selectedWallet.id !== undefined &&
-        selectedWallet.id !== null
-      )
-      ;
-  }
-
-  private _suggestClients = () => {
-    walletConnectionViewManual$.next(WalletConnectionViewKind.suggest);
+    return this.state.isChecked && this.state.walletType;
   }
 }
 
@@ -314,8 +175,23 @@ class Connected extends React.Component {
             )
           }
         </ul>
+        <div className={buttonPlaceholder}>
+          <Button size="md"
+                  color="secondaryOutlined"
+                  className={item}
+                  onClick={this._disconnect}
+                  data-test-id="connect-wallet"
+          >
+            Disconnect
+          </Button>
+        </div>
       </Panel>
     );
+  }
+  private _disconnect = () => {
+    executeWeb3StatusCommand({
+      kind: Web3StatusCommandKind.disconnect,
+    });
   }
 }
 
@@ -361,20 +237,16 @@ const Connecting = (props: any) => {
 };
 
 export enum WalletConnectionViewKind {
-  suggest = 'suggest',
   connected = 'connected',
   connecting = 'connecting',
   notConnected = 'notConnected',
-  noClient = 'noClient',
 }
 
 export const walletConnectionViewManual$ = new BehaviorSubject('');
 
 export const WalletConnectionViews = new Map<WalletConnectionViewKind, any>(
-  [
-    [WalletConnectionViewKind.connected, Connected],
-    [WalletConnectionViewKind.notConnected, NotConnected],
-    [WalletConnectionViewKind.noClient, NoClient],
-    [WalletConnectionViewKind.suggest, SuggestedClients],
-    [WalletConnectionViewKind.connecting, Connecting],
-  ]);
+[
+  [WalletConnectionViewKind.connected, Connected],
+  [WalletConnectionViewKind.notConnected, NotConnected],
+  [WalletConnectionViewKind.connecting, Connecting],
+]);

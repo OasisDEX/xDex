@@ -1,14 +1,12 @@
-import { isEqual } from 'lodash';
 import 'normalize.css';
 import * as Raven from 'raven-js';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { combineLatest, Observable, of } from 'rxjs';
-import { distinctUntilChanged, startWith, switchMap, tap } from 'rxjs/internal/operators';
-import { map } from 'rxjs/operators';
+import { combineLatest } from 'rxjs';
+import {map, startWith} from 'rxjs/operators';
 import { mixpanelInit } from './analytics';
 import { networks } from './blockchain/config';
-import { account$, networkId$ } from './blockchain/network';
+import { networkId$ } from './blockchain/network';
 import { Web3Status, web3Status$ } from './blockchain/web3';
 import { LoadingState } from './landingPage/LandingPage';
 import { Main } from './Main';
@@ -25,17 +23,23 @@ interface Props {
 
 mixpanelInit();
 
-class App extends React.Component<Props> {
+interface Web3StatusAndNetwork {
+  status: Web3Status;
+  networkId?: string;
+}
+
+class App extends React.Component<Web3StatusAndNetwork> {
 
   public render() {
     switch (this.props.status) {
-      case Web3Status.initializing:
+      case Web3Status.connecting:
+      case Web3Status.disconnecting:
         return LoadingState.INITIALIZATION;
-      case Web3Status.missing:
-        return LoadingState.MISSING_PROVIDER;
+      // case Web3Status.missing:
+      //   return LoadingState.MISSING_PROVIDER;
       case Web3Status.ready:
       case Web3Status.readonly:
-        if (this.props.network !== undefined && !networks[this.props.network]) {
+        if (this.props.networkId !== undefined && !networks[this.props.networkId]) {
           return LoadingState.UNSUPPORTED;
         }
         return <NavigationTxRx><Main/></NavigationTxRx>;
@@ -45,28 +49,11 @@ class App extends React.Component<Props> {
   }
 }
 
-const web3StatusResolve$: Observable<Props> = web3Status$.pipe(
-  switchMap(status =>
-    status === Web3Status.ready || status === Web3Status.readonly ?
-      combineLatest(networkId$, account$).pipe(
-        tap(([network, account]) =>
-          console.log(`status: ${status}, network: ${network}, account: ${account}`)),
-        map(([network, _account]) => ({ status, network })),
-      ) : of({ status })
-  ),
-  startWith({ status: Web3Status.initializing })
+const AppTxRx = connect<Props, {}>(
+  App, combineLatest(web3Status$, networkId$.pipe(startWith(undefined))).pipe(
+    map(([status, networkId]) => ({ status, networkId }))
+  )
 );
-
-const props$: Observable<Props> = web3StatusResolve$.pipe(
-  map((web3Status) => {
-    return {
-      ...web3Status
-    } as Props;
-  }),
-  distinctUntilChanged(isEqual)
-);
-
-const AppTxRx = connect<Props, {}>(App, props$);
 
 const root: HTMLElement = document.getElementById('root')!;
 

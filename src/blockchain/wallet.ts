@@ -1,4 +1,5 @@
-import { combineLatest, from, interval, Observable, of, Subject } from 'rxjs';
+import {isEqual} from 'lodash';
+import {combineLatest, from, interval, Observable, of, Subject} from 'rxjs';
 import {
   catchError,
   distinctUntilChanged,
@@ -10,74 +11,43 @@ import {
   switchMap,
   tap
 } from 'rxjs/operators';
+import {account$} from './network';
 // tslint:disable:import-name
-import Web3 from 'web3';
 
-import { isEqual } from 'lodash';
-import { account$ } from './network';
-import {connect, WaletType, Web3Window} from './web3';
+import { Web3Status, web3Status$, Web3Window } from './web3';
 
-// @ts-ignore
-import Maker, { DAI, USD } from '@makerdao/dai';
-// @ts-ignore
-import walletLinkPlugin from '@makerdao/dai-plugin-walletlink';
-// @ts-ignore
-// import McdPlugin, { ETH, BAT, MDAI, USDC } from '@makerdao/dai-plugin-mcd';
-
-export type WalletStatus = 'disconnected' | 'connecting' | 'connected' | 'denied' | 'missing';
-
-export const accepted$ = interval(500).pipe(
-  map(() => JSON.parse(localStorage.getItem('tos') || 'false')),
+const tosAccepted$: Observable<boolean> = interval(500).pipe(
+  map(
+    () => JSON.parse(localStorage.getItem('tos') || 'false')),
   startWith(JSON.parse(localStorage.getItem('tos') || 'false')),
   distinctUntilChanged(isEqual)
 );
 
-const connectToWallet$: Subject<WaletType> = new Subject();
-
-export function connectToWallet(type: WaletType) {
-  connectToWallet$.next(type);
+export enum WalletStatus {
+  disconnected = 'disconnected',
+  connecting = 'connecting',
+  connected = 'connected',
+  missing = 'missing',
 }
-
-const connecting$ = connectToWallet$.pipe(
-  switchMap((type) => {
-    const win = window as Web3Window;
-    window.localStorage.setItem('tos', 'true');
-    if (win.ethereum) {
-      return from(connect(type)).pipe(
-        switchMap((connectedAccount) => account$.pipe(
-          // @ts-ignore
-          filter(account => {
-            console.log('account$:', account);
-            return (account && account.toLowerCase()) === connectedAccount;
-          }),
-          first(),
-          map(() => {
-            return undefined;
-          }),
-        )),
-        startWith('connecting'),
-        catchError(() => of('denied')),
-      );
-    }
-    return of();
-  }),
-  startWith(undefined)
-);
-
 export const walletStatus$: Observable<WalletStatus> = combineLatest(
-  account$,
-  accepted$,
-  connecting$
+  tosAccepted$,
+  web3Status$,
+  account$
 ).pipe(
-  map(([account, hasAcceptedToS, connecting]) =>
-    connecting ? connecting :
-      account && hasAcceptedToS ?
-        'connected' :
+  map(([tosAccepted, web3Status, account]) =>
+    [
+      Web3Status.connecting,
+      Web3Status.disconnecting
+    ].indexOf(web3Status) >= 0 ?
+      WalletStatus.connecting :
+      tosAccepted ?
+        account ? WalletStatus.connected : WalletStatus.disconnected
+        :
         (window as Web3Window).ethereum ?
-          'disconnected' :
-          'missing'
+          WalletStatus.disconnected :
+          WalletStatus.missing
   ),
-  tap(console.log),
+  tap(status => console.log('wallet status', status)),
   shareReplay(1),
 );
 

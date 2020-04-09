@@ -14,26 +14,6 @@ export class LoadingState {
     );
   }
 
-  public static get MISSING_PROVIDER() {
-    return (
-      <section className={styles.section}>
-        <SvgImage image={OasisDexLogoSvg}/>
-        <div className={styles.container}>
-          <div style={{ justifyContent: 'center' }} className={styles.containerTopHalf}>
-            <h4>You have currently no Client in use</h4>
-          </div>
-          <div className={styles.containerBottomHalf}>
-            <h4 style={{ color: '#8D8D96' }}>Available Desktop Client</h4>
-          </div>
-          <div className={styles.availableClients}>
-            <Client client="metamask"/>
-            <Client client="parity"/>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
   public static get UNSUPPORTED() {
     return (
       <section className={styles.section}>

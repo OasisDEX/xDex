@@ -57,7 +57,6 @@ import * as proxyRegistry from './abi/proxy-registry.abi.json';
 import * as tokenRecovery from './abi/token-recovery.abi.json';
 import * as txManager from './abi/tx-manager.abi.json';
 import { nullAddress } from './utils';
-import { web3 } from './web3';
 
 const hasNewMarketsAvailable = process.env.REACT_APP_NEW_MARKETS_ENABLED === '1';
 
@@ -299,7 +298,8 @@ const load = memoize(
   (abi: any, address: string) => {
     return {
       address,
-      contract: new web3.eth.Contract(abi, address)
+      // TODO: remove web3 dependency from here!
+      contract: new (window as any)._web3.eth.Contract(abi, address)
     };
   },
   (_abi: any, address: string) => address
@@ -309,10 +309,14 @@ function loadToken(token: string, abi: any, address: string) {
   return { token, ...load(abi, address) };
 }
 
+const infuraProjectId = 'd96fcc7c667e4a03abf1cecd266ade2d';
+
 const protoMain = {
   id: '1',
   name: 'main',
   label: 'Mainnet',
+  infuraUrl: `https://mainnet.infura.io/v3/${infuraProjectId}`,
+  infuraUrlWS: `https://mainnet.infura.io/ws/v3/${infuraProjectId}`,
   thresholds: {
     ethdai: 0.02,
     mkrdai: 0.01,
@@ -431,6 +435,8 @@ const kovan: NetworkConfig = {
   id: '42',
   name: 'kovan',
   label: 'Kovan',
+  infuraUrl: `https://kovan.infura.io/v3/${infuraProjectId}`,
+  infuraUrlWS: `https://kovan.infura.io/ws/v3/${infuraProjectId}`,
   thresholds: {
     ethdai: 0.025,
     mkrdai: 0.015,
@@ -576,6 +582,9 @@ const localnet: NetworkConfig =  {
   id: '420',
   name: '   localnet',
   label: 'Localnet',
+  // TODO: what should be put here?
+  infuraUrl: `https://mainnet.infura.io/v3/${infuraProjectId}`,
+  infuraUrlWS: `https://mainnet.infura.io/ws/v3/${infuraProjectId}`,
   thresholds: {
     ethdai: 0.05,
     mkrdai: 0.05,
@@ -716,6 +725,7 @@ const localnet: NetworkConfig =  {
 };
 
 export const networks = asMap('id', [main, kovan, localnet]);
+export const networksByName = asMap('name', [main, kovan, localnet]);
 
-// use when contract is not deployed / not available on a given network
+// use when contract is not deployed / not available on a given networkId
 const NO_ADDR = '0x0000000000000000000000000000000000000000';
