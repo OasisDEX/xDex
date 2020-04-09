@@ -619,6 +619,7 @@ function getBuyPlan(
   // );
 
   const delta = BigNumber.min(request.targetDaiBalance, zero).times(minusOne);
+  console.log('delta', delta.toString());
   const postTradeAsset = calculateMarginable(
     {
       ...asset,
