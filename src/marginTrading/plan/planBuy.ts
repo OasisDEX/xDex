@@ -13,7 +13,7 @@ import { Observable } from 'rxjs';
 import { Calls } from '../../blockchain/calls/calls';
 import { TxState } from '../../blockchain/transactions';
 import { Impossible, impossible, isImpossible } from '../../utils/impossible';
-import { zero } from '../../utils/zero';
+import { minusOne, zero } from '../../utils/zero';
 import { AllocationRequestPilot } from '../allocate/allocate';
 import { EditableDebt } from '../allocate/mtOrderAllocateDebtForm';
 import { calculateMarginable } from '../state/mtCalculate';
