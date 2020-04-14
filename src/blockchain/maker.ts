@@ -1,5 +1,5 @@
 // @ts-ignore
-import { Maker } from '@makerdao/dai';
+import Maker from '@makerdao/dai';
 import { networksByName } from './config';
 // @ts-ignore
 import walletConnectPlugin from '@makerdao/dai-plugin-walletconnect';

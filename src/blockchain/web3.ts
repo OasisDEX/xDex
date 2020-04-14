@@ -25,7 +25,7 @@ export interface Web3Window {
 export enum WalletType {
   browser = 'browser',
   walletLink = 'walletlink',
-  walletConnect = 'walletConnect'
+  walletConnect = 'walletconnect'
 }
 
 export enum Web3StatusCommandKind {

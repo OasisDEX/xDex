@@ -316,7 +316,7 @@ const protoMain = {
   name: 'main',
   label: 'Mainnet',
   infuraUrl: `https://mainnet.infura.io/v3/${infuraProjectId}`,
-  infuraUrlWS: `https://mainnet.infura.io/ws/v3/${infuraProjectId}`,
+  infuraUrlWS: `wss://mainnet.infura.io/ws/v3/${infuraProjectId}`,
   thresholds: {
     ethdai: 0.02,
     mkrdai: 0.01,
@@ -436,7 +436,7 @@ const kovan: NetworkConfig = {
   name: 'kovan',
   label: 'Kovan',
   infuraUrl: `https://kovan.infura.io/v3/${infuraProjectId}`,
-  infuraUrlWS: `https://kovan.infura.io/ws/v3/${infuraProjectId}`,
+  infuraUrlWS: `wss://kovan.infura.io/ws/v3/${infuraProjectId}`,
   thresholds: {
     ethdai: 0.025,
     mkrdai: 0.015,
@@ -584,7 +584,7 @@ const localnet: NetworkConfig =  {
   label: 'Localnet',
   // TODO: what should be put here?
   infuraUrl: `https://mainnet.infura.io/v3/${infuraProjectId}`,
-  infuraUrlWS: `https://mainnet.infura.io/ws/v3/${infuraProjectId}`,
+  infuraUrlWS: `wss://mainnet.infura.io/ws/v3/${infuraProjectId}`,
   thresholds: {
     ethdai: 0.05,
     mkrdai: 0.05,
