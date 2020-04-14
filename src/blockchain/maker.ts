@@ -5,6 +5,8 @@ import { networksByName } from './config';
 import walletConnectPlugin from '@makerdao/dai-plugin-walletconnect';
 // @ts-ignore
 import walletLinkPlugin from '@makerdao/dai-plugin-walletlink';
+// @ts-ignore
+import trezorPlugin from '@makerdao/dai-plugin-trezor-web';
 
 import { WalletType } from './web3';
 import Web3 from 'web3';
@@ -17,7 +19,8 @@ export async function connectMaker(type: WalletType, networkId: string): Promise
     log: false,
     plugins: [
       [walletLinkPlugin, { rpcUrl: infuraUrl, appName: 'Oasis' }],
-      walletConnectPlugin
+      walletConnectPlugin,
+      trezorPlugin
     ],
     provider: {
       url: infuraUrlWS,

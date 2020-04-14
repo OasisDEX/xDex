@@ -121,7 +121,7 @@ export const Trezor = {
   icon: SvgImageSimple(trezorSvg),
   alias: 'trezor',
   name: 'Trezor',
-  supported: false,
+  supported: true,
 };
 
 export const Ledger = {

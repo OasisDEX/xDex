@@ -10,7 +10,8 @@ import {
   Ledger,
   Metamask,
   Provider,
-  Trezor, WalletConnect,
+  Trezor,
+  WalletConnect,
   WalletLink
 } from '../utils/providers';
 import * as styles from './WalletConnection.scss';
@@ -106,6 +107,13 @@ class NotConnected extends React.Component<{}, { isChecked: boolean, walletType?
                     supported={true}
                     isSelected={this.state.walletType === WalletType.walletConnect}
                     onSelect={() => this._selectWallet(WalletType.walletConnect)}
+                    tid="web-wallet"
+          />
+          <ListItem icon={Trezor.icon}
+                    name={Trezor.name}
+                    supported={true}
+                    isSelected={this.state.walletType === WalletType.trezor}
+                    onSelect={() => this._selectWallet(WalletType.trezor)}
                     tid="web-wallet"
           />
         </ul>
