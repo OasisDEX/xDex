@@ -8,9 +8,7 @@ import daiCircleSvg from '../icons/coins/dai-circle.svg';
 import daiColorSvg from '../icons/coins/dai-color.svg';
 import daiSvg from '../icons/coins/dai.svg';
 import ethCircleSvg from '../icons/coins/eth-circle.svg';
-// import ethColorInverseSvg from '../icons/coins/eth-color-inverse.svg';
 import ethColorSvg from '../icons/coins/eth-color.svg';
-// import ethInverseSvg from '../icons/coins/eth-inverse.svg';
 import ethSvg from '../icons/coins/eth.svg';
 import linkCircleSvg from '../icons/coins/link-circle.svg';
 import linkColorSvg from '../icons/coins/link-color.svg';
@@ -54,6 +52,7 @@ import * as otcSupport from './abi/otc-support-methods.abi.json';
 import * as proxyActions from './abi/proxy-actions.abi.json';
 import * as proxyCreationAndExecute from './abi/proxy-creation-and-execute.abi.json';
 import * as proxyRegistry from './abi/proxy-registry.abi.json';
+import * as tokenRecovery from './abi/token-recovery.abi.json';
 import * as txManager from './abi/tx-manager.abi.json';
 import { nullAddress } from './utils';
 import { web3 } from './web3';
@@ -326,7 +325,6 @@ const protoMain = {
   startingBlock: 4751582,
   get otc() { return load(otc, '0x794e6e91555438aFc3ccF1c5076A74F42133d08D'); },
   // get saiTub() { return load(saiTub, '0x448a5065aebb8e423f0896e6c5d525c040f59af3'); },
-  get ethPip() { return load(dsValue, '0x3546C7E3753C0e1D15878EC1C6dC65573864Dab7'); },
   get tokens() {
     return asMap('token', [
       loadToken('WETH', eth, '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'),
@@ -342,8 +340,42 @@ const protoMain = {
       loadToken('WBTC', erc20, '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599'),
     ]);
   },
-  mcd: {} as { [key: string]: any },
-  cdpManager: '',
+  cdpManager: '0x60762005be465901ca18ba34416b35143de72c0c',
+  mcd: {
+    vat: '0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B',
+    get cat() {
+      return load(mcdCat, '0x78F2c2AF65126834c51822F56Be0d7469D7A523E');
+    },
+    get jug() {
+      return load(mcdJug, '0x19c0976f590D67707E62397C87829d896Dc0f1F1');
+    },
+    get spot() {
+      return load(mcdSpotter, '0x65C79fcB50Ca1594B025960e539eD7A9a6D434A3');
+    },
+    dssCdpManager: '0x5ef30b9986345249bc32d8928B7ee64DE9435E39',
+    ilks: {
+      WETH: 'ETH-A',
+    },
+    joins: {
+      WETH: '0x2F0b23f53734252Bda2277357e97e1517d6B042A',
+      DAI: '0x9759A6Ac90977b93B58547b4A71c78317f391A28',
+    },
+    flip: {
+      get WETH() {
+        return load(mcdFlipper, '0xd8a04F5412223F513DC55F839574430f5EC15531');
+      },
+    },
+    prices: {
+      get WETH() {
+        return load(dsValue, '');
+      },
+    },
+    osms: {
+      get WETH() {
+        return load(mcdOsm, '0x81FE72B5A8d1A857d176C3E7d5Bd2679A9B85763');
+      },
+    }
+  } as { [key: string]: any },
   get otcSupportMethods() {
     return load(otcSupport, '0x9b3f075b12513afe56ca2ed838613b7395f57839');
   },
@@ -357,7 +389,7 @@ const protoMain = {
     return load(proxyCreationAndExecute, '0x793ebbe21607e4f04788f89c7a9b97320773ec59');
   },
   get proxyActions() {
-    return load(proxyActions, '');
+    return load(proxyActions, '0xb81f7ca8f12c2d433dcde39270de849e2475abb9');
   },
   get migration() {
     return '0xc73e0383F3Aff3215E6f04B0331D58CeCf0Ab849';
@@ -367,6 +399,9 @@ const protoMain = {
   },
   get instantMigrationProxyActions() {
     return load(instantMigrationProxyActions, '0x396Ea3C3376cC78864f51ce2FDdb275D3dC0968b');
+  },
+  get tokenRecovery() {
+    return load(tokenRecovery, '0xc06a269e3370f582df2dbb6cf0271c267badf99d');
   },
   oasisDataService: {
     url: 'https://cache.eth2dai.com/api/v1'
@@ -408,7 +443,6 @@ const kovan: NetworkConfig = {
   startingBlock: 5216718,
   get otc() { return load(otc, '0xe325acB9765b02b8b418199bf9650972299235F4'); },
   // get saiTub() { return load(saiTub, '0xa71937147b55deb8a530c7229c442fd3f31b7db2'); },
-  get ethPip() { return load(dsValue, '0xd44d1823c8839559c2d663e98261e0b193c256ad'); }, // ???
   get tokens() {
     return asMap('token', [
       loadToken('WETH', eth, '0xd0a1e359811322d97991e03f863a0c30c2cf029c'),
@@ -516,6 +550,9 @@ const kovan: NetworkConfig = {
   get instantMigrationProxyActions() {
     return load(instantMigrationProxyActions, '0xa623ea3b3219bb59b96c4aff2d26aff0d038af62');
   },
+  get tokenRecovery() {
+    return load(tokenRecovery, '0x225da3848f57248148d3faa1625d0beb66902de3');
+  },
   oasisDataService: {
     url: 'https://kovan-cache.eth2dai.com/api/v1'
   },
@@ -551,7 +588,6 @@ const localnet: NetworkConfig =  {
   startingBlock: 1,
   get otc() { return load(otc, '0x177b74CB6679C145Bb428Cc3E16F4a3d3ED905a3'); },
   // get saiTub() { return { address: '', contract: null }; },
-  get ethPip() { return load(dsValue, '0x8b8B359c33c13b818713570583C8bce2b030AD9A'); },
   get tokens() {
     return asMap('token', [
       loadToken('WETH', eth, '0x200938Bf7fF25EcF2eB7BC08e18b0892ED34c846'),
@@ -562,11 +598,11 @@ const localnet: NetworkConfig =  {
       loadToken('ZRX', erc20, '0x2c60CF08c07C212e21e6E2ee4626c478BACe092a'),
       loadToken('BAT', erc20, '0xd80110E3C107Eb206B556871cFe2532eC7D05E47'),
       loadToken('REP', erc20, '0xE8d4C2Ab5782c697f06f17610cC03068180d0FaC'),
-      loadToken('USDC', erc20, NO_ADDR),
-      loadToken('TUSD', erc20, NO_ADDR),
-      loadToken('PAX', erc20, NO_ADDR),
-      loadToken('LINK', erc20, NO_ADDR),
-      loadToken('WBTC', erc20, NO_ADDR),
+      loadToken('USDC', erc20, '0x25f50Ea441836ae39b54a9DcBbd57d7048d977CF'),
+      loadToken('TUSD', erc20, '0x83eF880aE7e9155Cf8Ad2CE5ba75019376C0B7F8'),
+      loadToken('PAX', erc20, '0xb02048C28D9BEE6989E8D48e3972F283D3B7822c'),
+      loadToken('LINK', erc20, '0x54729948EbD535aBC2492FdAAabb4153E9aC28f7'),
+      loadToken('WBTC', erc20, '0x85a91f61feA8f173434424F9758a12fEA11B613c'),
     ]);
   },
   mcd: {
@@ -657,6 +693,9 @@ const localnet: NetworkConfig =  {
   get instantMigrationProxyActions() {
     return load(instantMigrationProxyActions, '0x141048f25b24AEfAF1A13fD9C2e8628121A0f1E7');
   },
+  get tokenRecovery() {
+    return load(tokenRecovery, nullAddress);
+  },
   oasisDataService: {
     url: 'http://localhost:3001/v1'
   },
@@ -675,6 +714,3 @@ const localnet: NetworkConfig =  {
 };
 
 export const networks = asMap('id', [main, kovan, localnet]);
-
-// use when contract is not deployed / not available on a given network
-const NO_ADDR = '0x0000000000000000000000000000000000000000';

@@ -13,7 +13,7 @@ import { Observable } from 'rxjs';
 import { Calls } from '../../blockchain/calls/calls';
 import { TxState } from '../../blockchain/transactions';
 import { Impossible, impossible, isImpossible } from '../../utils/impossible';
-import { minusOne, zero } from '../../utils/zero';
+import { zero } from '../../utils/zero';
 import { AllocationRequestPilot } from '../allocate/allocate';
 import { EditableDebt } from '../allocate/mtOrderAllocateDebtForm';
 import { calculateMarginable } from '../state/mtCalculate';
@@ -68,13 +68,10 @@ export function prepareBuyAllocationRequest(
 
   const baseAsset = findMarginableAsset(baseToken, mta);
 
-  const cashBalance = baseAsset!.dai; // todo: no longer valid!! no cash balance ?
+  const cashBalance = baseAsset!.dai;
   const totalDebt = assets.reduce((sum, a) => sum.plus(a.debt), zero);
 
-  // const targetDaiBalance = cashBalance.minus(maxTotal).minus(totalDebt); -- old
-  const targetDaiBalance = cashBalance.gt(zero) ?
-    cashBalance.minus(maxTotal).minus(totalDebt)
-    : maxTotal.times(minusOne);
+  const targetDaiBalance = cashBalance.minus(maxTotal).minus(totalDebt);
 
   const defaultTargetCash = cashBalance; // BigNumber.max(zero, cashBalance.minus(maxTotal));
 

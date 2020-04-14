@@ -15,7 +15,6 @@ import { Button } from '../../utils/forms/Buttons';
 import { ErrorMessage } from '../../utils/forms/ErrorMessage';
 import { InputGroup, InputGroupAddon } from '../../utils/forms/InputGroup';
 import { GasCost } from '../../utils/gasCost/GasCost';
-import { SvgImage } from '../../utils/icons/utils';
 import { BorderBox, Hr } from '../../utils/layout/LayoutHelpers';
 import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
 import { ModalProps } from '../../utils/modal';
@@ -26,7 +25,8 @@ import { zero } from '../../utils/zero';
 
 import * as mixpanel from 'mixpanel-browser';
 import * as ReactDOM from 'react-dom';
-import { theAppContext } from 'src/AppContext';
+import { theAppContext } from '../../AppContext';
+import { SvgImage } from '../../utils/icons/utils';
 import { LoadableWithTradingPair } from '../../utils/loadable';
 import { MTSimpleFormState } from '../simple/mtOrderForm';
 import { MtSimpleOrderFormBody } from '../simple/mtOrderFormView';
@@ -60,24 +60,26 @@ interface StepComponentProps {
   btnDisabled: boolean;
   stepCompleted: boolean;
   isLoading: boolean;
+  tid?: string;
 }
 
 class StepComponent extends React.Component<StepComponentProps> {
   public render() {
     const { title, description, btnLabel, btnAction,
-      stepCompleted, btnDisabled, isLoading } = this.props;
+      stepCompleted, btnDisabled, isLoading, tid } = this.props;
 
     return (<div className={styles.onboardingPanel}>
       <h3 className={styles.onboardingHeader}>{title}</h3>
       <div className={styles.onboardingParagraph}>{description}</div>
       <Button
         size="md"
+        data-test-id={tid}
         color={stepCompleted ? 'primaryOutlinedDone' : 'primary'}
         disabled={btnDisabled || isLoading || stepCompleted}
         onClick={() => btnAction()}
         className={classnames({ [styles.buttonDone]: stepCompleted })}
       >{
-        stepCompleted ? <SvgImage image={checkIconSvg}/> :
+        stepCompleted ? <SvgImage data-test-id="step-completed" image={checkIconSvg}/> :
           isLoading && !btnDisabled ?  <LoadingIndicator inline={true} /> : btnLabel
       }</Button>
 
@@ -144,7 +146,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
         overlayRef={onModalRef}
         shouldCloseOnEsc={true}
       >
-        <Panel className={styles.modalChild}>
+        <Panel className={styles.modalChild} data-test-id="modal">
           { withOnboarding ?
             <div className={styles.tabs}>
               {
@@ -164,7 +166,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
               }
             </div>
             :
-            <PanelHeader>
+            <PanelHeader data-test-id="header">
               {this.getActionName()}
             </PanelHeader>
           }
@@ -178,6 +180,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
                       title="Deploy proxy"
                       description={`Proxies are used to bundle multiple transactions into one,
                 saving transaction time and gas costs. This only has to be done once.`}
+                      tid="create-proxy"
                       btnLabel="Deploy Proxy"
                       btnAction={() => this.setup()}
                       btnDisabled={mta.proxy && mta.proxy.options.address !== nullAddress}
@@ -189,6 +192,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
                       description={`This permission allows Oasis smart contracts
                    to interact with your ${token}.
                    This has to be done for each asset type.`}
+                      tid="set-allowance"
                       btnLabel="Set allowance"
                       btnAction={() => this.allowance()}
                       isLoading={isLoading}
@@ -213,7 +217,9 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
                 {
                   currentTab === MTTransferFormTab.transfer &&
                   <>
-                    <PanelBody paddingTop={true} style={{ height: '287px' }}>
+                    <PanelBody paddingTop={true}
+                               style={{ height: '287px' }}
+                               data-test-id="transfer">
                         {this.AccountSummary()}
                         <Hr color="dark" className={styles.hrBigMargin}/>
                         {this.FormOrTransactionState()}
@@ -453,7 +459,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
           <span className={styles.checklistTitle}>
             {getToken(this.props.token).name} deposit
           </span>
-          <div className={styles.checklistSummary}>
+          <div className={styles.checklistSummary} data-test-id="tx-status">
             <TransactionStateDescription progress={this.props.progress}/>
           </div>
         </div>
@@ -519,6 +525,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
         {deposit &&
         <Button size="md"
                 className={styles.confirmButton}
+                data-test-id={`${this.getActionName().toLowerCase()}-btn`}
                 disabled={!depositEnabled}
                 block={true}
                 color="primary"
@@ -608,6 +615,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
           guide={true}
           placeholderChar={' '}
           disabled={disabled}
+          data-test-id="amount-input"
         />
         <InputGroupAddon
           className={stylesOrder.setMaxBtnAddon} onClick={ () => this.handleSetMaxAmount() }>

@@ -5,13 +5,13 @@ import { combineLatest } from 'rxjs';
 import { Observable } from 'rxjs/index';
 import { first, switchMap } from 'rxjs/internal/operators';
 import { map } from 'rxjs/operators';
-import { WarningTooltip } from 'src/utils/tooltip/Tooltip';
 import { CDPHistoryView } from '../../balances/CDPHistoryView';
 import { Calls$ } from '../../blockchain/calls/calls';
 import { transactions$, TxState } from '../../blockchain/transactions';
 import { formatPrecision } from '../../utils/formatters/format';
 import { CryptoMoney, FormatPercent, Money } from '../../utils/formatters/Formatters';
 import { ModalOpenerProps } from '../../utils/modal';
+import { WarningTooltip } from '../../utils/tooltip/Tooltip';
 import { minusOne, one, zero } from '../../utils/zero';
 import {
   findMarginableAsset,
@@ -124,23 +124,26 @@ export class MTMyPositionView extends
     const { liquidationPenalty } = ma;
     const leverage = ma.leverage ? ma.leverage : ma.balance.gt(zero) ? one : zero;
     const liquidationPrice = ma.liquidationPrice ? ma.liquidationPrice : zero;
-    const liquidationPriceMarket = ma.liquidationPrice && ma.midpointPrice ?
-      ma.liquidationPrice.times(daiPrice)
+    const liquidationPriceMarket = ma.liquidationPrice && ma.midpointPrice && daiPrice.gt(zero)
+      ? ma.liquidationPrice.div(daiPrice)
       : zero;
 
-    const liquidationPriceDisplay = inDai ?
-      liquidationPriceMarket.gt(zero) ? liquidationPriceMarket : undefined
-      :
-      liquidationPrice.gt(zero) ? liquidationPrice : undefined;
+    const liquidationPriceDisplay = inDai
+      ? liquidationPriceMarket.gt(zero) ? liquidationPriceMarket : undefined
+      : liquidationPrice.gt(zero) ? liquidationPrice : undefined;
 
-    const markPrice = inDai
-      ? (ma.markPrice && daiPrice)
-        ? ma.markPrice.times(daiPrice)
+    const markPrice = ma.markPrice.gt(liquidationPrice) && liquidationPrice.gt(ma.referencePrice)
+      ? ma.referencePrice
+      : ma.markPrice;
+
+    const markPriceDisplay = inDai
+      ? (markPrice && daiPrice && daiPrice.gt(zero))
+        ? markPrice.div(daiPrice)
         : undefined
-      : ma.osmPriceNext;
+      : markPrice;
     return (
-      <div>
-        <div className={styles.MTPositionPanel}>
+      <div data-test-id="my-position">
+        <div className={styles.MTPositionPanel} data-test-id="summary">
           <div className={styles.MTPositionColumn}>
             <div className={styles.summaryRow}>
               <div className={styles.summaryLabel}>
@@ -160,7 +163,9 @@ export class MTMyPositionView extends
                 <WarningTooltip id="stability-fee"
                                 text={stabilityFeeTooltip}/>
               </div>
-              <div className={styles.summaryValue}>
+              <div className={styles.summaryValue}
+                   data-test-id="stability-fee"
+              >
                 <FormatPercent
                   value={ma.fee}
                   fallback="-"
@@ -177,6 +182,7 @@ export class MTMyPositionView extends
               </div>
               <div className={styles.summaryValue}>
                 <FormatPercent
+                  data-test-id="penalty"
                   value={liquidationPenalty}
                   fallback="-"
                   multiply={false}
@@ -191,7 +197,9 @@ export class MTMyPositionView extends
               <div className={styles.summaryLabel}>
                 <span>Liquidation Price</span>
               </div>
-              <div className={styles.summaryValue}>
+              <div className={styles.summaryValue}
+                   data-test-id="liquidation-price"
+              >
                 {inDai && liquidationPriceDisplay && '~'}
                 <Money
                   value={liquidationPriceDisplay}
@@ -212,14 +220,16 @@ export class MTMyPositionView extends
                 <WarningTooltip id="mark-price"
                                 text={markPriceTooltip}/>
               </div>
-              <div className={styles.summaryValue}>
+              <div className={styles.summaryValue}
+                    data-test-id="price"
+              >
                 {
-                  markPrice
+                  markPriceDisplay
                     ? (
                       <>
                         {inDai && '~'}
                         <Money
-                          value={markPrice}
+                          value={markPriceDisplay}
                           token={inDai ? 'DAI' : 'USD'}
                         />
                       </>
@@ -236,10 +246,12 @@ export class MTMyPositionView extends
                 <WarningTooltip id="col-balance"
                                 text={collateralBalanceTooltip(ma.name)}/>
               </div>
-              <div className={styles.summaryValue}>
+              <div className={styles.summaryValue}
+              >
                 {
                   ma.balance ?
                     <CryptoMoney
+                      data-test-id="col-balance"
                       value={ma.balance}
                       token={ma.name}
                       fallback="-"
@@ -264,7 +276,8 @@ export class MTMyPositionView extends
                 <WarningTooltip id="dai-balance"
                                 text={daiBalanceTooltip}/>
               </div>
-              <div className={styles.summaryValue}>
+              <div className={styles.summaryValue}
+                   data-test-id="dai-balance">
                 {
                   ma && ma.debt.gt(zero) ?
                     <CryptoMoney
@@ -281,7 +294,8 @@ export class MTMyPositionView extends
               </div>
             </div>
             <div className={styles.summaryRow}>
-              <div className={styles.summaryLabel}>
+              <div className={styles.summaryLabel}
+                   data-test-id="equity">
                 <span>Equity</span>
                 <WarningTooltip id="equity"
                                 text={equityTooltip}/>

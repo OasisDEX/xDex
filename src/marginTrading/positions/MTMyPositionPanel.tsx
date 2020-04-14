@@ -15,12 +15,12 @@ import { MTMyPositionView } from './MTMyPositionView';
 
 import { default as BigNumber } from 'bignumber.js';
 import { Observable } from 'rxjs';
-import { Switch } from 'src/utils/forms/Slider';
 import { AssetDropdownMenu } from '../../balances/AssetDropdownMenu';
 import { TxMetaKind } from '../../blockchain/calls/txMeta';
 import { isDone, TxState } from '../../blockchain/transactions';
 import { connect } from '../../utils/connect';
 import { Button } from '../../utils/forms/Buttons';
+import { Switch } from '../../utils/forms/Slider';
 import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
 import { LoggedOut } from '../../utils/loadingIndicator/LoggedOut';
 import { MtTransferFormView } from '../transfer/mtTransferFormView';
@@ -179,7 +179,7 @@ export class MTMyPositionPanel
 
         const hasHistoryEvents = ma && ma.rawHistory.length > 0;
 
-        if (hasHistoryEvents) {
+        if (hasHistoryEvents || ma.balance.gt(zero) || ma .dai.gt(zero)) {
           return (
             <Panel style={{ flexGrow: 1 }}>
               <MTMyPositionPanelInternal {...this.props.value} {...{ open: this.props.open }} />
@@ -212,7 +212,7 @@ export class MTMyPositionPanelInternal
     super(props);
     // TODO: this should come from the pipeline;
     this.state = {
-      blocked: true
+      blocked: false
     };
   }
 
@@ -260,12 +260,14 @@ export class MTMyPositionPanelInternal
               asset={ma.name}
               withIcon={false}
               label="Deposit"
+              tid="deposit-actions-dropdown"
             />
             <AssetDropdownMenu
               actions={this.createAssetActions(mta, ma, 'withdraw')}
               asset={ma.name}
               withIcon={false}
               label="Withdraw"
+              tid="withdraw-actions-dropdown"
             />
           </div>
         </PanelHeader>
@@ -295,6 +297,7 @@ export class MTMyPositionPanelInternal
           size="md"
           key={ma.name}
           className={styles.actionButton}
+          data-test-id="deposit-col"
           onClick={
             () => {
               this.transfer(UserActionKind.fund, ma.name, undefined);
@@ -312,6 +315,7 @@ export class MTMyPositionPanelInternal
       } else {
         actions.push(<Button
           size="md"
+          data-test-id="set-allowance"
           className={styles.actionButton}
           onClick={this.approveMTProxy(ma.name)}
         >
@@ -321,6 +325,7 @@ export class MTMyPositionPanelInternal
 
       if (mta.daiAllowance) {
         actions.push(<Button
+          data-test-id="deposit-dai"
           size="md"
           className={styles.actionButton}
           onClick={
@@ -339,6 +344,7 @@ export class MTMyPositionPanelInternal
         </Button>);
       } else {
         actions.push(<Button
+          data-test-id="set-allowance"
           size="md"
           className={styles.actionButton}
           onClick={this.approveMTProxy('DAI')}
@@ -350,6 +356,7 @@ export class MTMyPositionPanelInternal
 
     if (type === 'withdraw') {
       actions.push(<Button
+        data-test-id="withdraw-col"
         size="md"
         key={ma.name}
         className={styles.actionButton}
@@ -372,6 +379,8 @@ export class MTMyPositionPanelInternal
         size="md"
         className={styles.actionButton}
         disabled={ma.dai.eq(zero)}
+        data-test-id="withdraw-dai"
+        title={ma.dai.eq(zero) ? `You don't have any DAI to withdraw` : ''}
         onClick={
           () => {
             this.transfer(UserActionKind.draw, 'DAI', ma.name);
