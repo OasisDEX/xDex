@@ -7,7 +7,7 @@ version: 2
 jobs:
   install:
     docker:
-      - image: circleci/node:8.11.2-stretch
+      - image: circleci/node:10-stretch
     steps:
       - checkout
       - restore_cache:
@@ -24,13 +24,13 @@ jobs:
 
   test:
     docker:
-      - image: circleci/node:8.11.2-stretch
+      - image: circleci/node:10-stretch
     steps:
       - checkout
       - restore_cache:
           keys:
           - v7-dependencies-{{ checksum "package.json" }}
-      - run: 
+      - run:
           name: Run linting & tests
           command: yarn test
 
@@ -46,18 +46,18 @@ jobs:
           keys:
           - v7-dependencies-{{ checksum "package.json" }}
       - run: .circleci/install-yarn.sh
-      - run: 
+      - run:
           name: Get & run locanode and cache image
           command: |
             docker login -u $DOCKER_USER -p $DOCKER_PASS && ./scripts/dev.sh
-      - run: 
+      - run:
           name: Wait for localnode to be up
           command: |
             ./.circleci/wait-for-it.sh localhost:8545 -t 10
             ./.circleci/wait-for-it.sh localhost:5432 -t 10
             ./.circleci/wait-for-it.sh localhost:3001 -t 10
             sleep 10
-      - run: 
+      - run:
           name: Run build & e2e tests
           command: |
             source /opt/circleci/.nvm/nvm.sh
@@ -71,7 +71,7 @@ jobs:
 
   codechecks:
     docker:
-      - image: circleci/node:8.11.2-stretch
+      - image: circleci/node:10-stretch
     steps:
       - run:
           name: Update
@@ -101,7 +101,7 @@ jobs:
 
   codechecks-e2e:
     docker:
-      - image: circleci/node:8.11.2-stretch
+      - image: circleci/node:10-stretch
     steps:
       - run:
           name: Update
@@ -139,7 +139,7 @@ jobs:
 
   deploy_dev:
     docker:
-      - image: circleci/node:8.11.2-stretch
+      - image: circleci/node:10-stretch
     steps:
       - checkout
       - restore_cache:
@@ -149,7 +149,7 @@ jobs:
 
   deploy_prod:
     docker:
-      - image: circleci/node:8.11.2-stretch
+      - image: circleci/node:10-stretch
     steps:
       - add_ssh_keys:
           fingerprints:
@@ -172,7 +172,7 @@ workflows:
     jobs:
       - install
       - test:
-          requires: 
+          requires:
             - install
           filters:
             branches:
@@ -186,7 +186,7 @@ workflows:
               ignore:
                 - gh-pages
       - codechecks:
-          requires: 
+          requires:
             - install
           filters:
             branches:
