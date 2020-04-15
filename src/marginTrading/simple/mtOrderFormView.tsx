@@ -277,15 +277,18 @@ export class MtSimpleOrderFormBody
   }
 
   private renderAccountInfo = () => {
+
     const accountNotConnected = !this.props.account;
     const accountNotSetup = this.props.mta && this.props.mta.state === MTAccountState.notSetup;
 
     if (accountNotConnected) {
-      return <div className={styles.notSetupBorder}><LoggedOut view="Balances"/></div>;
+      return <div className={styles.notSetupBorder} data-test-id="locked-form">
+        <LoggedOut view="Balances"/>
+        </div>;
     }
 
     if (accountNotSetup) {
-      return <div className={styles.notSetupBorder}>
+      return <div className={styles.notSetupBorder} data-test-id="locked-form">
         <Muted>
           Deploy your Proxy and enable {this.props.baseToken}
         </Muted>
@@ -308,6 +311,7 @@ export class MtSimpleOrderFormBody
       <>
         <form
           onSubmit={this.handleProceed}
+          data-test-id="order-form"
         >
           {this.renderAccountInfo()}
           <Hr color="dark" className={styles.hrMargin}/>
@@ -356,6 +360,7 @@ export class MtSimpleOrderFormBody
           && (
             <div className={styles.checkbox}>
               <Checkbox name="risk-compliance"
+                        data-test-id="accept-rc"
                         checked={riskComplianceCurrent || false}
                         disabled={ !!progress }
                         onChange={this.handlecheckboxChange}
@@ -395,6 +400,7 @@ export class MtSimpleOrderFormBody
           {
             liquidationPrice.gt(zero) ?
               <Money
+                data-test-id="liquidation-price"
                 value={liquidationPrice}
                 token="USD"
                 fallback="-"
@@ -404,7 +410,7 @@ export class MtSimpleOrderFormBody
                     [styles.orderSummaryValueNegative]: baseTokenAsset && !baseTokenAsset.safe,
                   })
                 }
-              /> : <span>-</span>
+              /> : <span data-test-id="liquidation-price">-</span>
           }
           {
             this.props.liquidationPricePost &&
@@ -414,6 +420,7 @@ export class MtSimpleOrderFormBody
               {
                 liquidationPricePost.gt(zero) ?
                   <Money
+                    data-test-id="estimated-liquidation-price"
                     value={liquidationPricePost}
                     token="USD"
                     fallback="-"
@@ -423,7 +430,7 @@ export class MtSimpleOrderFormBody
                         [styles.orderSummaryValueNegative]: !this.props.isSafePost,
                       })
                     }
-                  /> : <span>-</span>
+                  /> : <span data-test-id="estimated-liquidation-price">-</span>
               }
             </>
           }
@@ -443,7 +450,7 @@ export class MtSimpleOrderFormBody
         <div className={styles.orderSummaryLabel}>
           Price (and Impact)
         </div>
-        <div className={styles.orderSummaryValue}>
+        <div className={styles.orderSummaryValue} data-test-id="price">
           <Money
             value={price || zero}
             token={quoteToken}
@@ -475,7 +482,7 @@ export class MtSimpleOrderFormBody
           <WarningTooltip id="slippage-limit"
                           text={slippageLimitTooltip}/>
         </div>
-        <div className={styles.orderSummaryValue}>
+        <div className={styles.orderSummaryValue} data-test-id="slippage-limit">
           {
             slippageLimit &&
             <FormatPercent
@@ -509,7 +516,7 @@ export class MtSimpleOrderFormBody
             ref={ (el: any) =>
               this.slippageLimitInput = (el && ReactDOM.findDOMNode(el) as HTMLElement) || undefined
             }
-            data-test-id="slippage-limit"
+            data-test-id="slippage-limit-input"
             type="text"
             mask={createNumberMask({
               allowDecimal: true,
@@ -608,7 +615,7 @@ export class MtSimpleOrderFormBody
           <div className={styles.orderSummaryLabel}>
             Purch. power
           </div>
-          <div className={styles.orderSummaryValue}>
+          <div className={styles.orderSummaryValue} data-test-id="purchasing-power">
             {
               this.props.realPurchasingPower &&
               <>
@@ -626,9 +633,9 @@ export class MtSimpleOrderFormBody
             <>
               <span className={styles.transitionArrow} />
               { this.props.realPurchasingPowerPost ?
-                <>
+                <span data-test-id="estimated-purchasing-power">
                   {formatPrecision(this.props.realPurchasingPowerPost, 2)}
-                </>
+                </span>
                 : <span>-</span>
               }
             </>
@@ -659,7 +666,7 @@ export class MtSimpleOrderFormBody
             <WarningTooltip id="col-balance"
                             text={collateralBalanceTooltip(baseToken)}/>
           </div>
-          <div className={styles.orderSummaryValue}>
+          <div className={styles.orderSummaryValue} data-test-id="col-balance">
             { baseTokenAsset && baseTokenAsset.balance ?
               <CryptoMoney
                 value={baseTokenAsset.balance}
@@ -673,6 +680,7 @@ export class MtSimpleOrderFormBody
                 <span className={styles.transitionArrow} />
                 { balancePost ?
                   <CryptoMoney
+                    data-test-id="estimated-col-balance"
                     value={balancePost}
                     token={baseToken}
                     fallback="-"
@@ -695,11 +703,13 @@ export class MtSimpleOrderFormBody
           <div className={styles.orderSummaryValue}>
             { baseTokenAsset && baseTokenAsset.debt.gt(zero) ?
               <CryptoMoney
+                data-test-id="dai-balance"
                 value={baseTokenAsset.debt.times(minusOne)}
                 token={quoteToken}
                 fallback="-"
               /> : baseTokenAsset && baseTokenAsset.dai ?
                 <CryptoMoney
+                  data-test-id="dai-balance"
                   value={baseTokenAsset.dai}
                   token={quoteToken}
                   fallback="-"
@@ -711,6 +721,7 @@ export class MtSimpleOrderFormBody
                 <span className={styles.transitionArrow} />
                 { daiBalancePost ?
                   <CryptoMoney
+                    data-test-id="estimated-dai-balance"
                     value={daiBalancePost}
                     token={quoteToken}
                     fallback="-"
@@ -728,7 +739,7 @@ export class MtSimpleOrderFormBody
     return (
       <div>
         { this.amountGroup() }
-        <Error field="amount" messages={this.props.messages} />
+        <Error field="amount" messages={this.props.messages} tid="amount-error"/>
       </div>
     );
   }
@@ -764,6 +775,7 @@ export class MtSimpleOrderFormBody
                 `Max. ${formatAmount(maxTotal, quoteToken)}`
               }
               className={styles.input}
+              data-test-id="total-input"
               // disabled={this.props.stage === FormStage.waitingForAllocation}
               // disabled={ true }
             />
@@ -780,7 +792,7 @@ export class MtSimpleOrderFormBody
             {quoteToken}
           </InputGroupAddon>
         </InputGroup>
-        <Error field="total" messages={this.props.messages} />
+        <Error field="total" messages={this.props.messages} tid="total-error"/>
       </div>
     );
   }
@@ -790,6 +802,7 @@ export class MtSimpleOrderFormBody
     return (
       <Button
         className={styles.confirmButton}
+        data-test-id="place-order"
         type="submit"
         value="submit"
         color={ this.props.kind === OfferType.buy ? 'primary' : 'danger' }
@@ -839,6 +852,7 @@ export class MtSimpleOrderFormBody
               `Max. ${formatAmount(maxAmount, baseToken)}`
             }
             className={styles.input}
+            data-test-id="amount-input"
             // disabled={this.props.progress === FormStage.waitingForAllocation}
           />
         </ApproximateInputValue>
@@ -936,6 +950,7 @@ export class MtSimpleOrderFormView extends React.Component<
         <Button
           size="md"
           color="primary"
+          data-test-id="open-position-with-DAI"
           disabled={!ma}
           onClick={
             () => this.transfer(UserActionKind.fund, 'DAI', transferWithOnboarding, ma!.name)
@@ -945,6 +960,7 @@ export class MtSimpleOrderFormView extends React.Component<
         <Button
           size="md"
           color="primary"
+          data-test-id={`open-position-with-${ma?.name}`}
           disabled={!ma}
           onClick={
             () => this.transfer(UserActionKind.fund, ma!.name, transferWithOnboarding, ma!.name)
@@ -1115,13 +1131,17 @@ export class MtSimpleOrderFormView extends React.Component<
   }
 }
 
-const Error = ({ field, messages } : { field: string, messages?: Message[] }) => {
+const Error = ({ field, messages, tid } : {
+  field: string,
+  messages?: Message[],
+  tid?: string
+}) => {
   const myMsg = (messages || [])
     .filter((message: Message) => message.field === field)
     .sort((m1, m2) => m2.priority - m1.priority)
     .map(msg => messageContent(msg));
   return (
-    <ErrorMessage messages={myMsg} style={{ height: '28px' }}/>
+    <ErrorMessage messages={myMsg} style={{ height: '28px' }} data-test-id={tid}/>
   );
 };
 

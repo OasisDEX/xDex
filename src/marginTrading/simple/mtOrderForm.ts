@@ -1,11 +1,13 @@
 import { BigNumber } from 'bignumber.js';
 import { curry } from 'lodash';
+import { Dictionary } from 'ramda';
 import { interval, merge, Observable, of, Subject } from 'rxjs';
 import { share, shareReplay } from 'rxjs/internal/operators';
 import { distinctUntilChanged, first, map, scan, switchMap, takeUntil } from 'rxjs/operators';
 import { DustLimits } from '../../balances/balances';
 import { Calls, Calls$, ReadCalls$ } from '../../blockchain/calls/calls';
 import { getToken } from '../../blockchain/config';
+import { localStorageGetDict, localStorageStoreDict } from '../../blockchain/utils';
 import { Offer, OfferType, Orderbook } from '../../exchange/orderbook/orderbook';
 import { TradingPair } from '../../exchange/tradingPair/tradingPair';
 import { combineAndMerge } from '../../utils/combineAndMerge';
@@ -213,7 +215,9 @@ function applyChange(state: MTSimpleFormState, change: MTFormChange): MTSimpleFo
       let  { riskComplianceAccepted, riskComplianceCurrent } = state;
 
       if (state.kind === OfferType.buy) {
-        localStorage.setItem('ltRiskAccepted', 'true');
+        const dict: Dictionary<boolean> = localStorageGetDict('ltRiskAcceptedDict');
+        dict[state?.mta?.proxy._address] = true;
+        localStorageStoreDict(dict, 'ltRiskAcceptedDict');
         riskComplianceAccepted = true;
         riskComplianceCurrent = false;
       }
@@ -433,7 +437,7 @@ function addAmount(total: BigNumber | undefined, state: MTSimpleFormState): MTSi
         ...state.messages,
         {
           kind: MessageKind.impossibleCalculateTotal,
-          message: 'orderbook to shallow',
+          message: 'orderbook too shallow',
           priority: 1,
           field: 'total'
         }
@@ -694,7 +698,7 @@ function getSellPlan(
     {
       ...asset,
       debt: asset.debt.plus(delta),
-      dai: total.plus(delta)
+      dai: asset.dai.plus(delta).plus(total)
     } as MarginableAssetCore,
     { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook
   );
@@ -865,30 +869,30 @@ function prepareSubmit(
     const formResetChange: FormResetChange = { kind: FormChangeKind.formResetChange };
 
     const submitCall$ = calls$.pipe(
-        first(),
-        switchMap((calls) => {
-          const call = state.kind === OfferType.buy ? calls.mtBuy : calls.mtSell;
-          return call({
-            amount,
-            baseToken,
-            price,
-            proxy,
-            plan,
-            total,
-            slippageLimit: (plan[0] as any).slippageLimit,
-            gas: Math.trunc(gasEstimation * 1.2),
-          }).pipe(
-            transactionToX<ProgressChange | FormResetChange>(
-              progressChange(ProgressStage.waitingForApproval),
-              progressChange(ProgressStage.waitingForConfirmation),
-              progressChange(undefined), // (ProgressStage.fiasco),
-              () => of(formResetChange) // (ProgressStage.done)
-            ),
-            takeUntil(cancel$)
-          );
-        }),
-        share(),
-      );
+      first(),
+      switchMap((calls) => {
+        const call = state.kind === OfferType.buy ? calls.mtBuy : calls.mtSell;
+        return call({
+          amount,
+          baseToken,
+          price,
+          proxy,
+          plan,
+          total,
+          slippageLimit: (plan[0] as any).slippageLimit,
+          gas: Math.trunc(gasEstimation * 1.2),
+        }).pipe(
+          transactionToX<ProgressChange | FormResetChange>(
+            progressChange(ProgressStage.waitingForApproval),
+            progressChange(ProgressStage.waitingForConfirmation),
+            progressChange(undefined), // (ProgressStage.fiasco),
+            () => of(formResetChange) // (ProgressStage.done)
+          ),
+          takeUntil(cancel$)
+        );
+      }),
+      share(),
+    );
 
     const changes$ = merge(
       cancel$.pipe(
@@ -912,7 +916,7 @@ function isReadyToProceed(state: MTSimpleFormState): MTSimpleFormState {
     state.gasEstimationStatus === GasEstimationStatus.calculated &&
     state.isSafeCollRatio &&
     (state.riskComplianceAccepted
-    || (state.kind === OfferType.buy ? state.riskComplianceCurrent : true))
+      || (state.kind === OfferType.buy ? state.riskComplianceCurrent : true))
   ) {
     return  { ...state, readyToProceed: true };
   }
@@ -985,10 +989,19 @@ export interface MTSimpleOrderFormParams {
   riskComplianceCheck$: Observable<boolean>;
 }
 
-export const riskComplianceProbe$ = interval(500).pipe(
-  switchMap(() => of(!!localStorage.getItem('ltRiskAccepted'))),
-  distinctUntilChanged(),
-);
+export const createRiskComplianceProbe$ = (mta$: Observable<MTAccount>) => {
+  return mta$.pipe(
+    switchMap((mta) => {
+      return interval(500).pipe(
+        switchMap(() => {
+          const dict: Dictionary<boolean> = localStorageGetDict('ltRiskAcceptedDict');
+          return of(!!dict[mta.proxy._address]);
+        }),
+        distinctUntilChanged(),
+      );
+    })
+  );
+};
 
 function toRiskComplianceChange($riskComplianceCheck$: Observable<boolean>) {
   return $riskComplianceCheck$.pipe(
@@ -1072,7 +1085,7 @@ export function createMTSimpleOrderForm$(
     map(isReadyToProceed),
     firstOfOrTrue(s => s.gasEstimationStatus === GasEstimationStatus.calculating),
     shareReplay(1),
-    // tap(state => state.plan && console.log('plan:', JSON.stringify(state.plan))),
+    // tap(state => console.log('MTA:', state && console.log('state.mta', state.mta))),
     // ),
     // catchError(e => {
     //   console.log(e);
