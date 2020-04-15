@@ -114,9 +114,18 @@ export const web3Status$: Observable<Web3Status> = web3StatusCommand.pipe(
   shareReplay(1),
 );
 
+function getParameterByName(name: string) {
+  const match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+  return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+}
+
 web3Status$.subscribe();
 
-executeWeb3StatusCommand({ kind: Web3StatusCommandKind.connectReadOnly, network: 'kovan' });
+sessionStorage.setItem('network', getParameterByName('network') || 'main');
+executeWeb3StatusCommand({
+  kind: Web3StatusCommandKind.connectReadOnly,
+  network: sessionStorage.getItem('network')!
+});
 
 export function setupFakeWeb3ForTesting() {
   // This is a temporary workaround

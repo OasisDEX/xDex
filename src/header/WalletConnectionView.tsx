@@ -84,7 +84,6 @@ class NotConnected extends React.Component<{}, { isChecked: boolean, walletType?
   }
 
   public render() {
-    const provider = getCurrentProviderName();
     return (
       <Panel heading="Connect Wallet">
         <ul className={classnames(single, list)}>
@@ -171,7 +170,8 @@ class NotConnected extends React.Component<{}, { isChecked: boolean, walletType?
 class Connected extends React.Component {
   public render() {
     return (
-      <Panel heading={`${getCurrentProviderName().name} Connected`}>
+      // <Panel heading={`${getCurrentProviderName().name} Connected`}>
+      <Panel heading={`Connected`}>
         <div className={buttonPlaceholder}>
           <Button size="md"
                   color="secondaryOutlined"
