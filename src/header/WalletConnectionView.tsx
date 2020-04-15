@@ -109,13 +109,13 @@ class NotConnected extends React.Component<{}, { isChecked: boolean, walletType?
                     onSelect={() => this._selectWallet(WalletType.walletConnect)}
                     tid="web-wallet"
           />
-          <ListItem icon={Trezor.icon}
-                    name={Trezor.name}
-                    supported={true}
-                    isSelected={this.state.walletType === WalletType.trezor}
-                    onSelect={() => this._selectWallet(WalletType.trezor)}
-                    tid="web-wallet"
-          />
+          {/*<ListItem icon={Trezor.icon}*/}
+          {/*          name={Trezor.name}*/}
+          {/*          supported={true}*/}
+          {/*          isSelected={this.state.walletType === WalletType.trezor}*/}
+          {/*          onSelect={() => this._selectWallet(WalletType.trezor)}*/}
+          {/*          tid="web-wallet"*/}
+          {/*/>*/}
         </ul>
         <Checkbox name="tos"
                   data-test-id="accept-tos"
@@ -172,17 +172,6 @@ class Connected extends React.Component {
   public render() {
     return (
       <Panel heading={`${getCurrentProviderName().name} Connected`}>
-        <ul className={classnames(list, single)}>
-          {
-            hwWallets.map((hwWallet) =>
-              <ListItem id={hwWallet.id}
-                        key={hwWallet.id}
-                        icon={hwWallet.icon}
-                        name={hwWallet.name}
-                        supported={hwWallet.supported}/>
-            )
-          }
-        </ul>
         <div className={buttonPlaceholder}>
           <Button size="md"
                   color="secondaryOutlined"
@@ -222,14 +211,14 @@ const Connecting = (props: any) => {
 
   return (
     <Panel heading="Connecting...">
-      <div style={_connectingContainerStyles()}>
-        <div>
-          <LoadingIndicator size="lg"/>
-          Waiting for Approval
-          <br/>
-          on {getCurrentProviderName().name}
-        </div>
-      </div>
+      {/*<div style={_connectingContainerStyles()}>*/}
+      {/*  <div>*/}
+      {/*    <LoadingIndicator size="lg"/>*/}
+      {/*    Waiting for Approval*/}
+      {/*    <br/>*/}
+      {/*    on {getCurrentProviderName().name}*/}
+      {/*  </div>*/}
+      {/*</div>*/}
       <div className={buttonPlaceholder}>
         <Button size="md"
                 color="secondaryOutlined"

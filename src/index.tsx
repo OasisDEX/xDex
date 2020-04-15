@@ -31,21 +31,25 @@ interface Web3StatusAndNetwork {
 class App extends React.Component<Web3StatusAndNetwork> {
 
   public render() {
-    switch (this.props.status) {
-      case Web3Status.connecting:
-      case Web3Status.disconnecting:
-        return LoadingState.INITIALIZATION;
-      // case Web3Status.missing:
-      //   return LoadingState.MISSING_PROVIDER;
-      case Web3Status.ready:
-      case Web3Status.readonly:
-        if (this.props.networkId !== undefined && !networks[this.props.networkId]) {
-          return LoadingState.UNSUPPORTED;
-        }
-        return <NavigationTxRx><Main/></NavigationTxRx>;
-      default:
-        throw new UnreachableCaseError(this.props.status);
+    if(!this.props.networkId) {
+      return LoadingState.INITIALIZATION;
     }
+    return <NavigationTxRx><Main/></NavigationTxRx>;
+    // switch (this.props.status) {
+    //   case Web3Status.connecting:
+    //   case Web3Status.disconnecting:
+    //     return LoadingState.INITIALIZATION;
+    //   // case Web3Status.missing:
+    //   //   return LoadingState.MISSING_PROVIDER;
+    //   case Web3Status.ready:
+    //   case Web3Status.readonly:
+    //     if (this.props.networkId !== undefined && !networks[this.props.networkId]) {
+    //       return LoadingState.UNSUPPORTED;
+    //     }
+    //     return <NavigationTxRx><Main/></NavigationTxRx>;
+    //   default:
+    //     throw new UnreachableCaseError(this.props.status);
+    // }
   }
 }
 

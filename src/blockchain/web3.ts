@@ -1,11 +1,11 @@
 import { combineLatest, Observable, of, Subject } from 'rxjs';
 import { fromPromise } from 'rxjs/internal-compatibility';
-import { map, shareReplay, startWith, switchMap } from 'rxjs/operators';
+import {distinctUntilChanged, map, shareReplay, startWith, switchMap} from 'rxjs/operators';
 // tslint:disable:import-name
 import Web3 from 'web3';
-import { networksByName } from './config';
+import {networks, networksByName} from './config';
 import { connectMaker, disconnectMaker } from './maker';
-import { account$ } from './network';
+import {account$, networkId$} from './network';
 
 export let web3 : Web3;
 
@@ -63,13 +63,10 @@ function setWeb3(newWeb3: Web3) {
   web3 = newWeb3;
   (window as any)._web3 = newWeb3;
 }
-
+let networkReadOnly: string;
 export const web3Status$: Observable<Web3Status> = web3StatusCommand.pipe(
   switchMap((command: Web3StatusCommand) => {
-
-    let networkReadOnly: string;
     if (command.kind === Web3StatusCommandKind.connectReadOnly) {
-      console.log('*** connectReadOnly');
       networkReadOnly = command.network;
       setWeb3(readOnlyWeb3(command.network));
       return of(Web3Status.readonly);
@@ -80,7 +77,10 @@ export const web3Status$: Observable<Web3Status> = web3StatusCommand.pipe(
         fromPromise(connectMaker(command.type, command.network)),
         account$
       ).pipe(
-        map(([[connectedWeb3, connectedAccount], detectedAccount]) => {
+        map(([
+          [connectedWeb3, connectedAccount],
+          detectedAccount]
+        ) => {
           setWeb3(connectedWeb3);
           (window as any)._web3 = web3;
           return detectedAccount?.toLowerCase() === connectedAccount.toLowerCase() ?
@@ -88,17 +88,24 @@ export const web3Status$: Observable<Web3Status> = web3StatusCommand.pipe(
               Web3Status.connecting;
         }),
         startWith(Web3Status.connecting),
+        distinctUntilChanged()
       );
     }
 
     if (command.kind === Web3StatusCommandKind.disconnect) {
       return fromPromise(disconnectMaker()).pipe(
-        map(() => {
+        switchMap(() => {
           setWeb3(readOnlyWeb3(networkReadOnly));
-          return Web3Status.readonly;
+          return networkId$.pipe(
+            map(networkId => networks[networkId].name === networkReadOnly ?
+              Web3Status.readonly :
+              Web3Status.disconnecting
+            )
+          );
         }),
         // TODO: error handling if any
         startWith(Web3Status.disconnecting),
+        distinctUntilChanged()
       );
     }
     throw new Error('Should not get here!');
@@ -109,8 +116,7 @@ export const web3Status$: Observable<Web3Status> = web3StatusCommand.pipe(
 
 web3Status$.subscribe();
 
-console.log('*** starting to connect!!!');
-executeWeb3StatusCommand({ kind: Web3StatusCommandKind.connectReadOnly, network: 'main' });
+executeWeb3StatusCommand({ kind: Web3StatusCommandKind.connectReadOnly, network: 'kovan' });
 
 export function setupFakeWeb3ForTesting() {
   // This is a temporary workaround

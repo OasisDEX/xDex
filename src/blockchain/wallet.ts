@@ -14,7 +14,13 @@ import {
 import {account$} from './network';
 // tslint:disable:import-name
 
-import { Web3Status, web3Status$, Web3Window } from './web3';
+import {
+  executeWeb3StatusCommand,
+  Web3Status,
+  web3Status$,
+  Web3StatusCommandKind,
+  Web3Window
+} from './web3';
 
 const tosAccepted$: Observable<boolean> = interval(500).pipe(
   map(
