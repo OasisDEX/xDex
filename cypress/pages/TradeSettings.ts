@@ -7,5 +7,5 @@ export class TradeSettings {
 
   public static slippageLimit = (value: string) =>
     cy.get(tid('slippage-limit'), timeout(2000))
-      .type(`{selectall}{backspace}${value}`)
+      .type(`{selectall}{backspace}${value}`, { delay: 100 })
 }
