@@ -286,3 +286,116 @@ test('buy with leverage - cash only', () => {
   change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(15) });
   expect(unpack(controller).leveragePost).toEqual(new BigNumber(1.5));
 });
+
+test('buy with leverage - add more to actual debt', () => {
+  const weth = {
+    ...wethEmpty,
+    referencePrice: new BigNumber(100),
+    balance: new BigNumber(10),
+    debt: new BigNumber(200),
+    dai: new BigNumber(10).div(10e18),
+  };
+  const mta: MTAccount = getMTAccount({ marginableAssets: [weth] });
+  const sells = [
+    { price: 100, amount: 20 }
+  ];
+
+  const controller = controllerWithFakeOrderBook([], sells, mta);
+  const { change } = unpack(controller);
+
+  change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(5) });
+
+  expect(unpack(controller).leveragePost).toEqual(new BigNumber(1.875));
+});
+
+// Below happens with the current OTC contract. Dusty amount of dai may rest in urn after
+// an OTC transaction during buyLev/sellLev procedure.
+test('buy with leverage - with debt and dusty dai balance (edge case)', () => {
+  const weth = {
+    ...wethEmpty,
+    referencePrice: new BigNumber(100),
+    balance: new BigNumber(10),
+    debt: new BigNumber(200),
+    dai: new BigNumber(10).div(10e18),
+  };
+  const mta: MTAccount = getMTAccount({ marginableAssets: [weth] });
+  const sells = [
+    { price: 100, amount: 20 }
+  ];
+
+  const controller = controllerWithFakeOrderBook([], sells, mta);
+  const { change } = unpack(controller);
+
+  change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(5) });
+
+  expect(unpack(controller).leveragePost).toEqual(new BigNumber(1.875));
+});
+
+test('sell leverage - partial debt repayment', () => {
+  const weth = {
+    ...wethEmpty,
+    referencePrice: new BigNumber(100),
+    balance: new BigNumber(10),
+    debt: new BigNumber(200),
+    dai: new BigNumber(0),
+  };
+  const mta: MTAccount = getMTAccount({ marginableAssets: [weth] });
+  const buys = [
+    { price: 100, amount: 200 }
+  ];
+
+  const controller = controllerWithFakeOrderBook(buys, [], mta);
+  const { change } = unpack(controller);
+
+  change({ kind: FormChangeKind.kindChange, newKind: OfferType.sell });
+  change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(1) });
+
+  expect(unpack(controller).leveragePost).toEqual(new BigNumber(1.125));
+  expect(unpack(controller).daiBalancePost).toEqual(new BigNumber(-100));
+});
+
+test('sell leverage - full debt repayment', () => {
+  const weth = {
+    ...wethEmpty,
+    referencePrice: new BigNumber(100),
+    balance: new BigNumber(10),
+    debt: new BigNumber(200),
+    dai: new BigNumber(0),
+  };
+  const mta: MTAccount = getMTAccount({ marginableAssets: [weth] });
+  const buys = [
+    { price: 100, amount: 200 }
+  ];
+
+  const controller = controllerWithFakeOrderBook(buys, [], mta);
+  const { change } = unpack(controller);
+
+  change({ kind: FormChangeKind.kindChange, newKind: OfferType.sell });
+  change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(2) });
+
+  expect(unpack(controller).leveragePost).toEqual(new BigNumber(1));
+  expect(unpack(controller).daiBalancePost).toEqual(new BigNumber(0));
+});
+
+test('sell without leverage', () => {
+  const weth = {
+    ...wethEmpty,
+    referencePrice: new BigNumber(100),
+    balance: new BigNumber(10),
+    debt: new BigNumber(0),
+    dai: new BigNumber(0),
+  };
+  const mta: MTAccount = getMTAccount({ marginableAssets: [weth] });
+  const buys = [
+    { price: 100, amount: 200 }
+  ];
+
+  const controller = controllerWithFakeOrderBook(buys, [], mta);
+  const { change } = unpack(controller);
+
+  change({ kind: FormChangeKind.kindChange, newKind: OfferType.sell });
+  change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(2) });
+
+  expect(unpack(controller).leveragePost).toEqual(new BigNumber(1));
+  expect(unpack(controller).daiBalancePost).toEqual(new BigNumber(200));
+});
