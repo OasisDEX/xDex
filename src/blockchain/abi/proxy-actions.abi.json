@@ -271,9 +271,9 @@
     "constant": false,
     "inputs": [
       {
-        "internalType": "address[7]",
+        "internalType": "address[8]",
         "name": "contracts",
-        "type": "address[7]"
+        "type": "address[8]"
       },
       {
         "internalType": "bytes32",
@@ -323,6 +323,11 @@
       {
         "internalType": "address",
         "name": "vat",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "jug",
         "type": "address"
       }
     ],
@@ -530,11 +535,6 @@
         "internalType": "uint256",
         "name": "amount",
         "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "adapter",
-        "type": "address"
       }
     ],
     "name": "redeem",

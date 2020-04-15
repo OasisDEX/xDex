@@ -45,7 +45,7 @@ export class Allowance {
           case ALLOWANCE_STATE.DISABLED:
             cy.get(`@${symbol}`)
               .find(tid('toggle-button-state'))
-              .should('have.attr','data-toggle-state', ALLOWANCE_STATE.DISABLED);
+              .should('have.attr', 'data-toggle-state', ALLOWANCE_STATE.DISABLED);
             break;
           case ALLOWANCE_STATE.ENABLED:
             cy.get(`@${symbol}`)

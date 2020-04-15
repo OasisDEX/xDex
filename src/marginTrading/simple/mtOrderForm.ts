@@ -428,7 +428,8 @@ function addAmount(total: BigNumber | undefined, state: MTSimpleFormState): MTSi
   }
   const [amount, left] = buy(
     total,
-    state.kind === OfferType.buy ? state.orderbook.sell : state.orderbook.buy
+    state.kind === OfferType.buy ? state.orderbook.sell : state.orderbook.buy,
+    state.kind
   );
 
   if (left.gt(zero)) {
@@ -636,7 +637,7 @@ function getBuyPlan(
   const daiBalancePost = postTradeAsset.debt.gt(zero) ?
     postTradeAsset.debt.times(minusOne) : postTradeAsset.dai;
 
-  const [, , offersLeft] = buy(total, sellOffers);
+  const [, , offersLeft] = buy(total, sellOffers, OfferType.buy);
   const [, realPurchasingPowerPost] = realPurchasingPowerMarginable(postTradeAsset, offersLeft);
 
   return [
@@ -931,7 +932,11 @@ function calculateMaxAmount(state: MTSimpleFormState): MTSimpleFormState {
 
   if (realPurchasingPower && orderbook && ma) {
     maxAmount = kind === OfferType.buy
-      ? buy(realPurchasingPower, orderbook.sell)[0]
+      ? buy(
+        realPurchasingPower,
+        orderbook.sell,
+        kind
+      )[0]
       : maxSellable(ma, orderbook.buy);
   }
 

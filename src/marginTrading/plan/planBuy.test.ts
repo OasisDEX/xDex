@@ -9,7 +9,8 @@ import { AllocationRequestPilot } from '../allocate/allocate';
 import { OperationKind } from '../state/mtAccount';
 import { getMTAccount } from '../state/mtTestUtils';
 import { planBuy, prepareBuyAllocationRequest } from './planBuy';
-import { cash, dgx100, mtaOnlyWeth, sell1, sell2, sellOffers, wethEmpty } from './planFixtures';
+import { cash, dgx100, mtaOnlyWeth,
+  sell1, sell2, sellOffers, wethEmpty, wethEmptyWithDai } from './planFixtures';
 
 describe('prepareBuyAllocationRequest', () => {
   test('no cash, no plan', () => {
@@ -39,7 +40,7 @@ describe('prepareBuyAllocationRequest', () => {
   });
 
   test('just buy', () => {
-    const mta = getMTAccount({ cash, marginableAssets: [wethEmpty, dgx100] });
+    const mta = getMTAccount({ cash, marginableAssets: [wethEmptyWithDai, dgx100] });
     const request: AllocationRequestPilot | Impossible = prepareBuyAllocationRequest(
       mta,
       sellOffers,
@@ -71,7 +72,7 @@ describe('prepareBuyAllocationRequest', () => {
 });
 
 describe('planBuy', () => {
-  test.only('just buy', () => {
+  test('just buy', () => {
     const plan = planBuy(
       'WETH',
       new BigNumber('10'),

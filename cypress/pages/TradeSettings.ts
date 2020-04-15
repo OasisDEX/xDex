@@ -5,7 +5,10 @@ export class TradeSettings {
 
   public static back = () => cy.get(tid('back')).click();
 
-  public static slippageLimit = (value: string) =>
-    cy.get(tid('slippage-limit'), timeout(2000))
-      .type(`{selectall}{backspace}${value}`)
+  public static slippageLimit = (value: string) => {
+    cy.get(tid('slippage-limit'), timeout(2000)).as('slippageLimit');
+    cy.get('@slippageLimit').clear();
+    cy.get('@slippageLimit').should('be.empty');
+    cy.get('@slippageLimit').type(value);
+  }
 }

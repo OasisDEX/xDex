@@ -32,6 +32,14 @@ export const wethEmpty: MarginableAssetCore = getMarginableCore({
   safeCollRatio: new BigNumber('2'),
 });
 
+export const wethEmptyWithDai: MarginableAssetCore = getMarginableCore({
+  name: 'WETH',
+  referencePrice: new BigNumber('200'),
+  minCollRatio: new BigNumber('1.5'),
+  safeCollRatio: new BigNumber('2'),
+  dai: new BigNumber(30000),
+});
+
 export const weth100: MarginableAssetCore = getMarginableCore({
   name: 'WETH',
   referencePrice: new BigNumber('200'),

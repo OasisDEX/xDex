@@ -1,5 +1,5 @@
 import { BigNumber } from 'bignumber.js';
-import { Offer } from '../../exchange/orderbook/orderbook';
+import { Offer, OfferType } from '../../exchange/orderbook/orderbook';
 import { Impossible, impossible } from '../../utils/impossible';
 import { zero } from '../../utils/zero';
 import { DebtDelta } from '../allocate/allocate';
@@ -69,7 +69,9 @@ export function getPriceImpact(amount: BigNumber, orders: Offer[]):
 }
 
 export function buy(
-  cash: BigNumber, offers: Offer[]
+  cash: BigNumber,
+  offers: Offer[],
+  kind: OfferType
 ): [BigNumber, BigNumber, Offer[]] {
 
   let totalBought = zero;
@@ -80,7 +82,7 @@ export function buy(
     const paid = BigNumber.min(cashLeft, offer.quoteAmount);
     // const bought = paid.div(offer.price);
     const bought = paid.div(offer.quoteAmount.div(offer.baseAmount))
-      .toFixed(18, BigNumber.ROUND_DOWN);
+      .toFixed(18, kind === OfferType.buy ? BigNumber.ROUND_DOWN : BigNumber.ROUND_UP);
     // console.log('bought2', bought2.toString());
 
     totalBought = totalBought.plus(bought);
