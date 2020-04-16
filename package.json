@@ -26,9 +26,6 @@
     "tsc": "tsc -p ./tsconfig.prod.json --noEmit && tsc -p ./cypress/tsconfig.json --noEmit && tsc -p ./tsconfig.test.json --noEmit && tsc -p ./tsconfig.json --noEmit",
     "storybook:screenshots": "storybook-chrome-screenshot -p 9001 --inject-files ./.storybook/disable-animations.js"
   },
-  "engines": {
-    "node": "10.19.x"
-  },
   "dependencies": {
     "@types/mixpanel-browser": "^2.23.1",
     "@types/ramda": "^0.25.38",
