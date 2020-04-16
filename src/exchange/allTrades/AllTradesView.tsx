@@ -45,7 +45,6 @@ export class AllTrades extends React.Component<AllTradesProps> {
         this.forceUpdate();
       });
     }
-    console.log(this.props.status);
     return (
       <>
         <PanelHeader>

@@ -292,16 +292,28 @@ tradingTokens.sort((t1, t2) =>
   Object.keys(tokens).indexOf(t1) - Object.keys(tokens).indexOf(t2)
 );
 
-const load = memoize(
-  (abi: any, address: string) => {
+const web3s: any[] = [];
+const loadInternal = memoize(
+  (web3: any, abi: any, address: string) => {
     return {
       address,
       // TODO: remove web3 dependency from here!
-      contract: new (window as any)._web3.eth.Contract(abi, address)
+      contract: new web3.eth.Contract(abi, address)
     };
   },
-  (_abi: any, address: string) => address
+  (web3: any, _abi: any, address: string) => {
+    if (web3s.indexOf(web3) < 0) {
+      web3s[web3s.length] = web3;
+    }
+    return `${web3s.indexOf(web3)}${address}`;
+  }
 );
+
+// new (window as any)._
+
+function load(abi: any, address: string) {
+  return loadInternal((window as any)._web3, abi, address);
+}
 
 function loadToken(token: string, abi: any, address: string) {
   return { token, ...load(abi, address) };

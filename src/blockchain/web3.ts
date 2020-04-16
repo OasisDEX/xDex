@@ -1,11 +1,11 @@
 import { combineLatest, Observable, of, Subject } from 'rxjs';
 import { fromPromise } from 'rxjs/internal-compatibility';
-import {distinctUntilChanged, map, shareReplay, startWith, switchMap} from 'rxjs/operators';
+import { distinctUntilChanged, map, shareReplay, startWith, switchMap } from 'rxjs/operators';
 // tslint:disable:import-name
 import Web3 from 'web3';
-import {networks, networksByName} from './config';
+import { networks, networksByName } from './config';
 import { connectMaker, disconnectMaker } from './maker';
-import {account$, networkId$} from './network';
+import { account$, networkId$ } from './network';
 
 export let web3 : Web3;
 
@@ -67,12 +67,14 @@ let networkReadOnly: string;
 export const web3Status$: Observable<Web3Status> = web3StatusCommand.pipe(
   switchMap((command: Web3StatusCommand) => {
     if (command.kind === Web3StatusCommandKind.connectReadOnly) {
+      console.log('*** connectReadOnly');
       networkReadOnly = command.network;
       setWeb3(readOnlyWeb3(command.network));
       return of(Web3Status.readonly);
     }
 
     if (command.kind === Web3StatusCommandKind.connect) {
+      networkReadOnly = command.network;
       return combineLatest(
         fromPromise(connectMaker(command.type, command.network)),
         account$
@@ -88,7 +90,6 @@ export const web3Status$: Observable<Web3Status> = web3StatusCommand.pipe(
               Web3Status.connecting;
         }),
         startWith(Web3Status.connecting),
-        distinctUntilChanged()
       );
     }
 
@@ -105,12 +106,12 @@ export const web3Status$: Observable<Web3Status> = web3StatusCommand.pipe(
         }),
         // TODO: error handling if any
         startWith(Web3Status.disconnecting),
-        distinctUntilChanged()
       );
     }
     throw new Error('Should not get here!');
   }),
   startWith(Web3Status.connecting),
+  distinctUntilChanged(),
   shareReplay(1),
 );
 

@@ -34,9 +34,6 @@ export const every30Seconds$ = interval(30000).pipe(startWith(0));
 export const networkId$ = every3Seconds$.pipe(
   startWith(0),
   switchMap(() => {
-    // if (!web3) {
-    //   return of();
-    // }
     return bindNodeCallback(web3.eth.net.getId)();
   }),
   distinctUntilChanged(),
@@ -45,16 +42,14 @@ export const networkId$ = every3Seconds$.pipe(
 
 export const account$: Observable<string | undefined> = every3Seconds$.pipe(
   switchMap(() => {
-    // debugger;
-    // if (!web3) {
-    //   return of();
-    // }
     return bindNodeCallback(web3.eth.getAccounts)();
   }),
   map(([account]) => account),
   distinctUntilChanged(),
   shareReplay(1)
 );
+
+account$.subscribe(console.log);
 
 export const initializedAccount$ = account$.pipe(
   filter((account: string | undefined) => account !== undefined)
