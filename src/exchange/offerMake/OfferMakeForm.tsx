@@ -5,7 +5,6 @@ import { Link } from 'react-router-dom';
 import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
 
 import * as mixpanel from 'mixpanel-browser';
-import { theAppContext } from '../../AppContext';
 import { getToken, isDAIEnabled } from '../../blockchain/config';
 import { routerContext } from '../../Main';
 import { BigNumberInput, lessThanOrEqual } from '../../utils/bigNumberInput/BigNumberInput';
@@ -233,20 +232,6 @@ export class OfferMakeForm extends React.Component<OfferFormState> {
             and swap your SAI to DAI
           </p>
         </div>
-        {
-          this.props.user && this.props.user.account && (
-            <theAppContext.Consumer>
-              {({ SAI2DAIMigrationTxRx }) =>
-                <SAI2DAIMigrationTxRx
-                  // @ts-ignore
-                  label={'Start Dai Migration'}
-                  className={styles.migrateButton}
-                  tid="update-btn-market"
-                />
-              }
-            </theAppContext.Consumer>
-          )
-        }
 
       </PanelBody>
     </div>;

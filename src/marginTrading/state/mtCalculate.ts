@@ -3,7 +3,7 @@ import { findLastIndex } from 'lodash';
 import * as moment from 'moment';
 import { Dictionary } from 'ramda';
 import { nullAddress } from '../../blockchain/utils';
-import { Offer, Orderbook } from '../../exchange/orderbook/orderbook';
+import { Offer, OfferType, Orderbook } from '../../exchange/orderbook/orderbook';
 import { minusOne, one, zero } from '../../utils/zero';
 import { buy, sellAll } from '../plan/planUtils';
 import {
@@ -45,7 +45,7 @@ export function realPurchasingPowerMarginable(
   let first = true;
   const dust = ma.minDebt;
   while ((cash.gt(0.01) || first) && offers.length > 0) {
-    const [bought, cashLeft, offersLeft] = buy(cash, offers);
+    const [bought, cashLeft, offersLeft] = buy(cash, offers, OfferType.buy);
     offers = offersLeft;
     amount = amount.plus(bought);
     purchasingPower = purchasingPower.plus(cash).minus(cashLeft);
