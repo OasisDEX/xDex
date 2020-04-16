@@ -5,7 +5,6 @@ import { distinctUntilChanged, map, shareReplay, startWith, switchMap } from 'rx
 import Web3 from 'web3';
 import { networks, networksByName } from './config';
 import { connectMaker, disconnectMaker } from './maker';
-import { account$, networkId$ } from './network';
 
 export let web3 : Web3;
 
@@ -75,19 +74,11 @@ export const web3Status$: Observable<Web3Status> = web3StatusCommand.pipe(
 
     if (command.kind === Web3StatusCommandKind.connect) {
       networkReadOnly = command.network;
-      return combineLatest(
-        fromPromise(connectMaker(command.type, command.network)),
-        account$
-      ).pipe(
-        map(([
-          [connectedWeb3, connectedAccount],
-          detectedAccount]
-        ) => {
+      return fromPromise(connectMaker(command.type, command.network)).pipe(
+        map(([connectedWeb3]) => {
           setWeb3(connectedWeb3);
           (window as any)._web3 = web3;
-          return detectedAccount?.toLowerCase() === connectedAccount.toLowerCase() ?
-              Web3Status.ready :
-              Web3Status.connecting;
+          return Web3Status.ready;
         }),
         startWith(Web3Status.connecting),
       );
@@ -95,14 +86,9 @@ export const web3Status$: Observable<Web3Status> = web3StatusCommand.pipe(
 
     if (command.kind === Web3StatusCommandKind.disconnect) {
       return fromPromise(disconnectMaker()).pipe(
-        switchMap(() => {
+        map(() => {
           setWeb3(readOnlyWeb3(networkReadOnly));
-          return networkId$.pipe(
-            map(networkId => networks[networkId].name === networkReadOnly ?
-              Web3Status.readonly :
-              Web3Status.disconnecting
-            )
-          );
+          return Web3Status.readonly;
         }),
         // TODO: error handling if any
         startWith(Web3Status.disconnecting),

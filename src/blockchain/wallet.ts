@@ -53,7 +53,6 @@ export const walletStatus$: Observable<WalletStatus> = combineLatest(
           WalletStatus.disconnected :
           WalletStatus.missing
   ),
-  tap(status => console.log('wallet status', status)),
   shareReplay(1),
 );
 

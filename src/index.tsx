@@ -24,7 +24,7 @@ interface Props {
 mixpanelInit();
 
 interface Web3StatusAndNetwork {
-  status: Web3Status;
+  // status: Web3Status;
   networkId?: string;
 }
 
@@ -35,27 +35,12 @@ class App extends React.Component<Web3StatusAndNetwork> {
       return LoadingState.INITIALIZATION;
     }
     return <NavigationTxRx><Main/></NavigationTxRx>;
-    // switch (this.props.status) {
-    //   case Web3Status.connecting:
-    //   case Web3Status.disconnecting:
-    //     return LoadingState.INITIALIZATION;
-    //   // case Web3Status.missing:
-    //   //   return LoadingState.MISSING_PROVIDER;
-    //   case Web3Status.ready:
-    //   case Web3Status.readonly:
-    //     if (this.props.networkId !== undefined && !networks[this.props.networkId]) {
-    //       return LoadingState.UNSUPPORTED;
-    //     }
-    //     return <NavigationTxRx><Main/></NavigationTxRx>;
-    //   default:
-    //     throw new UnreachableCaseError(this.props.status);
-    // }
   }
 }
 
-const AppTxRx = connect<Props, {}>(
-  App, combineLatest(web3Status$, networkId$.pipe(startWith(undefined))).pipe(
-    map(([status, networkId]) => ({ status, networkId }))
+const AppTxRx = connect(
+  App, networkId$.pipe(startWith(undefined)).pipe(
+    map((networkId) => ({ networkId } as Web3StatusAndNetwork))
   )
 );
 

@@ -32,7 +32,6 @@ export async function connectMaker(type: WalletType, networkId: string): Promise
     multicall: true
   };
 
-  console.log('Maker', Maker);
   maker = await Maker.create('http', config);
   window.maker = maker;
 
