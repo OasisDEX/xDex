@@ -23,6 +23,7 @@ import { Button } from '../../utils/forms/Buttons';
 import { Switch } from '../../utils/forms/Slider';
 import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
 import { LoggedOut } from '../../utils/loadingIndicator/LoggedOut';
+import { LiquidationMessage, LiquidationMessageKind } from '../simple/mtOrderForm';
 import { MtTransferFormView } from '../transfer/mtTransferFormView';
 import backArrowSvg from './back-arrow.svg';
 import * as myPositionStyles from './MTMyPositionView.scss';
@@ -67,6 +68,7 @@ interface MTMyPositionPanelInternalProps {
   transactions: TxState[];
   close?: () => void;
   daiPrice: BigNumber;
+  liquidationMessage?: LiquidationMessage;
 }
 
 export class MTLiquidationNotification
@@ -74,110 +76,67 @@ export class MTLiquidationNotification
   public render() {
 
     if (this.props.value && this.props.status === 'loaded' && this.props.value.mta) {
-      const { mta, ma, redeem, transactions } = this.props.value;
+      const { mta, ma, redeem, transactions, liquidationMessage } = this.props.value;
 
-      return <>
-        {
-          ma.bitable === 'imminent' &&
-          // tslint:disable
-          <div className={myPositionStyles.warningMessage}>
-            <SvgImage image={warningIconSvg} />
-            <span className={myPositionStyles.warningText}>
-              Your {ma.name} leveraged position has entered the liquidation phase and your collateral will be auctioned in {ma.nextPriceUpdateDelta} minutes.<br />
-              You can still avoid auction by
-              {ma.isSafeCollRatio ? 'selling, or ' : ' '}
-              depositing additional {ma.name} or DAI.
-            </span>
-          </div>
-          // tslint:enable
-          }
+      if (liquidationMessage) {
+        const warningClass = liquidationMessage.kind === LiquidationMessageKind.redeemable
+          ? myPositionStyles.infoMessage
+          : myPositionStyles.warningMessage;
+
+        return <div className={warningClass}>
+          <>{
+            liquidationMessage.kind !== LiquidationMessageKind.redeemable &&
+            <SvgImage image={warningIconSvg}/>
+          }</>
+          <span className={myPositionStyles.warningText}>
+            {liquidationMessageContent(liquidationMessage)}
+          </span>
           {
-            ma.bitable === 'yes' && ma.runningAuctions === 0 &&
-            <div className={myPositionStyles.warningMessage}>
-              <SvgImage image={warningIconSvg} />
-              <span className={myPositionStyles.warningText}>
-                {
-                  // tslint:disable
-                  <>
-                    Your {ma.name} leveraged position is now at risk of being liquidated. You can still avoid auction by depositing WETH or DAI.
-                  </>
-                  // tslint:enable
-                }
-              </span>
-              {
-                ma.redeemable.gt(zero) && <RedeemButton
-                  redeem={() => redeem({
-                    token: ma.name,
-                    proxy: mta.proxy,
-                    amount: ma.redeemable
-                  })}
+            liquidationMessage.kind === LiquidationMessageKind.redeemable
+            && ma.redeemable.gt(zero) && <RedeemButton
+              redeem={() => redeem({
+                token: ma.name,
+                proxy: mta.proxy,
+                amount: ma.redeemable
+              })}
 
-                  token={ma.name}
-                  disabled={false}
-                  transactions={transactions}
-                />
-              }
-            </div>
+              token={ma.name}
+              disabled={false}
+              transactions={transactions}
+            />
           }
-          {
-            ma.runningAuctions > 0 &&
-            <div className={myPositionStyles.warningMessage}>
-              <SvgImage image={warningIconSvg} />
-              <span className={myPositionStyles.warningText}>
-                {
-                  // tslint:disable
-                  <>Your {ma.name} leveraged position has been liquidated and your assets are currently being sold at
-                    auction to cover your debt. Check back soon for further details for the auction result.
-                  </>
-                  // tslint:enable
-                }
-              </span>
-              {
-                ma.redeemable.gt(zero) && <RedeemButton
-                  redeem={() => redeem({
-                    token: ma.name,
-                    proxy: mta.proxy,
-                    amount: ma.redeemable
-                  })}
-
-                  token={ma.name}
-                  disabled={false}
-                  transactions={transactions}
-                />
-              }
-            </div>
-          }
-          {
-            ma.bitable === 'no' && ma.redeemable.gt(zero) &&
-            <div className={myPositionStyles.infoMessage}>
-              <span>
-                {
-                  // tslint:disable
-                  <>
-                    Your {ma.name} leveraged position has been liquidated and sold to cover your debt.
-                    You have {ma.redeemable.toString()} {ma.name} that was not sold and can now be reclaimed.
-                  </>
-                  // tslint:enable
-                }
-              </span>
-              {
-                ma.redeemable.gt(zero) && <RedeemButton
-                  redeem={() => redeem({
-                    token: ma.name,
-                    proxy: mta.proxy,
-                    amount: ma.redeemable
-                  })}
-
-                  token={ma.name}
-                  disabled={false}
-                  transactions={transactions}
-                />
-              }
-            </div>
-          }
-      </>;
+        </div>;
+      }
     }
     return null;
+  }
+}
+
+function liquidationMessageContent(msg: LiquidationMessage) {
+  switch (msg.kind) {
+    // tslint:disable
+    case LiquidationMessageKind.bitable:
+      return <>Your WETH leveraged position is now at risk of being liquidated.
+        You can still avoid auction by depositing {msg.baseToken} or DAI.
+      </>;
+
+    case LiquidationMessageKind.imminent:
+      return <>Your {msg.baseToken} leveraged position has entered the liquidation phase and your
+        collateral will be auctioned in {msg.nextPriceUpdateDelta} minutes.<br />
+        You can still avoid auction by {msg.isSafeCollRatio ? 'selling, or ' : ' '}
+        depositing additional {msg.baseToken} or DAI.
+      </>;
+
+    case LiquidationMessageKind.inProgress:
+      return <>Your {msg.baseToken} leveraged position has been liquidated and your assets are currently being sold at
+        auction to cover your debt. Check back soon for further details for the auction result.
+      </>;
+
+    case LiquidationMessageKind.redeemable:
+      return <>Your {msg.baseToken} leveraged position has been liquidated and sold to cover your debt.
+        You have {msg.redeemable} {msg.baseToken} that was not sold and can now be reclaimed.
+      </>;
+    // tslint:enable
   }
 }
 

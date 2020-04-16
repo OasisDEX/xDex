@@ -91,7 +91,6 @@
 
   span {
     align-self: center;
-    flex-grow: 1;
   }
 
   .redeemButton {
@@ -105,7 +104,8 @@
 .infoMessage {
   @extend .message;
 
-  color: #828288;
+  color: $grey-light-mid;
+  background: white;
   border: 1px solid $another-light-grayish-blue-3;
 }
 
@@ -120,11 +120,12 @@
 
 .warningText {
   margin-left: 10px;
+  flex-grow: 1;
 }
 
 .redeemButton {
   &:disabled {
-    color: #58585F !important;
+    color: $grey-light !important;
   }
 
   .buttonLoading {

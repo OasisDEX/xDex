@@ -104,6 +104,7 @@ export function createMTMyPositionView$(
             account: state.value.account,
             mta: state.value.mta,
             ma: findMarginableAsset(state.tradingPair.base, state.value.mta),
+            liquidationMessage: state.value.liquidationMessage,
           },
         }
         : {
