@@ -80,6 +80,7 @@ export const web3Status$: Observable<Web3Status> = web3StatusCommand.pipe(
           (window as any)._web3 = web3;
           return Web3Status.ready;
         }),
+        // TODO: error handling if any
         startWith(Web3Status.connecting),
       );
     }
