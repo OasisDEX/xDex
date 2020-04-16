@@ -19,10 +19,15 @@ export class WarningTooltip extends React.Component<WarningTooltipType> {
     const { id, text, iconColor } = this.props;
     return (
       <Tooltip id={id} text={text}>
-        <SvgImage data-tip={true} data-for={id} className={classnames(styles.warningIcon, {
-          [styles.green]: iconColor === 'green',
-          [styles.grey]: !iconColor || iconColor === 'grey'
-        })} image={warningSvg}/>
+        <SvgImage
+          data-tip={true}
+          data-for={id}
+          className={classnames(styles.warningIcon, {
+            [styles.green]: iconColor === 'green',
+            [styles.grey]: !iconColor || iconColor === 'grey',
+          })}
+          image={warningSvg}
+        />
       </Tooltip>
     );
   }
@@ -31,7 +36,8 @@ export class WarningTooltip extends React.Component<WarningTooltipType> {
 export class Tooltip extends React.Component<TooltipType> {
   public render() {
     const { id, text, children } = this.props;
-    return (<>
+    return (
+      <>
         {children}
         <ReactTooltip className="instantTooltip" effect="solid" id={id}>
           <p>{text}</p>

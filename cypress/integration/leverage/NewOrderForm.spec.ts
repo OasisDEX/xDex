@@ -75,8 +75,8 @@ describe('Leverage form', () => {
     });
   });
 
-    // TODO: Skip for now because of misimplementation. Account should be taken from user
-    // The behavior of those tests should be line the ones in missing provider.
+  // TODO: Skip for now because of misimplementation. Account should be taken from user
+  // The behavior of those tests should be line the ones in missing provider.
   context.skip('without wallet connected', () => {
     beforeEach(() => {
       cypressVisitWithWeb3();
@@ -106,9 +106,7 @@ describe('Leverage form', () => {
     });
 
     // tslint:disable:no-empty
-    it('should be or not be able to switch to sell order form', () => {
-
-    });
+    it('should be or not be able to switch to sell order form', () => {});
     // tslint:disable:no-empty
     it('should be or not be able to check form settings ( slippage )', () => {});
   });
@@ -151,7 +149,7 @@ describe('Leverage form', () => {
         Position.expectAmountOfCollateral(`0.5000`);
         Position.expectAmountOfDAI(`150.50`);
 
-        Position.withdrawDAI(150.50);
+        Position.withdrawDAI(150.5);
         Position.expectAmountOfCollateral(`0.5000`);
         Position.expectAmountOfDAI(`0.00`);
       });
@@ -267,7 +265,6 @@ describe('Leverage form', () => {
     });
 
     context('selling collateral', () => {
-
       beforeEach(() => {
         Modal.open(Position.new('WETH'));
         Account.setupProxy();
@@ -348,7 +345,6 @@ describe('Leverage form', () => {
         Position.expectAmountOfDAI('799.37');
         // IN DAI - will change when default value is USD
         Position.expectLiquidationPrice('-');
-
       });
     });
   });

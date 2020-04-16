@@ -18,13 +18,11 @@ interface AssetDropdownMenuState {
   isCollapsed: boolean;
 }
 
-export class AssetDropdownMenu extends React.Component<AssetDropdownMenuProps,
-  AssetDropdownMenuState> {
-
+export class AssetDropdownMenu extends React.Component<AssetDropdownMenuProps, AssetDropdownMenuState> {
   constructor(props: AssetDropdownMenuProps) {
     super(props);
     this.state = {
-      isCollapsed: false
+      isCollapsed: false,
     };
   }
 
@@ -37,32 +35,21 @@ export class AssetDropdownMenu extends React.Component<AssetDropdownMenuProps,
         onMouseOver={this.handleOnMouseOver}
         onMouseLeave={this.handleOnMouseOut}
       >
-        <Button
-          size="md"
-          color="secondaryOutlined"
-          className={styles.dropdownButton}
-        >
-          { withIcon && <SvgImage image={dottedMenuSvg}/> }
-          {
-            label &&
+        <Button size="md" color="secondaryOutlined" className={styles.dropdownButton}>
+          {withIcon && <SvgImage image={dottedMenuSvg} />}
+          {label && (
             <>
               <span>{label}</span>
-              <SvgImage image={chevronDownSvg}
-                        className={classnames(styles.arrowDown, styles.dark)
-              }/>
+              <SvgImage image={chevronDownSvg} className={classnames(styles.arrowDown, styles.dark)} />
             </>
-          }
+          )}
         </Button>
         <div className={styles.dropdownList}>
-          {
-            actions.map((actionBtn, index) =>
-              <div key={`${asset}-${index}`}
-                   className={styles.actionButton}
-              >
-                {actionBtn}
-              </div>
-            )
-          }
+          {actions.map((actionBtn, index) => (
+            <div key={`${asset}-${index}`} className={styles.actionButton}>
+              {actionBtn}
+            </div>
+          ))}
         </div>
       </div>
     );
@@ -70,9 +57,9 @@ export class AssetDropdownMenu extends React.Component<AssetDropdownMenuProps,
 
   private handleOnMouseOver = () => {
     this.setState({ isCollapsed: true });
-  }
+  };
 
   private handleOnMouseOut = () => {
     this.setState({ isCollapsed: false });
-  }
+  };
 }

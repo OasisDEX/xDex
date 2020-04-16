@@ -22,13 +22,7 @@ describe('Sell Order', () => {
     orders.countIs(4);
     makeScreenshots('new-order');
 
-    new Order()
-      .sell()
-      .limit()
-      .amount(amount)
-      .atPrice(price)
-      .total(multiply(price, amount))
-      .place();
+    new Order().sell().limit().amount(amount).atPrice(price).total(multiply(price, amount)).place();
 
     orders.countIs(5);
     const lastOrder = orders.last();
@@ -45,13 +39,7 @@ describe('Sell Order', () => {
     const orders = Orderbook.list(OrderType.SELL);
     orders.countIs(4);
 
-    new Order()
-      .sell()
-      .limit()
-      .amount(amount)
-      .atPrice(price)
-      .total(multiply(price, amount))
-      .place();
+    new Order().sell().limit().amount(amount).atPrice(price).total(multiply(price, amount)).place();
 
     orders.countIs(5);
     const lastOrder = orders.number(3);
@@ -68,13 +56,7 @@ describe('Sell Order', () => {
     const orders = Orderbook.list(OrderType.BUY);
     orders.countIs(3);
 
-    new Order()
-      .sell()
-      .limit()
-      .amount(amount)
-      .atPrice(price)
-      .total(multiply(price, amount))
-      .place();
+    new Order().sell().limit().amount(amount).atPrice(price).total(multiply(price, amount)).place();
 
     orders.countIs(2);
 
@@ -93,13 +75,7 @@ describe('Sell Order', () => {
     const sellOrders = Orderbook.list(OrderType.SELL);
     sellOrders.countIs(4);
 
-    new Order()
-      .sell()
-      .limit()
-      .amount(amount)
-      .atPrice(price)
-      .total(multiply(price, amount))
-      .place();
+    new Order().sell().limit().amount(amount).atPrice(price).total(multiply(price, amount)).place();
 
     buyOrders.countIs(2);
     sellOrders.countIs(5);
@@ -125,13 +101,7 @@ describe('Sell Order', () => {
     const sellOrders = Orderbook.list(OrderType.SELL);
     sellOrders.countIs(4);
 
-    new Order()
-      .sell()
-      .limit()
-      .amount(amount)
-      .atPrice(price)
-      .total(multiply(price, amount))
-      .place();
+    new Order().sell().limit().amount(amount).atPrice(price).total(multiply(price, amount)).place();
 
     buyOrders.countIs(2);
     sellOrders.countIs(4);
@@ -150,13 +120,7 @@ describe('Sell Order', () => {
 
     Trades.countIs(2);
 
-    new Order()
-      .sell()
-      .limit()
-      .amount(amount)
-      .atPrice(price)
-      .total(multiply(price, amount))
-      .place();
+    new Order().sell().limit().amount(amount).atPrice(price).total(multiply(price, amount)).place();
 
     Trades.countIs(3);
 
@@ -173,13 +137,7 @@ describe('Sell Order', () => {
 
     Trades.countIs(2);
 
-    new Order()
-      .sell()
-      .limit()
-      .amount(amount)
-      .atPrice(price)
-      .total(multiply(price, amount))
-      .place();
+    new Order().sell().limit().amount(amount).atPrice(price).total(multiply(price, amount)).place();
 
     Trades.countIs(3);
     const trade = Trades.first();

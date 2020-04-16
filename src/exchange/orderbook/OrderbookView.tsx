@@ -26,15 +26,12 @@ import * as styles from './OrderbookView.scss';
 
 export function createOrderbookForView(
   currentOrderBook$: Observable<Orderbook>,
-  currentOfferForm$: Observable<{change: (ch: PickOfferChange) => void}>,
+  currentOfferForm$: Observable<{ change: (ch: PickOfferChange) => void }>,
   kindChange: (kind: OrderbookViewKind) => void,
 ): Observable<Props> {
   return combineLatest(
     loadablifyLight(currentOrderBook$),
-    currentOfferForm$.pipe(
-      distinctUntilKeyChanged('change'),
-      startWith({ change: () => null } as any),
-    ),
+    currentOfferForm$.pipe(distinctUntilKeyChanged('change'), startWith({ change: () => null } as any)),
   ).pipe(
     map(([currentOrderBook, { change }]) => ({
       tradingPair: (currentOrderBook.value && currentOrderBook.value.tradingPair) as TradingPair,
@@ -52,7 +49,6 @@ export interface Props extends Loadable<Orderbook> {
 }
 
 export class OrderbookView extends React.Component<Props> {
-
   private lastTradingPair?: TradingPair;
   private lastStatus?: LoadableStatus;
   private centerRow?: HTMLElement;
@@ -63,10 +59,7 @@ export class OrderbookView extends React.Component<Props> {
   public center() {
     this.autoScroll = true;
     if (this.scrollbar && this.centerRow) {
-      this.scrollbar.center(
-        this.centerRow.offsetTop - this.centerRowOffset,
-        this.centerRow.clientHeight
-      );
+      this.scrollbar.center(this.centerRow.offsetTop - this.centerRowOffset, this.centerRow.clientHeight);
     }
   }
 
@@ -76,34 +69,32 @@ export class OrderbookView extends React.Component<Props> {
 
   public enter = () => {
     this.center();
-  }
+  };
 
   public exit = () => {
     setTimeout(() => {
       this.center();
     });
-  }
+  };
 
   public scrolled = () => {
     if (!this.autoScroll && this.scrollbar && this.centerRow) {
       const { scrollTop, clientHeight } = this.scrollbar.scrollState();
-      this.centerRowOffset =
-        this.centerRow.offsetTop - scrollTop - (clientHeight - this.centerRow.clientHeight) / 2;
+      this.centerRowOffset = this.centerRow.offsetTop - scrollTop - (clientHeight - this.centerRow.clientHeight) / 2;
     }
     this.autoScroll = false;
-  }
+  };
 
   public shouldComponentUpdate(nextProps: Props): boolean {
     return !equals(nextProps, this.props);
   }
 
   public render() {
-    const tradingPairChanged = this.lastTradingPair &&
-      tradingPairResolver(this.lastTradingPair) !== tradingPairResolver(this.props.tradingPair);
+    const tradingPairChanged =
+      this.lastTradingPair && tradingPairResolver(this.lastTradingPair) !== tradingPairResolver(this.props.tradingPair);
     this.lastTradingPair = this.props.tradingPair;
 
-    const justLoaded = (!this.lastStatus || this.lastStatus === 'loading') &&
-      this.props.status === 'loaded';
+    const justLoaded = (!this.lastStatus || this.lastStatus === 'loading') && this.props.status === 'loaded';
     this.lastStatus = this.props.status;
 
     const skipTransition = justLoaded || tradingPairChanged;
@@ -122,55 +113,50 @@ export class OrderbookView extends React.Component<Props> {
           <div style={{ marginLeft: 'auto', display: 'flex' }}>
             <MediaQuery maxWidth={992}>
               {(matches) => {
-
                 if (matches) {
                   return <></>;
                 }
 
-                return <Button
-                  className={styles.switchBtn}
-                  onClick={() => {
-                    mixpanel.track('btn-click', {
-                      id: 'change-orderbook-view',
-                      product: 'oasis-trade',
-                      page: 'Market',
-                      section: 'orderbook',
-                    });
-                    this.changeChartListView();
-                  }}
-                  data-test-id="orderbook-type-list"
-                >
-                  <SvgImage image={depthChartSvg}/>
-                </Button>;
+                return (
+                  <Button
+                    className={styles.switchBtn}
+                    onClick={() => {
+                      mixpanel.track('btn-click', {
+                        id: 'change-orderbook-view',
+                        product: 'oasis-trade',
+                        page: 'Market',
+                        section: 'orderbook',
+                      });
+                      this.changeChartListView();
+                    }}
+                    data-test-id="orderbook-type-list"
+                  >
+                    <SvgImage image={depthChartSvg} />
+                  </Button>
+                );
               }}
             </MediaQuery>
           </div>
         </PanelHeader>
         <Table align="right" className={styles.orderbookTable}>
           <thead>
-          <tr>
-            <th data-test-id="price-col">
-              <InfoLabel>Price </InfoLabel>
-              <Currency theme="semi-bold"
-                        value={this.props.tradingPair && this.props.tradingPair.quote}/>
-            </th>
-            <th data-test-id="amount-col">
-              <InfoLabel>Amount </InfoLabel>
-              <Currency theme="semi-bold"
-                        value={this.props.tradingPair && this.props.tradingPair.base}/>
-            </th>
-            <th>
-              <InfoLabel>Total </InfoLabel>
-              <Currency theme="semi-bold"
-                        value={this.props.tradingPair && this.props.tradingPair.quote}/>
-            </th>
-          </tr>
+            <tr>
+              <th data-test-id="price-col">
+                <InfoLabel>Price </InfoLabel>
+                <Currency theme="semi-bold" value={this.props.tradingPair && this.props.tradingPair.quote} />
+              </th>
+              <th data-test-id="amount-col">
+                <InfoLabel>Amount </InfoLabel>
+                <Currency theme="semi-bold" value={this.props.tradingPair && this.props.tradingPair.base} />
+              </th>
+              <th>
+                <InfoLabel>Total </InfoLabel>
+                <Currency theme="semi-bold" value={this.props.tradingPair && this.props.tradingPair.quote} />
+              </th>
+            </tr>
           </thead>
         </Table>
-        <WithLoadingIndicator
-          loadable={skipTransition ? { status: 'loading' } : this.props}
-          size="lg"
-        >
+        <WithLoadingIndicator loadable={skipTransition ? { status: 'loading' } : this.props} size="lg">
           {(orderbook: Orderbook) => {
             const takeOffer = (offer: Offer) => {
               return (): void => {
@@ -189,43 +175,39 @@ export class OrderbookView extends React.Component<Props> {
                   we wait the order book for a given pair
                   to be loaded before we assert anything else.
                 */}
-                <span data-test-id={`${base}-${quote}-orderbook`}/>
-                <Scrollbar ref={el => this.scrollbar = el || undefined} onScroll={this.scrolled}>
+                <span data-test-id={`${base}-${quote}-orderbook`} />
+                <Scrollbar ref={(el) => (this.scrollbar = el || undefined)} onScroll={this.scrolled}>
                   <Table align="right" className={styles.orderbookTable}>
-                    <TransitionGroup
-                      component="tbody"
-                      exit={true}
-                      enter={true}
-                    >
-                      {orderbook.sell.slice().reverse().map((offer: Offer) => (
-                        <CSSTransition
-                          key={offer.offerId.toString()}
-                          classNames="order"
-                          timeout={1000}
-                          onEntering={this.enter}
-                          onExited={this.exit}
-                        >
-                          <this.OfferRow offer={offer} kind="sell" onClick={takeOffer}/>
-                        </CSSTransition>
-                      ))
-                      }
+                    <TransitionGroup component="tbody" exit={true} enter={true}>
+                      {orderbook.sell
+                        .slice()
+                        .reverse()
+                        .map((offer: Offer) => (
+                          <CSSTransition
+                            key={offer.offerId.toString()}
+                            classNames="order"
+                            timeout={1000}
+                            onEntering={this.enter}
+                            onExited={this.exit}
+                          >
+                            <this.OfferRow offer={offer} kind="sell" onClick={takeOffer} />
+                          </CSSTransition>
+                        ))}
 
                       {/* better don't remove me! */}
                       <CSSTransition key="0" classNames="order" timeout={1000}>
                         <RowHighlighted className={styles.spreadRow}>
-                          <td ref={el => this.centerRow = el || undefined}>
-                            {orderbook.spread
-                              ? <FormatAmount value={orderbook.spread}
-                                              token={this.props.tradingPair.quote}
-                              />
-                              : '-'}
+                          <td ref={(el) => (this.centerRow = el || undefined)}>
+                            {orderbook.spread ? (
+                              <FormatAmount value={orderbook.spread} token={this.props.tradingPair.quote} />
+                            ) : (
+                              '-'
+                            )}
                           </td>
                           <td>
-                            {orderbook.spreadPercentage && <FormatPercent
-                                value = {orderbook.spreadPercentage}
-                                precision = {2}
-                                multiply={ true }
-                            />}
+                            {orderbook.spreadPercentage && (
+                              <FormatPercent value={orderbook.spreadPercentage} precision={2} multiply={true} />
+                            )}
                           </td>
                           <td>
                             <Muted>{this.props.tradingPair.quote} Spread</Muted>
@@ -241,7 +223,7 @@ export class OrderbookView extends React.Component<Props> {
                           onEntering={this.enter}
                           onExited={this.exit}
                         >
-                          <this.OfferRow offer={offer} kind="buy" onClick={takeOffer}/>
+                          <this.OfferRow offer={offer} kind="buy" onClick={takeOffer} />
                         </CSSTransition>
                       ))}
                     </TransitionGroup>
@@ -255,26 +237,19 @@ export class OrderbookView extends React.Component<Props> {
     );
   }
 
-  public OfferRow({ offer, kind, onClick }: {
-    offer: Offer,
-    kind: string,
-    onClick: (attr: any) => any
-  }) {
+  public OfferRow({ offer, kind, onClick }: { offer: Offer; kind: string; onClick: (attr: any) => any }) {
     return (
-      <RowClickable
-        data-test-id={kind}
-        clickable={true}
-        onClick={onClick(offer)}>
+      <RowClickable data-test-id={kind} clickable={true} onClick={onClick(offer)}>
         <td data-test-id="price">
           <SellBuySpan type={kind}>
-            <FormatPriceOrder value={offer.price} token={offer.quoteToken} kind={kind}/>
+            <FormatPriceOrder value={offer.price} token={offer.quoteToken} kind={kind} />
           </SellBuySpan>
         </td>
         <td className={tableStyles.numerical} data-test-id="amount">
-          <FormatAmount value={offer.baseAmount} token={offer.baseToken}/>
+          <FormatAmount value={offer.baseAmount} token={offer.baseToken} />
         </td>
         <td className={tableStyles.numerical} data-test-id="total">
-          <FormatAmount value={offer.quoteAmount} token={offer.quoteToken}/>
+          <FormatAmount value={offer.quoteAmount} token={offer.quoteToken} />
         </td>
       </RowClickable>
     );
@@ -284,6 +259,5 @@ export class OrderbookView extends React.Component<Props> {
     if (this.props.kindChange) {
       this.props.kindChange(OrderbookViewKind.depthChart);
     }
-  }
-
+  };
 }

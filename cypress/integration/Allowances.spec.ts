@@ -4,7 +4,6 @@ import { WalletConnection } from '../pages/WalletConnection';
 import { cypressVisitWithWeb3 } from '../utils';
 
 describe('Setting allowances', () => {
-
   beforeEach(() => {
     cypressVisitWithWeb3();
     WalletConnection.connect();
@@ -12,14 +11,14 @@ describe('Setting allowances', () => {
   });
 
   it('should enable allowance on a given token', () => {
-    const allowance  = Allowance.of('ZRX');
+    const allowance = Allowance.of('ZRX');
     allowance.shouldBe(ALLOWANCE_STATE.DISABLED);
     allowance.enable();
     allowance.shouldBe(ALLOWANCE_STATE.ENABLED);
   });
 
   it('should disable allowance on a given token', () => {
-    const allowance  = Allowance.of('WETH');
+    const allowance = Allowance.of('WETH');
 
     allowance.shouldBe(ALLOWANCE_STATE.ENABLED);
     allowance.disable();

@@ -10,12 +10,7 @@ import { unpack } from '../../utils/testHelpers';
 import { noCash, wethEmpty } from '../plan/planFixtures';
 import { CashAssetCore, MTAccount } from '../state/mtAccount';
 import { getMTAccount } from '../state/mtTestUtils';
-import {
-  createMTSimpleOrderForm$,
-  ExternalChangeKind,
-  MessageKind,
-  MTSimpleOrderFormParams
-} from './mtOrderForm';
+import { createMTSimpleOrderForm$, ExternalChangeKind, MessageKind, MTSimpleOrderFormParams } from './mtOrderForm';
 setupFakeWeb3ForTesting();
 
 function snapshotify(object: any): any {
@@ -29,8 +24,7 @@ const defaultCalls = {
   mtSellEstimateGas: () => of(30),
 } as any;
 
-const defaultReadCalls = {
-} as any;
+const defaultReadCalls = {} as any;
 
 const defaultUser = '0x1234';
 
@@ -44,26 +38,24 @@ const defParams = {
   readCalls$: of(defaultReadCalls) as ReadCalls$,
   dustLimits$: of({ DAI: new BigNumber(0.1), WETH: new BigNumber(0.1) }),
   account$: of(defaultUser),
-  riskComplianceCheck$: of(true)
+  riskComplianceCheck$: of(true),
 };
 
-const controllerWithFakeOrderBook = (
-  buys: any = [], sells: any = [], mta: MTAccount = mtaEmpty
-) => {
+const controllerWithFakeOrderBook = (buys: any = [], sells: any = [], mta: MTAccount = mtaEmpty) => {
   const orderbook = createFakeOrderbook(buys, sells);
-  orderbook.buy.forEach((v, i) => v.offerId = new BigNumber(i + 1));
-  orderbook.sell.forEach((v, i) => v.offerId = new BigNumber(i + 1));
+  orderbook.buy.forEach((v, i) => (v.offerId = new BigNumber(i + 1)));
+  orderbook.sell.forEach((v, i) => (v.offerId = new BigNumber(i + 1)));
   return createMTSimpleOrderForm$(
     {
       ...defParams,
       orderbook$: of(orderbook),
       mta$: of(mta),
     } as MTSimpleOrderFormParams,
-    tradingPair
+    tradingPair,
   );
 };
 
-test('initial state', done => {
+test('initial state', (done) => {
   // const controller = createMTSimpleOrderForm$(defParams, tradingPair);
   const sells = [
     { price: 1, amount: 3 }, // 1
@@ -72,7 +64,7 @@ test('initial state', done => {
     { price: 5, amount: 4 }, // 4
   ];
   const controller = controllerWithFakeOrderBook([], sells);
-  controller.subscribe(state => {
+  controller.subscribe((state) => {
     expect(snapshotify(state)).toMatchSnapshot();
     done();
   });
@@ -91,7 +83,7 @@ test('set price and amount', () => {
   change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(1) });
   change({
     kind: ExternalChangeKind.riskCompliance,
-    hasRiskAccepted: true
+    hasRiskAccepted: true,
   });
 
   expect(unpack(controller).amount).toEqual(new BigNumber(1));
@@ -109,7 +101,7 @@ test('calculate position in order book for buy', () => {
     { price: 2, amount: 4 }, // 4
     { price: 1, amount: 4 }, // 5
   ];
-  const  controller = controllerWithFakeOrderBook(buys);
+  const controller = controllerWithFakeOrderBook(buys);
   expect(unpack(controller).amount).toBeUndefined();
   expect(unpack(controller).total).toBeUndefined();
 
@@ -155,7 +147,7 @@ test('buy with leverage - match exactly one order', () => {
     referencePrice: new BigNumber(1),
     balance: new BigNumber(0),
     debt: new BigNumber(0),
-    dai: new BigNumber(100)
+    dai: new BigNumber(100),
   };
 
   const mta: MTAccount = getMTAccount({ cash, marginableAssets: [weth] });
@@ -173,7 +165,7 @@ test('buy with leverage - match exactly one order', () => {
   change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(20) });
   change({
     kind: ExternalChangeKind.riskCompliance,
-    hasRiskAccepted: true
+    hasRiskAccepted: true,
   });
   expect(unpack(controller).readyToProceed).toEqual(true);
   expect(unpack(controller).realPurchasingPowerPost).toEqual(new BigNumber(179.98779296875));
@@ -184,7 +176,7 @@ test('buy with leverage - match more than one order', () => {
     ...wethEmpty,
     referencePrice: new BigNumber(10),
     balance: new BigNumber(30),
-    debt: new BigNumber(0)
+    debt: new BigNumber(0),
   };
 
   const mta: MTAccount = getMTAccount({ marginableAssets: [weth] });
@@ -202,8 +194,7 @@ test('buy with leverage - match more than one order', () => {
 
   const s = unpack(controller);
   expect(s.readyToProceed).toEqual(true);
-  expect(s.realPurchasingPowerPost.toFixed(0))
-    .toEqual(new BigNumber('275').toFixed());
+  expect(s.realPurchasingPowerPost.toFixed(0)).toEqual(new BigNumber('275').toFixed());
 });
 
 test('buy with leverage - purchasing power too low', () => {
@@ -211,12 +202,10 @@ test('buy with leverage - purchasing power too low', () => {
     ...wethEmpty,
     referencePrice: new BigNumber('100'),
     balance: new BigNumber('2'),
-    debt: new BigNumber('0')
+    debt: new BigNumber('0'),
   };
   const mta: MTAccount = getMTAccount({ marginableAssets: [weth] });
-  const sells = [
-    { price: 100, amount: 100 }
-  ];
+  const sells = [{ price: 100, amount: 100 }];
 
   const controller = controllerWithFakeOrderBook([], sells, mta);
   const { change } = unpack(controller);
@@ -231,12 +220,10 @@ test('buy with leverage - orderbook too shallow', () => {
     ...wethEmpty,
     referencePrice: new BigNumber('1'),
     balance: new BigNumber('20'),
-    debt: new BigNumber('0')
+    debt: new BigNumber('0'),
   };
   const mta: MTAccount = getMTAccount({ marginableAssets: [weth] });
-  const sells = [
-    { price: 1, amount: 10 }
-  ];
+  const sells = [{ price: 1, amount: 10 }];
 
   const controller = controllerWithFakeOrderBook([], sells, mta);
   const { change } = unpack(controller);
@@ -255,9 +242,7 @@ test('buy with leverage - collateral and cash', () => {
     dai: new BigNumber(500),
   };
   const mta: MTAccount = getMTAccount({ marginableAssets: [weth] });
-  const sells = [
-    { price: 100, amount: 20 }
-  ];
+  const sells = [{ price: 100, amount: 20 }];
 
   const controller = controllerWithFakeOrderBook([], sells, mta);
   const { change } = unpack(controller);
@@ -276,9 +261,7 @@ test('buy with leverage - cash only', () => {
     dai: new BigNumber(1000),
   };
   const mta: MTAccount = getMTAccount({ marginableAssets: [weth] });
-  const sells = [
-    { price: 100, amount: 20 }
-  ];
+  const sells = [{ price: 100, amount: 20 }];
 
   const controller = controllerWithFakeOrderBook([], sells, mta);
   const { change } = unpack(controller);
@@ -296,9 +279,7 @@ test('buy with leverage - add more to actual debt', () => {
     dai: new BigNumber(10).div(10e18),
   };
   const mta: MTAccount = getMTAccount({ marginableAssets: [weth] });
-  const sells = [
-    { price: 100, amount: 20 }
-  ];
+  const sells = [{ price: 100, amount: 20 }];
 
   const controller = controllerWithFakeOrderBook([], sells, mta);
   const { change } = unpack(controller);
@@ -319,9 +300,7 @@ test('buy with leverage - with debt and dusty dai balance (edge case)', () => {
     dai: new BigNumber(10).div(10e18),
   };
   const mta: MTAccount = getMTAccount({ marginableAssets: [weth] });
-  const sells = [
-    { price: 100, amount: 20 }
-  ];
+  const sells = [{ price: 100, amount: 20 }];
 
   const controller = controllerWithFakeOrderBook([], sells, mta);
   const { change } = unpack(controller);
@@ -340,9 +319,7 @@ test('sell leverage - partial debt repayment', () => {
     dai: new BigNumber(0),
   };
   const mta: MTAccount = getMTAccount({ marginableAssets: [weth] });
-  const buys = [
-    { price: 100, amount: 200 }
-  ];
+  const buys = [{ price: 100, amount: 200 }];
 
   const controller = controllerWithFakeOrderBook(buys, [], mta);
   const { change } = unpack(controller);
@@ -363,9 +340,7 @@ test('sell leverage - full debt repayment', () => {
     dai: new BigNumber(0),
   };
   const mta: MTAccount = getMTAccount({ marginableAssets: [weth] });
-  const buys = [
-    { price: 100, amount: 200 }
-  ];
+  const buys = [{ price: 100, amount: 200 }];
 
   const controller = controllerWithFakeOrderBook(buys, [], mta);
   const { change } = unpack(controller);
@@ -386,9 +361,7 @@ test('sell without leverage', () => {
     dai: new BigNumber(0),
   };
   const mta: MTAccount = getMTAccount({ marginableAssets: [weth] });
-  const buys = [
-    { price: 100, amount: 200 }
-  ];
+  const buys = [{ price: 100, amount: 200 }];
 
   const controller = controllerWithFakeOrderBook(buys, [], mta);
   const { change } = unpack(controller);

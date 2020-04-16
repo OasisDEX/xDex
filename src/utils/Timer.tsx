@@ -28,12 +28,16 @@ export class Timer extends React.Component<TimerProps, { elapsed: number }> {
     const minutes = Math.floor(elapsed / 60).toFixed(0);
     const seconds = (elapsed % 60).toFixed(0).padStart(2, '0');
 
-    return <span>{minutes}:{seconds}</span>;
+    return (
+      <span>
+        {minutes}:{seconds}
+      </span>
+    );
   }
 
   private tick() {
     this.setState({
-      elapsed: new Date().valueOf() - this.props.start.valueOf()
+      elapsed: new Date().valueOf() - this.props.start.valueOf(),
     });
   }
 }

@@ -45,7 +45,7 @@ export const weth100: MarginableAssetCore = getMarginableCore({
   referencePrice: new BigNumber('200'),
   minCollRatio: new BigNumber('1.5'),
   safeCollRatio: new BigNumber('2'),
-  balance: new BigNumber('100')
+  balance: new BigNumber('100'),
 });
 
 // export const mkrEmpty: NonMarginableAssetCore = getNonMarginableCore({
@@ -67,11 +67,10 @@ export const dgx: MarginableAssetCore = getMarginableCore({
 
 export const dgx100 = {
   ...dgx,
-  balance: new BigNumber('100')
+  balance: new BigNumber('100'),
 };
 
-export const mtaOnlyWeth: MTAccount =
-  getMTAccount({ cash, marginableAssets: [wethEmpty] });
+export const mtaOnlyWeth: MTAccount = getMTAccount({ cash, marginableAssets: [wethEmpty] });
 
 export const sell1: Offer = {
   offerId: new BigNumber('1'),
@@ -82,21 +81,21 @@ export const sell1: Offer = {
   price: new BigNumber('200'),
   ownerId: 'koko',
   timestamp: new Date(),
-  type: OfferType.sell
+  type: OfferType.sell,
 };
 
 export const sell2: Offer = {
   ...sell1,
   baseAmount: new BigNumber('100'),
   quoteAmount: new BigNumber('20100'),
-  price: new BigNumber('201')
+  price: new BigNumber('201'),
 };
 
 export const sell3: Offer = {
   ...sell1,
   baseAmount: new BigNumber('100'),
   quoteAmount: new BigNumber('20200'),
-  price: new BigNumber('202')
+  price: new BigNumber('202'),
 };
 
 export const sellOffers = [sell1, sell2, sell3];

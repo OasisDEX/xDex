@@ -25,80 +25,76 @@ import { TransactionStateDescription } from '../utils/text/TransactionStateDescr
 import { Message, MessageKind, WrapUnwrapFormKind, WrapUnwrapFormState } from './wrapUnwrapForm';
 import * as styles from './WrapUnwrapFormView.scss';
 
-type WrapUnwrapFormProps =
-  { kind: WrapUnwrapFormKind } &
-  Loadable<WrapUnwrapFormState> &
-  ModalProps;
+type WrapUnwrapFormProps = { kind: WrapUnwrapFormKind } & Loadable<WrapUnwrapFormState> & ModalProps;
 
-export class WrapUnwrapFormView
-  extends React.Component<WrapUnwrapFormProps> {
-
+export class WrapUnwrapFormView extends React.Component<WrapUnwrapFormProps> {
   private amountInput?: HTMLElement;
 
   public render() {
-    return <ReactModal
-      ariaHideApp={false}
-      isOpen={true}
-      className={styles.modal}
-      overlayClassName={styles.modalOverlay}
-      closeTimeoutMS={250}
-    >
-      <Panel className={classnames(styles.panel, styles.modalChild)}
-             onClick={event => event.stopPropagation()}>
-        <PanelHeader bordered={true}>
-          <div>
-            {this.props.kind === WrapUnwrapFormKind.wrap && 'Wrap Ether'}
-            {this.props.kind === WrapUnwrapFormKind.unwrap && 'Unwrap Ether'}
-          </div>
-        </PanelHeader>
-        <WithLoadingIndicator loadable={this.props}>
-        { state =>
-          (<React.Fragment>
-            <PanelBody className={styles.panelBody}>
-              { this.summary(state) }
-              <Hr color="light" className={styles.hrMargin}/>
-              {this.formOrTransactionState(state)}
-            </PanelBody>
-            { this.footerWithButtons(state)}
-          </React.Fragment>)
-        }
-        </WithLoadingIndicator>
-      </Panel>
-    </ReactModal>;
+    return (
+      <ReactModal
+        ariaHideApp={false}
+        isOpen={true}
+        className={styles.modal}
+        overlayClassName={styles.modalOverlay}
+        closeTimeoutMS={250}
+      >
+        <Panel className={classnames(styles.panel, styles.modalChild)} onClick={(event) => event.stopPropagation()}>
+          <PanelHeader bordered={true}>
+            <div>
+              {this.props.kind === WrapUnwrapFormKind.wrap && 'Wrap Ether'}
+              {this.props.kind === WrapUnwrapFormKind.unwrap && 'Unwrap Ether'}
+            </div>
+          </PanelHeader>
+          <WithLoadingIndicator loadable={this.props}>
+            {(state) => (
+              <React.Fragment>
+                <PanelBody className={styles.panelBody}>
+                  {this.summary(state)}
+                  <Hr color="light" className={styles.hrMargin} />
+                  {this.formOrTransactionState(state)}
+                </PanelBody>
+                {this.footerWithButtons(state)}
+              </React.Fragment>
+            )}
+          </WithLoadingIndicator>
+        </Panel>
+      </ReactModal>
+    );
   }
 
   public handleAmountFocus = () => {
     if (this.amountInput) {
       this.amountInput.focus();
     }
-  }
+  };
 
   public handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/,/g, '');
     this.props.value!.change({
       kind: FormChangeKind.amountFieldChange,
-      value: value === '' ? null : new BigNumber(value)
+      value: value === '' ? null : new BigNumber(value),
     } as AmountFieldChange);
-  }
+  };
 
   private summary(state: WrapUnwrapFormState) {
-
-    return <> {
-      (state.kind === WrapUnwrapFormKind.wrap || state.kind === WrapUnwrapFormKind.unwrap) &&
-      (
-        <div className={styles.summary}>
-          <div className={classnames(styles.infoRow, styles.infoRowMargin)}>
-            <Muted>Wallet</Muted>
-            <Money token="ETH" value={state.ethBalance} fallback="-" />
+    return (
+      <>
+        {' '}
+        {(state.kind === WrapUnwrapFormKind.wrap || state.kind === WrapUnwrapFormKind.unwrap) && (
+          <div className={styles.summary}>
+            <div className={classnames(styles.infoRow, styles.infoRowMargin)}>
+              <Muted>Wallet</Muted>
+              <Money token="ETH" value={state.ethBalance} fallback="-" />
+            </div>
+            <div className={classnames(styles.infoRow, styles.infoRowMargin)}>
+              <Muted>Wrapped</Muted>
+              <Money token="WETH" value={state.wethBalance} fallback="-" />
+            </div>
           </div>
-          <div className={classnames(styles.infoRow, styles.infoRowMargin)}>
-            <Muted>Wrapped</Muted>
-            <Money token="WETH" value={state.wethBalance} fallback="-" />
-          </div>
-        </div>
-      )
-    }
-    </>;
+        )}
+      </>
+    );
   }
 
   private formOrTransactionState(state: WrapUnwrapFormState) {
@@ -109,33 +105,32 @@ export class WrapUnwrapFormView
     const amount = state.amount || new BigNumber(0);
     return (
       <BorderBox>
-        <div className={styles.checklistLine} >
+        <div className={styles.checklistLine}>
           <span className={styles.checklistTitle}>
             {state.kind === WrapUnwrapFormKind.wrap && 'Wrap Ether'}
             {state.kind === WrapUnwrapFormKind.unwrap && 'Unwrap Ether'}
           </span>
           <div className={styles.checklistSummary}>
-            <TransactionStateDescription progress={state.progress}/>
+            <TransactionStateDescription progress={state.progress} />
           </div>
         </div>
         <Hr color="dark" className={styles.checklistHrMargin} />
-        <div className={styles.checklistLine} >
+        <div className={styles.checklistLine}>
           <span className={styles.checklistTitle}>Amount</span>
           <Muted className={styles.checklistSummary}>
-            {
-              [WrapUnwrapFormKind.unwrap, WrapUnwrapFormKind.wrap]
-              .includes(state.kind)
-              && <Money value={amount} token="ETH" />
-            }
+            {[WrapUnwrapFormKind.unwrap, WrapUnwrapFormKind.wrap].includes(state.kind) && (
+              <Money value={amount} token="ETH" />
+            )}
           </Muted>
         </div>
         <Hr color="dark" className={styles.checklistHrMargin} />
-        <div className={styles.checklistLine} >
+        <div className={styles.checklistLine}>
           <span className={styles.checklistTitle}>Gas cost</span>
           <Muted className={styles.checklistSummary}>
-            <GasCost gasEstimationStatus={state.gasEstimationStatus}
-                     gasEstimationUsd={state.gasEstimationUsd}
-                     gasEstimationEth={state.gasEstimationEth}
+            <GasCost
+              gasEstimationStatus={state.gasEstimationStatus}
+              gasEstimationUsd={state.gasEstimationUsd}
+              gasEstimationEth={state.gasEstimationEth}
             />
           </Muted>
         </div>
@@ -147,10 +142,12 @@ export class WrapUnwrapFormView
     return (
       <div>
         <div className={classnames(styles.warning, styles.infoRowMargin)}>
-          <div className={styles.warningIcon}><InfoIcon /></div>
+          <div className={styles.warningIcon}>
+            <InfoIcon />
+          </div>
           <Muted className={styles.warningText}>{this.info(state.kind)}</Muted>
         </div>
-        { this.amount(state) }
+        {this.amount(state)}
         <div className={classnames(styles.infoRow)}>
           <Muted>Gas cost</Muted>
           <GasCost {...state} />
@@ -162,12 +159,17 @@ export class WrapUnwrapFormView
   private info(kind: WrapUnwrapFormKind) {
     switch (kind) {
       case WrapUnwrapFormKind.wrap:
-        return 'Wrapped Ether (WETH) is a tradeable version of regular Ether. ' +
-          'Be sure to keep some Ether to pay for transactions';
+        return (
+          'Wrapped Ether (WETH) is a tradeable version of regular Ether. ' +
+          'Be sure to keep some Ether to pay for transactions'
+        );
       case WrapUnwrapFormKind.unwrap:
-        return 'You can unwrap your Wrapped Ether (WETH) back to ETH anytime. ' +
-          'Any WETH you convert back to ETH will no longer be usable on Oasis Trade';
-      default: return '';
+        return (
+          'You can unwrap your Wrapped Ether (WETH) back to ETH anytime. ' +
+          'Any WETH you convert back to ETH will no longer be usable on Oasis Trade'
+        );
+      default:
+        return '';
     }
   }
 
@@ -175,43 +177,32 @@ export class WrapUnwrapFormView
     const errorMessages = (state.messages || []).map(this.messageContent);
     return (
       <div>
-        <InputGroup hasError={ (state.messages || []).length > 0}>
-          <InputGroupAddon className={styles.inputHeader}>
-            Amount
-          </InputGroupAddon>
+        <InputGroup hasError={(state.messages || []).length > 0}>
+          <InputGroupAddon className={styles.inputHeader}>Amount</InputGroupAddon>
           <div className={styles.inputTail}>
             <BigNumberInput
               data-test-id="type-amount"
-              ref={(el: any) =>
-                this.amountInput = (el && ReactDOM.findDOMNode(el) as HTMLElement) || undefined
-              }
+              ref={(el: any) => (this.amountInput = (el && (ReactDOM.findDOMNode(el) as HTMLElement)) || undefined)}
               type="text"
               mask={createNumberMask({
                 allowDecimal: true,
                 decimalLimit: getToken('ETH').digits,
-                prefix: ''
+                prefix: '',
               })}
               onChange={this.handleAmountChange}
-              value={
-                (state.amount || null) &&
-                formatAmount(state.amount as BigNumber, 'ETH')
-              }
+              value={(state.amount || null) && formatAmount(state.amount as BigNumber, 'ETH')}
               guide={true}
               placeholder={'0'}
               disabled={state.progress !== undefined}
             />
-            <InputGroupAddon
-              className={styles.inputCurrencyAddon}
-              onClick={this.handleAmountFocus}
-            >
-              {(this.props.kind === WrapUnwrapFormKind.wrap && 'ETH')}
-              {(this.props.kind === WrapUnwrapFormKind.unwrap && 'WETH')}
+            <InputGroupAddon className={styles.inputCurrencyAddon} onClick={this.handleAmountFocus}>
+              {this.props.kind === WrapUnwrapFormKind.wrap && 'ETH'}
+              {this.props.kind === WrapUnwrapFormKind.unwrap && 'WETH'}
             </InputGroupAddon>
           </div>
         </InputGroup>
 
         <ErrorMessage data-test-id="error-msg" messages={errorMessages} />
-
       </div>
     );
   }
@@ -230,11 +221,7 @@ export class WrapUnwrapFormView
   private footerWithButtons(state: WrapUnwrapFormState) {
     return (
       <PanelFooter className={styles.buttons}>
-        <Button
-          onClick={this.props.close}
-          size="md"
-          color="dangerOutlined"
-        >
+        <Button onClick={this.props.close} size="md" color="dangerOutlined">
           Close
         </Button>
         <Button

@@ -9,7 +9,7 @@ const ethereum = {
   url: infuraUrl,
 };
 
-export let web3 : Web3;
+export let web3: Web3;
 
 export type Web3Status = 'ready' | 'readonly' | 'missing' | 'initializing';
 

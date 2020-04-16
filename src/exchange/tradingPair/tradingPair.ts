@@ -4,11 +4,7 @@ import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
 import { tradingPairs } from '../../blockchain/config';
-import {
-  Loadable,
-  LoadableWithTradingPair,
-  loadablifyLight
-} from '../../utils/loadable';
+import { Loadable, LoadableWithTradingPair, loadablifyLight } from '../../utils/loadable';
 import { MarketsDetails } from '../exchange';
 
 export interface TradingPair {
@@ -20,39 +16,35 @@ export function tradingPairResolver({ base, quote }: TradingPair) {
   return `${base}/${quote}`;
 }
 
-export function memoizeTradingPair<T>(
-  f: (pair: TradingPair) => T
-): (pair: TradingPair) => T {
-  return memoize(f, tp => tradingPairResolver(tp));
+export function memoizeTradingPair<T>(f: (pair: TradingPair) => T): (pair: TradingPair) => T {
+  return memoize(f, (tp) => tradingPairResolver(tp));
 }
 
 export function injectTradingPair$<T>(
   tradingPair$: Observable<TradingPair>,
-  f: (pair: TradingPair) => Observable<T>
-): Observable<{tradingPair: TradingPair} & T> {
+  f: (pair: TradingPair) => Observable<T>,
+): Observable<{ tradingPair: TradingPair } & T> {
   return tradingPair$.pipe(
-    switchMap(tradingPair => {
+    switchMap((tradingPair) => {
       return f(tradingPair).pipe(
-        map(r => ({
+        map((r) => ({
           tradingPair,
           // @ts-ignore
           ...r,
-        }))
+        })),
       );
-    })
+    }),
   );
 }
 
 export function loadablifyPlusTradingPair<T>(
   tradingPair: Observable<TradingPair>,
-  f: (pair: TradingPair) => Observable<T>
+  f: (pair: TradingPair) => Observable<T>,
 ): Observable<LoadableWithTradingPair<T>> {
-  return injectTradingPair$(tradingPair, pair => loadablifyLight(f(pair))
-  );
+  return injectTradingPair$(tradingPair, (pair) => loadablifyLight(f(pair)));
 }
 
-export const currentTradingPair$ =
-  new BehaviorSubject<TradingPair>(first(tradingPairs) as TradingPair);
+export const currentTradingPair$ = new BehaviorSubject<TradingPair>(first(tradingPairs) as TradingPair);
 
 export interface TradingPairsProps {
   parentMatch?: string;
@@ -80,15 +72,13 @@ export function createTradingPair$(
     loadablifyLight(weeklyVolume$),
     loadablifyLight(marketsDetails$),
   ).pipe(
-    map(
-      ([currentTradingPair, currentPrice, yesterdayPriceChange, weeklyVolume, marketsDetails]) => ({
-        ...currentTradingPair,
-        currentPrice,
-        yesterdayPriceChange,
-        weeklyVolume,
-        marketsDetails,
-        select: currentTradingPair$$.next.bind(currentTradingPair$$),
-      })
-    ),
+    map(([currentTradingPair, currentPrice, yesterdayPriceChange, weeklyVolume, marketsDetails]) => ({
+      ...currentTradingPair,
+      currentPrice,
+      yesterdayPriceChange,
+      weeklyVolume,
+      marketsDetails,
+      select: currentTradingPair$$.next.bind(currentTradingPair$$),
+    })),
   );
 }

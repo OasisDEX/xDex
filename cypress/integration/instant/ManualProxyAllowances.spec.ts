@@ -2,7 +2,7 @@ import {
   checkProxyAllowances,
   expectAllowanceStatusFor,
   expectAllowedTokensCount,
-  setAllowanceOf
+  setAllowanceOf,
 } from '../../pages/Allowance';
 import * as Proxy from '../../pages/Proxy';
 import { Tab } from '../../pages/Tab';
@@ -12,7 +12,7 @@ import { cypressVisitWithWeb3, tid } from '../../utils';
 
 const enum AllowanceStatus {
   ALLOWED = 'true',
-  DISABLED = 'false'
+  DISABLED = 'false',
 }
 
 describe('Proxy Allowance', () => {
@@ -31,7 +31,7 @@ describe('Proxy Allowance', () => {
     expectAllowedTokensCount(0);
   });
 
-  it('should set allowance to a single token', () =>   {
+  it('should set allowance to a single token', () => {
     Proxy.hasStatus(Proxy.ProxyStatus.ENABLED);
     checkProxyAllowances();
 
@@ -86,7 +86,7 @@ describe('Proxy Allowance', () => {
     expectAllowanceStatusFor('WETH', AllowanceStatus.DISABLED);
   });
 
-  it('should go to proxy setting page if proxy is deleted',  () => {
+  it('should go to proxy setting page if proxy is deleted', () => {
     Proxy.hasStatus(Proxy.ProxyStatus.ENABLED);
     checkProxyAllowances();
 

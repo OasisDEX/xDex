@@ -10,5 +10,5 @@ export class TradeSettings {
     cy.get('@slippageLimit').clear();
     cy.get('@slippageLimit').should('be.empty');
     cy.get('@slippageLimit').type(value);
-  }
+  };
 }

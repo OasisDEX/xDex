@@ -4,23 +4,15 @@ import * as React from 'react';
 import { ignoreDuringVisualRegression } from '../../storybookUtils';
 import { Panel } from '../panel/Panel';
 import { InfoLabel } from '../text/Text';
-import {
-  LoadingIndicator,
-  WithLoadingIndicator,
-  WithLoadingIndicatorInline
-} from './LoadingIndicator';
+import { LoadingIndicator, WithLoadingIndicator, WithLoadingIndicatorInline } from './LoadingIndicator';
 import { ServerUnreachable, ServerUnreachableInline } from './ServerUnreachable';
 
 const stories = storiesOf('Loading indicator', module);
 
-const StoryWithLoading = ({ loadable }: {loadable: any}) => {
+const StoryWithLoading = ({ loadable }: { loadable: any }) => {
   return (
     <Panel style={{ height: '150px', width: '300px', padding: '15px' }}>
-      <WithLoadingIndicator loadable={loadable}>
-        {(data: any) => (
-          <p>{data.text}</p>
-        )}
-      </WithLoadingIndicator>
+      <WithLoadingIndicator loadable={loadable}>{(data: any) => <p>{data.text}</p>}</WithLoadingIndicator>
     </Panel>
   );
 };
@@ -35,19 +27,18 @@ ignoreDuringVisualRegression(() => {
       </Panel>
 
       <h1>Loading indicator inline</h1>
-      <Panel style={{ height: '150px', width: '300px',  padding: '15px' }}>
+      <Panel style={{ height: '150px', width: '300px', padding: '15px' }}>
         <span>
           <span>it's loading</span>
-          <LoadingIndicator inline={true}/>
+          <LoadingIndicator inline={true} />
         </span>
       </Panel>
 
       <h1>Loading indicator with light background</h1>
-      <Panel style={{ height: '150px', width: '300px',  padding: '15px' }}>
+      <Panel style={{ height: '150px', width: '300px', padding: '15px' }}>
         <span>it's loading</span>
-        <LoadingIndicator light={true}/>
+        <LoadingIndicator light={true} />
       </Panel>
-
     </div>
   ));
 
@@ -56,14 +47,13 @@ ignoreDuringVisualRegression(() => {
     return (
       <div>
         <h1>Loading</h1>
-        <StoryWithLoading loadable={{ value, status: 'loading' }}/>
+        <StoryWithLoading loadable={{ value, status: 'loading' }} />
 
         <h1>Loaded</h1>
-        <StoryWithLoading loadable={{ value, status: 'loaded' }}/>
+        <StoryWithLoading loadable={{ value, status: 'loaded' }} />
 
         <h1>Error</h1>
-        <StoryWithLoading loadable={{ value, status: 'error' }}/>
-
+        <StoryWithLoading loadable={{ value, status: 'error' }} />
       </div>
     );
   });
@@ -75,12 +65,8 @@ ignoreDuringVisualRegression(() => {
         <h1>Error block</h1>
 
         <Panel style={{ height: '250px', width: '500px', padding: '15px' }}>
-          <WithLoadingIndicator
-            loadable={{ value, status: 'error' }}
-            error={<ServerUnreachable/>}>
-            {(data: any) => (
-              <p>{data.text}</p>
-            )}
+          <WithLoadingIndicator loadable={{ value, status: 'error' }} error={<ServerUnreachable />}>
+            {(data: any) => <p>{data.text}</p>}
           </WithLoadingIndicator>
         </Panel>
 
@@ -88,17 +74,11 @@ ignoreDuringVisualRegression(() => {
 
         <Panel style={{ width: '500px', padding: '15px' }}>
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <WithLoadingIndicatorInline
-              loadable={{ value, status: 'error' }}
-              error={<ServerUnreachableInline />}
-            >
-              {(data: any) => (
-                <span>{data.text}</span>
-              )}
+            <WithLoadingIndicatorInline loadable={{ value, status: 'error' }} error={<ServerUnreachableInline />}>
+              {(data: any) => <span>{data.text}</span>}
             </WithLoadingIndicatorInline>
             <InfoLabel style={{ marginLeft: '7px' }}>24h Price</InfoLabel>
           </div>
-
         </Panel>
       </div>
     );

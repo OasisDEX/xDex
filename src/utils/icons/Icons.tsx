@@ -10,29 +10,24 @@ import { SvgImage } from './utils';
 export const InfoIcon = (props: React.HTMLAttributes<HTMLDivElement>) => {
   const { className, ...otherProps } = props;
   return (
-    <div
-      className={classnames(styles.infoIcon, className)}
-      {...otherProps}
-    >i</div>
+    <div className={classnames(styles.infoIcon, className)} {...otherProps}>
+      i
+    </div>
   );
 };
 
 export const ButtonIcon = (props: ButtonProps & { image: any }) => {
   const { className, image, ...otherProps } = props;
   return (
-    <Button
-      size="unsized"
-      className={className}
-      type="button"
-      {...otherProps}>
-      <SvgImage className={styles.btnIcon} image={image}/>
+    <Button size="unsized" className={className} type="button" {...otherProps}>
+      <SvgImage className={styles.btnIcon} image={image} />
     </Button>
   );
 };
 
 export type ProgressIconProps = React.HTMLAttributes<HTMLDivElement> & {
-  light?: boolean,
-  size?: 'sm' | 'lg',
+  light?: boolean;
+  size?: 'sm' | 'lg';
 };
 
 export const ProgressIcon = (props: ProgressIconProps) => {

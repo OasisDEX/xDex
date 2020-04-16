@@ -28,12 +28,10 @@ export class TradeData extends React.Component<EntryProps> {
       <div className={classnames(styles.entry, theme ? skin(theme) : '')} {...rest}>
         <span data-test-id="label" className={styles.label}>
           {label}
-        </span>&nbsp;
-        {
-          tooltip && <WarningTooltip {...tooltip}/>
-        }
-        <span data-test-id="value"
-              className={styles.value}>
+        </span>
+        &nbsp;
+        {tooltip && <WarningTooltip {...tooltip} />}
+        <span data-test-id="value" className={styles.value}>
           {value}
         </span>
       </div>

@@ -22,12 +22,12 @@ export const storageHexToBigNumber = (uint256: string): [BigNumber, BigNumber] =
   if (!match) {
     throw new Error(`invalid uint256: ${uint256}`);
   }
-  return (match[0].length <= 32) ?
-    [new BigNumber(0), new BigNumber(uint256)] :
-  [
-    new BigNumber(`0x${match[0].substr(0, match[0].length - 32)}`),
-    new BigNumber(`0x${match[0].substr(match[0].length - 32, 32)}`)
-  ];
+  return match[0].length <= 32
+    ? [new BigNumber(0), new BigNumber(uint256)]
+    : [
+        new BigNumber(`0x${match[0].substr(0, match[0].length - 32)}`),
+        new BigNumber(`0x${match[0].substr(match[0].length - 32, 32)}`),
+      ];
 };
 
 export const localStorageStoreDict = (dict: Dictionary<boolean>, key: string) => {

@@ -4,9 +4,13 @@ import { flatten } from 'lodash';
 import { AssetKind } from '../../blockchain/config';
 import { Offer, Orderbook } from '../../exchange/orderbook/orderbook';
 import {
-  findAsset, findMarginableAsset, MarginableAsset, MarginableAssetCore, MTAccount,
+  findAsset,
+  findMarginableAsset,
+  MarginableAsset,
+  MarginableAssetCore,
+  MTAccount,
   Operation,
-  OperationKind
+  OperationKind,
 } from '../state/mtAccount';
 
 import { Observable } from 'rxjs';
@@ -26,7 +30,7 @@ export function prepareBuyAllocationRequest(
   amount: BigNumber,
   price: BigNumber,
   realPurchasingPower: BigNumber,
-  slippageLimit: BigNumber
+  slippageLimit: BigNumber,
 ): AllocationRequestPilot | Impossible {
   const asset = findAsset(baseToken, mta);
 
@@ -52,17 +56,15 @@ export function prepareBuyAllocationRequest(
     return impossible('price too low');
   }
 
-  const assets: MarginableAsset[] = mta.marginableAssets.map(ma => {
-    const balance = ma.name === baseToken ?
-      ma.balance.plus(amount) :
-      ma.balance;
+  const assets: MarginableAsset[] = mta.marginableAssets.map((ma) => {
+    const balance = ma.name === baseToken ? ma.balance.plus(amount) : ma.balance;
 
     return calculateMarginable(
       {
         ...ma,
         balance,
       } as MarginableAssetCore,
-      { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook
+      { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook,
     );
   });
 
@@ -70,9 +72,7 @@ export function prepareBuyAllocationRequest(
   const cashBalance = baseAsset!.dai;
   const debt = baseAsset!.debt;
 
-  const targetDaiBalance = debt.eq(zero)
-    ? cashBalance.minus(maxTotal)
-    : maxTotal.times(minusOne);
+  const targetDaiBalance = debt.eq(zero) ? cashBalance.minus(maxTotal) : maxTotal.times(minusOne);
 
   const defaultTargetCash = cashBalance;
 
@@ -91,8 +91,7 @@ export function prepareBuyAllocationRequest(
       total: maxTotal,
     });
 
-  const estimateGas = (calls: Calls, proxy: any, plan: Operation[]) =>
-    calls.mtBuyEstimateGas({ proxy, plan });
+  const estimateGas = (calls: Calls, proxy: any, plan: Operation[]) => calls.mtBuyEstimateGas({ proxy, plan });
 
   return {
     assets,
@@ -110,12 +109,11 @@ export function planBuy(
   amount: BigNumber,
   maxTotal: BigNumber,
   debts: Array<Required<EditableDebt>>,
-  slippageLimit: BigNumber
+  slippageLimit: BigNumber,
 ): Operation[] {
-
   // console.log(JSON.stringify(debts));
 
-  const otherAllocations = debts.filter(a => a.name !== name);
+  const otherAllocations = debts.filter((a) => a.name !== name);
   const otherOps: Operation[] = flatten(orderDeltas(otherAllocations).map(deltaToOps));
 
   return [

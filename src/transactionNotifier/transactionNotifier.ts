@@ -10,6 +10,6 @@ export function createTransactionNotifier$(
   context$: Observable<NetworkConfig>,
 ) {
   return combineLatest(transactions$, context$, interval$).pipe(
-    map(([transactions, { etherscan }]) => ({ transactions, etherscan }))
+    map(([transactions, { etherscan }]) => ({ transactions, etherscan })),
   );
 }

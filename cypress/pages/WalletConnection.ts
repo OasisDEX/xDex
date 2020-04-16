@@ -4,24 +4,22 @@ import { Tab } from './Tab';
 const timeout = 5000;
 
 class Wallet {
-
   public web = () => {
     cy.get(tid('web-wallet')).click();
     return this;
-  }
+  };
 
   public acceptToS = () => {
     cy.get(tid('accept-tos')).check({ force: true });
     return this;
-  }
+  };
 
   public connect = () => {
     cy.get(tid('connect-wallet')).click();
-  }
+  };
 }
 
 export class WalletConnection {
-
   public static connect() {
     WalletConnection.open().web().acceptToS().connect();
   }

@@ -5,7 +5,6 @@ import { cypressVisitWithWeb3 } from '../utils/index';
 import { makeScreenshots } from '../utils/makeScreenshots';
 
 describe('Balances', () => {
-
   beforeEach(() => {
     cypressVisitWithWeb3();
     WalletConnection.connect();

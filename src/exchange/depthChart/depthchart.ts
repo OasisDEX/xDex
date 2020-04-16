@@ -2,13 +2,7 @@ import { BigNumber } from 'bignumber.js';
 import { isEmpty } from 'lodash';
 import { Observable, Subject } from 'rxjs';
 import { first } from 'rxjs/internal/operators';
-import {
-  flatMap,
-  scan,
-  shareReplay,
-  startWith,
-  switchMap,
-} from 'rxjs/operators';
+import { flatMap, scan, shareReplay, startWith, switchMap } from 'rxjs/operators';
 import { Error } from 'tslint/lib/error';
 import { OfferMatchType } from '../../utils/form';
 import { Offer, OfferType, Orderbook } from '../orderbook/orderbook';
@@ -28,7 +22,7 @@ interface DepthChartVolumes {
   sellsExtra?: PriceVolume[];
 }
 
-interface DepthChartVolumesWithZoom extends DepthChartVolumes{
+interface DepthChartVolumesWithZoom extends DepthChartVolumes {
   zoomInEnabled: boolean;
   zoomOutEnabled: boolean;
 }
@@ -72,9 +66,8 @@ function zoomOut(zoom: BigNumber) {
 
 export function createZoom$(
   tradingPair$: Observable<TradingPair>,
-  orderBook$: Observable<Orderbook>
+  orderBook$: Observable<Orderbook>,
 ): [(change: ZoomChange) => void, Observable<BigNumber>] {
-
   const zoomChange$: Subject<ZoomChange> = new Subject<ZoomChange>();
 
   return [
@@ -83,27 +76,22 @@ export function createZoom$(
       switchMap(() =>
         orderBook$.pipe(
           first(),
-          flatMap(orderbook =>
+          flatMap((orderbook) =>
             zoomChange$.pipe(
               startWith(findDefaultZoom(orderbook)),
-              scan(
-                (zoom: BigNumber, change: ZoomChange) => {
-                  return change === 'zoomOut' ?
-                    zoomOut(zoom) :
-                    zoomIn(zoom);
-                },
-              ),
-            )
-          )
-        )
+              scan((zoom: BigNumber, change: ZoomChange) => {
+                return change === 'zoomOut' ? zoomOut(zoom) : zoomIn(zoom);
+              }),
+            ),
+          ),
+        ),
       ),
       shareReplay(1),
-    )
+    ),
   ];
 }
 
 function accumulateOffer(a: PriceVolume[], o: Offer) {
-
   const prev: PriceVolume = a[a.length - 1];
 
   const currentPrice: number = o.price.toNumber();
@@ -113,15 +101,15 @@ function accumulateOffer(a: PriceVolume[], o: Offer) {
     if (prev.price !== currentPrice) {
       a.push({
         price: currentPrice,
-        volume: (prev.volume + currentAmount)
+        volume: prev.volume + currentAmount,
       });
     } else {
-      a[a.length - 1].volume = (Number(a[a.length - 1].volume) + Number(currentAmount));
+      a[a.length - 1].volume = Number(a[a.length - 1].volume) + Number(currentAmount);
     }
   } else {
     a.push({
       price: currentPrice,
-      volume: currentAmount
+      volume: currentAmount,
     });
   }
 
@@ -134,45 +122,47 @@ function accumulate(offers: Offer[]) {
 
 function minMax<T>(data: T[], select: (x: T) => number) {
   return data
-  .map(select)
-  .reduce(
-    ([min, max], v) => [Math.min(v, min), Math.max(v, max)],
-    [Number.MAX_VALUE, Number.MIN_VALUE]);
+    .map(select)
+    .reduce(([min, max], v) => [Math.min(v, min), Math.max(v, max)], [Number.MAX_VALUE, Number.MIN_VALUE]);
 }
 
 // adjust price range by extending a little bit on both sides
-function adjustPriceRange(volumes: DepthChartVolumesWithZoom,
-                          minPrice: number,
-                          maxPrice: number): [DepthChartVolumesWithZoom, number, number] {
+function adjustPriceRange(
+  volumes: DepthChartVolumesWithZoom,
+  minPrice: number,
+  maxPrice: number,
+): [DepthChartVolumesWithZoom, number, number] {
   const extender = (maxPrice - minPrice) * 0.1;
 
   let newMaxPrice = maxPrice + extender;
   let newMinPrice = minPrice - extender;
 
-  if (volumes.sellsBefore !== undefined && volumes.sellsBefore.length > 0
-      && volumes.buysBefore !== undefined && volumes.buysBefore.length > 0) {
+  if (
+    volumes.sellsBefore !== undefined &&
+    volumes.sellsBefore.length > 0 &&
+    volumes.buysBefore !== undefined &&
+    volumes.buysBefore.length > 0
+  ) {
     const midMarketPrice = (volumes.sellsBefore[0].price + volumes.buysBefore[0].price) / 2;
     const expectedDiff = Math.max(newMaxPrice - midMarketPrice, midMarketPrice - newMinPrice);
     newMinPrice = midMarketPrice - expectedDiff;
     newMaxPrice = midMarketPrice + expectedDiff;
   }
 
-  [volumes.buysAfter, volumes.buysBefore, volumes.buysExtra]
-    .forEach(v => {
-      if (v === undefined || v.length === 0) {
-        return;
-      }
-      const minVolumeElem = v[v.length - 1];
-      v.push({ ...minVolumeElem, price: Math.max(newMinPrice, 0) });
-    });
-  [volumes.sellsAfter, volumes.sellsBefore, volumes.sellsExtra]
-    .forEach(v => {
-      if (v === undefined || v.length === 0) {
-        return;
-      }
-      const maxVolumeElem = v[v.length - 1];
-      v.push({ ...maxVolumeElem, price: newMaxPrice });
-    });
+  [volumes.buysAfter, volumes.buysBefore, volumes.buysExtra].forEach((v) => {
+    if (v === undefined || v.length === 0) {
+      return;
+    }
+    const minVolumeElem = v[v.length - 1];
+    v.push({ ...minVolumeElem, price: Math.max(newMinPrice, 0) });
+  });
+  [volumes.sellsAfter, volumes.sellsBefore, volumes.sellsExtra].forEach((v) => {
+    if (v === undefined || v.length === 0) {
+      return;
+    }
+    const maxVolumeElem = v[v.length - 1];
+    v.push({ ...maxVolumeElem, price: newMaxPrice });
+  });
   return [volumes, newMinPrice, newMaxPrice];
 }
 
@@ -182,12 +172,12 @@ function calculateSummaryForSell(price: BigNumber, volume?: PriceVolume[]): Summ
   if (price === undefined || volume === undefined || volume.length === 0) {
     return { amount, totalCost } as SummaryAmountAndTotal;
   }
-  const adeqVolumes = volume.filter(vol => price.toNumber() >= vol.price);
+  const adeqVolumes = volume.filter((vol) => price.toNumber() >= vol.price);
   if (adeqVolumes.length > 0) {
     amount = adeqVolumes[adeqVolumes.length - 1].volume;
   }
   for (let i = 0; i < adeqVolumes.length; i = i + 1) {
-    const v = (i === 0 ? adeqVolumes[i].volume : adeqVolumes[i].volume - adeqVolumes[i - 1].volume);
+    const v = i === 0 ? adeqVolumes[i].volume : adeqVolumes[i].volume - adeqVolumes[i - 1].volume;
     totalCost += adeqVolumes[i].price * v;
   }
   return { amount, totalCost };
@@ -199,13 +189,13 @@ function calculateSummaryForBuys(price: BigNumber, volume?: PriceVolume[]): Summ
   if (price === undefined || volume === undefined || volume.length === 0) {
     return { amount, totalCost } as SummaryAmountAndTotal;
   }
-  const adeqVolumes = volume.filter(vol => price.toNumber() <= vol.price);
+  const adeqVolumes = volume.filter((vol) => price.toNumber() <= vol.price);
   if (adeqVolumes.length > 0) {
     const thePriceVolume = adeqVolumes[adeqVolumes.length - 1];
     amount = thePriceVolume.volume;
   }
   for (let i = 0; i < adeqVolumes.length; i = i + 1) {
-    const v = (i === 0 ? adeqVolumes[i].volume : adeqVolumes[i].volume - adeqVolumes[i - 1].volume);
+    const v = i === 0 ? adeqVolumes[i].volume : adeqVolumes[i].volume - adeqVolumes[i - 1].volume;
     totalCost += adeqVolumes[i].price * v;
   }
   return { amount, totalCost };
@@ -224,20 +214,22 @@ function calculateSummary(volumes: DepthChartVolumes, price?: BigNumber): Summar
     currentWanted,
     afterOrderForSale,
     afterOrderWanted,
-    price: price.toNumber()
+    price: price.toNumber(),
   } as Summary;
 }
 
 function addMinMax(volumes: DepthChartVolumesWithZoom) {
-
   const accumulated: PriceVolume[] = ([
-    volumes.buysAfter, volumes.buysBefore, volumes.buysExtra,
-    volumes.sellsAfter, volumes.sellsBefore, volumes.sellsExtra]
-    .filter(v => v !== undefined) as PriceVolume[][])
-    .reduce((a: PriceVolume[], v: PriceVolume[]) => a.concat(v), []);
+    volumes.buysAfter,
+    volumes.buysBefore,
+    volumes.buysExtra,
+    volumes.sellsAfter,
+    volumes.sellsBefore,
+    volumes.sellsExtra,
+  ].filter((v) => v !== undefined) as PriceVolume[][]).reduce((a: PriceVolume[], v: PriceVolume[]) => a.concat(v), []);
 
-  let [minPrice, maxPrice] = minMax(accumulated, o => o.price);
-  let [minVolume, maxVolume] = minMax(accumulated, o => o.volume);
+  let [minPrice, maxPrice] = minMax(accumulated, (o) => o.price);
+  let [minVolume, maxVolume] = minMax(accumulated, (o) => o.volume);
 
   if (minPrice > maxPrice) {
     // that means that min and max price are undefined
@@ -250,23 +242,20 @@ function addMinMax(volumes: DepthChartVolumesWithZoom) {
     maxVolume = 100;
   }
 
-  const [adjustedVolumes, adjustedMinPrice, adjustedMaxPrice]
-    = adjustPriceRange(volumes, minPrice, maxPrice);
+  const [adjustedVolumes, adjustedMinPrice, adjustedMaxPrice] = adjustPriceRange(volumes, minPrice, maxPrice);
 
   return {
     ...adjustedVolumes,
     minVolume,
     maxVolume,
     minPrice: adjustedMinPrice,
-    maxPrice: adjustedMaxPrice
+    maxPrice: adjustedMaxPrice,
   };
 }
 
 // For offerType: buy
 // Sell offers after transaction
-function sellsAfterForBuyOffer(amount: BigNumber,
-                               price: BigNumber,
-                               sells: Offer[]): [Offer[], BigNumber] {
+function sellsAfterForBuyOffer(amount: BigNumber, price: BigNumber, sells: Offer[]): [Offer[], BigNumber] {
   let remaining = amount;
   const result: Offer[] = [];
 
@@ -295,23 +284,21 @@ function buyAfterForBuyOffer(remaining: BigNumber, price: BigNumber, buys: Offer
   }
 
   let remainingUnused = true;
-  const buyResult = buys.reduce(
-    (result: Offer[], offer: Offer) => {
-      // console.log(offer.price);
-      if (remainingUnused && offer.price.eq(price)) {
-        const baseAmount = offer.baseAmount.plus(remaining);
-        result.push({ ...offer, baseAmount });
-        remainingUnused = false;
-      } else {
-        result.push(offer);
-      }
-      return result;
-    },
-    []);
+  const buyResult = buys.reduce((result: Offer[], offer: Offer) => {
+    // console.log(offer.price);
+    if (remainingUnused && offer.price.eq(price)) {
+      const baseAmount = offer.baseAmount.plus(remaining);
+      result.push({ ...offer, baseAmount });
+      remainingUnused = false;
+    } else {
+      result.push(offer);
+    }
+    return result;
+  }, []);
 
   if (remainingUnused) {
     buyResult.push({ price, baseAmount: remaining } as Offer);
-    buyResult.sort((o1: Offer, o2: Offer) => (o2.price.minus(o1.price).toNumber()));
+    buyResult.sort((o1: Offer, o2: Offer) => o2.price.minus(o1.price).toNumber());
   }
   return buyResult;
 }
@@ -322,17 +309,14 @@ function extraBuyOffers(remaining: BigNumber, price: BigNumber, buys: Offer[]): 
   if (remaining.isZero()) {
     return [];
   }
-  const minPrice: BigNumber = buys.length > 0 && buys[buys.length - 1].price.lte(price) ?
-    buys[buys.length - 1].price : price;
-  return [{ price, baseAmount: remaining } as Offer,
-    { price: minPrice, baseAmount: new BigNumber(0) } as Offer];
+  const minPrice: BigNumber =
+    buys.length > 0 && buys[buys.length - 1].price.lte(price) ? buys[buys.length - 1].price : price;
+  return [{ price, baseAmount: remaining } as Offer, { price: minPrice, baseAmount: new BigNumber(0) } as Offer];
 }
 
 // For offerType: sell
 // Buy offers after transaction
-function buyAfterForSellOffer(amount: BigNumber,
-                              price: BigNumber,
-                              buys: Offer[]): [Offer[], BigNumber] {
+function buyAfterForSellOffer(amount: BigNumber, price: BigNumber, buys: Offer[]): [Offer[], BigNumber] {
   let remaining = amount;
   const result: Offer[] = [];
 
@@ -360,22 +344,20 @@ function sellsAfterForSellOffer(remaining: BigNumber, price: BigNumber, sells: O
   }
 
   let remainingUnused = true;
-  const sellsResult = sells.reduce(
-    (result: Offer[], offer: Offer) => {
-      if (remainingUnused && price.eq(offer.price)) {
-        const baseAmount = offer.baseAmount.plus(remaining);
-        result.push({ ...offer, baseAmount });
-        remainingUnused = false;
-      } else {
-        result.push(offer);
-      }
-      return result;
-    },
-    []);
+  const sellsResult = sells.reduce((result: Offer[], offer: Offer) => {
+    if (remainingUnused && price.eq(offer.price)) {
+      const baseAmount = offer.baseAmount.plus(remaining);
+      result.push({ ...offer, baseAmount });
+      remainingUnused = false;
+    } else {
+      result.push(offer);
+    }
+    return result;
+  }, []);
 
   if (remainingUnused) {
     sellsResult.push({ price, baseAmount: remaining } as Offer);
-    sellsResult.sort((o1: Offer, o2: Offer) => (o1.price.minus(o2.price).toNumber())); // sort asc
+    sellsResult.sort((o1: Offer, o2: Offer) => o1.price.minus(o2.price).toNumber()); // sort asc
   }
   return sellsResult;
 }
@@ -386,16 +368,16 @@ function extraSellOffers(remaining: BigNumber, price: BigNumber, sells: Offer[])
   if (remaining.isZero()) {
     return [];
   }
-  const minPrice: BigNumber = sells.length > 0 && sells[sells.length - 1].price.gte(price) ?
-    sells[sells.length - 1].price : price;
-  return [{ price, baseAmount: remaining } as Offer,
-    { price: minPrice, baseAmount: new BigNumber(0) } as Offer];
+  const minPrice: BigNumber =
+    sells.length > 0 && sells[sells.length - 1].price.gte(price) ? sells[sells.length - 1].price : price;
+  return [{ price, baseAmount: remaining } as Offer, { price: minPrice, baseAmount: new BigNumber(0) } as Offer];
 }
 
 export function logOffers(msg: string, offers: Offer[]) {
   console.log(
     msg,
-    offers.map(o => [o.price.toNumber(), o.baseAmount.toNumber()]));
+    offers.map((o) => [o.price.toNumber(), o.baseAmount.toNumber()]),
+  );
 }
 
 export function getCenter(buys: Offer[], sells: Offer[]): BigNumber {
@@ -411,7 +393,7 @@ export function getCenter(buys: Offer[], sells: Offer[]): BigNumber {
 }
 
 export function findDefaultZoom(orderbook: Orderbook | undefined): BigNumber | undefined {
-  if (!orderbook || isEmpty(orderbook.sell) && isEmpty(orderbook.buy)) {
+  if (!orderbook || (isEmpty(orderbook.sell) && isEmpty(orderbook.buy))) {
     return undefined;
   }
 
@@ -419,14 +401,14 @@ export function findDefaultZoom(orderbook: Orderbook | undefined): BigNumber | u
 
   let zoom = center.times(0.5);
 
-  const notEmpty = (orderbook.buy.length + orderbook.sell.length) > 0;
+  const notEmpty = orderbook.buy.length + orderbook.sell.length > 0;
 
   while (true) {
     const zoomLeft = center.minus(zoom);
     const zoomRight = center.plus(zoom);
     const ordersNo =
-      orderbook.buy.filter(offer => offer.price.gt(zoomLeft)).length +
-      orderbook.sell.filter(offer => offer.price.lt(zoomRight)).length;
+      orderbook.buy.filter((offer) => offer.price.gt(zoomLeft)).length +
+      orderbook.sell.filter((offer) => offer.price.lt(zoomRight)).length;
 
     if (ordersNo === 0 && notEmpty) {
       zoom = zoom.times(2);
@@ -440,7 +422,7 @@ function doZoom(
   zoom: BigNumber | undefined,
   buys: Offer[],
   sells: Offer[],
-  data: DepthChartVolumes
+  data: DepthChartVolumes,
 ): DepthChartVolumesWithZoom {
   if (zoom && (!isEmpty(buys) || !isEmpty(sells))) {
     const mid = getCenter(buys, sells);
@@ -454,18 +436,18 @@ function doZoom(
     return {
       zoomInEnabled,
       zoomOutEnabled,
-      sellsBefore: data.sellsBefore && data.sellsBefore.filter(v => v.price < zoomRight),
-      buysBefore: data.buysBefore && data.buysBefore.filter(v => v.price > zoomLeft),
-      sellsAfter: data.sellsAfter && data.sellsAfter.filter(v => v.price < zoomRight),
-      buysAfter: data.buysAfter && data.buysAfter.filter(v => v.price > zoomLeft),
-      sellsExtra: data.sellsExtra && data.sellsExtra.filter(v => v.price < zoomRight),
-      buysExtra: data.buysExtra && data.buysExtra.filter(v => v.price > zoomLeft),
+      sellsBefore: data.sellsBefore && data.sellsBefore.filter((v) => v.price < zoomRight),
+      buysBefore: data.buysBefore && data.buysBefore.filter((v) => v.price > zoomLeft),
+      sellsAfter: data.sellsAfter && data.sellsAfter.filter((v) => v.price < zoomRight),
+      buysAfter: data.buysAfter && data.buysAfter.filter((v) => v.price > zoomLeft),
+      sellsExtra: data.sellsExtra && data.sellsExtra.filter((v) => v.price < zoomRight),
+      buysExtra: data.buysExtra && data.buysExtra.filter((v) => v.price > zoomLeft),
     };
   }
   return {
     ...data,
     zoomInEnabled: false,
-    zoomOutEnabled: false
+    zoomOutEnabled: false,
   };
 }
 
@@ -480,12 +462,14 @@ function doZoom(
 function isZoomInEnabled(mid: BigNumber, zoom: BigNumber, data: DepthChartVolumes): boolean {
   const zoomLeftAfterZoomIn = mid.minus(zoomIn(zoom)).toNumber();
   const zoomRightAfterZoomIn = mid.plus(zoomIn(zoom)).toNumber();
-  return ([data.buysAfter, data.buysBefore, data.buysExtra]
-      .filter(v => v !== undefined) as PriceVolume[][])
-      .some(d => d.filter(v => v.price > zoomLeftAfterZoomIn).length > 0) ||
-    ([data.sellsAfter, data.sellsBefore, data.sellsExtra]
-      .filter(v => v !== undefined) as PriceVolume[][])
-      .some(d => d.filter(v => v.price < zoomRightAfterZoomIn).length > 0);
+  return (
+    ([data.buysAfter, data.buysBefore, data.buysExtra].filter((v) => v !== undefined) as PriceVolume[][]).some(
+      (d) => d.filter((v) => v.price > zoomLeftAfterZoomIn).length > 0,
+    ) ||
+    ([data.sellsAfter, data.sellsBefore, data.sellsExtra].filter((v) => v !== undefined) as PriceVolume[][]).some(
+      (d) => d.filter((v) => v.price < zoomRightAfterZoomIn).length > 0,
+    )
+  );
 }
 
 /** Checks if zoom out is enabled.
@@ -501,12 +485,14 @@ function isZoomInEnabled(mid: BigNumber, zoom: BigNumber, data: DepthChartVolume
 function isZoomOutEnabled(mid: BigNumber, zoom: BigNumber, data: DepthChartVolumes): boolean {
   const zoomLeft = mid.minus(zoom).toNumber();
   const zoomRight = mid.plus(zoom).toNumber();
-  return ([data.buysAfter, data.buysBefore, data.buysExtra]
-      .filter(v => v !== undefined) as PriceVolume[][])
-      .some(d => Math.min(...d.map(v => v.price)) < zoomLeft) ||
-    ([data.sellsAfter, data.sellsBefore, data.sellsExtra]
-      .filter(v => v !== undefined) as PriceVolume[][])
-      .some(d => Math.max(...d.map(v => v.price)) > zoomRight);
+  return (
+    ([data.buysAfter, data.buysBefore, data.buysExtra].filter((v) => v !== undefined) as PriceVolume[][]).some(
+      (d) => Math.min(...d.map((v) => v.price)) < zoomLeft,
+    ) ||
+    ([data.sellsAfter, data.sellsBefore, data.sellsExtra].filter((v) => v !== undefined) as PriceVolume[][]).some(
+      (d) => Math.max(...d.map((v) => v.price)) > zoomRight,
+    )
+  );
 }
 
 /**
@@ -530,8 +516,7 @@ export function getDepthChartData(
   amount?: BigNumber,
   price?: BigNumber,
   zoom?: BigNumber,
-  ): DepthChartData {
-
+): DepthChartData {
   const sellsBefore = accumulate(sells);
   const buysBefore = accumulate(buys);
 
@@ -550,9 +535,7 @@ export function getDepthChartData(
 
     // In functions below price means maxPrice, so for "direct" as maxPrice we use
     // the greatest price from orderbook
-    const maxPrice = matchType === OfferMatchType.direct ?
-      sells[sells.length - 1].price :
-      price;
+    const maxPrice = matchType === OfferMatchType.direct ? sells[sells.length - 1].price : price;
 
     const [sellsAfterOffers, remainingAfterSell] = sellsAfterForBuyOffer(amount, maxPrice, sells);
     const sellsAfter = accumulate(sellsAfterOffers);
@@ -573,25 +556,15 @@ export function getDepthChartData(
     }
 
     return {
-      ...addMinMax(doZoom(
-        zoom, buys, sells,
-        { sellsBefore, sellsAfter, buysBefore, buysAfter, buysExtra }
-        )
-      ),
-      summary: calculateSummary(
-        { sellsBefore, sellsAfter, buysBefore, buysAfter, buysExtra },
-        maxPrice
-      )
+      ...addMinMax(doZoom(zoom, buys, sells, { sellsBefore, sellsAfter, buysBefore, buysAfter, buysExtra })),
+      summary: calculateSummary({ sellsBefore, sellsAfter, buysBefore, buysAfter, buysExtra }, maxPrice),
     };
   }
 
   if (offerType === 'sell') {
-
     // In functions below price means minPrice, so for "direct" as minPrice we use
     // the lowest price from buys orderbook
-    const minPrice = matchType === OfferMatchType.direct ?
-      buys[buys.length - 1].price :
-      price;
+    const minPrice = matchType === OfferMatchType.direct ? buys[buys.length - 1].price : price;
 
     const [buysAfterOffers, remainingAfterBuy] = buyAfterForSellOffer(amount, minPrice, buys);
     const buysAfter = accumulate(buysAfterOffers);
@@ -612,13 +585,8 @@ export function getDepthChartData(
     }
 
     return {
-      ...addMinMax(doZoom(
-        zoom, buys, sells,
-        { sellsBefore, sellsAfter, sellsExtra, buysBefore, buysAfter })),
-      summary: calculateSummary(
-        { sellsBefore, sellsAfter, sellsExtra, buysBefore, buysAfter },
-        minPrice
-      )
+      ...addMinMax(doZoom(zoom, buys, sells, { sellsBefore, sellsAfter, sellsExtra, buysBefore, buysAfter })),
+      summary: calculateSummary({ sellsBefore, sellsAfter, sellsExtra, buysBefore, buysAfter }, minPrice),
     };
   }
 

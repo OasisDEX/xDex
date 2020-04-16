@@ -26,7 +26,6 @@ interface Props {
 mixpanelInit();
 
 class App extends React.Component<Props> {
-
   public render() {
     switch (this.props.status) {
       case 'initializing':
@@ -38,7 +37,11 @@ class App extends React.Component<Props> {
         if (this.props.network !== undefined && !networks[this.props.network]) {
           return LoadingState.UNSUPPORTED;
         }
-        return <NavigationTxRx><Main/></NavigationTxRx>;
+        return (
+          <NavigationTxRx>
+            <Main />
+          </NavigationTxRx>
+        );
       default:
         throw new UnreachableCaseError(this.props.status);
     }
@@ -46,24 +49,24 @@ class App extends React.Component<Props> {
 }
 
 const web3StatusResolve$: Observable<Props> = web3Status$.pipe(
-  switchMap(status =>
-    status === 'ready' || status === 'readonly' ?
-      combineLatest(networkId$, account$).pipe(
-        tap(([network, account]) =>
-          console.log(`status: ${status}, network: ${network}, account: ${account}`)),
-        map(([network, _account]) => ({ status, network })),
-      ) : of({ status })
+  switchMap((status) =>
+    status === 'ready' || status === 'readonly'
+      ? combineLatest(networkId$, account$).pipe(
+          tap(([network, account]) => console.log(`status: ${status}, network: ${network}, account: ${account}`)),
+          map(([network, _account]) => ({ status, network })),
+        )
+      : of({ status }),
   ),
-  startWith({ status: 'initializing' as Web3Status })
+  startWith({ status: 'initializing' as Web3Status }),
 );
 
 const props$: Observable<Props> = web3StatusResolve$.pipe(
   map((web3Status) => {
     return {
-      ...web3Status
+      ...web3Status,
     } as Props;
   }),
-  distinctUntilChanged(isEqual)
+  distinctUntilChanged(isEqual),
 );
 
 const AppTxRx = connect<Props, {}>(App, props$);
@@ -71,10 +74,8 @@ const AppTxRx = connect<Props, {}>(App, props$);
 const root: HTMLElement = document.getElementById('root')!;
 
 if (process.env.NODE_ENV === 'production' && process.env.REACT_APP_SENTRY_DNS) {
-  Raven.config(
-    process.env.REACT_APP_SENTRY_DNS
-  ).install();
-  Raven.context(() => ReactDOM.render(<AppTxRx/>, root));
+  Raven.config(process.env.REACT_APP_SENTRY_DNS).install();
+  Raven.context(() => ReactDOM.render(<AppTxRx />, root));
 } else {
-  ReactDOM.render(<AppTxRx/>, root);
+  ReactDOM.render(<AppTxRx />, root);
 }
