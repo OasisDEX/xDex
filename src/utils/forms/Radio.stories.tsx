@@ -1,8 +1,8 @@
-import { storiesOf } from '@storybook/react';
-import * as React from 'react';
-import { Radio } from './Radio';
+import { storiesOf } from '@storybook/react'
+import * as React from 'react'
+import { Radio } from './Radio'
 
-const stories = storiesOf('Form inputs and buttons', module);
+const stories = storiesOf('Form inputs and buttons', module)
 
 stories.add('Radio', () => (
   <div>
@@ -22,4 +22,4 @@ stories.add('Radio', () => (
       Label e
     </Radio>
   </div>
-));
+))

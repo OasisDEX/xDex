@@ -1,24 +1,24 @@
-import { storiesOf } from '@storybook/react';
-import { BigNumber } from 'bignumber.js';
-import * as React from 'react';
-import { BrowserRouter } from 'react-router-dom';
+import { storiesOf } from '@storybook/react'
+import { BigNumber } from 'bignumber.js'
+import * as React from 'react'
+import { BrowserRouter } from 'react-router-dom'
 
-import { GasEstimationStatus, OfferMatchType } from '../../utils/form';
-import { FlexLayoutRow } from '../../utils/layout/FlexLayoutRow';
-import { Loadable, LoadableStatus } from '../../utils/loadable';
-import { Panel, PanelHeader } from '../../utils/panel/Panel';
-import { DepthChartView } from '../depthChart/DepthChartView';
-import { fakeOrderBook } from '../depthChart/fakeOrderBook';
-import { OfferType } from '../orderbook/orderbook';
-import { OrderbookView } from '../orderbook/OrderbookView';
-import { TradingPair } from '../tradingPair/tradingPair';
-import { FormStage, Message, MessageKind, OfferFormState } from './offerMake';
-import { OfferMakePanel } from './OfferMakePanel';
+import { GasEstimationStatus, OfferMatchType } from '../../utils/form'
+import { FlexLayoutRow } from '../../utils/layout/FlexLayoutRow'
+import { Loadable, LoadableStatus } from '../../utils/loadable'
+import { Panel, PanelHeader } from '../../utils/panel/Panel'
+import { DepthChartView } from '../depthChart/DepthChartView'
+import { fakeOrderBook } from '../depthChart/fakeOrderBook'
+import { OfferType } from '../orderbook/orderbook'
+import { OrderbookView } from '../orderbook/OrderbookView'
+import { TradingPair } from '../tradingPair/tradingPair'
+import { FormStage, Message, MessageKind, OfferFormState } from './offerMake'
+import { OfferMakePanel } from './OfferMakePanel'
 
-const stories = storiesOf('Offer Make Form', module);
+const stories = storiesOf('Offer Make Form', module)
 
-const normalPanelStyle = { width: '454px', height: '487px', display: 'inline-block', marginRight: '2em' };
-const narrowPanelStyle = { width: '398px', height: '487px', display: 'inline-block' };
+const normalPanelStyle = { width: '454px', height: '487px', display: 'inline-block', marginRight: '2em' }
+const narrowPanelStyle = { width: '398px', height: '487px', display: 'inline-block' }
 
 function offerMakeFormProps(overrides: object = {}): Loadable<OfferFormState> {
   return {
@@ -40,7 +40,7 @@ function offerMakeFormProps(overrides: object = {}): Loadable<OfferFormState> {
       pickerOpen: false,
       ...overrides,
     },
-  };
+  }
 }
 
 stories.add('Default form', () => {
@@ -71,8 +71,8 @@ stories.add('Default form', () => {
         </Panel>
       </FlexLayoutRow>
     </div>
-  );
-});
+  )
+})
 
 stories.add('Buy with price and amount, ready to proceed', () => {
   return (
@@ -98,8 +98,8 @@ stories.add('Buy with price and amount, ready to proceed', () => {
         />
       </Panel>
     </div>
-  );
-});
+  )
+})
 
 stories.add('Sell with price and amount, ready to proceed', () => {
   return (
@@ -127,8 +127,8 @@ stories.add('Sell with price and amount, ready to proceed', () => {
         />
       </Panel>
     </div>
-  );
-});
+  )
+})
 
 stories.add('Gas estimation statuses', () => {
   return (
@@ -180,8 +180,8 @@ stories.add('Gas estimation statuses', () => {
         />
       </Panel>
     </div>
-  );
-});
+  )
+})
 
 stories.add('Validations on form', () => {
   // const allPossibleFieldMessages: Message[] = [
@@ -334,8 +334,8 @@ stories.add('Validations on form', () => {
         </Panel>
       </div>
     </BrowserRouter>
-  );
-});
+  )
+})
 
 stories.add('Three validations error on one element', () => {
   const messages: Message[] = [
@@ -357,7 +357,7 @@ stories.add('Three validations error on one element', () => {
       priority: -1,
       token: '3th error, priority -1',
     },
-  ];
+  ]
 
   return (
     <div>
@@ -382,23 +382,23 @@ stories.add('Three validations error on one element', () => {
         />
       </Panel>
     </div>
-  );
-});
+  )
+})
 
 stories.add('Width of Create order and Order book panels', () => {
-  const orderbook = fakeOrderBook;
+  const orderbook = fakeOrderBook
   // console.warn(fakeOrderBook);
   orderbook.sell.forEach((s) => {
-    s.baseToken = 'WETH';
-    s.quoteToken = 'DAI';
+    s.baseToken = 'WETH'
+    s.quoteToken = 'DAI'
     // console.warn('tutaj sumato ', s.quoteAmount);
-    return;
-  });
+    return
+  })
   orderbook.buy.forEach((s) => {
-    s.baseToken = 'WETH';
-    s.quoteToken = 'DAI';
-    return;
-  });
+    s.baseToken = 'WETH'
+    s.quoteToken = 'DAI'
+    return
+  })
   return (
     <div style={{ width: '932px' }}>
       <FlexLayoutRow>
@@ -438,8 +438,8 @@ stories.add('Width of Create order and Order book panels', () => {
         </Panel>
       </FlexLayoutRow>
     </div>
-  );
-});
+  )
+})
 
 stories.add('Direct', () => {
   return (
@@ -489,8 +489,8 @@ stories.add('Direct', () => {
         />
       </Panel>
     </div>
-  );
-});
+  )
+})
 
 stories.add('Order type picker', () => {
   return (
@@ -518,5 +518,5 @@ stories.add('Order type picker', () => {
         />
       </Panel>
     </div>
-  );
-});
+  )
+})

@@ -1,12 +1,12 @@
-import classnames from 'classnames';
-import * as mixpanel from 'mixpanel-browser';
-import * as React from 'react';
-import { FormatPercent } from '../../utils/formatters/Formatters';
-import { CloseButton } from '../../utils/forms/Buttons';
-import { TopRightCorner } from '../../utils/panel/TopRightCorner';
-import { InstantFormChangeKind, InstantFormState, ViewKind } from '../instantForm';
-import { InstantFormWrapper } from '../InstantFormWrapper';
-import * as styles from './PriceImpactWarningView.scss';
+import classnames from 'classnames'
+import * as mixpanel from 'mixpanel-browser'
+import * as React from 'react'
+import { FormatPercent } from '../../utils/formatters/Formatters'
+import { CloseButton } from '../../utils/forms/Buttons'
+import { TopRightCorner } from '../../utils/panel/TopRightCorner'
+import { InstantFormChangeKind, InstantFormState, ViewKind } from '../instantForm'
+import { InstantFormWrapper } from '../InstantFormWrapper'
+import * as styles from './PriceImpactWarningView.scss'
 
 const PriceImpactGraph = () => (
   <div className={styles.graph}>
@@ -24,11 +24,11 @@ const PriceImpactGraph = () => (
       <div className={classnames(styles.bar, styles.bar4, styles.danger)} />
     </div>
   </div>
-);
+)
 
 export class PriceImpactWarningView extends React.Component<InstantFormState> {
   public render() {
-    const { priceImpact } = this.props;
+    const { priceImpact } = this.props
     return (
       <InstantFormWrapper
         heading="Order Warning!"
@@ -50,15 +50,15 @@ export class PriceImpactWarningView extends React.Component<InstantFormState> {
           <p className={styles.continueText}>Do you still want to proceed?</p>
         </div>
       </InstantFormWrapper>
-    );
+    )
   }
 
   private onDismiss = () => {
     this.props.change({
       kind: InstantFormChangeKind.viewChange,
       view: ViewKind.new,
-    });
-  };
+    })
+  }
 
   private onAcknowledge = () => {
     mixpanel.track('btn-click', {
@@ -67,11 +67,11 @@ export class PriceImpactWarningView extends React.Component<InstantFormState> {
       page: 'Instant',
       section: 'order-details',
       case: 'price-impact-warning',
-    });
-    this.props.submit(this.props);
+    })
+    this.props.submit(this.props)
     this.props.change({
       kind: InstantFormChangeKind.viewChange,
       view: ViewKind.finalization,
-    });
-  };
+    })
+  }
 }

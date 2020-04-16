@@ -1,8 +1,8 @@
 // tslint:disable:no-console
 
-import * as moment from 'moment';
-import { equals } from 'ramda';
-import { combineLatest, Observable, Subject } from 'rxjs';
+import * as moment from 'moment'
+import { equals } from 'ramda'
+import { combineLatest, Observable, Subject } from 'rxjs'
 import {
   delay,
   distinctUntilChanged,
@@ -13,20 +13,20 @@ import {
   shareReplay,
   startWith,
   switchMap,
-} from 'rxjs/operators';
+} from 'rxjs/operators'
 
-import { NetworkConfig } from '../../blockchain/config';
-import { EtherscanConfig } from '../../blockchain/etherscan';
-import { LoadableWithTradingPair } from '../../utils/loadable';
-import { getTrades, Trade } from '../trades';
-import { TradingPair } from '../tradingPair/tradingPair';
+import { NetworkConfig } from '../../blockchain/config'
+import { EtherscanConfig } from '../../blockchain/etherscan'
+import { LoadableWithTradingPair } from '../../utils/loadable'
+import { getTrades, Trade } from '../trades'
+import { TradingPair } from '../tradingPair/tradingPair'
 
-export type IntervalUnit = 'hour' | 'day' | 'week' | 'month';
+export type IntervalUnit = 'hour' | 'day' | 'week' | 'month'
 
-const TRADES_PAGE_SIZE = 100;
+const TRADES_PAGE_SIZE = 100
 
 export interface AllTradesProps extends LoadableWithTradingPair<TradesBrowser> {
-  etherscan: EtherscanConfig;
+  etherscan: EtherscanConfig
 }
 
 export function loadAllTrades(
@@ -34,7 +34,7 @@ export function loadAllTrades(
   onEveryBlock$$: Observable<number>,
   { base, quote }: TradingPair,
 ): Observable<Trade[]> {
-  const borderline = moment().subtract(1, 'hour').toDate();
+  const borderline = moment().subtract(1, 'hour').toDate()
 
   return context$$.pipe(
     switchMap((context) =>
@@ -56,7 +56,7 @@ export function loadAllTrades(
     map(([recent, later]) => [...recent, ...later]),
     distinctUntilChanged((x, y) => equals(x, y)),
     shareReplay(1),
-  );
+  )
 }
 
 export function loadPriceDaysAgo(
@@ -81,7 +81,7 @@ export function loadPriceDaysAgo(
     ),
     distinctUntilChanged((x, y) => equals(x, y)),
     shareReplay(1),
-  );
+  )
 }
 
 export function loadVolumeForThePastDay(
@@ -103,7 +103,7 @@ export function loadVolumeForThePastDay(
     map((trades: Trade[]) => trades.sort((current, next) => next.time.getTime() - current.time.getTime())),
     distinctUntilChanged((x, y) => equals(x, y)),
     shareReplay(1),
-  );
+  )
 }
 
 export function createAllTrades$(
@@ -112,13 +112,13 @@ export function createAllTrades$(
 ): Observable<AllTradesProps> {
   return combineLatest(tradeHistory$$, context$$).pipe(
     map(([allTradesHistory, context]) => ({ ...allTradesHistory, etherscan: context.etherscan })),
-  );
+  )
 }
 
 export interface TradesBrowser {
-  trades: Trade[];
-  loading: boolean;
-  more$: Subject<any>;
+  trades: Trade[]
+  loading: boolean
+  more$: Subject<any>
 }
 
 export function createTradesBrowser$(
@@ -126,7 +126,7 @@ export function createTradesBrowser$(
   allTrades: (pair: TradingPair) => Observable<Trade[]>,
   tradingPair: TradingPair,
 ): Observable<TradesBrowser> {
-  const more$ = new Subject<any>();
+  const more$ = new Subject<any>()
 
   return context$$.pipe(
     switchMap((context) =>
@@ -150,7 +150,7 @@ export function createTradesBrowser$(
                   nextPageStart,
                   loading: true,
                 }),
-              );
+              )
             },
             { nextPageStart: TRADES_PAGE_SIZE, loading: false, trades: [] },
           ),
@@ -164,5 +164,5 @@ export function createTradesBrowser$(
         })),
       ),
     ),
-  );
+  )
 }

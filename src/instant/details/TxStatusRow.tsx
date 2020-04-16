@@ -1,16 +1,16 @@
-import classnames from 'classnames';
-import * as React from 'react';
-import * as styles from './TxStatusRow.scss';
+import classnames from 'classnames'
+import * as React from 'react'
+import * as styles from './TxStatusRow.scss'
 
 interface TxStatusRowProps {
-  icon?: React.ReactNode | HTMLElement;
-  label: string | React.ReactNode;
-  status?: string | React.ReactNode;
+  icon?: React.ReactNode | HTMLElement
+  label: string | React.ReactNode
+  status?: string | React.ReactNode
 }
 
 export class TxStatusRow extends React.Component<TxStatusRowProps> {
   public render() {
-    const { icon, label, status, ...rest } = this.props;
+    const { icon, label, status, ...rest } = this.props
     return (
       <div {...rest} className={classnames(styles.txStatusRow)}>
         {icon && <span className={styles.icon}>{icon}</span>}
@@ -23,6 +23,6 @@ export class TxStatusRow extends React.Component<TxStatusRowProps> {
           </span>
         )}
       </div>
-    );
+    )
   }
 }

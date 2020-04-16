@@ -1,14 +1,14 @@
-import { storiesOf } from '@storybook/react';
-import { BigNumber } from 'bignumber.js';
-import * as React from 'react';
+import { storiesOf } from '@storybook/react'
+import { BigNumber } from 'bignumber.js'
+import * as React from 'react'
 
-import { GasEstimationStatus } from '../form';
-import { GasCost } from './GasCost';
+import { GasEstimationStatus } from '../form'
+import { GasCost } from './GasCost'
 
-const stories = storiesOf('Form inputs and buttons/Gas price', module);
+const stories = storiesOf('Form inputs and buttons/Gas price', module)
 
-const thStyle = { fontSize: 'smaller', color: '#aaa', padding: '0 10px' };
-const tdStyle = { padding: '5px 15px' };
+const thStyle = { fontSize: 'smaller', color: '#aaa', padding: '0 10px' }
+const tdStyle = { padding: '5px 15px' }
 
 stories.add('Gas cost states', () => (
   <div>
@@ -57,4 +57,4 @@ stories.add('Gas cost states', () => (
       </tbody>
     </table>
   </div>
-));
+))

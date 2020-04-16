@@ -1,22 +1,22 @@
-import * as React from 'react';
-import { CSSTransition, TransitionGroup } from 'react-transition-group';
+import * as React from 'react'
+import { CSSTransition, TransitionGroup } from 'react-transition-group'
 
-import { transactionObserver, TxRebroadcastStatus, TxState, TxStatus } from '../blockchain/transactions';
-import { CloseButton } from '../utils/forms/Buttons';
-import { Timer } from '../utils/Timer';
-import { UnreachableCaseError } from '../utils/UnreachableCaseError';
-import * as styles from './TransactionNotifier.scss';
+import { transactionObserver, TxRebroadcastStatus, TxState, TxStatus } from '../blockchain/transactions'
+import { CloseButton } from '../utils/forms/Buttons'
+import { Timer } from '../utils/Timer'
+import { UnreachableCaseError } from '../utils/UnreachableCaseError'
+import * as styles from './TransactionNotifier.scss'
 
-const VISIBILITY_TIMEOUT: number = 5;
+const VISIBILITY_TIMEOUT: number = 5
 
 export interface TransactionNotifierPros {
-  transactions: TxState[];
-  etherscan: { url: string; apiUrl: string; apiKey: string };
+  transactions: TxState[]
+  etherscan: { url: string; apiUrl: string; apiKey: string }
 }
 
 export class TransactionNotifierView extends React.Component<TransactionNotifierPros> {
   public render() {
-    const now = new Date().getTime();
+    const now = new Date().getTime()
     return (
       <TransitionGroup className={styles.main}>
         {this.props.transactions
@@ -42,15 +42,15 @@ export class TransactionNotifierView extends React.Component<TransactionNotifier
             </CSSTransition>
           ))}
       </TransitionGroup>
-    );
+    )
   }
 }
 
-export type NotificationProps = TxState & { etherscan: { url: string }; onDismiss: () => void };
+export type NotificationProps = TxState & { etherscan: { url: string }; onDismiss: () => void }
 
 export const Notification: React.SFC<NotificationProps> = ({ onDismiss, etherscan, ...transaction }) => {
-  const description = transaction.meta.description(transaction.meta.args);
-  const icon = transaction.meta.descriptionIcon && transaction.meta.descriptionIcon(transaction.meta.args);
+  const description = transaction.meta.description(transaction.meta.args)
+  const icon = transaction.meta.descriptionIcon && transaction.meta.descriptionIcon(transaction.meta.args)
 
   return (
     <div key={transaction.txNo} className={styles.block} data-vis-reg-hide={true}>
@@ -63,8 +63,8 @@ export const Notification: React.SFC<NotificationProps> = ({ onDismiss, ethersca
       <div className={styles.description}>{describeTxStatus(transaction, etherscan)}</div>
       <CloseButton onClick={onDismiss} className={styles.cross} data-test-id="notification-cross" />
     </div>
-  );
-};
+  )
+}
 
 export function describeTxStatus(tx: TxState, etherscan: { url: string }) {
   switch (tx.status) {
@@ -72,32 +72,32 @@ export function describeTxStatus(tx: TxState, etherscan: { url: string }) {
       const rebroadcast: { [key in TxRebroadcastStatus]: string } = {
         speedup: 'gas price increased',
         cancel: 'cancelled',
-      };
+      }
       return (
         <a href={`${etherscan.url}/tx/${tx.txHash}`} target="_blank" rel="noopener noreferrer" className={styles.link}>
           Confirmed {tx.rebroadcast ? ` (${rebroadcast[tx.rebroadcast]})` : ''}
         </a>
-      );
+      )
     case TxStatus.Error:
     case TxStatus.Failure:
-      return 'Failed';
+      return 'Failed'
     case TxStatus.WaitingForApproval:
-      return 'Signing Transaction';
+      return 'Signing Transaction'
     case TxStatus.Propagating:
       return (
         <>
           Unconfirmed <Timer start={tx.broadcastedAt} />
         </>
-      );
+      )
     case TxStatus.WaitingForConfirmation:
       return (
         <a href={`${etherscan.url}/tx/${tx.txHash}`} target="_blank" rel="noopener noreferrer" className={styles.link}>
           Unconfirmed <Timer start={tx.broadcastedAt} />
         </a>
-      );
+      )
     case TxStatus.CancelledByTheUser:
-      return 'Rejected';
+      return 'Rejected'
     default:
-      throw new UnreachableCaseError(tx);
+      throw new UnreachableCaseError(tx)
   }
 }

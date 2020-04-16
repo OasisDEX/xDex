@@ -1,33 +1,33 @@
-import classnames from 'classnames';
-import * as React from 'react';
-import { Redirect, Route, RouteComponentProps, Switch } from 'react-router';
-import { map } from 'rxjs/operators';
+import classnames from 'classnames'
+import * as React from 'react'
+import { Redirect, Route, RouteComponentProps, Switch } from 'react-router'
+import { map } from 'rxjs/operators'
 
-import { theAppContext } from '../AppContext';
-import { tradingPairs } from '../blockchain/config';
-import { connect } from '../utils/connect';
-import { FlexLayoutRow } from '../utils/layout/FlexLayoutRow';
-import { Panel } from '../utils/panel/Panel';
-import * as styles from './ExchangeView.scss';
-import { currentTradingPair$, TradingPair } from './tradingPair/tradingPair';
+import { theAppContext } from '../AppContext'
+import { tradingPairs } from '../blockchain/config'
+import { connect } from '../utils/connect'
+import { FlexLayoutRow } from '../utils/layout/FlexLayoutRow'
+import { Panel } from '../utils/panel/Panel'
+import * as styles from './ExchangeView.scss'
+import { currentTradingPair$, TradingPair } from './tradingPair/tradingPair'
 
 export interface ExchangeViewOwnProps {
-  setTradingPair: (tp: TradingPair) => void;
-  tp: TradingPair;
+  setTradingPair: (tp: TradingPair) => void
+  tp: TradingPair
 }
 
-type ExchangeViewProps = RouteComponentProps<any> & ExchangeViewOwnProps;
+type ExchangeViewProps = RouteComponentProps<any> & ExchangeViewOwnProps
 
 interface ContentProps extends RouteComponentProps<any> {
-  tp: TradingPair;
-  parentMatch: string;
-  setTradingPair: (tp: TradingPair) => void;
+  tp: TradingPair
+  parentMatch: string
+  setTradingPair: (tp: TradingPair) => void
 }
 
 class Content extends React.Component<ContentProps, { pairPickerOpen: boolean }> {
   constructor(props: ContentProps) {
-    super(props);
-    this.state = { pairPickerOpen: false };
+    super(props)
+    this.state = { pairPickerOpen: false }
   }
 
   public render() {
@@ -36,10 +36,10 @@ class Content extends React.Component<ContentProps, { pairPickerOpen: boolean }>
       parentMatch,
       tp,
       setTradingPair,
-    } = this.props;
+    } = this.props
 
     if (tp.base !== params.base || tp.quote !== params.quote) {
-      setTradingPair(params);
+      setTradingPair(params)
     }
 
     return (
@@ -81,7 +81,7 @@ class Content extends React.Component<ContentProps, { pairPickerOpen: boolean }>
           </Panel>
         </FlexLayoutRow>
       </div>
-    );
+    )
   }
 }
 
@@ -90,7 +90,7 @@ export class ExchangeView extends React.Component<ExchangeViewProps> {
     const {
       match: { url: matchUrl },
       tp,
-    } = this.props;
+    } = this.props
 
     return (
       <div>
@@ -98,21 +98,21 @@ export class ExchangeView extends React.Component<ExchangeViewProps> {
           <Route
             path={`${matchUrl}/:base/:quote`}
             render={(props) => {
-              const valid = tradingPairs.find((t) => t.base === tp.base && t.quote === tp.quote);
+              const valid = tradingPairs.find((t) => t.base === tp.base && t.quote === tp.quote)
 
               if (!valid) {
                 // It should be a redirect, but I can't make it work!
-                window.location.href = `${matchUrl}/${tradingPairs[0].base}/${tradingPairs[0].quote}`;
-                return;
+                window.location.href = `${matchUrl}/${tradingPairs[0].base}/${tradingPairs[0].quote}`
+                return
               }
 
-              return <Content {...props} tp={tp} parentMatch={matchUrl} setTradingPair={this.props.setTradingPair} />;
+              return <Content {...props} tp={tp} parentMatch={matchUrl} setTradingPair={this.props.setTradingPair} />
             }}
           />
           <Redirect push={false} from={'/market'} to={`/market/${tp.base}/${tp.quote}`} />
         </Switch>
       </div>
-    );
+    )
   }
 }
 
@@ -124,4 +124,4 @@ export const ExchangeViewTxRx = connect<ExchangeViewOwnProps, RouteComponentProp
       setTradingPair: currentTradingPair$.next.bind(currentTradingPair$),
     })),
   ),
-);
+)

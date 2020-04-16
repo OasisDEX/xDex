@@ -1,9 +1,9 @@
-import { storiesOf } from '@storybook/react';
-import * as React from 'react';
-import { BigNumberInput } from '../bigNumberInput/BigNumberInput';
-import { InputGroup, InputGroupAddon } from './InputGroup';
+import { storiesOf } from '@storybook/react'
+import * as React from 'react'
+import { BigNumberInput } from '../bigNumberInput/BigNumberInput'
+import { InputGroup, InputGroupAddon } from './InputGroup'
 
-const stories = storiesOf('Form inputs and buttons/Input group', module);
+const stories = storiesOf('Form inputs and buttons/Input group', module)
 
 stories.add('Input group', () => (
   <div>
@@ -95,4 +95,4 @@ stories.add('Input group', () => (
       <InputGroupAddon>(USD)</InputGroupAddon>
     </InputGroup>
   </div>
-));
+))

@@ -1,6 +1,6 @@
-import * as React from 'react';
-import { ProgressStage } from '../form';
-import { Timer } from '../Timer';
+import * as React from 'react'
+import { ProgressStage } from '../form'
+import { Timer } from '../Timer'
 
 export const TransactionStateDescription = ({ progress }: { progress: ProgressStage } | any) => {
   return (
@@ -15,5 +15,5 @@ export const TransactionStateDescription = ({ progress }: { progress: ProgressSt
       {progress === ProgressStage.canceled && 'Cancelled'}
       {progress === ProgressStage.fiasco && 'Failure'}
     </span>
-  );
-};
+  )
+}

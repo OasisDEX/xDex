@@ -1,23 +1,23 @@
-import * as classnames from 'classnames';
-import * as React from 'react';
-import { Button } from '../utils/forms/Buttons';
-import * as styles from './CallForAction.scss';
+import * as classnames from 'classnames'
+import * as React from 'react'
+import { Button } from '../utils/forms/Buttons'
+import * as styles from './CallForAction.scss'
 
 export interface CallForActionProps {
-  title: string;
-  description: string;
-  data?: string | React.ReactChild;
-  btn?: React.ReactNode;
-  btnLabel?: string | React.ReactChild;
-  btnAction?: () => void;
-  btnDisabled?: boolean;
-  tid?: string;
-  className?: string;
+  title: string
+  description: string
+  data?: string | React.ReactChild
+  btn?: React.ReactNode
+  btnLabel?: string | React.ReactChild
+  btnAction?: () => void
+  btnDisabled?: boolean
+  tid?: string
+  className?: string
 }
 
 export class CallForAction extends React.Component<CallForActionProps> {
   public render() {
-    const { title, description, data, children, btn, btnLabel, btnDisabled, btnAction, tid, className } = this.props;
+    const { title, description, data, children, btn, btnLabel, btnDisabled, btnAction, tid, className } = this.props
     return (
       <div className={classnames(className, styles.container)} data-test-id={tid}>
         <h6 className={styles.title}>{title}</h6>
@@ -44,6 +44,6 @@ export class CallForAction extends React.Component<CallForActionProps> {
           </Button>
         )}
       </div>
-    );
+    )
   }
 }

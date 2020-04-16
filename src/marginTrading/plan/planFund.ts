@@ -1,11 +1,11 @@
-import { BigNumber } from 'bignumber.js';
-import { flatten } from 'lodash';
-import { AssetKind } from '../../blockchain/config';
-import { impossible } from '../../utils/impossible';
-import { zero } from '../../utils/zero';
-import { EditableDebt } from '../allocate/mtOrderAllocateDebtForm';
-import { findAsset, MTAccount, Operation, OperationKind } from '../state/mtAccount';
-import { deltaToOps, Operations, orderDeltas } from './planUtils';
+import { BigNumber } from 'bignumber.js'
+import { flatten } from 'lodash'
+import { AssetKind } from '../../blockchain/config'
+import { impossible } from '../../utils/impossible'
+import { zero } from '../../utils/zero'
+import { EditableDebt } from '../allocate/mtOrderAllocateDebtForm'
+import { findAsset, MTAccount, Operation, OperationKind } from '../state/mtAccount'
+import { deltaToOps, Operations, orderDeltas } from './planUtils'
 
 // export function prepareFundRequest(
 //   ilk: string | undefined,
@@ -56,17 +56,17 @@ export function planFund(
   amount: BigNumber,
   debts: Array<Required<EditableDebt>>,
 ): Operations {
-  const asset = findAsset(token, mta);
+  const asset = findAsset(token, mta)
 
   if (asset === undefined) {
-    return impossible('asset not setup');
+    return impossible('asset not setup')
   }
 
   if (asset.assetKind !== AssetKind.marginable) {
-    return impossible(`can\'t fund with ${token}`);
+    return impossible(`can\'t fund with ${token}`)
   }
 
-  const fundOps: Operation[] = [{ amount, name: token, kind: OperationKind.fundGem }];
+  const fundOps: Operation[] = [{ amount, name: token, kind: OperationKind.fundGem }]
 
   return [
     ...fundOps,
@@ -75,7 +75,7 @@ export function planFund(
         .filter((d) => !d.delta.eq(zero))
         .map(deltaToOps),
     ),
-  ];
+  ]
 }
 
 export function planFundDai(
@@ -84,10 +84,10 @@ export function planFundDai(
   amount: BigNumber,
   debts: Array<Required<EditableDebt>>,
 ): Operations {
-  const asset = findAsset(token, mta);
+  const asset = findAsset(token, mta)
 
   if (asset === undefined) {
-    return impossible('asset not setup');
+    return impossible('asset not setup')
   }
 
   if (
@@ -95,10 +95,10 @@ export function planFundDai(
     // asset.assetKind !== AssetKind.nonMarginable &&
     // asset.assetKind !== AssetKind.cash
   ) {
-    return impossible(`can\'t fund with ${token}`);
+    return impossible(`can\'t fund with ${token}`)
   }
 
-  const fundOps: Operation[] = [{ amount, name: token, kind: OperationKind.fundDai }];
+  const fundOps: Operation[] = [{ amount, name: token, kind: OperationKind.fundDai }]
 
   return [
     ...fundOps,
@@ -107,5 +107,5 @@ export function planFundDai(
         .filter((d) => !d.delta.eq(zero))
         .map(deltaToOps),
     ),
-  ];
+  ]
 }

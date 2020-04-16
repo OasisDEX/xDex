@@ -1,18 +1,18 @@
-import * as React from 'react';
-import { Link } from 'react-router-dom';
-import { AssetKind, getToken, tradingPairs } from '../../blockchain/config';
-import { routerContext } from '../../Main';
-import { LoadableWithTradingPair } from '../../utils/loadable';
-import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
-import { ModalOpenerProps } from '../../utils/modal';
-import { PanelBody, PanelHeader } from '../../utils/panel/Panel';
-import { CreateMTFundForm$ } from '../transfer/mtTransferForm';
-import { MTSimpleFormState } from './mtOrderForm';
-import { MtSimpleOrderFormView } from './mtOrderFormView';
-import * as styles from './mtOrderFormView.scss';
+import * as React from 'react'
+import { Link } from 'react-router-dom'
+import { AssetKind, getToken, tradingPairs } from '../../blockchain/config'
+import { routerContext } from '../../Main'
+import { LoadableWithTradingPair } from '../../utils/loadable'
+import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator'
+import { ModalOpenerProps } from '../../utils/modal'
+import { PanelBody, PanelHeader } from '../../utils/panel/Panel'
+import { CreateMTFundForm$ } from '../transfer/mtTransferForm'
+import { MTSimpleFormState } from './mtOrderForm'
+import { MtSimpleOrderFormView } from './mtOrderFormView'
+import * as styles from './mtOrderFormView.scss'
 
 export interface MTSimpleOrderPanelProps {
-  createMTFundForm$: CreateMTFundForm$;
+  createMTFundForm$: CreateMTFundForm$
 }
 
 export class MTSimpleOrderPanel extends React.Component<
@@ -25,7 +25,7 @@ export class MTSimpleOrderPanel extends React.Component<
     ) {
       const marginablePairs = tradingPairs.filter(
         ({ base, quote }) => getToken(base).assetKind === AssetKind.marginable && quote === 'DAI',
-      );
+      )
 
       return (
         <>
@@ -46,12 +46,12 @@ export class MTSimpleOrderPanel extends React.Component<
             ))}
           </PanelBody>
         </>
-      );
+      )
     }
 
     if (this.props.status === 'loaded' && this.props.value && this.props.value.mta) {
-      const formState = this.props.value;
-      return <MtSimpleOrderFormView {...{ ...this.props, ...formState }} />;
+      const formState = this.props.value
+      return <MtSimpleOrderFormView {...{ ...this.props, ...formState }} />
     }
 
     return (
@@ -59,6 +59,6 @@ export class MTSimpleOrderPanel extends React.Component<
         <PanelHeader style={{ width: '100%' }}>Manage Your Leverage</PanelHeader>
         <LoadingIndicator size="lg" />
       </div>
-    );
+    )
   }
 }

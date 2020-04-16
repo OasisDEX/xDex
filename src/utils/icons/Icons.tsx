@@ -1,37 +1,37 @@
-import classnames from 'classnames';
-import * as React from 'react';
-import accountSvg from '../../icons/account.svg';
-import backSvg from '../../icons/back.svg';
-import cogWheelSvg from '../../icons/cog-wheel.svg';
-import { Button, ButtonProps } from '../forms/Buttons';
-import * as styles from './Icons.scss';
-import { SvgImage } from './utils';
+import classnames from 'classnames'
+import * as React from 'react'
+import accountSvg from '../../icons/account.svg'
+import backSvg from '../../icons/back.svg'
+import cogWheelSvg from '../../icons/cog-wheel.svg'
+import { Button, ButtonProps } from '../forms/Buttons'
+import * as styles from './Icons.scss'
+import { SvgImage } from './utils'
 
 export const InfoIcon = (props: React.HTMLAttributes<HTMLDivElement>) => {
-  const { className, ...otherProps } = props;
+  const { className, ...otherProps } = props
   return (
     <div className={classnames(styles.infoIcon, className)} {...otherProps}>
       i
     </div>
-  );
-};
+  )
+}
 
 export const ButtonIcon = (props: ButtonProps & { image: any }) => {
-  const { className, image, ...otherProps } = props;
+  const { className, image, ...otherProps } = props
   return (
     <Button size="unsized" className={className} type="button" {...otherProps}>
       <SvgImage className={styles.btnIcon} image={image} />
     </Button>
-  );
-};
+  )
+}
 
 export type ProgressIconProps = React.HTMLAttributes<HTMLDivElement> & {
-  light?: boolean;
-  size?: 'sm' | 'lg';
-};
+  light?: boolean
+  size?: 'sm' | 'lg'
+}
 
 export const ProgressIcon = (props: ProgressIconProps) => {
-  const { className, light, size, ...otherProps } = props;
+  const { className, light, size, ...otherProps } = props
   return (
     <div
       className={classnames(styles.progressIcon, className, {
@@ -41,11 +41,11 @@ export const ProgressIcon = (props: ProgressIconProps) => {
       })}
       {...otherProps}
     />
-  );
-};
+  )
+}
 
 export const SettingsIcon = (props: ButtonProps) => {
-  const { className, ...other } = props;
+  const { className, ...other } = props
   return (
     <ButtonIcon
       color="secondaryOutlined"
@@ -54,11 +54,11 @@ export const SettingsIcon = (props: ButtonProps) => {
       image={cogWheelSvg}
       {...other}
     />
-  );
-};
+  )
+}
 
 export const BackIcon = (props: ButtonProps) => {
-  const { className, ...other } = props;
+  const { className, ...other } = props
   return (
     <ButtonIcon
       color="secondaryOutlined"
@@ -66,11 +66,11 @@ export const BackIcon = (props: ButtonProps) => {
       image={backSvg}
       {...other}
     />
-  );
-};
+  )
+}
 
 export const AccountIcon = (props: ButtonProps) => {
-  const { className, ...other } = props;
+  const { className, ...other } = props
   return (
     <ButtonIcon
       color="secondaryOutlined"
@@ -78,5 +78,5 @@ export const AccountIcon = (props: ButtonProps) => {
       image={accountSvg}
       {...other}
     />
-  );
-};
+  )
+}

@@ -1,23 +1,23 @@
-import { BigNumber } from 'bignumber.js';
-import * as React from 'react';
-import { Error } from 'tslint/lib/error';
+import { BigNumber } from 'bignumber.js'
+import * as React from 'react'
+import { Error } from 'tslint/lib/error'
 
-import { OfferType } from '../../exchange/orderbook/orderbook';
-import { TradeAct } from '../../exchange/trades';
-import { OfferMatchType } from '../../utils/form';
-import { Money } from '../../utils/formatters/Formatters';
-import { NetworkConfig } from '../config';
-import { amountToWei } from '../utils';
-import { TransactionDef } from './callsHelpers';
-import { TxMetaKind } from './txMeta';
+import { OfferType } from '../../exchange/orderbook/orderbook'
+import { TradeAct } from '../../exchange/trades'
+import { OfferMatchType } from '../../utils/form'
+import { Money } from '../../utils/formatters/Formatters'
+import { NetworkConfig } from '../config'
+import { amountToWei } from '../utils'
+import { TransactionDef } from './callsHelpers'
+import { TxMetaKind } from './txMeta'
 
 export interface CancelData {
-  offerId: BigNumber;
-  type: TradeAct;
-  amount: BigNumber;
-  token: string;
-  gasPrice?: BigNumber;
-  gasEstimation?: number;
+  offerId: BigNumber
+  type: TradeAct
+  amount: BigNumber
+  token: string
+  gasPrice?: BigNumber
+  gasEstimation?: number
 }
 
 export const cancelOffer: TransactionDef<CancelData> = {
@@ -32,26 +32,26 @@ export const cancelOffer: TransactionDef<CancelData> = {
       Order <Money value={amount} token={token} />
     </React.Fragment>
   ),
-};
+}
 
 export interface OfferMakeData {
-  buyAmount: BigNumber;
-  buyToken: string;
-  sellAmount: BigNumber;
-  sellToken: string;
-  matchType: OfferMatchType;
-  position?: BigNumber;
-  kind: OfferType;
-  gasPrice: BigNumber;
-  gasEstimation?: number;
+  buyAmount: BigNumber
+  buyToken: string
+  sellAmount: BigNumber
+  sellToken: string
+  matchType: OfferMatchType
+  position?: BigNumber
+  kind: OfferType
+  gasPrice: BigNumber
+  gasEstimation?: number
 }
 
 export const offerMake: TransactionDef<OfferMakeData> = {
   call: (data: OfferMakeData, context: NetworkConfig) => {
     if (data.matchType === OfferMatchType.limitOrder) {
-      return context.otc.contract.methods['offer(uint256,address,uint256,address,uint256,bool)'];
+      return context.otc.contract.methods['offer(uint256,address,uint256,address,uint256,bool)']
     }
-    throw new Error('should not be here');
+    throw new Error('should not be here')
   },
   prepareArgs: (
     { buyAmount, buyToken, sellAmount, sellToken, matchType, position }: OfferMakeData,
@@ -79,18 +79,18 @@ export const offerMake: TransactionDef<OfferMakeData> = {
         Create Buy Order <Money value={buyAmount} token={buyToken} />
       </>
     ),
-};
+}
 
 export interface OfferMakeDirectData {
-  baseAmount: BigNumber;
-  baseToken: string;
-  quoteAmount: BigNumber;
-  quoteToken: string;
-  matchType: OfferMatchType;
-  price: BigNumber;
-  kind: OfferType;
-  gasPrice: BigNumber;
-  gasEstimation?: number;
+  baseAmount: BigNumber
+  baseToken: string
+  quoteAmount: BigNumber
+  quoteToken: string
+  matchType: OfferMatchType
+  price: BigNumber
+  kind: OfferType
+  gasPrice: BigNumber
+  gasEstimation?: number
 }
 
 export const offerMakeDirect: TransactionDef<OfferMakeDirectData> = {
@@ -119,4 +119,4 @@ export const offerMakeDirect: TransactionDef<OfferMakeDirectData> = {
         Create Buy Order <Money value={quoteAmount} token={quoteToken} />
       </>
     ),
-};
+}

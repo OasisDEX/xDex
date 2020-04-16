@@ -1,51 +1,51 @@
-import { BigNumber } from 'bignumber.js';
-import classnames from 'classnames';
-import * as d3 from 'd3';
-import { ScaleLinear, ScaleLogarithmic } from 'd3-scale';
-import { BaseType, Selection } from 'd3-selection';
-import * as React from 'react';
-import { createElement } from 'react-faux-dom';
+import { BigNumber } from 'bignumber.js'
+import classnames from 'classnames'
+import * as d3 from 'd3'
+import { ScaleLinear, ScaleLogarithmic } from 'd3-scale'
+import { BaseType, Selection } from 'd3-selection'
+import * as React from 'react'
+import { createElement } from 'react-faux-dom'
 
-import { OfferMatchType } from '../../utils/form';
-import { Button } from '../../utils/forms/Buttons';
-import { SvgImage } from '../../utils/icons/utils';
-import { PanelHeader } from '../../utils/panel/Panel';
-import { Muted } from '../../utils/text/Text';
-import { OfferType, Orderbook } from '../orderbook/orderbook';
-import { OrderbookViewKind } from '../OrderbookPanel';
-import { DepthChartData, getDepthChartData, Summary, ZoomChange } from './depthchart';
-import * as styles from './DepthChartView.scss';
-import minusSvg from './minus.svg';
-import orderbookSvg from './orderbook.svg';
-import plusSvg from './plus.svg';
+import { OfferMatchType } from '../../utils/form'
+import { Button } from '../../utils/forms/Buttons'
+import { SvgImage } from '../../utils/icons/utils'
+import { PanelHeader } from '../../utils/panel/Panel'
+import { Muted } from '../../utils/text/Text'
+import { OfferType, Orderbook } from '../orderbook/orderbook'
+import { OrderbookViewKind } from '../OrderbookPanel'
+import { DepthChartData, getDepthChartData, Summary, ZoomChange } from './depthchart'
+import * as styles from './DepthChartView.scss'
+import minusSvg from './minus.svg'
+import orderbookSvg from './orderbook.svg'
+import plusSvg from './plus.svg'
 
 interface PriceVolume {
-  price: number;
-  volume: number;
+  price: number
+  volume: number
 }
 
 interface DepthChartInternalProps {
-  orderbook: Orderbook;
-  kind: OfferType;
-  matchType: OfferMatchType;
-  amount?: BigNumber;
-  price?: BigNumber;
-  zoom?: BigNumber;
-  base?: string;
-  quote?: string;
-  zoomChange: (change: ZoomChange) => void;
-  kindChange: (kind: OrderbookViewKind) => void;
+  orderbook: Orderbook
+  kind: OfferType
+  matchType: OfferMatchType
+  amount?: BigNumber
+  price?: BigNumber
+  zoom?: BigNumber
+  base?: string
+  quote?: string
+  zoomChange: (change: ZoomChange) => void
+  kindChange: (kind: OrderbookViewKind) => void
 }
 
-const totalWidth = 508;
-const totalHeight = 396;
+const totalWidth = 508
+const totalHeight = 396
 
 // margin used as place for axis labels and other text around strict chart
-const margin = { top: 10, right: 50, bottom: 30, left: 50 };
+const margin = { top: 10, right: 50, bottom: 30, left: 50 }
 const chartSize = {
   width: totalWidth - margin.left - margin.right, // chart's width
   height: totalHeight - margin.top - margin.bottom, // chart's height
-};
+}
 // chart's bounding box
 const chartCoords = {
   left: margin.left,
@@ -53,13 +53,13 @@ const chartCoords = {
   top: margin.top,
   bottom: totalHeight - margin.bottom,
   verticalHalf: chartSize.height / 2 + margin.top,
-};
+}
 const infoBox = {
   sellTop: margin.top + 10,
   sellLeft: 10,
   buyBottom: margin.bottom + 10,
   buyRight: 10,
-};
+}
 
 function axes(
   svgContainer: any,
@@ -73,32 +73,32 @@ function axes(
     .append('g')
     .classed('xAdditional', true)
     .attr('transform', `translate(0, ${chartCoords.top})`)
-    .call(d3.axisBottom(x).ticks(30).tickSize(chartSize.height));
-  xAdditionalAxe.select('.domain').classed(styles.hidden, true);
-  xAdditionalAxe.selectAll('.tick line').classed(styles.axisLineAdditional, true);
-  xAdditionalAxe.selectAll('.tick text').classed(styles.hidden, true);
+    .call(d3.axisBottom(x).ticks(30).tickSize(chartSize.height))
+  xAdditionalAxe.select('.domain').classed(styles.hidden, true)
+  xAdditionalAxe.selectAll('.tick line').classed(styles.axisLineAdditional, true)
+  xAdditionalAxe.selectAll('.tick text').classed(styles.hidden, true)
 
   // -----------
   // volume axis
-  const yAxis = svgContainer.append('g').classed('yAxis', true);
-  const yTickAddon = 0;
-  const yTokenMarginTop = 20;
-  const yTokenMarginHorizontal = 8;
+  const yAxis = svgContainer.append('g').classed('yAxis', true)
+  const yTickAddon = 0
+  const yTokenMarginTop = 20
+  const yTokenMarginHorizontal = 8
 
-  const buyAxis = yAxis.append('g').classed('buyAxis', true);
-  buyAxis.attr('transform', `translate( ${chartCoords.right}, 0)`);
+  const buyAxis = yAxis.append('g').classed('buyAxis', true)
+  buyAxis.attr('transform', `translate( ${chartCoords.right}, 0)`)
   buyAxis.call(
     d3
       .axisLeft(yBuy)
       .ticks(15)
       .tickSize(chartSize.width + yTickAddon)
       .tickFormat((d) => d.toString()),
-  );
+  )
 
   const yBuyTokenLabel = yAxis
     .append('g')
     .classed('yBuyTokenLabel', true)
-    .attr('transform', `translate( ${chartCoords.left}, ${yTokenMarginTop})`);
+    .attr('transform', `translate( ${chartCoords.left}, ${yTokenMarginTop})`)
   yBuyTokenLabel.call(
     d3
       .axisLeft(yBuy)
@@ -106,19 +106,19 @@ function axes(
       .tickSize(0)
       .tickPadding(yTokenMarginHorizontal)
       .tickFormat((_d) => `${yToken}`),
-  );
+  )
 
-  const sellAxis = yAxis.append('g').classed('sellAxis', true);
-  sellAxis.attr('transform', `translate( ${chartCoords.left}, 0)`);
+  const sellAxis = yAxis.append('g').classed('sellAxis', true)
+  sellAxis.attr('transform', `translate( ${chartCoords.left}, 0)`)
   sellAxis.call(
     d3
       .axisRight(ySell)
       .ticks(15)
       .tickSize(chartSize.width + yTickAddon)
       .tickFormat((d) => d.toString()),
-  );
+  )
 
-  const ySellTokenLabel = yAxis.append('g').attr('transform', `translate( ${chartCoords.right}, ${yTokenMarginTop})`);
+  const ySellTokenLabel = yAxis.append('g').attr('transform', `translate( ${chartCoords.right}, ${yTokenMarginTop})`)
   ySellTokenLabel.call(
     d3
       .axisRight(ySell)
@@ -126,33 +126,33 @@ function axes(
       .tickSize(0)
       .tickPadding(yTokenMarginHorizontal)
       .tickFormat((_d) => `${yToken}`),
-  );
+  )
 
-  yAxis.selectAll('.tick line').classed(styles.axisLineMain, true);
-  yAxis.selectAll('.tick text').classed(styles.axisMainLabel, true);
-  yAxis.selectAll('.tick text').attr('y', -10);
-  yAxis.selectAll('.domain').classed(styles.hidden, true);
+  yAxis.selectAll('.tick line').classed(styles.axisLineMain, true)
+  yAxis.selectAll('.tick text').classed(styles.axisMainLabel, true)
+  yAxis.selectAll('.tick text').attr('y', -10)
+  yAxis.selectAll('.domain').classed(styles.hidden, true)
 
   // fix y additional ticks, which should: not have labels, be narrow and not expand chart
-  const yAdditional = yAxis.selectAll('.tick').filter((d: number) => d.toString().match(/^0\.0*1$|^10*$/) === null);
+  const yAdditional = yAxis.selectAll('.tick').filter((d: number) => d.toString().match(/^0\.0*1$|^10*$/) === null)
   // hide labels for all volumes that's not 1e+x
-  yAdditional.select('text').classed(styles.hidden, true);
+  yAdditional.select('text').classed(styles.hidden, true)
   // modify additional lines style and cut them from being outside the chart
   yAdditional
     .select('line')
     .classed(styles.axisYLineAdditional, true)
     .attr('x2', (_d: number, i: number, n: any) => {
-      const currentdx: number = Number(d3.select(n[i]).attr('x2'));
-      return currentdx < 0 ? currentdx + yTickAddon : currentdx - yTickAddon;
-    });
+      const currentdx: number = Number(d3.select(n[i]).attr('x2'))
+      return currentdx < 0 ? currentdx + yTickAddon : currentdx - yTickAddon
+    })
 
   // volume axis: style token labels
-  yBuyTokenLabel.selectAll('.tick text').classed(styles.axisMainLabel, false).classed(styles.axisYTokenLabel, true);
-  ySellTokenLabel.selectAll('.tick text').classed(styles.axisMainLabel, false).classed(styles.axisYTokenLabel, true);
+  yBuyTokenLabel.selectAll('.tick text').classed(styles.axisMainLabel, false).classed(styles.axisYTokenLabel, true)
+  ySellTokenLabel.selectAll('.tick text').classed(styles.axisMainLabel, false).classed(styles.axisYTokenLabel, true)
 
   // -----------
   // main price axis
-  const xAxis = svgContainer.append('g').classed('xAxis', true);
+  const xAxis = svgContainer.append('g').classed('xAxis', true)
 
   xAxis
     .attr('transform', `translate(0, ${chartCoords.top})`)
@@ -163,15 +163,15 @@ function axes(
         .axisBottom(x)
         .ticks(5)
         .tickSize(chartSize.height + 6),
-    );
-  xAxis.select('.domain').classed(styles.axisLineMain, true);
-  xAxis.selectAll('.tick line').classed(styles.axisLineMain, true);
+    )
+  xAxis.select('.domain').classed(styles.axisLineMain, true)
+  xAxis.selectAll('.tick line').classed(styles.axisLineMain, true)
 
   // remove prices smaller than 0
   xAxis
     .selectAll('.tick')
     .filter((d: any, _i: number) => d < 0)
-    .classed(styles.hidden, true);
+    .classed(styles.hidden, true)
 }
 
 const btnStyles = {
@@ -180,11 +180,11 @@ const btnStyles = {
   width: '30px',
   height: '30px',
   background: 'white',
-};
+}
 
 export class DepthChartView extends React.Component<DepthChartInternalProps> {
   public render() {
-    const chart = createElement('div');
+    const chart = createElement('div')
 
     // console.log('zoom', this.props.zoom);
 
@@ -196,7 +196,7 @@ export class DepthChartView extends React.Component<DepthChartInternalProps> {
       this.props.amount,
       this.props.price,
       this.props.zoom,
-    );
+    )
 
     const svgContainer = d3
       .select(chart)
@@ -204,44 +204,44 @@ export class DepthChartView extends React.Component<DepthChartInternalProps> {
       .attr('width', totalWidth)
       .attr('height', totalHeight)
       .append('g')
-      .classed('depthchart', true);
+      .classed('depthchart', true)
 
-    const x = d3.scaleLinear().domain([data.minPrice, data.maxPrice]).range([chartCoords.left, chartCoords.right]);
+    const x = d3.scaleLinear().domain([data.minPrice, data.maxPrice]).range([chartCoords.left, chartCoords.right])
 
-    const minYVolume = 1e-1;
-    const minYVolumePlus = 1e-1 + 1e-2;
+    const minYVolume = 1e-1
+    const minYVolumePlus = 1e-1 + 1e-2
 
     const yBuy = d3
       .scaleLog()
       .nice()
       .domain([minYVolume, data.maxVolume])
-      .range([chartCoords.verticalHalf, chartCoords.bottom]);
+      .range([chartCoords.verticalHalf, chartCoords.bottom])
 
     const ySell = d3
       .scaleLog()
       .nice()
       .domain([data.maxVolume, minYVolume])
-      .range([chartCoords.top, chartCoords.verticalHalf]);
+      .range([chartCoords.top, chartCoords.verticalHalf])
 
     const buyArea = d3
       .area<PriceVolume>()
       .x((o) => x(o.price))
       .y1((o) => yBuy(o.volume < minYVolume ? minYVolumePlus : o.volume))
       .curve(d3.curveStepAfter)
-      .y0(chartCoords.verticalHalf);
+      .y0(chartCoords.verticalHalf)
 
     const sellArea = d3
       .area<PriceVolume>()
       .x((o) => x(o.price))
       .y1((o) => ySell(o.volume < minYVolume ? minYVolumePlus : o.volume))
       .curve(d3.curveStepAfter)
-      .y0(chartCoords.verticalHalf);
+      .y0(chartCoords.verticalHalf)
 
-    axes(svgContainer, x, ySell, yBuy, this.props.base);
+    axes(svgContainer, x, ySell, yBuy, this.props.base)
 
-    const chartMode = !this.props.price || !this.props.amount ? 'none' : this.props.kind;
+    const chartMode = !this.props.price || !this.props.amount ? 'none' : this.props.kind
 
-    ([
+    ;([
       [data.buysBefore, buyArea, chartMode === 'buy' ? styles.hidden : styles.buyChart],
       [data.buysAfter, buyArea, chartMode === 'sell' ? styles.buyChartDark : styles.buyChart],
       [data.buysExtra, buyArea, styles.buyChartDark],
@@ -250,16 +250,15 @@ export class DepthChartView extends React.Component<DepthChartInternalProps> {
       [data.sellsExtra, sellArea, styles.sellChartDark],
     ].filter(([volumes]) => volumes !== undefined && volumes.length > 0) as any).forEach(
       ([volumes, area, style]: any) => {
-        return svgContainer.append('g').append('path').attr('d', area(volumes)).classed(style, true);
+        return svgContainer.append('g').append('path').attr('d', area(volumes)).classed(style, true)
       },
-    );
+    )
 
-    drawDotsAndLine(svgContainer, chartMode, x, yBuy, ySell, data);
+    drawDotsAndLine(svgContainer, chartMode, x, yBuy, ySell, data)
 
-    const hasBuys = [data.buysBefore, data.buysAfter].filter((vol) => vol !== undefined && vol.length > 0).length > 0;
+    const hasBuys = [data.buysBefore, data.buysAfter].filter((vol) => vol !== undefined && vol.length > 0).length > 0
 
-    const hasSells =
-      [data.sellsBefore, data.sellsAfter].filter((vol) => vol !== undefined && vol.length > 0).length > 0;
+    const hasSells = [data.sellsBefore, data.sellsAfter].filter((vol) => vol !== undefined && vol.length > 0).length > 0
 
     return (
       <>
@@ -291,30 +290,30 @@ export class DepthChartView extends React.Component<DepthChartInternalProps> {
           )}
         </div>
       </>
-    );
+    )
   }
 
   private zoomIn = () => {
-    this.props.zoomChange('zoomIn');
-  };
+    this.props.zoomChange('zoomIn')
+  }
 
   private zoomOut = () => {
-    this.props.zoomChange('zoomOut');
-  };
+    this.props.zoomChange('zoomOut')
+  }
 
   private changeChartListView = () => {
-    this.props.kindChange(OrderbookViewKind.list);
-  };
+    this.props.kindChange(OrderbookViewKind.list)
+  }
 }
 
 function drawSummaryInfoBox(summary?: Summary) {
   if (!summary) {
-    return false;
+    return false
   }
   return (
     summary.currentForSale.amount !== summary.afterOrderForSale.amount ||
     summary.currentWanted.amount !== summary.afterOrderWanted.amount
-  );
+  )
 }
 
 function drawDotsAndLine(
@@ -326,17 +325,17 @@ function drawDotsAndLine(
   data: DepthChartData,
 ) {
   if (!data.summary || !drawSummaryInfoBox(data.summary)) {
-    return;
+    return
   }
-  const cx = xScale(data.summary.price);
-  const svg = svgContainer.append('g').classed('dots', true);
+  const cx = xScale(data.summary.price)
+  const svg = svgContainer.append('g').classed('dots', true)
 
-  let extra: [number, string, ScaleLogarithmic<number, number>] = [0, '', yBuyScale];
+  let extra: [number, string, ScaleLogarithmic<number, number>] = [0, '', yBuyScale]
   if (chartMode === 'buy' && data.buysExtra && data.buysExtra.length > 0) {
-    extra = [data.buysExtra[0].volume, styles.dotBuy, yBuyScale];
+    extra = [data.buysExtra[0].volume, styles.dotBuy, yBuyScale]
   }
   if (chartMode === 'sell' && data.sellsExtra && data.sellsExtra.length > 0) {
-    extra = [data.sellsExtra[0].volume, styles.dotSell, ySellScale];
+    extra = [data.sellsExtra[0].volume, styles.dotSell, ySellScale]
   }
 
   const circleData: [[number, string, ScaleLogarithmic<number, number>]] = [
@@ -345,9 +344,9 @@ function drawDotsAndLine(
     [chartMode === 'buy' ? 0 : data.summary.currentWanted.amount, styles.dotBuy, yBuyScale],
     [data.summary.afterOrderForSale.amount, styles.dotSell, ySellScale],
     [data.summary.afterOrderWanted.amount, styles.dotBuy, yBuyScale],
-  ].filter(([amount]) => amount > 0) as any;
+  ].filter(([amount]) => amount > 0) as any
 
-  drawInfoBoxLine(svg, circleData, data.summary, cx);
+  drawInfoBoxLine(svg, circleData, data.summary, cx)
 
   svg
     .selectAll('circle.glow')
@@ -358,7 +357,7 @@ function drawDotsAndLine(
     .attr('cx', (_d) => cx)
     .attr('cy', (d) => d[2](d[0]))
     .attr('r', 8)
-    .classed(styles.dotGlow, true);
+    .classed(styles.dotGlow, true)
   svg
     .selectAll('circle.dot')
     .data(circleData)
@@ -368,7 +367,7 @@ function drawDotsAndLine(
     .attr('cx', (_d) => cx)
     .attr('cy', (d) => d[2](d[0]))
     .attr('r', 5)
-    .attr('class', (d) => d[1]);
+    .attr('class', (d) => d[1])
 }
 
 function drawInfoBoxLine(
@@ -377,44 +376,44 @@ function drawInfoBoxLine(
   summary: Summary,
   xPrice: number,
 ) {
-  const { showLegendOnBottom } = calculateLegendParams(summary);
-  const x = xPrice;
-  const yData: number[] = circleData.map((a: [number, string, ScaleLogarithmic<number, number>]) => a[2](a[0]));
+  const { showLegendOnBottom } = calculateLegendParams(summary)
+  const x = xPrice
+  const yData: number[] = circleData.map((a: [number, string, ScaleLogarithmic<number, number>]) => a[2](a[0]))
 
-  const top = infoBox.sellTop + 10;
-  const left = infoBox.sellLeft + 10;
-  const bottom = totalHeight - infoBox.buyBottom - 10;
-  const right = totalWidth - infoBox.buyRight - 10;
+  const top = infoBox.sellTop + 10
+  const left = infoBox.sellLeft + 10
+  const bottom = totalHeight - infoBox.buyBottom - 10
+  const right = totalWidth - infoBox.buyRight - 10
 
   if (showLegendOnBottom) {
-    const max = d3.max(yData) || 0;
-    const y = max < bottom ? Math.min(bottom, max + 15) : Math.max(bottom, max - 15);
-    svg.append('line').attr('x1', x).attr('y1', y).attr('x2', x).attr('y2', bottom).classed(styles.infoBoxGreen, true);
+    const max = d3.max(yData) || 0
+    const y = max < bottom ? Math.min(bottom, max + 15) : Math.max(bottom, max - 15)
+    svg.append('line').attr('x1', x).attr('y1', y).attr('x2', x).attr('y2', bottom).classed(styles.infoBoxGreen, true)
     svg
       .append('line')
       .attr('x1', x)
       .attr('y1', bottom)
       .attr('x2', right)
       .attr('y2', bottom)
-      .classed(styles.infoBoxGreen, true);
+      .classed(styles.infoBoxGreen, true)
   } else {
-    const min = d3.min(yData) || 0;
-    const y = min > top ? Math.max(min - 15, top) : Math.min(min + 15, top);
-    svg.append('line').attr('x1', left).attr('y1', top).attr('x2', x).attr('y2', top).classed(styles.infoBoxRed, true);
-    svg.append('line').attr('x1', x).attr('y1', top).attr('x2', x).attr('y2', y).classed(styles.infoBoxRed, true);
+    const min = d3.min(yData) || 0
+    const y = min > top ? Math.max(min - 15, top) : Math.min(min + 15, top)
+    svg.append('line').attr('x1', left).attr('y1', top).attr('x2', x).attr('y2', top).classed(styles.infoBoxRed, true)
+    svg.append('line').attr('x1', x).attr('y1', top).attr('x2', x).attr('y2', y).classed(styles.infoBoxRed, true)
   }
 }
 
 function calculateLegendParams(
   summary: Summary,
 ): { showSales: boolean; showBuys: boolean; showLegendOnBottom: boolean } {
-  const showSales = summary.currentForSale.totalCost !== 0 || summary.afterOrderForSale.totalCost !== 0;
-  const showBuys = summary.currentWanted.totalCost !== 0 || summary.afterOrderWanted.totalCost !== 0;
+  const showSales = summary.currentForSale.totalCost !== 0 || summary.afterOrderForSale.totalCost !== 0
+  const showBuys = summary.currentWanted.totalCost !== 0 || summary.afterOrderWanted.totalCost !== 0
   return {
     showSales,
     showBuys,
     showLegendOnBottom: showBuys && !showSales,
-  };
+  }
 }
 
 const Legend = ({
@@ -422,14 +421,14 @@ const Legend = ({
   fromCurrency,
   toCurrency,
 }: {
-  summary: Summary;
-  fromCurrency: string;
-  toCurrency: string;
+  summary: Summary
+  fromCurrency: string
+  toCurrency: string
 }) => {
-  const { showSales, showBuys, showLegendOnBottom } = calculateLegendParams(summary);
+  const { showSales, showBuys, showLegendOnBottom } = calculateLegendParams(summary)
   const position = showLegendOnBottom
     ? { bottom: infoBox.buyBottom, right: infoBox.buyRight }
-    : { top: infoBox.sellTop, left: infoBox.sellLeft };
+    : { top: infoBox.sellTop, left: infoBox.sellLeft }
   return (
     <div
       className={classnames(styles.infoBox, {
@@ -491,8 +490,8 @@ const Legend = ({
         )}
       </div>
     </div>
-  );
-};
+  )
+}
 
 const SummaryLine = ({
   amount,
@@ -502,12 +501,12 @@ const SummaryLine = ({
   describer,
   color,
 }: {
-  amount: number;
-  totalCost: number;
-  fromCurrency: string;
-  toCurrency: string;
-  describer: string;
-  color: 'sellText' | 'buyText';
+  amount: number
+  totalCost: number
+  fromCurrency: string
+  toCurrency: string
+  describer: string
+  color: 'sellText' | 'buyText'
 }) => (
   <div className={styles.infoSummaryLine}>
     <div>
@@ -523,15 +522,15 @@ const SummaryLine = ({
       <Muted> total</Muted>
     </div>
   </div>
-);
+)
 
 const LegendImage = ({
   color,
   className,
 }: {
-  color: 'sellChart' | 'sellChartDark' | 'buyChart' | 'buyChartDark';
-  className?: any;
-}) => <div className={classnames(styles.legendImg, styles[color], className)} />;
+  color: 'sellChart' | 'sellChartDark' | 'buyChart' | 'buyChartDark'
+  className?: any
+}) => <div className={classnames(styles.legendImg, styles[color], className)} />
 
 const SellersLegend = () => (
   <div
@@ -544,7 +543,7 @@ const SellersLegend = () => (
     <span style={{ marginRight: '1em' }}>Sellers</span>
     <LegendImage color="sellChartDark" />
   </div>
-);
+)
 
 const BuyersLegend = () => (
   <div
@@ -557,4 +556,4 @@ const BuyersLegend = () => (
     <LegendImage color="buyChart" />
     <span style={{ marginLeft: '1em' }}>Buyers</span>
   </div>
-);
+)

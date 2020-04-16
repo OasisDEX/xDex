@@ -1,6 +1,6 @@
-import { Tab } from '../../pages/Tab';
-import { instantForm, Trade } from '../../pages/Trade';
-import { WalletConnection } from '../../pages/WalletConnection';
+import { Tab } from '../../pages/Tab'
+import { instantForm, Trade } from '../../pages/Trade'
+import { WalletConnection } from '../../pages/WalletConnection'
 import {
   // ACCOUNT_3_PUBLIC,
   cypressVisitWithWeb3,
@@ -8,280 +8,280 @@ import {
   tid,
   // toHex,
   // verifySendTxs
-} from '../../utils';
+} from '../../utils'
 
 const nextTrade = () => {
-  cy.get(tid('new-trade')).click();
-};
+  cy.get(tid('new-trade')).click()
+}
 
 describe('Buying', () => {
   beforeEach(() => {
-    cypressVisitWithWeb3();
-    WalletConnection.connect();
-    WalletConnection.isConnected();
-    Tab.instant();
-    instantForm();
-  });
+    cypressVisitWithWeb3()
+    WalletConnection.connect()
+    WalletConnection.isConnected()
+    Tab.instant()
+    instantForm()
+  })
 
   context('ETH for ERC20', () => {
     it('without proxy', () => {
-      const from = 'ETH';
-      const to = 'DAI';
-      const willPay = '0.357';
-      const willReceive = '100';
-      const price = '280 ETH/DAI';
+      const from = 'ETH'
+      const to = 'DAI'
+      const willPay = '0.357'
+      const willReceive = '100'
+      const price = '280 ETH/DAI'
 
-      const trade = new Trade();
-      trade.buy(to).amount(willReceive);
+      const trade = new Trade()
+      trade.buy(to).amount(willReceive)
 
-      trade.expectToPay(`${willPay}`);
+      trade.expectToPay(`${willPay}`)
 
-      const finalization = trade.execute();
+      const finalization = trade.execute()
 
-      const summary = finalization.shouldCreateProxy().shouldCommitATrade(willPay, from, willReceive, to);
+      const summary = finalization.shouldCreateProxy().shouldCommitATrade(willPay, from, willReceive, to)
 
-      summary.expectProxyBeingCreated();
-      summary.expectBought(willReceive, to);
-      summary.expectSold(willPay, from);
+      summary.expectProxyBeingCreated()
+      summary.expectBought(willReceive, to)
+      summary.expectSold(willPay, from)
       summary.expectPriceOf(
         price,
-      ); /* TODO .then(() => {
+      ) /* TODO .then(() => {
         verifySendTxs([{
           from: ACCOUNT_3_PUBLIC,
           to: INSTANT_PROXY_CREATE_AND_EXECUTE_ADDRESS,
           value: toHex('374999999999999999'),
         }]);
       });*/
-    });
+    })
 
     it('with proxy', () => {
-      const to = 'DAI';
-      const from = 'ETH';
-      const willReceive = '100';
+      const to = 'DAI'
+      const from = 'ETH'
+      const willReceive = '100'
 
-      const trade = new Trade();
-      trade.buy(to).amount(willReceive);
+      const trade = new Trade()
+      trade.buy(to).amount(willReceive)
 
-      trade.execute();
+      trade.execute()
 
-      nextTrade();
+      nextTrade()
 
-      const willReceiveMore = '500';
-      const willPay = '1.806';
-      const price = '276.78 ETH/DAI';
+      const willReceiveMore = '500'
+      const willPay = '1.806'
+      const price = '276.78 ETH/DAI'
 
-      const secondTrade = new Trade();
-      secondTrade.buy(to).amount(willReceiveMore);
+      const secondTrade = new Trade()
+      secondTrade.buy(to).amount(willReceiveMore)
 
-      secondTrade.expectToPay(willPay);
+      secondTrade.expectToPay(willPay)
 
-      const finalization = trade.execute();
+      const finalization = trade.execute()
 
-      const summary = finalization.shouldNotCreateProxy().shouldCommitATrade(willPay, from, willReceiveMore, to);
+      const summary = finalization.shouldNotCreateProxy().shouldCommitATrade(willPay, from, willReceiveMore, to)
 
-      summary.expectProxyNotBeingCreated();
-      summary.expectBought(willReceiveMore, to);
-      summary.expectSold(willPay, from);
-      summary.expectPriceOf(price);
-    });
-  });
+      summary.expectProxyNotBeingCreated()
+      summary.expectBought(willReceiveMore, to)
+      summary.expectSold(willPay, from)
+      summary.expectPriceOf(price)
+    })
+  })
 
   context('ERC20 for ETH', () => {
     it('without proxy and allowance', () => {
-      const from = 'DAI';
-      const to = 'ETH';
-      const willPay = '37.02';
-      const willReceive = '0.123';
-      const price = '301 ETH/DAI';
+      const from = 'DAI'
+      const to = 'ETH'
+      const willPay = '37.02'
+      const willReceive = '0.123'
+      const price = '301 ETH/DAI'
 
-      Trade.swapTokens();
+      Trade.swapTokens()
 
-      const trade = new Trade();
-      trade.buy(to).amount(willReceive);
+      const trade = new Trade()
+      trade.buy(to).amount(willReceive)
 
-      trade.expectToPay(`${willPay}`);
+      trade.expectToPay(`${willPay}`)
 
-      const finalization = trade.execute();
+      const finalization = trade.execute()
 
-      finalization.shouldCreateProxy().expectSuccess();
-      finalization.shouldSetAllowanceFor(from).expectSuccess();
+      finalization.shouldCreateProxy().expectSuccess()
+      finalization.shouldSetAllowanceFor(from).expectSuccess()
 
-      const summary = finalization.shouldCommitATrade(willPay, from, willReceive, to);
+      const summary = finalization.shouldCommitATrade(willPay, from, willReceive, to)
 
-      summary.expectBought(willReceive, to);
-      summary.expectSold(willPay, from);
-      summary.expectPriceOf(price);
-    });
+      summary.expectBought(willReceive, to)
+      summary.expectSold(willPay, from)
+      summary.expectPriceOf(price)
+    })
 
     it('with proxy and no allowance', () => {
-      const from = 'ETH';
-      const to = 'DAI';
-      const willPay = '1';
+      const from = 'ETH'
+      const to = 'DAI'
+      const willPay = '1'
 
-      const trade = new Trade();
-      trade.buy(to);
-      trade.sell(from).amount(willPay);
-      trade.execute();
+      const trade = new Trade()
+      trade.buy(to)
+      trade.sell(from).amount(willPay)
+      trade.execute()
 
-      nextTrade();
+      nextTrade()
 
-      Trade.swapTokens();
+      Trade.swapTokens()
 
-      const nextFrom = 'DAI';
-      const nextTo = 'ETH';
-      const nextWillPay = '37.02';
-      const nextWillReceive = '0.123';
-      const price = '301 ETH/DAI';
+      const nextFrom = 'DAI'
+      const nextTo = 'ETH'
+      const nextWillPay = '37.02'
+      const nextWillReceive = '0.123'
+      const price = '301 ETH/DAI'
 
-      const secondTrade = new Trade();
-      secondTrade.sell(nextFrom);
-      secondTrade.buy(nextTo).amount(nextWillReceive);
+      const secondTrade = new Trade()
+      secondTrade.sell(nextFrom)
+      secondTrade.buy(nextTo).amount(nextWillReceive)
 
-      secondTrade.expectToReceive(`${nextWillReceive}`);
+      secondTrade.expectToReceive(`${nextWillReceive}`)
 
-      const nextFinalization = secondTrade.execute();
+      const nextFinalization = secondTrade.execute()
 
-      nextFinalization.shouldNotCreateProxy().shouldSetAllowanceFor(nextFrom).expectSuccess();
+      nextFinalization.shouldNotCreateProxy().shouldSetAllowanceFor(nextFrom).expectSuccess()
 
-      const finalSummary = nextFinalization.shouldCommitATrade(nextWillPay, nextFrom, nextWillReceive, nextTo);
+      const finalSummary = nextFinalization.shouldCommitATrade(nextWillPay, nextFrom, nextWillReceive, nextTo)
 
-      finalSummary.expectProxyNotBeingCreated();
-      finalSummary.expectBought(nextWillReceive, nextTo);
-      finalSummary.expectSold(nextWillPay, nextFrom);
-      finalSummary.expectPriceOf(price);
-    });
+      finalSummary.expectProxyNotBeingCreated()
+      finalSummary.expectBought(nextWillReceive, nextTo)
+      finalSummary.expectSold(nextWillPay, nextFrom)
+      finalSummary.expectPriceOf(price)
+    })
 
     it('with proxy and allowance', () => {
-      const from = 'DAI';
-      const to = 'ETH';
-      const willPay = '37.02';
-      const willReceive = '0.123';
-      const price = '301 ETH/DAI';
+      const from = 'DAI'
+      const to = 'ETH'
+      const willPay = '37.02'
+      const willReceive = '0.123'
+      const price = '301 ETH/DAI'
 
-      Trade.swapTokens();
+      Trade.swapTokens()
 
-      const trade = new Trade();
-      trade.sell(from);
-      trade.buy(to).amount(willReceive);
-      trade.execute();
+      const trade = new Trade()
+      trade.sell(from)
+      trade.buy(to).amount(willReceive)
+      trade.execute()
 
-      nextTrade();
+      nextTrade()
 
-      const newTrade = new Trade();
-      trade.sell(from);
-      trade.buy(to).amount(willReceive);
+      const newTrade = new Trade()
+      trade.sell(from)
+      trade.buy(to).amount(willReceive)
 
-      const finalization = newTrade.execute();
+      const finalization = newTrade.execute()
 
       const summary = finalization
         .shouldNotCreateProxy()
         .shouldNotSetAllowance()
-        .shouldCommitATrade(willPay, from, willReceive, to);
+        .shouldCommitATrade(willPay, from, willReceive, to)
 
-      summary.expectBought(willReceive, to);
-      summary.expectSold(willPay, from);
-      summary.expectPriceOf(price);
-    });
-  });
+      summary.expectBought(willReceive, to)
+      summary.expectSold(willPay, from)
+      summary.expectPriceOf(price)
+    })
+  })
 
   context('ERC20 for ERC20', () => {
     it('without proxy and allowance', () => {
-      const from = 'DAI';
-      const to = 'WETH';
-      const willPay = '150.50';
-      const willReceive = '0.5';
-      const price = '301 WETH/DAI';
+      const from = 'DAI'
+      const to = 'WETH'
+      const willPay = '150.50'
+      const willReceive = '0.5'
+      const price = '301 WETH/DAI'
 
-      Trade.swapTokens();
+      Trade.swapTokens()
 
-      const trade = new Trade();
-      trade.sell(from);
-      trade.buy(to).amount(willReceive);
+      const trade = new Trade()
+      trade.sell(from)
+      trade.buy(to).amount(willReceive)
 
-      trade.expectToPay(`${willPay}`);
+      trade.expectToPay(`${willPay}`)
 
-      const finalization = trade.execute();
+      const finalization = trade.execute()
 
-      finalization.shouldCreateProxy().expectSuccess();
-      finalization.shouldSetAllowanceFor(from).expectSuccess();
+      finalization.shouldCreateProxy().expectSuccess()
+      finalization.shouldSetAllowanceFor(from).expectSuccess()
 
-      const summary = finalization.shouldCommitATrade(willPay, from, willReceive, to);
+      const summary = finalization.shouldCommitATrade(willPay, from, willReceive, to)
 
-      summary.expectBought(willReceive, to);
-      summary.expectSold(willPay, from);
-      summary.expectPriceOf(price);
-    });
+      summary.expectBought(willReceive, to)
+      summary.expectSold(willPay, from)
+      summary.expectPriceOf(price)
+    })
 
     it('with proxy and no allowance', () => {
-      const from = 'ETH';
-      const to = 'DAI';
-      const willPay = '1';
+      const from = 'ETH'
+      const to = 'DAI'
+      const willPay = '1'
 
-      const trade = new Trade();
-      trade.buy(to);
-      trade.sell(from).amount(willPay);
-      trade.execute();
+      const trade = new Trade()
+      trade.buy(to)
+      trade.sell(from).amount(willPay)
+      trade.execute()
 
-      nextTrade();
+      nextTrade()
 
-      Trade.swapTokens();
+      Trade.swapTokens()
 
-      const nextFrom = 'DAI';
-      const nextTo = 'WETH';
-      const nextWillPay = '150.50';
-      const nextWillReceive = '0.5';
-      const price = '301 WETH/DAI';
+      const nextFrom = 'DAI'
+      const nextTo = 'WETH'
+      const nextWillPay = '150.50'
+      const nextWillReceive = '0.5'
+      const price = '301 WETH/DAI'
 
-      const secondTrade = new Trade();
-      secondTrade.sell(nextFrom);
-      secondTrade.buy(nextTo).amount(nextWillReceive);
+      const secondTrade = new Trade()
+      secondTrade.sell(nextFrom)
+      secondTrade.buy(nextTo).amount(nextWillReceive)
 
-      secondTrade.expectToReceive(`${nextWillReceive}`);
+      secondTrade.expectToReceive(`${nextWillReceive}`)
 
-      const nextFinalization = secondTrade.execute();
+      const nextFinalization = secondTrade.execute()
 
-      nextFinalization.shouldNotCreateProxy().shouldSetAllowanceFor(nextFrom).expectSuccess();
+      nextFinalization.shouldNotCreateProxy().shouldSetAllowanceFor(nextFrom).expectSuccess()
 
-      const finalSummary = nextFinalization.shouldCommitATrade(nextWillPay, nextFrom, nextWillReceive, nextTo);
+      const finalSummary = nextFinalization.shouldCommitATrade(nextWillPay, nextFrom, nextWillReceive, nextTo)
 
-      finalSummary.expectProxyNotBeingCreated();
-      finalSummary.expectBought(nextWillReceive, nextTo);
-      finalSummary.expectSold(nextWillPay, nextFrom);
-      finalSummary.expectPriceOf(price);
-    });
+      finalSummary.expectProxyNotBeingCreated()
+      finalSummary.expectBought(nextWillReceive, nextTo)
+      finalSummary.expectSold(nextWillPay, nextFrom)
+      finalSummary.expectPriceOf(price)
+    })
 
     it('with proxy and allowance', () => {
-      const from = 'DAI';
-      const to = 'WETH';
-      const willReceive = '0.3';
-      const price = '301 WETH/DAI';
+      const from = 'DAI'
+      const to = 'WETH'
+      const willReceive = '0.3'
+      const price = '301 WETH/DAI'
 
-      Trade.swapTokens();
+      Trade.swapTokens()
 
-      const trade = new Trade();
-      trade.sell(from);
-      trade.buy(to).amount(willReceive);
-      trade.execute();
+      const trade = new Trade()
+      trade.sell(from)
+      trade.buy(to).amount(willReceive)
+      trade.execute()
 
-      nextTrade();
+      nextTrade()
 
-      const nextWillReceive = '0.1';
-      const nextWillPay = '30.10';
+      const nextWillReceive = '0.1'
+      const nextWillPay = '30.10'
 
-      const newTrade = new Trade();
-      newTrade.sell(from);
-      newTrade.buy(to).amount(nextWillReceive);
+      const newTrade = new Trade()
+      newTrade.sell(from)
+      newTrade.buy(to).amount(nextWillReceive)
 
-      const finalization = newTrade.execute();
+      const finalization = newTrade.execute()
 
       const summary = finalization
         .shouldNotCreateProxy()
         .shouldNotSetAllowance()
-        .shouldCommitATrade(nextWillPay, from, nextWillReceive, to);
+        .shouldCommitATrade(nextWillPay, from, nextWillReceive, to)
 
-      summary.expectBought(nextWillReceive, to);
-      summary.expectSold(nextWillPay, from);
-      summary.expectPriceOf(price);
-    });
-  });
-});
+      summary.expectBought(nextWillReceive, to)
+      summary.expectSold(nextWillPay, from)
+      summary.expectPriceOf(price)
+    })
+  })
+})

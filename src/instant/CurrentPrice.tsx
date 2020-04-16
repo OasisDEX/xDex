@@ -1,16 +1,16 @@
-import { BigNumber } from 'bignumber.js';
-import classnames from 'classnames';
-import * as React from 'react';
-import { Approximate } from '../utils/Approximate';
-import { formatAmountInstant } from '../utils/formatters/format';
-import * as styles from './Instant.scss';
+import { BigNumber } from 'bignumber.js'
+import classnames from 'classnames'
+import * as React from 'react'
+import { Approximate } from '../utils/Approximate'
+import { formatAmountInstant } from '../utils/formatters/format'
+import * as styles from './Instant.scss'
 
 export class CurrentPrice extends React.Component<{
-  price?: BigNumber;
-  quotation?: string;
+  price?: BigNumber
+  quotation?: string
 }> {
   public render() {
-    const { price, quotation } = this.props;
+    const { price, quotation } = this.props
     return (
       <div className={classnames(styles.details, styles.finalization)}>
         <span>Current Estimated Price</span>
@@ -21,6 +21,6 @@ export class CurrentPrice extends React.Component<{
           </Approximate>
         </span>
       </div>
-    );
+    )
   }
 }

@@ -1,18 +1,18 @@
-import classnames from 'classnames';
-import * as React from 'react';
+import classnames from 'classnames'
+import * as React from 'react'
 
-import { getToken } from '../blockchain/config';
-import { MarginableAsset } from '../marginTrading/state/mtAccount';
-import { FormatPercent, Money } from '../utils/formatters/Formatters';
-import { Button } from '../utils/forms/Buttons';
-import { inject } from '../utils/inject';
-import { Hr } from '../utils/layout/LayoutHelpers';
-import { ModalOpenerProps, ModalProps } from '../utils/modal';
-import { Panel, PanelHeader } from '../utils/panel/Panel';
-import { Currency, Muted } from '../utils/text/Text';
-import { zero } from '../utils/zero';
-import { CDPHistoryViewModal } from './CDPHistoryView';
-import * as styles from './CDPRiskManagement.scss';
+import { getToken } from '../blockchain/config'
+import { MarginableAsset } from '../marginTrading/state/mtAccount'
+import { FormatPercent, Money } from '../utils/formatters/Formatters'
+import { Button } from '../utils/forms/Buttons'
+import { inject } from '../utils/inject'
+import { Hr } from '../utils/layout/LayoutHelpers'
+import { ModalOpenerProps, ModalProps } from '../utils/modal'
+import { Panel, PanelHeader } from '../utils/panel/Panel'
+import { Currency, Muted } from '../utils/text/Text'
+import { zero } from '../utils/zero'
+import { CDPHistoryViewModal } from './CDPHistoryView'
+import * as styles from './CDPRiskManagement.scss'
 
 enum CollateralizationState {
   safe,
@@ -57,20 +57,20 @@ export class CDPRiskManagement extends React.Component<MarginableAsset & ModalOp
           )}
         </div>
       </Panel>
-    );
+    )
   }
 
   private showHistory() {
-    this.props.open(inject<ModalProps, MarginableAsset>(CDPHistoryViewModal, this.props));
+    this.props.open(inject<ModalProps, MarginableAsset>(CDPHistoryViewModal, this.props))
   }
 
   private collateralState() {
     if (!this.props.currentCollRatio || this.props.currentCollRatio.gte(this.props.safeCollRatio)) {
-      return CollateralizationState.safe;
+      return CollateralizationState.safe
     }
     return this.props.currentCollRatio.gte(this.props.minCollRatio)
       ? CollateralizationState.unsafe
-      : CollateralizationState.toLiquidation;
+      : CollateralizationState.toLiquidation
   }
 
   private purchasingPower() {
@@ -79,7 +79,7 @@ export class CDPRiskManagement extends React.Component<MarginableAsset & ModalOp
         <Muted>Purchasing power</Muted>
         <Money value={undefined} token="DAI" className={styles.largeFontSize} greyedNonSignZeros={false} />
       </div>
-    );
+    )
   }
 
   private liquidationPrice() {
@@ -100,7 +100,7 @@ export class CDPRiskManagement extends React.Component<MarginableAsset & ModalOp
           />
         )}
       </div>
-    );
+    )
   }
 
   private currentPriceInfo() {
@@ -109,7 +109,7 @@ export class CDPRiskManagement extends React.Component<MarginableAsset & ModalOp
         <Muted>Oracle price</Muted>
         <Money value={this.props.referencePrice} token="USD" className={styles.largeFontSize} />
       </div>
-    );
+    )
   }
 
   private balance() {
@@ -129,7 +129,7 @@ export class CDPRiskManagement extends React.Component<MarginableAsset & ModalOp
           <Money value={this.props.balance} token={this.props.name} className={styles.detailedMoney} />
         </div>
       </div>
-    );
+    )
   }
 
   private collateralisation() {
@@ -159,7 +159,7 @@ export class CDPRiskManagement extends React.Component<MarginableAsset & ModalOp
           <FormatPercent value={this.props.minCollRatio} multiply={true} className={styles.detailedPercent} />
         </div>
       </div>
-    );
+    )
   }
 
   private debt() {
@@ -179,6 +179,6 @@ export class CDPRiskManagement extends React.Component<MarginableAsset & ModalOp
           <Money value={this.props.maxDebt} token="DAI" className={styles.detailedMoney} />
         </div>
       </div>
-    );
+    )
   }
 }

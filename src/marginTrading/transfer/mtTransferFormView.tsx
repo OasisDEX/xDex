@@ -1,36 +1,36 @@
-import { BigNumber } from 'bignumber.js';
-import * as React from 'react';
-import * as ReactModal from 'react-modal';
+import { BigNumber } from 'bignumber.js'
+import * as React from 'react'
+import * as ReactModal from 'react-modal'
 
-import classnames from 'classnames';
-import { Dictionary } from 'ramda';
-import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
-import { getToken } from '../../blockchain/config';
-import { nullAddress } from '../../blockchain/utils';
-import { BigNumberInput } from '../../utils/bigNumberInput/BigNumberInput';
-import { FormChangeKind, ProgressStage } from '../../utils/form';
-import { formatAmount } from '../../utils/formatters/format';
-import { Money } from '../../utils/formatters/Formatters';
-import { Button } from '../../utils/forms/Buttons';
-import { ErrorMessage } from '../../utils/forms/ErrorMessage';
-import { InputGroup, InputGroupAddon } from '../../utils/forms/InputGroup';
-import { GasCost } from '../../utils/gasCost/GasCost';
-import { BorderBox, Hr } from '../../utils/layout/LayoutHelpers';
-import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
-import { ModalProps } from '../../utils/modal';
-import { Panel, PanelBody, PanelFooter, PanelHeader } from '../../utils/panel/Panel';
-import { Muted } from '../../utils/text/Text';
-import { TransactionStateDescription } from '../../utils/text/TransactionStateDescription';
-import { zero } from '../../utils/zero';
+import classnames from 'classnames'
+import { Dictionary } from 'ramda'
+import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons'
+import { getToken } from '../../blockchain/config'
+import { nullAddress } from '../../blockchain/utils'
+import { BigNumberInput } from '../../utils/bigNumberInput/BigNumberInput'
+import { FormChangeKind, ProgressStage } from '../../utils/form'
+import { formatAmount } from '../../utils/formatters/format'
+import { Money } from '../../utils/formatters/Formatters'
+import { Button } from '../../utils/forms/Buttons'
+import { ErrorMessage } from '../../utils/forms/ErrorMessage'
+import { InputGroup, InputGroupAddon } from '../../utils/forms/InputGroup'
+import { GasCost } from '../../utils/gasCost/GasCost'
+import { BorderBox, Hr } from '../../utils/layout/LayoutHelpers'
+import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator'
+import { ModalProps } from '../../utils/modal'
+import { Panel, PanelBody, PanelFooter, PanelHeader } from '../../utils/panel/Panel'
+import { Muted } from '../../utils/text/Text'
+import { TransactionStateDescription } from '../../utils/text/TransactionStateDescription'
+import { zero } from '../../utils/zero'
 
-import * as mixpanel from 'mixpanel-browser';
-import * as ReactDOM from 'react-dom';
-import { theAppContext } from '../../AppContext';
-import { SvgImage } from '../../utils/icons/utils';
-import { LoadableWithTradingPair } from '../../utils/loadable';
-import { MTSimpleFormState } from '../simple/mtOrderForm';
-import { MtSimpleOrderFormBody } from '../simple/mtOrderFormView';
-import * as stylesOrder from '../simple/mtOrderFormView.scss';
+import * as mixpanel from 'mixpanel-browser'
+import * as ReactDOM from 'react-dom'
+import { theAppContext } from '../../AppContext'
+import { SvgImage } from '../../utils/icons/utils'
+import { LoadableWithTradingPair } from '../../utils/loadable'
+import { MTSimpleFormState } from '../simple/mtOrderForm'
+import { MtSimpleOrderFormBody } from '../simple/mtOrderFormView'
+import * as stylesOrder from '../simple/mtOrderFormView.scss'
 import {
   CashAsset,
   findAsset,
@@ -39,33 +39,33 @@ import {
   MTAccount,
   MTAccountState,
   UserActionKind,
-} from '../state/mtAccount';
-import checkIconSvg from './check-icon.svg';
-import { Message, MessageKind, MTTransferFormState, MTTransferFormTab } from './mtTransferForm';
-import * as styles from './mtTransferFormView.scss';
+} from '../state/mtAccount'
+import checkIconSvg from './check-icon.svg'
+import { Message, MessageKind, MTTransferFormState, MTTransferFormTab } from './mtTransferForm'
+import * as styles from './mtTransferFormView.scss'
 
-type MTFundFormProps = MTTransferFormState & ModalProps;
+type MTFundFormProps = MTTransferFormState & ModalProps
 
 const tabLabels: Dictionary<string> = {
   [MTTransferFormTab.proxy]: 'Deploy proxy',
   [MTTransferFormTab.transfer]: 'Deposit',
   [MTTransferFormTab.buy]: 'Buy',
-};
+}
 
 interface StepComponentProps {
-  title: string;
-  description: string;
-  btnLabel: string;
-  btnAction: () => void;
-  btnDisabled: boolean;
-  stepCompleted: boolean;
-  isLoading: boolean;
-  tid?: string;
+  title: string
+  description: string
+  btnLabel: string
+  btnAction: () => void
+  btnDisabled: boolean
+  stepCompleted: boolean
+  isLoading: boolean
+  tid?: string
 }
 
 class StepComponent extends React.Component<StepComponentProps> {
   public render() {
-    const { title, description, btnLabel, btnAction, stepCompleted, btnDisabled, isLoading, tid } = this.props;
+    const { title, description, btnLabel, btnAction, stepCompleted, btnDisabled, isLoading, tid } = this.props
 
     return (
       <div className={styles.onboardingPanel}>
@@ -88,53 +88,53 @@ class StepComponent extends React.Component<StepComponentProps> {
           )}
         </Button>
       </div>
-    );
+    )
   }
 }
 
 export class MtTransferFormView extends React.Component<MTFundFormProps> {
-  private amountInput?: HTMLElement;
+  private amountInput?: HTMLElement
 
   constructor(p: MTFundFormProps) {
-    super(p);
+    super(p)
   }
 
   public render() {
-    const { mta, token, progress, startTab, withOnboarding, ilk } = this.props;
+    const { mta, token, progress, startTab, withOnboarding, ilk } = this.props
 
     const onModalRef = (node: any) => {
       if (node) {
         node.addEventListener('click', (e: any) => {
           if (e.target.classList.contains(styles.modal)) {
-            this.close();
+            this.close()
           }
-        });
+        })
       }
-    };
+    }
 
-    let currentTab = MTTransferFormTab.transfer;
-    let onboardingTabs: string[] = [];
-    let startIndex = 0;
+    let currentTab = MTTransferFormTab.transfer
+    let onboardingTabs: string[] = []
+    let startIndex = 0
 
     const isLoading =
-      !mta || progress === ProgressStage.waitingForApproval || progress === ProgressStage.waitingForConfirmation;
+      !mta || progress === ProgressStage.waitingForApproval || progress === ProgressStage.waitingForConfirmation
 
     const allowance = (_mta: MTAccount, _token: string) =>
-      _token === 'DAI' ? _mta.daiAllowance : findMarginableAsset(_token, _mta)!.allowance;
+      _token === 'DAI' ? _mta.daiAllowance : findMarginableAsset(_token, _mta)!.allowance
 
     if (withOnboarding) {
-      onboardingTabs = Object.keys(MTTransferFormTab);
-      startIndex = startTab ? onboardingTabs.indexOf(startTab) : 0;
-      currentTab = MTTransferFormTab.proxy;
+      onboardingTabs = Object.keys(MTTransferFormTab)
+      startIndex = startTab ? onboardingTabs.indexOf(startTab) : 0
+      currentTab = MTTransferFormTab.proxy
 
       if (mta && mta.proxy && mta.proxy.options.address !== nullAddress && allowance(mta, token)) {
-        currentTab = MTTransferFormTab.transfer;
+        currentTab = MTTransferFormTab.transfer
       }
 
-      const ma = findMarginableAsset((token === 'DAI' && ilk) || token, mta);
+      const ma = findMarginableAsset((token === 'DAI' && ilk) || token, mta)
 
       if (mta && ma && ma.purchasingPower.gt(zero)) {
-        currentTab = MTTransferFormTab.buy;
+        currentTab = MTTransferFormTab.buy
       }
     }
 
@@ -165,7 +165,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
                     >
                       {tabLabels[_tab]}
                     </div>
-                  );
+                  )
                 })}
             </div>
           ) : (
@@ -238,46 +238,46 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
           )}
         </Panel>
       </ReactModal>
-    );
+    )
   }
 
   public handleSetMaxAmount = () => {
-    const { token, balances, actionKind } = this.props;
+    const { token, balances, actionKind } = this.props
 
     if (balances) {
-      const maxValue = actionKind === UserActionKind.fund ? balances[token] : this.getMaxWithdrawAmount();
-      this.handleSetMax(maxValue, FormChangeKind.amountFieldChange);
+      const maxValue = actionKind === UserActionKind.fund ? balances[token] : this.getMaxWithdrawAmount()
+      this.handleSetMax(maxValue, FormChangeKind.amountFieldChange)
     }
-  };
+  }
 
   public handleAmountFocus = () => {
     if (this.amountInput) {
-      this.amountInput.focus();
+      this.amountInput.focus()
     }
-  };
+  }
 
   private getMaxWithdrawAmount = (): BigNumber => {
-    const { daiBalance, ilk, token } = this.props;
-    const baseToken = (token === 'DAI' && ilk) || token;
-    const baseAsset = this.getAsset(baseToken) as MarginableAsset;
-    return token === 'DAI' ? (daiBalance && daiBalance.gt(zero) ? daiBalance : zero) : baseAsset.availableBalance;
-  };
+    const { daiBalance, ilk, token } = this.props
+    const baseToken = (token === 'DAI' && ilk) || token
+    const baseAsset = this.getAsset(baseToken) as MarginableAsset
+    return token === 'DAI' ? (daiBalance && daiBalance.gt(zero) ? daiBalance : zero) : baseAsset.availableBalance
+  }
 
   private amountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/,/g, '');
+    const value = e.target.value.replace(/,/g, '')
     this.props.change({
       kind: FormChangeKind.amountFieldChange,
       value: value === '' ? undefined : new BigNumber(value),
-    });
-  };
+    })
+  }
 
   private close = () => {
-    this.props.cancel();
-    this.props.close();
-  };
+    this.props.cancel()
+    this.props.close()
+  }
 
   private getAsset(token: string): undefined | CashAsset | MarginableAsset {
-    return findAsset(token, this.props.mta);
+    return findAsset(token, this.props.mta)
   }
 
   private AccountSummary = () => {
@@ -293,11 +293,11 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
       daiBalance,
       daiBalancePost,
       balances,
-    } = this.props;
-    const baseToken = (token === 'DAI' && ilk) || token;
-    const baseAsset = this.getAsset(baseToken) as MarginableAsset;
-    const liquidationPriceDisplay = liquidationPrice ? liquidationPrice : zero;
-    const liquidationPricePostDisplay = liquidationPricePost ? liquidationPricePost : zero;
+    } = this.props
+    const baseToken = (token === 'DAI' && ilk) || token
+    const baseAsset = this.getAsset(baseToken) as MarginableAsset
+    const liquidationPriceDisplay = liquidationPrice ? liquidationPrice : zero
+    const liquidationPricePostDisplay = liquidationPricePost ? liquidationPricePost : zero
     return (
       <>
         <div className={styles.subtitle}>{`${getToken(token).name} (${token}) ${this.getActionName()}`}</div>
@@ -381,8 +381,8 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
           </div>
         </div>
       </>
-    );
-  };
+    )
+  }
 
   private Form() {
     return (
@@ -392,11 +392,11 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
           <ErrorMessage messages={this.props.messages.map((msg) => this.messageContent(msg))} />
         )}
       </div>
-    );
+    )
   }
 
   private TransactionState() {
-    const amount = this.props.amount || new BigNumber(0);
+    const amount = this.props.amount || new BigNumber(0)
     return (
       <BorderBox className={styles.checklistBox}>
         <div className={styles.checklistLine}>
@@ -424,43 +424,43 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
           </Muted>
         </div>
       </BorderBox>
-    );
+    )
   }
 
   private FormOrTransactionState() {
-    return this.props.progress ? this.TransactionState() : this.Form();
+    return this.props.progress ? this.TransactionState() : this.Form()
   }
 
   private transfer() {
     if (this.props.mta && this.props.mta.state !== MTAccountState.notSetup && this.props.amount) {
-      this.props.transfer(this.props);
+      this.props.transfer(this.props)
     }
   }
 
   private setup() {
     if (this.props.mta) {
-      this.props.setup(this.props);
+      this.props.setup(this.props)
     }
   }
 
   private allowance() {
     if (this.props.mta && this.props.mta.state !== MTAccountState.notSetup) {
-      this.props.allowance(this.props);
+      this.props.allowance(this.props)
     }
   }
 
   private getActionName() {
-    const { actionKind } = this.props;
-    return actionKind === UserActionKind.fund ? 'Deposit' : 'Withdraw';
+    const { actionKind } = this.props
+    return actionKind === UserActionKind.fund ? 'Deposit' : 'Withdraw'
   }
 
   private Buttons() {
-    const { progress, readyToProceed, token, ilk, actionKind } = this.props;
-    const retry = progress === ProgressStage.fiasco;
-    const depositAgain = progress === ProgressStage.done;
-    const deposit = !retry && !depositAgain;
-    const depositEnabled = readyToProceed && progress === undefined && (token !== 'DAI' || !!ilk);
-    const proceedName = `${this.getActionName()} ${token}`;
+    const { progress, readyToProceed, token, ilk, actionKind } = this.props
+    const retry = progress === ProgressStage.fiasco
+    const depositAgain = progress === ProgressStage.done
+    const deposit = !retry && !depositAgain
+    const depositEnabled = readyToProceed && progress === undefined && (token !== 'DAI' || !!ilk)
+    const proceedName = `${this.getActionName()} ${token}`
 
     return (
       <PanelFooter className={styles.buttons}>
@@ -473,14 +473,14 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
             block={true}
             color="primary"
             onClick={() => {
-              this.transfer();
+              this.transfer()
               mixpanel.track('btn-click', {
                 id: `${actionKind}-${token === 'DAI' ? 'dai' : 'collateral'}-submit`,
                 product: 'oasis-trade',
                 page: 'Leverage',
                 section: 'deposit-withdraw-modal',
                 currency: token,
-              });
+              })
             }}
           >
             {proceedName}
@@ -507,21 +507,21 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
           Cancel
         </Button>
       </PanelFooter>
-    );
+    )
   }
 
   private handleSetMax = (value: BigNumber, kind: FormChangeKind.amountFieldChange) => {
-    this.props.change({ kind, value });
-  };
+    this.props.change({ kind, value })
+  }
 
   private AmountGroup(disabled: boolean) {
-    const { token, balances, actionKind } = this.props;
+    const { token, balances, actionKind } = this.props
 
     const maxTotal = balances
       ? actionKind === UserActionKind.fund
         ? balances[token]
         : this.getMaxWithdrawAmount()
-      : zero;
+      : zero
 
     return (
       <InputGroup sizer="md" disabled={disabled}>
@@ -551,7 +551,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
           {token}
         </InputGroupAddon>
       </InputGroup>
-    );
+    )
   }
 
   private messageContent(msg: Message) {
@@ -559,15 +559,15 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
       case MessageKind.insufficientAvailableAmount:
         return msg.token === 'DAI'
           ? `Your balance is too low to withdraw that amount`
-          : `You don't have enough free collateral to withdraw that amount`;
+          : `You don't have enough free collateral to withdraw that amount`
       case MessageKind.insufficientAmount:
-        return `Your balance is too low to deposit that amount`;
+        return `Your balance is too low to deposit that amount`
       case MessageKind.dustAmount:
-        return `Transfer below token limit`;
+        return `Transfer below token limit`
       case MessageKind.impossibleToPlan:
-        return msg.message;
+        return msg.message
       case MessageKind.minDebt:
-        return `Dai debt below ${msg.message} DAI limit`;
+        return `Dai debt below ${msg.message} DAI limit`
       case MessageKind.purchasingPowerEqZero:
         return (
           <div style={{ marginTop: '8px' }}>
@@ -575,7 +575,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
             <br />
             Min amount to deposit is {msg.minDepositAmount.toPrecision(4, 2)} {msg.token}.
           </div>
-        );
+        )
     }
   }
 }
@@ -585,9 +585,9 @@ export class MTSimpleOrderBuyPanel extends React.Component<
 > {
   public render() {
     if (this.props.status === 'loaded' && this.props.value && this.props.value.mta) {
-      const formState = this.props.value;
-      const { mta } = formState;
-      const ma = findMarginableAsset(formState.baseToken, mta);
+      const formState = this.props.value
+      const { mta } = formState
+      const ma = findMarginableAsset(formState.baseToken, mta)
 
       if (mta && mta.proxy && ma && (ma.balance.gt(zero) || ma.dai.gt(zero))) {
         return (
@@ -604,7 +604,7 @@ export class MTSimpleOrderBuyPanel extends React.Component<
               Cancel
             </Button>
           </div>
-        );
+        )
       }
     }
 
@@ -613,6 +613,6 @@ export class MTSimpleOrderBuyPanel extends React.Component<
         <PanelHeader>Manage Your Leverage</PanelHeader>
         <LoadingIndicator size="lg" />
       </div>
-    );
+    )
   }
 }

@@ -1,8 +1,8 @@
-import { storiesOf } from '@storybook/react';
-import * as React from 'react';
-import { Button, ButtonGroup } from './Buttons';
+import { storiesOf } from '@storybook/react'
+import * as React from 'react'
+import { Button, ButtonGroup } from './Buttons'
 
-const stories = storiesOf('Form inputs and buttons/Buttons', module);
+const stories = storiesOf('Form inputs and buttons/Buttons', module)
 
 stories.add('Colors', () => (
   <div>
@@ -32,7 +32,7 @@ stories.add('Colors', () => (
       Secondary disabled button
     </Button>
   </div>
-));
+))
 
 stories.add('Button group', () => (
   <div>
@@ -50,7 +50,7 @@ stories.add('Button group', () => (
       <Button color="greyOutlined">Hank Griffin</Button>
     </ButtonGroup>
   </div>
-));
+))
 
 stories.add('Button size', () => (
   <div
@@ -64,7 +64,7 @@ stories.add('Button size', () => (
     <Button size="md">Medium (size="md")</Button>
     <Button size="lg">Medium (size="lg")</Button>
   </div>
-));
+))
 
 stories.add('Button block', () => (
   <table>
@@ -84,4 +84,4 @@ stories.add('Button block', () => (
       </tr>
     </thead>
   </table>
-));
+))

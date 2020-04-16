@@ -1,10 +1,10 @@
-import { BigNumber } from 'bignumber.js';
-import { curry } from 'ramda';
-import { merge, Observable, of, Subject } from 'rxjs';
-import { first, tap } from 'rxjs/internal/operators';
-import { map, scan, switchMap, takeUntil } from 'rxjs/operators';
-import { Calls, Calls$, ReadCalls, ReadCalls$ } from '../../blockchain/calls/calls';
-import { combineAndMerge } from '../../utils/combineAndMerge';
+import { BigNumber } from 'bignumber.js'
+import { curry } from 'ramda'
+import { merge, Observable, of, Subject } from 'rxjs'
+import { first, tap } from 'rxjs/internal/operators'
+import { map, scan, switchMap, takeUntil } from 'rxjs/operators'
+import { Calls, Calls$, ReadCalls, ReadCalls$ } from '../../blockchain/calls/calls'
+import { combineAndMerge } from '../../utils/combineAndMerge'
 import {
   doGasEstimation,
   EtherPriceUSDChange,
@@ -19,18 +19,18 @@ import {
   toEtherPriceUSDChange,
   toGasPriceChange,
   transactionToX,
-} from '../../utils/form';
-import { description, Impossible, isImpossible } from '../../utils/impossible';
-import { Omit } from '../../utils/omit';
-import { minusOne, zero } from '../../utils/zero';
-import { Operation } from '../state/mtAccount';
-import { AllocationRequestAssetInfo, AllocationRequestPilot } from './allocate';
-import { balance } from './balance';
+} from '../../utils/form'
+import { description, Impossible, isImpossible } from '../../utils/impossible'
+import { Omit } from '../../utils/omit'
+import { minusOne, zero } from '../../utils/zero'
+import { Operation } from '../state/mtAccount'
+import { AllocationRequestAssetInfo, AllocationRequestPilot } from './allocate'
+import { balance } from './balance'
 
 export interface EditableDebt extends AllocationRequestAssetInfo {
-  delta?: BigNumber;
-  liquidationPrice?: BigNumber;
-  currentCollRatio?: BigNumber;
+  delta?: BigNumber
+  liquidationPrice?: BigNumber
+  currentCollRatio?: BigNumber
 }
 
 export enum MessageKind {
@@ -43,44 +43,44 @@ export enum MessageKind {
 
 export type Message =
   | {
-      kind: MessageKind.debtToBig | MessageKind.debtLowerThanZero;
-      name: string;
+      kind: MessageKind.debtToBig | MessageKind.debtLowerThanZero
+      name: string
     }
   | {
-      kind: MessageKind.notEnoughCash;
+      kind: MessageKind.notEnoughCash
     }
   | {
-      kind: MessageKind.totalCashAllocatedToBig;
+      kind: MessageKind.totalCashAllocatedToBig
     }
   | {
-      kind: MessageKind.impossibleToPlan;
-      field?: string;
-      priority: number;
-      message: string;
-    };
+      kind: MessageKind.impossibleToPlan
+      field?: string
+      priority: number
+      message: string
+    }
 
 export interface MTAllocateState extends HasGasEstimation, Omit<AllocationRequestPilot, 'assets'> {
-  proxy: any;
-  progress?: ProgressStage;
-  readyToProceed?: boolean;
-  debts: EditableDebt[];
-  targetCash?: BigNumber;
-  daiBalance: BigNumber;
-  cashDelta?: BigNumber;
-  reverseCashDelta?: BigNumber;
-  targetDaiBalance: BigNumber;
-  initialDaiBalance: BigNumber;
-  diffDaiBalance: BigNumber;
-  deltaDaiBalance: BigNumber;
-  messages: Message[];
-  plan?: Operation[] | Impossible;
-  change: (change: ManualChange) => void;
-  submit: (state: MTAllocateState) => void;
-  autoAllocate: (state: MTAllocateState) => void;
-  cancel: () => void;
+  proxy: any
+  progress?: ProgressStage
+  readyToProceed?: boolean
+  debts: EditableDebt[]
+  targetCash?: BigNumber
+  daiBalance: BigNumber
+  cashDelta?: BigNumber
+  reverseCashDelta?: BigNumber
+  targetDaiBalance: BigNumber
+  initialDaiBalance: BigNumber
+  diffDaiBalance: BigNumber
+  deltaDaiBalance: BigNumber
+  messages: Message[]
+  plan?: Operation[] | Impossible
+  change: (change: ManualChange) => void
+  submit: (state: MTAllocateState) => void
+  autoAllocate: (state: MTAllocateState) => void
+  cancel: () => void
 }
 
-export type EnvironmentChange = GasPriceChange | EtherPriceUSDChange;
+export type EnvironmentChange = GasPriceChange | EtherPriceUSDChange
 
 export enum AllocateChangeKind {
   targetCashChange = 'targetCashChange',
@@ -94,19 +94,19 @@ export interface TargetCashChange {
   kind:
     | AllocateChangeKind.targetCashChange
     | AllocateChangeKind.cashDeltaChange
-    | AllocateChangeKind.reverseCashDeltaChange;
-  value?: BigNumber;
+    | AllocateChangeKind.reverseCashDeltaChange
+  value?: BigNumber
 }
 
 export interface DebtChange {
-  kind: AllocateChangeKind.debtChange | AllocateChangeKind.debtDeltaChange;
-  name: string;
-  value?: BigNumber;
+  kind: AllocateChangeKind.debtChange | AllocateChangeKind.debtDeltaChange
+  name: string
+  value?: BigNumber
 }
 
-export type ManualChange = TargetCashChange | DebtChange;
+export type ManualChange = TargetCashChange | DebtChange
 
-export type MTAllocateStateChange = ManualChange | EnvironmentChange | FormResetChange | ProgressChange;
+export type MTAllocateStateChange = ManualChange | EnvironmentChange | FormResetChange | ProgressChange
 
 function applyChange(state: MTAllocateState, change: MTAllocateStateChange): MTAllocateState {
   switch (change.kind) {
@@ -115,25 +115,25 @@ function applyChange(state: MTAllocateState, change: MTAllocateStateChange): MTA
         ...state,
         gasPrice: change.value,
         gasEstimationStatus: GasEstimationStatus.unset,
-      };
+      }
     case FormChangeKind.etherPriceUSDChange:
       return {
         ...state,
         etherPriceUsd: change.value,
         gasEstimationStatus: GasEstimationStatus.unset,
-      };
+      }
     case AllocateChangeKind.targetCashChange:
       return {
         ...state,
         targetCash: change.value,
         gasEstimationStatus: GasEstimationStatus.unset,
-      };
+      }
     case AllocateChangeKind.debtChange:
       return {
         ...state,
         debts: state.debts.map((d) => (d.name === change.name ? { ...d, targetDebt: change.value } : d)),
         gasEstimationStatus: GasEstimationStatus.unset,
-      };
+      }
     case AllocateChangeKind.debtDeltaChange:
       return {
         ...state,
@@ -141,42 +141,42 @@ function applyChange(state: MTAllocateState, change: MTAllocateStateChange): MTA
           d.name === change.name ? { ...d, targetDebt: change.value ? d.debt.plus(change.value) : undefined } : d,
         ),
         gasEstimationStatus: GasEstimationStatus.unset,
-      };
+      }
     case FormChangeKind.progress:
       return {
         ...state,
         progress: change.progress,
-      };
+      }
     case AllocateChangeKind.cashDeltaChange:
       return {
         ...state,
         targetCash: change.value ? state.cashBalance.plus(change.value) : undefined,
-      };
+      }
     case AllocateChangeKind.reverseCashDeltaChange:
       return {
         ...state,
         targetCash: change.value ? state.cashBalance.plus(change.value.times(minusOne)) : undefined,
-      };
+      }
     case FormChangeKind.formResetChange:
-      return state;
+      return state
   }
 }
 
 function calculate(
   state: Omit<MTAllocateState, 'diffDaiBalance' | 'daiBalance' | 'cashDelta' | 'initialDaiBalance' | 'deltaDaiBalance'>,
 ): MTAllocateState {
-  const totalTargetDebt = state.debts.reduce((sum, d) => sum.plus(d.targetDebt || zero), zero);
+  const totalTargetDebt = state.debts.reduce((sum, d) => sum.plus(d.targetDebt || zero), zero)
 
-  const totalDebt = state.debts.reduce((sum, d) => sum.plus(d.debt), zero);
+  const totalDebt = state.debts.reduce((sum, d) => sum.plus(d.debt), zero)
 
-  const daiBalance = (state.targetCash || zero).minus(totalTargetDebt);
-  const initialDaiBalance = state.cashBalance.minus(totalDebt);
+  const daiBalance = (state.targetCash || zero).minus(totalTargetDebt)
+  const initialDaiBalance = state.cashBalance.minus(totalDebt)
 
-  const diffDaiBalance = state.targetDaiBalance.minus(daiBalance);
-  const deltaDaiBalance = daiBalance.minus(initialDaiBalance);
+  const diffDaiBalance = state.targetDaiBalance.minus(daiBalance)
+  const deltaDaiBalance = daiBalance.minus(initialDaiBalance)
 
-  const cashDelta = state.targetCash ? state.targetCash.minus(state.cashBalance) : undefined;
-  const reverseCashDelta = cashDelta ? cashDelta.times(minusOne) : undefined;
+  const cashDelta = state.targetCash ? state.targetCash.minus(state.cashBalance) : undefined
+  const reverseCashDelta = cashDelta ? cashDelta.times(minusOne) : undefined
 
   const debts = state.debts.map((d) => ({
     ...d,
@@ -184,7 +184,7 @@ function calculate(
     liquidationPrice: d.targetDebt ? d.minCollRatio.times(d.targetDebt).div(d.balance) : undefined,
     currentCollRatio:
       d.targetDebt && d.targetDebt.gt(zero) ? d.balance.times(d.referencePrice).dividedBy(d.targetDebt) : undefined,
-  }));
+  }))
 
   return {
     ...state,
@@ -195,33 +195,33 @@ function calculate(
     reverseCashDelta,
     initialDaiBalance,
     deltaDaiBalance,
-  };
+  }
 }
 
 function validate(state: MTAllocateState): MTAllocateState {
-  const messages: Message[] = [];
+  const messages: Message[] = []
 
   for (const { targetDebt, maxDebt, name } of state.debts) {
     if (targetDebt && targetDebt.gt(maxDebt)) {
-      messages.push({ name, kind: MessageKind.debtToBig });
+      messages.push({ name, kind: MessageKind.debtToBig })
     }
     if (targetDebt && targetDebt.lt(zero)) {
-      messages.push({ name, kind: MessageKind.debtLowerThanZero });
+      messages.push({ name, kind: MessageKind.debtLowerThanZero })
     }
   }
 
   if (state.targetCash && state.targetCash.lt(zero)) {
-    messages.push({ kind: MessageKind.notEnoughCash });
+    messages.push({ kind: MessageKind.notEnoughCash })
   }
 
   if (messages.length === 0) {
-    return state;
+    return state
   }
 
   return {
     ...state,
     messages,
-  };
+  }
 }
 
 function addPlan(state: MTAllocateState): MTAllocateState {
@@ -229,7 +229,7 @@ function addPlan(state: MTAllocateState): MTAllocateState {
     return {
       ...state,
       plan: undefined,
-    };
+    }
   }
 
   const deltas: Array<Required<EditableDebt>> = state.debts
@@ -240,18 +240,18 @@ function addPlan(state: MTAllocateState): MTAllocateState {
       liquidationPrice: debt.liquidationPrice as BigNumber,
       currentCollRatio: debt.currentCollRatio as BigNumber,
       delta: debt.delta as BigNumber,
-    }));
+    }))
 
   if (deltas.length !== state.debts.length) {
     return {
       ...state,
       plan: undefined,
-    };
+    }
   }
 
   // console.log('plan deltas:', JSON.stringify(deltas));
 
-  const plan = state.createPlan(deltas);
+  const plan = state.createPlan(deltas)
 
   const messages: Message[] = isImpossible(plan)
     ? [
@@ -263,13 +263,13 @@ function addPlan(state: MTAllocateState): MTAllocateState {
           field: 'total',
         },
       ]
-    : state.messages;
+    : state.messages
 
   return {
     ...state,
     plan,
     messages,
-  };
+  }
 }
 
 function estimateGasPrice(
@@ -283,14 +283,14 @@ function estimateGasPrice(
     theState,
     (calls: Calls, _readCalls: ReadCalls, state: MTAllocateState) => {
       if (!state.plan || isImpossible(state.plan) || state.progress) {
-        return undefined;
+        return undefined
       }
 
-      const { proxy, plan, estimateGas } = state;
+      const { proxy, plan, estimateGas } = state
 
-      return estimateGas(calls, proxy, plan);
+      return estimateGas(calls, proxy, plan)
     },
-  );
+  )
 }
 
 function freezeGasEstimation(previous: MTAllocateState, state: MTAllocateState) {
@@ -301,20 +301,20 @@ function freezeGasEstimation(previous: MTAllocateState, state: MTAllocateState) 
       gasPrice: previous.gasPrice,
       gasEstimationUsd: previous.gasEstimationUsd,
       gasEstimationEth: previous.gasEstimationEth,
-    };
+    }
   }
-  return state;
+  return state
 }
 
 function prepareSubmit(calls$: Calls$): [(state: MTAllocateState) => void, () => void, Observable<ProgressChange>] {
-  const progressChange$ = new Subject<ProgressChange>();
-  const cancel$ = new Subject<void>();
+  const progressChange$ = new Subject<ProgressChange>()
+  const cancel$ = new Subject<void>()
 
   function submit(state: MTAllocateState) {
-    const { proxy, plan, gasEstimation, execute } = state;
+    const { proxy, plan, gasEstimation, execute } = state
 
     if (!plan || isImpossible(plan) || !gasEstimation) {
-      return;
+      return
     }
 
     const changes$: Observable<ProgressChange> = merge(
@@ -331,16 +331,16 @@ function prepareSubmit(calls$: Calls$): [(state: MTAllocateState) => void, () =>
                 () => of(progressChange(ProgressStage.done)),
               ),
               takeUntil(cancel$),
-            );
+            )
           },
         ),
       ),
-    );
+    )
 
-    changes$.subscribe((change) => progressChange$.next(change));
+    changes$.subscribe((change) => progressChange$.next(change))
   }
 
-  return [submit, cancel$.next.bind(cancel$), progressChange$];
+  return [submit, cancel$.next.bind(cancel$), progressChange$]
 }
 
 function isReadyToProceed(state: MTAllocateState): MTAllocateState {
@@ -352,13 +352,13 @@ function isReadyToProceed(state: MTAllocateState): MTAllocateState {
     state.plan.length !== 0 &&
     state.gasEstimationStatus === GasEstimationStatus.calculated
   ) {
-    return { ...state, readyToProceed: true };
+    return { ...state, readyToProceed: true }
   }
-  return { ...state, readyToProceed: false };
+  return { ...state, readyToProceed: false }
 }
 
 function autoAllocate(state: MTAllocateState): void {
-  const targetDebt = state.targetDaiBalance.minus(state.targetCash || zero);
+  const targetDebt = state.targetDaiBalance.minus(state.targetCash || zero)
 
   balance(targetDebt.absoluteValue(), state.debts).forEach((delta, i) =>
     state.change({
@@ -366,7 +366,7 @@ function autoAllocate(state: MTAllocateState): void {
       name: state.debts[i].name,
       value: delta,
     }),
-  );
+  )
 }
 
 export function createMTAllocateForm$(
@@ -377,11 +377,11 @@ export function createMTAllocateForm$(
   proxy: any,
   { assets, ...request }: AllocationRequestPilot,
 ): Observable<MTAllocateState> {
-  const manualChange$ = new Subject<ManualChange>();
+  const manualChange$ = new Subject<ManualChange>()
 
-  const environmentChange$ = combineAndMerge(toGasPriceChange(gasPrice$), toEtherPriceUSDChange(etherPriceUsd$));
+  const environmentChange$ = combineAndMerge(toGasPriceChange(gasPrice$), toEtherPriceUSDChange(etherPriceUsd$))
 
-  const [submit, cancel, stageChange$] = prepareSubmit(theCalls$);
+  const [submit, cancel, stageChange$] = prepareSubmit(theCalls$)
 
   const initialState = calculate({
     proxy,
@@ -394,9 +394,9 @@ export function createMTAllocateForm$(
     targetCash: request.defaultTargetCash,
     debts: assets.map(({ debt, ...rest }) => ({ debt, targetDebt: debt, ...rest })),
     gasEstimationStatus: GasEstimationStatus.unset,
-  });
+  })
 
-  const changes = merge(manualChange$, environmentChange$, stageChange$);
+  const changes = merge(manualChange$, environmentChange$, stageChange$)
 
   return changes.pipe(
     scan(applyChange, initialState),
@@ -415,5 +415,5 @@ export function createMTAllocateForm$(
           `${s.gasEstimationUsd && s.gasEstimationUsd.toString()} USD `,
         ),
     ),
-  );
+  )
 }

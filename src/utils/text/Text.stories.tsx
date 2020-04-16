@@ -1,9 +1,9 @@
-import { storiesOf } from '@storybook/react';
-import { BigNumber } from 'bignumber.js';
-import * as React from 'react';
-import { BoundarySpan, GreenSpan, InfoLabel, Muted, RedSpan, SellBuySpan } from './Text';
+import { storiesOf } from '@storybook/react'
+import { BigNumber } from 'bignumber.js'
+import * as React from 'react'
+import { BoundarySpan, GreenSpan, InfoLabel, Muted, RedSpan, SellBuySpan } from './Text'
 
-const stories = storiesOf('Text utils', module);
+const stories = storiesOf('Text utils', module)
 
 stories.add('Text span helpers', () => {
   return (
@@ -63,17 +63,17 @@ stories.add('Text span helpers', () => {
         </tr>
       </tbody>
     </table>
-  );
-});
+  )
+})
 
 const BoundaryRow = ({
   value,
   middleValue,
   middleValueAs,
 }: {
-  value: number;
-  middleValue?: number;
-  middleValueAs?: 'greater' | 'lower' | 'neutral';
+  value: number
+  middleValue?: number
+  middleValueAs?: 'greater' | 'lower' | 'neutral'
 }) => (
   <tr>
     <td style={{ padding: '0.25em 1em', textAlign: 'right' }}>{value}</td>
@@ -89,7 +89,7 @@ const BoundaryRow = ({
       </BoundarySpan>
     </td>
   </tr>
-);
+)
 stories.add('Boundary span', () => {
   return (
     <div>
@@ -154,5 +154,5 @@ stories.add('Boundary span', () => {
         </tbody>
       </table>
     </div>
-  );
-});
+  )
+})

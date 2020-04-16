@@ -1,20 +1,20 @@
-import classnames from 'classnames';
-import * as React from 'react';
+import classnames from 'classnames'
+import * as React from 'react'
 
-import { ProgressIcon } from '../icons/Icons';
-import * as styles from './Slider.scss';
+import { ProgressIcon } from '../icons/Icons'
+import * as styles from './Slider.scss'
 
 type SliderProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  disabled?: boolean;
-  moveOnHover?: boolean;
-  blocked: boolean;
-  className?: string;
-  pointerStyle?: string;
-  inProgress?: boolean;
-};
+  disabled?: boolean
+  moveOnHover?: boolean
+  blocked: boolean
+  className?: string
+  pointerStyle?: string
+  inProgress?: boolean
+}
 
 export function Slider(props: SliderProps) {
-  const { blocked, moveOnHover, inProgress, disabled, className, pointerStyle, ...selectProps } = props;
+  const { blocked, moveOnHover, inProgress, disabled, className, pointerStyle, ...selectProps } = props
 
   return (
     <button
@@ -47,13 +47,13 @@ export function Slider(props: SliderProps) {
         />
       )}
     </button>
-  );
+  )
 }
 
 type SwitchProps = SliderProps & {
-  optionOne: any;
-  optionTwo: any;
-};
+  optionOne: any
+  optionTwo: any
+}
 
 export function Switch(props: SwitchProps) {
   const {
@@ -66,7 +66,7 @@ export function Switch(props: SwitchProps) {
     optionOne,
     optionTwo,
     ...selectProps
-  } = props;
+  } = props
 
   return (
     <button
@@ -91,5 +91,5 @@ export function Switch(props: SwitchProps) {
       <div className={classnames(styles.option, blocked && styles.highlight)}>{optionOne}</div>
       <div className={classnames(styles.option, !blocked && styles.highlight)}>{optionTwo}</div>
     </button>
-  );
+  )
 }

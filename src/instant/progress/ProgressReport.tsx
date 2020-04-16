@@ -1,16 +1,16 @@
-import * as React from 'react';
-import { TxStatus } from '../../blockchain/transactions';
-import { ProgressIcon } from '../../utils/icons/Icons';
-import * as styles from './ProgressReport.scss';
+import * as React from 'react'
+import { TxStatus } from '../../blockchain/transactions'
+import { ProgressIcon } from '../../utils/icons/Icons'
+import * as styles from './ProgressReport.scss'
 
 interface Params {
-  txReport: string;
+  txReport: string
 }
 
 export interface Report {
-  txStatus: TxStatus | string;
-  txHash: string;
-  etherscanURI: string;
+  txStatus: TxStatus | string
+  txHash: string
+  etherscanURI: string
 }
 
 const statuses = new Map<string, (params: Params) => React.ReactNode>([
@@ -77,14 +77,14 @@ const statuses = new Map<string, (params: Params) => React.ReactNode>([
       </>
     ),
   ],
-]);
+])
 
 export class ProgressReport extends React.Component<{ report: Report }> {
   public render() {
-    const { txStatus, txHash, etherscanURI } = this.props.report;
-    const partial = statuses.get(txStatus);
-    const txReport = `${etherscanURI}/tx/${txHash}`;
+    const { txStatus, txHash, etherscanURI } = this.props.report
+    const partial = statuses.get(txStatus)
+    const txReport = `${etherscanURI}/tx/${txHash}`
 
-    return <div className={styles.progressReport}>{partial ? partial({ txReport } as Params) : txStatus}</div>;
+    return <div className={styles.progressReport}>{partial ? partial({ txReport } as Params) : txStatus}</div>
   }
 }

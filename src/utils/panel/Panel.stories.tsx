@@ -1,10 +1,10 @@
-import { storiesOf } from '@storybook/react';
-import * as React from 'react';
+import { storiesOf } from '@storybook/react'
+import * as React from 'react'
 
-import { Table } from '../table/Table';
-import { Panel, PanelBody, PanelHeader } from './Panel';
+import { Table } from '../table/Table'
+import { Panel, PanelBody, PanelHeader } from './Panel'
 
-const stories = storiesOf('Panel', module);
+const stories = storiesOf('Panel', module)
 
 stories.add('Panel', () => (
   <div>
@@ -112,4 +112,4 @@ stories.add('Panel', () => (
       </PanelBody>
     </Panel>
   </div>
-));
+))
