@@ -38,7 +38,14 @@ import {
 } from '../state/mtAccount';
 import { MTTransferFormState } from '../transfer/mtTransferForm';
 import { MtTransferFormView } from '../transfer/mtTransferFormView';
-import { Message, MessageKind, MTSimpleFormState, ViewKind } from './mtOrderForm';
+import {
+  Message,
+  MessageKind,
+  MTSimpleFormState,
+  OrderFormMessage,
+  OrderFormMessageKind,
+  ViewKind
+} from './mtOrderForm';
 import * as styles from './mtOrderFormView.scss';
 import { MTSimpleOrderPanelProps } from './mtOrderPanel';
 
@@ -153,12 +160,6 @@ const slippageLimitTooltip = `
 //     </div>
 //   );
 // };
-
-enum depositMessageType {
-  onboarding = 'onboarding',
-  collRatioUnsafe = 'collRatioUnsafe',
-  liquidationImminent = 'liquidationImminent',
-}
 
 export class MtSimpleOrderFormBody
   extends React.Component<MTSimpleFormState & {close?: () => void}> {
@@ -355,29 +356,29 @@ export class MtSimpleOrderFormBody
   private riskCompliance = () => {
     const { riskComplianceAccepted, riskComplianceCurrent , progress, kind } = this.props;
     return (
-          !riskComplianceAccepted
-          && kind === OfferType.buy
-          && (
-            <div className={styles.checkbox}>
-              <Checkbox name="risk-compliance"
-                        data-test-id="accept-rc"
-                        checked={riskComplianceCurrent || false}
-                        disabled={ !!progress }
-                        onChange={this.handlecheckboxChange}
-              >
+      !riskComplianceAccepted
+      && kind === OfferType.buy
+      && (
+        <div className={styles.checkbox}>
+          <Checkbox name="risk-compliance"
+                    data-test-id="accept-rc"
+                    checked={riskComplianceCurrent || false}
+                    disabled={ !!progress }
+                    onChange={this.handlecheckboxChange}
+          >
                 <span style={{ width: '100%' }}>
                   I understand that this involves the usage of
                   <a href="https://oasis.app/terms"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                     target="_blank"
+                     rel="noopener noreferrer"
                   >
                     <strong> Maker Vaults </strong>
                   </a>
                   and the associated risks involved in using the Maker Protocol
                 </span>
-              </Checkbox>
-           </div>
-          )
+          </Checkbox>
+        </div>
+      )
     );
   }
   private liquidationPrice() {
@@ -899,54 +900,14 @@ export class MtSimpleOrderFormView extends React.Component<
     }
   }
 
-  public CallForDeposit(messageType: depositMessageType, ma?: MarginableAsset) {
-    const { baseToken } = this.props;
-    const transferWithOnboarding = messageType === depositMessageType.onboarding;
+  public CallForDeposit(message: OrderFormMessage, ma?: MarginableAsset) {
+    const transferWithOnboarding = message
+      ? message.kind === OrderFormMessageKind.onboarding
+      : false;
+
     return (
       <div className={styles.onboardingPanel}>
-        {
-          messageType === depositMessageType.onboarding &&
-          <>
-            <h3>Deposit into Leverage Account</h3>
-            <div className={styles.onboardingParagraph}>
-              Before opening a new position, deposit WETH<br/>
-              or DAI into your Leverage Trading Account
-            </div>
-          </>
-        }
-        {
-          messageType === depositMessageType.collRatioUnsafe &&
-          <>
-            <div className={styles.onboardingParagraph}>
-              <div className={styles.warningMessage}>
-                Warning - Your position is currently too close to the liquidation price to sell.
-              </div>
-              <br/>
-              <br/>
-              To sell your position, you must first<br/> deposit DAI or {baseToken}.
-            </div>
-          </>
-        }
-        {
-          messageType === depositMessageType.liquidationImminent &&
-          <>
-            <div className={styles.onboardingParagraph}>
-              <div className={styles.warningMessage}>
-                {
-                  // tslint:disable
-                  <>
-                    Warning - Your position is currently too close to the liquidation price to sell. <br/>
-                    To sell your position, you must first deposit DAI or {baseToken}.
-                  </>
-                  // tslint:enable
-                }
-              </div>
-              <br/>
-              <br/>
-              To sell your position, you must first<br/> deposit DAI or {baseToken}.
-            </div>
-          </>
-        }
+        {orderFormMessageContent(message)}
         <Button
           size="md"
           color="primary"
@@ -985,24 +946,14 @@ export class MtSimpleOrderFormView extends React.Component<
   }
 
   public MainContent() {
-    const { mta, baseToken, isSafeCollRatio } = this.props;
+    const { mta, baseToken, orderFormMessage } = this.props;
     const ma = findMarginableAsset(baseToken, mta);
 
-    if (!isSafeCollRatio) {
-      return this.CallForDeposit(depositMessageType.collRatioUnsafe, ma);
+    if (orderFormMessage) {
+      return this.CallForDeposit(orderFormMessage, ma);
     }
 
-    if (ma && ma.liquidationPrice.gt(ma.markPrice)) {
-      return this.CallForDeposit(depositMessageType.liquidationImminent, ma);
-    }
-
-    const hasHistoryEvents = ma && ma.rawHistory.length > 0;
-
-    if (hasHistoryEvents || ma!.balance.gt(zero) || ma!.dai.gt(zero)) {
-      return <MtSimpleOrderFormBody {...this.props} />;
-    }
-
-    return this.CallForDeposit(depositMessageType.onboarding, ma);
+    return <MtSimpleOrderFormBody {...this.props} />;
   }
 
   public render() {
@@ -1163,5 +1114,44 @@ function messageContent(msg: Message) {
       return `Dai debt below ${msg.message} DAI limit`;
     case MessageKind.unsellable:
       return `Your position is unsellable. ${msg.message}`;
+  }
+}
+
+function orderFormMessageContent(msg: OrderFormMessage) {
+  if (!msg) {
+    return null;
+  }
+
+  switch (msg.kind) {
+    // tslint:disable
+    case OrderFormMessageKind.onboarding:
+      return <>
+        <h3>Deposit into Leverage Account</h3>
+        Before opening a new position, deposit {msg.baseToken}<br/>
+        or DAI into your Leverage Trading Account
+      </>;
+
+    case OrderFormMessageKind.collRatioUnsafe:
+      return <div className={styles.warningMessage}>
+        Warning - Your position is currently too close to the liquidation price to sell.<br/>
+        To sell your position, you must first<br/> deposit DAI or {msg.baseToken}.
+      </div>;
+
+    case OrderFormMessageKind.liquidationImminent:
+      return <div className={styles.warningMessage}>
+        {
+          <>
+            Warning - Your position will be liquidated in {msg.nextPriceUpdateDelta} minutes and cannot currently be sold.<br />
+            To rescue your position, you must deposit additional {msg.baseToken} or DAI
+          </>
+        }
+      </div>;
+
+    case OrderFormMessageKind.bitable:
+      return <div className={styles.warningMessage}>
+        Your {msg.baseToken} leveraged position is now at risk of being liquidated.
+        You can still avoid auction by <br /> depositing {msg.baseToken} or DAI.
+      </div>;
+    // tslint:enable
   }
 }
