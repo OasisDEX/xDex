@@ -307,7 +307,16 @@ export function calculateMarginable(ma: MarginableAssetCore, orderbook: Orderboo
   if (ma.referencePrice.lte(liquidationPrice)) {
     bitable = mtBitable.yes
   }
-  const runningAuctions = 2
+
+  let runningAuctions = 0
+  ma.rawHistory.forEach((h) => {
+    if (h.kind === MTHistoryEventKind.bite) {
+      runningAuctions += 1
+    }
+    if (h.kind === MTHistoryEventKind.deal) {
+      runningAuctions -= 1
+    }
+  })
 
   let amountBeingLiquidated = zero
   ma.rawHistory.forEach((h) => {

@@ -70,6 +70,62 @@ export enum MessageKind {
   unsellable = 'unsellable',
 }
 
+export enum LiquidationMessageKind {
+  bitable = 'bitable',
+  imminent = 'imminent',
+  inProgress = 'inProgress',
+  redeemable = 'redeemable',
+}
+
+export enum OrderFormMessageKind {
+  onboarding = 'onboarding',
+  collRatioUnsafe = 'collRatioUnsafe',
+  liquidationImminent = 'liquidationImminent',
+  bitable = 'bitable',
+}
+
+export type LiquidationMessage =
+  | {
+      kind: LiquidationMessageKind.bitable
+      baseToken?: string
+      nextPriceUpdateDelta?: string
+    }
+  | {
+      kind: LiquidationMessageKind.imminent
+      baseToken?: string
+      nextPriceUpdateDelta?: string
+      isSafeCollRatio?: boolean
+    }
+  | {
+      kind: LiquidationMessageKind.inProgress
+      baseToken?: string
+    }
+  | {
+      kind: LiquidationMessageKind.redeemable
+      baseToken?: string
+      redeemable?: string
+    }
+
+export type OrderFormMessage =
+  | {
+      kind: OrderFormMessageKind.onboarding
+      baseToken: string
+    }
+  | {
+      kind: OrderFormMessageKind.collRatioUnsafe
+      baseToken: string
+    }
+  | {
+      kind: OrderFormMessageKind.liquidationImminent
+      baseToken: string
+      nextPriceUpdateDelta: string
+    }
+  | {
+      kind: OrderFormMessageKind.bitable
+      baseToken: string
+    }
+  | undefined
+
 export type Message =
   | {
       kind: MessageKind.dustTotal
@@ -166,6 +222,8 @@ export interface MTSimpleFormState extends HasGasEstimation {
   isSafeCollRatio?: boolean
   riskComplianceAccepted?: boolean
   riskComplianceCurrent?: boolean
+  liquidationMessage?: LiquidationMessage
+  orderFormMessage?: OrderFormMessage
 }
 
 export type ManualChange =
@@ -278,7 +336,7 @@ function validate(state: MTSimpleFormState): MTSimpleFormState {
   }
   const messages: Message[] = [...state.messages]
   const baseAsset = findAsset(state.baseToken, state.mta) as MarginableAsset
-  // const quoteAsset = findAsset(state.quoteToken, state.mta);
+
   if (state.amount && state.total && baseAsset && state.realPurchasingPower) {
     const [
       spendAmount,
@@ -387,7 +445,6 @@ function addUserConfig(state: MTSimpleFormState) {
 
 function addApr(state: MTSimpleFormState) {
   const baseAsset = findMarginableAsset(state.baseToken, state.mta)
-  // todo: calculate APR from fee
 
   if (!state.mta || state.mta.state !== MTAccountState.setup || !state.orderbook || !baseAsset) {
     return state
@@ -780,6 +837,83 @@ function addPlan(state: MTSimpleFormState): MTSimpleFormState {
   }
 }
 
+function addMessages(state: MTSimpleFormState): MTSimpleFormState {
+  const baseAsset = findMarginableAsset(state.baseToken, state.mta)
+
+  if (!baseAsset) {
+    return state
+  }
+
+  let liquidationMessage
+
+  let orderFormMessage: OrderFormMessage = {
+    kind: OrderFormMessageKind.onboarding,
+    baseToken: baseAsset.name,
+  }
+
+  const hasHistoryEvents = baseAsset.rawHistory.length > 0
+
+  if (hasHistoryEvents || baseAsset.dai.gt(zero) || baseAsset.balance.gt(zero)) {
+    orderFormMessage = undefined
+  }
+
+  if (!baseAsset.isSafeCollRatio) {
+    orderFormMessage = {
+      kind: OrderFormMessageKind.collRatioUnsafe,
+      baseToken: baseAsset.name,
+    }
+  }
+
+  if (baseAsset.runningAuctions > 0) {
+    liquidationMessage = {
+      kind: LiquidationMessageKind.inProgress,
+      baseToken: baseAsset.name,
+    }
+  }
+
+  if (baseAsset.bitable === 'no' && baseAsset.redeemable.gt(zero)) {
+    liquidationMessage = {
+      kind: LiquidationMessageKind.redeemable,
+      baseToken: baseAsset.name,
+      redeemable: baseAsset.redeemable.toString(),
+    }
+  }
+
+  if (baseAsset.bitable === 'imminent') {
+    liquidationMessage = {
+      kind: LiquidationMessageKind.imminent,
+      baseToken: baseAsset.name,
+      nextPriceUpdateDelta: baseAsset.nextPriceUpdateDelta,
+      isSafeCollRatio: baseAsset.isSafeCollRatio,
+    }
+
+    orderFormMessage = {
+      kind: OrderFormMessageKind.liquidationImminent,
+      baseToken: baseAsset.name,
+      nextPriceUpdateDelta: baseAsset.nextPriceUpdateDelta,
+    }
+  }
+
+  if (baseAsset.bitable === 'yes' && baseAsset.runningAuctions === 0) {
+    liquidationMessage = {
+      kind: LiquidationMessageKind.bitable,
+      baseToken: baseAsset.name,
+      nextPriceUpdateDelta: baseAsset.nextPriceUpdateDelta,
+    }
+
+    orderFormMessage = {
+      kind: OrderFormMessageKind.bitable,
+      baseToken: baseAsset.name,
+    }
+  }
+
+  return {
+    ...state,
+    liquidationMessage,
+    orderFormMessage,
+  }
+}
+
 function estimateGasPrice(
   theCalls$: Calls$,
   theReadCalls$: ReadCalls$,
@@ -1042,6 +1176,7 @@ export function createMTSimpleOrderForm$(
     map(calculateMaxTotal),
     map(validate),
     map(addPlan),
+    map(addMessages),
     switchMap(curry(estimateGasPrice)(calls$, readCalls$)),
     scan(freezeGasEstimation),
     map(isReadyToProceed),

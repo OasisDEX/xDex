@@ -36,7 +36,6 @@ export function pluginDevModeHelpers(
         ),
       )
       .subscribe(identity)
-
   ;(window as any).disapproveProxy = (token: string) =>
     calls$
       .pipe(
@@ -57,7 +56,6 @@ export function pluginDevModeHelpers(
         ),
       )
       .subscribe(identity)
-
   ;(window as any).previewLinearOffers = (
     baseToken: string,
     quoteToken: string,
@@ -84,7 +82,6 @@ export function pluginDevModeHelpers(
       [quoteToken]: baseAmount * count * (midPrice - (delta * (count + 1)) / 2),
     })
   }
-
   ;(window as any).makeLinearOffers = (
     baseToken: string,
     quoteToken: string,
@@ -119,7 +116,6 @@ export function pluginDevModeHelpers(
         ),
       )
       .subscribe(identity)
-
   ;(window as any).cancelAllOffers = (baseToken: string, quoteToken: string) =>
     calls$
       .pipe(
@@ -139,7 +135,6 @@ export function pluginDevModeHelpers(
         ),
       )
       .subscribe(identity)
-
   ;(window as any).export = (token: string) =>
     calls$
       .pipe(
@@ -159,7 +154,6 @@ export function pluginDevModeHelpers(
         ),
       )
       .subscribe(identity)
-
   ;(window as any).drip = (token: string) =>
     calls$
       .pipe(
@@ -167,7 +161,6 @@ export function pluginDevModeHelpers(
         flatMap((calls) => calls.drip({ token })),
       )
       .subscribe(identity)
-
   ;(window as any).readPrice = (token: string) =>
     readCalls$
       .pipe(
@@ -176,7 +169,6 @@ export function pluginDevModeHelpers(
         tap((price) => console.log(price.toString())),
       )
       .subscribe(identity)
-
   ;(window as any).changePrice = (token: string, price: number) =>
     calls$
       .pipe(
@@ -184,7 +176,6 @@ export function pluginDevModeHelpers(
         flatMap((calls) => calls.changePrice({ token, price })),
       )
       .subscribe(identity)
-
   ;(window as any).changePriceAndPoke = (token: string, price: number) =>
     calls$
       .pipe(
@@ -192,7 +183,6 @@ export function pluginDevModeHelpers(
         flatMap((calls) => calls.changePriceAndPoke({ token, price })),
       )
       .subscribe(identity)
-
   ;(window as any).printOsmInfo = (token: string) =>
     calls$
       .pipe(
@@ -200,7 +190,6 @@ export function pluginDevModeHelpers(
         flatMap((calls) => calls.printOsmInfo({ token })),
       )
       .subscribe(identity)
-
   ;(window as any).readOsm = (token: string) =>
     context$
       .pipe(
@@ -209,7 +198,6 @@ export function pluginDevModeHelpers(
         tap(({ next }) => console.log({ next: next && next.toString() })),
       )
       .subscribe(identity)
-
   ;(window as any).pokeOsm = (token: string) =>
     calls$
       .pipe(
@@ -217,7 +205,6 @@ export function pluginDevModeHelpers(
         flatMap((calls) => calls.pokeOsm({ token })),
       )
       .subscribe(identity)
-
   ;(window as any).pokeSpotter = (token: string) =>
     calls$
       .pipe(
@@ -225,7 +212,6 @@ export function pluginDevModeHelpers(
         flatMap((calls) => calls.pokeSpotter({ token })),
       )
       .subscribe(identity)
-
   ;(window as any).mtaDetails = () =>
     mta$.subscribe((mta) => {
       if (mta) {
@@ -248,7 +234,6 @@ export function pluginDevModeHelpers(
     })
 
   console.log('Dev mode helpers installed!')
-
   ;(window as any).cancelAllOffers = (baseToken: string, quoteToken: string) =>
     calls$
       .pipe(
