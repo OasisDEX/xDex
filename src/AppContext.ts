@@ -48,7 +48,6 @@ import {
 } from './exchange/tradingPair/tradingPair';
 
 import { BigNumber } from 'bignumber.js';
-import * as mixpanel from 'mixpanel-browser';
 import { transactions$, TxState } from './blockchain/transactions';
 import {
   AllTradesProps,
@@ -123,6 +122,7 @@ import {
 } from './migration/migrationForm';
 import { MigrationButton } from './migration/MigrationFormView';
 
+import { trackingEvents } from './analytics/analytics';
 import { NetworkConfig } from './blockchain/config';
 import {
   MTLiquidationNotification,
@@ -427,11 +427,7 @@ export function setupAppContext() {
       const tx_identify = `${tx.account}${tx.networkId}${tx.status}${tx.txNo}`;
       if (!(transactionsLog.includes(tx_identify))) {
         transactionsLog.push(tx_identify);
-        mixpanel.track('notification', {
-          network,
-          product: 'oasis-trade',
-          status: tx.status
-        });
+        trackingEvents.txNotification(tx.status, network as string);
       }
     });
   });

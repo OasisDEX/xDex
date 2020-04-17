@@ -1,19 +1,9 @@
+import { BigNumber } from 'bignumber.js';
 import * as classnames from 'classnames';
 import * as React from 'react';
 import * as ReactModal from 'react-modal';
-import { Observable } from 'rxjs';
-import { Button, CloseButton } from '../utils/forms/Buttons';
-import { Loadable } from '../utils/loadable';
-import { LoadingIndicator, WithLoadingIndicator } from '../utils/loadingIndicator/LoadingIndicator';
-import { ModalOpenerProps, ModalProps } from '../utils/modal';
-import { Panel, PanelBody, PanelFooter, PanelHeader } from '../utils/panel/Panel';
-import { TopRightCorner } from '../utils/panel/TopRightCorner';
-
-import { ExchangeMigrationStatus, ExchangeMigrationTxKind } from './migration';
-
-import { BigNumber } from 'bignumber.js';
-import * as mixpanel from 'mixpanel-browser';
 import { default as MediaQuery } from 'react-responsive';
+import { Observable } from 'rxjs';
 import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
 import { getToken, isDAIEnabled } from '../blockchain/config';
 import { TradeStatus, TradeWithStatus } from '../exchange/myTrades/openTrades';
@@ -28,15 +18,22 @@ import { connect } from '../utils/connect';
 import { AmountFieldChange, FormChangeKind } from '../utils/form';
 import { formatAmount } from '../utils/formatters/format';
 import { Money } from '../utils/formatters/Formatters';
+import { Button, CloseButton } from '../utils/forms/Buttons';
 import { ErrorMessage } from '../utils/forms/ErrorMessage';
 import { InputGroup, InputGroupAddon } from '../utils/forms/InputGroup';
 import { SvgImage } from '../utils/icons/utils';
+import { Loadable } from '../utils/loadable';
+import { LoadingIndicator, WithLoadingIndicator } from '../utils/loadingIndicator/LoadingIndicator';
+import { ModalOpenerProps, ModalProps } from '../utils/modal';
+import { Panel, PanelBody, PanelFooter, PanelHeader } from '../utils/panel/Panel';
+import { TopRightCorner } from '../utils/panel/TopRightCorner';
 import { Scrollbar } from '../utils/Scrollbar/Scrollbar';
 import { RowClickable, Table } from '../utils/table/Table';
 import { SellBuySpan } from '../utils/text/Text';
 import { WarningTooltipType } from '../utils/tooltip/Tooltip';
 import { zero } from '../utils/zero';
 import { CallForAction } from './CallForAction';
+import { ExchangeMigrationStatus, ExchangeMigrationTxKind } from './migration';
 import * as styles from './Migration.scss';
 import { Message, MessageKind, MigrationFormKind, MigrationFormState } from './migrationForm';
 
@@ -97,12 +94,6 @@ export class MigrationButton extends React.Component<MigrationButtonProps & Moda
                       onClick={
                         () => {
                           this.setup();
-                          mixpanel.track('btn-click', {
-                            id: 'initiate-sai-dai-migration',
-                            product: 'oasis-trade',
-                            page: 'Sitewide',
-                            section: 'sitewide',
-                          });
                         }
                       }
               >
@@ -435,12 +426,6 @@ export class MigrationModal extends React.Component<MigrationFormState & ModalPr
                      btnDisabled={!ordersCount}
                      btnAction={() => {
                        this.setState({ view: MigrationViews.cancelOrders });
-                       mixpanel.track('btn-click', {
-                         id: 'cancel-offers',
-                         product: 'oasis-trade',
-                         page: 'Sitewide',
-                         section: 'sai-dai-migration',
-                       });
                      }}
                      tid="cfa-cancel-orders"
                      className={styles.callForAction}
@@ -476,12 +461,6 @@ export class MigrationModal extends React.Component<MigrationFormState & ModalPr
                      btnAction={() => {
                        this.setState({ view: MigrationViews.initial });
                        proceed(this.props);
-                       mixpanel.track('btn-click', {
-                         id: `${fromToken === 'SAI' ? 'upgrade' : 'swap'}-${fromToken}`,
-                         product: 'oasis-trade',
-                         page: 'Sitewide',
-                         section: 'sai-dai-migration',
-                       });
                      }}
                      tid="cfa-upgrade-balance"
                      className={styles.callForAction}
@@ -624,13 +603,6 @@ export class MigrationModal extends React.Component<MigrationFormState & ModalPr
       type: order.act,
       amount: order.baseAmount,
       token: order.baseToken
-    });
-
-    mixpanel.track('btn-click', {
-      id: 'cancel-single-offer',
-      product: 'oasis-trade',
-      page: 'Sitewide',
-      section: 'sai-dai-migration',
     });
   }
 }

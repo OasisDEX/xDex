@@ -1,10 +1,12 @@
 import { BigNumber } from 'bignumber.js';
-import * as React from 'react';
-import * as ReactModal from 'react-modal';
-
 import classnames from 'classnames';
 import { Dictionary } from 'ramda';
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
+import * as ReactModal from 'react-modal';
 import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
+import { trackingEvents } from '../../analytics/analytics';
+import { theAppContext } from '../../AppContext';
 import { getToken } from '../../blockchain/config';
 import { nullAddress } from '../../blockchain/utils';
 import { BigNumberInput } from '../../utils/bigNumberInput/BigNumberInput';
@@ -15,19 +17,15 @@ import { Button } from '../../utils/forms/Buttons';
 import { ErrorMessage } from '../../utils/forms/ErrorMessage';
 import { InputGroup, InputGroupAddon } from '../../utils/forms/InputGroup';
 import { GasCost } from '../../utils/gasCost/GasCost';
+import { SvgImage } from '../../utils/icons/utils';
 import { BorderBox, Hr } from '../../utils/layout/LayoutHelpers';
+import { LoadableWithTradingPair } from '../../utils/loadable';
 import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
 import { ModalProps } from '../../utils/modal';
 import { Panel, PanelBody, PanelFooter, PanelHeader } from '../../utils/panel/Panel';
 import { Muted } from '../../utils/text/Text';
 import { TransactionStateDescription } from '../../utils/text/TransactionStateDescription';
 import { zero } from '../../utils/zero';
-
-import * as mixpanel from 'mixpanel-browser';
-import * as ReactDOM from 'react-dom';
-import { theAppContext } from '../../AppContext';
-import { SvgImage } from '../../utils/icons/utils';
-import { LoadableWithTradingPair } from '../../utils/loadable';
 import { MTSimpleFormState } from '../simple/mtOrderForm';
 import { MtSimpleOrderFormBody } from '../simple/mtOrderFormView';
 import * as stylesOrder from '../simple/mtOrderFormView.scss';
@@ -532,13 +530,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
                 onClick={
                   () => {
                     this.transfer();
-                    mixpanel.track('btn-click', {
-                      id: `${actionKind}-${token === 'DAI' ? 'dai' : 'collateral'}-submit`,
-                      product: 'oasis-trade',
-                      page: 'Leverage',
-                      section: 'deposit-withdraw-modal',
-                      currency: token
-                    });
+                    trackingEvents.transferTokens(actionKind, token);
                   }
                 }
         >

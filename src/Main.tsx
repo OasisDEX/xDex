@@ -2,9 +2,8 @@ import createBrowserHistory from 'history/createBrowserHistory';
 import * as React from 'react';
 import { Redirect, Route, Router, Switch } from 'react-router';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
-
-import * as mixpanel from 'mixpanel-browser';
 import { map } from 'rxjs/operators';
+import { trackingEvents } from './analytics/analytics';
 import { setupAppContext, theAppContext } from './AppContext';
 import { BalancesView } from './balances/BalancesView';
 import { WalletStatus, walletStatus$ } from './blockchain/wallet';
@@ -26,10 +25,7 @@ const browserHistoryInstance = createBrowserHistory({
 });
 
 browserHistoryInstance.listen(location => {
-  mixpanel.track('Pageview', {
-    product: 'oasis-trade',
-    id: location.pathname
-  });
+  trackingEvents.pageView(location.pathname);
 });
 
 export class Main extends React.Component {

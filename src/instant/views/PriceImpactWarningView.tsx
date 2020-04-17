@@ -1,6 +1,6 @@
 import classnames from 'classnames';
-import * as mixpanel from 'mixpanel-browser';
 import * as React from 'react';
+import { trackingEvents } from '../../analytics/analytics';
 import { FormatPercent } from '../../utils/formatters/Formatters';
 import { CloseButton } from '../../utils/forms/Buttons';
 import { TopRightCorner } from '../../utils/panel/TopRightCorner';
@@ -64,13 +64,7 @@ export class PriceImpactWarningView extends React.Component<InstantFormState> {
   }
 
   private onAcknowledge = () => {
-    mixpanel.track('btn-click', {
-      id: 'initiate-trade',
-      product: 'oasis-trade',
-      page: 'Instant',
-      section: 'order-details',
-      case: 'price-impact-warning'
-    });
+    trackingEvents.initiateTradeInstant();
     this.props.submit(this.props);
     this.props.change({
       kind: InstantFormChangeKind.viewChange,

@@ -1,9 +1,9 @@
 import { BigNumber } from 'bignumber.js';
 import * as classnames from 'classnames';
-import * as mixpanel from 'mixpanel-browser';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
+import { trackingEvents } from '../../analytics/analytics';
 import { getToken } from '../../blockchain/config';
 import * as formStyles from '../../exchange/offerMake/OfferMakeForm.scss';
 import { OfferType } from '../../exchange/orderbook/orderbook';
@@ -808,13 +808,7 @@ export class MtSimpleOrderFormBody
         color={ this.props.kind === OfferType.buy ? 'primary' : 'danger' }
         disabled={ !this.props.readyToProceed || !!this.props.progress }
         onClick={() => {
-          mixpanel.track('btn-click', {
-            id: 'initiate-trade',
-            product: 'oasis-trade',
-            page: 'Leverage',
-            section: 'manage-leverage',
-            kind: this.props.kind
-          });
+          trackingEvents.initiateTradeLeverage(this.props.kind);
         }}
       >
         {label}

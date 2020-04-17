@@ -19,8 +19,8 @@ import {
   switchMap,
 } from 'rxjs/operators';
 
-import * as mixpanel from 'mixpanel-browser';
-import { mixpanelIdentify } from '../analytics';
+import { trackingEvents } from '../analytics/analytics';
+import { mixpanelIdentify } from '../analytics/mixpanel';
 import { getToken, NetworkConfig, networks, tradingTokens } from './config';
 import { amountFromWei } from './utils';
 import { web3 } from './web3';
@@ -63,12 +63,9 @@ combineLatest(account$, context$).pipe(
   })
 ).subscribe(([account, network]) => {
   mixpanelIdentify(account!, { wallet: 'metamask' });
-  mixpanel.track('account-change', {
-    account,
-    network,
-    product: 'oasis-trade',
-    wallet: 'metamask'
-  });
+  if (account && network) {
+    trackingEvents.accountChange(account, network);
+  }
 });
 
 export const onEveryBlock$ = combineLatest(every5Seconds$, context$).pipe(

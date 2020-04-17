@@ -1,7 +1,7 @@
 import { BigNumber } from 'bignumber.js';
 import classnames from 'classnames';
-import * as mixpanel from 'mixpanel-browser';
 import * as React from 'react';
+import { trackingEvents } from '../../analytics/analytics';
 import { etherscan, EtherscanConfig } from '../../blockchain/etherscan';
 import swapArrowsSvg from '../../icons/swap-arrows.svg';
 import { formatAmountInstant } from '../../utils/formatters/format';
@@ -230,12 +230,7 @@ export class NewTradeView extends React.Component<InstantFormState> {
         view: ViewKind.priceImpactWarning
       });
     } else {
-      mixpanel.track('btn-click', {
-        id: 'initiate-trade',
-        product: 'oasis-trade',
-        page: 'Instant',
-        section: 'order-details'
-      });
+      trackingEvents.initiateTrade();
       this.props.submit(this.props);
       this.props.change({
         kind: InstantFormChangeKind.viewChange,

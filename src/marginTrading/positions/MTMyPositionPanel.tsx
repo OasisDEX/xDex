@@ -1,8 +1,18 @@
-import * as mixpanel from 'mixpanel-browser';
+import { default as BigNumber } from 'bignumber.js';
 import * as React from 'react';
+import { Observable } from 'rxjs';
+import { trackingEvents } from '../../analytics/analytics';
+import { AssetDropdownMenu } from '../../balances/AssetDropdownMenu';
 import * as styles from '../../balances/mtBalancesView.scss';
+import { TxMetaKind } from '../../blockchain/calls/txMeta';
+import { isDone, TxState } from '../../blockchain/transactions';
+import { connect } from '../../utils/connect';
+import { Button } from '../../utils/forms/Buttons';
+import { Switch } from '../../utils/forms/Slider';
 import { SvgImage } from '../../utils/icons/utils';
 import { Loadable } from '../../utils/loadable';
+import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
+import { LoggedOut } from '../../utils/loadingIndicator/LoggedOut';
 import { ModalOpenerProps, ModalProps } from '../../utils/modal';
 import { Panel, PanelBody, PanelHeader } from '../../utils/panel/Panel';
 import { zero } from '../../utils/zero';
@@ -11,20 +21,9 @@ import {
   MTAccountState, UserActionKind
 } from '../state/mtAccount';
 import { CreateMTFundForm$, MTTransferFormState } from '../transfer/mtTransferForm';
-import { MTMyPositionView } from './MTMyPositionView';
-
-import { default as BigNumber } from 'bignumber.js';
-import { Observable } from 'rxjs';
-import { AssetDropdownMenu } from '../../balances/AssetDropdownMenu';
-import { TxMetaKind } from '../../blockchain/calls/txMeta';
-import { isDone, TxState } from '../../blockchain/transactions';
-import { connect } from '../../utils/connect';
-import { Button } from '../../utils/forms/Buttons';
-import { Switch } from '../../utils/forms/Slider';
-import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
-import { LoggedOut } from '../../utils/loadingIndicator/LoggedOut';
 import { MtTransferFormView } from '../transfer/mtTransferFormView';
 import backArrowSvg from './back-arrow.svg';
+import { MTMyPositionView } from './MTMyPositionView';
 import * as myPositionStyles from './MTMyPositionView.scss';
 import warningIconSvg from './warning-icon.svg';
 
@@ -236,13 +235,7 @@ export class MTMyPositionPanelInternal
                       this.setState(prevState =>
                         ({ blocked: !prevState.blocked })
                       );
-                      mixpanel.track('btn-click', {
-                        id: 'dai-usd-toggle',
-                        product: 'oasis-trade',
-                        page: 'Leverage',
-                        section: 'my-position',
-                        currency: this.state.blocked ? 'usd' : 'dai'
-                      });
+                      trackingEvents.daiUsdToggle(this.state.blocked);
                     }
                   }
                   optionOne="DAI"
@@ -301,12 +294,7 @@ export class MTMyPositionPanelInternal
           onClick={
             () => {
               this.transfer(UserActionKind.fund, ma.name, undefined);
-              mixpanel.track('btn-click', {
-                id: 'fund-collateral-open',
-                product: 'oasis-trade',
-                page: 'Leverage',
-                section: 'my-position',
-              });
+              trackingEvents.depositCollateral();
             }
           }
         >
@@ -331,12 +319,7 @@ export class MTMyPositionPanelInternal
           onClick={
             () => {
               this.transfer(UserActionKind.fund, 'DAI', ma.name);
-              mixpanel.track('btn-click', {
-                id: 'fund-dai-open',
-                product: 'oasis-trade',
-                page: 'Leverage',
-                section: 'my-position',
-              });
+              trackingEvents.depositDai();
             }
           }
         >
@@ -363,12 +346,7 @@ export class MTMyPositionPanelInternal
         onClick={
           () => {
             this.transfer(UserActionKind.draw, ma.name, undefined);
-            mixpanel.track('btn-click', {
-              id: 'draw-collateral-open',
-              product: 'oasis-trade',
-              page: 'Leverage',
-              section: 'my-position',
-            });
+            trackingEvents.withdrawCollateral();
           }
         }
       >
@@ -384,12 +362,7 @@ export class MTMyPositionPanelInternal
         onClick={
           () => {
             this.transfer(UserActionKind.draw, 'DAI', ma.name);
-            mixpanel.track('btn-click', {
-              id: 'draw-dai-open',
-              product: 'oasis-trade',
-              page: 'Leverage',
-              section: 'my-position',
-            });
+            trackingEvents.withdrawDai();
           }
         }
       >
