@@ -1,119 +1,119 @@
-import { Tab } from '../../pages/Tab';
-import { instantForm, Trade } from '../../pages/Trade';
-import { TradeData } from '../../pages/TradeData';
-import { TradeSettings } from '../../pages/TradeSettings';
-import { WalletConnection } from '../../pages/WalletConnection';
-import { cypressVisitWithWeb3, tid, timeout } from '../../utils';
+import { Tab } from '../../pages/Tab'
+import { instantForm, Trade } from '../../pages/Trade'
+import { TradeData } from '../../pages/TradeData'
+import { TradeSettings } from '../../pages/TradeSettings'
+import { WalletConnection } from '../../pages/WalletConnection'
+import { cypressVisitWithWeb3, tid, timeout } from '../../utils'
 
 const initiateTrade = () => {
-  const trade = new Trade();
-  trade.buy('DAI').amount('100');
-  return trade;
-};
+  const trade = new Trade()
+  trade.buy('DAI').amount('100')
+  return trade
+}
 
 describe('Trade Settings', () => {
   beforeEach(() => {
-    cypressVisitWithWeb3();
-    WalletConnection.connect();
-    WalletConnection.isConnected();
-    Tab.instant();
-    instantForm();
-  });
+    cypressVisitWithWeb3()
+    WalletConnection.connect()
+    WalletConnection.isConnected()
+    Tab.instant()
+    instantForm()
+  })
 
   it('should be disabled', () => {
-    TradeSettings.button().should('be.disabled');
-  });
+    TradeSettings.button().should('be.disabled')
+  })
 
   it('should be enabled when trade details are calculated', () => {
-    initiateTrade();
-    TradeSettings.button().should('not.be.disabled');
-  });
+    initiateTrade()
+    TradeSettings.button().should('not.be.disabled')
+  })
 
   context('Trade Details', () => {
     it('should be displayed in trade settings', () => {
-      initiateTrade();
+      initiateTrade()
 
-      TradeSettings.button().click();
+      TradeSettings.button().click()
 
-      TradeData.expectPriceImpact('0.00');
-      TradeData.expectSlippageLimit('5.00');
-      TradeData.expectPriceOf('280');
-    });
+      TradeData.expectPriceImpact('0.00')
+      TradeData.expectSlippageLimit('5.00')
+      TradeData.expectPriceOf('280')
+    })
 
     it('should reflect changed slippage limit', () => {
-      initiateTrade();
+      initiateTrade()
 
-      TradeSettings.button().click();
+      TradeSettings.button().click()
 
-      TradeData.expectSlippageLimit('5.00');
+      TradeData.expectSlippageLimit('5.00')
 
-      TradeSettings.slippageLimit('3');
+      TradeSettings.slippageLimit('3')
 
-      TradeData.expectSlippageLimit('3.00');
-    });
+      TradeData.expectSlippageLimit('3.00')
+    })
 
     it('should keep changed value when returned to the new trade view', () => {
-      initiateTrade();
+      initiateTrade()
 
-      TradeSettings.button().click();
+      TradeSettings.button().click()
 
-      TradeSettings.slippageLimit('3');
+      TradeSettings.slippageLimit('3')
 
-      TradeSettings.back();
+      TradeSettings.back()
 
-      TradeData.expectSlippageLimit('3.00');
-    });
+      TradeData.expectSlippageLimit('3.00')
+    })
 
     it('should reset the slippage limit if new token is selected for deposit token', () => {
-      initiateTrade();
+      initiateTrade()
 
-      TradeSettings.button().click();
+      TradeSettings.button().click()
 
-      TradeSettings.slippageLimit('3');
+      TradeSettings.slippageLimit('3')
 
-      TradeSettings.back();
+      TradeSettings.back()
 
-      TradeData.expectSlippageLimit('3.00');
+      TradeData.expectSlippageLimit('3.00')
 
-      new Trade().sell('WETH').amount('1');
+      new Trade().sell('WETH').amount('1')
 
-      TradeData.expectSlippageLimit('5.00');
-    });
+      TradeData.expectSlippageLimit('5.00')
+    })
 
     it('should reset the slippage limit if new token is selected for receive token', () => {
-      initiateTrade();
+      initiateTrade()
 
-      TradeSettings.button().click();
+      TradeSettings.button().click()
 
-      TradeSettings.slippageLimit('3');
+      TradeSettings.slippageLimit('3')
 
-      TradeSettings.back();
+      TradeSettings.back()
 
-      TradeData.expectSlippageLimit('3.00');
+      TradeData.expectSlippageLimit('3.00')
 
-      Trade.swapTokens();
+      Trade.swapTokens()
 
-      new Trade().buy('WETH').amount('1');
+      new Trade().buy('WETH').amount('1')
 
-      TradeData.expectSlippageLimit('5.00');
-    });
+      TradeData.expectSlippageLimit('5.00')
+    })
 
     it('should reset the slippage limit if tokens in the pair are just swapped', () => {
-      initiateTrade();
+      initiateTrade()
 
-      TradeSettings.button().click();
+      TradeSettings.button().click()
 
-      TradeSettings.slippageLimit('3');
+      TradeSettings.slippageLimit('3')
 
-      TradeSettings.back();
+      TradeSettings.back()
 
-      TradeData.expectSlippageLimit('3.00');
+      TradeData.expectSlippageLimit('3.00')
 
-      Trade.swapTokens();
+      Trade.swapTokens()
 
-      cy.get(tid('buying-token', tid('amount')), timeout(2000)).type('1');
+      cy.get(tid('buying-token', tid('amount')), timeout(2000)).type('1')
 
-      TradeData.expectSlippageLimit('5.00');
-    });
-  });
-});
+      TradeData.expectSlippageLimit('5.00')
+    })
+  })
+})

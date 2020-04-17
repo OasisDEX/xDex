@@ -1,17 +1,17 @@
-import { storiesOf } from '@storybook/react';
-import * as React from 'react';
-import { of } from 'rxjs';
+import { storiesOf } from '@storybook/react'
+import * as React from 'react'
+import { of } from 'rxjs'
 
-import { BigNumber } from 'bignumber.js';
-import { AssetKind } from '../../blockchain/config';
-import { TxState } from '../../blockchain/transactions';
-import { GasEstimationStatus, ProgressStage } from '../../utils/form';
-import { MTAllocateState } from '../allocate/mtOrderAllocateDebtForm';
-import { MTAccount, MTAccountState, UserActionKind } from '../state/mtAccount';
-import { MessageKind } from './mtTransferForm';
-import { MtTransferFormView } from './mtTransferFormView';
+import { BigNumber } from 'bignumber.js'
+import { AssetKind } from '../../blockchain/config'
+import { TxState } from '../../blockchain/transactions'
+import { GasEstimationStatus, ProgressStage } from '../../utils/form'
+import { MTAllocateState } from '../allocate/mtOrderAllocateDebtForm'
+import { MTAccount, MTAccountState, UserActionKind } from '../state/mtAccount'
+import { MessageKind } from './mtTransferForm'
+import { MtTransferFormView } from './mtTransferFormView'
 
-const stories = storiesOf('Margin Trading/Transfer', module);
+const stories = storiesOf('Margin Trading/Transfer', module)
 
 const defaultParams = {
   // stage
@@ -40,11 +40,11 @@ const defaultParams = {
     marginableAssets: [],
     nonMarginableAssets: [],
     totalAssetValue: new BigNumber(3),
-    totalDebt:  new BigNumber(4),
-    totalAvailableDebt:  new BigNumber(0),
+    totalDebt: new BigNumber(4),
+    totalAvailableDebt: new BigNumber(0),
     totalLeverage: new BigNumber(5),
     proxy: null,
-    approve: () => of({} as TxState)
+    approve: () => of({} as TxState),
   } as MTAccount,
   messages: [],
   // amount
@@ -60,68 +60,50 @@ const defaultParams = {
   close: () => null,
   open: () => null,
   createMTAllocateForm$: () => of({} as MTAllocateState),
-};
+}
 
 stories.add('FormStage is editing (default)', () => (
   <div style={{ width: '932px' }}>
-    <MtTransferFormView
-                    {...defaultParams}
-    />
+    <MtTransferFormView {...defaultParams} />
   </div>
-));
+))
 
 stories.add('FormStage is editing with validation error', () => (
   <div style={{ width: '932px' }}>
     <MtTransferFormView
-                    {...defaultParams}
-                    messages={[
-                      { kind: MessageKind.insufficientAmount }]}
-                    amount={new BigNumber(152345)}
-                    />
+      {...defaultParams}
+      messages={[{ kind: MessageKind.insufficientAmount }]}
+      amount={new BigNumber(152345)}
+    />
   </div>
-));
+))
 
 stories.add('FormStage is readyToProceed', () => (
   <div style={{ width: '932px' }}>
-    <MtTransferFormView
-                    {...defaultParams}
-                    amount={new BigNumber(15)} />
+    <MtTransferFormView {...defaultParams} amount={new BigNumber(15)} />
   </div>
-));
+))
 
 stories.add('ProgressStage is waitingForApproval', () => (
   <div style={{ width: '932px' }}>
-    <MtTransferFormView
-                    {...defaultParams}
-                    progress={ProgressStage.waitingForApproval}
-                    amount={new BigNumber(15)}/>
+    <MtTransferFormView {...defaultParams} progress={ProgressStage.waitingForApproval} amount={new BigNumber(15)} />
   </div>
-));
+))
 
 stories.add('ProgressStage is waitingForConfirmation', () => (
   <div style={{ width: '932px' }}>
-    <MtTransferFormView
-                    {...defaultParams}
-                    progress={ProgressStage.waitingForConfirmation}
-                    amount={new BigNumber(15)}
-                    />
+    <MtTransferFormView {...defaultParams} progress={ProgressStage.waitingForConfirmation} amount={new BigNumber(15)} />
   </div>
-));
+))
 
 stories.add('ProgressStage is done', () => (
   <div style={{ width: '932px' }}>
-    <MtTransferFormView
-                    {...defaultParams}
-                    progress={ProgressStage.done}
-                    amount={new BigNumber(15)}/>
+    <MtTransferFormView {...defaultParams} progress={ProgressStage.done} amount={new BigNumber(15)} />
   </div>
-));
+))
 
 stories.add('ProgressStage is fiasco', () => (
   <div style={{ width: '932px' }}>
-    <MtTransferFormView
-                    {...defaultParams}
-                    progress={ProgressStage.fiasco}
-                    amount={new BigNumber(15)}/>
+    <MtTransferFormView {...defaultParams} progress={ProgressStage.fiasco} amount={new BigNumber(15)} />
   </div>
-));
+))
