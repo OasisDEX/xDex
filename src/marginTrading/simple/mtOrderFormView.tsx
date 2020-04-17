@@ -1,9 +1,9 @@
 import { BigNumber } from 'bignumber.js'
 import * as classnames from 'classnames'
-import * as mixpanel from 'mixpanel-browser'
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons'
+import { trackingEvents } from '../../analytics/analytics'
 import { getToken } from '../../blockchain/config'
 import * as formStyles from '../../exchange/offerMake/OfferMakeForm.scss'
 import { OfferType } from '../../exchange/orderbook/orderbook'
@@ -39,7 +39,6 @@ import {
 } from './mtOrderForm'
 import * as styles from './mtOrderFormView.scss'
 import { MTSimpleOrderPanelProps } from './mtOrderPanel'
-import { trackingEvents } from '../../analytics/analytics'
 
 /* tslint:disable */
 const collateralBalanceTooltip = (collateral: string) => `

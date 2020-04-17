@@ -1,14 +1,13 @@
-import * as mixpanel from 'mixpanel-browser'
 import * as React from 'react'
 import { Observable } from 'rxjs'
 import { take } from 'rxjs/internal/operators'
+import { trackingEvents } from '../analytics/analytics'
 import { Button } from '../utils/forms/Buttons'
 import { ProgressIcon } from '../utils/icons/Icons'
 import { Panel, PanelBody, PanelHeader } from '../utils/panel/Panel'
 import { Muted } from '../utils/text/Text'
 import { TradeExport } from './taxExporter'
 import * as styles from './TaxExporter.scss'
-import { trackingEvents } from '../analytics/analytics';
 
 export interface TaxExporterViewProps {
   export: () => Observable<any[]>

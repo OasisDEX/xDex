@@ -94,6 +94,7 @@ import { createExchangeMigration$, createMigrationOps$, ExchangeMigrationState }
 import { createMigrationForm$, MigrationFormKind, MigrationFormState } from './migration/migrationForm'
 import { MigrationButton } from './migration/MigrationFormView'
 
+import { trackingEvents } from './analytics/analytics'
 import { NetworkConfig } from './blockchain/config'
 import { MTLiquidationNotification, MTMyPositionPanel } from './marginTrading/positions/MTMyPositionPanel'
 import { createMTMyPositionView$ } from './marginTrading/positions/MTMyPositionView'
@@ -113,7 +114,6 @@ import { Loadable, LoadableWithTradingPair, loadablifyLight } from './utils/load
 import { withModal } from './utils/modal'
 import { zero } from './utils/zero'
 import { createWrapUnwrapForm$ } from './wrapUnwrap/wrapUnwrapForm'
-import { trackingEvents } from './analytics/analytics'
 
 const { REACT_APP_LT_ENABLED } = process.env
 

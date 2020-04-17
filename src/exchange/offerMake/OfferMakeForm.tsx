@@ -4,7 +4,7 @@ import * as ReactDOM from 'react-dom'
 import { Link } from 'react-router-dom'
 import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons'
 
-import * as mixpanel from 'mixpanel-browser'
+import { trackingEvents } from '../../analytics/analytics'
 import { getToken, isDAIEnabled } from '../../blockchain/config'
 import { routerContext } from '../../Main'
 import { BigNumberInput, lessThanOrEqual } from '../../utils/bigNumberInput/BigNumberInput'
@@ -30,7 +30,6 @@ import {
   SlippageLimitChange,
 } from './offerMake'
 import * as styles from './OfferMakeForm.scss'
-import { trackingEvents } from '../../analytics/analytics'
 
 export class OfferMakeForm extends React.Component<OfferFormState> {
   public orderTypes: { [key in OfferMatchType]: string } = {

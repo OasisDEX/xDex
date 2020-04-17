@@ -1,13 +1,12 @@
 import classnames from 'classnames'
-import * as mixpanel from 'mixpanel-browser'
 import * as React from 'react'
+import { trackingEvents } from '../../analytics/analytics'
 import { FormatPercent } from '../../utils/formatters/Formatters'
 import { CloseButton } from '../../utils/forms/Buttons'
 import { TopRightCorner } from '../../utils/panel/TopRightCorner'
 import { InstantFormChangeKind, InstantFormState, ViewKind } from '../instantForm'
 import { InstantFormWrapper } from '../InstantFormWrapper'
 import * as styles from './PriceImpactWarningView.scss'
-import { trackingEvents } from '../../analytics/analytics'
 
 const PriceImpactGraph = () => (
   <div className={styles.graph}>

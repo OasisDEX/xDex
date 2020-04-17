@@ -6,7 +6,7 @@ import { CSSTransition, TransitionGroup } from 'react-transition-group'
 import { combineLatest, Observable } from 'rxjs'
 import { distinctUntilKeyChanged, map, startWith } from 'rxjs/operators'
 
-import * as mixpanel from 'mixpanel-browser'
+import { trackingEvents } from '../../analytics/analytics'
 import { FormChangeKind, PickOfferChange } from '../../utils/form'
 import { FormatAmount, FormatPercent, FormatPriceOrder } from '../../utils/formatters/Formatters'
 import { Button } from '../../utils/forms/Buttons'
@@ -23,7 +23,6 @@ import { TradingPair, tradingPairResolver } from '../tradingPair/tradingPair'
 import depthChartSvg from './depth-chart.svg'
 import { Offer, Orderbook } from './orderbook'
 import * as styles from './OrderbookView.scss'
-import { trackingEvents } from '../../analytics/analytics'
 
 export function createOrderbookForView(
   currentOrderBook$: Observable<Orderbook>,

@@ -23,8 +23,8 @@ import { Muted } from '../../utils/text/Text'
 import { TransactionStateDescription } from '../../utils/text/TransactionStateDescription'
 import { zero } from '../../utils/zero'
 
-import * as mixpanel from 'mixpanel-browser'
 import * as ReactDOM from 'react-dom'
+import { trackingEvents } from '../../analytics/analytics'
 import { theAppContext } from '../../AppContext'
 import { SvgImage } from '../../utils/icons/utils'
 import { LoadableWithTradingPair } from '../../utils/loadable'
@@ -43,8 +43,6 @@ import {
 import checkIconSvg from './check-icon.svg'
 import { Message, MessageKind, MTTransferFormState, MTTransferFormTab } from './mtTransferForm'
 import * as styles from './mtTransferFormView.scss'
-import { trackingEvents } from '../../analytics/analytics'
-
 
 type MTFundFormProps = MTTransferFormState & ModalProps
 
@@ -477,7 +475,6 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
             onClick={() => {
               this.transfer()
               trackingEvents.transferTokens(actionKind, token)
-
             }}
           >
             {proceedName}

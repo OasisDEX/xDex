@@ -1,7 +1,7 @@
 import { BigNumber } from 'bignumber.js'
 import classnames from 'classnames'
-import * as mixpanel from 'mixpanel-browser'
 import * as React from 'react'
+import { trackingEvents } from '../../analytics/analytics'
 import { etherscan, EtherscanConfig } from '../../blockchain/etherscan'
 import swapArrowsSvg from '../../icons/swap-arrows.svg'
 import { formatAmountInstant } from '../../utils/formatters/format'
@@ -24,7 +24,6 @@ import {
 } from '../instantForm'
 import { InstantFormWrapper } from '../InstantFormWrapper'
 import { Buying, Selling } from '../TradingSide'
-import { trackingEvents } from '../../analytics/analytics'
 
 const inProgressMessages = new Map<ProgressKind, (msg: TxInProgressMessage) => string>([
   [ProgressKind.onlyProxy, (_: TxInProgressMessage) => `Your manual proxy creation is pending...`],

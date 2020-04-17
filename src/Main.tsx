@@ -3,8 +3,8 @@ import * as React from 'react'
 import { Redirect, Route, Router, Switch } from 'react-router'
 import { RouteComponentProps, withRouter } from 'react-router-dom'
 
-import * as mixpanel from 'mixpanel-browser'
 import { map } from 'rxjs/operators'
+import { trackingEvents } from './analytics/analytics'
 import { setupAppContext, theAppContext } from './AppContext'
 import { BalancesView } from './balances/BalancesView'
 import { WalletStatus, walletStatus$ } from './blockchain/wallet'
@@ -14,7 +14,6 @@ import * as styles from './index.scss'
 import { InstantExchange } from './instant/InstantViewPanel'
 import { MarginTradingSimpleTxRx } from './marginTrading/MarginTradingSimple'
 import { connect } from './utils/connect'
-import { trackingEvents } from './analytics/analytics'
 
 const { REACT_APP_INSTANT_ENABLED, REACT_APP_LT_ENABLED, REACT_APP_SUBDIR } = process.env
 

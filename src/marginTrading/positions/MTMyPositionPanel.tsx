@@ -1,4 +1,3 @@
-import * as mixpanel from 'mixpanel-browser'
 import * as React from 'react'
 import * as styles from '../../balances/mtBalancesView.scss'
 import { SvgImage } from '../../utils/icons/utils'
@@ -12,6 +11,7 @@ import { MTMyPositionView } from './MTMyPositionView'
 
 import { default as BigNumber } from 'bignumber.js'
 import { Observable } from 'rxjs'
+import { trackingEvents } from '../../analytics/analytics'
 import { AssetDropdownMenu } from '../../balances/AssetDropdownMenu'
 import { TxMetaKind } from '../../blockchain/calls/txMeta'
 import { isDone, TxState } from '../../blockchain/transactions'
@@ -25,7 +25,6 @@ import { MtTransferFormView } from '../transfer/mtTransferFormView'
 import backArrowSvg from './back-arrow.svg'
 import * as myPositionStyles from './MTMyPositionView.scss'
 import warningIconSvg from './warning-icon.svg'
-import { trackingEvents } from '../../analytics/analytics'
 
 interface RedeemButtonProps {
   disabled: boolean
