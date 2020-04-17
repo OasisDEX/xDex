@@ -16,24 +16,12 @@ import { LoggedOut } from '../../utils/loadingIndicator/LoggedOut';
 import { ModalOpenerProps, ModalProps } from '../../utils/modal';
 import { Panel, PanelBody, PanelHeader } from '../../utils/panel/Panel';
 import { zero } from '../../utils/zero';
+import { LiquidationMessage, LiquidationMessageKind } from '../simple/mtOrderForm';
 import {
   MarginableAsset, MTAccount,
   MTAccountState, UserActionKind
 } from '../state/mtAccount';
 import { CreateMTFundForm$, MTTransferFormState } from '../transfer/mtTransferForm';
-import { MTMyPositionView } from './MTMyPositionView';
-
-import { default as BigNumber } from 'bignumber.js';
-import { Observable } from 'rxjs';
-import { AssetDropdownMenu } from '../../balances/AssetDropdownMenu';
-import { TxMetaKind } from '../../blockchain/calls/txMeta';
-import { isDone, TxState } from '../../blockchain/transactions';
-import { connect } from '../../utils/connect';
-import { Button } from '../../utils/forms/Buttons';
-import { Switch } from '../../utils/forms/Slider';
-import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
-import { LoggedOut } from '../../utils/loadingIndicator/LoggedOut';
-import { LiquidationMessage, LiquidationMessageKind } from '../simple/mtOrderForm';
 import { MtTransferFormView } from '../transfer/mtTransferFormView';
 import backArrowSvg from './back-arrow.svg';
 import { MTMyPositionView } from './MTMyPositionView';
