@@ -1,25 +1,25 @@
-import { BigNumber } from 'bignumber.js';
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-import { Link } from 'react-router-dom';
-import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
+import { BigNumber } from 'bignumber.js'
+import * as React from 'react'
+import * as ReactDOM from 'react-dom'
+import { Link } from 'react-router-dom'
+import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons'
 
-import { trackingEvents } from '../../analytics/analytics';
-import { getToken, isDAIEnabled } from '../../blockchain/config';
-import { routerContext } from '../../Main';
-import { BigNumberInput, lessThanOrEqual } from '../../utils/bigNumberInput/BigNumberInput';
-import { FormChangeKind, OfferMatchType } from '../../utils/form';
-import { formatAmount, formatPrice } from '../../utils/formatters/format';
-import { FormatAmount, FormatPercent } from '../../utils/formatters/Formatters';
-import { Button, ButtonGroup } from '../../utils/forms/Buttons';
-import { ErrorMessage } from '../../utils/forms/ErrorMessage';
-import { InputGroup, InputGroupAddon } from '../../utils/forms/InputGroup';
-import { Radio } from '../../utils/forms/Radio';
-import { GasCost } from '../../utils/gasCost/GasCost';
-import { Hr } from '../../utils/layout/LayoutHelpers';
-import { PanelBody, PanelFooter, PanelHeader } from '../../utils/panel/Panel';
-import { Currency, Muted } from '../../utils/text/Text';
-import { OfferType } from '../orderbook/orderbook';
+import * as mixpanel from 'mixpanel-browser'
+import { getToken, isDAIEnabled } from '../../blockchain/config'
+import { routerContext } from '../../Main'
+import { BigNumberInput, lessThanOrEqual } from '../../utils/bigNumberInput/BigNumberInput'
+import { FormChangeKind, OfferMatchType } from '../../utils/form'
+import { formatAmount, formatPrice } from '../../utils/formatters/format'
+import { FormatAmount, FormatPercent } from '../../utils/formatters/Formatters'
+import { Button, ButtonGroup } from '../../utils/forms/Buttons'
+import { ErrorMessage } from '../../utils/forms/ErrorMessage'
+import { InputGroup, InputGroupAddon } from '../../utils/forms/InputGroup'
+import { Radio } from '../../utils/forms/Radio'
+import { GasCost } from '../../utils/gasCost/GasCost'
+import { Hr } from '../../utils/layout/LayoutHelpers'
+import { PanelBody, PanelFooter, PanelHeader } from '../../utils/panel/Panel'
+import { Currency, Muted } from '../../utils/text/Text'
+import { OfferType } from '../orderbook/orderbook'
 import {
   ManualChange,
   Message,
@@ -28,85 +28,85 @@ import {
   OfferMakeChangeKind,
   PickerOpenChange,
   SlippageLimitChange,
-} from './offerMake';
-import * as styles from './OfferMakeForm.scss';
+} from './offerMake'
+import * as styles from './OfferMakeForm.scss'
+import { trackingEvents } from '../../analytics/analytics'
 
 export class OfferMakeForm extends React.Component<OfferFormState> {
-
   public orderTypes: { [key in OfferMatchType]: string } = {
     limitOrder: 'Limit order type',
     direct: 'Average price fill or kill order type',
     fillOrKill: 'Fill or kill',
-    immediateOrCancel: 'Immediate or cancel'
-  };
+    immediateOrCancel: 'Immediate or cancel',
+  }
 
-  private amountInput?: HTMLElement;
-  private priceInput?: HTMLElement;
+  private amountInput?: HTMLElement
+  private priceInput?: HTMLElement
 
   public handleKindChange(kind: OfferType) {
     this.props.change({
       kind: FormChangeKind.kindChange,
       newKind: kind,
-    });
+    })
   }
 
   public handleOpenPicker = () => {
     this.props.change({
       kind: OfferMakeChangeKind.pickerOpenChange,
-    } as PickerOpenChange);
+    } as PickerOpenChange)
   }
 
   public handleOrderTypeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     this.props.change({
       kind: FormChangeKind.matchTypeChange,
-      matchType: e.target.value
-    } as ManualChange);
+      matchType: e.target.value,
+    } as ManualChange)
   }
 
   public handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/,/g, '');
+    const value = e.target.value.replace(/,/g, '')
     this.props.change({
       kind: FormChangeKind.priceFieldChange,
-      value: value === '' ? null : new BigNumber(value)
-    } as ManualChange);
+      value: value === '' ? null : new BigNumber(value),
+    } as ManualChange)
   }
 
   public handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/,/g, '');
+    const value = e.target.value.replace(/,/g, '')
     this.props.change({
       kind: FormChangeKind.amountFieldChange,
-      value: value === '' ? undefined : new BigNumber(value)
-    } as ManualChange);
+      value: value === '' ? undefined : new BigNumber(value),
+    } as ManualChange)
   }
 
   public handleSlippageLimitChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/,/g, '');
+    const value = e.target.value.replace(/,/g, '')
     this.props.change({
       kind: OfferMakeChangeKind.slippageLimitChange,
-      value: value === '' ? undefined : new BigNumber(value)
-    } as SlippageLimitChange);
+      value: value === '' ? undefined : new BigNumber(value),
+    } as SlippageLimitChange)
   }
 
   public handleSetMax = () => {
     this.props.change({
       kind: FormChangeKind.setMaxChange,
-    });
+    })
   }
 
   public handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    this.props.submit(this.props);
+    e.preventDefault()
+    this.props.submit(this.props)
   }
 
   public handleAmountFocus = () => {
     if (this.amountInput) {
-      this.amountInput.focus();
+      this.amountInput.focus()
     }
   }
 
   public handlePriceFocus = () => {
     if (this.priceInput) {
-      this.priceInput.focus();
+      this.priceInput.focus()
     }
   }
 
@@ -114,131 +114,119 @@ export class OfferMakeForm extends React.Component<OfferFormState> {
     const isSaiMarket =
       this.props.quoteToken === 'SAI' &&
       // this.props.baseToken !== 'WETH' &&
-      isDAIEnabled();
-    return this.props.pickerOpen
-    ? this.orderTypePicker()
-    : isSaiMarket
-      ? this.lockedSaiMarket()
-      : this.formProper();
+      isDAIEnabled()
+    return this.props.pickerOpen ? this.orderTypePicker() : isSaiMarket ? this.lockedSaiMarket() : this.formProper()
   }
 
   private slippageLimit() {
     return (
       <React.Fragment>
         {this.slippageLimitGroup()}
-        <Error field="slippageLimit" messages={this.props.messages}/>
+        <Error field="slippageLimit" messages={this.props.messages} />
       </React.Fragment>
-    );
+    )
   }
 
   private orderTypePicker() {
-    return <div className={styles.picker}>
-      <PanelHeader bordered={true}>
-        Choose order type
-      </PanelHeader>
+    return (
+      <div className={styles.picker}>
+        <PanelHeader bordered={true}>Choose order type</PanelHeader>
 
-      <PanelBody paddingVertical={true} className={styles.pickerBody}>
-        <form>
-          <div>
-            <div className={styles.pickerOrderType}>
-              <Radio
-                dataTestId="limitOrder"
-                name="orderType"
-                value="limitOrder"
-                checked={this.props.matchType === OfferMatchType.limitOrder}
-                onChange={this.handleOrderTypeChange}
-              >
-                {this.orderTypes.limitOrder}
-              </Radio>
-              <Muted className={styles.pickerDescription}>
-                The order is allowed to rest on the book and can
-                be filled only at the specified price or better
-              </Muted>
+        <PanelBody paddingVertical={true} className={styles.pickerBody}>
+          <form>
+            <div>
+              <div className={styles.pickerOrderType}>
+                <Radio
+                  dataTestId="limitOrder"
+                  name="orderType"
+                  value="limitOrder"
+                  checked={this.props.matchType === OfferMatchType.limitOrder}
+                  onChange={this.handleOrderTypeChange}
+                >
+                  {this.orderTypes.limitOrder}
+                </Radio>
+                <Muted className={styles.pickerDescription}>
+                  The order is allowed to rest on the book and can be filled only at the specified price or better
+                </Muted>
+              </div>
+              <Hr />
+              <div className={styles.pickerOrderType}>
+                <Radio
+                  dataTestId="fillOrKill"
+                  name="orderType"
+                  value="direct"
+                  checked={this.props.matchType === OfferMatchType.direct}
+                  onChange={this.handleOrderTypeChange}
+                >
+                  {this.orderTypes.direct}
+                </Radio>
+                <Muted className={styles.pickerDescription}>
+                  The order is executed in its entirety such that the average fill price is the limit price or better,
+                  otherwise it is canceled
+                </Muted>
+                {this.slippageLimit()}
+              </div>
             </div>
-            <Hr/>
-            <div className={styles.pickerOrderType}>
-              <Radio
-                dataTestId="fillOrKill"
-                name="orderType"
-                value="direct"
-                checked={this.props.matchType === OfferMatchType.direct}
-                onChange={this.handleOrderTypeChange}
-              >
-                {this.orderTypes.direct}
-              </Radio>
-              <Muted className={styles.pickerDescription}>
-                The order is executed in its entirety such that the average fill price is
-                the limit price or better, otherwise it is canceled
-              </Muted>
-              {this.slippageLimit()}
-            </div>
-          </div>
-        </form>
-      </PanelBody>
-      <PanelFooter>
-        {this.pickerDone()}
-      </PanelFooter>
-    </div>;
+          </form>
+        </PanelBody>
+        <PanelFooter>{this.pickerDone()}</PanelFooter>
+      </div>
+    )
   }
 
   private formProper() {
-    return <div data-test-id="create-order-widget">
-      <PanelHeader bordered={true}>
-        Create order
-        {this.headerButtons()}
-      </PanelHeader>
+    return (
+      <div data-test-id="create-order-widget">
+        <PanelHeader bordered={true}>
+          Create order
+          {this.headerButtons()}
+        </PanelHeader>
 
-      <PanelBody paddingVertical={true}>
-        <form onSubmit={this.handleSubmit}>
-          {this.orderType()}
-          {this.balanceButtons()}
+        <PanelBody paddingVertical={true}>
+          <form onSubmit={this.handleSubmit}>
+            {this.orderType()}
+            {this.balanceButtons()}
 
-          {
-            this.props.matchType !== OfferMatchType.direct &&
-            this.price()
-          }
-          {this.props.matchType === OfferMatchType.direct &&
-          this.directSummary()
-          }
+            {this.props.matchType !== OfferMatchType.direct && this.price()}
+            {this.props.matchType === OfferMatchType.direct && this.directSummary()}
 
-          {this.amount()}
+            {this.amount()}
 
-          {this.gasCost()}
-          {this.total()}
+            {this.gasCost()}
+            {this.total()}
 
-          {this.submitButton()}
-        </form>
-      </PanelBody>
-    </div>;
+            {this.submitButton()}
+          </form>
+        </PanelBody>
+      </div>
+    )
   }
 
   private lockedSaiMarket() {
-    return <div data-test-id="create-order-widget">
-      <PanelHeader bordered={true}>
-        Create order
-        {this.headerButtons()}
-      </PanelHeader>
+    return (
+      <div data-test-id="create-order-widget">
+        <PanelHeader bordered={true}>
+          Create order
+          {this.headerButtons()}
+        </PanelHeader>
 
-      <PanelBody paddingVertical={true}>
-        {this.balanceButtons(true)}
-        <Hr color="dark" className={styles.hrMargin}/>
-        <div className={styles.migrationDescription}>
-          <p className={styles.text}>
-            Oasis Trade does not support SAI markets.
-          </p>
-          <p className={styles.text}>
-            You can cancel resting orders manually or use our migration
-            process which will cancel your resting orders
-            and swap your SAI to DAI
-          </p>
-        </div>
-
-      </PanelBody>
-    </div>;
+        <PanelBody paddingVertical={true}>
+          {this.balanceButtons(true)}
+          <Hr color="dark" className={styles.hrMargin} />
+          <div className={styles.migrationDescription}>
+            <p className={styles.text}>Oasis Trade does not support SAI markets.</p>
+            <p className={styles.text}>
+              You can cancel resting orders manually or use our migration process which will cancel your resting orders
+              and swap your SAI to DAI
+            </p>
+          </div>
+        </PanelBody>
+      </div>
+    )
   }
 
   private headerButtons() {
-    const disabled = this.props.stage === 'waitingForApproval';
+    const disabled = this.props.stage === 'waitingForApproval'
     return (
       <ButtonGroup className={styles.btnGroup}>
         <Button
@@ -248,7 +236,9 @@ export class OfferMakeForm extends React.Component<OfferFormState> {
           color={this.props.kind === OfferType.buy ? 'primary' : 'greyOutlined'}
           disabled={disabled}
           size="sm"
-        >Buy</Button>
+        >
+          Buy
+        </Button>
         <Button
           data-test-id="new-sell-order"
           className={styles.btn}
@@ -256,27 +246,29 @@ export class OfferMakeForm extends React.Component<OfferFormState> {
           color={this.props.kind === OfferType.sell ? 'danger' : 'greyOutlined'}
           disabled={disabled}
           size="sm"
-        >Sell</Button>
+        >
+          Sell
+        </Button>
       </ButtonGroup>
-    );
+    )
   }
 
-  private balanceButtons(enforceDisabled?:boolean) {
+  private balanceButtons(enforceDisabled?: boolean) {
     if (!this.props.user || !this.props.user.account) {
       return (
         <div className={styles.noResourcesInfoBox}>
           <span>Connect to view Account</span>
         </div>
-      );
+      )
     }
 
-    const disabled = this.props.stage === 'waitingForApproval'
-      || enforceDisabled;
-    const setMaxSellDisabled = this.props.kind === OfferType.buy || disabled;
-    const setMaxBuyDisabled = this.props.kind === OfferType.sell ||
+    const disabled = this.props.stage === 'waitingForApproval' || enforceDisabled
+    const setMaxSellDisabled = this.props.kind === OfferType.buy || disabled
+    const setMaxBuyDisabled =
+      this.props.kind === OfferType.sell ||
       this.props.matchType === OfferMatchType.direct ||
       !this.props.price ||
-      disabled;
+      disabled
 
     return (
       <div className={styles.ownedResourcesInfoBox}>
@@ -288,17 +280,12 @@ export class OfferMakeForm extends React.Component<OfferFormState> {
           disabled={setMaxSellDisabled}
           className={styles.balanceBtn}
         >
-          <span className={styles.icon}>
-            {
-              this.props.baseToken && getToken(this.props.baseToken).icon
-            }
-          </span>
+          <span className={styles.icon}>{this.props.baseToken && getToken(this.props.baseToken).icon}</span>
           <span data-test-id="base-balance">
-                {
-                  this.props.balances && this.props.balances[this.props.baseToken] &&
-                  formatAmount(this.props.balances[this.props.baseToken], this.props.baseToken)
-                }{' '}
-            <Currency value={this.props.baseToken}/>
+            {this.props.balances &&
+              this.props.balances[this.props.baseToken] &&
+              formatAmount(this.props.balances[this.props.baseToken], this.props.baseToken)}{' '}
+            <Currency value={this.props.baseToken} />
           </span>
         </Button>
         <Button
@@ -309,25 +296,20 @@ export class OfferMakeForm extends React.Component<OfferFormState> {
           disabled={setMaxBuyDisabled}
           className={styles.balanceBtn}
         >
-          <span className={styles.icon}>
-            {
-              this.props.quoteToken && getToken(this.props.quoteToken).icon
-            }
-          </span>
+          <span className={styles.icon}>{this.props.quoteToken && getToken(this.props.quoteToken).icon}</span>
           <span data-test-id="quote-balance">
-                {
-                  this.props.balances && this.props.balances[this.props.quoteToken] &&
-                  formatAmount(this.props.balances[this.props.quoteToken], this.props.quoteToken)
-                }{' '}
-            <Currency value={this.props.quoteToken}/>
+            {this.props.balances &&
+              this.props.balances[this.props.quoteToken] &&
+              formatAmount(this.props.balances[this.props.quoteToken], this.props.quoteToken)}{' '}
+            <Currency value={this.props.quoteToken} />
           </span>
         </Button>
       </div>
-    );
+    )
   }
 
   private orderType() {
-    const disabled = this.props.stage === 'waitingForApproval';
+    const disabled = this.props.stage === 'waitingForApproval'
     return (
       <div className={styles.summary} style={{ marginBottom: '16px' }}>
         <Button
@@ -342,59 +324,62 @@ export class OfferMakeForm extends React.Component<OfferFormState> {
           {this.orderTypes[this.props.matchType]}
         </Button>
       </div>
-    );
+    )
   }
 
   private amount() {
     return (
       <div>
         {this.amountGroup()}
-        <Error field="amount" messages={this.props.messages}/>
+        <Error field="amount" messages={this.props.messages} />
       </div>
-    );
+    )
   }
 
   private price() {
     return (
       <React.Fragment>
-        <Hr color="light" className={styles.hrMargin}/>
+        <Hr color="light" className={styles.hrMargin} />
         {this.priceGroup()}
-        <Error field="price" messages={this.props.messages}/>
+        <Error field="price" messages={this.props.messages} />
       </React.Fragment>
-    );
+    )
   }
 
   private gasCost() {
     return (
       <React.Fragment>
         <div className={styles.summary}>
-          <span><Muted>Gas cost</Muted></span>
-          <GasCost gasEstimationStatus={this.props.gasEstimationStatus}
-                   gasEstimationUsd={this.props.gasEstimationUsd}
-                   gasEstimationEth={this.props.gasEstimationEth}
+          <span>
+            <Muted>Gas cost</Muted>
+          </span>
+          <GasCost
+            gasEstimationStatus={this.props.gasEstimationStatus}
+            gasEstimationUsd={this.props.gasEstimationUsd}
+            gasEstimationEth={this.props.gasEstimationEth}
           />
         </div>
-        <Error field="gas" messages={this.props.messages}/>
+        <Error field="gas" messages={this.props.messages} />
       </React.Fragment>
-    );
+    )
   }
 
   private total() {
     return (
       <React.Fragment>
         <div data-test-id="type-total" className={styles.summary}>
-          <span><Muted>Total</Muted></span>
           <span>
-    <FormatAmount
-      value={this.props.total || new BigNumber(0)} token={this.props.quoteToken}
-    />
+            <Muted>Total</Muted>
+          </span>
+          <span>
+            <FormatAmount value={this.props.total || new BigNumber(0)} token={this.props.quoteToken} />
             &#x20;
-            <Currency value={this.props.quoteToken}/>
-    </span>
+            <Currency value={this.props.quoteToken} />
+          </span>
         </div>
-        <Error field="total" messages={this.props.messages}/>
+        <Error field="total" messages={this.props.messages} />
       </React.Fragment>
-    );
+    )
   }
 
   private submitButton() {
@@ -407,20 +392,19 @@ export class OfferMakeForm extends React.Component<OfferFormState> {
         color={this.props.kind === OfferType.buy ? 'primary' : 'danger'}
         disabled={this.props.stage !== 'readyToProceed'}
         onClick={() => {
-          trackingEvents.initiateTradeMarket(this.props.kind);
+          trackingEvents.initiateTradeMarket(this.props.kind)
         }}
       >
         {this.props.kind} {this.props.baseToken}
       </Button>
-    );
+    )
   }
 
   private pickerDone() {
-    const disabledByDirectError = this.props.matchType === OfferMatchType.direct
-      && (this.props.messages || [])
-        .filter((message: Message) => message.field === 'slippageLimit')
-        .length > 0;
-    const disabled = disabledByDirectError || this.props.stage === 'waitingForApproval';
+    const disabledByDirectError =
+      this.props.matchType === OfferMatchType.direct &&
+      (this.props.messages || []).filter((message: Message) => message.field === 'slippageLimit').length > 0
+    const disabled = disabledByDirectError || this.props.stage === 'waitingForApproval'
     return (
       <Button
         data-test-id="submit"
@@ -430,124 +414,107 @@ export class OfferMakeForm extends React.Component<OfferFormState> {
         color={this.props.kind === 'buy' ? 'primary' : 'danger'}
         disabled={disabled}
         onClick={() => {
-          trackingEvents.changeOrderType();
-          this.handleOpenPicker();
+          trackingEvents.changeOrderType()
+          this.handleOpenPicker()
         }}
       >
         Done
       </Button>
-    );
+    )
   }
 
   private amountGroup() {
     return (
-    <InputGroup hasError={ (this.props.messages || [])
-                                    .filter((message: Message) => message.field === 'amount')
-                                    .length > 0}>
-      <InputGroupAddon className={styles.inputHeader}>Amount</InputGroupAddon>
-      <div className={styles.inputTail}>
-        <BigNumberInput
-          data-test-id="type-amount"
-          ref={(el: any) =>
-            this.amountInput = (el && ReactDOM.findDOMNode(el) as HTMLElement) || undefined
-          }
-          type="text"
-          mask={createNumberMask({
-            allowDecimal: true,
-            decimalLimit: this.props.baseTokenDigits,
-            prefix: ''
-          })}
-          onChange={this.handleAmountChange}
-          pipe={
-            lessThanOrEqual(maxTokenValue(this.props.baseToken))
-          }
-          value={
-            (this.props.amount || null) &&
-            formatAmount(this.props.amount as BigNumber, this.props.baseToken)
-          }
-          guide={true}
-          placeholder={'0'}
-          className={styles.input}
-          disabled={this.props.stage === 'waitingForApproval'}
-        />
-        <InputGroupAddon className={styles.inputCurrencyAddon}
-                         onClick={this.handleAmountFocus}
-                         disabled={this.props.stage === 'waitingForApproval'}
-        >
-          {this.props.baseToken}
-        </InputGroupAddon>
-      </div>
-    </InputGroup>
-    );
-  }
-
-  private priceGroup() {
-    return (
-      <InputGroup hasError={(this.props.messages || [])
-        .filter((message: Message) => message.field === 'price')
-        .length > 0}>
-        <InputGroupAddon className={styles.inputHeader}>Price</InputGroupAddon>
+      <InputGroup
+        hasError={(this.props.messages || []).filter((message: Message) => message.field === 'amount').length > 0}
+      >
+        <InputGroupAddon className={styles.inputHeader}>Amount</InputGroupAddon>
         <div className={styles.inputTail}>
           <BigNumberInput
-            data-test-id="type-price"
-            ref={(el: any) =>
-              this.priceInput = (el && ReactDOM.findDOMNode(el) as HTMLElement) || undefined
-            }
+            data-test-id="type-amount"
+            ref={(el: any) => (this.amountInput = (el && (ReactDOM.findDOMNode(el) as HTMLElement)) || undefined)}
             type="text"
             mask={createNumberMask({
               allowDecimal: true,
-              decimalLimit: this.props.quoteTokenDigits,
-              prefix: ''
+              decimalLimit: this.props.baseTokenDigits,
+              prefix: '',
             })}
-            pipe={
-              lessThanOrEqual(maxTokenValue(this.props.quoteToken))
-            }
-            onChange={this.handlePriceChange}
-            value={
-              (this.props.price || null) &&
-              formatPrice(this.props.price as BigNumber, this.props.quoteToken)
-            }
+            onChange={this.handleAmountChange}
+            pipe={lessThanOrEqual(maxTokenValue(this.props.baseToken))}
+            value={(this.props.amount || null) && formatAmount(this.props.amount as BigNumber, this.props.baseToken)}
             guide={true}
             placeholder={'0'}
             className={styles.input}
             disabled={this.props.stage === 'waitingForApproval'}
           />
-          <InputGroupAddon className={styles.inputCurrencyAddon}
-                           onClick={this.handlePriceFocus}
-                           disabled={this.props.stage === 'waitingForApproval'}
+          <InputGroupAddon
+            className={styles.inputCurrencyAddon}
+            onClick={this.handleAmountFocus}
+            disabled={this.props.stage === 'waitingForApproval'}
+          >
+            {this.props.baseToken}
+          </InputGroupAddon>
+        </div>
+      </InputGroup>
+    )
+  }
+
+  private priceGroup() {
+    return (
+      <InputGroup
+        hasError={(this.props.messages || []).filter((message: Message) => message.field === 'price').length > 0}
+      >
+        <InputGroupAddon className={styles.inputHeader}>Price</InputGroupAddon>
+        <div className={styles.inputTail}>
+          <BigNumberInput
+            data-test-id="type-price"
+            ref={(el: any) => (this.priceInput = (el && (ReactDOM.findDOMNode(el) as HTMLElement)) || undefined)}
+            type="text"
+            mask={createNumberMask({
+              allowDecimal: true,
+              decimalLimit: this.props.quoteTokenDigits,
+              prefix: '',
+            })}
+            pipe={lessThanOrEqual(maxTokenValue(this.props.quoteToken))}
+            onChange={this.handlePriceChange}
+            value={(this.props.price || null) && formatPrice(this.props.price as BigNumber, this.props.quoteToken)}
+            guide={true}
+            placeholder={'0'}
+            className={styles.input}
+            disabled={this.props.stage === 'waitingForApproval'}
+          />
+          <InputGroupAddon
+            className={styles.inputCurrencyAddon}
+            onClick={this.handlePriceFocus}
+            disabled={this.props.stage === 'waitingForApproval'}
           >
             {this.props.quoteToken}
           </InputGroupAddon>
         </div>
       </InputGroup>
-    );
+    )
   }
 
   private slippageLimitGroup() {
-    const enabled = this.props.matchType === OfferMatchType.direct &&
-      this.props.stage !== 'waitingForApproval';
+    const enabled = this.props.matchType === OfferMatchType.direct && this.props.stage !== 'waitingForApproval'
     return (
       <InputGroup
         sizer="md"
-        hasError={(this.props.messages || [])
-          .filter((message: Message) => message.field === 'slippageLimit')
-          .length > 0}
+        hasError={
+          (this.props.messages || []).filter((message: Message) => message.field === 'slippageLimit').length > 0
+        }
         disabled={!enabled}
       >
-        <InputGroupAddon className={styles.inputHeader}>
-          Slippage limit
-        </InputGroupAddon>
+        <InputGroupAddon className={styles.inputHeader}>Slippage limit</InputGroupAddon>
         <div className={styles.inputTail}>
           <BigNumberInput
             data-test-id="type-price"
             type="text"
             mask={createNumberMask({
               allowDecimal: true,
-              prefix: ''
+              prefix: '',
             })}
-            pipe={
-              lessThanOrEqual(new BigNumber(100))
-            }
+            pipe={lessThanOrEqual(new BigNumber(100))}
             onChange={this.handleSlippageLimitChange}
             value={
               (this.props.slippageLimit || null) &&
@@ -558,100 +525,84 @@ export class OfferMakeForm extends React.Component<OfferFormState> {
             className={styles.input}
             disabled={!enabled}
           />
-          <InputGroupAddon className={styles.inputPercentAddon}>
-            %
-          </InputGroupAddon>
+          <InputGroupAddon className={styles.inputPercentAddon}>%</InputGroupAddon>
         </div>
       </InputGroup>
-    );
+    )
   }
 
   private directSummary() {
     return (
       <div className={styles.directSummary}>
-
         <div className={styles.directSummaryLeft}>
-          <Muted>Price {this.props.baseToken} / {this.props.quoteToken}</Muted>
+          <Muted>
+            Price {this.props.baseToken} / {this.props.quoteToken}
+          </Muted>
           <div>
-            <FormatAmount value={this.props.price as BigNumber}
-                          token={this.props.quoteToken}
-                          fallback="-"
-            />
+            <FormatAmount value={this.props.price as BigNumber} token={this.props.quoteToken} fallback="-" />
           </div>
         </div>
 
         <div className={styles.directSummaryRight}>
           <div className={styles.directSummaryHorizontal}>
             <Muted>Price Impact</Muted>
-            <div><FormatPercent value={this.props.priceImpact} fallback="-"/></div>
+            <div>
+              <FormatPercent value={this.props.priceImpact} fallback="-" />
+            </div>
           </div>
 
           <div className={styles.directSummaryHorizontal}>
             <Muted>Slippage limit</Muted>
-            <div><FormatPercent value={this.props.slippageLimit} fallback="-"/></div>
+            <div>
+              <FormatPercent value={this.props.slippageLimit} fallback="-" />
+            </div>
           </div>
         </div>
-
       </div>
-    );
+    )
   }
 }
 
-const maxTokenValue = (token: string) => new BigNumber(getToken(token).maxSell)
-  .minus(new BigNumber(1));
+const maxTokenValue = (token: string) => new BigNumber(getToken(token).maxSell).minus(new BigNumber(1))
 
-const Error = ({ field, messages }: { field: string, messages?: Message[] }) => {
+const Error = ({ field, messages }: { field: string; messages?: Message[] }) => {
   const myMsg = (messages || [])
     .filter((message: Message) => message.field === field)
     .sort((m1, m2) => m2.priority - m1.priority)
-    .map(msg => messageContent(msg));
-  return (
-    <ErrorMessage messages={myMsg}/>
-  );
-};
+    .map((msg) => messageContent(msg))
+  return <ErrorMessage messages={myMsg} />
+}
 
 function messageContent(msg: Message) {
   switch (msg.kind) {
     case MessageKind.noAllowance:
-      return <span>
-    {`Unlock ${msg.token} for Trading in the `}
-        <routerContext.Consumer>
-    {({ rootUrl }) =>
-      <Link to={`${rootUrl}account`} style={{ whiteSpace: 'nowrap' }}>Account Page</Link>
-    }
-    </routerContext.Consumer>
-    </span>;
+      return (
+        <span>
+          {`Unlock ${msg.token} for Trading in the `}
+          <routerContext.Consumer>
+            {({ rootUrl }) => (
+              <Link to={`${rootUrl}account`} style={{ whiteSpace: 'nowrap' }}>
+                Account Page
+              </Link>
+            )}
+          </routerContext.Consumer>
+        </span>
+      )
     case MessageKind.insufficientAmount:
-      return <>
-        {`Your ${msg.token} balance is too low to fund this order`}
-      </>;
+      return <>{`Your ${msg.token} balance is too low to fund this order`}</>
     case MessageKind.dustAmount:
-      return <>
-        {`Order below ${msg.amount} ${msg.token} limit`}
-      </>;
+      return <>{`Order below ${msg.amount} ${msg.token} limit`}</>
     case MessageKind.incredibleAmount:
-      return <>
-        {`Your order exceeds max amount for ${msg.token} token`}
-      </>;
+      return <>{`Your order exceeds max amount for ${msg.token} token`}</>
     case MessageKind.orderbookTotalExceeded:
-      return <>
-        {`Your order exceeds the order book total`}
-      </>;
+      return <>{`Your order exceeds the order book total`}</>
     case MessageKind.notConnected:
-      return <>
-        {`Connect to create Orders`}
-      </>;
+      return <>{`Connect to create Orders`}</>
     case MessageKind.slippageLimitToLow:
-      return <>
-        Slippage limit too low
-      </>;
+      return <>Slippage limit too low</>
     case MessageKind.slippageLimitToHigh:
-      return <>
-        Slippage limit too high
-      </>;
+      return <>Slippage limit too high</>
     case MessageKind.slippageLimitNotSet:
-      return <>
-        Slippage limit is necessary
-      </>;
+      return <>Slippage limit is necessary</>
   }
 }

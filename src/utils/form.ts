@@ -1,21 +1,19 @@
-import { BigNumber } from 'bignumber.js';
-import { combineLatest, Observable, of } from 'rxjs';
-import { takeWhileInclusive } from 'rxjs-take-while-inclusive';
-import {
-  catchError, distinctUntilChanged, first, flatMap, map, startWith, switchMap
-} from 'rxjs/operators';
-import { Balances, DustLimits } from '../balances/balances';
-import { Calls, Calls$, ReadCalls, ReadCalls$ } from '../blockchain/calls/calls';
-import { TxState, TxStatus } from '../blockchain/transactions';
-import { User } from '../blockchain/user';
-import { amountFromWei } from '../blockchain/utils';
-import { TradeWithStatus } from '../exchange/myTrades/openTrades';
-import { Offer, OfferType, Orderbook } from '../exchange/orderbook/orderbook';
-import { MTAccount, MTAccountState } from '../marginTrading/state/mtAccount';
+import { BigNumber } from 'bignumber.js'
+import { combineLatest, Observable, of } from 'rxjs'
+import { takeWhileInclusive } from 'rxjs-take-while-inclusive'
+import { catchError, distinctUntilChanged, first, flatMap, map, startWith, switchMap } from 'rxjs/operators'
+import { Balances, DustLimits } from '../balances/balances'
+import { Calls, Calls$, ReadCalls, ReadCalls$ } from '../blockchain/calls/calls'
+import { TxState, TxStatus } from '../blockchain/transactions'
+import { User } from '../blockchain/user'
+import { amountFromWei } from '../blockchain/utils'
+import { TradeWithStatus } from '../exchange/myTrades/openTrades'
+import { Offer, OfferType, Orderbook } from '../exchange/orderbook/orderbook'
+import { MTAccount, MTAccountState } from '../marginTrading/state/mtAccount'
 
 export enum FormStage {
   idle = 'idle',
-  blocked = 'blocked'
+  blocked = 'blocked',
 }
 
 export enum ProgressStage {
@@ -23,7 +21,7 @@ export enum ProgressStage {
   waitingForConfirmation = 'waitingForConfirmation',
   fiasco = 'fiasco',
   done = 'done',
-  canceled = 'canceled'
+  canceled = 'canceled',
 }
 
 export enum FormChangeKind {
@@ -53,7 +51,7 @@ export enum FormChangeKind {
   viewChange = 'viewChange',
   accountChange = 'accountChange',
   ordersChange = 'ordersChange',
-  checkboxChange = 'checkboxChange'
+  checkboxChange = 'checkboxChange',
 }
 
 export enum OfferMatchType {
@@ -64,287 +62,305 @@ export enum OfferMatchType {
 }
 
 export interface StageChange {
-  kind: FormChangeKind.formStageChange;
-  stage: FormStage;
+  kind: FormChangeKind.formStageChange
+  stage: FormStage
 }
 
 export function formStageChange(stage: FormStage): StageChange {
-  return { stage, kind: FormChangeKind.formStageChange };
+  return { stage, kind: FormChangeKind.formStageChange }
 }
 
 export interface PriceFieldChange {
-  kind: FormChangeKind.priceFieldChange;
-  value?: BigNumber;
+  kind: FormChangeKind.priceFieldChange
+  value?: BigNumber
 }
 
 export interface AmountFieldChange {
-  kind: FormChangeKind.amountFieldChange;
-  value?: BigNumber;
+  kind: FormChangeKind.amountFieldChange
+  value?: BigNumber
 }
 
 export interface TotalFieldChange {
-  kind: FormChangeKind.totalFieldChange;
-  value?: BigNumber;
+  kind: FormChangeKind.totalFieldChange
+  value?: BigNumber
 }
 
 export interface TokenChange {
-  kind: FormChangeKind.tokenChange;
-  token: string;
+  kind: FormChangeKind.tokenChange
+  token: string
 }
 
 export interface SetMaxChange {
-  kind: FormChangeKind.setMaxChange;
+  kind: FormChangeKind.setMaxChange
 }
 
 export interface KindChange {
-  kind: FormChangeKind.kindChange;
-  newKind: OfferType;
+  kind: FormChangeKind.kindChange
+  newKind: OfferType
 }
 
 export interface MatchTypeChange {
-  kind: FormChangeKind.matchTypeChange;
-  matchType: OfferMatchType;
+  kind: FormChangeKind.matchTypeChange
+  matchType: OfferMatchType
 }
 
 export interface PickOfferChange {
-  kind: FormChangeKind.pickOfferChange;
-  offer: Offer;
+  kind: FormChangeKind.pickOfferChange
+  offer: Offer
 }
 
 export interface FormResetChange {
-  kind: FormChangeKind.formResetChange;
+  kind: FormChangeKind.formResetChange
 }
 
 export interface GasPriceChange {
-  kind: FormChangeKind.gasPriceChange;
-  value: BigNumber;
+  kind: FormChangeKind.gasPriceChange
+  value: BigNumber
 }
 
 export interface EtherPriceUSDChange {
-  kind: FormChangeKind.etherPriceUSDChange;
-  value: BigNumber;
+  kind: FormChangeKind.etherPriceUSDChange
+  value: BigNumber
 }
 
 export interface AllowanceChange {
-  kind: FormChangeKind.buyAllowanceChange | FormChangeKind.sellAllowanceChange;
-  allowance: boolean;
+  kind: FormChangeKind.buyAllowanceChange | FormChangeKind.sellAllowanceChange
+  allowance: boolean
 }
 
 export interface OrderbookChange {
-  kind: FormChangeKind.orderbookChange;
-  orderbook: Orderbook;
+  kind: FormChangeKind.orderbookChange
+  orderbook: Orderbook
 }
 
 export interface MTAccountChange {
-  kind: FormChangeKind.marginTradingAccountChange;
-  mta: MTAccount;
+  kind: FormChangeKind.marginTradingAccountChange
+  mta: MTAccount
 }
 
 export interface MTAccountStateChange {
-  kind: FormChangeKind.marginTradingAccountStateChange;
-  mtaState: MTAccountState;
+  kind: FormChangeKind.marginTradingAccountStateChange
+  mtaState: MTAccountState
 }
 
 export interface BalancesChange {
-  kind: FormChangeKind.balancesChange;
-  balances: Balances;
+  kind: FormChangeKind.balancesChange
+  balances: Balances
 }
 
 export interface DustLimitChange {
-  kind: FormChangeKind.dustLimitChange;
-  dustLimitBase: BigNumber;
-  dustLimitQuote: BigNumber;
+  kind: FormChangeKind.dustLimitChange
+  dustLimitBase: BigNumber
+  dustLimitQuote: BigNumber
 }
 
 export interface UserChange {
-  kind: FormChangeKind.userChange;
-  user: User;
+  kind: FormChangeKind.userChange
+  user: User
 }
 
 export interface ProgressChange {
-  kind: FormChangeKind.progress;
-  progress?: ProgressStage;
+  kind: FormChangeKind.progress
+  progress?: ProgressStage
 }
 
 export interface EtherBalanceChange {
-  kind: FormChangeKind.etherBalanceChange;
-  etherBalance: BigNumber;
+  kind: FormChangeKind.etherBalanceChange
+  etherBalance: BigNumber
 }
 
-export interface  SlippageLimitChange {
-  kind: FormChangeKind.slippageLimitChange;
-  value: BigNumber;
+export interface SlippageLimitChange {
+  kind: FormChangeKind.slippageLimitChange
+  value: BigNumber
 }
 
-export interface  AccountChange {
-  kind: FormChangeKind.accountChange;
-  value: string;
+export interface AccountChange {
+  kind: FormChangeKind.accountChange
+  value: string
 }
 
 export interface OrdersChange {
-  kind: FormChangeKind.ordersChange;
-  orders: TradeWithStatus[];
+  kind: FormChangeKind.ordersChange
+  orders: TradeWithStatus[]
 }
 
 export interface CheckboxChange {
-  kind: FormChangeKind.checkboxChange;
-  value: boolean;
+  kind: FormChangeKind.checkboxChange
+  value: boolean
 }
 
 export function progressChange(progress?: ProgressStage): ProgressChange {
-  return { progress, kind: FormChangeKind.progress };
+  return { progress, kind: FormChangeKind.progress }
 }
 
 export function toEtherBalanceChange(etherBalance$: Observable<BigNumber>) {
   return etherBalance$.pipe(
-    map(etherBalance => ({
+    map((etherBalance) => ({
       etherBalance,
       kind: FormChangeKind.etherBalanceChange,
-    }))
-  );
+    })),
+  )
 }
 
 export function toGasPriceChange(gasPrice$: Observable<BigNumber>): Observable<GasPriceChange> {
   return gasPrice$.pipe(
-    map(gasPrice => ({
-      kind: FormChangeKind.gasPriceChange,
-      value: gasPrice
-    } as GasPriceChange))
-  );
+    map(
+      (gasPrice) =>
+        ({
+          kind: FormChangeKind.gasPriceChange,
+          value: gasPrice,
+        } as GasPriceChange),
+    ),
+  )
 }
 
-export function toEtherPriceUSDChange(etherPriceUsd$: Observable<BigNumber|undefined>):
-  Observable<EtherPriceUSDChange> {
+export function toEtherPriceUSDChange(
+  etherPriceUsd$: Observable<BigNumber | undefined>,
+): Observable<EtherPriceUSDChange> {
   return etherPriceUsd$.pipe(
-    map(value => ({
-      value,
-      kind: FormChangeKind.etherPriceUSDChange,
-    } as EtherPriceUSDChange))
-  );
+    map(
+      (value) =>
+        ({
+          value,
+          kind: FormChangeKind.etherPriceUSDChange,
+        } as EtherPriceUSDChange),
+    ),
+  )
 }
 
 export function toAllowanceChange$(
   kind: FormChangeKind.buyAllowanceChange | FormChangeKind.sellAllowanceChange,
   token: string,
-  theAllowance$: (token: string) => Observable<boolean>): Observable<AllowanceChange> {
-  return theAllowance$(token).pipe(
-    map((allowance: boolean) => ({ kind, allowance } as AllowanceChange))
-  );
+  theAllowance$: (token: string) => Observable<boolean>,
+): Observable<AllowanceChange> {
+  return theAllowance$(token).pipe(map((allowance: boolean) => ({ kind, allowance } as AllowanceChange)))
 }
 
 export function toOrderbookChange$(orderbook$: Observable<Orderbook>): Observable<OrderbookChange> {
   return orderbook$.pipe(
-    map(orderbook => ({
-      orderbook,
-      kind: FormChangeKind.orderbookChange,
-    } as OrderbookChange))
-  );
+    map(
+      (orderbook) =>
+        ({
+          orderbook,
+          kind: FormChangeKind.orderbookChange,
+        } as OrderbookChange),
+    ),
+  )
 }
 
 export function toDustLimitChange$(
   dustLimits$: Observable<DustLimits>,
   base: string,
-  quote: string
-):
-  Observable<DustLimitChange> {
+  quote: string,
+): Observable<DustLimitChange> {
   return dustLimits$.pipe(
-    map(dustLimits => ({
-      kind: FormChangeKind.dustLimitChange,
-      dustLimitBase: dustLimits[base] || new BigNumber(0),
-      dustLimitQuote: dustLimits[quote] || new BigNumber(0),
-    } as DustLimitChange)
-    ));
+    map(
+      (dustLimits) =>
+        ({
+          kind: FormChangeKind.dustLimitChange,
+          dustLimitBase: dustLimits[base] || new BigNumber(0),
+          dustLimitQuote: dustLimits[quote] || new BigNumber(0),
+        } as DustLimitChange),
+    ),
+  )
 }
 
 export function toMTAccountChange(mta$: Observable<MTAccount>) {
-
   return mta$.pipe(
-    map(mta => {
-      return ({
+    map((mta) => {
+      return {
         mta,
         kind: FormChangeKind.marginTradingAccountChange,
-      } as MTAccountChange);
-
-    })
-  );
+      } as MTAccountChange
+    }),
+  )
 }
 
 export function toMTAccountStateChange(mta$: Observable<MTAccount>) {
   return mta$.pipe(
-    map(mta => ({
-      mtaState: mta.state,
-      kind: FormChangeKind.marginTradingAccountStateChange,
-    } as MTAccountStateChange)),
-    distinctUntilChanged()
-  );
+    map(
+      (mta) =>
+        ({
+          mtaState: mta.state,
+          kind: FormChangeKind.marginTradingAccountStateChange,
+        } as MTAccountStateChange),
+    ),
+    distinctUntilChanged(),
+  )
 }
 
 export function toBalancesChange(balances$: Observable<Balances>) {
   return balances$.pipe(
-    map(balances => ({
-      balances,
-      kind: FormChangeKind.balancesChange
-    } as BalancesChange))
-  );
+    map(
+      (balances) =>
+        ({
+          balances,
+          kind: FormChangeKind.balancesChange,
+        } as BalancesChange),
+    ),
+  )
 }
 
 export function toUserChange(user$: Observable<User>) {
   return user$.pipe(
-    map(user => ({
-      user,
-      kind: FormChangeKind.userChange
-    } as UserChange))
-  );
+    map(
+      (user) =>
+        ({
+          user,
+          kind: FormChangeKind.userChange,
+        } as UserChange),
+    ),
+  )
 }
-export function toAccountChange(account$: Observable<string|undefined>) {
+export function toAccountChange(account$: Observable<string | undefined>) {
   return account$.pipe(
-    map(value => ({
-      value,
-      kind: FormChangeKind.accountChange
-    } as AccountChange))
-  );
+    map(
+      (value) =>
+        ({
+          value,
+          kind: FormChangeKind.accountChange,
+        } as AccountChange),
+    ),
+  )
 }
 
-export function toOrdersChange(
-  orders$: Observable<TradeWithStatus[]>
-) {
-  return orders$.pipe(
-    map(orders => ({ orders, kind: FormChangeKind.ordersChange }))
-  );
+export function toOrdersChange(orders$: Observable<TradeWithStatus[]>) {
+  return orders$.pipe(map((orders) => ({ orders, kind: FormChangeKind.ordersChange })))
 }
 
-type TransationStateToX<X> =
-  (transactionState$: Observable<TxState>) => Observable<X>;
+type TransationStateToX<X> = (transactionState$: Observable<TxState>) => Observable<X>
 
 export function transactionToX<X>(
   startWithX: X,
   waitingForConfirmationX: X,
   fiascoX: X,
-  successHandler?: () => Observable<X>): TransationStateToX<X> {
-
+  successHandler?: () => Observable<X>,
+): TransationStateToX<X> {
   return (transactionState$: Observable<TxState>) =>
     transactionState$.pipe(
-      takeWhileInclusive((txState: TxState) =>
-        txState.status === TxStatus.Success && txState.confirmations === 0 ||
-        txState.status !== TxStatus.Success
+      takeWhileInclusive(
+        (txState: TxState) =>
+          (txState.status === TxStatus.Success && txState.confirmations === 0) || txState.status !== TxStatus.Success,
       ),
-      flatMap((txState: TxState): Observable<X> => {
-        switch (txState.status) {
-          case TxStatus.CancelledByTheUser:
-          case TxStatus.Failure:
-          case TxStatus.Error:
-            return of(fiascoX);
-          case TxStatus.Propagating:
-          case TxStatus.WaitingForConfirmation:
-            return of(waitingForConfirmationX);
-          case TxStatus.Success:
-            return successHandler ? successHandler() : of();
-          default:
-            return of();
-        }
-      }),
-      startWith(startWithX)
-    );
+      flatMap(
+        (txState: TxState): Observable<X> => {
+          switch (txState.status) {
+            case TxStatus.CancelledByTheUser:
+            case TxStatus.Failure:
+            case TxStatus.Error:
+              return of(fiascoX)
+            case TxStatus.Propagating:
+            case TxStatus.WaitingForConfirmation:
+              return of(waitingForConfirmationX)
+            case TxStatus.Success:
+              return successHandler ? successHandler() : of()
+            default:
+              return of()
+          }
+        },
+      ),
+      startWith(startWithX),
+    )
 }
 
 export enum GasEstimationStatus {
@@ -356,70 +372,52 @@ export enum GasEstimationStatus {
 }
 
 export interface HasGasEstimationEthUsd {
-  gasEstimation?: number;
-  gasEstimationEth?: BigNumber;
-  gasEstimationUsd?: BigNumber;
+  gasEstimation?: number
+  gasEstimationEth?: BigNumber
+  gasEstimationUsd?: BigNumber
 }
 
 export interface HasGasEstimation extends HasGasEstimationEthUsd {
-  gasPrice?: BigNumber;
-  etherPriceUsd?: BigNumber;
-  gasEstimationStatus: GasEstimationStatus;
-  error?: any;
+  gasPrice?: BigNumber
+  etherPriceUsd?: BigNumber
+  gasEstimationStatus: GasEstimationStatus
+  error?: any
 }
 
 export function doGasEstimation<S extends HasGasEstimation>(
   calls$: Calls$,
   readCalls$: ReadCalls$ | undefined,
   state: S,
-  call: (
-    calls: Calls,
-    readCalls: ReadCalls | undefined,
-    state: S
-  ) => Observable<number> | undefined,
-): Observable<S>;
+  call: (calls: Calls, readCalls: ReadCalls | undefined, state: S) => Observable<number> | undefined,
+): Observable<S>
 
 export function doGasEstimation<S extends HasGasEstimation>(
   calls$: Calls$,
   readCalls$: ReadCalls$,
   state: S,
   call: (calls: Calls, readCalls: ReadCalls, state: S) => Observable<number> | undefined,
-): Observable<S>;
+): Observable<S>
 
 export function doGasEstimation<S extends HasGasEstimation>(
   calls$: Calls$ | undefined,
   readCalls$: ReadCalls$,
   state: S,
-  call: (
-    calls: Calls | undefined,
-    readCalls: ReadCalls,
-    state: S
-  ) => Observable<number> | undefined,
-): Observable<S>;
+  call: (calls: Calls | undefined, readCalls: ReadCalls, state: S) => Observable<number> | undefined,
+): Observable<S>
 
 export function doGasEstimation<S extends HasGasEstimation>(
   calls$: Calls$ | undefined,
   readCalls$: ReadCalls$ | undefined,
   state: S,
   call:
-    (
-      (
-        calls: Calls | undefined,
-        readCalls: ReadCalls | undefined,
-        state: S) => Observable<number> | undefined
-      ) |
-    (
-      (
-        calls: Calls,
-        readCalls: ReadCalls,
-        state: S
-      ) => Observable<number> | undefined),
+    | ((calls: Calls | undefined, readCalls: ReadCalls | undefined, state: S) => Observable<number> | undefined)
+    | ((calls: Calls, readCalls: ReadCalls, state: S) => Observable<number> | undefined),
 ): Observable<S> {
   return combineLatest(calls$ || of(undefined), readCalls$ || of(undefined)).pipe(
     first(),
     switchMap(([calls, readCalls]) => {
       if (state.gasEstimationStatus !== GasEstimationStatus.unset) {
-        return of(state);
+        return of(state)
       }
 
       const {
@@ -428,67 +426,63 @@ export function doGasEstimation<S extends HasGasEstimation>(
         // @ts-ignore
         gasEstimationUsd,
         ...stateWithoutGasEstimation
-      } = state as object;
+      } = state as object
 
       // @ts-ignore
-      const gasCall = call(calls, readCalls, state);
-      const gasPrice = state.gasPrice;
-      const etherPriceUsd = state.etherPriceUsd;
+      const gasCall = call(calls, readCalls, state)
+      const gasPrice = state.gasPrice
+      const etherPriceUsd = state.etherPriceUsd
 
       if (!gasPrice || !gasCall) {
         return of({
           ...(stateWithoutGasEstimation as object),
           gasEstimationStatus: GasEstimationStatus.unset,
-        } as S);
+        } as S)
       }
 
       return gasCall.pipe(
         map((gasEstimation: number) => {
-          const gasCost = amountFromWei((gasPrice).times(gasEstimation), 'ETH');
+          const gasCost = amountFromWei(gasPrice.times(gasEstimation), 'ETH')
           return {
             ...(state as object),
             gasEstimation,
             gasEstimationStatus: GasEstimationStatus.calculated,
             gasEstimationEth: gasCost,
             gasEstimationUsd: etherPriceUsd ? gasCost.times(etherPriceUsd) : undefined,
-          };
-        })
-      );
+          }
+        }),
+      )
     }),
     catchError((error) => {
-      console.warn('Error while estimating gas:', error.toString());
+      console.warn('Error while estimating gas:', error.toString())
       return of({
         ...(state as object),
         error,
         gasEstimationStatus: GasEstimationStatus.error,
-      });
+      })
     }),
     startWith({
       ...(state as object),
-      gasEstimationStatus: GasEstimationStatus.calculating } as S)
-  );
+      gasEstimationStatus: GasEstimationStatus.calculating,
+    } as S),
+  )
 }
 
-export function calculateTotal(
-  amount: BigNumber | undefined,
-  orders: Offer[]
-): BigNumber | undefined {
-  if (!amount) return undefined;
-  let base = amount;
-  let quote = new BigNumber(0);
+export function calculateTotal(amount: BigNumber | undefined, orders: Offer[]): BigNumber | undefined {
+  if (!amount) return undefined
+  let base = amount
+  let quote = new BigNumber(0)
   for (const offer of orders) {
     if (base.lte(new BigNumber(0))) {
-      break;
+      break
     }
     if (base.gte(offer.baseAmount)) {
-      quote = quote.plus(offer.quoteAmount);
-      base = base.minus(offer.baseAmount);
+      quote = quote.plus(offer.quoteAmount)
+      base = base.minus(offer.baseAmount)
     } else {
-      quote = quote.plus(
-        offer.quoteAmount.times(base).dividedBy(offer.baseAmount)
-      );
-      base = new BigNumber(0);
+      quote = quote.plus(offer.quoteAmount.times(base).dividedBy(offer.baseAmount))
+      base = new BigNumber(0)
     }
   }
-  return !base.isZero() ? undefined : quote;
+  return !base.isZero() ? undefined : quote
 }

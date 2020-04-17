@@ -1,21 +1,21 @@
-import { tid } from '../utils/index';
+import { tid } from '../utils/index'
 
-const defaultTimeout = { timeout: 10000 };
+const defaultTimeout = { timeout: 10000 }
 
 export class Tab {
   public static market = () => {
-    cy.get(tid('Market'), { ...defaultTimeout }).click();
+    cy.get(tid('Market'), { ...defaultTimeout }).click()
   }
 
   public static balances = () => {
-    cy.get(tid('Balances'), { ...defaultTimeout }).click();
+    cy.get(tid('Balances'), { ...defaultTimeout }).click()
   }
 
   public static instant = () => {
-    cy.get(tid('Instant'), { ...defaultTimeout }).click();
+    cy.get(tid('Instant'), { ...defaultTimeout }).click()
   }
 
   public static leverage = () => {
-    cy.get(tid('Leverage'), { ...defaultTimeout }).click();
+    cy.get(tid('Leverage'), { ...defaultTimeout }).click()
   }
 }

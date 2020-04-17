@@ -1,1 +1,1 @@
-export const scrollbarThumb: string;
+export const scrollbarThumb: string

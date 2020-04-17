@@ -1,53 +1,45 @@
-import { BigNumber } from 'bignumber.js';
-import * as classnames from 'classnames';
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
-import { trackingEvents } from '../../analytics/analytics';
-import { getToken } from '../../blockchain/config';
-import * as formStyles from '../../exchange/offerMake/OfferMakeForm.scss';
-import { OfferType } from '../../exchange/orderbook/orderbook';
-import { ApproximateInputValue } from '../../utils/Approximate';
-import { BigNumberInput, lessThanOrEqual } from '../../utils/bigNumberInput/BigNumberInput';
-import { connect } from '../../utils/connect';
-import { FormChangeKind, ProgressStage } from '../../utils/form';
-import {
-  formatAmount,
-  formatPrecision,
-  formatPrice
-} from '../../utils/formatters/format';
-import { CryptoMoney, FormatPercent, Money } from '../../utils/formatters/Formatters';
-import { Button, ButtonGroup } from '../../utils/forms/Buttons';
-import { Checkbox } from '../../utils/forms/Checkbox';
-import { ErrorMessage } from '../../utils/forms/ErrorMessage';
-import { InputGroup, InputGroupAddon } from '../../utils/forms/InputGroup';
-import { Radio } from '../../utils/forms/Radio';
-import { SettingsIcon } from '../../utils/icons/Icons';
-import { Hr } from '../../utils/layout/LayoutHelpers';
-import { LoggedOut } from '../../utils/loadingIndicator/LoggedOut';
-import { ModalOpenerProps, ModalProps } from '../../utils/modal';
-import { PanelBody, PanelFooter, PanelHeader } from '../../utils/panel/Panel';
-import { Muted } from '../../utils/text/Text';
-import { WarningTooltip } from '../../utils/tooltip/Tooltip';
-import { minusOne, zero } from '../../utils/zero';
-import {
-  findMarginableAsset,
-  MarginableAsset,
-  MTAccountState,
-  UserActionKind
-} from '../state/mtAccount';
-import { MTTransferFormState } from '../transfer/mtTransferForm';
-import { MtTransferFormView } from '../transfer/mtTransferFormView';
+import { BigNumber } from 'bignumber.js'
+import * as classnames from 'classnames'
+import * as mixpanel from 'mixpanel-browser'
+import * as React from 'react'
+import * as ReactDOM from 'react-dom'
+import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons'
+import { getToken } from '../../blockchain/config'
+import * as formStyles from '../../exchange/offerMake/OfferMakeForm.scss'
+import { OfferType } from '../../exchange/orderbook/orderbook'
+import { ApproximateInputValue } from '../../utils/Approximate'
+import { BigNumberInput, lessThanOrEqual } from '../../utils/bigNumberInput/BigNumberInput'
+import { connect } from '../../utils/connect'
+import { FormChangeKind, ProgressStage } from '../../utils/form'
+import { formatAmount, formatPrecision, formatPrice } from '../../utils/formatters/format'
+import { CryptoMoney, FormatPercent, Money } from '../../utils/formatters/Formatters'
+import { Button, ButtonGroup } from '../../utils/forms/Buttons'
+import { Checkbox } from '../../utils/forms/Checkbox'
+import { ErrorMessage } from '../../utils/forms/ErrorMessage'
+import { InputGroup, InputGroupAddon } from '../../utils/forms/InputGroup'
+import { Radio } from '../../utils/forms/Radio'
+import { SettingsIcon } from '../../utils/icons/Icons'
+import { Hr } from '../../utils/layout/LayoutHelpers'
+import { LoggedOut } from '../../utils/loadingIndicator/LoggedOut'
+import { ModalOpenerProps, ModalProps } from '../../utils/modal'
+import { PanelBody, PanelFooter, PanelHeader } from '../../utils/panel/Panel'
+import { Muted } from '../../utils/text/Text'
+import { WarningTooltip } from '../../utils/tooltip/Tooltip'
+import { minusOne, zero } from '../../utils/zero'
+import { findMarginableAsset, MarginableAsset, MTAccountState, UserActionKind } from '../state/mtAccount'
+import { MTTransferFormState } from '../transfer/mtTransferForm'
+import { MtTransferFormView } from '../transfer/mtTransferFormView'
 import {
   Message,
   MessageKind,
   MTSimpleFormState,
   OrderFormMessage,
   OrderFormMessageKind,
-  ViewKind
-} from './mtOrderForm';
-import * as styles from './mtOrderFormView.scss';
-import { MTSimpleOrderPanelProps } from './mtOrderPanel';
+  ViewKind,
+} from './mtOrderForm'
+import * as styles from './mtOrderFormView.scss'
+import { MTSimpleOrderPanelProps } from './mtOrderPanel'
+import { trackingEvents } from '../../analytics/analytics'
 
 /* tslint:disable */
 const collateralBalanceTooltip = (collateral: string) => `
@@ -161,54 +153,50 @@ const slippageLimitTooltip = `
 //   );
 // };
 
-export class MtSimpleOrderFormBody
-  extends React.Component<MTSimpleFormState & {close?: () => void}> {
-
-  private amountInput?: HTMLElement;
-  private priceInput?: HTMLElement;
-  private slippageLimitInput?: HTMLElement;
+export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState & { close?: () => void }> {
+  private amountInput?: HTMLElement
+  private priceInput?: HTMLElement
+  private slippageLimitInput?: HTMLElement
 
   public handleKindChange(kind: OfferType) {
     this.props.change({
       kind: FormChangeKind.kindChange,
       newKind: kind,
-    });
+    })
   }
 
   public handleTotalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/,/g, '');
+    const value = e.target.value.replace(/,/g, '')
     this.props.change({
       kind: FormChangeKind.totalFieldChange,
-      value: value === '' ? undefined : new BigNumber(value)
-    });
+      value: value === '' ? undefined : new BigNumber(value),
+    })
   }
 
   public handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/,/g, '');
+    const value = e.target.value.replace(/,/g, '')
     this.props.change({
       kind: FormChangeKind.amountFieldChange,
-      value: value === '' ? undefined : new BigNumber(value)
-    });
+      value: value === '' ? undefined : new BigNumber(value),
+    })
   }
 
   public handleSlippageLimitChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = new BigNumber(e.target.value.replace(/,/g, ''));
+    const value = new BigNumber(e.target.value.replace(/,/g, ''))
     if (!value.isNaN()) {
       this.props.change({
         kind: FormChangeKind.slippageLimitChange,
         value: value.div(100),
-      });
+      })
     }
   }
 
-  public handleSetMaxTotal = () =>
-    this.handleSetMax(this.props.maxTotal, FormChangeKind.totalFieldChange)
+  public handleSetMaxTotal = () => this.handleSetMax(this.props.maxTotal, FormChangeKind.totalFieldChange)
 
-  public handleSetMaxAmount = () =>
-    this.handleSetMax(this.props.maxAmount, FormChangeKind.amountFieldChange)
+  public handleSetMaxAmount = () => this.handleSetMax(this.props.maxAmount, FormChangeKind.amountFieldChange)
 
   public handleProceed = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+    e.preventDefault()
     if (
       !this.props.mta ||
       this.props.mta.state === MTAccountState.notSetup ||
@@ -217,130 +205,123 @@ export class MtSimpleOrderFormBody
       !this.props.price ||
       !this.props.total
     ) {
-      return;
+      return
     }
-    const submitCall$ = this.props.submit(this.props);
+    const submitCall$ = this.props.submit(this.props)
     if (this.props.close) {
       submitCall$.subscribe((next: any) => {
         if (next.progress === ProgressStage.waitingForConfirmation) {
           if (this.props.close) {
-            this.props.close();
+            this.props.close()
           }
         }
-      });
+      })
     }
   }
 
   public handleAmountFocus = () => {
     if (this.amountInput) {
-      this.amountInput.focus();
+      this.amountInput.focus()
     }
   }
 
   public handlePriceFocus = () => {
     if (this.priceInput) {
-      this.priceInput.focus();
+      this.priceInput.focus()
     }
   }
 
   public handleSlippageLimitFocus = () => {
     if (this.slippageLimitInput) {
-      this.slippageLimitInput.focus();
+      this.slippageLimitInput.focus()
     }
   }
 
   public render() {
-    return this.props.view === ViewKind.instantTradeForm
-      ? this.instantOrderForm()
-      : this.advancedSettings();
+    return this.props.view === ViewKind.instantTradeForm ? this.instantOrderForm() : this.advancedSettings()
   }
 
   private handlecheckboxChange = () => {
     this.props.change({
       kind: FormChangeKind.checkboxChange,
       value: !this.props.riskComplianceCurrent,
-    });
+    })
   }
 
   private handleSetMax = (
     value: BigNumber,
-    kind: FormChangeKind.amountFieldChange | FormChangeKind.totalFieldChange
+    kind: FormChangeKind.amountFieldChange | FormChangeKind.totalFieldChange,
   ) => {
-    this.props.change({ kind, value });
+    this.props.change({ kind, value })
   }
 
   private switchToInstantOrderForm = () => {
-    this.props.change({ kind: FormChangeKind.viewChange, value: ViewKind.instantTradeForm });
+    this.props.change({ kind: FormChangeKind.viewChange, value: ViewKind.instantTradeForm })
   }
 
   private switchToSettings = () => {
-    this.props.change({ kind: FormChangeKind.viewChange, value: ViewKind.settings });
+    this.props.change({ kind: FormChangeKind.viewChange, value: ViewKind.settings })
   }
 
   private renderAccountInfo = () => {
-
-    const accountNotConnected = !this.props.account;
-    const accountNotSetup = this.props.mta && this.props.mta.state === MTAccountState.notSetup;
+    const accountNotConnected = !this.props.account
+    const accountNotSetup = this.props.mta && this.props.mta.state === MTAccountState.notSetup
 
     if (accountNotConnected) {
-      return <div className={styles.notSetupBorder} data-test-id="locked-form">
-        <LoggedOut view="Balances"/>
-        </div>;
+      return (
+        <div className={styles.notSetupBorder} data-test-id="locked-form">
+          <LoggedOut view="Balances" />
+        </div>
+      )
     }
 
     if (accountNotSetup) {
-      return <div className={styles.notSetupBorder} data-test-id="locked-form">
-        <Muted>
-          Deploy your Proxy and enable {this.props.baseToken}
-        </Muted>
-      </div>;
+      return (
+        <div className={styles.notSetupBorder} data-test-id="locked-form">
+          <Muted>Deploy your Proxy and enable {this.props.baseToken}</Muted>
+        </div>
+      )
     }
 
-    return (<div className={styles.summaryBox}>
-      {this.purchasingPower()}
-      {this.slippageLimit()}
-      {this.stabilityFee()}
-      {this.accountBalance()}
-      {this.leverage()}
-      {this.price()}
-      {this.liquidationPrice()}
-    </div>);
+    return (
+      <div className={styles.summaryBox}>
+        {this.purchasingPower()}
+        {this.slippageLimit()}
+        {this.stabilityFee()}
+        {this.accountBalance()}
+        {this.leverage()}
+        {this.price()}
+        {this.liquidationPrice()}
+      </div>
+    )
   }
 
   private instantOrderForm = () => {
     return (
       <>
-        <form
-          onSubmit={this.handleProceed}
-          data-test-id="order-form"
-        >
+        <form onSubmit={this.handleProceed} data-test-id="order-form">
           {this.renderAccountInfo()}
-          <Hr color="dark" className={styles.hrMargin}/>
+          <Hr color="dark" className={styles.hrMargin} />
           {this.amount()}
           {this.total()}
           {this.riskCompliance()}
           {this.proceedButton()}
         </form>
       </>
-    );
+    )
   }
 
   private advancedSettings = () => (
     <>
       <div className={formStyles.pickerOrderType}>
-        <Radio
-          dataTestId="fillOrKill"
-          name="orderType"
-          value="direct"
-          defaultChecked={true}
-        >
+        <Radio dataTestId="fillOrKill" name="orderType" value="direct" defaultChecked={true}>
           Average price fill or kill order type
         </Radio>
         <Muted className={formStyles.pickerDescription}>
-          The order is executed in its entirety such that the average fill price is
-          the limit price or better, otherwise it is canceled
+          The order is executed in its entirety such that the average fill price is the limit price or better, otherwise
+          it is canceled
         </Muted>
-        { this.slippageLimitForm() }
+        {this.slippageLimitForm()}
       </div>
       <Button
         style={{ marginTop: 'auto' }}
@@ -354,550 +335,465 @@ export class MtSimpleOrderFormBody
   )
 
   private riskCompliance = () => {
-    const { riskComplianceAccepted, riskComplianceCurrent , progress, kind } = this.props;
+    const { riskComplianceAccepted, riskComplianceCurrent, progress, kind } = this.props
     return (
-      !riskComplianceAccepted
-      && kind === OfferType.buy
-      && (
+      !riskComplianceAccepted &&
+      kind === OfferType.buy && (
         <div className={styles.checkbox}>
-          <Checkbox name="risk-compliance"
-                    data-test-id="accept-rc"
-                    checked={riskComplianceCurrent || false}
-                    disabled={ !!progress }
-                    onChange={this.handlecheckboxChange}
+          <Checkbox
+            name="risk-compliance"
+            data-test-id="accept-rc"
+            checked={riskComplianceCurrent || false}
+            disabled={!!progress}
+            onChange={this.handlecheckboxChange}
           >
-                <span style={{ width: '100%' }}>
-                  I understand that this involves the usage of
-                  <a href="https://oasis.app/terms"
-                     target="_blank"
-                     rel="noopener noreferrer"
-                  >
-                    <strong> Maker Vaults </strong>
-                  </a>
-                  and the associated risks involved in using the Maker Protocol
-                </span>
+            <span style={{ width: '100%' }}>
+              I understand that this involves the usage of
+              <a href="https://oasis.app/terms" target="_blank" rel="noopener noreferrer">
+                <strong> Maker Vaults </strong>
+              </a>
+              and the associated risks involved in using the Maker Protocol
+            </span>
           </Checkbox>
         </div>
       )
-    );
+    )
   }
   private liquidationPrice() {
-    const liquidationPrice = this.props.liquidationPrice ?
-      this.props.liquidationPrice : zero;
-    const liquidationPricePost = this.props.liquidationPricePost ?
-      this.props.liquidationPricePost : zero;
+    const liquidationPrice = this.props.liquidationPrice ? this.props.liquidationPrice : zero
+    const liquidationPricePost = this.props.liquidationPricePost ? this.props.liquidationPricePost : zero
 
-    const baseTokenAsset = findMarginableAsset(this.props.baseToken, this.props.mta);
+    const baseTokenAsset = findMarginableAsset(this.props.baseToken, this.props.mta)
     return (
-      <div className={classnames(
-        styles.orderSummaryRow,
-        styles.orderSummaryRowDark,
-        this.props.liquidationPricePost ? styles.visible : styles.hidden
-      )}>
-        <div className={styles.orderSummaryLabel}>
-          Liquidation price
-        </div>
+      <div
+        className={classnames(
+          styles.orderSummaryRow,
+          styles.orderSummaryRowDark,
+          this.props.liquidationPricePost ? styles.visible : styles.hidden,
+        )}
+      >
+        <div className={styles.orderSummaryLabel}>Liquidation price</div>
         <div className={classnames(styles.orderSummaryValue, styles.orderSummaryValuePositive)}>
-          {
-            liquidationPrice.gt(zero) ?
-              <Money
-                data-test-id="liquidation-price"
-                value={liquidationPrice}
-                token="USD"
-                fallback="-"
-                className={
-                  classnames({
-                    [styles.orderSummaryValuePositive]: baseTokenAsset && baseTokenAsset.safe,
-                    [styles.orderSummaryValueNegative]: baseTokenAsset && !baseTokenAsset.safe,
-                  })
-                }
-              /> : <span data-test-id="liquidation-price">-</span>
-          }
-          {
-            this.props.liquidationPricePost &&
-            !liquidationPrice.isEqualTo(liquidationPricePost) &&
+          {liquidationPrice.gt(zero) ? (
+            <Money
+              data-test-id="liquidation-price"
+              value={liquidationPrice}
+              token="USD"
+              fallback="-"
+              className={classnames({
+                [styles.orderSummaryValuePositive]: baseTokenAsset && baseTokenAsset.safe,
+                [styles.orderSummaryValueNegative]: baseTokenAsset && !baseTokenAsset.safe,
+              })}
+            />
+          ) : (
+            <span data-test-id="liquidation-price">-</span>
+          )}
+          {this.props.liquidationPricePost && !liquidationPrice.isEqualTo(liquidationPricePost) && (
             <>
               <span className={styles.transitionArrow} />
-              {
-                liquidationPricePost.gt(zero) ?
-                  <Money
-                    data-test-id="estimated-liquidation-price"
-                    value={liquidationPricePost}
-                    token="USD"
-                    fallback="-"
-                    className={
-                      classnames({
-                        [styles.orderSummaryValuePositive]: this.props.isSafePost,
-                        [styles.orderSummaryValueNegative]: !this.props.isSafePost,
-                      })
-                    }
-                  /> : <span data-test-id="estimated-liquidation-price">-</span>
-              }
+              {liquidationPricePost.gt(zero) ? (
+                <Money
+                  data-test-id="estimated-liquidation-price"
+                  value={liquidationPricePost}
+                  token="USD"
+                  fallback="-"
+                  className={classnames({
+                    [styles.orderSummaryValuePositive]: this.props.isSafePost,
+                    [styles.orderSummaryValueNegative]: !this.props.isSafePost,
+                  })}
+                />
+              ) : (
+                <span data-test-id="estimated-liquidation-price">-</span>
+              )}
             </>
-          }
+          )}
         </div>
       </div>
-    );
+    )
   }
 
   private price() {
-    const { price, priceImpact, quoteToken, messages } = this.props;
+    const { price, priceImpact, quoteToken, messages } = this.props
     return (
-      <div className={classnames(
-        styles.orderSummaryRow,
-        styles.orderSummaryRowDark,
-        price && priceImpact && messages.length === 0 ? styles.visible : styles.hidden
-      )}>
-        <div className={styles.orderSummaryLabel}>
-          Price (and Impact)
-        </div>
+      <div
+        className={classnames(
+          styles.orderSummaryRow,
+          styles.orderSummaryRowDark,
+          price && priceImpact && messages.length === 0 ? styles.visible : styles.hidden,
+        )}
+      >
+        <div className={styles.orderSummaryLabel}>Price (and Impact)</div>
         <div className={styles.orderSummaryValue} data-test-id="price">
-          <Money
-            value={price || zero}
-            token={quoteToken}
-          />
-          {' '}
-          {
-            priceImpact && <>
-              (<FormatPercent
-                value={priceImpact}
-                fallback="-"
-                multiply={true}
-              /> Impact)
+          <Money value={price || zero} token={quoteToken} />{' '}
+          {priceImpact && (
+            <>
+              (<FormatPercent value={priceImpact} fallback="-" multiply={true} /> Impact)
             </>
-          }
+          )}
         </div>
       </div>
-    );
+    )
   }
 
   private slippageLimit() {
-    const { slippageLimit } = this.props;
+    const { slippageLimit } = this.props
     return (
       <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
         <div className={styles.orderSummaryLabel}>
           <span>Slippage limit</span>
-          <SettingsIcon className={styles.settingsIcon}
-                        onClick={this.switchToSettings}
-          />
-          <WarningTooltip id="slippage-limit"
-                          text={slippageLimitTooltip}/>
+          <SettingsIcon className={styles.settingsIcon} onClick={this.switchToSettings} />
+          <WarningTooltip id="slippage-limit" text={slippageLimitTooltip} />
         </div>
         <div className={styles.orderSummaryValue} data-test-id="slippage-limit">
-          {
-            slippageLimit &&
-            <FormatPercent
-              value={
-                slippageLimit
-              }
-              fallback="-"
-              precision={2}
-              multiply={true}
-            />
-          }
+          {slippageLimit && <FormatPercent value={slippageLimit} fallback="-" precision={2} multiply={true} />}
         </div>
       </div>
-    );
+    )
   }
 
   private slippageLimitForm() {
-    const slippageLimit = this.props.slippageLimit
-      ? this.props.slippageLimit.times(100).valueOf()
-      : '';
+    const slippageLimit = this.props.slippageLimit ? this.props.slippageLimit.times(100).valueOf() : ''
     return (
-      <InputGroup
-        sizer="lg"
-        style={ { marginTop: '24px' } }
-      >
-        <InputGroupAddon className={formStyles.inputHeader}>
-          Slippage limit
-        </InputGroupAddon>
+      <InputGroup sizer="lg" style={{ marginTop: '24px' }}>
+        <InputGroupAddon className={formStyles.inputHeader}>Slippage limit</InputGroupAddon>
         <div className={formStyles.inputTail}>
           <BigNumberInput
-            ref={ (el: any) =>
-              this.slippageLimitInput = (el && ReactDOM.findDOMNode(el) as HTMLElement) || undefined
+            ref={(el: any) =>
+              (this.slippageLimitInput = (el && (ReactDOM.findDOMNode(el) as HTMLElement)) || undefined)
             }
             data-test-id="slippage-limit-input"
             type="text"
             mask={createNumberMask({
               allowDecimal: true,
               precision: 2,
-              prefix: ''
+              prefix: '',
             })}
-            pipe={
-              lessThanOrEqual(new BigNumber(100))
-            }
+            pipe={lessThanOrEqual(new BigNumber(100))}
             onChange={this.handleSlippageLimitChange}
-            value={ slippageLimit }
+            value={slippageLimit}
             guide={true}
-            placeholder={ slippageLimit }
+            placeholder={slippageLimit}
             className={styles.input}
           />
-          <InputGroupAddon className={formStyles.inputPercentAddon}
-                           onClick={this.handleSlippageLimitFocus}
-          >
+          <InputGroupAddon className={formStyles.inputPercentAddon} onClick={this.handleSlippageLimitFocus}>
             %
           </InputGroupAddon>
         </div>
       </InputGroup>
-    );
+    )
   }
 
   private stabilityFee() {
-    const {  baseToken, mta } = this.props;
-    const baseTokenAsset = findMarginableAsset(baseToken, mta);
+    const { baseToken, mta } = this.props
+    const baseTokenAsset = findMarginableAsset(baseToken, mta)
 
     return (
       <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
-        <div className={styles.orderSummaryLabel}>
-          Stability Fee (Variable)
-        </div>
+        <div className={styles.orderSummaryLabel}>Stability Fee (Variable)</div>
         <div className={styles.orderSummaryValue}>
-          {
-            baseTokenAsset?.fee ? <FormatPercent
-              value={baseTokenAsset?.fee}
-              fallback="-"
-              multiply={false}
-              precision={2}
-            /> : <span>-</span>
-          }
+          {baseTokenAsset?.fee ? (
+            <FormatPercent value={baseTokenAsset?.fee} fallback="-" multiply={false} precision={2} />
+          ) : (
+            <span>-</span>
+          )}
         </div>
       </div>
-    );
+    )
   }
 
   private leverage() {
-    const { leverage, leveragePost } = this.props;
-    const leverageDisplay = leverage && leverage.gt(zero)
-      ? leverage
-      : leveragePost
-        ? zero
-        : minusOne;
+    const { leverage, leveragePost } = this.props
+    const leverageDisplay = leverage && leverage.gt(zero) ? leverage : leveragePost ? zero : minusOne
 
-    const leveragePostDisplay = leveragePost && leveragePost.gt(zero)
-      ? leveragePost
-      : minusOne;
+    const leveragePostDisplay = leveragePost && leveragePost.gt(zero) ? leveragePost : minusOne
     return (
-      <div className={classnames(
-        styles.orderSummaryRow,
-        styles.orderSummaryRowDark,
-        leveragePost ? styles.visible : styles.hidden
-      )}>
-        <div className={styles.orderSummaryLabel}>
-          Leverage
-        </div>
+      <div
+        className={classnames(
+          styles.orderSummaryRow,
+          styles.orderSummaryRowDark,
+          leveragePost ? styles.visible : styles.hidden,
+        )}
+      >
+        <div className={styles.orderSummaryLabel}>Leverage</div>
         <div className={styles.orderSummaryValue}>
-          {
-            leverageDisplay.gt(zero)
-              ? <>{ formatPrecision(leverageDisplay, 1) }x</>
-              : <span>-</span>
-          }
-          {
-            leveragePost && <>
-              <span className={styles.transitionArrow}/>
-              {
-                leveragePostDisplay.gte(zero)
-                  ? <>
-                    {formatPrecision(leveragePostDisplay, 1)}x
-                  </>
-                  : <span>-</span>
-              }
+          {leverageDisplay.gt(zero) ? <>{formatPrecision(leverageDisplay, 1)}x</> : <span>-</span>}
+          {leveragePost && (
+            <>
+              <span className={styles.transitionArrow} />
+              {leveragePostDisplay.gte(zero) ? <>{formatPrecision(leveragePostDisplay, 1)}x</> : <span>-</span>}
             </>
-          }
+          )}
         </div>
       </div>
-    );
+    )
   }
 
   private purchasingPower() {
-    return (
-      this.props.kind === OfferType.buy ?
-        <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
-          <div className={styles.orderSummaryLabel}>
-            Purch. power
-          </div>
-          <div className={styles.orderSummaryValue} data-test-id="purchasing-power">
-            {
-              this.props.realPurchasingPower &&
-              <>
-                {
-                  this.props.dustWarning &&
-                  <div className={styles.purchasingPowerTooltip}>
-                    <WarningTooltip id="purchasing-power-dust"
-                      text="You do not have enough purchasing power to complete this order." />
-                  </div>
-                }
-                {formatPrecision(this.props.realPurchasingPower, 2)}
-              </>
-            }
-            { this.props.realPurchasingPowerPost &&
+    return this.props.kind === OfferType.buy ? (
+      <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
+        <div className={styles.orderSummaryLabel}>Purch. power</div>
+        <div className={styles.orderSummaryValue} data-test-id="purchasing-power">
+          {this.props.realPurchasingPower && (
+            <>
+              {this.props.dustWarning && (
+                <div className={styles.purchasingPowerTooltip}>
+                  <WarningTooltip
+                    id="purchasing-power-dust"
+                    text="You do not have enough purchasing power to complete this order."
+                  />
+                </div>
+              )}
+              {formatPrecision(this.props.realPurchasingPower, 2)}
+            </>
+          )}
+          {this.props.realPurchasingPowerPost && (
             <>
               <span className={styles.transitionArrow} />
-              { this.props.realPurchasingPowerPost ?
+              {this.props.realPurchasingPowerPost ? (
                 <span data-test-id="estimated-purchasing-power">
                   {formatPrecision(this.props.realPurchasingPowerPost, 2)}
                 </span>
-                : <span>-</span>
-              }
+              ) : (
+                <span>-</span>
+              )}
             </>
-            }
-            <>
-              {
-                (this.props.realPurchasingPower || this.props.realPurchasingPowerPost) &&
-                <> { this.props.quoteToken } </>
-              }</>
-          </div>
+          )}
+          <>
+            {(this.props.realPurchasingPower || this.props.realPurchasingPowerPost) && <> {this.props.quoteToken} </>}
+          </>
         </div>
-        : null
-    );
+      </div>
+    ) : null
   }
 
   private accountBalance() {
-    const baseTokenAsset = findMarginableAsset(this.props.baseToken, this.props.mta);
-    const { balancePost, daiBalancePost, baseToken, quoteToken, kind } = this.props;
+    const baseTokenAsset = findMarginableAsset(this.props.baseToken, this.props.mta)
+    const { balancePost, daiBalancePost, baseToken, quoteToken, kind } = this.props
 
     return (
       <>
-        <div className={classnames(
-          styles.orderSummaryRow,
-          styles.orderSummaryRowDark,
-          balancePost || kind === OfferType.sell ? styles.visible : styles.hidden)}>
+        <div
+          className={classnames(
+            styles.orderSummaryRow,
+            styles.orderSummaryRowDark,
+            balancePost || kind === OfferType.sell ? styles.visible : styles.hidden,
+          )}
+        >
           <div className={styles.orderSummaryLabel}>
             <span>Balance</span>
-            <WarningTooltip id="col-balance"
-                            text={collateralBalanceTooltip(baseToken)}/>
+            <WarningTooltip id="col-balance" text={collateralBalanceTooltip(baseToken)} />
           </div>
           <div className={styles.orderSummaryValue} data-test-id="col-balance">
-            { baseTokenAsset && baseTokenAsset.balance ?
-              <CryptoMoney
-                value={baseTokenAsset.balance}
-                token={baseToken}
-                fallback="-"
-              /> : <span>-</span>
-            }
-            {
-              balancePost &&
+            {baseTokenAsset && baseTokenAsset.balance ? (
+              <CryptoMoney value={baseTokenAsset.balance} token={baseToken} fallback="-" />
+            ) : (
+              <span>-</span>
+            )}
+            {balancePost && (
               <>
                 <span className={styles.transitionArrow} />
-                { balancePost ?
+                {balancePost ? (
                   <CryptoMoney
                     data-test-id="estimated-col-balance"
                     value={balancePost}
                     token={baseToken}
                     fallback="-"
-                  /> : <span>-</span>
-                }
+                  />
+                ) : (
+                  <span>-</span>
+                )}
               </>
-            }
+            )}
           </div>
         </div>
-        <div className={classnames(
-          styles.orderSummaryRow,
-          styles.orderSummaryRowDark,
-          daiBalancePost || kind === OfferType.sell ? styles.visible : styles.hidden
-        )}>
+        <div
+          className={classnames(
+            styles.orderSummaryRow,
+            styles.orderSummaryRowDark,
+            daiBalancePost || kind === OfferType.sell ? styles.visible : styles.hidden,
+          )}
+        >
           <div className={styles.orderSummaryLabel}>
             <span>DAI Balance</span>
-            <WarningTooltip id="dai-balance"
-                            text={daiBalanceTooltip}/>
+            <WarningTooltip id="dai-balance" text={daiBalanceTooltip} />
           </div>
           <div className={styles.orderSummaryValue}>
-            { baseTokenAsset && baseTokenAsset.debt.gt(zero) ?
+            {baseTokenAsset && baseTokenAsset.debt.gt(zero) ? (
               <CryptoMoney
                 data-test-id="dai-balance"
                 value={baseTokenAsset.debt.times(minusOne)}
                 token={quoteToken}
                 fallback="-"
-              /> : baseTokenAsset && baseTokenAsset.dai ?
-                <CryptoMoney
-                  data-test-id="dai-balance"
-                  value={baseTokenAsset.dai}
-                  token={quoteToken}
-                  fallback="-"
-                /> : <span>-</span>
-            }
-            {
-              daiBalancePost &&
+              />
+            ) : baseTokenAsset && baseTokenAsset.dai ? (
+              <CryptoMoney data-test-id="dai-balance" value={baseTokenAsset.dai} token={quoteToken} fallback="-" />
+            ) : (
+              <span>-</span>
+            )}
+            {daiBalancePost && (
               <>
                 <span className={styles.transitionArrow} />
-                { daiBalancePost ?
+                {daiBalancePost ? (
                   <CryptoMoney
                     data-test-id="estimated-dai-balance"
                     value={daiBalancePost}
                     token={quoteToken}
                     fallback="-"
-                  /> : <span>-</span>
-                }
+                  />
+                ) : (
+                  <span>-</span>
+                )}
               </>
-            }
+            )}
           </div>
         </div>
       </>
-    );
+    )
   }
 
   private amount() {
     return (
       <div>
-        { this.amountGroup() }
-        <Error field="amount" messages={this.props.messages} tid="amount-error"/>
+        {this.amountGroup()}
+        <Error field="amount" messages={this.props.messages} tid="amount-error" />
       </div>
-    );
+    )
   }
 
   private total() {
-    const { total, quoteToken, maxTotal } = this.props;
+    const { total, quoteToken, maxTotal } = this.props
 
     return (
       <div>
         <InputGroup>
-          <InputGroupAddon border="right" className={styles.inputHeader}>Total</InputGroupAddon>
-          <ApproximateInputValue shouldApproximate={
-            !!total
-            && !total.eq(new BigNumber(formatPrice(total, quoteToken)))
-          }>
+          <InputGroupAddon border="right" className={styles.inputHeader}>
+            Total
+          </InputGroupAddon>
+          <ApproximateInputValue
+            shouldApproximate={!!total && !total.eq(new BigNumber(formatPrice(total, quoteToken)))}
+          >
             <BigNumberInput
-              ref={ (el: any) =>
-                this.priceInput = (el && ReactDOM.findDOMNode(el) as HTMLElement) || undefined
-              }
+              ref={(el: any) => (this.priceInput = (el && (ReactDOM.findDOMNode(el) as HTMLElement)) || undefined)}
               type="text"
               mask={createNumberMask({
                 allowDecimal: true,
                 decimalLimit: getToken(quoteToken).digits,
-                prefix: ''
+                prefix: '',
               })}
               onChange={this.handleTotalChange}
-              value={
-                (total || null) &&
-                formatPrice(total as BigNumber, quoteToken)
-              }
+              value={(total || null) && formatPrice(total as BigNumber, quoteToken)}
               guide={true}
-              placeholder={
-                `Max. ${formatAmount(maxTotal, quoteToken)}`
-              }
+              placeholder={`Max. ${formatAmount(maxTotal, quoteToken)}`}
               className={styles.input}
               data-test-id="total-input"
               // disabled={this.props.stage === FormStage.waitingForAllocation}
               // disabled={ true }
             />
           </ApproximateInputValue>
-          <InputGroupAddon  className={styles.setMaxBtnAddon}
-                            onClick={
-                              this.handleSetMaxTotal
-                            }>
+          <InputGroupAddon className={styles.setMaxBtnAddon} onClick={this.handleSetMaxTotal}>
             <Button size="sm" type="button" className={styles.setMaxBtn}>
               Set Max
             </Button>
           </InputGroupAddon>
-          <InputGroupAddon className={styles.inputCurrencyAddon} onClick={ this.handlePriceFocus }>
+          <InputGroupAddon className={styles.inputCurrencyAddon} onClick={this.handlePriceFocus}>
             {quoteToken}
           </InputGroupAddon>
         </InputGroup>
-        <Error field="total" messages={this.props.messages} tid="total-error"/>
+        <Error field="total" messages={this.props.messages} tid="total-error" />
       </div>
-    );
+    )
   }
 
   private proceedButton() {
-    const label = this.props.kind === 'buy' ? 'Place Buy Order' : 'Place Sell Order';
+    const label = this.props.kind === 'buy' ? 'Place Buy Order' : 'Place Sell Order'
     return (
       <Button
         className={styles.confirmButton}
         data-test-id="place-order"
         type="submit"
         value="submit"
-        color={ this.props.kind === OfferType.buy ? 'primary' : 'danger' }
-        disabled={ !this.props.readyToProceed || !!this.props.progress }
+        color={this.props.kind === OfferType.buy ? 'primary' : 'danger'}
+        disabled={!this.props.readyToProceed || !!this.props.progress}
         onClick={() => {
-          trackingEvents.initiateTradeLeverage(this.props.kind);
+          trackingEvents.initiateTradeLeverage(this.props.kind)
         }}
       >
         {label}
       </Button>
-    );
+    )
   }
 
   private amountGroup() {
-    const { amount, baseToken, maxAmount } = this.props;
+    const { amount, baseToken, maxAmount } = this.props
 
     return (
       <InputGroup>
-        <InputGroupAddon border="right" className={styles.inputHeader}>Amount</InputGroupAddon>
-        <ApproximateInputValue shouldApproximate={
-          !!amount
-          && !amount.eq(new BigNumber(formatAmount(amount, baseToken)))
-        }>
+        <InputGroupAddon border="right" className={styles.inputHeader}>
+          Amount
+        </InputGroupAddon>
+        <ApproximateInputValue
+          shouldApproximate={!!amount && !amount.eq(new BigNumber(formatAmount(amount, baseToken)))}
+        >
           <BigNumberInput
-            ref={(el: any) =>
-              this.amountInput = (el && ReactDOM.findDOMNode(el) as HTMLElement) || undefined
-            }
+            ref={(el: any) => (this.amountInput = (el && (ReactDOM.findDOMNode(el) as HTMLElement)) || undefined)}
             type="text"
             mask={createNumberMask({
               allowDecimal: true,
               decimalLimit: getToken(baseToken).digits,
-              prefix: ''
+              prefix: '',
             })}
             onChange={this.handleAmountChange}
-            value={
-              (amount || null) &&
-              formatAmount(amount as BigNumber, baseToken)
-            }
+            value={(amount || null) && formatAmount(amount as BigNumber, baseToken)}
             guide={true}
-            placeholder={
-              `Max. ${formatAmount(maxAmount, baseToken)}`
-            }
+            placeholder={`Max. ${formatAmount(maxAmount, baseToken)}`}
             className={styles.input}
             data-test-id="amount-input"
             // disabled={this.props.progress === FormStage.waitingForAllocation}
           />
         </ApproximateInputValue>
-        <InputGroupAddon  className={styles.setMaxBtnAddon}
-                          onClick={this.handleSetMaxAmount}>
+        <InputGroupAddon className={styles.setMaxBtnAddon} onClick={this.handleSetMaxAmount}>
           <Button size="sm" type="button" className={styles.setMaxBtn}>
             Set Max
           </Button>
         </InputGroupAddon>
-        <InputGroupAddon className={styles.inputCurrencyAddon} onClick={ this.handleAmountFocus }>
+        <InputGroupAddon className={styles.inputCurrencyAddon} onClick={this.handleAmountFocus}>
           {baseToken}
         </InputGroupAddon>
-
       </InputGroup>
-    );
+    )
   }
 }
 
 export class MtSimpleOrderFormView extends React.Component<
-  MTSimpleFormState & MTSimpleOrderPanelProps & ModalOpenerProps> {
-
-  private slippageLimitInput?: HTMLElement;
+  MTSimpleFormState & MTSimpleOrderPanelProps & ModalOpenerProps
+> {
+  private slippageLimitInput?: HTMLElement
 
   public handleKindChange(kind: OfferType) {
     this.props.change({
       kind: FormChangeKind.kindChange,
       newKind: kind,
-    });
+    })
   }
 
   public handleSlippageLimitChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = new BigNumber(e.target.value.replace(/,/g, ''));
+    const value = new BigNumber(e.target.value.replace(/,/g, ''))
     if (!value.isNaN()) {
       this.props.change({
         kind: FormChangeKind.slippageLimitChange,
         value: value.div(100),
-      });
+      })
     }
   }
 
   public handleSlippageLimitFocus = () => {
     if (this.slippageLimitInput) {
-      this.slippageLimitInput.focus();
+      this.slippageLimitInput.focus()
     }
   }
 
   public CallForDeposit(message: OrderFormMessage, ma?: MarginableAsset) {
-    const transferWithOnboarding = message
-      ? message.kind === OrderFormMessageKind.onboarding
-      : false;
+    const transferWithOnboarding = message ? message.kind === OrderFormMessageKind.onboarding : false
 
     return (
       <div className={styles.onboardingPanel}>
@@ -907,109 +803,93 @@ export class MtSimpleOrderFormView extends React.Component<
           color="primary"
           data-test-id="open-position-with-DAI"
           disabled={!ma}
-          onClick={
-            () => this.transfer(UserActionKind.fund, 'DAI', transferWithOnboarding, ma!.name)
-          }
-        >Deposit DAI</Button>
-        <br/>
+          onClick={() => this.transfer(UserActionKind.fund, 'DAI', transferWithOnboarding, ma!.name)}
+        >
+          Deposit DAI
+        </Button>
+        <br />
         <Button
           size="md"
           color="primary"
           data-test-id={`open-position-with-${ma?.name}`}
           disabled={!ma}
-          onClick={
-            () => this.transfer(UserActionKind.fund, ma!.name, transferWithOnboarding, ma!.name)
-          }
-        >Deposit {ma && ma.name}</Button>
+          onClick={() => this.transfer(UserActionKind.fund, ma!.name, transferWithOnboarding, ma!.name)}
+        >
+          Deposit {ma && ma.name}
+        </Button>
       </div>
-    );
+    )
   }
 
-  public transfer(
-    actionKind: UserActionKind, token: string, withOnboarding: boolean, ilk?: string
-  ) {
+  public transfer(actionKind: UserActionKind, token: string, withOnboarding: boolean, ilk?: string) {
     const fundForm$ = this.props.createMTFundForm$({
-      actionKind, token, ilk, withOnboarding
-    });
-    const MTFundFormViewRxTx =
-      connect<MTTransferFormState, ModalProps>(
-        MtTransferFormView,
-        fundForm$
-      );
-    this.props.open(MTFundFormViewRxTx);
+      actionKind,
+      token,
+      ilk,
+      withOnboarding,
+    })
+    const MTFundFormViewRxTx = connect<MTTransferFormState, ModalProps>(MtTransferFormView, fundForm$)
+    this.props.open(MTFundFormViewRxTx)
   }
 
   public MainContent() {
-    const { mta, baseToken, orderFormMessage } = this.props;
-    const ma = findMarginableAsset(baseToken, mta);
+    const { mta, baseToken, orderFormMessage } = this.props
+    const ma = findMarginableAsset(baseToken, mta)
 
     if (orderFormMessage) {
-      return this.CallForDeposit(orderFormMessage, ma);
+      return this.CallForDeposit(orderFormMessage, ma)
     }
 
-    return <MtSimpleOrderFormBody {...this.props} />;
+    return <MtSimpleOrderFormBody {...this.props} />
   }
 
   public render() {
     return (
       <>
         <PanelHeader>
-          {
-            this.props.view === ViewKind.instantTradeForm ?
-              <>
-                Manage your Leverage
-                {this.headerButtons()}
-              </>
-              : 'Advanced Settings'
-          }
+          {this.props.view === ViewKind.instantTradeForm ? (
+            <>
+              Manage your Leverage
+              {this.headerButtons()}
+            </>
+          ) : (
+            'Advanced Settings'
+          )}
         </PanelHeader>
         <PanelBody style={{ paddingBottom: '16px' }}>
-          {
-            this.props.view === ViewKind.instantTradeForm
-              ? this.MainContent()
-              : this.advancedSettings()
-          }
+          {this.props.view === ViewKind.instantTradeForm ? this.MainContent() : this.advancedSettings()}
         </PanelBody>
-        {
-          this.props.view === ViewKind.settings &&
+        {this.props.view === ViewKind.settings && (
           <PanelFooter className={styles.settingsFooter}>
-            <Button
-              className={formStyles.confirmButton}
-              type="submit"
-              onClick={this.switchToInstantOrderForm}
-            >
+            <Button className={formStyles.confirmButton} type="submit" onClick={this.switchToInstantOrderForm}>
               Done
             </Button>
           </PanelFooter>
-        }
-      </>);
+        )}
+      </>
+    )
   }
 
   private switchToInstantOrderForm = () => {
-    this.props.change({ kind: FormChangeKind.viewChange, value: ViewKind.instantTradeForm });
+    this.props.change({ kind: FormChangeKind.viewChange, value: ViewKind.instantTradeForm })
   }
 
   private advancedSettings = () => (
     <>
       <div className={formStyles.pickerOrderType}>
-        <Radio
-          dataTestId="fillOrKill"
-          name="orderType"
-          value="direct"
-          defaultChecked={true}
-        >
+        <Radio dataTestId="fillOrKill" name="orderType" value="direct" defaultChecked={true}>
           Average price fill or kill order type
         </Radio>
         <Muted className={formStyles.pickerDescription}>
-          The order is executed in its entirety such that the average fill price is
-          the limit price or better, otherwise it is canceled
+          The order is executed in its entirety such that the average fill price is the limit price or better, otherwise
+          it is canceled
         </Muted>
-        { this.slippageLimitForm() }
+        {this.slippageLimitForm()}
       </div>
     </>
   )
 
-  private headerButtons()   {
+  private headerButtons() {
     return (
       <>
         <ButtonGroup style={{ marginLeft: 'auto' }}>
@@ -1019,133 +899,133 @@ export class MtSimpleOrderFormView extends React.Component<
             onClick={() => this.handleKindChange(OfferType.buy)}
             color={this.props.kind === OfferType.buy ? 'primary' : 'greyOutlined'}
             size="sm"
-          >Buy</Button>
+          >
+            Buy
+          </Button>
           <Button
             data-test-id="new-sell-order"
             className={styles.btn}
             onClick={() => this.handleKindChange(OfferType.sell)}
             color={this.props.kind === OfferType.sell ? 'danger' : 'greyOutlined'}
             size="sm"
-          >Sell</Button>
+          >
+            Sell
+          </Button>
         </ButtonGroup>
       </>
-    );
+    )
   }
 
   private slippageLimitForm() {
-    const slippageLimit = this.props.slippageLimit
-      ? this.props.slippageLimit.times(100).valueOf()
-      : '';
+    const slippageLimit = this.props.slippageLimit ? this.props.slippageLimit.times(100).valueOf() : ''
     return (
-      <InputGroup
-        sizer="lg"
-        style={ { marginTop: '24px' } }
-      >
-        <InputGroupAddon className={formStyles.inputHeader}>
-          Slippage limit
-        </InputGroupAddon>
+      <InputGroup sizer="lg" style={{ marginTop: '24px' }}>
+        <InputGroupAddon className={formStyles.inputHeader}>Slippage limit</InputGroupAddon>
         <div className={formStyles.inputTail}>
           <BigNumberInput
-            ref={ (el: any) =>
-              this.slippageLimitInput = (el && ReactDOM.findDOMNode(el) as HTMLElement) || undefined
+            ref={(el: any) =>
+              (this.slippageLimitInput = (el && (ReactDOM.findDOMNode(el) as HTMLElement)) || undefined)
             }
             data-test-id="slippage-limit"
             type="text"
             mask={createNumberMask({
               allowDecimal: true,
               precision: 2,
-              prefix: ''
+              prefix: '',
             })}
-            pipe={
-              lessThanOrEqual(new BigNumber(100))
-            }
+            pipe={lessThanOrEqual(new BigNumber(100))}
             onChange={this.handleSlippageLimitChange}
-            value={ slippageLimit }
+            value={slippageLimit}
             guide={true}
-            placeholder={ slippageLimit }
+            placeholder={slippageLimit}
             className={styles.input}
           />
-          <InputGroupAddon className={formStyles.inputPercentAddon}
-                           onClick={this.handleSlippageLimitFocus}
-          >
+          <InputGroupAddon className={formStyles.inputPercentAddon} onClick={this.handleSlippageLimitFocus}>
             %
           </InputGroupAddon>
         </div>
       </InputGroup>
-    );
+    )
   }
 }
 
-const Error = ({ field, messages, tid } : {
-  field: string,
-  messages?: Message[],
-  tid?: string
-}) => {
+const Error = ({ field, messages, tid }: { field: string; messages?: Message[]; tid?: string }) => {
   const myMsg = (messages || [])
     .filter((message: Message) => message.field === field)
     .sort((m1, m2) => m2.priority - m1.priority)
-    .map(msg => messageContent(msg));
-  return (
-    <ErrorMessage messages={myMsg} style={{ height: '28px' }} data-test-id={tid}/>
-  );
-};
+    .map((msg) => messageContent(msg))
+  return <ErrorMessage messages={myMsg} style={{ height: '28px' }} data-test-id={tid} />
+}
 
 function messageContent(msg: Message) {
   switch (msg.kind) {
     case MessageKind.insufficientAmount:
-      return  `Your ${msg.token} balance is too low to fund this order`;
+      return `Your ${msg.token} balance is too low to fund this order`
     case MessageKind.dustAmount:
-      return `Order below ${msg.amount} ${msg.token} limit`;
+      return `Order below ${msg.amount} ${msg.token} limit`
     case MessageKind.incredibleAmount:
-      return `Your order exceeds max amount for ${msg.token} token`;
+      return `Your order exceeds max amount for ${msg.token} token`
     case MessageKind.dustTotal:
-      return `Your order must be greater than 0`;
+      return `Your order must be greater than 0`
     case MessageKind.impossibleToPlan:
-      return `Can't plan operation: ${msg.message}`;
+      return `Can't plan operation: ${msg.message}`
     case MessageKind.impossibleCalculateTotal:
-      return `Can't calculate: ${msg.message}. Type smaller amount`;
+      return `Can't calculate: ${msg.message}. Type smaller amount`
     case MessageKind.minDebt:
-      return `Dai debt below ${msg.message} DAI limit`;
+      return `Dai debt below ${msg.message} DAI limit`
     case MessageKind.unsellable:
-      return `Your position is unsellable. ${msg.message}`;
+      return `Your position is unsellable. ${msg.message}`
   }
 }
 
 function orderFormMessageContent(msg: OrderFormMessage) {
   if (!msg) {
-    return null;
+    return null
   }
 
   switch (msg.kind) {
     // tslint:disable
     case OrderFormMessageKind.onboarding:
-      return <>
-        <h3>Deposit into Leverage Account</h3>
-        Before opening a new position, deposit {msg.baseToken}<br/>
-        or DAI into your Leverage Trading Account
-      </>;
+      return (
+        <>
+          <h3>Deposit into Leverage Account</h3>
+          Before opening a new position, deposit {msg.baseToken}
+          <br />
+          or DAI into your Leverage Trading Account
+        </>
+      )
 
     case OrderFormMessageKind.collRatioUnsafe:
-      return <div className={styles.warningMessage}>
-        Warning - Your position is currently too close to the liquidation price to sell.<br/>
-        To sell your position, you must first<br/> deposit DAI or {msg.baseToken}.
-      </div>;
+      return (
+        <div className={styles.warningMessage}>
+          Warning - Your position is currently too close to the liquidation price to sell.
+          <br />
+          To sell your position, you must first
+          <br /> deposit DAI or {msg.baseToken}.
+        </div>
+      )
 
     case OrderFormMessageKind.liquidationImminent:
-      return <div className={styles.warningMessage}>
-        {
-          <>
-            Warning - Your position will be liquidated in {msg.nextPriceUpdateDelta} minutes and cannot currently be sold.<br />
-            To rescue your position, you must deposit additional {msg.baseToken} or DAI
-          </>
-        }
-      </div>;
+      return (
+        <div className={styles.warningMessage}>
+          {
+            <>
+              Warning - Your position will be liquidated in {msg.nextPriceUpdateDelta} minutes and cannot currently be
+              sold.
+              <br />
+              To rescue your position, you must deposit additional {msg.baseToken} or DAI
+            </>
+          }
+        </div>
+      )
 
     case OrderFormMessageKind.bitable:
-      return <div className={styles.warningMessage}>
-        Your {msg.baseToken} leveraged position is now at risk of being liquidated.
-        You can still avoid auction by <br /> depositing {msg.baseToken} or DAI.
-      </div>;
+      return (
+        <div className={styles.warningMessage}>
+          Your {msg.baseToken} leveraged position is now at risk of being liquidated. You can still avoid auction by{' '}
+          <br /> depositing {msg.baseToken} or DAI.
+        </div>
+      )
     // tslint:enable
   }
 }

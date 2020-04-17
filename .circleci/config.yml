@@ -7,11 +7,11 @@ version: 2
 jobs:
   install:
     docker:
-      - image: circleci/node:8.11.2-stretch
+      - image: circleci/node:10.19.0-stretch
     steps:
       - checkout
       - restore_cache:
-            keys:
+          keys:
             - v11-dependencies-{{ checksum "package.json" }}
 
       - run: yarn install --frozen-lockfile
@@ -24,13 +24,13 @@ jobs:
 
   test:
     docker:
-      - image: circleci/node:8.11.2-stretch
+      - image: circleci/node:10.19.0-stretch
     steps:
       - checkout
       - restore_cache:
           keys:
-          - v11-dependencies-{{ checksum "package.json" }}
-      - run: 
+            - v11-dependencies-{{ checksum "package.json" }}
+      - run:
           name: Run linting & tests
           command: yarn test
 
@@ -44,13 +44,13 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-          - v11-dependencies-{{ checksum "package.json" }}
+            - v11-dependencies-{{ checksum "package.json" }}
       - run: .circleci/install-yarn.sh
-      - run: 
+      - run:
           name: Get & run locanode and cache image
           command: |
             docker login -u $DOCKER_USER -p $DOCKER_PASS && ./scripts/dev.sh
-      - run: 
+      - run:
           name: Wait for localnode to be up
           command: |
             ./.circleci/wait-for-it.sh localhost:8545 -t 10
@@ -59,7 +59,7 @@ jobs:
 
             ./.circleci/wait-for-docker-log.sh scripts_localnode_1 "All done"
             sleep 10
-      - run: 
+      - run:
           name: Run build & e2e tests
           command: |
             source /opt/circleci/.nvm/nvm.sh
@@ -73,7 +73,7 @@ jobs:
 
   codechecks:
     docker:
-      - image: circleci/node:8.11.2-stretch
+      - image: circleci/node:10.19.0-stretch
     steps:
       - run:
           name: Update
@@ -96,14 +96,14 @@ jobs:
             ca-certificates fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils wget --fix-missing
       - checkout
       - restore_cache:
-            keys:
+          keys:
             - v11-dependencies-{{ checksum "package.json" }}
       - run: PUBLIC_URL=. ENV=dev yarn build
       - run: DEBUG=codechecks:* yarn codechecks
 
   codechecks-e2e:
     docker:
-      - image: circleci/node:8.11.2-stretch
+      - image: circleci/node:10.19.0-stretch
     steps:
       - run:
           name: Update
@@ -126,7 +126,7 @@ jobs:
             ca-certificates fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils wget --fix-missing
       - checkout
       - restore_cache:
-            keys:
+          keys:
             - v11-dependencies-{{ checksum "package.json" }}
       - attach_workspace:
           at: /tmp/workspace
@@ -141,28 +141,28 @@ jobs:
 
   deploy_dev:
     docker:
-      - image: circleci/node:8.11.2-stretch
+      - image: circleci/node:10.19.0-stretch
     steps:
       - checkout
       - restore_cache:
-            keys:
+          keys:
             - v11-dependencies-{{ checksum "package.json" }}
       - run: yarn run deploy:dev
 
   deploy_prod:
     docker:
-      - image: circleci/node:8.11.2-stretch
+      - image: circleci/node:10.19.0-stretch
     steps:
       - add_ssh_keys:
           fingerprints:
-            - "d2:4f:e3:c0:5d:8e:2b:14:6b:67:74:e2:2f:f2:a8:43"
+            - 'd2:4f:e3:c0:5d:8e:2b:14:6b:67:74:e2:2f:f2:a8:43'
       - checkout
       - restore_cache:
-            keys:
+          keys:
             - v11-dependencies-{{ checksum "package.json" }}
       - run:
           name: Configure git defaults
-          command:  git config user.email "circleci@makerdao.com" && git config user.name "CircleCI"
+          command: git config user.email "circleci@makerdao.com" && git config user.name "CircleCI"
       - run:
           name: Deploying to production
           command: yarn run deploy:prod
@@ -174,7 +174,7 @@ workflows:
     jobs:
       - install
       - test:
-          requires: 
+          requires:
             - install
           filters:
             branches:
@@ -188,7 +188,7 @@ workflows:
               ignore:
                 - gh-pages
       - codechecks:
-          requires: 
+          requires:
             - install
           filters:
             branches:
