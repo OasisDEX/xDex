@@ -389,7 +389,7 @@ const protoMain = {
     return load(proxyCreationAndExecute, '0x793ebbe21607e4f04788f89c7a9b97320773ec59');
   },
   get proxyActions() {
-    return load(proxyActions, '0xb81f7ca8f12c2d433dcde39270de849e2475abb9');
+    return load(proxyActions, '0x4fb2f29608b05dfc935c20c076f0b1a022407e3e');
   },
   get migration() {
     return '0xc73e0383F3Aff3215E6f04B0331D58CeCf0Ab849';
@@ -539,7 +539,7 @@ const kovan: NetworkConfig = {
     return load(proxyCreationAndExecute, '0xee419971e63734fed782cfe49110b1544ae8a773');
   },
   get proxyActions() {
-    return load(proxyActions, '0x9cbb4e9de5024bf702bc83f00a0dd22953531f77');
+    return load(proxyActions, '0x2347ba6fa55e128d8918c6de361e8c1277453ab8');
   },
   get migration() {
     return '0x411b2faa662c8e3e5cf8f01dfdae0aee482ca7b0';
