@@ -455,7 +455,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
   }
 
   private Buttons() {
-    const { progress, readyToProceed, token, ilk, actionKind } = this.props
+    const { progress, readyToProceed, token, ilk, actionKind, amount } = this.props
     const retry = progress === ProgressStage.fiasco
     const depositAgain = progress === ProgressStage.done
     const deposit = !retry && !depositAgain
@@ -474,14 +474,26 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
             color="primary"
             onClick={() => {
               this.transfer()
-              trackingEvents.transferTokens(actionKind, token)
+              if (amount) {
+                trackingEvents.transferTokens(actionKind, token, amount.toNumber())
+              }
             }}
           >
             {proceedName}
           </Button>
         )}
         {retry && (
-          <Button size="md" className={styles.confirmButton} block={true} onClick={() => this.transfer()}>
+          <Button
+            size="md"
+            className={styles.confirmButton}
+            block={true}
+            onClick={() => {
+              this.transfer()
+              if (amount) {
+                trackingEvents.transferTokens(actionKind, token, amount.toNumber())
+              }
+            }}
+          >
             Retry
           </Button>
         )}

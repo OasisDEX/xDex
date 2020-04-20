@@ -704,17 +704,20 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState & {
   }
 
   private proceedButton() {
-    const label = this.props.kind === 'buy' ? 'Place Buy Order' : 'Place Sell Order'
+    const { kind, total, readyToProceed, progress } = this.props
+    const label = kind === 'buy' ? 'Place Buy Order' : 'Place Sell Order'
     return (
       <Button
         className={styles.confirmButton}
         data-test-id="place-order"
         type="submit"
         value="submit"
-        color={this.props.kind === OfferType.buy ? 'primary' : 'danger'}
-        disabled={!this.props.readyToProceed || !!this.props.progress}
+        color={kind === OfferType.buy ? 'primary' : 'danger'}
+        disabled={!readyToProceed || !!progress}
         onClick={() => {
-          trackingEvents.initiateTradeLeverage(this.props.kind)
+          if (total) {
+            trackingEvents.initiateTradeLeverage(kind, total.toNumber())
+          }
         }}
       >
         {label}

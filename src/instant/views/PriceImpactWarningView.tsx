@@ -1,6 +1,7 @@
 import classnames from 'classnames'
 import * as React from 'react'
 import { trackingEvents } from '../../analytics/analytics'
+import { OfferType } from '../../exchange/orderbook/orderbook'
 import { FormatPercent } from '../../utils/formatters/Formatters'
 import { CloseButton } from '../../utils/forms/Buttons'
 import { TopRightCorner } from '../../utils/panel/TopRightCorner'
@@ -61,7 +62,11 @@ export class PriceImpactWarningView extends React.Component<InstantFormState> {
   }
 
   private onAcknowledge = () => {
-    trackingEvents.initiateTradeInstant()
+    const { kind, quotation, buyAmount, sellAmount } = this.props
+    const amount = kind === OfferType.buy ? sellAmount : buyAmount
+    if (kind && amount && quotation) {
+      trackingEvents.initiateTradeInstant(kind, amount.toNumber(), quotation.replace('/', ''))
+    }
     this.props.submit(this.props)
     this.props.change({
       kind: InstantFormChangeKind.viewChange,

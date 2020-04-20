@@ -382,16 +382,19 @@ export class OfferMakeForm extends React.Component<OfferFormState> {
   }
 
   private submitButton() {
+    const { stage, kind, total, baseToken, quoteToken } = this.props
     return (
       <Button
         data-test-id="place-order"
         className={styles.confirmButton}
         type="submit"
         value="submit"
-        color={this.props.kind === OfferType.buy ? 'primary' : 'danger'}
-        disabled={this.props.stage !== 'readyToProceed'}
+        color={kind === OfferType.buy ? 'primary' : 'danger'}
+        disabled={stage !== 'readyToProceed'}
         onClick={() => {
-          trackingEvents.initiateTradeMarket(this.props.kind)
+          if (total) {
+            trackingEvents.initiateTradeMarket(kind, total.toNumber(), `${baseToken}${quoteToken}`)
+          }
         }}
       >
         {this.props.kind} {this.props.baseToken}

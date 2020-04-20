@@ -3,6 +3,7 @@ import classnames from 'classnames'
 import * as React from 'react'
 import { trackingEvents } from '../../analytics/analytics'
 import { etherscan, EtherscanConfig } from '../../blockchain/etherscan'
+import { OfferType } from '../../exchange/orderbook/orderbook'
 import swapArrowsSvg from '../../icons/swap-arrows.svg'
 import { formatAmountInstant } from '../../utils/formatters/format'
 import { Button } from '../../utils/forms/Buttons'
@@ -207,14 +208,17 @@ export class NewTradeView extends React.Component<InstantFormState> {
 
   private startTx = () => {
     const priceImpact = this.props.priceImpact
-
     if (priceImpact && priceImpact.gt(new BigNumber(5))) {
       this.props.change({
         kind: InstantFormChangeKind.viewChange,
         view: ViewKind.priceImpactWarning,
       })
     } else {
-      trackingEvents.initiateTrade()
+      const { kind, quotation, buyAmount, sellAmount } = this.props
+      const amount = kind === OfferType.buy ? sellAmount : buyAmount
+      if (kind && amount && quotation) {
+        trackingEvents.initiateTradeInstant(kind, amount.toNumber(), quotation.replace('/', ''))
+      }
       this.props.submit(this.props)
       this.props.change({
         kind: InstantFormChangeKind.viewChange,

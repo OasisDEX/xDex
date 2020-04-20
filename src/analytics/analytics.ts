@@ -1,5 +1,7 @@
 import * as mixpanel from 'mixpanel-browser'
+import { Dictionary } from 'ramda'
 import { OfferType } from '../exchange/orderbook/orderbook'
+import { UserActionKind } from '../marginTrading/state/mtAccount'
 import * as Fathom from './fathom'
 
 export const trackingEvents = {
@@ -9,26 +11,23 @@ export const trackingEvents = {
       id: location,
     })
     Fathom.trackPageview()
-    // Fathom.trackGoal('RROZMOHX', 100);
   },
-  initiateTrade: () => {
+  initiateTradeInstant: (kind: OfferType, total: number, pair: string) => {
     mixpanel.track('btn-click', {
       id: 'initiate-trade',
       product: 'oasis-trade',
       page: 'Instant',
       section: 'order-details',
     })
+
+    const fathomGoal: Dictionary<string> =
+      kind === OfferType.buy
+        ? (Fathom.fathomGoals.instantBuy as Dictionary<string>)
+        : (Fathom.fathomGoals.instantSell as Dictionary<string>)
+
+    Fathom.trackGoal(fathomGoal[pair], total)
   },
-  initiateTradeInstant: () => {
-    mixpanel.track('btn-click', {
-      id: 'initiate-trade',
-      product: 'oasis-trade',
-      page: 'Instant',
-      section: 'order-details',
-      case: 'price-impact-warning',
-    })
-  },
-  initiateTradeMarket: (kind: OfferType) => {
+  initiateTradeMarket: (kind: OfferType, total: number, pair: string) => {
     mixpanel.track('btn-click', {
       kind,
       id: 'initiate-trade',
@@ -36,8 +35,15 @@ export const trackingEvents = {
       page: 'Market',
       section: 'create-order',
     })
+
+    const fathomGoal: Dictionary<string> =
+      kind === OfferType.buy
+        ? (Fathom.fathomGoals.marketBuy as Dictionary<string>)
+        : (Fathom.fathomGoals.marketSell as Dictionary<string>)
+
+    Fathom.trackGoal(fathomGoal[pair], total)
   },
-  initiateTradeLeverage: (kind: OfferType) => {
+  initiateTradeLeverage: (kind: OfferType, total: number) => {
     mixpanel.track('btn-click', {
       kind,
       id: 'initiate-trade',
@@ -45,6 +51,9 @@ export const trackingEvents = {
       page: 'Leverage',
       section: 'manage-leverage',
     })
+    const fathomGoal = kind === OfferType.buy ? Fathom.fathomGoals.leverageBuy : Fathom.fathomGoals.leverageSell
+
+    Fathom.trackGoal(fathomGoal, total)
   },
   taxExport: () => {
     mixpanel.track('btn-click', {
@@ -79,7 +88,7 @@ export const trackingEvents = {
       section: 'asset-picker',
     })
   },
-  transferTokens: (actionKind: string, token: string) => {
+  transferTokens: (actionKind: string, token: string, amount: number) => {
     mixpanel.track('btn-click', {
       id: `${actionKind}-${token === 'DAI' ? 'dai' : 'collateral'}-submit`,
       product: 'oasis-trade',
@@ -87,6 +96,20 @@ export const trackingEvents = {
       section: 'deposit-withdraw-modal',
       currency: token,
     })
+    if (actionKind === UserActionKind.fund) {
+      if (token === 'DAI') {
+        Fathom.trackGoal(Fathom.fathomGoals.depositDai, amount)
+      } else {
+        Fathom.trackGoal(Fathom.fathomGoals.depositCollateral, amount)
+      }
+    }
+    if (actionKind === UserActionKind.draw) {
+      if (token === 'DAI') {
+        Fathom.trackGoal(Fathom.fathomGoals.withdrawDai, amount)
+      } else {
+        Fathom.trackGoal(Fathom.fathomGoals.withdrawCollateral, amount)
+      }
+    }
   },
   daiUsdToggle: (toggle: boolean) => {
     mixpanel.track('btn-click', {
@@ -136,6 +159,7 @@ export const trackingEvents = {
       product: 'oasis-trade',
       wallet: 'metamask',
     })
+    Fathom.trackGoal(Fathom.fathomGoals.connectWallet, 0)
   },
   txNotification: (txStatus: string, network: string) => {
     mixpanel.track('notification', {
@@ -143,5 +167,8 @@ export const trackingEvents = {
       product: 'oasis-trade',
       status: txStatus,
     })
+  },
+  cancelOffer: () => {
+    Fathom.trackGoal(Fathom.fathomGoals.cancelOffer, 0)
   },
 }
