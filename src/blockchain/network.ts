@@ -118,7 +118,7 @@ export type GasPrice$ = Observable<BigNumber>
 export const gasPrice$: GasPrice$ = onEveryBlock$.pipe(
   switchMap(() => bindNodeCallback(web3.eth.getGasPrice)()),
   map((x) => new BigNumber(x)),
-  map((x) => x.multipliedBy(1.25)),
+  map((x) => x.multipliedBy(1.25).decimalPlaces(0, 0)),
   distinctUntilChanged((x: BigNumber, y: BigNumber) => x.eq(y)),
   shareReplay(1),
 )
