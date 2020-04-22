@@ -51,6 +51,7 @@ export const trackingEvents = {
       page: 'Leverage',
       section: 'manage-leverage',
     })
+
     const fathomGoal = kind === OfferType.buy ? Fathom.fathomGoals.leverageBuy : Fathom.fathomGoals.leverageSell
 
     Fathom.trackGoal(fathomGoal, total)
@@ -89,6 +90,8 @@ export const trackingEvents = {
     })
   },
   transferTokens: (actionKind: string, token: string, amount: number) => {
+    const { depositDai, depositCollateral, withdrawDai, withdrawCollateral } = Fathom.fathomGoals
+
     mixpanel.track('btn-click', {
       id: `${actionKind}-${token === 'DAI' ? 'dai' : 'collateral'}-submit`,
       product: 'oasis-trade',
@@ -97,18 +100,10 @@ export const trackingEvents = {
       currency: token,
     })
     if (actionKind === UserActionKind.fund) {
-      if (token === 'DAI') {
-        Fathom.trackGoal(Fathom.fathomGoals.depositDai, amount)
-      } else {
-        Fathom.trackGoal(Fathom.fathomGoals.depositCollateral, amount)
-      }
+      Fathom.trackGoal(token === 'DAI' ? depositDai : depositCollateral, amount)
     }
     if (actionKind === UserActionKind.draw) {
-      if (token === 'DAI') {
-        Fathom.trackGoal(Fathom.fathomGoals.withdrawDai, amount)
-      } else {
-        Fathom.trackGoal(Fathom.fathomGoals.withdrawCollateral, amount)
-      }
+      Fathom.trackGoal(token === 'DAI' ? withdrawDai : withdrawCollateral, amount)
     }
   },
   daiUsdToggle: (toggle: boolean) => {
