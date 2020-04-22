@@ -1,10 +1,10 @@
-import classnames from 'classnames'
-import * as React from 'react'
-import { BehaviorSubject } from 'rxjs'
-import { connectToWallet } from '../blockchain/wallet'
-import { Button } from '../utils/forms/Buttons'
-import { Checkbox } from '../utils/forms/Checkbox'
-import { LoadingIndicator } from '../utils/loadingIndicator/LoadingIndicator'
+import classnames from 'classnames';
+import * as React from 'react';
+import { BehaviorSubject } from 'rxjs';
+import { connectToWallet } from '../blockchain/wallet';
+import { Button } from '../utils/forms/Buttons';
+import { Checkbox } from '../utils/forms/Checkbox';
+import { LoadingIndicator } from '../utils/loadingIndicator/LoadingIndicator';
 import {
   getCurrentProviderName,
   Ledger,
@@ -15,10 +15,10 @@ import {
   Trezor,
   Trust,
   WebWallet,
-} from '../utils/providers'
-import * as styles from './WalletConnection.scss'
+} from '../utils/providers';
+import * as styles from './WalletConnection.scss';
 
-const hwWallets = [Trezor, Ledger]
+const hwWallets = [Trezor, Ledger];
 
 const {
   section,
@@ -32,17 +32,17 @@ const {
   selected,
   termsAndConditions,
   buttonPlaceholder,
-} = styles
+} = styles;
 
 const ListItem = (
   props: Provider & {
-    className?: string
-    isSelected?: boolean
-    onSelect?: () => void
-    tid?: string
+    className?: string;
+    isSelected?: boolean;
+    onSelect?: () => void;
+    tid?: string;
   },
 ) => {
-  const { supported, isSelected, className, name: fullName, icon: walletIcon, onSelect, tid } = props
+  const { supported, isSelected, className, name: fullName, icon: walletIcon, onSelect, tid } = props;
   return (
     <li
       className={classnames(item, wallet, className, !supported && inactive, isSelected && selected)}
@@ -52,8 +52,8 @@ const ListItem = (
       <div className={icon}>{walletIcon}</div>
       <span>{fullName}</span>
     </li>
-  )
-}
+  );
+};
 
 const Panel = (props: { heading?: string | React.ReactNode; children?: any }) => {
   return (
@@ -63,8 +63,8 @@ const Panel = (props: { heading?: string | React.ReactNode; children?: any }) =>
       </h4>
       {props.children}
     </section>
-  )
-}
+  );
+};
 
 class SuggestedClients extends React.Component {
   public render() {
@@ -81,7 +81,7 @@ class SuggestedClients extends React.Component {
                   supported={provider.supported}
                 />
               </a>
-            )
+            );
           })}
         </ul>
         <div className={buttonPlaceholder}>
@@ -96,25 +96,25 @@ class SuggestedClients extends React.Component {
           </Button>
         </div>
       </Panel>
-    )
+    );
   }
 
   private _goBack = () => {
-    walletConnectionViewManual$.next(WalletConnectionViewKind.noClient)
-  }
+    walletConnectionViewManual$.next(WalletConnectionViewKind.noClient);
+  };
 }
 
 class NotConnected extends React.Component<{}, { isChecked: boolean; selectedWallet: Provider }> {
   public constructor(props: any) {
-    super(props)
+    super(props);
     this.state = {
       isChecked: false,
       selectedWallet: {} as Provider,
-    }
+    };
   }
 
   public render() {
-    const provider = getCurrentProviderName()
+    const provider = getCurrentProviderName();
     return (
       <Panel heading="Connect Wallet">
         <ul className={classnames(single, list)}>
@@ -155,37 +155,37 @@ class NotConnected extends React.Component<{}, { isChecked: boolean; selectedWal
           </Button>
         </div>
       </Panel>
-    )
+    );
   }
 
   private _toggle = () => {
     this.setState((state: any) => {
-      const isChecked = !state.isChecked
-      return { isChecked }
-    })
-  }
+      const isChecked = !state.isChecked;
+      return { isChecked };
+    });
+  };
 
   private _selectWallet = (selectedWallet: Provider) => {
-    this.setState({ selectedWallet })
-  }
+    this.setState({ selectedWallet });
+  };
 
   private _connect = () => {
-    connectToWallet()
-  }
+    connectToWallet();
+  };
 
   private _canConnect = () => {
-    const selectedWallet = this.state.selectedWallet
-    return this.state.isChecked && selectedWallet && selectedWallet.id !== undefined && selectedWallet.id !== null
-  }
+    const selectedWallet = this.state.selectedWallet;
+    return this.state.isChecked && selectedWallet && selectedWallet.id !== undefined && selectedWallet.id !== null;
+  };
 }
 
 class NoClient extends React.Component<{}, { isChecked: boolean; selectedWallet: Provider }> {
   public constructor(props: any) {
-    super(props)
+    super(props);
     this.state = {
       isChecked: false,
       selectedWallet: {} as Provider,
-    }
+    };
   }
 
   public render() {
@@ -229,28 +229,28 @@ class NoClient extends React.Component<{}, { isChecked: boolean; selectedWallet:
           </Button>
         </div>
       </Panel>
-    )
+    );
   }
 
   private _toggle = () => {
     this.setState((state: any) => {
-      const isChecked = !state.isChecked
-      return { isChecked }
-    })
-  }
+      const isChecked = !state.isChecked;
+      return { isChecked };
+    });
+  };
 
   private _connect = () => {
-    connectToWallet()
-  }
+    connectToWallet();
+  };
 
   private _canConnect = () => {
-    const selectedWallet = this.state.selectedWallet
-    return this.state.isChecked && selectedWallet && selectedWallet.id !== undefined && selectedWallet.id !== null
-  }
+    const selectedWallet = this.state.selectedWallet;
+    return this.state.isChecked && selectedWallet && selectedWallet.id !== undefined && selectedWallet.id !== null;
+  };
 
   private _suggestClients = () => {
-    walletConnectionViewManual$.next(WalletConnectionViewKind.suggest)
-  }
+    walletConnectionViewManual$.next(WalletConnectionViewKind.suggest);
+  };
 }
 
 class Connected extends React.Component {
@@ -269,7 +269,7 @@ class Connected extends React.Component {
           ))}
         </ul>
       </Panel>
-    )
+    );
   }
 }
 
@@ -289,7 +289,7 @@ const Connecting = (props: any) => {
       borderBottom: '1px solid rgba(88, 88, 95, 0.2)',
       flexDirection: 'column',
       textAlign: 'center',
-    } as React.CSSProperties)
+    } as React.CSSProperties);
 
   return (
     <Panel heading="Connecting...">
@@ -313,8 +313,8 @@ const Connecting = (props: any) => {
         </Button>
       </div>
     </Panel>
-  )
-}
+  );
+};
 
 export enum WalletConnectionViewKind {
   suggest = 'suggest',
@@ -324,7 +324,7 @@ export enum WalletConnectionViewKind {
   noClient = 'noClient',
 }
 
-export const walletConnectionViewManual$ = new BehaviorSubject('')
+export const walletConnectionViewManual$ = new BehaviorSubject('');
 
 export const WalletConnectionViews = new Map<WalletConnectionViewKind, any>([
   [WalletConnectionViewKind.connected, Connected],
@@ -332,4 +332,4 @@ export const WalletConnectionViews = new Map<WalletConnectionViewKind, any>([
   [WalletConnectionViewKind.noClient, NoClient],
   [WalletConnectionViewKind.suggest, SuggestedClients],
   [WalletConnectionViewKind.connecting, Connecting],
-])
+]);

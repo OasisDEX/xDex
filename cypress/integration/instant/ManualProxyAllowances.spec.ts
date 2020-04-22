@@ -3,12 +3,12 @@ import {
   expectAllowanceStatusFor,
   expectAllowedTokensCount,
   setAllowanceOf,
-} from '../../pages/Allowance'
-import * as Proxy from '../../pages/Proxy'
-import { Tab } from '../../pages/Tab'
-import { instantForm } from '../../pages/Trade'
-import { WalletConnection } from '../../pages/WalletConnection'
-import { cypressVisitWithWeb3, tid } from '../../utils'
+} from '../../pages/Allowance';
+import * as Proxy from '../../pages/Proxy';
+import { Tab } from '../../pages/Tab';
+import { instantForm } from '../../pages/Trade';
+import { WalletConnection } from '../../pages/WalletConnection';
+import { cypressVisitWithWeb3, tid } from '../../utils';
 
 const enum AllowanceStatus {
   ALLOWED = 'true',
@@ -17,87 +17,87 @@ const enum AllowanceStatus {
 
 describe('Proxy Allowance', () => {
   beforeEach(() => {
-    cypressVisitWithWeb3()
-    WalletConnection.connect()
-    WalletConnection.isConnected()
-    Tab.instant()
-    instantForm()
-    Proxy.settings().click()
-    Proxy.create()
-  })
+    cypressVisitWithWeb3();
+    WalletConnection.connect();
+    WalletConnection.isConnected();
+    Tab.instant();
+    instantForm();
+    Proxy.settings().click();
+    Proxy.create();
+  });
 
   it('should not be set initially', () => {
-    Proxy.hasStatus(Proxy.ProxyStatus.ENABLED)
-    expectAllowedTokensCount(0)
-  })
+    Proxy.hasStatus(Proxy.ProxyStatus.ENABLED);
+    expectAllowedTokensCount(0);
+  });
 
   it('should set allowance to a single token', () => {
-    Proxy.hasStatus(Proxy.ProxyStatus.ENABLED)
-    checkProxyAllowances()
+    Proxy.hasStatus(Proxy.ProxyStatus.ENABLED);
+    checkProxyAllowances();
 
-    expectAllowanceStatusFor('WETH', AllowanceStatus.DISABLED)
-    setAllowanceOf('WETH')
-    expectAllowanceStatusFor('WETH', AllowanceStatus.ALLOWED)
-  })
+    expectAllowanceStatusFor('WETH', AllowanceStatus.DISABLED);
+    setAllowanceOf('WETH');
+    expectAllowanceStatusFor('WETH', AllowanceStatus.ALLOWED);
+  });
 
   it('should set allowance to two token at the same time', () => {
-    Proxy.hasStatus(Proxy.ProxyStatus.ENABLED)
-    checkProxyAllowances()
-    expectAllowanceStatusFor('WETH', AllowanceStatus.DISABLED)
-    setAllowanceOf('WETH')
+    Proxy.hasStatus(Proxy.ProxyStatus.ENABLED);
+    checkProxyAllowances();
+    expectAllowanceStatusFor('WETH', AllowanceStatus.DISABLED);
+    setAllowanceOf('WETH');
 
-    expectAllowanceStatusFor('DAI', AllowanceStatus.DISABLED)
-    setAllowanceOf('DAI')
+    expectAllowanceStatusFor('DAI', AllowanceStatus.DISABLED);
+    setAllowanceOf('DAI');
 
-    expectAllowanceStatusFor('WETH', AllowanceStatus.ALLOWED)
-    expectAllowanceStatusFor('DAI', AllowanceStatus.ALLOWED)
-  })
+    expectAllowanceStatusFor('WETH', AllowanceStatus.ALLOWED);
+    expectAllowanceStatusFor('DAI', AllowanceStatus.ALLOWED);
+  });
 
   it('should display allowance if one is set', () => {
-    Proxy.hasStatus(Proxy.ProxyStatus.ENABLED)
-    checkProxyAllowances()
+    Proxy.hasStatus(Proxy.ProxyStatus.ENABLED);
+    checkProxyAllowances();
 
-    expectAllowanceStatusFor('WETH', AllowanceStatus.DISABLED)
-    setAllowanceOf('WETH')
+    expectAllowanceStatusFor('WETH', AllowanceStatus.DISABLED);
+    setAllowanceOf('WETH');
 
-    expectAllowanceStatusFor('WETH', AllowanceStatus.ALLOWED)
+    expectAllowanceStatusFor('WETH', AllowanceStatus.ALLOWED);
 
-    cy.get(tid('close')).click()
+    cy.get(tid('close')).click();
 
-    expectAllowedTokensCount(1)
+    expectAllowedTokensCount(1);
 
-    checkProxyAllowances()
+    checkProxyAllowances();
 
-    expectAllowanceStatusFor('WETH', AllowanceStatus.ALLOWED)
-  })
+    expectAllowanceStatusFor('WETH', AllowanceStatus.ALLOWED);
+  });
 
   it('should disable already set allowance', () => {
-    Proxy.hasStatus(Proxy.ProxyStatus.ENABLED)
-    checkProxyAllowances()
+    Proxy.hasStatus(Proxy.ProxyStatus.ENABLED);
+    checkProxyAllowances();
 
-    expectAllowanceStatusFor('WETH', AllowanceStatus.DISABLED)
+    expectAllowanceStatusFor('WETH', AllowanceStatus.DISABLED);
 
-    setAllowanceOf('WETH')
+    setAllowanceOf('WETH');
 
-    expectAllowanceStatusFor('WETH', AllowanceStatus.ALLOWED)
+    expectAllowanceStatusFor('WETH', AllowanceStatus.ALLOWED);
 
-    setAllowanceOf('WETH')
+    setAllowanceOf('WETH');
 
-    expectAllowanceStatusFor('WETH', AllowanceStatus.DISABLED)
-  })
+    expectAllowanceStatusFor('WETH', AllowanceStatus.DISABLED);
+  });
 
   it('should go to proxy setting page if proxy is deleted', () => {
-    Proxy.hasStatus(Proxy.ProxyStatus.ENABLED)
-    checkProxyAllowances()
+    Proxy.hasStatus(Proxy.ProxyStatus.ENABLED);
+    checkProxyAllowances();
 
-    expectAllowanceStatusFor('WETH', AllowanceStatus.DISABLED)
+    expectAllowanceStatusFor('WETH', AllowanceStatus.DISABLED);
 
-    setAllowanceOf('WETH')
+    setAllowanceOf('WETH');
 
-    expectAllowanceStatusFor('WETH', AllowanceStatus.ALLOWED)
+    expectAllowanceStatusFor('WETH', AllowanceStatus.ALLOWED);
 
-    Proxy.clear()
+    Proxy.clear();
 
-    Proxy.hasStatus(Proxy.ProxyStatus.MISSING)
-  })
-})
+    Proxy.hasStatus(Proxy.ProxyStatus.MISSING);
+  });
+});

@@ -1,10 +1,10 @@
-import classnames from 'classnames'
-import * as React from 'react'
+import classnames from 'classnames';
+import * as React from 'react';
 
-import errorSvg from '../../icons/error.svg'
-import { SvgImage } from '../icons/utils'
-import { Muted } from '../text/Text'
-import * as styles from './ServerUnreachable.scss'
+import errorSvg from '../../icons/error.svg';
+import { SvgImage } from '../icons/utils';
+import { Muted } from '../text/Text';
+import * as styles from './ServerUnreachable.scss';
 
 export const ServerUnreachable = ({ className, ...props }: { className?: string }) => {
   return (
@@ -25,16 +25,16 @@ export const ServerUnreachable = ({ className, ...props }: { className?: string 
         </a>
       </Muted>
     </div>
-  )
-}
+  );
+};
 
 export const ServerUnreachableInline = ({
   className,
   fallback,
   ...props
 }: {
-  className?: string
-  fallback?: string | React.ReactChild
+  className?: string;
+  fallback?: string | React.ReactChild;
 }) => {
   return (
     <div
@@ -45,5 +45,5 @@ export const ServerUnreachableInline = ({
       <SvgImage image={errorSvg} className={styles.icon} />
       {fallback}
     </div>
-  )
-}
+  );
+};

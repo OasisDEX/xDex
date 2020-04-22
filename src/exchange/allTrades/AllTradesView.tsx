@@ -1,49 +1,49 @@
-import { equals } from 'ramda'
-import * as React from 'react'
-import { CSSTransition, TransitionGroup } from 'react-transition-group'
-import { Subject } from 'rxjs'
+import { equals } from 'ramda';
+import * as React from 'react';
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
+import { Subject } from 'rxjs';
 
-import { etherscan } from '../../blockchain/etherscan'
-import { formatDateTime } from '../../utils/formatters/format'
-import { FormatAmount, FormatPriceOrder } from '../../utils/formatters/Formatters'
-import { Button } from '../../utils/forms/Buttons'
-import { LoadableStatus } from '../../utils/loadable'
-import { LoadingIndicator, WithLoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator'
-import { ServerUnreachable } from '../../utils/loadingIndicator/ServerUnreachable'
-import { PanelHeader } from '../../utils/panel/Panel'
-import { Scrollbar } from '../../utils/Scrollbar/Scrollbar'
-import { RowClickable, Table } from '../../utils/table/Table'
-import * as tableStyles from '../../utils/table/Table.scss'
-import { InfoLabel, Muted, SellBuySpan } from '../../utils/text/Text'
-import { Trade } from '../trades'
-import { TradingPair } from '../tradingPair/tradingPair'
-import { AllTradesProps } from './allTrades'
-import * as styles from './AllTradesView.scss'
+import { etherscan } from '../../blockchain/etherscan';
+import { formatDateTime } from '../../utils/formatters/format';
+import { FormatAmount, FormatPriceOrder } from '../../utils/formatters/Formatters';
+import { Button } from '../../utils/forms/Buttons';
+import { LoadableStatus } from '../../utils/loadable';
+import { LoadingIndicator, WithLoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
+import { ServerUnreachable } from '../../utils/loadingIndicator/ServerUnreachable';
+import { PanelHeader } from '../../utils/panel/Panel';
+import { Scrollbar } from '../../utils/Scrollbar/Scrollbar';
+import { RowClickable, Table } from '../../utils/table/Table';
+import * as tableStyles from '../../utils/table/Table.scss';
+import { InfoLabel, Muted, SellBuySpan } from '../../utils/text/Text';
+import { Trade } from '../trades';
+import { TradingPair } from '../tradingPair/tradingPair';
+import { AllTradesProps } from './allTrades';
+import * as styles from './AllTradesView.scss';
 
 export class AllTrades extends React.Component<AllTradesProps> {
-  private lastTradingPair?: TradingPair
-  private lastLoadingStatus?: LoadableStatus
+  private lastTradingPair?: TradingPair;
+  private lastLoadingStatus?: LoadableStatus;
 
   public shouldComponentUpdate(nextProps: AllTradesProps): boolean {
-    return !equals(nextProps, this.props)
+    return !equals(nextProps, this.props);
   }
 
   public render() {
     const showMore = (more$: Subject<any>) => () => {
-      more$.next(true)
-    }
+      more$.next(true);
+    };
 
     const skipTransition =
       !equals(this.props.tradingPair, this.lastTradingPair) ||
-      (this.lastLoadingStatus === 'loading' && this.props.status === 'loaded')
-    this.lastTradingPair = this.props.tradingPair
-    this.lastLoadingStatus = this.props.status
+      (this.lastLoadingStatus === 'loading' && this.props.status === 'loaded');
+    this.lastTradingPair = this.props.tradingPair;
+    this.lastLoadingStatus = this.props.status;
     if (skipTransition) {
       setTimeout(() => {
-        this.forceUpdate()
-      })
+        this.forceUpdate();
+      });
     }
-    console.log(this.props.status)
+    console.log(this.props.status);
     return (
       <>
         <PanelHeader>Trade history</PanelHeader>
@@ -109,18 +109,18 @@ export class AllTrades extends React.Component<AllTradesProps> {
                   </Table>
                 </Scrollbar>
               </>
-            )
+            );
           }}
         </WithLoadingIndicator>
       </>
-    )
+    );
   }
 
   public tradeDetails = (trade: Trade) => {
     return (): void => {
       etherscan(this.props.etherscan)
         .transaction(trade.tx as string)
-        .open()
-    }
-  }
+        .open();
+    };
+  };
 }

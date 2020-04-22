@@ -1,32 +1,32 @@
-import createBrowserHistory from 'history/createBrowserHistory'
-import * as React from 'react'
-import { Redirect, Route, Router, Switch } from 'react-router'
-import { RouteComponentProps, withRouter } from 'react-router-dom'
+import createBrowserHistory from 'history/createBrowserHistory';
+import * as React from 'react';
+import { Redirect, Route, Router, Switch } from 'react-router';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 
-import * as mixpanel from 'mixpanel-browser'
-import { map } from 'rxjs/operators'
-import { setupAppContext, theAppContext } from './AppContext'
-import { BalancesView } from './balances/BalancesView'
-import { WalletStatus, walletStatus$ } from './blockchain/wallet'
-import { ExchangeViewTxRx } from './exchange/ExchangeView'
-import { HeaderTxRx } from './header/Header'
-import * as styles from './index.scss'
-import { InstantExchange } from './instant/InstantViewPanel'
-import { MarginTradingSimpleTxRx } from './marginTrading/MarginTradingSimple'
-import { connect } from './utils/connect'
+import * as mixpanel from 'mixpanel-browser';
+import { map } from 'rxjs/operators';
+import { setupAppContext, theAppContext } from './AppContext';
+import { BalancesView } from './balances/BalancesView';
+import { WalletStatus, walletStatus$ } from './blockchain/wallet';
+import { ExchangeViewTxRx } from './exchange/ExchangeView';
+import { HeaderTxRx } from './header/Header';
+import * as styles from './index.scss';
+import { InstantExchange } from './instant/InstantViewPanel';
+import { MarginTradingSimpleTxRx } from './marginTrading/MarginTradingSimple';
+import { connect } from './utils/connect';
 
-const { REACT_APP_INSTANT_ENABLED, REACT_APP_LT_ENABLED, REACT_APP_SUBDIR } = process.env
+const { REACT_APP_INSTANT_ENABLED, REACT_APP_LT_ENABLED, REACT_APP_SUBDIR } = process.env;
 
 const browserHistoryInstance = createBrowserHistory({
   basename: REACT_APP_SUBDIR ? REACT_APP_SUBDIR : '/',
-})
+});
 
 browserHistoryInstance.listen((location) => {
   mixpanel.track('Pageview', {
     product: 'oasis-trade',
     id: location.pathname,
-  })
-})
+  });
+});
 
 export class Main extends React.Component {
   public render() {
@@ -36,7 +36,7 @@ export class Main extends React.Component {
           <MainContentWithRouter />
         </Router>
       </theAppContext.Provider>
-    )
+    );
   }
 }
 
@@ -55,7 +55,7 @@ export class MainContent extends React.Component<RouterProps> {
           <theAppContext.Consumer>{({ TheFooterTxRx }) => <TheFooterTxRx />}</theAppContext.Consumer>
         </div>
       </routerContext.Provider>
-    )
+    );
   }
 }
 
@@ -72,7 +72,7 @@ class Routes extends React.Component<{ status: WalletStatus }> {
         <Redirect from={'/account'} to={'/balances'} />
         <Redirect from={'/'} to={'/market'} />
       </Switch>
-    )
+    );
   }
 }
 
@@ -83,12 +83,12 @@ const RoutesRx = connect<{ status: WalletStatus }, {}>(
       status,
     })),
   ),
-)
+);
 
-const MainContentWithRouter = withRouter(MainContent)
+const MainContentWithRouter = withRouter(MainContent);
 
 interface RouterContext {
-  rootUrl: string
+  rootUrl: string;
 }
 
-export const routerContext = React.createContext<RouterContext>({ rootUrl: '/' })
+export const routerContext = React.createContext<RouterContext>({ rootUrl: '/' });

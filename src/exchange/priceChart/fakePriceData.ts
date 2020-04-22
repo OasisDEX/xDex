@@ -1,5 +1,5 @@
-import * as moment from 'moment'
-import { GroupMode, groupModeMapper, PriceChartDataPoint } from './pricechart'
+import * as moment from 'moment';
+import { GroupMode, groupModeMapper, PriceChartDataPoint } from './pricechart';
 
 export const fakeDailyData = [
   {
@@ -74,7 +74,7 @@ export const fakeDailyData = [
     close: 1069.4,
     turnover: 10.25,
   },
-]
+];
 
 export function generate(
   groupMode: GroupMode,
@@ -85,42 +85,42 @@ export function generate(
   minTurnover: number,
   maxTurnover: number,
 ): PriceChartDataPoint[] {
-  const result = []
-  const addUnit = groupModeMapper[groupMode].addUnit as moment.unitOfTime.DurationConstructor
+  const result = [];
+  const addUnit = groupModeMapper[groupMode].addUnit as moment.unitOfTime.DurationConstructor;
 
-  let prevMid = Math.random() * (maxPrice - minPrice) + minPrice
-  const maxMidDiff = (maxPrice - minPrice) * 0.12
-  const maxOpenCloseDiff = (maxPrice - minPrice) * 0.2
-  const maxLowHighDiff = (maxPrice - minPrice) * 0.25
+  let prevMid = Math.random() * (maxPrice - minPrice) + minPrice;
+  const maxMidDiff = (maxPrice - minPrice) * 0.12;
+  const maxOpenCloseDiff = (maxPrice - minPrice) * 0.2;
+  const maxLowHighDiff = (maxPrice - minPrice) * 0.25;
 
-  const currDate = moment(startDate)
-  const lastDate = moment(endDate)
+  const currDate = moment(startDate);
+  const lastDate = moment(endDate);
 
   while (currDate.add(1, addUnit).diff(lastDate) < 0) {
-    const timestamp = currDate.clone().toDate()
-    const turnover = Math.random() * (maxTurnover - minTurnover) + minTurnover
+    const timestamp = currDate.clone().toDate();
+    const turnover = Math.random() * (maxTurnover - minTurnover) + minTurnover;
 
-    let mid = Math.random() * (maxPrice - minPrice) + minPrice
+    let mid = Math.random() * (maxPrice - minPrice) + minPrice;
     if (Math.abs(mid - prevMid) > maxMidDiff) {
-      mid = mid > prevMid ? prevMid + maxMidDiff : prevMid - maxMidDiff
+      mid = mid > prevMid ? prevMid + maxMidDiff : prevMid - maxMidDiff;
     }
 
-    const openCloseDiff = (Math.random() - 0.5) * maxOpenCloseDiff
-    const open = mid + openCloseDiff
-    const close = mid - openCloseDiff
+    const openCloseDiff = (Math.random() - 0.5) * maxOpenCloseDiff;
+    const open = mid + openCloseDiff;
+    const close = mid - openCloseDiff;
 
-    const lowDiff = Math.random() * maxLowHighDiff
-    const low = Math.max(Math.min(mid - lowDiff, open, close), 0)
+    const lowDiff = Math.random() * maxLowHighDiff;
+    const low = Math.max(Math.min(mid - lowDiff, open, close), 0);
 
-    const highDiff = Math.random() * maxLowHighDiff
-    const high = Math.min(Math.max(mid + highDiff, open, close), maxPrice)
+    const highDiff = Math.random() * maxLowHighDiff;
+    const high = Math.min(Math.max(mid + highDiff, open, close), maxPrice);
 
-    result.push({ timestamp, open, high, low, close, turnover } as PriceChartDataPoint)
+    result.push({ timestamp, open, high, low, close, turnover } as PriceChartDataPoint);
 
-    prevMid = mid
+    prevMid = mid;
   }
-  console.warn('result is ', JSON.stringify(result))
-  return result
+  console.warn('result is ', JSON.stringify(result));
+  return result;
 }
 
 export const bigFakeDailyData = [
@@ -628,4 +628,4 @@ export const bigFakeDailyData = [
     close: 264.51315552571947,
     turnover: 17.851425246175083,
   },
-]
+];

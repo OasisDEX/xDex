@@ -1,36 +1,36 @@
-import { BigNumber } from 'bignumber.js'
-import classnames from 'classnames'
-import * as React from 'react'
+import { BigNumber } from 'bignumber.js';
+import classnames from 'classnames';
+import * as React from 'react';
 
-import { Approximate } from '../../utils/Approximate'
-import { GasEstimationStatus } from '../../utils/form'
-import { FormatPercent, Money } from '../../utils/formatters/Formatters'
-import { ProgressIcon } from '../../utils/icons/Icons'
-import { TradeData } from './TradeData'
-import * as styles from './TradeDetails.scss'
+import { Approximate } from '../../utils/Approximate';
+import { GasEstimationStatus } from '../../utils/form';
+import { FormatPercent, Money } from '../../utils/formatters/Formatters';
+import { ProgressIcon } from '../../utils/icons/Icons';
+import { TradeData } from './TradeData';
+import * as styles from './TradeDetails.scss';
 
 // tslint:disable
 const priceImpactTooltip = {
   id: 'price-impact',
   text:
     'The difference between the best current price on the Oasis Trade order book and the estimated price of your order.',
-}
+};
 const slippageLimitTooltip = {
   id: 'slippage-limit',
   text:
     'The maximum allowed difference between the estimated price of the order and the actual price. The two may differ if the order book changes before your trade executes.',
-}
+};
 
 // tslint:enable
 
 interface TradeDetailsProps {
-  price?: BigNumber
-  quotation?: string
-  priceImpact?: BigNumber
-  slippageLimit: BigNumber
-  gasEstimationStatus?: GasEstimationStatus
-  gasEstimationUsd?: BigNumber
-  withErrors?: string
+  price?: BigNumber;
+  quotation?: string;
+  priceImpact?: BigNumber;
+  slippageLimit: BigNumber;
+  gasEstimationStatus?: GasEstimationStatus;
+  gasEstimationUsd?: BigNumber;
+  withErrors?: string;
 }
 
 export class TradeDetails extends React.Component<TradeDetailsProps> {
@@ -39,11 +39,11 @@ export class TradeDetails extends React.Component<TradeDetailsProps> {
       <section data-test-id={dataTestId} className={classnames(styles.details, styles.errors)}>
         {message}
       </section>
-    )
+    );
   }
 
   public render() {
-    const { price, quotation, slippageLimit, gasEstimationStatus, gasEstimationUsd, priceImpact } = this.props
+    const { price, quotation, slippageLimit, gasEstimationStatus, gasEstimationUsd, priceImpact } = this.props;
     return (
       <section className={styles.details}>
         {' '}
@@ -99,6 +99,6 @@ export class TradeDetails extends React.Component<TradeDetailsProps> {
           </>
         )}
       </section>
-    )
+    );
   }
 }

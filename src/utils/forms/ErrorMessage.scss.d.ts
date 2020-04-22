@@ -1,1 +1,1 @@
-export const errors: string
+export const errors: string;

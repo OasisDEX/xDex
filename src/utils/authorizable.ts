@@ -1,12 +1,12 @@
-import { Observable, of } from 'rxjs'
-import { map, switchMap } from 'rxjs/operators'
+import { Observable, of } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 
-import { User, user$ } from '../blockchain/user'
+import { User, user$ } from '../blockchain/user';
 
 export interface Authorizable<T> {
-  authorized: boolean
-  value?: T
-  user?: User
+  authorized: boolean;
+  value?: T;
+  user?: User;
 }
 
 export function authorizablify<T>(
@@ -19,5 +19,5 @@ export function authorizablify<T>(
         ? factory(user).pipe(map((value) => ({ value, user, authorized: true })))
         : of({ user, authorized: false }),
     ),
-  )
+  );
 }
