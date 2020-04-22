@@ -45,7 +45,7 @@ export const Metamask = {
   icon: SvgImageSimple(metamaskSvg),
   iconWhite: SvgImageSimple(metamaskBlackSvg),
   alias: 'metamask',
-  name: 'Metamask',
+  name: 'MetaMask',
   supported: true,
   website: 'https://metamask.io/'
 };

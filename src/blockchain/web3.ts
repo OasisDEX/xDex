@@ -65,15 +65,13 @@ export const web3Status$: Observable<Web3Status> = web3StatusCommand.pipe(
           setWeb3(connectedWeb3);
           return Web3Status.readonly;
         }),
-        // TODO: error handling if any
-        startWith(Web3Status.connecting),
       );
     }
 
     else if (command.kind === Web3StatusCommandKind.connect) {
       networkReadOnly = command.network;
       return fromPromise(connectAccount(command.type)).pipe(
-        map(([address]) => {
+        map((address) => {
           console.log(`Connected account: ${address}`);
           return Web3Status.ready;
         }),
