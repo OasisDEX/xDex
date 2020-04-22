@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { initScreenshot, withScreenshot } from 'storybook-chrome-screenshot';
 import { configure, addDecorator } from '@storybook/react';
 

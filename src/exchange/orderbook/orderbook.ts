@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { BigNumber } from 'bignumber.js';
 import { at, isEmpty, uniqBy, unzip } from 'lodash';
 import { combineLatest, from, Observable, of, zip } from 'rxjs';

@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 export const guid = () => {
   const s4 = () => {
     return Math.floor((1 + Math.random()) * 0x10000)

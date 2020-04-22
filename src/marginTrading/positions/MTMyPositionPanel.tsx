@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import * as mixpanel from 'mixpanel-browser';
 import * as React from 'react';
 import * as styles from '../../balances/mtBalancesView.scss';

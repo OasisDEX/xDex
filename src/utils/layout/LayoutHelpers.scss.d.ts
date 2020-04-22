@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 export const borderBox: string;
 export const smPadding: string;
 export const mdPadding: string;

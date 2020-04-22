@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { Account } from '../../pages/leverage/Account';
 import { Form } from '../../pages/leverage/Form';
 import { Modal } from '../../pages/leverage/Modal';

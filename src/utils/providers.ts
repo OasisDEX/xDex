@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { Web3Window } from '../blockchain/web3';
 import coinbaseSvg from '../icons/providers/coinbase.svg';
 import imTokenSvg from '../icons/providers/im-token.svg';

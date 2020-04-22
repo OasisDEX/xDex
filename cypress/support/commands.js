@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 // ***********************************************
 // This example commands.js shows you how to
 // create various custom commands and overwrite

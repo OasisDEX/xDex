@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { equals } from 'ramda';
 import * as React from 'react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';

@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import classnames from 'classnames';
 import * as React from 'react';
 import { map } from 'rxjs/operators';

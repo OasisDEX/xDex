@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { BigNumber } from 'bignumber.js';
 import { billion, million, thousand, zero } from '../zero';
 import { formatAsShorthandNumbers, formatCryptoBalance, formatFiatBalance } from './format';

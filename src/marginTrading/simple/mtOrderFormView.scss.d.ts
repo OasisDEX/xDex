@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 export const settingsIcon: string;
 export const visible: string;
 export const hidden: string;

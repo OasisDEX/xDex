@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 // import { BigNumber } from 'bignumber.js';
 import * as d3 from 'd3';
 import { ScaleLinear } from 'd3-scale';

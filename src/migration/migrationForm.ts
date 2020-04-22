@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { BigNumber } from 'bignumber.js';
 import { concat, merge, Observable, of, Subject, Subscription } from 'rxjs';
 import { filter, first, map, scan, switchMap } from 'rxjs/operators';

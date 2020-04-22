@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { BigNumber } from 'bignumber.js';
 import { formatPrice, formatPriceInstant } from './formatters/format';
 import { calculateTradePrice } from './price';

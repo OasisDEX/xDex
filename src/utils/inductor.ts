@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { Observable, Subscription } from 'rxjs';
 
 export function inductor<T>(seed: T, next: (p: T) => Observable<T> | undefined): Observable<T> {

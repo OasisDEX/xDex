@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { concat, Observable, of } from 'rxjs';
 import { catchError, first, map, skip, startWith } from 'rxjs/operators';
 

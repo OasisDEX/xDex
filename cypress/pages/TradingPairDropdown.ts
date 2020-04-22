@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 // This should be taken from src/exchange/tradingPair/tradingPair.ts
 // but for now there are issues with importing project ( src ) files.
 import { tid } from '../utils';

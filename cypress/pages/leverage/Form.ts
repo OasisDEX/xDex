@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { tid } from '../../utils';
 
 const orderForm = (property: string) => cy.get(tid('order-form', tid(property)));

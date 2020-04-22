@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { combineLatest, from, Observable } from 'rxjs';
 import { first, map, switchMap } from 'rxjs/internal/operators';
 import { NetworkConfig } from '../config';

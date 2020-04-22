@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import * as BigNumber from 'bignumber.js';
 // tslint:disable-next-line
 import PrivateKeyProvider from 'truffle-privatekey-provider';

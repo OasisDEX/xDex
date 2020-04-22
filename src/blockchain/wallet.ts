@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { combineLatest, from, interval, Observable, of, Subject } from 'rxjs';
 import {
   catchError,

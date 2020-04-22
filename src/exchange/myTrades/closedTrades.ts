@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { isEqual } from 'lodash';
 import { combineLatest, Observable, of } from 'rxjs';
 import { distinctUntilChanged, exhaustMap, map, shareReplay, switchMap } from 'rxjs/operators';

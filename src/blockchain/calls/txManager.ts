@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 function padBytes(web3: any, calldata: string) {
   return web3.utils.padRight(calldata, Math.ceil(calldata.length / 32) * 32);
 }

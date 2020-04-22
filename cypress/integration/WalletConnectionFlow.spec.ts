@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { WalletConnection } from '../pages/WalletConnection';
 import { cypressVisitWithoutProvider, cypressVisitWithWeb3, tid } from '../utils';
 
