@@ -23,7 +23,7 @@ const browserHistoryInstance = createBrowserHistory({
 
 browserHistoryInstance.listen((location) => {
   trackingEvents.pageView(location.pathname);
-})
+});
 
 export class Main extends React.Component {
   public render() {

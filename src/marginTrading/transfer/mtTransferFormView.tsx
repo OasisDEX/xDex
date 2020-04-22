@@ -473,7 +473,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
             block={true}
             color="primary"
             onClick={() => {
-              this.transfer()
+              this.transfer();
               if (amount) {
                 trackingEvents.transferTokens(actionKind, token, amount.toNumber());
               }
@@ -488,9 +488,9 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
             className={styles.confirmButton}
             block={true}
             onClick={() => {
-              this.transfer()
+              this.transfer();
               if (amount) {
-                trackingEvents.transferTokens(actionKind, token, amount.toNumber())
+                trackingEvents.transferTokens(actionKind, token, amount.toNumber());
               }
             }}
           >

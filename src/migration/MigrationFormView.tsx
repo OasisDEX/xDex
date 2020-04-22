@@ -527,5 +527,5 @@ export class MigrationModal extends React.Component<MigrationFormState & ModalPr
       amount: order.baseAmount,
       token: order.baseToken,
     });
-  }
+  };
 }

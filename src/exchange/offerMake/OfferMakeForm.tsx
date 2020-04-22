@@ -382,7 +382,7 @@ export class OfferMakeForm extends React.Component<OfferFormState> {
   }
 
   private submitButton() {
-    const { stage, kind, total, baseToken, quoteToken } = this.props
+    const { stage, kind, total, baseToken, quoteToken } = this.props;
     return (
       <Button
         data-test-id="place-order"

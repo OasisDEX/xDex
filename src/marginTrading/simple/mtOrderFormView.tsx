@@ -704,8 +704,8 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState & {
   }
 
   private proceedButton() {
-    const { kind, total, readyToProceed, progress } = this.props
-    const label = kind === 'buy' ? 'Place Buy Order' : 'Place Sell Order'
+    const { kind, total, readyToProceed, progress } = this.props;
+    const label = kind === 'buy' ? 'Place Buy Order' : 'Place Sell Order';
     return (
       <Button
         className={styles.confirmButton}

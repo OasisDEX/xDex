@@ -126,8 +126,8 @@ export class MyTradesTable extends React.Component<MyTradesPropsLoadable> {
     return (): void => {
       this.props.cancelOffer({ offerId, type, amount, token });
       trackingEvents.cancelOffer();
-    }
-  }
+    };
+  };
 
   public showInEtherscan = (trade: Trade) => {
     return (): void => {

@@ -1,4 +1,4 @@
-const env = process.env.NODE_ENV === 'production' ? 'prod' : 'test'
+const env = process.env.NODE_ENV === 'production' ? 'prod' : 'test';
 
 const config = {
   test: {
@@ -7,16 +7,16 @@ const config = {
   prod: {
     key: 'TEKLVTPG',
   },
-}[env]
+}[env];
 
 interface Fathom {
-  (...args: any[]): void
-  q?: IArguments[]
+  (...args: any[]): void;
+  q?: IArguments[];
 }
 
 declare global {
   interface Window {
-    fathom: Fathom
+    fathom: Fathom;
   }
 }
 
@@ -25,10 +25,10 @@ const getFathom = (): Fathom => {
     // tslint:disable
     window.fathom ||
     function () {
-      ;(window.fathom.q = window.fathom.q || []).push(arguments)
-    })
+      (window.fathom.q = window.fathom.q || []).push(arguments);
+    });
   // tslint:enable
-}
+};
 
 export const fathomGoals = {
   test: {
@@ -183,45 +183,45 @@ export const fathomGoals = {
       WBTCWETH: 'EDGIZQGS',
     },
   },
-}[env]
+}[env];
 
 export const load = (url = '//cdn.usefathom.com/tracker.js'): void => {
   window.fathom =
     window.fathom ||
     // tslint:disable
     function () {
-      ;(window.fathom.q = window.fathom.q || []).push(arguments)
-    }
+      (window.fathom.q = window.fathom.q || []).push(arguments);
+    };
   // tslint:enable
 
-  const tracker = document.createElement('script')
-  const firstScript = document.getElementsByTagName('script')[0]
+  const tracker = document.createElement('script');
+  const firstScript = document.getElementsByTagName('script')[0];
 
-  tracker.async = true
-  tracker.src = url
-  tracker.id = 'fathom-script'
+  tracker.async = true;
+  tracker.src = url;
+  tracker.id = 'fathom-script';
   if (firstScript.parentNode) {
-    firstScript.parentNode.insertBefore(tracker, firstScript)
+    firstScript.parentNode.insertBefore(tracker, firstScript);
   }
-}
+};
 
 export const setSiteId = (siteId: string): void => {
-  const fathom = getFathom()
-  fathom('set', 'siteId', siteId)
-}
+  const fathom = getFathom();
+  fathom('set', 'siteId', siteId);
+};
 
 export const trackPageview = (): void => {
-  const fathom = getFathom()
-  fathom('trackPageview')
-}
+  const fathom = getFathom();
+  fathom('trackPageview');
+};
 
 export const trackGoal = (id: string, cents: number) => {
-  const fathom = getFathom()
-  fathom('trackGoal', id, cents * 100)
-}
+  const fathom = getFathom();
+  fathom('trackGoal', id, cents * 100);
+};
 
 export function fathomInit() {
-  load()
-  setSiteId(config.key)
-  trackPageview()
+  load();
+  setSiteId(config.key);
+  trackPageview();
 }

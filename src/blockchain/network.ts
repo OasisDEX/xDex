@@ -18,7 +18,7 @@ import {
 } from 'rxjs/operators';
 
 import { trackingEvents } from '../analytics/analytics';
-import { mixpanelIdentify } from '../analytics';
+import { mixpanelIdentify } from '../analytics/mixpanel';
 import { getToken, NetworkConfig, networks, tradingTokens } from './config';
 import { amountFromWei } from './utils';
 import { web3 } from './web3';
@@ -64,7 +64,7 @@ combineLatest(account$, context$)
   .subscribe(([account, network]) => {
     mixpanelIdentify(account!, { wallet: 'metamask' });
     trackingEvents.accountChange(account!, network!);
-  })
+  });
 
 export const onEveryBlock$ = combineLatest(every5Seconds$, context$).pipe(
   switchMap(() => bindNodeCallback(web3.eth.getBlockNumber)()),

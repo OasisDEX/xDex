@@ -220,7 +220,7 @@ export class MTMyPositionPanelInternal extends React.Component<
           <Switch
             blocked={this.state.blocked}
             onClick={() => {
-              this.setState((prevState) => ({ blocked: !prevState.blocked }))
+              this.setState((prevState) => ({ blocked: !prevState.blocked }));
               trackingEvents.daiUsdToggle(this.state.blocked);
             }}
             optionOne="DAI"
@@ -278,7 +278,7 @@ export class MTMyPositionPanelInternal extends React.Component<
             className={styles.actionButton}
             data-test-id="deposit-col"
             onClick={() => {
-              this.transfer(UserActionKind.fund, ma.name, undefined)
+              this.transfer(UserActionKind.fund, ma.name, undefined);
               trackingEvents.depositCollateral();
             }}
           >
@@ -305,7 +305,7 @@ export class MTMyPositionPanelInternal extends React.Component<
             size="md"
             className={styles.actionButton}
             onClick={() => {
-              this.transfer(UserActionKind.fund, 'DAI', ma.name)
+              this.transfer(UserActionKind.fund, 'DAI', ma.name);
               trackingEvents.depositDai();
             }}
           >
@@ -334,7 +334,7 @@ export class MTMyPositionPanelInternal extends React.Component<
           key={ma.name}
           className={styles.actionButton}
           onClick={() => {
-            this.transfer(UserActionKind.draw, ma.name, undefined)
+            this.transfer(UserActionKind.draw, ma.name, undefined);
             trackingEvents.withdrawCollateral();
           }}
         >
@@ -350,7 +350,7 @@ export class MTMyPositionPanelInternal extends React.Component<
           data-test-id="withdraw-dai"
           title={ma.dai.eq(zero) ? `You don't have any DAI to withdraw` : ''}
           onClick={() => {
-            this.transfer(UserActionKind.draw, 'DAI', ma.name)
+            this.transfer(UserActionKind.draw, 'DAI', ma.name);
             trackingEvents.withdrawDai();
           }}
         >
