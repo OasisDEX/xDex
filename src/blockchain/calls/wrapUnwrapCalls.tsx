@@ -1,15 +1,15 @@
-import { BigNumber } from 'bignumber.js'
-import * as React from 'react'
-import { Money } from '../../utils/formatters/Formatters'
-import { getToken, NetworkConfig } from '../config'
-import { amountToWei } from '../utils'
-import { TransactionDef } from './callsHelpers'
-import { TxMetaKind } from './txMeta'
+import { BigNumber } from 'bignumber.js';
+import * as React from 'react';
+import { Money } from '../../utils/formatters/Formatters';
+import { getToken, NetworkConfig } from '../config';
+import { amountToWei } from '../utils';
+import { TransactionDef } from './callsHelpers';
+import { TxMetaKind } from './txMeta';
 
 export interface WrapUnwrapData {
-  amount: BigNumber
-  gasPrice: BigNumber
-  gas?: number
+  amount: BigNumber;
+  gasPrice: BigNumber;
+  gas?: number;
 }
 
 export const wrap: TransactionDef<WrapUnwrapData> = {
@@ -27,7 +27,7 @@ export const wrap: TransactionDef<WrapUnwrapData> = {
     </React.Fragment>
   ),
   descriptionIcon: () => getToken('ETH').iconCircle,
-}
+};
 
 export const unwrap: TransactionDef<WrapUnwrapData> = {
   call: (_: WrapUnwrapData, context: NetworkConfig) => context.tokens.WETH.contract.methods.withdraw,
@@ -40,4 +40,4 @@ export const unwrap: TransactionDef<WrapUnwrapData> = {
     </React.Fragment>
   ),
   descriptionIcon: () => getToken('ETH').iconCircle,
-}
+};

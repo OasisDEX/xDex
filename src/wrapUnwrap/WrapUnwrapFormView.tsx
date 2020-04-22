@@ -1,34 +1,34 @@
-import { BigNumber } from 'bignumber.js'
-import classnames from 'classnames'
-import * as React from 'react'
-import * as ReactDOM from 'react-dom'
-import * as ReactModal from 'react-modal'
+import { BigNumber } from 'bignumber.js';
+import classnames from 'classnames';
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
+import * as ReactModal from 'react-modal';
 
-import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons'
-import { getToken } from '../blockchain/config'
-import { BigNumberInput } from '../utils/bigNumberInput/BigNumberInput'
-import { AmountFieldChange, FormChangeKind } from '../utils/form'
-import { formatAmount } from '../utils/formatters/format'
-import { Money } from '../utils/formatters/Formatters'
-import { Button } from '../utils/forms/Buttons'
-import { ErrorMessage } from '../utils/forms/ErrorMessage'
-import { InputGroup, InputGroupAddon } from '../utils/forms/InputGroup'
-import { GasCost } from '../utils/gasCost/GasCost'
-import { InfoIcon } from '../utils/icons/Icons'
-import { BorderBox, Hr } from '../utils/layout/LayoutHelpers'
-import { Loadable } from '../utils/loadable'
-import { WithLoadingIndicator } from '../utils/loadingIndicator/LoadingIndicator'
-import { ModalProps } from '../utils/modal'
-import { Panel, PanelBody, PanelFooter, PanelHeader } from '../utils/panel/Panel'
-import { Muted } from '../utils/text/Text'
-import { TransactionStateDescription } from '../utils/text/TransactionStateDescription'
-import { Message, MessageKind, WrapUnwrapFormKind, WrapUnwrapFormState } from './wrapUnwrapForm'
-import * as styles from './WrapUnwrapFormView.scss'
+import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
+import { getToken } from '../blockchain/config';
+import { BigNumberInput } from '../utils/bigNumberInput/BigNumberInput';
+import { AmountFieldChange, FormChangeKind } from '../utils/form';
+import { formatAmount } from '../utils/formatters/format';
+import { Money } from '../utils/formatters/Formatters';
+import { Button } from '../utils/forms/Buttons';
+import { ErrorMessage } from '../utils/forms/ErrorMessage';
+import { InputGroup, InputGroupAddon } from '../utils/forms/InputGroup';
+import { GasCost } from '../utils/gasCost/GasCost';
+import { InfoIcon } from '../utils/icons/Icons';
+import { BorderBox, Hr } from '../utils/layout/LayoutHelpers';
+import { Loadable } from '../utils/loadable';
+import { WithLoadingIndicator } from '../utils/loadingIndicator/LoadingIndicator';
+import { ModalProps } from '../utils/modal';
+import { Panel, PanelBody, PanelFooter, PanelHeader } from '../utils/panel/Panel';
+import { Muted } from '../utils/text/Text';
+import { TransactionStateDescription } from '../utils/text/TransactionStateDescription';
+import { Message, MessageKind, WrapUnwrapFormKind, WrapUnwrapFormState } from './wrapUnwrapForm';
+import * as styles from './WrapUnwrapFormView.scss';
 
-type WrapUnwrapFormProps = { kind: WrapUnwrapFormKind } & Loadable<WrapUnwrapFormState> & ModalProps
+type WrapUnwrapFormProps = { kind: WrapUnwrapFormKind } & Loadable<WrapUnwrapFormState> & ModalProps;
 
 export class WrapUnwrapFormView extends React.Component<WrapUnwrapFormProps> {
-  private amountInput?: HTMLElement
+  private amountInput?: HTMLElement;
 
   public render() {
     return (
@@ -60,22 +60,22 @@ export class WrapUnwrapFormView extends React.Component<WrapUnwrapFormProps> {
           </WithLoadingIndicator>
         </Panel>
       </ReactModal>
-    )
+    );
   }
 
   public handleAmountFocus = () => {
     if (this.amountInput) {
-      this.amountInput.focus()
+      this.amountInput.focus();
     }
-  }
+  };
 
   public handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/,/g, '')
+    const value = e.target.value.replace(/,/g, '');
     this.props.value!.change({
       kind: FormChangeKind.amountFieldChange,
       value: value === '' ? null : new BigNumber(value),
-    } as AmountFieldChange)
-  }
+    } as AmountFieldChange);
+  };
 
   private summary(state: WrapUnwrapFormState) {
     return (
@@ -94,15 +94,15 @@ export class WrapUnwrapFormView extends React.Component<WrapUnwrapFormProps> {
           </div>
         )}
       </>
-    )
+    );
   }
 
   private formOrTransactionState(state: WrapUnwrapFormState) {
-    return state.progress ? this.transactionState(state) : this.form(state)
+    return state.progress ? this.transactionState(state) : this.form(state);
   }
 
   private transactionState(state: WrapUnwrapFormState) {
-    const amount = state.amount || new BigNumber(0)
+    const amount = state.amount || new BigNumber(0);
     return (
       <BorderBox>
         <div className={styles.checklistLine}>
@@ -135,7 +135,7 @@ export class WrapUnwrapFormView extends React.Component<WrapUnwrapFormProps> {
           </Muted>
         </div>
       </BorderBox>
-    )
+    );
   }
 
   private form(state: WrapUnwrapFormState) {
@@ -153,7 +153,7 @@ export class WrapUnwrapFormView extends React.Component<WrapUnwrapFormProps> {
           <GasCost {...state} />
         </div>
       </div>
-    )
+    );
   }
 
   private info(kind: WrapUnwrapFormKind) {
@@ -162,19 +162,19 @@ export class WrapUnwrapFormView extends React.Component<WrapUnwrapFormProps> {
         return (
           'Wrapped Ether (WETH) is a tradeable version of regular Ether. ' +
           'Be sure to keep some Ether to pay for transactions'
-        )
+        );
       case WrapUnwrapFormKind.unwrap:
         return (
           'You can unwrap your Wrapped Ether (WETH) back to ETH anytime. ' +
           'Any WETH you convert back to ETH will no longer be usable on Oasis Trade'
-        )
+        );
       default:
-        return ''
+        return '';
     }
   }
 
   private amount(state: WrapUnwrapFormState) {
-    const errorMessages = (state.messages || []).map(this.messageContent)
+    const errorMessages = (state.messages || []).map(this.messageContent);
     return (
       <div>
         <InputGroup hasError={(state.messages || []).length > 0}>
@@ -204,17 +204,17 @@ export class WrapUnwrapFormView extends React.Component<WrapUnwrapFormProps> {
 
         <ErrorMessage data-test-id="error-msg" messages={errorMessages} />
       </div>
-    )
+    );
   }
 
   private messageContent(msg: Message) {
     switch (msg.kind) {
       case MessageKind.insufficientAmount:
-        return `Your ${msg.token} balance is too low`
+        return `Your ${msg.token} balance is too low`;
       case MessageKind.dustAmount:
-        return `Amount is too low`
+        return `Amount is too low`;
       case MessageKind.cannotPayForGas:
-        return `You will not be able to pay the gas cost`
+        return `You will not be able to pay the gas cost`;
     }
   }
 
@@ -234,6 +234,6 @@ export class WrapUnwrapFormView extends React.Component<WrapUnwrapFormProps> {
           Proceed
         </Button>
       </PanelFooter>
-    )
+    );
   }
 }

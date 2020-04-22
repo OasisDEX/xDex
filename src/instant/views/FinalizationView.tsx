@@ -1,39 +1,39 @@
-import classnames from 'classnames'
-import * as React from 'react'
-import { getToken } from '../../blockchain/config'
-import { TxStatus } from '../../blockchain/transactions'
-import accountSvg from '../../icons/account.svg'
-import doneSvg from '../../icons/done.svg'
-import { Approximate } from '../../utils/Approximate'
-import { formatAmountInstant } from '../../utils/formatters/format'
-import { Money } from '../../utils/formatters/Formatters'
-import { SvgImage } from '../../utils/icons/utils'
-import { WarningTooltipType } from '../../utils/tooltip/Tooltip'
-import { CurrentPrice } from '../CurrentPrice'
-import { TradeData } from '../details/TradeData'
-import { TxStatusRow } from '../details/TxStatusRow'
-import * as styles from '../Instant.scss'
-import { InstantFormChangeKind, InstantFormState, ProgressKind, sai2dai, ViewKind } from '../instantForm'
-import { InstantFormWrapper } from '../InstantFormWrapper'
-import { ProgressReport } from '../progress/ProgressReport'
+import classnames from 'classnames';
+import * as React from 'react';
+import { getToken } from '../../blockchain/config';
+import { TxStatus } from '../../blockchain/transactions';
+import accountSvg from '../../icons/account.svg';
+import doneSvg from '../../icons/done.svg';
+import { Approximate } from '../../utils/Approximate';
+import { formatAmountInstant } from '../../utils/formatters/format';
+import { Money } from '../../utils/formatters/Formatters';
+import { SvgImage } from '../../utils/icons/utils';
+import { WarningTooltipType } from '../../utils/tooltip/Tooltip';
+import { CurrentPrice } from '../CurrentPrice';
+import { TradeData } from '../details/TradeData';
+import { TxStatusRow } from '../details/TxStatusRow';
+import * as styles from '../Instant.scss';
+import { InstantFormChangeKind, InstantFormState, ProgressKind, sai2dai, ViewKind } from '../instantForm';
+import { InstantFormWrapper } from '../InstantFormWrapper';
+import { ProgressReport } from '../progress/ProgressReport';
 
 // tslint:disable
 const proxyTooltip = {
   id: 'proxy-tooltip',
   text: 'Proxy is a supporting contract owned by you that groups different actions as one Ethereum transaction.',
   iconColor: 'grey',
-} as WarningTooltipType
+} as WarningTooltipType;
 
 const allowanceTooltip = {
   id: 'allowance-tooltip',
   text: 'Enabling token trading allows your Proxy to take tokens from you and trade them on the exchange.',
   iconColor: 'grey',
-} as WarningTooltipType
+} as WarningTooltipType;
 // tslint:enable
 
 export class FinalizationView extends React.Component<InstantFormState> {
   public render() {
-    const { price, quotation, progress } = this.props
+    const { price, quotation, progress } = this.props;
 
     return (
       <InstantFormWrapper
@@ -54,25 +54,25 @@ export class FinalizationView extends React.Component<InstantFormState> {
           {progress && this._tradeTx()}
         </>
       </InstantFormWrapper>
-    )
+    );
   }
 
   private resetForm = () => {
     this.props.change({
       kind: InstantFormChangeKind.formResetChange,
-    })
+    });
 
     this.props.change({
       kind: InstantFormChangeKind.viewChange,
       view: ViewKind.new,
-    })
-  }
+    });
+  };
 
   private _tradeTx = () => {
-    const { sellToken, buyToken, sellAmount, buyAmount, progress } = this.props
+    const { sellToken, buyToken, sellAmount, buyAmount, progress } = this.props;
 
     if (!progress) {
-      return <div />
+      return <div />;
     }
 
     return (
@@ -136,8 +136,8 @@ export class FinalizationView extends React.Component<InstantFormState> {
           />
         </div>
       </>
-    )
-  }
+    );
+  };
 
   private _proxyCreationTx = () => {
     return (
@@ -150,11 +150,11 @@ export class FinalizationView extends React.Component<InstantFormState> {
           status={<ProgressReport report={this._proxyProgress()} />}
         />
       </div>
-    )
-  }
+    );
+  };
 
   private _tokenAllowanceTx = () => {
-    const { sellToken } = this.props
+    const { sellToken } = this.props;
     return (
       <div className={classnames(styles.details, styles.transaction)}>
         <TxStatusRow
@@ -170,39 +170,39 @@ export class FinalizationView extends React.Component<InstantFormState> {
           status={<ProgressReport report={this._allowanceProgress()} />}
         />
       </div>
-    )
-  }
+    );
+  };
 
   private _tradeProgress = () => {
     const { tradeTxStatus: txStatus, tradeTxHash: txHash } = this.props.progress as {
-      tradeTxStatus: TxStatus
-      tradeTxHash: string
-    }
+      tradeTxStatus: TxStatus;
+      tradeTxHash: string;
+    };
 
-    return this._createReport(txStatus, txHash)
-  }
+    return this._createReport(txStatus, txHash);
+  };
 
   private _proxyProgress = () => {
     const { proxyTxStatus: txStatus, proxyTxHash: txHash } = this.props.progress as {
-      proxyTxStatus: TxStatus
-      proxyTxHash: string
-    }
+      proxyTxStatus: TxStatus;
+      proxyTxHash: string;
+    };
 
-    return this._createReport(txStatus, txHash)
-  }
+    return this._createReport(txStatus, txHash);
+  };
 
   private _allowanceProgress = () => {
     const { allowanceTxStatus: txStatus, allowanceTxHash: txHash } = this.props.progress as {
-      allowanceTxStatus: TxStatus
-      allowanceTxHash: string
-    }
+      allowanceTxStatus: TxStatus;
+      allowanceTxHash: string;
+    };
 
-    return this._createReport(txStatus, txHash)
-  }
+    return this._createReport(txStatus, txHash);
+  };
 
   private _createReport = (txStatus: TxStatus, txHash: string) => ({
     txStatus,
     txHash,
     etherscanURI: this.props.context!.etherscan.url,
-  })
+  });
 }

@@ -1,1 +1,1 @@
-export const unknownIcon: string
+export const unknownIcon: string;

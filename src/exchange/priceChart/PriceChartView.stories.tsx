@@ -1,20 +1,20 @@
-import { storiesOf } from '@storybook/react'
-import * as React from 'react'
-import { ignoreDuringVisualRegression } from '../../storybookUtils'
-import { Panel } from '../../utils/panel/Panel'
-import { bigFakeDailyData, fakeDailyData, generate } from './fakePriceData'
-import { GroupMode, PriceChartDataPoint } from './pricechart'
-import { PriceChartView } from './PriceChartView'
+import { storiesOf } from '@storybook/react';
+import * as React from 'react';
+import { ignoreDuringVisualRegression } from '../../storybookUtils';
+import { Panel } from '../../utils/panel/Panel';
+import { bigFakeDailyData, fakeDailyData, generate } from './fakePriceData';
+import { GroupMode, PriceChartDataPoint } from './pricechart';
+import { PriceChartView } from './PriceChartView';
 
-const stories = storiesOf('PriceChartView', module)
+const stories = storiesOf('PriceChartView', module);
 
 const PriceChartWithPanel = ({ data, groupMode }: { data: PriceChartDataPoint[]; groupMode?: GroupMode }) => (
   <Panel style={{ width: '454px', height: '320px', paddingTop: '2em' }}>
     <PriceChartView data={data} groupMode={groupMode || 'byDay'} />
   </Panel>
-)
+);
 
-stories.add('Simple daily data', () => <PriceChartWithPanel data={fakeDailyData} />)
+stories.add('Simple daily data', () => <PriceChartWithPanel data={fakeDailyData} />);
 
 stories.add('Candle samples (daily data)', () => (
   <div>
@@ -134,7 +134,7 @@ stories.add('Candle samples (daily data)', () => (
       </li>
     </ul>
   </div>
-))
+));
 
 ignoreDuringVisualRegression(() => {
   stories.add('Degenerate data - empty', () => (
@@ -149,8 +149,8 @@ ignoreDuringVisualRegression(() => {
       <small>Monthly</small>
       <PriceChartWithPanel data={[]} groupMode="byMonth" />
     </div>
-  ))
-})
+  ));
+});
 
 stories.add('Degenerate data - few timestamps', () => (
   <div>
@@ -231,12 +231,12 @@ stories.add('Degenerate data - few timestamps', () => (
       ]}
     />
   </div>
-))
+));
 
 ignoreDuringVisualRegression(() => {
   stories.add('Random daily and hourly data', () => {
-    const dailyData = generate('byDay', new Date('2018-01-05'), new Date('2018-03-10'), 240, 350, 1, 200)
-    const hourlyData = generate('byHour', new Date('2018-01-05'), new Date('2018-03-10T14:00:00'), 240, 350, 1, 200)
+    const dailyData = generate('byDay', new Date('2018-01-05'), new Date('2018-03-10'), 240, 350, 1, 200);
+    const hourlyData = generate('byHour', new Date('2018-01-05'), new Date('2018-03-10T14:00:00'), 240, 350, 1, 200);
     return (
       <div>
         <h4>Daily</h4>
@@ -244,13 +244,13 @@ ignoreDuringVisualRegression(() => {
         <h4>Hourly</h4>
         <PriceChartWithPanel data={hourlyData} groupMode="byHour" />
       </div>
-    )
-  })
-})
+    );
+  });
+});
 
 stories.add('Big fake daily data (are cut)', () => {
-  return <PriceChartWithPanel data={bigFakeDailyData} />
-})
+  return <PriceChartWithPanel data={bigFakeDailyData} />;
+});
 
 stories.add('High range with very close to 0 minimal price', () => {
   return (
@@ -324,8 +324,8 @@ stories.add('High range with very close to 0 minimal price', () => {
         ]}
       />
     </div>
-  )
-})
+  );
+});
 
 stories.add('Small range very close to 0', () => {
   return (
@@ -399,8 +399,8 @@ stories.add('Small range very close to 0', () => {
         ]}
       />
     </div>
-  )
-})
+  );
+});
 
 stories.add('Edge axis labels', () => {
   return (
@@ -434,8 +434,8 @@ stories.add('Edge axis labels', () => {
         ]}
       />
     </div>
-  )
-})
+  );
+});
 
 // - all timespan has data
 // - some timespan don't have data

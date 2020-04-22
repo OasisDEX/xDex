@@ -1,10 +1,10 @@
-import { storiesOf } from '@storybook/react'
-import * as React from 'react'
+import { storiesOf } from '@storybook/react';
+import * as React from 'react';
 
-import { Panel, PanelHeader } from '../panel/Panel'
-import { RowClickable, RowHighlighted, Table } from './Table'
+import { Panel, PanelHeader } from '../panel/Panel';
+import { RowClickable, RowHighlighted, Table } from './Table';
 
-const stories = storiesOf('Table', module)
+const stories = storiesOf('Table', module);
 
 stories.add('Table', () => (
   <Table>
@@ -58,7 +58,7 @@ stories.add('Table', () => (
       </RowHighlighted>
     </tbody>
   </Table>
-))
+));
 
 stories.add('Table in panel', () => (
   <Panel>
@@ -106,4 +106,4 @@ stories.add('Table in panel', () => (
       </tbody>
     </Table>
   </Panel>
-))
+));

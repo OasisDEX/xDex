@@ -1,140 +1,140 @@
-import { BigNumber } from 'bignumber.js'
-import { billion, million, thousand, zero } from '../zero'
-import { formatAsShorthandNumbers, formatCryptoBalance, formatFiatBalance } from './format'
+import { BigNumber } from 'bignumber.js';
+import { billion, million, thousand, zero } from '../zero';
+import { formatAsShorthandNumbers, formatCryptoBalance, formatFiatBalance } from './format';
 
 describe('Formatting numbers as shorthand ones', () => {
   beforeEach(() => {
-    BigNumber.config({ EXPONENTIAL_AT: [-20, 20] })
-  })
+    BigNumber.config({ EXPONENTIAL_AT: [-20, 20] });
+  });
 
   it('should format billions', () => {
-    const number = new BigNumber(123.45).times(billion)
-    expect(formatAsShorthandNumbers(number)).toEqual('123.45B')
-  })
+    const number = new BigNumber(123.45).times(billion);
+    expect(formatAsShorthandNumbers(number)).toEqual('123.45B');
+  });
 
   it('should format negative billions', () => {
-    const number = new BigNumber(-123.45).times(billion)
-    expect(formatAsShorthandNumbers(number)).toEqual('-123.45B')
-  })
+    const number = new BigNumber(-123.45).times(billion);
+    expect(formatAsShorthandNumbers(number)).toEqual('-123.45B');
+  });
 
   it('should format billions with no precision', () => {
-    const number = new BigNumber(123.45).times(billion)
-    expect(formatAsShorthandNumbers(number, 0)).toEqual('123B')
-  })
+    const number = new BigNumber(123.45).times(billion);
+    expect(formatAsShorthandNumbers(number, 0)).toEqual('123B');
+  });
 
   it('should format billions with custome precision', () => {
-    const number = new BigNumber(123.67801).times(billion)
-    expect(formatAsShorthandNumbers(number, 5)).toEqual('123.67801B')
-  })
+    const number = new BigNumber(123.67801).times(billion);
+    expect(formatAsShorthandNumbers(number, 5)).toEqual('123.67801B');
+  });
 
   it('should format billions and not remove the trailing zeroes', () => {
-    const number = new BigNumber(123.678).times(billion)
-    expect(formatAsShorthandNumbers(number, 5)).toEqual('123.67800B')
-  })
+    const number = new BigNumber(123.678).times(billion);
+    expect(formatAsShorthandNumbers(number, 5)).toEqual('123.67800B');
+  });
 
   // tslint:disable-next-line:max-line-length
   it('should format billions and not remove trailing zeroes if any after precicion format on number with digits after the precision point', () => {
-    const number = new BigNumber(23.45900002).times(billion)
-    expect(formatAsShorthandNumbers(number, 5)).toEqual('23.45900B')
-  })
+    const number = new BigNumber(23.45900002).times(billion);
+    expect(formatAsShorthandNumbers(number, 5)).toEqual('23.45900B');
+  });
 
   it('should format millions', () => {
-    const number = new BigNumber(999.999).times(million)
-    expect(formatAsShorthandNumbers(number)).toEqual('999.999M')
-  })
+    const number = new BigNumber(999.999).times(million);
+    expect(formatAsShorthandNumbers(number)).toEqual('999.999M');
+  });
 
   it('should format negative millions', () => {
-    const number = new BigNumber(-999.999).times(million)
-    expect(formatAsShorthandNumbers(number)).toEqual('-999.999M')
-  })
+    const number = new BigNumber(-999.999).times(million);
+    expect(formatAsShorthandNumbers(number)).toEqual('-999.999M');
+  });
 
   it('should format millions with no precision', () => {
-    const number = new BigNumber(999.999).times(million)
-    expect(formatAsShorthandNumbers(number, 0)).toEqual('999M')
-  })
+    const number = new BigNumber(999.999).times(million);
+    expect(formatAsShorthandNumbers(number, 0)).toEqual('999M');
+  });
 
   it('should format millions with custome precision', () => {
-    const number = new BigNumber(999.12345).times(million)
-    expect(formatAsShorthandNumbers(number, 2)).toEqual('999.12M')
-  })
+    const number = new BigNumber(999.12345).times(million);
+    expect(formatAsShorthandNumbers(number, 2)).toEqual('999.12M');
+  });
 
   it('should format millions and not remove trailing zeroes', () => {
-    const number = new BigNumber(999.678).times(million)
-    expect(formatAsShorthandNumbers(number, 5)).toEqual('999.67800M')
-  })
+    const number = new BigNumber(999.678).times(million);
+    expect(formatAsShorthandNumbers(number, 5)).toEqual('999.67800M');
+  });
 
   // tslint:disable-next-line:max-line-length
   it('should format millions and not remove trailing zeroes if any after precicion format on number with digits after the precision point', () => {
-    const number = new BigNumber(243.45900002).times(million)
-    expect(formatAsShorthandNumbers(number, 5)).toEqual('243.45900M')
-  })
+    const number = new BigNumber(243.45900002).times(million);
+    expect(formatAsShorthandNumbers(number, 5)).toEqual('243.45900M');
+  });
 
   it('should format thousands', () => {
-    const number = new BigNumber(123.4567).times(thousand)
-    expect(formatAsShorthandNumbers(number)).toEqual('123.4567K')
-  })
+    const number = new BigNumber(123.4567).times(thousand);
+    expect(formatAsShorthandNumbers(number)).toEqual('123.4567K');
+  });
 
   it('should format negative thousands', () => {
-    const number = new BigNumber(-123.4567).times(thousand)
-    expect(formatAsShorthandNumbers(number)).toEqual('-123.4567K')
-  })
+    const number = new BigNumber(-123.4567).times(thousand);
+    expect(formatAsShorthandNumbers(number)).toEqual('-123.4567K');
+  });
 
   it('should format thousands with no precision', () => {
-    const number = new BigNumber(12.12).times(thousand)
-    expect(formatAsShorthandNumbers(number, 0)).toEqual('12K')
-  })
+    const number = new BigNumber(12.12).times(thousand);
+    expect(formatAsShorthandNumbers(number, 0)).toEqual('12K');
+  });
 
   it('should format thousands with custome precision', () => {
-    const number = new BigNumber(12.002).times(thousand)
-    expect(formatAsShorthandNumbers(number, 6)).toEqual('12.002000K')
-  })
+    const number = new BigNumber(12.002).times(thousand);
+    expect(formatAsShorthandNumbers(number, 6)).toEqual('12.002000K');
+  });
 
   it('should format thousands and not remove trailing zeroes', () => {
-    const number = new BigNumber(23.459).times(thousand)
-    expect(formatAsShorthandNumbers(number, 4)).toEqual('23.4590K')
-  })
+    const number = new BigNumber(23.459).times(thousand);
+    expect(formatAsShorthandNumbers(number, 4)).toEqual('23.4590K');
+  });
 
   // tslint:disable-next-line:max-line-length
   it('should format thousands and not remove trailing zeroes if any after precicion format on number with digits after the precision point', () => {
-    const number = new BigNumber(23.45900002).times(thousand)
-    expect(formatAsShorthandNumbers(number, 4)).toEqual('23.4590K')
-  })
+    const number = new BigNumber(23.45900002).times(thousand);
+    expect(formatAsShorthandNumbers(number, 4)).toEqual('23.4590K');
+  });
 
   it('should not shorthand the number', () => {
-    const number = new BigNumber(923.45900002)
-    expect(formatAsShorthandNumbers(number)).toEqual('923.45900002')
-  })
+    const number = new BigNumber(923.45900002);
+    expect(formatAsShorthandNumbers(number)).toEqual('923.45900002');
+  });
 
   it('should not shorthand the negative number', () => {
-    const number = new BigNumber(-923.45900002)
-    expect(formatAsShorthandNumbers(number)).toEqual('-923.45900002')
-  })
+    const number = new BigNumber(-923.45900002);
+    expect(formatAsShorthandNumbers(number)).toEqual('-923.45900002');
+  });
 
   it('should not shorthand the number but remove trailing zeroes', () => {
-    const number = new BigNumber(923.459)
-    expect(formatAsShorthandNumbers(number)).toEqual('923.459')
-  })
+    const number = new BigNumber(923.459);
+    expect(formatAsShorthandNumbers(number)).toEqual('923.459');
+  });
 
   // tslint:disable-next-line:max-line-length
   it('should not shorthand the number but format to precision and not remove trailing zeroes if any', () => {
-    const number = new BigNumber(923.45900002)
-    expect(formatAsShorthandNumbers(number, 4)).toEqual('923.4590')
-  })
+    const number = new BigNumber(923.45900002);
+    expect(formatAsShorthandNumbers(number, 4)).toEqual('923.4590');
+  });
 
   it('should format 0', () => {
-    expect(formatAsShorthandNumbers(zero, 4)).toEqual('0.0000')
-  })
+    expect(formatAsShorthandNumbers(zero, 4)).toEqual('0.0000');
+  });
 
   it('should format numbers bigger than billion', () => {
-    const trillion = new BigNumber('1000000000000')
-    expect(formatAsShorthandNumbers(trillion)).toEqual('1000B')
-  })
+    const trillion = new BigNumber('1000000000000');
+    expect(formatAsShorthandNumbers(trillion)).toEqual('1000B');
+  });
 
   it('should format numbers bigger than billion with precision', () => {
-    const trillion = new BigNumber('1000045600000')
-    expect(formatAsShorthandNumbers(trillion, 2)).toEqual('1000.04B')
-  })
-})
+    const trillion = new BigNumber('1000045600000');
+    expect(formatAsShorthandNumbers(trillion, 2)).toEqual('1000.04B');
+  });
+});
 
 // **Crypto Balances (DAI, ETH, BAT etc)**
 
@@ -145,83 +145,83 @@ describe('Formatting numbers as shorthand ones', () => {
 // - If >1B -Shortened to B (without a space) and to two decimal places (4.22B)
 describe('Formatting crypto balances according to number formatting spec', () => {
   it('should display number as it is without precision', () => {
-    const amount = new BigNumber('0.00002312321')
-    expect(formatCryptoBalance(amount)).toEqual('<0.001')
-  })
+    const amount = new BigNumber('0.00002312321');
+    expect(formatCryptoBalance(amount)).toEqual('<0.001');
+  });
 
   it('should display  negative number as it is without precision', () => {
-    const amount = new BigNumber('-0.00002312321')
-    expect(formatCryptoBalance(amount)).toEqual('-0.000')
-  })
+    const amount = new BigNumber('-0.00002312321');
+    expect(formatCryptoBalance(amount)).toEqual('-0.000');
+  });
 
   it('should have a precision of 4 for lower bound', () => {
-    const amount = new BigNumber('0.0001')
-    expect(formatCryptoBalance(amount)).toEqual('0.0001')
-  })
+    const amount = new BigNumber('0.0001');
+    expect(formatCryptoBalance(amount)).toEqual('0.0001');
+  });
 
   it('should have a precision of 4 for lower bound (negative number)', () => {
-    const amount = new BigNumber('-0.0001')
-    expect(formatCryptoBalance(amount)).toEqual('-0.0001')
-  })
+    const amount = new BigNumber('-0.0001');
+    expect(formatCryptoBalance(amount)).toEqual('-0.0001');
+  });
 
   it('should have a precision of 4', () => {
-    const amount = new BigNumber('9.456789')
-    expect(formatCryptoBalance(amount)).toEqual('9.4567')
-  })
+    const amount = new BigNumber('9.456789');
+    expect(formatCryptoBalance(amount)).toEqual('9.4567');
+  });
 
   it('should have a precision of 4 (negative number)', () => {
-    const amount = new BigNumber('-9.456789')
-    expect(formatCryptoBalance(amount)).toEqual('-9.4567')
-  })
+    const amount = new BigNumber('-9.456789');
+    expect(formatCryptoBalance(amount)).toEqual('-9.4567');
+  });
 
   it('should have precision of 2 lower bound', () => {
-    const amount = new BigNumber('10.012')
-    expect(formatCryptoBalance(amount)).toEqual('10.01')
-  })
+    const amount = new BigNumber('10.012');
+    expect(formatCryptoBalance(amount)).toEqual('10.01');
+  });
 
   it('should have precision of 2 lower bound (negative number)', () => {
-    const amount = new BigNumber('-10.012')
-    expect(formatCryptoBalance(amount)).toEqual('-10.01')
-  })
+    const amount = new BigNumber('-10.012');
+    expect(formatCryptoBalance(amount)).toEqual('-10.01');
+  });
 
   it('should format number with precision 2 and not shorthand thousands', () => {
-    const amount = new BigNumber(9.991235).times(thousand)
-    expect(formatCryptoBalance(amount)).toBe('9991.23')
-  })
+    const amount = new BigNumber(9.991235).times(thousand);
+    expect(formatCryptoBalance(amount)).toBe('9991.23');
+  });
 
   it('should format number with precision 2 and not shorthand thousands (negative number)', () => {
-    const amount = new BigNumber(-999.991235).times(thousand)
-    expect(formatCryptoBalance(amount)).toBe('-999991.23')
-  })
+    const amount = new BigNumber(-999.991235).times(thousand);
+    expect(formatCryptoBalance(amount)).toBe('-999991.23');
+  });
 
   it('should have precision of 2 and suffix M', () => {
-    const amount = new BigNumber('10.012').times(million)
-    expect(formatCryptoBalance(amount)).toEqual('10.01M')
-  })
+    const amount = new BigNumber('10.012').times(million);
+    expect(formatCryptoBalance(amount)).toEqual('10.01M');
+  });
 
   it('should have precision of 2 and suffix M (negative number)', () => {
-    const amount = new BigNumber('-10.012').times(million)
-    expect(formatCryptoBalance(amount)).toEqual('-10.01M')
-  })
+    const amount = new BigNumber('-10.012').times(million);
+    expect(formatCryptoBalance(amount)).toEqual('-10.01M');
+  });
 
   it('should have precision of 2 and suffix B', () => {
-    const amount = new BigNumber('10.012').times(billion)
-    expect(formatCryptoBalance(amount)).toEqual('10.01B')
-  })
+    const amount = new BigNumber('10.012').times(billion);
+    expect(formatCryptoBalance(amount)).toEqual('10.01B');
+  });
 
   it('should have precision of 2 and suffix B (negative number)', () => {
-    const amount = new BigNumber('-10.012').times(billion)
-    expect(formatCryptoBalance(amount)).toEqual('-10.01B')
-  })
+    const amount = new BigNumber('-10.012').times(billion);
+    expect(formatCryptoBalance(amount)).toEqual('-10.01B');
+  });
 
   it('should format zero balance', () => {
-    const amount = new BigNumber('0.000000000000').times(billion)
-    expect(formatCryptoBalance(amount)).toEqual('0.00')
+    const amount = new BigNumber('0.000000000000').times(billion);
+    expect(formatCryptoBalance(amount)).toEqual('0.00');
 
-    const negativeAmount = new BigNumber('-0.000000000000').times(billion)
-    expect(formatCryptoBalance(negativeAmount)).toEqual('0.00')
-  })
-})
+    const negativeAmount = new BigNumber('-0.000000000000').times(billion);
+    expect(formatCryptoBalance(negativeAmount)).toEqual('0.00');
+  });
+});
 
 // **FIAT Balances (USD, EUR etc)**
 
@@ -233,60 +233,60 @@ describe('Formatting crypto balances according to number formatting spec', () =>
 
 describe('Formatting fiat balances according to number formatting spec', () => {
   it('should format number with precision 4', () => {
-    const amount = new BigNumber(0.991235)
-    expect(formatFiatBalance(amount)).toBe('0.9912')
-  })
+    const amount = new BigNumber(0.991235);
+    expect(formatFiatBalance(amount)).toBe('0.9912');
+  });
 
   it('should format number with precision 4 (negative number)', () => {
-    const amount = new BigNumber(-0.991235)
-    expect(formatFiatBalance(amount)).toBe('-0.9912')
-  })
+    const amount = new BigNumber(-0.991235);
+    expect(formatFiatBalance(amount)).toBe('-0.9912');
+  });
 
   it('should format number with precision 2 ', () => {
-    const amount = new BigNumber(9.991235)
-    expect(formatFiatBalance(amount)).toBe('9.99')
-  })
+    const amount = new BigNumber(9.991235);
+    expect(formatFiatBalance(amount)).toBe('9.99');
+  });
 
   it('should format number with precision 2 (negative number)', () => {
-    const amount = new BigNumber(-9.991235)
-    expect(formatFiatBalance(amount)).toBe('-9.99')
-  })
+    const amount = new BigNumber(-9.991235);
+    expect(formatFiatBalance(amount)).toBe('-9.99');
+  });
 
   it('should format number with precision 2 and suffix K', () => {
-    const amount = new BigNumber(9.991235).times(thousand)
-    expect(formatFiatBalance(amount)).toBe('9.99K')
-  })
+    const amount = new BigNumber(9.991235).times(thousand);
+    expect(formatFiatBalance(amount)).toBe('9.99K');
+  });
 
   it('should format number with precision 2 and suffix K (negative number)', () => {
-    const amount = new BigNumber(-999.991235).times(thousand)
-    expect(formatFiatBalance(amount)).toBe('-999.99K')
-  })
+    const amount = new BigNumber(-999.991235).times(thousand);
+    expect(formatFiatBalance(amount)).toBe('-999.99K');
+  });
 
   it('should format number with precision 2 and suffix M', () => {
-    const amount = new BigNumber(234.985623423).times(million)
-    expect(formatFiatBalance(amount)).toBe('234.98M')
-  })
+    const amount = new BigNumber(234.985623423).times(million);
+    expect(formatFiatBalance(amount)).toBe('234.98M');
+  });
 
   it('should format number with precision 2 and suffix M (negative number)', () => {
-    const amount = new BigNumber(-234.985623423).times(million)
-    expect(formatFiatBalance(amount)).toBe('-234.98M')
-  })
+    const amount = new BigNumber(-234.985623423).times(million);
+    expect(formatFiatBalance(amount)).toBe('-234.98M');
+  });
 
   it('should format number with precision 2 and suffix B', () => {
-    const amount = new BigNumber(1234.12345).times(million)
-    expect(formatFiatBalance(amount)).toBe('1.23B')
-  })
+    const amount = new BigNumber(1234.12345).times(million);
+    expect(formatFiatBalance(amount)).toBe('1.23B');
+  });
 
   it('should format number with precision 2 and suffix B (negative number)', () => {
-    const amount = new BigNumber(-1234.985623423).times(million)
-    expect(formatFiatBalance(amount)).toBe('-1.23B')
-  })
+    const amount = new BigNumber(-1234.985623423).times(million);
+    expect(formatFiatBalance(amount)).toBe('-1.23B');
+  });
 
   it('should format zero balance', () => {
-    const amount = new BigNumber('0.000000000000').times(billion)
-    expect(formatFiatBalance(amount)).toEqual('0.00')
+    const amount = new BigNumber('0.000000000000').times(billion);
+    expect(formatFiatBalance(amount)).toEqual('0.00');
 
-    const negativeAmount = new BigNumber('-0.000000000000').times(billion)
-    expect(formatFiatBalance(negativeAmount)).toEqual('0.00')
-  })
-})
+    const negativeAmount = new BigNumber('-0.000000000000').times(billion);
+    expect(formatFiatBalance(negativeAmount)).toEqual('0.00');
+  });
+});

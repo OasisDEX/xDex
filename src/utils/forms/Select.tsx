@@ -1,17 +1,17 @@
-import classnames from 'classnames'
-import * as React from 'react'
+import classnames from 'classnames';
+import * as React from 'react';
 
-import * as styles from './Select.scss'
+import * as styles from './Select.scss';
 
 type SelectProps = React.SelectHTMLAttributes<HTMLSelectElement> & {
-  bordered?: boolean
-  sizer?: 'sm' | 'md' | 'lg' | 'unsized'
-  wrapperClassName?: string
-  dataTestId?: string
-}
+  bordered?: boolean;
+  sizer?: 'sm' | 'md' | 'lg' | 'unsized';
+  wrapperClassName?: string;
+  dataTestId?: string;
+};
 
 export function Select(props: SelectProps) {
-  const { style, bordered, sizer, className, wrapperClassName, disabled, ...selectProps } = props
+  const { style, bordered, sizer, className, wrapperClassName, disabled, ...selectProps } = props;
 
   return (
     <div
@@ -26,5 +26,5 @@ export function Select(props: SelectProps) {
         {props.children}
       </select>
     </div>
-  )
+  );
 }

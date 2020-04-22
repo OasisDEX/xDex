@@ -1,16 +1,16 @@
-import { tid } from '../utils/index'
+import { tid } from '../utils/index';
 
 class Order {
   public price() {
-    return cy.get('@order').find(tid('price'))
+    return cy.get('@order').find(tid('price'));
   }
 
   public amount() {
-    return cy.get('@order').find(tid('amount'))
+    return cy.get('@order').find(tid('amount'));
   }
 
   public total() {
-    return cy.get('@order').find(tid('total'))
+    return cy.get('@order').find(tid('total'));
   }
 }
 
@@ -18,27 +18,27 @@ class Orders {
   constructor(public type: OrderType) {}
 
   public countIs(number: number) {
-    cy.get(tid(this.type), { timeout: 60000 }).should('have.length', number)
+    cy.get(tid(this.type), { timeout: 60000 }).should('have.length', number);
   }
 
   public first() {
-    cy.get(tid(this.type)).first().as('order')
+    cy.get(tid(this.type)).first().as('order');
 
-    return new Order()
+    return new Order();
   }
 
   public number(number: number) {
     cy.get(tid(this.type))
       .eq(number - 1)
-      .as('order')
+      .as('order');
 
-    return new Order()
+    return new Order();
   }
 
   public last() {
-    cy.get(tid(this.type)).last().as('order')
+    cy.get(tid(this.type)).last().as('order');
 
-    return new Order()
+    return new Order();
   }
 }
 
@@ -49,11 +49,11 @@ export enum OrderType {
 
 export class Orderbook {
   public static list(type: OrderType) {
-    return new Orders(type)
+    return new Orders(type);
   }
 
   public static waitToLoad(base: string, quote: string) {
-    cy.get(tid('price-col')).should('have.text', `Price ${quote}`)
-    cy.get(tid('amount-col')).should('have.text', `Amount ${base}`)
+    cy.get(tid('price-col')).should('have.text', `Price ${quote}`);
+    cy.get(tid('amount-col')).should('have.text', `Amount ${base}`);
   }
 }

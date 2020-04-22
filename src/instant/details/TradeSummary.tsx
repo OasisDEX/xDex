@@ -1,27 +1,27 @@
-import { BigNumber } from 'bignumber.js'
-import classnames from 'classnames'
-import * as React from 'react'
-import { TxStatus } from '../../blockchain/transactions'
-import { OfferType } from '../../exchange/orderbook/orderbook'
-import { formatAmountInstant } from '../../utils/formatters/format'
-import { Money } from '../../utils/formatters/Formatters'
-import * as genericStyles from '../Instant.scss'
-import { ProgressReport, Report } from '../progress/ProgressReport'
-import * as styles from './TradeSummary.scss'
-import { TxStatusRow } from './TxStatusRow'
+import { BigNumber } from 'bignumber.js';
+import classnames from 'classnames';
+import * as React from 'react';
+import { TxStatus } from '../../blockchain/transactions';
+import { OfferType } from '../../exchange/orderbook/orderbook';
+import { formatAmountInstant } from '../../utils/formatters/format';
+import { Money } from '../../utils/formatters/Formatters';
+import * as genericStyles from '../Instant.scss';
+import { ProgressReport, Report } from '../progress/ProgressReport';
+import * as styles from './TradeSummary.scss';
+import { TxStatusRow } from './TxStatusRow';
 
 interface TradeSummaryProps {
-  price: BigNumber
-  quotation: string
-  gasCost: BigNumber
-  etherscanURI: string
-  txHash: string
-  sold: BigNumber
-  soldToken: string
-  bought: BigNumber
-  boughtToken: string
-  type: OfferType
-  hadCreatedProxy: boolean
+  price: BigNumber;
+  quotation: string;
+  gasCost: BigNumber;
+  etherscanURI: string;
+  txHash: string;
+  sold: BigNumber;
+  soldToken: string;
+  bought: BigNumber;
+  boughtToken: string;
+  type: OfferType;
+  hadCreatedProxy: boolean;
 }
 
 export class TradeSummary extends React.Component<TradeSummaryProps> {
@@ -38,7 +38,7 @@ export class TradeSummary extends React.Component<TradeSummaryProps> {
       hadCreatedProxy,
       price,
       quotation,
-    } = this.props
+    } = this.props;
 
     return (
       <div className={classnames(genericStyles.details, styles.details)}>
@@ -77,7 +77,7 @@ export class TradeSummary extends React.Component<TradeSummaryProps> {
           <span> gas cost</span>
         </div>
       </div>
-    )
+    );
   }
 }
 
@@ -93,8 +93,8 @@ const summarizeSell = (sold: BigNumber, soldToken: string, bought: BigNumber, bo
         <Money formatter={formatAmountInstant} value={bought} token={boughtToken.toUpperCase()} />
       </span>
     </>
-  )
-}
+  );
+};
 
 const summarizeBuy = (sold: BigNumber, soldToken: string, bought: BigNumber, boughtToken: string) => {
   return (
@@ -108,5 +108,5 @@ const summarizeBuy = (sold: BigNumber, soldToken: string, bought: BigNumber, bou
         <Money formatter={formatAmountInstant} value={sold} token={soldToken.toUpperCase()} />
       </span>
     </>
-  )
-}
+  );
+};

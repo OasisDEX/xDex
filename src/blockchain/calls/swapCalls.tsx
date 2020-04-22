@@ -1,23 +1,23 @@
-import { BigNumber } from 'bignumber.js'
-import * as React from 'react'
-import { FormatAmount } from '../../utils/formatters/Formatters'
-import * as dsProxy from '../abi/ds-proxy.abi.json'
-import * as migrationProxyActions from '../abi/migration-proxy-actions.abi.json'
-import { NetworkConfig } from '../config'
-import { amountToWei } from '../utils'
-import { web3 } from '../web3'
-import { TransactionDef } from './callsHelpers'
-import { TxMetaKind } from './txMeta'
+import { BigNumber } from 'bignumber.js';
+import * as React from 'react';
+import { FormatAmount } from '../../utils/formatters/Formatters';
+import * as dsProxy from '../abi/ds-proxy.abi.json';
+import * as migrationProxyActions from '../abi/migration-proxy-actions.abi.json';
+import { NetworkConfig } from '../config';
+import { amountToWei } from '../utils';
+import { web3 } from '../web3';
+import { TransactionDef } from './callsHelpers';
+import { TxMetaKind } from './txMeta';
 
 export interface SwapData {
-  proxyAddress: string
-  amount: BigNumber
-  gas?: number
-  gasPrice?: BigNumber
+  proxyAddress: string;
+  amount: BigNumber;
+  gas?: number;
+  gasPrice?: BigNumber;
 }
 
 const execute = (proxyAddress: string) =>
-  new web3.eth.Contract(dsProxy as any, proxyAddress).methods['execute(address,bytes)']
+  new web3.eth.Contract(dsProxy as any, proxyAddress).methods['execute(address,bytes)'];
 
 export const swapSaiToDai: TransactionDef<SwapData> = {
   call: ({ proxyAddress }: SwapData) => execute(proxyAddress),
@@ -34,7 +34,7 @@ export const swapSaiToDai: TransactionDef<SwapData> = {
       Swapping SAI <FormatAmount value={amount} token={'SAI'} /> for DAI
     </>
   ),
-}
+};
 
 export const swapDaiToSai: TransactionDef<SwapData> = {
   call: ({ proxyAddress }: SwapData) => execute(proxyAddress),
@@ -47,4 +47,4 @@ export const swapDaiToSai: TransactionDef<SwapData> = {
   kind: TxMetaKind.swapSai,
   options: () => ({ gas: 5000000 }),
   description: () => <>Swapping MCD DAI for SAI</>,
-}
+};
