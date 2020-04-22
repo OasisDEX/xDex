@@ -158,7 +158,7 @@ class NotConnected extends React.Component<{}, { isChecked: boolean, walletType?
     executeWeb3StatusCommand({
       kind: Web3StatusCommandKind.connect,
       type: this.state.walletType!,
-      network: 'main'
+      network: sessionStorage.getItem('network')!
     });
   }
 
