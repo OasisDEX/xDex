@@ -1,33 +1,33 @@
-import * as React from 'react'
-import * as ReactDOM from 'react-dom'
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
 
 export interface ModalProps {
-  close: () => void
+  close: () => void;
 }
 
 export interface ModalOpenerProps {
-  open: (modalClass: React.ComponentType<ModalProps>) => void
+  open: (modalClass: React.ComponentType<ModalProps>) => void;
 }
 
 interface WrapperState {
-  modalType?: React.ComponentType<ModalProps>
+  modalType?: React.ComponentType<ModalProps>;
 }
 
 class ReRenderBarrier extends React.Component {
   public shouldComponentUpdate(): boolean {
-    return false
+    return false;
   }
 
   public render() {
-    return this.props.children
+    return this.props.children;
   }
 }
 
 export function withModal<O, P extends ModalOpenerProps>(Wrapped: React.ComponentType<O & P>): React.ComponentType<O> {
   return class extends React.Component<O, WrapperState> {
     constructor(o: O) {
-      super(o)
-      this.state = {}
+      super(o);
+      this.state = {};
     }
 
     public render() {
@@ -42,15 +42,15 @@ export function withModal<O, P extends ModalOpenerProps>(Wrapped: React.Componen
             // It closes the modal.
             ReactDOM.createPortal(<this.state.modalType {...{ close: this.close }} />, document.body)}
         </React.Fragment>
-      )
+      );
     }
 
     private open = (modalType: React.ComponentType<ModalProps>) => {
-      this.setState({ ...this.state, modalType })
-    }
+      this.setState({ ...this.state, modalType });
+    };
 
     private close = (): void => {
-      this.setState({ ...this.state, modalType: undefined })
-    }
-  }
+      this.setState({ ...this.state, modalType: undefined });
+    };
+  };
 }

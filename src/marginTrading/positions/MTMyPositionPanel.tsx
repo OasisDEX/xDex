@@ -1,36 +1,36 @@
-import * as React from 'react'
-import * as styles from '../../balances/mtBalancesView.scss'
-import { SvgImage } from '../../utils/icons/utils'
-import { Loadable } from '../../utils/loadable'
-import { ModalOpenerProps, ModalProps } from '../../utils/modal'
-import { Panel, PanelBody, PanelHeader } from '../../utils/panel/Panel'
-import { zero } from '../../utils/zero'
-import { MarginableAsset, MTAccount, MTAccountState, UserActionKind } from '../state/mtAccount'
-import { CreateMTFundForm$, MTTransferFormState } from '../transfer/mtTransferForm'
-import { MTMyPositionView } from './MTMyPositionView'
+import * as React from 'react';
+import * as styles from '../../balances/mtBalancesView.scss';
+import { SvgImage } from '../../utils/icons/utils';
+import { Loadable } from '../../utils/loadable';
+import { ModalOpenerProps, ModalProps } from '../../utils/modal';
+import { Panel, PanelBody, PanelHeader } from '../../utils/panel/Panel';
+import { zero } from '../../utils/zero';
+import { MarginableAsset, MTAccount, MTAccountState, UserActionKind } from '../state/mtAccount';
+import { CreateMTFundForm$, MTTransferFormState } from '../transfer/mtTransferForm';
+import { MTMyPositionView } from './MTMyPositionView';
 
-import { default as BigNumber } from 'bignumber.js'
-import { Observable } from 'rxjs'
-import { trackingEvents } from '../../analytics/analytics'
-import { AssetDropdownMenu } from '../../balances/AssetDropdownMenu'
-import { TxMetaKind } from '../../blockchain/calls/txMeta'
-import { isDone, TxState } from '../../blockchain/transactions'
-import { connect } from '../../utils/connect'
-import { Button } from '../../utils/forms/Buttons'
-import { Switch } from '../../utils/forms/Slider'
-import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator'
-import { LoggedOut } from '../../utils/loadingIndicator/LoggedOut'
-import { LiquidationMessage, LiquidationMessageKind } from '../simple/mtOrderForm'
-import { MtTransferFormView } from '../transfer/mtTransferFormView'
-import backArrowSvg from './back-arrow.svg'
-import * as myPositionStyles from './MTMyPositionView.scss'
-import warningIconSvg from './warning-icon.svg'
+import { default as BigNumber } from 'bignumber.js';
+import { Observable } from 'rxjs';
+import { trackingEvents } from '../../analytics/analytics';
+import { AssetDropdownMenu } from '../../balances/AssetDropdownMenu';
+import { TxMetaKind } from '../../blockchain/calls/txMeta';
+import { isDone, TxState } from '../../blockchain/transactions';
+import { connect } from '../../utils/connect';
+import { Button } from '../../utils/forms/Buttons';
+import { Switch } from '../../utils/forms/Slider';
+import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
+import { LoggedOut } from '../../utils/loadingIndicator/LoggedOut';
+import { LiquidationMessage, LiquidationMessageKind } from '../simple/mtOrderForm';
+import { MtTransferFormView } from '../transfer/mtTransferFormView';
+import backArrowSvg from './back-arrow.svg';
+import * as myPositionStyles from './MTMyPositionView.scss';
+import warningIconSvg from './warning-icon.svg';
 
 interface RedeemButtonProps {
-  disabled: boolean
-  redeem: () => void
-  token: string
-  transactions: TxState[]
+  disabled: boolean;
+  redeem: () => void;
+  token: string;
+  transactions: TxState[];
 }
 
 class RedeemButton extends React.Component<RedeemButtonProps> {
@@ -39,7 +39,7 @@ class RedeemButton extends React.Component<RedeemButtonProps> {
       this.props.transactions.find(
         (t: TxState) => t.meta.kind === TxMetaKind.redeem && !isDone(t) && t.meta.args.token === this.props.token,
       ),
-    )
+    );
 
     return (
       <Button
@@ -50,33 +50,33 @@ class RedeemButton extends React.Component<RedeemButtonProps> {
       >
         {txInProgress ? <LoadingIndicator className={myPositionStyles.buttonLoading} /> : 'Reclaim'}
       </Button>
-    )
+    );
   }
 }
 
 interface MTMyPositionPanelInternalProps {
-  account: string | undefined
-  mta: MTAccount
-  ma: MarginableAsset
-  createMTFundForm$: CreateMTFundForm$
-  approveMTProxy: (args: { token: string; proxyAddress: string }) => Observable<TxState>
-  redeem: (args: { token: string; proxy: any; amount: BigNumber }) => void
-  transactions: TxState[]
-  close?: () => void
-  daiPrice: BigNumber
-  liquidationMessage?: LiquidationMessage
+  account: string | undefined;
+  mta: MTAccount;
+  ma: MarginableAsset;
+  createMTFundForm$: CreateMTFundForm$;
+  approveMTProxy: (args: { token: string; proxyAddress: string }) => Observable<TxState>;
+  redeem: (args: { token: string; proxy: any; amount: BigNumber }) => void;
+  transactions: TxState[];
+  close?: () => void;
+  daiPrice: BigNumber;
+  liquidationMessage?: LiquidationMessage;
 }
 
 export class MTLiquidationNotification extends React.Component<Loadable<MTMyPositionPanelInternalProps>> {
   public render() {
     if (this.props.value && this.props.status === 'loaded' && this.props.value.mta) {
-      const { mta, ma, redeem, transactions, liquidationMessage } = this.props.value
+      const { mta, ma, redeem, transactions, liquidationMessage } = this.props.value;
 
       if (liquidationMessage) {
         const warningClass =
           liquidationMessage.kind === LiquidationMessageKind.redeemable
             ? myPositionStyles.infoMessage
-            : myPositionStyles.warningMessage
+            : myPositionStyles.warningMessage;
 
         return (
           <div className={warningClass}>
@@ -97,10 +97,10 @@ export class MTLiquidationNotification extends React.Component<Loadable<MTMyPosi
               />
             )}
           </div>
-        )
+        );
       }
     }
-    return null
+    return null;
   }
 }
 
@@ -113,7 +113,7 @@ function liquidationMessageContent(msg: LiquidationMessage) {
           Your WETH leveraged position is now at risk of being liquidated. You can still avoid auction by depositing{' '}
           {msg.baseToken} or DAI.
         </>
-      )
+      );
 
     case LiquidationMessageKind.imminent:
       return (
@@ -124,7 +124,7 @@ function liquidationMessageContent(msg: LiquidationMessage) {
           You can still avoid auction by {msg.isSafeCollRatio ? 'selling, or ' : ' '}
           depositing additional {msg.baseToken} or DAI.
         </>
-      )
+      );
 
     case LiquidationMessageKind.inProgress:
       return (
@@ -132,7 +132,7 @@ function liquidationMessageContent(msg: LiquidationMessage) {
           Your {msg.baseToken} leveraged position has been liquidated and your assets are currently being sold at
           auction to cover your debt. Check back soon for further details for the auction result.
         </>
-      )
+      );
 
     case LiquidationMessageKind.redeemable:
       return (
@@ -140,7 +140,7 @@ function liquidationMessageContent(msg: LiquidationMessage) {
           Your {msg.baseToken} leveraged position has been liquidated and sold to cover your debt. You have{' '}
           {msg.redeemable} {msg.baseToken} that was not sold and can now be reclaimed.
         </>
-      )
+      );
     // tslint:enable
   }
 }
@@ -149,7 +149,7 @@ export class MTMyPositionPanel extends React.Component<Loadable<MTMyPositionPane
   public render() {
     if (this.props.value) {
       const panelTitle =
-        this.props.value.ma && this.props.value.ma.name ? `${this.props.value.ma.name} Position` : 'My Position'
+        this.props.value.ma && this.props.value.ma.name ? `${this.props.value.ma.name} Position` : 'My Position';
       if (this.props.value && !this.props.value.account) {
         return (
           <Panel style={{ flexGrow: 1 }}>
@@ -160,25 +160,25 @@ export class MTMyPositionPanel extends React.Component<Loadable<MTMyPositionPane
               </div>
             )}
           </Panel>
-        )
+        );
       }
 
       if (this.props.status === 'loaded' && this.props.value.mta) {
-        const { ma } = this.props.value
+        const { ma } = this.props.value;
 
-        const hasHistoryEvents = ma && ma.rawHistory.length > 0
+        const hasHistoryEvents = ma && ma.rawHistory.length > 0;
 
         if (hasHistoryEvents || ma.balance.gt(zero) || ma.dai.gt(zero)) {
           return (
             <Panel style={{ flexGrow: 1 }}>
               <MTMyPositionPanelInternal {...this.props.value} {...{ open: this.props.open }} />
             </Panel>
-          )
+          );
         }
       }
     }
 
-    return null
+    return null;
   }
 
   public transfer(actionKind: UserActionKind, token: string, ilk?: string) {
@@ -187,9 +187,9 @@ export class MTMyPositionPanel extends React.Component<Loadable<MTMyPositionPane
       token,
       ilk,
       withOnboarding: false,
-    })
-    const MTFundFormViewRxTx = connect<MTTransferFormState, ModalProps>(MtTransferFormView, fundForm$)
-    this.props.open(MTFundFormViewRxTx)
+    });
+    const MTFundFormViewRxTx = connect<MTTransferFormState, ModalProps>(MtTransferFormView, fundForm$);
+    this.props.open(MTFundFormViewRxTx);
   }
 }
 
@@ -198,15 +198,15 @@ export class MTMyPositionPanelInternal extends React.Component<
   { blocked: boolean }
 > {
   public constructor(props: any) {
-    super(props)
+    super(props);
     // TODO: this should come from the pipeline;
     this.state = {
       blocked: false,
-    }
+    };
   }
 
   public render() {
-    const { ma, mta } = this.props
+    const { ma, mta } = this.props;
 
     return (
       <div>
@@ -221,7 +221,7 @@ export class MTMyPositionPanelInternal extends React.Component<
             blocked={this.state.blocked}
             onClick={() => {
               this.setState((prevState) => ({ blocked: !prevState.blocked }))
-              trackingEvents.daiUsdToggle(this.state.blocked)
+              trackingEvents.daiUsdToggle(this.state.blocked);
             }}
             optionOne="DAI"
             optionTwo="USD"
@@ -263,11 +263,11 @@ export class MTMyPositionPanelInternal extends React.Component<
           }
         </PanelBody>
       </div>
-    )
+    );
   }
 
   private createAssetActions(mta: MTAccount, ma: MarginableAsset, type: string): React.ReactNode[] {
-    const actions: React.ReactNode[] = []
+    const actions: React.ReactNode[] = [];
 
     if (type === 'deposit') {
       if (ma.allowance) {
@@ -279,12 +279,12 @@ export class MTMyPositionPanelInternal extends React.Component<
             data-test-id="deposit-col"
             onClick={() => {
               this.transfer(UserActionKind.fund, ma.name, undefined)
-              trackingEvents.depositCollateral()
+              trackingEvents.depositCollateral();
             }}
           >
             Deposit {ma.name}
           </Button>,
-        )
+        );
       } else {
         actions.push(
           <Button
@@ -295,7 +295,7 @@ export class MTMyPositionPanelInternal extends React.Component<
           >
             Enable {ma.name}
           </Button>,
-        )
+        );
       }
 
       if (mta.daiAllowance) {
@@ -306,12 +306,12 @@ export class MTMyPositionPanelInternal extends React.Component<
             className={styles.actionButton}
             onClick={() => {
               this.transfer(UserActionKind.fund, 'DAI', ma.name)
-              trackingEvents.depositDai()
+              trackingEvents.depositDai();
             }}
           >
             Deposit DAI
           </Button>,
-        )
+        );
       } else {
         actions.push(
           <Button
@@ -322,7 +322,7 @@ export class MTMyPositionPanelInternal extends React.Component<
           >
             Enable DAI
           </Button>,
-        )
+        );
       }
     }
 
@@ -335,12 +335,12 @@ export class MTMyPositionPanelInternal extends React.Component<
           className={styles.actionButton}
           onClick={() => {
             this.transfer(UserActionKind.draw, ma.name, undefined)
-            trackingEvents.withdrawCollateral()
+            trackingEvents.withdrawCollateral();
           }}
         >
           Withdraw {ma.name}
         </Button>,
-      )
+      );
 
       actions.push(
         <Button
@@ -351,15 +351,15 @@ export class MTMyPositionPanelInternal extends React.Component<
           title={ma.dai.eq(zero) ? `You don't have any DAI to withdraw` : ''}
           onClick={() => {
             this.transfer(UserActionKind.draw, 'DAI', ma.name)
-            trackingEvents.withdrawDai()
+            trackingEvents.withdrawDai();
           }}
         >
           Withdraw DAI
         </Button>,
-      )
+      );
     }
 
-    return actions
+    return actions;
   }
 
   private approveMTProxy(token: string) {
@@ -368,9 +368,9 @@ export class MTMyPositionPanelInternal extends React.Component<
         this.props.approveMTProxy({
           token,
           proxyAddress: this.props.mta.proxy.options.address as string,
-        })
+        });
       }
-    }
+    };
   }
 
   private transfer(actionKind: UserActionKind, token: string, ilk?: string) {
@@ -379,8 +379,8 @@ export class MTMyPositionPanelInternal extends React.Component<
       token,
       ilk,
       withOnboarding: false,
-    })
-    const MTFundFormViewRxTx = connect<MTTransferFormState, ModalProps>(MtTransferFormView, fundForm$)
-    this.props.open(MTFundFormViewRxTx)
+    });
+    const MTFundFormViewRxTx = connect<MTTransferFormState, ModalProps>(MtTransferFormView, fundForm$);
+    this.props.open(MTFundFormViewRxTx);
   }
 }

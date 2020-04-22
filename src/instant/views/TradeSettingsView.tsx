@@ -1,24 +1,24 @@
-import { BigNumber } from 'bignumber.js'
-import classnames from 'classnames'
-import * as React from 'react'
-import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons'
-import warningSvg from '../../icons/warning.svg'
-import { BigNumberInput, lessThanOrEqual } from '../../utils/bigNumberInput/BigNumberInput'
-import { formatPrice } from '../../utils/formatters/format'
-import { BackIcon } from '../../utils/icons/Icons'
-import { SvgImage } from '../../utils/icons/utils'
-import { TopLeftCorner } from '../../utils/panel/TopRightCorner'
-import { TradeDetails } from '../details/TradeDetails'
-import * as instantStyles from '../Instant.scss'
-import { InstantFormChangeKind, InstantFormState, ViewKind } from '../instantForm'
-import { InstantFormWrapper } from '../InstantFormWrapper'
-import * as styles from './TradeSettingsView.scss'
+import { BigNumber } from 'bignumber.js';
+import classnames from 'classnames';
+import * as React from 'react';
+import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
+import warningSvg from '../../icons/warning.svg';
+import { BigNumberInput, lessThanOrEqual } from '../../utils/bigNumberInput/BigNumberInput';
+import { formatPrice } from '../../utils/formatters/format';
+import { BackIcon } from '../../utils/icons/Icons';
+import { SvgImage } from '../../utils/icons/utils';
+import { TopLeftCorner } from '../../utils/panel/TopRightCorner';
+import { TradeDetails } from '../details/TradeDetails';
+import * as instantStyles from '../Instant.scss';
+import { InstantFormChangeKind, InstantFormState, ViewKind } from '../instantForm';
+import { InstantFormWrapper } from '../InstantFormWrapper';
+import * as styles from './TradeSettingsView.scss';
 
 export class TradeSettingsView extends React.Component<InstantFormState> {
   public render() {
-    const { slippageLimit, price, sellToken } = this.props
-    const slippageLimitInPercentage = slippageLimit.times(100).valueOf()
-    const { base, quote } = this._quotation()
+    const { slippageLimit, price, sellToken } = this.props;
+    const slippageLimitInPercentage = slippageLimit.times(100).valueOf();
+    const { base, quote } = this._quotation();
     return (
       <InstantFormWrapper heading="Advanced Settings">
         <TopLeftCorner>
@@ -61,38 +61,38 @@ export class TradeSettingsView extends React.Component<InstantFormState> {
           </div>
         </section>
       </InstantFormWrapper>
-    )
+    );
   }
 
   private _hideTradeSettings = () => {
     this.props.change({
       kind: InstantFormChangeKind.viewChange,
       view: ViewKind.new,
-    })
-  }
+    });
+  };
 
   private _updateSlippageLimit = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = new BigNumber(e.target.value.replace(/,/g, ''))
+    const value = new BigNumber(e.target.value.replace(/,/g, ''));
     if (!value.isNaN()) {
       this.props.change({
         value: value.div(100),
         kind: InstantFormChangeKind.slippageLimitChange,
-      })
+      });
     }
-  }
+  };
 
   private _quotation = () => {
     if (this.props.quotation) {
-      const [base, quote] = this.props.quotation.split('/')
-      return { base, quote }
+      const [base, quote] = this.props.quotation.split('/');
+      return { base, quote };
     }
-    return { quote: '', base: '' }
-  }
+    return { quote: '', base: '' };
+  };
 
   private _calculateSlippage = (price: BigNumber, slippageLimit: BigNumber) => {
     if (this._quotation().base === this.props.sellToken) {
-      return price.minus(price.times(slippageLimit))
+      return price.minus(price.times(slippageLimit));
     }
-    return price.plus(price.times(slippageLimit))
-  }
+    return price.plus(price.times(slippageLimit));
+  };
 }

@@ -1,33 +1,33 @@
-import classnames from 'classnames'
-import { isEqual } from 'lodash'
-import * as React from 'react'
+import classnames from 'classnames';
+import { isEqual } from 'lodash';
+import * as React from 'react';
 // @ts-ignore
 // tslint:disable:import-name
-import Jazzicon, { jsNumberForAddress } from 'react-jazzicon'
+import Jazzicon, { jsNumberForAddress } from 'react-jazzicon';
 // @ts-ignore
-import * as ReactPopover from 'react-popover'
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs'
-import { distinctUntilChanged, map } from 'rxjs/operators'
+import * as ReactPopover from 'react-popover';
+import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import { distinctUntilChanged, map } from 'rxjs/operators';
 
-import { IoIosWifi } from 'react-icons/io'
-import MediaQuery from 'react-responsive'
-import { NavLink } from 'react-router-dom'
-import { theAppContext } from '../AppContext'
-import { account$ } from '../blockchain/network'
-import { WalletStatus, walletStatus$ } from '../blockchain/wallet'
-import { web3Status$ } from '../blockchain/web3'
-import chevronDownSvg from '../icons/chevron-down.svg'
-import { routerContext } from '../Main'
-import { connect } from '../utils/connect'
-import { Button } from '../utils/forms/Buttons'
-import { SvgImage } from '../utils/icons/utils'
-import { Loadable } from '../utils/loadable'
-import { WithLoadingIndicatorInline } from '../utils/loadingIndicator/LoadingIndicator'
-import * as styles from './Header.scss'
-import OasisDexLogo from './OasisDexLogo.svg'
-import { WalletConnectionViewKind, walletConnectionViewManual$, WalletConnectionViews } from './WalletConnectionView'
+import { IoIosWifi } from 'react-icons/io';
+import MediaQuery from 'react-responsive';
+import { NavLink } from 'react-router-dom';
+import { theAppContext } from '../AppContext';
+import { account$ } from '../blockchain/network';
+import { WalletStatus, walletStatus$ } from '../blockchain/wallet';
+import { web3Status$ } from '../blockchain/web3';
+import chevronDownSvg from '../icons/chevron-down.svg';
+import { routerContext } from '../Main';
+import { connect } from '../utils/connect';
+import { Button } from '../utils/forms/Buttons';
+import { SvgImage } from '../utils/icons/utils';
+import { Loadable } from '../utils/loadable';
+import { WithLoadingIndicatorInline } from '../utils/loadingIndicator/LoadingIndicator';
+import * as styles from './Header.scss';
+import OasisDexLogo from './OasisDexLogo.svg';
+import { WalletConnectionViewKind, walletConnectionViewManual$, WalletConnectionViews } from './WalletConnectionView';
 
-const { REACT_APP_INSTANT_ENABLED, REACT_APP_LT_ENABLED, REACT_APP_SUBDIR } = process.env
+const { REACT_APP_INSTANT_ENABLED, REACT_APP_LT_ENABLED, REACT_APP_SUBDIR } = process.env;
 
 const {
   header,
@@ -45,10 +45,10 @@ const {
   dark,
   mild,
   walletConnection,
-} = styles
+} = styles;
 
 interface HeaderProps {
-  walletStatus: WalletStatus
+  walletStatus: WalletStatus;
 }
 
 const walletConnectionView$: Observable<WalletConnectionViewKind> = combineLatest(
@@ -58,23 +58,23 @@ const walletConnectionView$: Observable<WalletConnectionViewKind> = combineLates
 ).pipe(
   map(([manualViewChange, walletStatus, web3Status]) => {
     if (manualViewChange) {
-      return manualViewChange
+      return manualViewChange;
     }
 
     if (web3Status === 'readonly') {
-      return WalletConnectionViewKind.noClient
+      return WalletConnectionViewKind.noClient;
     }
 
     if (walletStatus === 'connected') {
-      return WalletConnectionViewKind.connected
+      return WalletConnectionViewKind.connected;
     }
 
-    return WalletConnectionViewKind.notConnected
+    return WalletConnectionViewKind.notConnected;
   }),
   distinctUntilChanged(isEqual),
-)
+);
 
-const popup = new BehaviorSubject(false)
+const popup = new BehaviorSubject(false);
 
 const popup$ = combineLatest(walletStatus$, popup, walletConnectionView$).pipe(
   map(([status, isOpen, view]) => ({
@@ -82,21 +82,21 @@ const popup$ = combineLatest(walletStatus$, popup, walletConnectionView$).pipe(
     isOpen,
     open: () => popup.next(true),
     close: () => {
-      popup.next(false)
+      popup.next(false);
       setTimeout(() => {
-        walletConnectionViewManual$.next('')
-      }, 500)
+        walletConnectionViewManual$.next('');
+      }, 500);
     },
     isConnected: status === 'connected',
     isConnecting: status === 'connecting',
   })),
-)
+);
 
 walletStatus$.pipe().subscribe((status) => {
   if (status === 'connected' || status === 'disconnected') {
-    popup.next(false)
+    popup.next(false);
   }
-})
+});
 
 class Header extends React.Component<HeaderProps> {
   public render() {
@@ -129,28 +129,28 @@ class Header extends React.Component<HeaderProps> {
           </header>
         )}
       </routerContext.Consumer>
-    )
+    );
   }
 }
 
 export const HeaderTxRx = connect<HeaderProps, {}>(
   Header,
   combineLatest(walletStatus$).pipe(map(([walletStatus]) => ({ walletStatus }))),
-)
+);
 
 interface WalletConnectionStatusProps {
-  open: () => void
-  close: () => void
-  isOpen: boolean
-  isConnected: boolean
-  isConnecting: boolean
-  view: any
+  open: () => void;
+  close: () => void;
+  isOpen: boolean;
+  isConnected: boolean;
+  isConnecting: boolean;
+  view: any;
 }
 
 class WalletConnectionStatus extends React.Component<WalletConnectionStatusProps> {
   public render(): JSX.Element {
-    const { open, close, view, isConnected, isConnecting, isOpen } = this.props
-    const View = WalletConnectionViews.get(isConnecting ? WalletConnectionViewKind.connecting : view)
+    const { open, close, view, isConnected, isConnecting, isOpen } = this.props;
+    const View = WalletConnectionViews.get(isConnecting ? WalletConnectionViewKind.connecting : view);
 
     return (
       <ReactPopover
@@ -191,20 +191,20 @@ class WalletConnectionStatus extends React.Component<WalletConnectionStatusProps
                         Connect Wallet
                         <SvgImage image={chevronDownSvg} className={classnames(arrowDown, dark)} />
                       </>
-                    )
+                    );
                   }
-                  return <IoIosWifi />
+                  return <IoIosWifi />;
                 }}
               </MediaQuery>
             </Button>
           )}
         </div>
       </ReactPopover>
-    )
+    );
   }
 }
 
-const WalletConnectionStatusRx = connect<WalletConnectionStatusProps, {}>(WalletConnectionStatus, popup$)
+const WalletConnectionStatusRx = connect<WalletConnectionStatusProps, {}>(WalletConnectionStatus, popup$);
 
 interface StatusProps extends Loadable<Account> {}
 
@@ -214,7 +214,7 @@ class Status extends React.Component<StatusProps> {
       <span className={styles.accountLoader}>
         <WithLoadingIndicatorInline loadable={this.props} className={styles.account}>
           {({ account }: Account) => {
-            const label = account ? account.slice(0, 6) + '...' + account.slice(-4) : 'Logged out'
+            const label = account ? account.slice(0, 6) + '...' + account.slice(-4) : 'Logged out';
 
             return (
               <div title={account} data-test-id="status" className={classnames(navElement, styles.account)}>
@@ -226,35 +226,35 @@ class Status extends React.Component<StatusProps> {
 
                 <SvgImage image={chevronDownSvg} className={classnames(arrowDown, mild)} />
               </div>
-            )
+            );
           }}
         </WithLoadingIndicatorInline>
       </span>
-    )
+    );
   }
 }
 
 interface Account {
-  account: string | undefined
-  available?: boolean
+  account: string | undefined;
+  available?: boolean;
 }
 
 const loadableAccount$: Observable<Loadable<Account>> = combineLatest(walletStatus$, account$).pipe(
   map(([walletStatus, account]) => {
     if (walletStatus === 'connecting') {
-      return { status: 'loading' } as Loadable<Account>
+      return { status: 'loading' } as Loadable<Account>;
     }
     return {
       status: 'loaded',
       value: { account, available: walletStatus !== 'missing' },
-    } as Loadable<Account>
+    } as Loadable<Account>;
   }),
-)
+);
 
-export const StatusTxRx = connect<StatusProps, {}>(Status, loadableAccount$)
+export const StatusTxRx = connect<StatusProps, {}>(Status, loadableAccount$);
 
 export const HeaderNavLink = ({ to, name }: { to: string; name: string }) => (
   <NavLink data-test-id={name} to={to} className={classnames(item, navLink)} activeClassName={activeNavLink}>
     {name}
   </NavLink>
-)
+);

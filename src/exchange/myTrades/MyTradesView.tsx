@@ -1,28 +1,28 @@
-import classnames from 'classnames'
-import * as React from 'react'
+import classnames from 'classnames';
+import * as React from 'react';
 
-import { BigNumber } from 'bignumber.js'
-import { trackingEvents } from '../../analytics/analytics'
-import { etherscan } from '../../blockchain/etherscan'
-import { formatDateTime } from '../../utils/formatters/format'
-import { FormatAmount, FormatPriceOrder } from '../../utils/formatters/Formatters'
-import { Button, ButtonGroup, CloseButton } from '../../utils/forms/Buttons'
-import { ProgressIcon } from '../../utils/icons/Icons'
-import { Authorization } from '../../utils/loadingIndicator/Authorization'
-import { WithLoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator'
-import { ServerUnreachable } from '../../utils/loadingIndicator/ServerUnreachable'
-import { PanelHeader } from '../../utils/panel/Panel'
-import { Scrollbar } from '../../utils/Scrollbar/Scrollbar'
-import { RowClickable, Table } from '../../utils/table/Table'
-import { InfoLabel, Muted, SellBuySpan } from '../../utils/text/Text'
-import { Trade, TradeAct } from '../trades'
-import { MyTradesKind, MyTradesPropsLoadable } from './myTrades'
-import * as styles from './MyTradesView.scss'
-import { TradeWithStatus } from './openTrades'
+import { BigNumber } from 'bignumber.js';
+import { trackingEvents } from '../../analytics/analytics';
+import { etherscan } from '../../blockchain/etherscan';
+import { formatDateTime } from '../../utils/formatters/format';
+import { FormatAmount, FormatPriceOrder } from '../../utils/formatters/Formatters';
+import { Button, ButtonGroup, CloseButton } from '../../utils/forms/Buttons';
+import { ProgressIcon } from '../../utils/icons/Icons';
+import { Authorization } from '../../utils/loadingIndicator/Authorization';
+import { WithLoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
+import { ServerUnreachable } from '../../utils/loadingIndicator/ServerUnreachable';
+import { PanelHeader } from '../../utils/panel/Panel';
+import { Scrollbar } from '../../utils/Scrollbar/Scrollbar';
+import { RowClickable, Table } from '../../utils/table/Table';
+import { InfoLabel, Muted, SellBuySpan } from '../../utils/text/Text';
+import { Trade, TradeAct } from '../trades';
+import { MyTradesKind, MyTradesPropsLoadable } from './myTrades';
+import * as styles from './MyTradesView.scss';
+import { TradeWithStatus } from './openTrades';
 
 export class MyTradesTable extends React.Component<MyTradesPropsLoadable> {
   public render() {
-    const { kind, tradingPair } = this.props
+    const { kind, tradingPair } = this.props;
 
     return (
       <>
@@ -108,7 +108,7 @@ export class MyTradesTable extends React.Component<MyTradesPropsLoadable> {
                                 </td>
                               )}
                             </RowClickable>
-                          )
+                          );
                         })}
                       </tbody>
                     </Table>
@@ -119,13 +119,13 @@ export class MyTradesTable extends React.Component<MyTradesPropsLoadable> {
           )}
         </Authorization>
       </>
-    )
+    );
   }
 
   public cancelOffer = (offerId: BigNumber, type: TradeAct, amount: BigNumber, token: string) => {
     return (): void => {
-      this.props.cancelOffer({ offerId, type, amount, token })
-      trackingEvents.cancelOffer()
+      this.props.cancelOffer({ offerId, type, amount, token });
+      trackingEvents.cancelOffer();
     }
   }
 
@@ -133,14 +133,14 @@ export class MyTradesTable extends React.Component<MyTradesPropsLoadable> {
     return (): void => {
       etherscan(this.props.etherscan)
         .transaction(trade.tx as string)
-        .open()
-    }
-  }
+        .open();
+    };
+  };
 }
 
 export class MyTrades extends React.Component<MyTradesPropsLoadable> {
   public render() {
-    const { value, kind, changeKind } = this.props
+    const { value, kind, changeKind } = this.props;
     return (
       <>
         <PanelHeader bordered={value && value.status === 'error'}>
@@ -166,6 +166,6 @@ export class MyTrades extends React.Component<MyTradesPropsLoadable> {
         </PanelHeader>
         <MyTradesTable {...this.props} />
       </>
-    )
+    );
   }
 }

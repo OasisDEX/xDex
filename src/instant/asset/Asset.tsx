@@ -1,26 +1,26 @@
-import { BigNumber } from 'bignumber.js'
-import classnames from 'classnames'
-import * as React from 'react'
+import { BigNumber } from 'bignumber.js';
+import classnames from 'classnames';
+import * as React from 'react';
 
-import { getToken } from '../../blockchain/config'
-import { User } from '../../blockchain/user'
-import { formatAmountInstant } from '../../utils/formatters/format'
-import { ProgressIcon } from '../../utils/icons/Icons'
-import { Currency } from '../../utils/text/Text'
-import * as styles from './Asset.scss'
+import { getToken } from '../../blockchain/config';
+import { User } from '../../blockchain/user';
+import { formatAmountInstant } from '../../utils/formatters/format';
+import { ProgressIcon } from '../../utils/icons/Icons';
+import { Currency } from '../../utils/text/Text';
+import * as styles from './Asset.scss';
 
 export interface AssetProps {
-  currency: string
-  balance?: any
-  onClick?: () => void
-  user?: User
-  isLocked?: boolean
+  currency: string;
+  balance?: any;
+  onClick?: () => void;
+  user?: User;
+  isLocked?: boolean;
 }
 
 export class Asset extends React.Component<AssetProps> {
   public render() {
-    const { user, currency, onClick, isLocked } = this.props
-    const balance = user && user.account ? this.props.balance : new BigNumber(0)
+    const { user, currency, onClick, isLocked } = this.props;
+    const balance = user && user.account ? this.props.balance : new BigNumber(0);
     return (
       <button
         className={classnames(styles.asset, isLocked && styles.locked)}
@@ -38,6 +38,6 @@ export class Asset extends React.Component<AssetProps> {
           </div>
         )}
       </button>
-    )
+    );
   }
 }
