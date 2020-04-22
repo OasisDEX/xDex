@@ -1,2 +1,2 @@
-export const radio: string;
-export const hasError: string;
+export const radio: string
+export const hasError: string

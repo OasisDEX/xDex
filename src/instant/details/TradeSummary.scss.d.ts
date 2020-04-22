@@ -1,3 +1,3 @@
-export const details: string;
-export const summary: string;
-export const highlight: string;
+export const details: string
+export const summary: string
+export const highlight: string

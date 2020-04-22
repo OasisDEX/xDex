@@ -1,1 +1,1 @@
-export const client: string;
+export const client: string

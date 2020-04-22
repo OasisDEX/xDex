@@ -1,66 +1,63 @@
-import classnames from 'classnames';
-import * as mixpanel from 'mixpanel-browser';
-import * as React from 'react';
-import { FormatPercent } from '../../utils/formatters/Formatters';
-import { CloseButton } from '../../utils/forms/Buttons';
-import { TopRightCorner } from '../../utils/panel/TopRightCorner';
-import { InstantFormChangeKind, InstantFormState, ViewKind } from '../instantForm';
-import { InstantFormWrapper } from '../InstantFormWrapper';
-import * as styles from './PriceImpactWarningView.scss';
+import classnames from 'classnames'
+import * as mixpanel from 'mixpanel-browser'
+import * as React from 'react'
+import { FormatPercent } from '../../utils/formatters/Formatters'
+import { CloseButton } from '../../utils/forms/Buttons'
+import { TopRightCorner } from '../../utils/panel/TopRightCorner'
+import { InstantFormChangeKind, InstantFormState, ViewKind } from '../instantForm'
+import { InstantFormWrapper } from '../InstantFormWrapper'
+import * as styles from './PriceImpactWarningView.scss'
 
 const PriceImpactGraph = () => (
   <div className={styles.graph}>
     <div>
       <div style={{ display: 'inline-block', width: '75%' }}>
-        <div className={classnames(styles.bar, styles.bar1)}/>
-        <div className={classnames(styles.bar, styles.bar2)}/>
-        <div className={classnames(styles.bar, styles.bar3)}/>
+        <div className={classnames(styles.bar, styles.bar1)} />
+        <div className={classnames(styles.bar, styles.bar2)} />
+        <div className={classnames(styles.bar, styles.bar3)} />
       </div>
       <div className={styles.arrowPlaceholder}>
-        <div className={styles.arrow}/>
+        <div className={styles.arrow} />
       </div>
     </div>
     <div>
-      <div className={classnames(styles.bar, styles.bar4, styles.danger)}/>
+      <div className={classnames(styles.bar, styles.bar4, styles.danger)} />
     </div>
   </div>
-);
+)
 
 export class PriceImpactWarningView extends React.Component<InstantFormState> {
-
   public render() {
-    const { priceImpact } = this.props;
+    const { priceImpact } = this.props
     return (
-      <InstantFormWrapper heading="Order Warning!"
-                          btnLabel="Proceed with order"
-                          btnAction={this.onAcknowledge}
-                          btnDataTestId="proceed-with-order">
+      <InstantFormWrapper
+        heading="Order Warning!"
+        btnLabel="Proceed with order"
+        btnAction={this.onAcknowledge}
+        btnDataTestId="proceed-with-order"
+      >
         <TopRightCorner>
-          <CloseButton theme="danger"
-                       data-test-id="dismiss-warning"
-                       onClick={this.onDismiss}/>
+          <CloseButton theme="danger" data-test-id="dismiss-warning" onClick={this.onDismiss} />
         </TopRightCorner>
         <div className={styles.container}>
-          <PriceImpactGraph/>
+          <PriceImpactGraph />
           <p className={styles.impactText} data-test-id="price-impact-text">
             <span>Order has a significant </span>
             <span className={classnames('danger', 'semi-bold')}>
-              price impact of <FormatPercent fallback={'N/A'} value={priceImpact} precision={2}/>
+              price impact of <FormatPercent fallback={'N/A'} value={priceImpact} precision={2} />
             </span>
           </p>
-          <p className={styles.continueText}>
-            Do you still want to proceed?
-          </p>
+          <p className={styles.continueText}>Do you still want to proceed?</p>
         </div>
       </InstantFormWrapper>
-    );
+    )
   }
 
   private onDismiss = () => {
     this.props.change({
       kind: InstantFormChangeKind.viewChange,
-      view: ViewKind.new
-    });
+      view: ViewKind.new,
+    })
   }
 
   private onAcknowledge = () => {
@@ -69,12 +66,12 @@ export class PriceImpactWarningView extends React.Component<InstantFormState> {
       product: 'oasis-trade',
       page: 'Instant',
       section: 'order-details',
-      case: 'price-impact-warning'
-    });
-    this.props.submit(this.props);
+      case: 'price-impact-warning',
+    })
+    this.props.submit(this.props)
     this.props.change({
       kind: InstantFormChangeKind.viewChange,
-      view: ViewKind.finalization
-    });
+      view: ViewKind.finalization,
+    })
   }
 }

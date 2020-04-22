@@ -1,1 +1,1 @@
-export const flr: string;
+export const flr: string

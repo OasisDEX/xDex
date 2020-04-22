@@ -1,10 +1,10 @@
-import { storiesOf } from '@storybook/react';
-import * as React from 'react';
+import { storiesOf } from '@storybook/react'
+import * as React from 'react'
 
-import { Table } from '../table/Table';
-import { Panel, PanelBody, PanelHeader } from './Panel';
+import { Table } from '../table/Table'
+import { Panel, PanelBody, PanelHeader } from './Panel'
 
-const stories = storiesOf('Panel', module);
+const stories = storiesOf('Panel', module)
 
 stories.add('Panel', () => (
   <div>
@@ -21,19 +21,19 @@ stories.add('Panel', () => (
     </Panel>
 
     <h3>Panel with table - do not ue panel body</h3>
-    <Panel  style={{ width: '750px' }}>
+    <Panel style={{ width: '750px' }}>
       <PanelHeader>Panel header </PanelHeader>
       <Table>
         <thead>
-        <tr>
-          <th style={{ width: '30%' }}>Name</th>
-          <th style={{ width: '10%' }}>Blood type</th>
-          <th style={{ width: '20%' }}>Height</th>
-          <th style={{ width: '20%' }}>Weight</th>
-          <th style={{ width: '20%' }}>Zodiac</th>
-          <th style={{ width: '25%' }}>Birthday</th>
-          <th style={{ width: '20%' }}>Lucky stone</th>
-        </tr>
+          <tr>
+            <th style={{ width: '30%' }}>Name</th>
+            <th style={{ width: '10%' }}>Blood type</th>
+            <th style={{ width: '20%' }}>Height</th>
+            <th style={{ width: '20%' }}>Weight</th>
+            <th style={{ width: '20%' }}>Zodiac</th>
+            <th style={{ width: '25%' }}>Birthday</th>
+            <th style={{ width: '20%' }}>Lucky stone</th>
+          </tr>
         </thead>
         <tbody>
           <tr>
@@ -112,4 +112,4 @@ stories.add('Panel', () => (
       </PanelBody>
     </Panel>
   </div>
-));
+))
