@@ -432,8 +432,10 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
   }
 
   private transfer() {
-    if (this.props.mta && this.props.mta.state !== MTAccountState.notSetup && this.props.amount) {
+    const { mta, amount, actionKind, token } = this.props;
+    if (mta && mta.state !== MTAccountState.notSetup && amount) {
       this.props.transfer(this.props);
+      trackingEvents.transferTokens(actionKind, token, amount.toNumber());
     }
   }
 
@@ -455,7 +457,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
   }
 
   private Buttons() {
-    const { progress, readyToProceed, token, ilk, actionKind, amount } = this.props;
+    const { progress, readyToProceed, token, ilk } = this.props;
     const retry = progress === ProgressStage.fiasco;
     const depositAgain = progress === ProgressStage.done;
     const deposit = !retry && !depositAgain;
@@ -474,9 +476,6 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
             color="primary"
             onClick={() => {
               this.transfer();
-              if (amount) {
-                trackingEvents.transferTokens(actionKind, token, amount.toNumber());
-              }
             }}
           >
             {proceedName}
@@ -489,9 +488,6 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
             block={true}
             onClick={() => {
               this.transfer();
-              if (amount) {
-                trackingEvents.transferTokens(actionKind, token, amount.toNumber());
-              }
             }}
           >
             Retry
