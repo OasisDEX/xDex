@@ -67,7 +67,8 @@ export async function disconnectAccount() {
 
   const subprovider = maker.service('accounts').currentWallet();
   if (subprovider.isWalletLink) {
-    subprovider.resetWallet();
+    subprovider.resetAndReload();
+    return;
   } else if (subprovider.isWalletConnect) {
     await subprovider.getWalletConnector().killSession();
   } else if (
