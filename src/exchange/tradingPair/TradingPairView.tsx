@@ -1,9 +1,9 @@
 import { BigNumber } from 'bignumber.js';
 import classnames from 'classnames';
-import * as mixpanel from 'mixpanel-browser';
 import * as React from 'react';
 import { NavLink } from 'react-router-dom';
 
+import { trackingEvents } from '../../analytics/analytics';
 import { getToken, tradingPairs } from '../../blockchain/config';
 import { FormatAmount, FormatPercent, FormatPrice, FormatQuoteToken } from '../../utils/formatters/Formatters';
 import { Loadable } from '../../utils/loadable';
@@ -48,13 +48,7 @@ export class TradingPairView extends React.Component<TradingPairsProps, TradingP
           className={classnames(styles.dropdownItemLink, styles.pairView)}
           onClick={() => {
             clickHandler();
-            mixpanel.track('btn-click', {
-              pair: `${pair.base}${pair.quote}`,
-              id: 'change-asset-pair',
-              product: 'oasis-trade',
-              page: 'Market',
-              section: 'asset-picker',
-            });
+            trackingEvents.changeAssetPair(pair.base, pair.quote);
           }}
         >
           <TradingPairView.PairView {...{ pair, marketsDetailsLoadable }} />

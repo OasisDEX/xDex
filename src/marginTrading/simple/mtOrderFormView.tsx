@@ -1,9 +1,9 @@
 import { BigNumber } from 'bignumber.js';
 import * as classnames from 'classnames';
-import * as mixpanel from 'mixpanel-browser';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
+import { trackingEvents } from '../../analytics/analytics';
 import { getToken } from '../../blockchain/config';
 import * as formStyles from '../../exchange/offerMake/OfferMakeForm.scss';
 import { OfferType } from '../../exchange/orderbook/orderbook';
@@ -704,23 +704,20 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState & {
   }
 
   private proceedButton() {
-    const label = this.props.kind === 'buy' ? 'Place Buy Order' : 'Place Sell Order';
+    const { kind, total, readyToProceed, progress } = this.props;
+    const label = kind === 'buy' ? 'Place Buy Order' : 'Place Sell Order';
     return (
       <Button
         className={styles.confirmButton}
         data-test-id="place-order"
         type="submit"
         value="submit"
-        color={this.props.kind === OfferType.buy ? 'primary' : 'danger'}
-        disabled={!this.props.readyToProceed || !!this.props.progress}
+        color={kind === OfferType.buy ? 'primary' : 'danger'}
+        disabled={!readyToProceed || !!progress}
         onClick={() => {
-          mixpanel.track('btn-click', {
-            id: 'initiate-trade',
-            product: 'oasis-trade',
-            page: 'Leverage',
-            section: 'manage-leverage',
-            kind: this.props.kind,
-          });
+          if (total) {
+            trackingEvents.initiateTradeLeverage(kind, total.toNumber());
+          }
         }}
       >
         {label}

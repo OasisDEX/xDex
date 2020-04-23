@@ -23,8 +23,8 @@ import { Muted } from '../../utils/text/Text';
 import { TransactionStateDescription } from '../../utils/text/TransactionStateDescription';
 import { zero } from '../../utils/zero';
 
-import * as mixpanel from 'mixpanel-browser';
 import * as ReactDOM from 'react-dom';
+import { trackingEvents } from '../../analytics/analytics';
 import { theAppContext } from '../../AppContext';
 import { SvgImage } from '../../utils/icons/utils';
 import { LoadableWithTradingPair } from '../../utils/loadable';
@@ -432,8 +432,10 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
   }
 
   private transfer() {
-    if (this.props.mta && this.props.mta.state !== MTAccountState.notSetup && this.props.amount) {
+    const { mta, amount, actionKind, token } = this.props;
+    if (mta && mta.state !== MTAccountState.notSetup && amount) {
       this.props.transfer(this.props);
+      trackingEvents.transferTokens(actionKind, token, amount.toNumber());
     }
   }
 
@@ -455,7 +457,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
   }
 
   private Buttons() {
-    const { progress, readyToProceed, token, ilk, actionKind } = this.props;
+    const { progress, readyToProceed, token, ilk } = this.props;
     const retry = progress === ProgressStage.fiasco;
     const depositAgain = progress === ProgressStage.done;
     const deposit = !retry && !depositAgain;
@@ -474,20 +476,20 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
             color="primary"
             onClick={() => {
               this.transfer();
-              mixpanel.track('btn-click', {
-                id: `${actionKind}-${token === 'DAI' ? 'dai' : 'collateral'}-submit`,
-                product: 'oasis-trade',
-                page: 'Leverage',
-                section: 'deposit-withdraw-modal',
-                currency: token,
-              });
             }}
           >
             {proceedName}
           </Button>
         )}
         {retry && (
-          <Button size="md" className={styles.confirmButton} block={true} onClick={() => this.transfer()}>
+          <Button
+            size="md"
+            className={styles.confirmButton}
+            block={true}
+            onClick={() => {
+              this.transfer();
+            }}
+          >
             Retry
           </Button>
         )}
