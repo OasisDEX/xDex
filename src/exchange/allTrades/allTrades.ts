@@ -34,10 +34,12 @@ export function loadAllTrades(
   onEveryBlock$$: Observable<number>,
   { base, quote }: TradingPair,
 ): Observable<Trade[]> {
-  const borderline = moment().subtract(1, 'hour').toDate();
+  const borderline = moment()
+    .subtract(1, 'hour')
+    .toDate();
 
   return context$$.pipe(
-    switchMap((context) =>
+    switchMap(context =>
       combineLatest(
         onEveryBlock$$.pipe(
           exhaustMap(() =>
@@ -49,7 +51,9 @@ export function loadAllTrades(
         getTrades(context, base, quote, 'allTradesCurrent', {
           limit: TRADES_PAGE_SIZE,
           to: borderline,
-          from: moment(borderline).subtract(14, 'day').toDate(),
+          from: moment(borderline)
+            .subtract(14, 'day')
+            .toDate(),
         }),
       ),
     ),
@@ -66,11 +70,13 @@ export function loadPriceDaysAgo(
   { base, quote }: TradingPair,
 ): Observable<Trade[]> {
   return context$$.pipe(
-    switchMap((context) =>
+    switchMap(context =>
       onEveryBlock$$.pipe(
         exhaustMap(() =>
           getTrades(context, base, quote, 'allTradesCurrent', {
-            to: moment().subtract(days, 'days').toDate(),
+            to: moment()
+              .subtract(days, 'days')
+              .toDate(),
             from: moment()
               .subtract(days + 1, 'days')
               .toDate(),
@@ -90,12 +96,14 @@ export function loadVolumeForThePastDay(
   { base, quote }: TradingPair,
 ): Observable<Trade[]> {
   return context$$.pipe(
-    switchMap((context) =>
+    switchMap(context =>
       onEveryBlock$$.pipe(
         exhaustMap(() =>
           getTrades(context, base, quote, 'allTradesCurrent', {
             to: moment().toDate(),
-            from: moment().subtract(1, 'days').toDate(),
+            from: moment()
+              .subtract(1, 'days')
+              .toDate(),
           }),
         ),
       ),
@@ -129,7 +137,7 @@ export function createTradesBrowser$(
   const more$ = new Subject<any>();
 
   return context$$.pipe(
-    switchMap((context) =>
+    switchMap(context =>
       combineLatest(
         allTrades(tradingPair),
         more$.pipe(
@@ -139,8 +147,8 @@ export function createTradesBrowser$(
                 offset: nextPageStart,
                 limit: TRADES_PAGE_SIZE,
               }).pipe(
-                retryWhen((errors) => errors.pipe(delay(500))),
-                map((newTrades) => ({
+                retryWhen(errors => errors.pipe(delay(500))),
+                map(newTrades => ({
                   trades: [...trades, ...newTrades],
                   loading: false,
                   nextPageStart: nextPageStart + TRADES_PAGE_SIZE,

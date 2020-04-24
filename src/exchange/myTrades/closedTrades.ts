@@ -20,7 +20,7 @@ export function createMyClosedTrades$(
             exhaustMap(() =>
               getTrades(context, base, quote, 'myTrades', {
                 account,
-              }).pipe(map((trades) => trades.sort(compareByTimestampOnly))),
+              }).pipe(map(trades => trades.sort(compareByTimestampOnly))),
             ),
             distinctUntilChanged(isEqual),
           ),

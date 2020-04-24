@@ -76,7 +76,7 @@ export class MigrationButton extends React.Component<MigrationButtonProps & Moda
   public render() {
     return (
       <WithLoadingIndicator loadable={this.props} className={styles.loadingIndicator}>
-        {(migrationState) => {
+        {migrationState => {
           const visible =
             (isDAIEnabled() &&
               migrationState.kind === MigrationFormKind.sai2dai &&
@@ -185,12 +185,10 @@ export class MigrationModal extends React.Component<MigrationFormState & ModalPr
         </PanelHeader>
         <PanelBody paddingVertical={true} className={classnames(styles.panelBody, styles.process)}>
           <div className={styles.description}>
-            {
-              // tslint:disable-next-line:max-line-length
-              `Cancel your ${orders.length} Open ${
-                orders.length === 1 ? 'Order' : 'Orders'
-              } before upgrading your Single-Collateral Sai`
-            }
+            {// tslint:disable-next-line:max-line-length
+            `Cancel your ${orders.length} Open ${
+              orders.length === 1 ? 'Order' : 'Orders'
+            } before upgrading your Single-Collateral Sai`}
           </div>
           <div className={styles.ordersPlaceholder}>
             <Table align="left" className={styles.orders}>
@@ -228,7 +226,7 @@ export class MigrationModal extends React.Component<MigrationFormState & ModalPr
                           <LoadingIndicator className={styles.orderCancellationIndicator} inline={true} />
                         ) : (
                           <MediaQuery maxWidth={480}>
-                            {(matches) => {
+                            {matches => {
                               if (matches) {
                                 return (
                                   <CloseButton
@@ -305,12 +303,12 @@ export class MigrationModal extends React.Component<MigrationFormState & ModalPr
             <LoadingIndicator className={styles.processLoadingIndicator} inline={true} />
           )}
           {progress.status === ExchangeMigrationStatus.ready &&
-            progress.pending.map((operation) => {
+            progress.pending.map(operation => {
               return this.txRow(operation);
             })}
           {(progress.status === ExchangeMigrationStatus.inProgress ||
             progress.status === ExchangeMigrationStatus.fiasco) &&
-            progress.done.map((operation) => {
+            progress.done.map(operation => {
               return this.txRow(operation);
             })}
 
@@ -320,7 +318,7 @@ export class MigrationModal extends React.Component<MigrationFormState & ModalPr
 
           {(progress.status === ExchangeMigrationStatus.inProgress ||
             progress.status === ExchangeMigrationStatus.fiasco) &&
-            progress.pending.map((operation) => {
+            progress.pending.map(operation => {
               return this.txRow(operation);
             })}
 

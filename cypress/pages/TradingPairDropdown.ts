@@ -18,7 +18,7 @@ export class TradingPairDropdown {
   }
 
   public static hasMarkets(tradingPairs: TradingPair[]) {
-    tradingPairs.forEach((pair) => {
+    tradingPairs.forEach(pair => {
       cy.get(tid(`${pair.base}-${pair.quote}`, tid('base'))).contains(pair.base);
       cy.get(tid(`${pair.base}-${pair.quote}`, tid('quote'))).contains(pair.quote);
     });

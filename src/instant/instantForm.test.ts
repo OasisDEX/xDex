@@ -45,8 +45,8 @@ const controllerWithFakeOrderBook = (buys: any = [], sells: any = [], overrides:
   const orderbook = createFakeOrderbook(buys, sells);
   orderbook.buy.forEach((v, i) => (v.offerId = new BigNumber(i + 1)));
   orderbook.sell.forEach((v, i) => (v.offerId = new BigNumber(i + 1)));
-  orderbook.buy.forEach((v) => (v.timestamp = new Date('2019-02-19')));
-  orderbook.sell.forEach((v) => (v.timestamp = new Date('2019-02-19')));
+  orderbook.buy.forEach(v => (v.timestamp = new Date('2019-02-19')));
+  orderbook.sell.forEach(v => (v.timestamp = new Date('2019-02-19')));
   return createFormController$({
     ...defParams,
     ...overrides,
@@ -55,21 +55,21 @@ const controllerWithFakeOrderBook = (buys: any = [], sells: any = [], overrides:
 
 const fakeOrderBook = [[{ price: 180, amount: 10 }], [{ price: 200, amount: 10 }]];
 
-test.skip('initial state', (done) => {
+test.skip('initial state', done => {
   const controller = createFormController$(defParams);
-  controller.subscribe((state) => {
+  controller.subscribe(state => {
     expect(snapshotify(state)).toMatchSnapshot();
     done();
   });
 });
 
-test.skip('change pair', (done) => {
+test.skip('change pair', done => {
   const controller = createFormController$(defParams);
   const { change } = unpack(controller);
 
   change({ kind: InstantFormChangeKind.pairChange, buyToken: 'WETH', sellToken: 'DAI' });
 
-  controller.subscribe((state) => {
+  controller.subscribe(state => {
     expect(snapshotify(state)).toMatchSnapshot();
     done();
   });
@@ -120,55 +120,55 @@ jestEach([
 
   perform(unpack(controller).change);
 
-  controller.pipe(first()).subscribe((state) => {
+  controller.pipe(first()).subscribe(state => {
     expect(snapshotify(state)).toMatchSnapshot();
   });
 
   unpack(controller).submit(unpack(controller));
   expect(instantOrderMock.mock.calls).toMatchSnapshot();
 
-  controller.subscribe((state) => {
+  controller.subscribe(state => {
     expect(snapshotify(state)).toMatchSnapshot();
     done();
   });
 });
 
-test.skip('complex scenario', (done) => {
+test.skip('complex scenario', done => {
   const controller = controllerWithFakeOrderBook(...fakeOrderBook);
   const { change } = unpack(controller);
 
-  controller.pipe(first()).subscribe((state) => {
+  controller.pipe(first()).subscribe(state => {
     expect(snapshotify(state)).toMatchSnapshot();
     done();
   });
 
   change({ kind: InstantFormChangeKind.sellAmountFieldChange, value: new BigNumber(2) });
-  controller.pipe(first()).subscribe((state) => {
+  controller.pipe(first()).subscribe(state => {
     expect(snapshotify(state)).toMatchSnapshot();
   });
 
   change({ kind: InstantFormChangeKind.buyAmountFieldChange, value: new BigNumber(90) });
-  controller.pipe(first()).subscribe((state) => {
+  controller.pipe(first()).subscribe(state => {
     expect(snapshotify(state)).toMatchSnapshot();
   });
 
   change({ kind: InstantFormChangeKind.pairChange, buyToken: 'WETH', sellToken: 'DAI' });
-  controller.pipe(first()).subscribe((state) => {
+  controller.pipe(first()).subscribe(state => {
     expect(snapshotify(state)).toMatchSnapshot();
   });
 
   change({ kind: InstantFormChangeKind.buyAmountFieldChange, value: new BigNumber(2) });
-  controller.pipe(first()).subscribe((state) => {
+  controller.pipe(first()).subscribe(state => {
     expect(snapshotify(state)).toMatchSnapshot();
   });
 
   change({ kind: InstantFormChangeKind.sellAmountFieldChange, value: new BigNumber(100) });
-  controller.pipe(first()).subscribe((state) => {
+  controller.pipe(first()).subscribe(state => {
     expect(snapshotify(state)).toMatchSnapshot();
   });
 
   change({ kind: InstantFormChangeKind.formResetChange });
-  controller.pipe(first()).subscribe((state) => {
+  controller.pipe(first()).subscribe(state => {
     expect(snapshotify(state)).toMatchSnapshot();
   });
 });
@@ -226,7 +226,7 @@ jestEach([
 ]).test.skip('validation - %s', (_test, perform, done) => {
   const controller = controllerWithFakeOrderBook(...fakeOrderBook);
   perform(unpack(controller).change);
-  controller.subscribe((state) => {
+  controller.subscribe(state => {
     expect(snapshotify(state)).toMatchSnapshot();
     done();
   });

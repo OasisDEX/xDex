@@ -27,7 +27,7 @@ export class TheFooter extends React.Component<FooterProps> {
               <span>
                 Market Closing Time -{' '}
                 <WithLoadingIndicatorInline loadable={expirationDate}>
-                  {(expDate) => <span data-vis-reg-hide={true}>{moment(expDate).format('DD.MM.YYYY')}</span>}
+                  {expDate => <span data-vis-reg-hide={true}>{moment(expDate).format('DD.MM.YYYY')}</span>}
                 </WithLoadingIndicatorInline>
               </span>
               <a target="_blank" rel="noopener noreferrer" href={`${etherscan.url}/address/${address}`}>
@@ -86,7 +86,7 @@ export class TheFooter extends React.Component<FooterProps> {
             <div>
               Market Closing Time -{' '}
               <WithLoadingIndicatorInline loadable={expirationDate}>
-                {(expDate) => <span data-vis-reg-hide={true}>{moment(expDate).format('DD.MM.YYYY')}</span>}
+                {expDate => <span data-vis-reg-hide={true}>{moment(expDate).format('DD.MM.YYYY')}</span>}
               </WithLoadingIndicatorInline>
             </div>
             <div className={styles.links}>
@@ -148,13 +148,13 @@ export class TheFooter extends React.Component<FooterProps> {
 
 export function createFooter$(context$: Observable<NetworkConfig>): Observable<FooterProps> {
   return context$.pipe(
-    switchMap((context) =>
+    switchMap(context =>
       loadablifyLight<Date>(
         from(context.otc.contract.methods.close_time().call()).pipe(
           map((closeTime: string) => moment.unix(Number(closeTime)).toDate()),
         ),
       ).pipe(
-        map((expirationDate) => ({
+        map(expirationDate => ({
           expirationDate,
           etherscan: context.etherscan,
           address: context.otc.contract.options.address,

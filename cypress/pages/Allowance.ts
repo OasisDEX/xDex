@@ -28,11 +28,15 @@ export class Allowance {
 
     return {
       enable: () => {
-        cy.get(`@${symbol}`).find(tid('toggle-allowance')).click();
+        cy.get(`@${symbol}`)
+          .find(tid('toggle-allowance'))
+          .click();
       },
 
       disable: () => {
-        cy.get(`@${symbol}`).find(tid('toggle-allowance')).click();
+        cy.get(`@${symbol}`)
+          .find(tid('toggle-allowance'))
+          .click();
       },
 
       shouldBe: (state: ALLOWANCE_STATE) => {

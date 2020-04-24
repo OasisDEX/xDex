@@ -112,7 +112,7 @@ export class OrderbookView extends React.Component<Props> {
           <span>Order book</span>
           <div style={{ marginLeft: 'auto', display: 'flex' }}>
             <MediaQuery maxWidth={992}>
-              {(matches) => {
+              {matches => {
                 if (matches) {
                   return <></>;
                 }
@@ -171,7 +171,7 @@ export class OrderbookView extends React.Component<Props> {
                   to be loaded before we assert anything else.
                 */}
                 <span data-test-id={`${base}-${quote}-orderbook`} />
-                <Scrollbar ref={(el) => (this.scrollbar = el || undefined)} onScroll={this.scrolled}>
+                <Scrollbar ref={el => (this.scrollbar = el || undefined)} onScroll={this.scrolled}>
                   <Table align="right" className={styles.orderbookTable}>
                     <TransitionGroup component="tbody" exit={true} enter={true}>
                       {orderbook.sell
@@ -192,7 +192,7 @@ export class OrderbookView extends React.Component<Props> {
                       {/* better don't remove me! */}
                       <CSSTransition key="0" classNames="order" timeout={1000}>
                         <RowHighlighted className={styles.spreadRow}>
-                          <td ref={(el) => (this.centerRow = el || undefined)}>
+                          <td ref={el => (this.centerRow = el || undefined)}>
                             {orderbook.spread ? (
                               <FormatAmount value={orderbook.spread} token={this.props.tradingPair.quote} />
                             ) : (

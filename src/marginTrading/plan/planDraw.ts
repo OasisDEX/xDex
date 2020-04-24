@@ -76,7 +76,7 @@ export function planDraw(
     ...drawOps,
     ...flatten(
       orderDeltas(debts)
-        .filter((d) => !d.delta.eq(zero))
+        .filter(d => !d.delta.eq(zero))
         .map(deltaToOps),
     ),
   ];
@@ -108,7 +108,7 @@ export function planDrawDai(
     ...drawOps,
     ...flatten(
       orderDeltas(debts)
-        .filter((d) => !d.delta.eq(zero))
+        .filter(d => !d.delta.eq(zero))
         .map(deltaToOps),
     ),
   ];

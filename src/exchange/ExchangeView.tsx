@@ -97,8 +97,8 @@ export class ExchangeView extends React.Component<ExchangeViewProps> {
         <Switch>
           <Route
             path={`${matchUrl}/:base/:quote`}
-            render={(props) => {
-              const valid = tradingPairs.find((t) => t.base === tp.base && t.quote === tp.quote);
+            render={props => {
+              const valid = tradingPairs.find(t => t.base === tp.base && t.quote === tp.quote);
 
               if (!valid) {
                 // It should be a redirect, but I can't make it work!

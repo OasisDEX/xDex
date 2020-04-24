@@ -7,15 +7,15 @@ import { OfferType } from '../orderbook/orderbook';
 import { DepthChartView } from './DepthChartView';
 import { createFakeOrderbook, fakeOrderBook, fakeOrderbookWithOutliers } from './fakeOrderBook';
 
-const defaultStories = storiesOf('DepthChartView/Default - no price, no amount', module).addDecorator((story) => (
+const defaultStories = storiesOf('DepthChartView/Default - no price, no amount', module).addDecorator(story => (
   <Panel style={{ width: '510px' }}>{story()}</Panel>
 ));
 
-const limitOrderStories = storiesOf('DepthChartView/Limit Order', module).addDecorator((story) => (
+const limitOrderStories = storiesOf('DepthChartView/Limit Order', module).addDecorator(story => (
   <Panel style={{ width: '510px' }}>{story()}</Panel>
 ));
 
-const direct = storiesOf('DepthChartView/Direct', module).addDecorator((story) => (
+const direct = storiesOf('DepthChartView/Direct', module).addDecorator(story => (
   <Panel style={{ width: '510px' }}>{story()}</Panel>
 ));
 

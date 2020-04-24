@@ -61,7 +61,7 @@ export function createPriceChartLoadable$(
     switchMap((groupMode: GroupMode) =>
       dataSources$[groupMode].pipe(
         map(
-          (tradeHistory) =>
+          tradeHistory =>
             ({
               ...tradeHistory,
               groupMode,

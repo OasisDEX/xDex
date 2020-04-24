@@ -312,7 +312,7 @@ const loadInternal = memoize(
     return {
       address,
       // TODO: remove web3 dependency from here!
-      contract: new web3.eth.Contract(abi, address)
+      contract: new web3.eth.Contract(abi, address),
     };
   },
   (web3: any, _abi: any, address: string) => {
@@ -320,7 +320,7 @@ const loadInternal = memoize(
       web3s[web3s.length] = web3;
     }
     return `${web3s.indexOf(web3)}${address}`;
-  }
+  },
 );
 
 // new (window as any)._

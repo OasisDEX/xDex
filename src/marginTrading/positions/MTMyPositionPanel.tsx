@@ -220,7 +220,7 @@ export class MTMyPositionPanelInternal extends React.Component<
           <Switch
             blocked={this.state.blocked}
             onClick={() => {
-              this.setState((prevState) => ({ blocked: !prevState.blocked }));
+              this.setState(prevState => ({ blocked: !prevState.blocked }));
               trackingEvents.daiUsdToggle(this.state.blocked);
             }}
             optionOne="DAI"

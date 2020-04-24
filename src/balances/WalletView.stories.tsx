@@ -12,7 +12,7 @@ import { WrapUnwrapFormState } from '../wrapUnwrap/wrapUnwrapForm';
 import { CombinedBalance, CombinedBalances } from './balances';
 import { WalletViewInternal } from './WalletView';
 
-const stories = storiesOf('Account/My Wallet', module).addDecorator((story) => (
+const stories = storiesOf('Account/My Wallet', module).addDecorator(story => (
   <Panel>
     <div style={{ width: '932px' }}>{story()}</div>
   </Panel>

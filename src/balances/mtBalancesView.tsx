@@ -47,7 +47,7 @@ export class MTBalancesView extends React.Component<Loadable<MTBalancesProps> & 
       <Panel className={styles.balancesPanel}>
         <PanelHeader>Leverage Account</PanelHeader>
         <WithLoadingIndicator loadable={this.props}>
-          {(combinedBalances) =>
+          {combinedBalances =>
             combinedBalances.ma && combinedBalances.mta.state === MTAccountState.setup ? (
               <MTMyPositionPanelInternal
                 {...{
@@ -123,8 +123,8 @@ export class MTBalancesViewInternalImpl extends React.Component<MTBalancesProps 
           )}
           {this.props.balances &&
             this.props.balances
-              .filter((b) => b.asset && b.asset.assetKind === AssetKind.marginable)
-              .map((combinedBalance) => {
+              .filter(b => b.asset && b.asset.assetKind === AssetKind.marginable)
+              .map(combinedBalance => {
                 const asset: MarginableAsset = combinedBalance.asset!;
                 const lastEvent = asset.rawHistory.slice(-1)[0] || undefined;
                 const daiPrice = this.props.daiPrice;

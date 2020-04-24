@@ -41,7 +41,10 @@ export class Account {
    * one can enable DAI allowance
    */
   public static setProxyDAIAllowance = () => {
-    cy.get(tid('withdraw-actions-dropdown')).trigger('mouseover').find(tid('set-allowance')).click();
+    cy.get(tid('withdraw-actions-dropdown'))
+      .trigger('mouseover')
+      .find(tid('set-allowance'))
+      .click();
     cy.get(tid('withdraw-dai')).should('be.visible');
   };
 }

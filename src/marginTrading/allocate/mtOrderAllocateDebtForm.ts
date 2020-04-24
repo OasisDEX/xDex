@@ -131,13 +131,13 @@ function applyChange(state: MTAllocateState, change: MTAllocateStateChange): MTA
     case AllocateChangeKind.debtChange:
       return {
         ...state,
-        debts: state.debts.map((d) => (d.name === change.name ? { ...d, targetDebt: change.value } : d)),
+        debts: state.debts.map(d => (d.name === change.name ? { ...d, targetDebt: change.value } : d)),
         gasEstimationStatus: GasEstimationStatus.unset,
       };
     case AllocateChangeKind.debtDeltaChange:
       return {
         ...state,
-        debts: state.debts.map((d) =>
+        debts: state.debts.map(d =>
           d.name === change.name ? { ...d, targetDebt: change.value ? d.debt.plus(change.value) : undefined } : d,
         ),
         gasEstimationStatus: GasEstimationStatus.unset,
@@ -178,7 +178,7 @@ function calculate(
   const cashDelta = state.targetCash ? state.targetCash.minus(state.cashBalance) : undefined;
   const reverseCashDelta = cashDelta ? cashDelta.times(minusOne) : undefined;
 
-  const debts = state.debts.map((d) => ({
+  const debts = state.debts.map(d => ({
     ...d,
     delta: d.targetDebt ? d.targetDebt.minus(d.debt) : undefined,
     liquidationPrice: d.targetDebt ? d.minCollRatio.times(d.targetDebt).div(d.balance) : undefined,
@@ -225,7 +225,7 @@ function validate(state: MTAllocateState): MTAllocateState {
 }
 
 function addPlan(state: MTAllocateState): MTAllocateState {
-  if (!state.diffDaiBalance.eq(zero) || state.debts.find((d) => !d.targetDebt) || state.messages.length > 0) {
+  if (!state.diffDaiBalance.eq(zero) || state.debts.find(d => !d.targetDebt) || state.messages.length > 0) {
     return {
       ...state,
       plan: undefined,
@@ -233,8 +233,8 @@ function addPlan(state: MTAllocateState): MTAllocateState {
   }
 
   const deltas: Array<Required<EditableDebt>> = state.debts
-    .filter((d) => d.delta !== undefined)
-    .map((debt) => ({
+    .filter(d => d.delta !== undefined)
+    .map(debt => ({
       ...debt,
       targetDebt: debt.targetDebt as BigNumber,
       liquidationPrice: debt.liquidationPrice as BigNumber,
@@ -337,7 +337,7 @@ function prepareSubmit(calls$: Calls$): [(state: MTAllocateState) => void, () =>
       ),
     );
 
-    changes$.subscribe((change) => progressChange$.next(change));
+    changes$.subscribe(change => progressChange$.next(change));
   }
 
   return [submit, cancel$.next.bind(cancel$), progressChange$];
@@ -408,7 +408,7 @@ export function createMTAllocateForm$(
     map(isReadyToProceed),
     // tap(s => s.plan && console.log('plan', JSON.stringify(s.plan))),
     tap(
-      (s) =>
+      s =>
         s.gasEstimation &&
         console.log(
           `gas estimation: ${s.gasEstimation && s.gasEstimation.toString()} gas`,

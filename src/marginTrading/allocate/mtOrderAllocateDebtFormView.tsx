@@ -131,7 +131,7 @@ class BuyAllocateForm extends React.Component<OrderAllocateFormProps & MTAllocat
         <BuyOrderSummary {...this.props} />
         <Hr color="dark" className={styles.hrMargin} />
         <Cash {...this.props} reversed={true} maxCashBalance={this.props.cashBalance} />
-        {this.props.debts.map((debt) => (
+        {this.props.debts.map(debt => (
           <MarginableEditable key={debt.name} debt={debt} {...this.props} />
         ))}
       </React.Fragment>
@@ -146,7 +146,7 @@ class SellAllocateForm extends React.Component<OrderAllocateFormProps & MTAlloca
         <SellOrderSummary {...this.props} />
         <Hr color="dark" className={styles.hrMargin} />
         <Cash {...this.props} reversed={false} maxCashBalance={this.props.cashBalance.plus(this.props.total)} />
-        {this.props.debts.map((debt) => (
+        {this.props.debts.map(debt => (
           <MarginableEditable key={debt.name} debt={debt} {...this.props} />
         ))}
       </React.Fragment>
@@ -163,7 +163,7 @@ class FundAllocateForm extends React.Component<TransferAllocateFormProps & MTAll
         <FundOrderSummary {...this.props} />
         <Hr color="dark" className={styles.hrMargin} />
         <Cash {...this.props} reversed={false} maxCashBalance={maxCashBalance} />
-        {this.props.debts.map((debt) => (
+        {this.props.debts.map(debt => (
           <MarginableEditable key={debt.name} debt={debt} {...this.props} />
         ))}
       </React.Fragment>
@@ -178,7 +178,7 @@ class DrawAllocateForm extends React.Component<TransferAllocateFormProps & MTAll
         <DrawOrderSummary {...this.props} />
         <Hr color="dark" className={styles.hrMargin} />
         <Cash {...this.props} reversed={false} maxCashBalance={this.props.cashBalance} />
-        {this.props.debts.map((debt) => (
+        {this.props.debts.map(debt => (
           <MarginableEditable key={debt.name} debt={debt} {...this.props} />
         ))}
       </React.Fragment>
@@ -193,7 +193,7 @@ class ReallocateForm extends React.Component<MTAllocateState> {
         <ReallocateTopSummary {...this.props} />
         <Hr color="dark" className={styles.hrMargin} />
         <Cash {...this.props} reversed={false} maxCashBalance={this.props.cashBalance} />
-        {this.props.debts.map((debt) => (
+        {this.props.debts.map(debt => (
           <MarginableEditable key={debt.name} debt={debt} {...this.props} />
         ))}
       </React.Fragment>
@@ -217,7 +217,7 @@ class OrderSummary extends React.Component<
   { deltaDaiBalanceToShow: BigNumber } & OrderAllocateFormProps & MTAllocateState
 > {
   public render() {
-    const daiAllocatedError = this.props.messages.find((msg) => msg.kind === MessageKind.totalCashAllocatedToBig);
+    const daiAllocatedError = this.props.messages.find(msg => msg.kind === MessageKind.totalCashAllocatedToBig);
     // const remainingDaiBalance = loaded.diffDaiBalance.times(this.useReversed() ? minusOne : one);
     return (
       <div>
@@ -284,7 +284,7 @@ class DrawOrderSummary extends React.Component<TransferAllocateFormProps & MTAll
 
 class TransferOrderSummary extends React.Component<{ label: string } & TransferAllocateFormProps & MTAllocateState> {
   public render() {
-    const daiAllocatedError = this.props.messages.find((msg) => msg.kind === MessageKind.totalCashAllocatedToBig);
+    const daiAllocatedError = this.props.messages.find(msg => msg.kind === MessageKind.totalCashAllocatedToBig);
     return (
       <div>
         <div className={styles.dict}>
@@ -321,7 +321,7 @@ class TransferOrderSummary extends React.Component<{ label: string } & TransferA
 
 class ReallocateTopSummary extends React.Component<MTAllocateState> {
   public render() {
-    const daiAllocatedError = this.props.messages.find((msg) => msg.kind === MessageKind.totalCashAllocatedToBig);
+    const daiAllocatedError = this.props.messages.find(msg => msg.kind === MessageKind.totalCashAllocatedToBig);
     // const remainingDaiBalance = loaded.diffDaiBalance.times(this.useReversed() ? minusOne : one);
     return (
       <div>
@@ -357,7 +357,7 @@ class MarginableEditable extends React.Component<
   public render() {
     const debt = this.props.debt;
     const message = this.props.messages.find(
-      (msg) =>
+      msg =>
         (msg.kind === MessageKind.debtToBig || msg.kind === MessageKind.debtLowerThanZero) &&
         msg.name === this.props.debt.name,
     );
@@ -450,7 +450,7 @@ class Cash extends React.Component<
   } & MTAllocateState
 > {
   public render() {
-    const message = this.props.messages.find((msg) => msg.kind === MessageKind.notEnoughCash);
+    const message = this.props.messages.find(msg => msg.kind === MessageKind.notEnoughCash);
     const currentValue = this.props.targetCash ? this.props.targetCash.toNumber() : 0;
     const cashDelta = this.props.reversed ? this.props.reverseCashDelta : this.props.cashDelta;
     // tslint:disable
@@ -630,14 +630,14 @@ class FinalizeCashAndMarginableOrdered extends React.Component<MTAllocateState> 
       <React.Fragment>
         {cashPositive && <FinalizeCash {...this.props} />}
         {this.props.debts
-          .filter((debt) => debt.delta && debt.delta.gt(zero))
-          .map((debt) => (
+          .filter(debt => debt.delta && debt.delta.gt(zero))
+          .map(debt => (
             <FinalizeMarginable debt={debt} key={debt.name} />
           ))}
         {!cashPositive && <FinalizeCash {...this.props} />}
         {this.props.debts
-          .filter((debt) => debt.delta && debt.delta.lt(zero))
-          .map((debt) => (
+          .filter(debt => debt.delta && debt.delta.lt(zero))
+          .map(debt => (
             <FinalizeMarginable debt={debt} key={debt.name} />
           ))}
       </React.Fragment>

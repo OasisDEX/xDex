@@ -22,7 +22,9 @@ class Orders {
   }
 
   public first() {
-    cy.get(tid(this.type)).first().as('order');
+    cy.get(tid(this.type))
+      .first()
+      .as('order');
 
     return new Order();
   }
@@ -36,7 +38,9 @@ class Orders {
   }
 
   public last() {
-    cy.get(tid(this.type)).last().as('order');
+    cy.get(tid(this.type))
+      .last()
+      .as('order');
 
     return new Order();
   }

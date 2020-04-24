@@ -44,7 +44,7 @@ export class MtAccountDetailsView extends React.Component<MTAccount> {
             {/*Marginable assets*/}
             {/*</td>*/}
             {/*</tr>*/}
-            {this.props.marginableAssets.map((ma) => (
+            {this.props.marginableAssets.map(ma => (
               <tr key={ma.name}>
                 <td className={styles.left}>
                   <Currency value={ma.name} />

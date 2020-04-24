@@ -51,7 +51,7 @@ export class MyTradesTable extends React.Component<MyTradesPropsLoadable> {
           </thead>
         </Table>
         <Authorization authorizable={this.props} view={`${kind} orders`}>
-          {(loadable) => (
+          {loadable => (
             <WithLoadingIndicator
               size="lg"
               loadable={loadable}

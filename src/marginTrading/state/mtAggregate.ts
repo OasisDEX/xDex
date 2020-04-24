@@ -36,12 +36,12 @@ interface MTHistories {
 
 function rawMTHistories$(context: NetworkConfig, proxy: string, assets: string[]): Observable<MTHistories> {
   return forkJoin(
-    assets.map((token) =>
-      createRawMTHistoryFromCache(proxy, context, token).pipe(map((history) => ({ [token]: history }))),
+    assets.map(token =>
+      createRawMTHistoryFromCache(proxy, context, token).pipe(map(history => ({ [token]: history }))),
     ),
   ).pipe(
     concatAll(),
-    catchError((error) => {
+    catchError(error => {
       console.log('error', error);
       return of(
         assets.reduce((r, t) => {
@@ -56,8 +56,8 @@ function rawMTHistories$(context: NetworkConfig, proxy: string, assets: string[]
 
 function osms$(context: NetworkConfig, assets: string[]) {
   return forkJoin(
-    assets.map((token) =>
-      context.mcd.osms[token] ? readOsm(context, token).pipe(map((osm) => ({ [token]: osm }))) : of({}),
+    assets.map(token =>
+      context.mcd.osms[token] ? readOsm(context, token).pipe(map(osm => ({ [token]: osm }))) : of({}),
     ),
   ).pipe(
     concatAll(),
@@ -67,8 +67,8 @@ function osms$(context: NetworkConfig, assets: string[]) {
 
 function osmsParams$(context: NetworkConfig, assets: string[]) {
   return readCalls$.pipe(
-    switchMap((calls) => {
-      return forkJoin(assets.map((token) => (context.mcd.osms[token] ? calls.osmParams({ token }) : of({})))).pipe(
+    switchMap(calls => {
+      return forkJoin(assets.map(token => (context.mcd.osms[token] ? calls.osmParams({ token }) : of({})))).pipe(
         concatAll(),
         reduce((a, e) => ({ ...a, ...e }), {}),
       );
@@ -78,10 +78,10 @@ function osmsParams$(context: NetworkConfig, assets: string[]) {
 
 function orderbooks$(assetNames: string[], loadOrderbook: (pair: TradingPair) => Observable<Orderbook>) {
   return forkJoin(
-    assetNames.map((token) => {
+    assetNames.map(token => {
       return loadOrderbook({ base: token, quote: 'DAI' }).pipe(
         first(),
-        map((obk) => ({ [obk.tradingPair.base]: obk })),
+        map(obk => ({ [obk.tradingPair.base]: obk })),
       );
     }),
   ).pipe(
@@ -100,7 +100,7 @@ export function aggregateMTAccountState(
   const assetNames: string[] = tradingTokens
     .map((symbol: string) => getToken(symbol))
     .filter((t: any) => t.assetKind === AssetKind.marginable)
-    .map((t) => t.symbol);
+    .map(t => t.symbol);
 
   return combineLatest(
     calls.mtBalance({ tokens: assetNames, proxyAddress: proxy.options.address }),
@@ -110,7 +110,7 @@ export function aggregateMTAccountState(
     orderbooks$(assetNames, loadOrderbook),
   ).pipe(
     map(([balanceResult, rawHistories, osmPrices, osmParams, orderbooks]) => {
-      const marginables = assetNames.map((token) => {
+      const marginables = assetNames.map(token => {
         return getMarginableCore({
           name: token,
           assetKind: AssetKind.marginable,

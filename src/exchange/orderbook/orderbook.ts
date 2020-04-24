@@ -98,9 +98,9 @@ function loadOffersAllAtOnce(
             ).call(),
           ).pipe(map(parseOffers(sellToken, buyToken, type, false))),
     ),
-    retryWhen((errors) =>
+    retryWhen(errors =>
       errors.pipe(
-        switchMap((e) => {
+        switchMap(e => {
           if (e instanceof InconsistentLoadingError) {
             console.log(e.message);
             return errors;
@@ -110,7 +110,7 @@ function loadOffersAllAtOnce(
       ),
     ),
     reduce<{ offers: Offer[] }, Offer[]>((result, { offers }) => result.concat(offers), []),
-    map((offers) => uniqBy(offers, ({ offerId }) => offerId.toString())),
+    map(offers => uniqBy(offers, ({ offerId }) => offerId.toString())),
   );
 }
 
@@ -186,7 +186,7 @@ function isDustOrder(o: Offer): boolean {
 }
 
 function hideDusts(dusts: Offer[][]): Offer[][] {
-  return dusts.map((offers) => offers.filter((o) => !isDustOrder(o)));
+  return dusts.map(offers => offers.filter(o => !isDustOrder(o)));
 }
 
 // export function createPickableOrderBookFromMTSimpleFormState$(

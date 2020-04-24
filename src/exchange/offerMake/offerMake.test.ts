@@ -53,9 +53,9 @@ const controllerWithFakeOrderBook = (buys: any = [], sells: any = []) => {
   );
 };
 
-test('initial state', (done) => {
+test('initial state', done => {
   const controller = createFormController$(defParams, tradingPair);
-  controller.subscribe((state) => {
+  controller.subscribe(state => {
     expect(snapshotify(state)).toMatchSnapshot();
     done();
   });

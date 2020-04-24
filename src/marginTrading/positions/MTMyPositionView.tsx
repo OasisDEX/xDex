@@ -69,7 +69,7 @@ export function createRedeem(calls$: Calls$) {
   return (args: { token: string; proxy: any; amount: BigNumber }): Observable<TxState> => {
     const r = calls$.pipe(
       first(),
-      switchMap((calls) => {
+      switchMap(calls => {
         return calls.mtRedeem(args);
       }),
     );

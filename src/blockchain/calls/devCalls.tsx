@@ -109,7 +109,10 @@ export const changePrice: TransactionDef<ChangePriceData> = {
     return context.mcd.prices[token].contract.methods.poke;
   },
   prepareArgs: ({ price }: ChangePriceData) => [
-    `0x${amountToWei(new BigNumber(price), 'DAI').toNumber().toString(16).padStart(64, '0')}`,
+    `0x${amountToWei(new BigNumber(price), 'DAI')
+      .toNumber()
+      .toString(16)
+      .padStart(64, '0')}`,
   ],
   kind: TxMetaKind.devChangePrice,
   description: ({ token, price }: ChangePriceData) => (
@@ -127,7 +130,10 @@ export const changePriceAndPoke: TransactionDef<ChangePriceData> = {
         {
           address: context.mcd.prices[token].address,
           calldata: context.mcd.prices[token].contract.methods.poke(
-            `0x${amountToWei(new BigNumber(price), 'DAI').toNumber().toString(16).padStart(64, '0')}`,
+            `0x${amountToWei(new BigNumber(price), 'DAI')
+              .toNumber()
+              .toString(16)
+              .padStart(64, '0')}`,
           ),
         },
         {

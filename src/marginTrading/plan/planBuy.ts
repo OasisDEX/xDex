@@ -56,7 +56,7 @@ export function prepareBuyAllocationRequest(
     return impossible('price too low');
   }
 
-  const assets: MarginableAsset[] = mta.marginableAssets.map((ma) => {
+  const assets: MarginableAsset[] = mta.marginableAssets.map(ma => {
     const balance = ma.name === baseToken ? ma.balance.plus(amount) : ma.balance;
 
     return calculateMarginable(
@@ -113,7 +113,7 @@ export function planBuy(
 ): Operation[] {
   // console.log(JSON.stringify(debts));
 
-  const otherAllocations = debts.filter((a) => a.name !== name);
+  const otherAllocations = debts.filter(a => a.name !== name);
   const otherOps: Operation[] = flatten(orderDeltas(otherAllocations).map(deltaToOps));
 
   return [

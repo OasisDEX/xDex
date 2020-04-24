@@ -120,18 +120,18 @@ function prepareProceed(
 
     const changes$ = balance$.pipe(
       first(),
-      switchMap((balanceBeforeMigration) =>
+      switchMap(balanceBeforeMigration =>
         migrate$(amount).pipe(
-          map((progress) => ({ progress, kind: FormChangeKind.progress } as ProgressChange)),
+          map(progress => ({ progress, kind: FormChangeKind.progress } as ProgressChange)),
           switchMap((change: ProgressChange) => {
             if (change.progress && change.progress.status === ExchangeMigrationStatus.done) {
               return concat(
                 toBalanceChange(balance$).pipe(first()),
                 balance$.pipe(
-                  filter((balance) => !balanceBeforeMigration.eq(balance)),
+                  filter(balance => !balanceBeforeMigration.eq(balance)),
                   first(),
                   map(
-                    (value) =>
+                    value =>
                       ({
                         value,
                         kind: FormChangeKind.amountFieldChange,
@@ -147,11 +147,11 @@ function prepareProceed(
       ),
     );
 
-    progressSubscription = changes$.subscribe((change) => proceedChange$.next(change));
+    progressSubscription = changes$.subscribe(change => proceedChange$.next(change));
   }
 
-  const progressChanges$ = new Observable<MigrationFormChange>((subscriber) => {
-    const subs = proceedChange$.subscribe((change) => subscriber.next(change));
+  const progressChanges$ = new Observable<MigrationFormChange>(subscriber => {
+    const subs = proceedChange$.subscribe(change => subscriber.next(change));
     return () => {
       subs.unsubscribe();
       if (progressSubscription) {
@@ -177,7 +177,7 @@ function freezeIfInProgress(previous: MigrationFormState, state: MigrationFormSt
 function toBalanceChange(balance$: Observable<BigNumber>) {
   return balance$.pipe(
     map(
-      (balance) =>
+      balance =>
         ({
           balance,
           kind: BalanceChangeKind.balanceChange,
@@ -187,7 +187,7 @@ function toBalanceChange(balance$: Observable<BigNumber>) {
 }
 
 function toContextChange(context$: Observable<NetworkConfig>) {
-  return context$.pipe(map((context) => ({ context, kind: InstantFormChangeKind.contextChange })));
+  return context$.pipe(map(context => ({ context, kind: InstantFormChangeKind.contextChange })));
 }
 
 export function createMigrationForm$(
@@ -210,7 +210,7 @@ export function createMigrationForm$(
 
   return balance$.pipe(
     first(),
-    switchMap((balance) => {
+    switchMap(balance => {
       const initialState = {
         kind,
         change,
@@ -224,7 +224,7 @@ export function createMigrationForm$(
           calls$
             .pipe(
               first(),
-              switchMap((calls) => calls.cancelOffer2(cancelData)),
+              switchMap(calls => calls.cancelOffer2(cancelData)),
             )
             .subscribe(),
       };

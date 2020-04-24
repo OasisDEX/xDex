@@ -153,7 +153,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
             <div className={styles.tabs}>
               {onboardingTabs
                 .filter((_tab: string, index: number) => index >= startIndex)
-                .map((_tab) => {
+                .map(_tab => {
                   return (
                     <div
                       data-test-id={(_tab === currentTab && 'active-tab') || ''}
@@ -388,9 +388,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
     return (
       <div>
         {this.AmountGroup(false)}
-        {!!this.props.messages && (
-          <ErrorMessage messages={this.props.messages.map((msg) => this.messageContent(msg))} />
-        )}
+        {!!this.props.messages && <ErrorMessage messages={this.props.messages.map(msg => this.messageContent(msg))} />}
       </div>
     );
   }

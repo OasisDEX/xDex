@@ -111,7 +111,7 @@ export class MarginTradingSimple extends React.Component<MarginTradingProps> {
         <Switch>
           <Route
             path={`${matchUrl}/:base/:quote`}
-            render={(props) => (
+            render={props => (
               <Content {...props} tp={tp} parentMatch={matchUrl} setTradingPair={this.props.setTradingPair} />
             )}
           />

@@ -30,9 +30,7 @@ export const every10Seconds$ = interval(10000).pipe(startWith(0));
 export const every30Seconds$ = interval(30000).pipe(startWith(0));
 
 export const networkId$ = web3Status$.pipe(
-  filter(web3Status =>
-    web3Status === Web3Status.readonly || web3Status === Web3Status.ready
-  ),
+  filter(web3Status => web3Status === Web3Status.readonly || web3Status === Web3Status.ready),
   switchMap(() => {
     return bindNodeCallback(web3.eth.net.getId)();
   }),
@@ -41,9 +39,7 @@ export const networkId$ = web3Status$.pipe(
 );
 
 export const account$: Observable<string | undefined> = web3Status$.pipe(
-  filter(web3Status =>
-    web3Status === Web3Status.readonly || web3Status === Web3Status.ready
-  ),
+  filter(web3Status => web3Status === Web3Status.readonly || web3Status === Web3Status.ready),
   switchMap(() => {
     return bindNodeCallback(web3.eth.getAccounts)();
   }),
@@ -88,13 +84,13 @@ export const onEveryBlock$ = combineLatest(every5Seconds$, context$).pipe(
 type GetBalanceType = (account: string, callback: (err: any, r: BigNumber) => any) => any;
 
 export const etherBalance$: Observable<BigNumber> = initializedAccount$.pipe(
-  switchMap((address) =>
+  switchMap(address =>
     onEveryBlock$.pipe(
       switchMap(
         (): Observable<BigNumber> =>
           bindNodeCallback(web3.eth.getBalance as GetBalanceType)(address).pipe(
             map((x: string) => new BigNumber(x)),
-            map((balance) => {
+            map(balance => {
               return amountFromWei(balance, 'ETH');
             }),
           ),
@@ -121,8 +117,8 @@ export type GasPrice$ = Observable<BigNumber>;
 
 export const gasPrice$: GasPrice$ = onEveryBlock$.pipe(
   switchMap(() => bindNodeCallback(web3.eth.getGasPrice)()),
-  map((x) => new BigNumber(x)),
-  map((x) => x.multipliedBy(1.25).decimalPlaces(0, 0)),
+  map(x => new BigNumber(x)),
+  map(x => x.multipliedBy(1.25).decimalPlaces(0, 0)),
   distinctUntilChanged((x: BigNumber, y: BigNumber) => x.eq(y)),
   shareReplay(1),
 );
@@ -137,7 +133,7 @@ export interface Ticker {
 export const tokenPricesInUSD$: Observable<Ticker> = onEveryBlock$.pipe(
   switchMap(() =>
     forkJoin(
-      tradingTokens.map((token) =>
+      tradingTokens.map(token =>
         ajax({
           url: `https://api.coinpaprika.com/v1/tickers/${getToken(token).ticker}/`,
           method: 'GET',
@@ -148,7 +144,7 @@ export const tokenPricesInUSD$: Observable<Ticker> = onEveryBlock$.pipe(
           map(({ response }) => ({
             [token]: new BigNumber(response.quotes.USD.price),
           })),
-          catchError((error) => {
+          catchError(error => {
             console.debug(`Error fetching price data: ${error}`);
             return of({});
           }),
@@ -156,7 +152,7 @@ export const tokenPricesInUSD$: Observable<Ticker> = onEveryBlock$.pipe(
       ),
     ),
   ),
-  map((prices) => prices.reduce((a, e) => ({ ...a, ...e }))),
+  map(prices => prices.reduce((a, e) => ({ ...a, ...e }))),
   shareReplay(1),
 );
 
@@ -169,7 +165,7 @@ function getPriceFeed(ticker: string): Observable<BigNumber | undefined> {
     },
   }).pipe(
     map(({ response }) => new BigNumber(response.quotes.USD.price)),
-    catchError((error) => {
+    catchError(error => {
       console.debug(`Error fetching price data: ${error}`);
       return of(undefined);
     }),

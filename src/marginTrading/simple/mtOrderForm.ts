@@ -509,7 +509,7 @@ function addAmount(total: BigNumber | undefined, state: MTSimpleFormState): MTSi
     ...state,
     total,
     amount,
-    messages: state.messages.filter((m) => m.kind !== MessageKind.impossibleCalculateTotal),
+    messages: state.messages.filter(m => m.kind !== MessageKind.impossibleCalculateTotal),
   };
 }
 
@@ -546,7 +546,7 @@ function addTotal(amount: BigNumber | undefined, state: MTSimpleFormState): MTSi
   return {
     ...state,
     amount,
-    messages: state.messages.filter((m) => m.kind !== MessageKind.impossibleCalculateTotal),
+    messages: state.messages.filter(m => m.kind !== MessageKind.impossibleCalculateTotal),
     total: orderbookTotal,
   };
 }
@@ -654,7 +654,7 @@ function getBuyPlan(
     ];
   }
 
-  const asset: MarginableAsset = request.assets.find((ai) => ai.name === baseToken) as MarginableAsset;
+  const asset: MarginableAsset = request.assets.find(ai => ai.name === baseToken) as MarginableAsset;
 
   // const delta = mta.cash.balance.plus(request.targetDaiBalance);
   // const delta =
@@ -689,7 +689,7 @@ function getBuyPlan(
   return [
     request.createPlan([
       {
-        ...request.assets.find((ai) => ai.name === baseToken),
+        ...request.assets.find(ai => ai.name === baseToken),
         delta,
       } as Required<EditableDebt>,
     ]),
@@ -730,7 +730,7 @@ function getSellPlan(
     ];
   }
 
-  const asset: MarginableAsset = request.assets.find((ai) => ai.name === baseToken) as MarginableAsset;
+  const asset: MarginableAsset = request.assets.find(ai => ai.name === baseToken) as MarginableAsset;
 
   const delta = BigNumber.min(asset.debt, total).times(minusOne);
 
@@ -753,7 +753,7 @@ function getSellPlan(
   return [
     request.createPlan([
       {
-        ...request.assets.find((ai) => ai.name === baseToken),
+        ...request.assets.find(ai => ai.name === baseToken),
         delta,
       } as Required<EditableDebt>,
     ]),
@@ -981,7 +981,7 @@ function prepareSubmit(
 
     const submitCall$ = calls$.pipe(
       first(),
-      switchMap((calls) => {
+      switchMap(calls => {
         const call = state.kind === OfferType.buy ? calls.mtBuy : calls.mtSell;
         return call({
           amount,
@@ -1007,7 +1007,7 @@ function prepareSubmit(
 
     const changes$ = merge(cancel$.pipe(map(() => progressChange(ProgressStage.canceled))), submitCall$);
 
-    changes$.subscribe((change) => progressChange$.next(change));
+    changes$.subscribe(change => progressChange$.next(change));
 
     return submitCall$;
   }
@@ -1095,7 +1095,7 @@ export interface MTSimpleOrderFormParams {
 
 export const createRiskComplianceProbe$ = (mta$: Observable<MTAccount>) => {
   return mta$.pipe(
-    switchMap((mta) => {
+    switchMap(mta => {
       return interval(500).pipe(
         switchMap(() => {
           const dict: Dictionary<boolean> = localStorageGetDict('ltRiskAcceptedDict');
@@ -1109,7 +1109,7 @@ export const createRiskComplianceProbe$ = (mta$: Observable<MTAccount>) => {
 
 function toRiskComplianceChange($riskComplianceCheck$: Observable<boolean>) {
   return $riskComplianceCheck$.pipe(
-    map((value) => ({
+    map(value => ({
       kind: ExternalChangeKind.riskCompliance,
       hasRiskAccepted: value,
     })),
@@ -1180,7 +1180,7 @@ export function createMTSimpleOrderForm$(
     switchMap(curry(estimateGasPrice)(calls$, readCalls$)),
     scan(freezeGasEstimation),
     map(isReadyToProceed),
-    firstOfOrTrue((s) => s.gasEstimationStatus === GasEstimationStatus.calculating),
+    firstOfOrTrue(s => s.gasEstimationStatus === GasEstimationStatus.calculating),
     shareReplay(1),
     // tap(state => console.log('MTA:', state && console.log('state.mta', state.mta))),
     // ),

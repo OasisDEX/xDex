@@ -14,7 +14,7 @@ export interface Loadable<T> {
 
 export function loadablifyLight<T>(observable: Observable<T>): Observable<Loadable<T>> {
   return observable.pipe(
-    map((value) => ({ value, status: 'loaded' })),
+    map(value => ({ value, status: 'loaded' })),
     startWith({ status: 'loading' } as Loadable<T>),
     catchError((error, source) => {
       console.log(error);

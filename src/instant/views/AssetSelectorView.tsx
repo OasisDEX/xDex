@@ -85,10 +85,10 @@ class AssetSelectorView extends React.Component<InstantFormState & { side: Offer
   };
 }
 
-export const SellAssetSelectorView: React.SFC<InstantFormState> = (props) => (
+export const SellAssetSelectorView: React.SFC<InstantFormState> = props => (
   <AssetSelectorView side={OfferType.sell} {...props} />
 );
 
-export const BuyAssetSelectorView: React.SFC<InstantFormState> = (props) => (
+export const BuyAssetSelectorView: React.SFC<InstantFormState> = props => (
   <AssetSelectorView side={OfferType.buy} {...props} />
 );

@@ -5,7 +5,7 @@ export function switchSpread<C, S>(
   spreadFn: (state: S, crumb: C | undefined) => S,
 ) {
   return (source: Observable<S>) => {
-    return new Observable<S>((subscriber) => {
+    return new Observable<S>(subscriber => {
       let innerSub: Subscription | undefined;
       let previousCrumb: C | undefined;
       let previousState: S | undefined;

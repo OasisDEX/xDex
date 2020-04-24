@@ -71,7 +71,7 @@ export function createDepthChartWithLoading$(
 ): Observable<DepthChartProps> {
   const [zoomChange, zoom$] = createZoom$(
     orderbook$.pipe(
-      map((orderbook) => orderbook.tradingPair),
+      map(orderbook => orderbook.tradingPair),
       distinctUntilChanged(),
     ),
     orderbook$,

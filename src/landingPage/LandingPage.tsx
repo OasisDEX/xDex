@@ -1,8 +1,6 @@
 import * as React from 'react';
-import OasisDexLogoSvg from '../header/OasisDexLogo.svg';
 import networkSvg from '../icons/network.svg';
 import { SvgImage } from '../utils/icons/utils';
-import { Client } from './client/Client';
 import * as styles from './LandingPage.scss';
 
 export class LoadingState {

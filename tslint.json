@@ -17,6 +17,9 @@
     "ter-arrow-parens": false,
     "no-default-export": true,
     "no-var-requires": false,
-    "prefer-array-literal": [true, { "allow-type-parameters": true }]
+    "prefer-array-literal": [true, { "allow-type-parameters": true }],
+    "no-else-after-return": [true, "allow-else-if"],
+    "import-name": [false, "ignore-modules"]
+
   }
 }

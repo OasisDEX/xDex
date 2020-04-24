@@ -59,7 +59,7 @@ export class AllowancesView extends React.Component<InstantFormState> {
         </TopRightCorner>
         <div className={styles.assets}>
           {tradingTokens
-            .filter((token) => token !== 'ETH')
+            .filter(token => token !== 'ETH')
             .map((token: any, index: number) => {
               const progress = manualAllowancesProgress && manualAllowancesProgress[token];
 

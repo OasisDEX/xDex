@@ -955,7 +955,7 @@ const Error = ({ field, messages, tid }: { field: string; messages?: Message[]; 
   const myMsg = (messages || [])
     .filter((message: Message) => message.field === field)
     .sort((m1, m2) => m2.priority - m1.priority)
-    .map((msg) => messageContent(msg));
+    .map(msg => messageContent(msg));
   return <ErrorMessage messages={myMsg} style={{ height: '28px' }} data-test-id={tid} />;
 };
 

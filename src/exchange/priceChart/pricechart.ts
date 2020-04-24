@@ -32,7 +32,10 @@ export function loadAggregatedTrades(
   onEveryBlock$$: Observable<number>,
   { base, quote }: TradingPair,
 ): Observable<PriceChartDataPoint[]> {
-  const borderline = moment().subtract(interval, unit).startOf('day').toDate();
+  const borderline = moment()
+    .subtract(interval, unit)
+    .startOf('day')
+    .toDate();
   const params = [
     new Placeholder('timeUnit', 'String!', unit),
     new Placeholder('tzOffset', 'IntervalInput!', { minutes: -new Date().getTimezoneOffset() }),
@@ -48,7 +51,7 @@ export function loadAggregatedTrades(
         params,
       }),
     ),
-    map((aggrs) => aggrs.map(parseAggregatedData)),
+    map(aggrs => aggrs.map(parseAggregatedData)),
   );
 }
 

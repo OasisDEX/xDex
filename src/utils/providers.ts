@@ -49,7 +49,7 @@ export const Metamask = {
   alias: 'metamask',
   name: 'MetaMask',
   supported: true,
-  website: 'https://metamask.io/'
+  website: 'https://metamask.io/',
 };
 
 export const WalletConnect = {
@@ -59,7 +59,7 @@ export const WalletConnect = {
   alias: 'walletConnect',
   name: 'WalletConnect',
   supported: true,
-  website: 'https://metamask.io/'
+  website: 'https://metamask.io/',
 };
 
 export const WalletLink = {

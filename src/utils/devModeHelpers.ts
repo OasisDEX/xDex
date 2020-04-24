@@ -19,9 +19,9 @@ export function pluginDevModeHelpers(
   (window as any).removeProxy = () =>
     calls$
       .pipe(
-        flatMap((calls) =>
+        flatMap(calls =>
           calls.proxyAddress().pipe(
-            flatMap((proxyAddress) => {
+            flatMap(proxyAddress => {
               if (!proxyAddress) {
                 console.log('Proxy not found!');
                 return of();
@@ -39,9 +39,9 @@ export function pluginDevModeHelpers(
   (window as any).disapproveProxy = (token: string) =>
     calls$
       .pipe(
-        flatMap((calls) =>
+        flatMap(calls =>
           calls.proxyAddress().pipe(
-            flatMap((proxyAddress) => {
+            flatMap(proxyAddress => {
               if (!proxyAddress) {
                 console.log('Proxy not found!');
                 return of();
@@ -71,10 +71,10 @@ export function pluginDevModeHelpers(
     console.table(
       concat(
         range(1, count + 1)
-          .map((i) => item({ pr: midPrice + i * delta, am: baseAmount }))
+          .map(i => item({ pr: midPrice + i * delta, am: baseAmount }))
           .reverse(),
         [item({ pr: '---', am: '(spread)' })],
-        range(1, count + 1).map((i) => item({ pr: midPrice - i * delta, am: baseAmount })),
+        range(1, count + 1).map(i => item({ pr: midPrice - i * delta, am: baseAmount })),
       ),
     );
     console.log('requires', {
@@ -93,11 +93,11 @@ export function pluginDevModeHelpers(
     calls$
       .pipe(
         first(),
-        flatMap((calls) =>
+        flatMap(calls =>
           createProxyAddress$(context$, initializedAccount$, onEveryBlock$).pipe(
             first(),
-            tap((proxyAddress) => console.log({ proxyAddress })),
-            flatMap((proxyAddress) => {
+            tap(proxyAddress => console.log({ proxyAddress })),
+            flatMap(proxyAddress => {
               if (!proxyAddress) {
                 console.log('Proxy not found!');
                 return of();
@@ -120,11 +120,11 @@ export function pluginDevModeHelpers(
     calls$
       .pipe(
         first(),
-        flatMap((calls) =>
+        flatMap(calls =>
           createProxyAddress$(context$, initializedAccount$, onEveryBlock$).pipe(
             first(),
-            tap((proxyAddress) => console.log({ proxyAddress })),
-            flatMap((proxyAddress) => {
+            tap(proxyAddress => console.log({ proxyAddress })),
+            flatMap(proxyAddress => {
               if (!proxyAddress) {
                 console.log('Proxy not found!');
                 return of();
@@ -139,11 +139,11 @@ export function pluginDevModeHelpers(
     calls$
       .pipe(
         first(),
-        flatMap((calls) =>
+        flatMap(calls =>
           createProxyAddress$(context$, initializedAccount$, onEveryBlock$).pipe(
             first(),
-            tap((proxyAddress) => console.log({ proxyAddress })),
-            flatMap((proxyAddress) => {
+            tap(proxyAddress => console.log({ proxyAddress })),
+            flatMap(proxyAddress => {
               if (!proxyAddress) {
                 console.log('Proxy not found!');
                 return of();
@@ -158,43 +158,43 @@ export function pluginDevModeHelpers(
     calls$
       .pipe(
         first(),
-        flatMap((calls) => calls.drip({ token })),
+        flatMap(calls => calls.drip({ token })),
       )
       .subscribe(identity);
   (window as any).readPrice = (token: string) =>
     readCalls$
       .pipe(
         first(),
-        flatMap((calls) => calls.readPrice({ token })),
-        tap((price) => console.log(price.toString())),
+        flatMap(calls => calls.readPrice({ token })),
+        tap(price => console.log(price.toString())),
       )
       .subscribe(identity);
   (window as any).changePrice = (token: string, price: number) =>
     calls$
       .pipe(
         first(),
-        flatMap((calls) => calls.changePrice({ token, price })),
+        flatMap(calls => calls.changePrice({ token, price })),
       )
       .subscribe(identity);
   (window as any).changePriceAndPoke = (token: string, price: number) =>
     calls$
       .pipe(
         first(),
-        flatMap((calls) => calls.changePriceAndPoke({ token, price })),
+        flatMap(calls => calls.changePriceAndPoke({ token, price })),
       )
       .subscribe(identity);
   (window as any).printOsmInfo = (token: string) =>
     calls$
       .pipe(
         first(),
-        flatMap((calls) => calls.printOsmInfo({ token })),
+        flatMap(calls => calls.printOsmInfo({ token })),
       )
       .subscribe(identity);
   (window as any).readOsm = (token: string) =>
     context$
       .pipe(
         first(),
-        flatMap((context) => readOsm(context, token)),
+        flatMap(context => readOsm(context, token)),
         tap(({ next }) => console.log({ next: next && next.toString() })),
       )
       .subscribe(identity);
@@ -202,18 +202,18 @@ export function pluginDevModeHelpers(
     calls$
       .pipe(
         first(),
-        flatMap((calls) => calls.pokeOsm({ token })),
+        flatMap(calls => calls.pokeOsm({ token })),
       )
       .subscribe(identity);
   (window as any).pokeSpotter = (token: string) =>
     calls$
       .pipe(
         first(),
-        flatMap((calls) => calls.pokeSpotter({ token })),
+        flatMap(calls => calls.pokeSpotter({ token })),
       )
       .subscribe(identity);
   (window as any).mtaDetails = () =>
-    mta$.subscribe((mta) => {
+    mta$.subscribe(mta => {
       if (mta) {
         const ma = mta.marginableAssets[0];
         const maTable: Dictionary<any> = {};
@@ -238,11 +238,11 @@ export function pluginDevModeHelpers(
     calls$
       .pipe(
         first(),
-        flatMap((calls) =>
+        flatMap(calls =>
           createProxyAddress$(context$, initializedAccount$, onEveryBlock$).pipe(
             first(),
-            tap((proxyAddress) => console.log({ proxyAddress })),
-            flatMap((proxyAddress) => {
+            tap(proxyAddress => console.log({ proxyAddress })),
+            flatMap(proxyAddress => {
               if (!proxyAddress) {
                 console.log('Proxy not found!');
                 return of();
@@ -258,14 +258,14 @@ export function pluginDevModeHelpers(
       .pipe(
         flatMap(([readCalls, calls]) =>
           calls.proxyAddress().pipe(
-            flatMap((proxyAddress) => {
+            flatMap(proxyAddress => {
               if (!proxyAddress) {
                 return of();
               }
               console.log('proxyAddress:', proxyAddress);
               return readCalls.proxyERC20Balance({ proxyAddress, token });
             }),
-            tap((balance) => console.log(balance.toString())),
+            tap(balance => console.log(balance.toString())),
           ),
         ),
       )
@@ -273,9 +273,9 @@ export function pluginDevModeHelpers(
   (window as any).recoverERC20 = (token: string) =>
     calls$
       .pipe(
-        flatMap((calls) =>
+        flatMap(calls =>
           calls.proxyAddress().pipe(
-            flatMap((proxyAddress) => {
+            flatMap(proxyAddress => {
               if (!proxyAddress) {
                 return of();
               }

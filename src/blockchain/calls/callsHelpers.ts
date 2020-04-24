@@ -30,7 +30,7 @@ export function callCurried(context: NetworkConfig, account: string | undefined)
   return <D, R>({ call, prepareArgs, postprocess }: CallDef<D, R>) => {
     return (args: D) => {
       return from(call(args, context)(...prepareArgs(args, context)).call({ from: account })).pipe(
-        map((i) => (postprocess ? postprocess(i, args) : i)),
+        map(i => (postprocess ? postprocess(i, args) : i)),
       ) as Observable<R>;
     };
   };

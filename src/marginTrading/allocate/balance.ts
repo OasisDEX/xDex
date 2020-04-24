@@ -15,22 +15,22 @@ export function balance(
     safeCollRatio: BigNumber;
   }>,
 ): BigNumber[] {
-  const names = assets.map((a) => a.name);
-  const inks = assets.map((a) => a.balance.toNumber());
-  const tags = assets.map((a) => a.referencePrice.toNumber());
-  const mats = assets.map((a) => a.safeCollRatio.toNumber());
+  const names = assets.map(a => a.name);
+  const inks = assets.map(a => a.balance.toNumber());
+  const tags = assets.map(a => a.referencePrice.toNumber());
+  const mats = assets.map(a => a.safeCollRatio.toNumber());
   const sigmas = [0.9, 0.1];
 
   const f = makeRiskParityObjective(inks, tags, mats, sigmas);
 
   const D = targetDebt.toNumber();
-  const scale = (tabz: number[]) => tabz.map((tab) => (D * tab) / sum(tabz));
+  const scale = (tabz: number[]) => tabz.map(tab => (D * tab) / sum(tabz));
 
   const [tabs, loss, iter] = optimiseByAnnealing(f, assets.length, { scale, tol: 0.0000001, max_iter: 100000 });
 
   console.log('balance', { D, names, inks, tags, mats, sigmas, tabs, loss, iter });
 
-  const tabsRounded = tabs.map((tab) => new BigNumber(tab).decimalPlaces(2));
+  const tabsRounded = tabs.map(tab => new BigNumber(tab).decimalPlaces(2));
 
   const tabsTotalRounded: BigNumber = tabsRounded.reduce((s, tab) => s.plus(tab), zero);
 
@@ -42,7 +42,7 @@ export function balance(
     return tab.minus(assets[i].debt).minus(i === tabs.length - 1 ? roundingCorrection : zero);
   });
 
-  console.log(deltas.map((d) => d.toString()));
+  console.log(deltas.map(d => d.toString()));
 
   return deltas;
 }
@@ -69,8 +69,8 @@ function makeRiskParityObjective(
   }
   return (tabs: number[]) =>
     sum(
-      [...tabs.keys()].map((i) =>
-        sum([...tabs.keys()].map((j) => (j >= i ? 0 : Math.abs(lp(tabs[i], i) - lp(tabs[j], j))))),
+      [...tabs.keys()].map(i =>
+        sum([...tabs.keys()].map(j => (j >= i ? 0 : Math.abs(lp(tabs[i], i) - lp(tabs[j], j))))),
       ),
     );
 }
@@ -88,7 +88,7 @@ function randomNormal(x: number, sigma: number): number {
 
 function neighbour(xs: number[], sigma: number = 0.1): number[] {
   // geometric brownian step
-  return xs.map((x) => x * (1 + randomNormal(0, sigma)));
+  return xs.map(x => x * (1 + randomNormal(0, sigma)));
 }
 
 function optimiseByAnnealing(
@@ -136,7 +136,7 @@ export function do_example_with_2() {
   // target debt: 3000 dai
   const D = 3000;
   const [tabs, loss, iter] = optimiseByAnnealing(f, 2, {
-    scale: (tabz) => tabz.map((tab) => (D * tab) / sum(tabz)),
+    scale: tabz => tabz.map(tab => (D * tab) / sum(tabz)),
     tol: 0.0000001,
     max_iter: 100000,
   });

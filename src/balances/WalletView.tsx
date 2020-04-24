@@ -34,7 +34,7 @@ export class WalletView extends React.Component<Loadable<CombinedBalances> & Wal
       <Panel className={styles.balancesPanel}>
         <PanelHeader>My Wallet</PanelHeader>
         <WithLoadingIndicator loadable={this.props}>
-          {(combinedBalances) => <WalletViewInternal {...{ ...combinedBalances, ...walletViewProps }} />}
+          {combinedBalances => <WalletViewInternal {...{ ...combinedBalances, ...walletViewProps }} />}
         </WithLoadingIndicator>
       </Panel>
     );
@@ -64,7 +64,7 @@ export class WalletViewInternal extends React.Component<CombinedBalances & Walle
             </tr>
           )}
           {this.props.balances &&
-            this.props.balances.map((combinedBalance) => {
+            this.props.balances.map(combinedBalance => {
               return (
                 <tr data-test-id={`${combinedBalance.name}-overview`} key={combinedBalance.name}>
                   <td>

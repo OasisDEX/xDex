@@ -1,9 +1,8 @@
 import { combineLatest } from 'rxjs';
-import {distinctUntilChanged, map, tap} from 'rxjs/operators';
+import { distinctUntilChanged, map } from 'rxjs/operators';
 import { ObservableItem } from '../../utils/observableItem';
 import { NetworkConfig } from '../config';
 import { account$, context$, initializedAccount$ } from '../network';
-import {web3} from '../web3';
 import { approveProxy, approveWallet, disapproveProxy, disapproveWallet } from './approveCalls';
 import {
   callCurried,
@@ -134,10 +133,7 @@ function readCalls([context, account]: [NetworkConfig, string | undefined]) {
   };
 }
 
-export const calls$ = combineLatest(context$, initializedAccount$).pipe(
-  map(calls),
-  distinctUntilChanged(),
-);
+export const calls$ = combineLatest(context$, initializedAccount$).pipe(map(calls), distinctUntilChanged());
 
 export const readCalls$ = combineLatest(context$, account$).pipe(map(readCalls));
 

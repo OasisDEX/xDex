@@ -75,7 +75,7 @@ export class TradingPairView extends React.Component<TradingPairsProps, TradingP
           <FormatQuoteToken token={quote} />
         </div>
         <WithLoadingIndicatorInline loadable={marketsDetailsLoadable}>
-          {(marketsDetails) => {
+          {marketsDetails => {
             const { price, priceDiff } = marketsDetails[tradingPairResolver(pair)];
             return (
               <>

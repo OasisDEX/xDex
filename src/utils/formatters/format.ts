@@ -24,7 +24,7 @@ export function toShorthandNumber(amount: BigNumber, suffix: string = '', precis
         if (index === 0) return part;
         return part.substr(0, precision);
       })
-      .filter((el) => el)
+      .filter(el => el)
       .join('.'),
   )
     .toFixed(precision)

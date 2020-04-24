@@ -92,7 +92,7 @@ function doTradePayWithERC20(
     proxyAddress,
     sellToken: sai2dai(state.sellToken),
   } as InstantOrderData).pipe(
-    switchMap((gasEstimation) => {
+    switchMap(gasEstimation => {
       const call = state.sellToken === 'SAI' ? calls.migrateTradePayWithERC20 : calls.tradePayWithERC20;
 
       return call({
@@ -139,8 +139,8 @@ function doTradePayWithERC20(
 }
 
 function doApprove(calls: Calls, state: InstantFormState, initialProgress: Progress): Observable<Progress> {
-  return waitUntil(calls.proxyAddress(), (proxyAddress) => !!proxyAddress).pipe(
-    flatMap((proxyAddress) => {
+  return waitUntil(calls.proxyAddress(), proxyAddress => !!proxyAddress).pipe(
+    flatMap(proxyAddress => {
       if (!proxyAddress) {
         throw new Error('Proxy not ready!');
       }
@@ -242,7 +242,7 @@ export function tradePayWithERC20(
   const sellAllowance$ = proxyAddress ? allowance$(state.sellToken, proxyAddress).pipe(first()) : of(false);
 
   return sellAllowance$.pipe(
-    flatMap((sellAllowance) => {
+    flatMap(sellAllowance => {
       if (!proxyAddress) {
         return doSetupProxy(calls, state);
       }

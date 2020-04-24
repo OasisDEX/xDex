@@ -436,12 +436,12 @@ function prepareSetup(
         (calls): Observable<ProgressChange> => {
           return calls.setupMTProxy({}).pipe(
             transactionHandler(),
-            switchMap((change) => {
+            switchMap(change => {
               if (change.progress !== ProgressStage.done) {
                 return of(change);
               }
               return mta$.pipe(
-                filter((mta) => mta.state === MTAccountState.setup),
+                filter(mta => mta.state === MTAccountState.setup),
                 first(),
                 map(() => change),
               );
@@ -482,12 +482,12 @@ function prepareAllowance(
             })
             .pipe(
               transactionHandler(),
-              switchMap((change) => {
+              switchMap(change => {
                 if (change.progress !== ProgressStage.done) {
                   return of(change);
                 }
                 return mta$.pipe(
-                  filter((mta) => {
+                  filter(mta => {
                     return state.token === 'DAI' ? mta.daiAllowance : findMarginableAsset(state.token, mta)!.allowance;
                   }),
                   first(),
@@ -634,6 +634,6 @@ export function createMTTransferForm$(
     switchMap(curry(estimateGasPrice)(calls$, readCalls$)),
     map(checkIfIsReadyToProceed),
     scan(freezeIfInProgress),
-    firstOfOrTrue((s) => s.gasEstimationStatus === GasEstimationStatus.calculating),
+    firstOfOrTrue(s => s.gasEstimationStatus === GasEstimationStatus.calculating),
   );
 }

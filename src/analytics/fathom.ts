@@ -24,7 +24,7 @@ const getFathom = (): Fathom => {
   return (window.fathom =
     // tslint:disable
     window.fathom ||
-    function () {
+    function() {
       (window.fathom.q = window.fathom.q || []).push(arguments);
     });
   // tslint:enable
@@ -189,7 +189,7 @@ export const load = (url = '//cdn.usefathom.com/tracker.js'): void => {
   window.fathom =
     window.fathom ||
     // tslint:disable
-    function () {
+    function() {
       (window.fathom.q = window.fathom.q || []).push(arguments);
     };
   // tslint:enable

@@ -129,7 +129,7 @@ export function vulcan0x<R>(
       }
       return (Object.values(response.data)[0] as { nodes: R[] }).nodes;
     }),
-    catchError((error) => {
+    catchError(error => {
       console.error('Vulcan0x error...', error);
       return throwError(error);
     }),

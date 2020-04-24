@@ -115,11 +115,18 @@ export class PriceChartView extends React.Component<
     const addUnit = groupModeMap.addUnit as moment.unitOfTime.DurationConstructor;
     const minimalDate =
       data.length === 0
-        ? moment().startOf(addUnit).subtract(4, addUnit).toDate()
-        : moment(data[0].timestamp).subtract(1, addUnit).toDate();
+        ? moment()
+            .startOf(addUnit)
+            .subtract(4, addUnit)
+            .toDate()
+        : moment(data[0].timestamp)
+            .subtract(1, addUnit)
+            .toDate();
     const maximalDate =
       data.length === 0
-        ? moment().startOf(addUnit).toDate()
+        ? moment()
+            .startOf(addUnit)
+            .toDate()
         : moment(data[data.length - 1].timestamp)
             .add(1, addUnit)
             .toDate();
@@ -129,8 +136,8 @@ export class PriceChartView extends React.Component<
       // .nice(d3.timeDay)
       .range([0, bothChartSize.width]);
 
-    let minimal: number = d3.min(data, (d) => d.low) || 0;
-    let maximal: number = d3.max(data, (d) => d.high) || 100;
+    let minimal: number = d3.min(data, d => d.low) || 0;
+    let maximal: number = d3.max(data, d => d.high) || 100;
     const minMaxDiff = maximal - minimal;
     minimal = minimal - minMaxDiff * 0.1; // make bottom margin
     maximal = Math.max(maximal + minMaxDiff * 0.1, minimal); // make top margin
@@ -139,9 +146,13 @@ export class PriceChartView extends React.Component<
       minimal *= 0.9;
       maximal *= 1.1;
     }
-    const yCandleScale = d3.scaleLinear().domain([minimal, maximal]).range([candleChartSize.height, 0]).nice();
+    const yCandleScale = d3
+      .scaleLinear()
+      .domain([minimal, maximal])
+      .range([candleChartSize.height, 0])
+      .nice();
 
-    const volumeMaximal = Math.ceil((d3.max(data, (d) => d.turnover) || 10) * 1.1);
+    const volumeMaximal = Math.ceil((d3.max(data, d => d.turnover) || 10) * 1.1);
     const yVolumeScale = d3
       .scaleLinear()
       .domain([0, volumeMaximal * 1.4]) // multiply to add space at top of volume
@@ -192,17 +203,22 @@ function hoverBarChart(
   xScale: ScaleTime<number, number>,
 ) {
   const { bars, bothChartSize } = chartParams;
-  const mbar = svgContainer.selectAll('.hoverbar').data([data]).enter().append('g').classed('hoverbar', true);
+  const mbar = svgContainer
+    .selectAll('.hoverbar')
+    .data([data])
+    .enter()
+    .append('g')
+    .classed('hoverbar', true);
 
   mbar
     .selectAll('rect')
-    .data((d) => d)
+    .data(d => d)
     .enter()
     .append('rect')
     .style('fill', 'transparent')
-    .attr('x', (d) => xScale(d.timestamp) + bars.delta)
-    .attr('y', (_d) => 0)
-    .attr('height', (_d) => bothChartSize.height)
+    .attr('x', d => xScale(d.timestamp) + bars.delta)
+    .attr('y', _d => 0)
+    .attr('height', _d => bothChartSize.height)
     .attr('width', bars.width);
 }
 
@@ -220,18 +236,23 @@ function volumeChart(
     .attr('transform', `translate(0, ${candleChartSize.height - 0.3})`)
     .classed('volume', true);
 
-  const mbar = svg.selectAll('.bar').data([data]).enter().append('g').classed('bar', true);
+  const mbar = svg
+    .selectAll('.bar')
+    .data([data])
+    .enter()
+    .append('g')
+    .classed('bar', true);
 
   mbar
     .selectAll('rect')
-    .data((d) => d)
+    .data(d => d)
     .enter()
     .append('rect')
     .attr('class', (_d, i) => (hoverId === i ? styles.hoved : ''))
     .classed(styles.volume, true)
-    .attr('x', (d) => xScale(d.timestamp) + bars.delta)
-    .attr('y', (d) => yVolumeScale(d.turnover))
-    .attr('height', (d) => yVolumeScale(0) - yVolumeScale(d.turnover))
+    .attr('x', d => xScale(d.timestamp) + bars.delta)
+    .attr('y', d => yVolumeScale(d.turnover))
+    .attr('height', d => yVolumeScale(0) - yVolumeScale(d.turnover))
     .attr('width', bars.width);
 }
 
@@ -245,40 +266,50 @@ function candleChart(
 ) {
   const { bars } = chartParams;
   const svg = svgContainer.append('g').classed('candleChart', true);
-  const stick = svg.selectAll('.sticks').data([data]).enter().append('g').attr('class', 'sticks');
+  const stick = svg
+    .selectAll('.sticks')
+    .data([data])
+    .enter()
+    .append('g')
+    .attr('class', 'sticks');
 
   stick
     .selectAll('rect')
-    .data((d) => d)
+    .data(d => d)
     .enter()
     .append('rect')
-    .attr('x', (d) => xScale(d.timestamp) - 1)
-    .attr('y', (d) => yScale(d.high))
-    .attr('height', (d) => yScale(d.low) - yScale(d.high))
+    .attr('x', d => xScale(d.timestamp) - 1)
+    .attr('y', d => yScale(d.high))
+    .attr('height', d => yScale(d.low) - yScale(d.high))
     .attr('width', 1)
     .attr('class', (_d, i) => (hoverId === i ? styles.hoved : ''))
-    .classed(styles.riseStick, (d) => d.close > d.open)
-    .classed(styles.fallStick, (d) => d.open > d.close)
-    .classed(styles.equal, (d) => d.open === d.close);
+    .classed(styles.riseStick, d => d.close > d.open)
+    .classed(styles.fallStick, d => d.open > d.close)
+    .classed(styles.equal, d => d.open === d.close);
 
-  const candle = svg.selectAll('.candles').data([data]).enter().append('g').attr('class', 'candles');
+  const candle = svg
+    .selectAll('.candles')
+    .data([data])
+    .enter()
+    .append('g')
+    .attr('class', 'candles');
 
   candle
     .selectAll('rect')
-    .data((d) => d)
+    .data(d => d)
     .enter()
     .append('rect')
-    .attr('x', (d) => xScale(d.timestamp) + bars.delta)
-    .attr('y', (d) => yScale(Math.max(d.open, d.close)))
-    .attr('height', (d) => {
+    .attr('x', d => xScale(d.timestamp) + bars.delta)
+    .attr('y', d => yScale(Math.max(d.open, d.close)))
+    .attr('height', d => {
       const h = yScale(Math.min(d.open, d.close)) - yScale(Math.max(d.open, d.close));
       return h < 1 ? 1 : h;
     })
     .attr('width', bars.width)
     .attr('class', (_d, i) => (hoverId === i ? styles.hoved : ''))
-    .classed(styles.riseBar, (d) => d.close > d.open)
-    .classed(styles.fallBar, (d) => d.open > d.close)
-    .classed(styles.equal, (d) => d.open === d.close);
+    .classed(styles.riseBar, d => d.close > d.open)
+    .classed(styles.fallBar, d => d.open > d.close)
+    .classed(styles.equal, d => d.open === d.close);
 }
 
 function axes(
@@ -314,9 +345,15 @@ function axes(
     .tickSize(volumeChartSize.width)
     .tickValues([volumeMaximal]);
 
-  const xAxisGroup = svg.append<SVGGraphicsElement>('g').attr('class', 'axis xaxis').call(xGridAxis);
+  const xAxisGroup = svg
+    .append<SVGGraphicsElement>('g')
+    .attr('class', 'axis xaxis')
+    .call(xGridAxis);
 
-  const yCandleAxisGroup = svg.append<SVGGraphicsElement>('g').attr('class', 'axis yaxisCandle').call(yCandleGridAxis);
+  const yCandleAxisGroup = svg
+    .append<SVGGraphicsElement>('g')
+    .attr('class', 'axis yaxisCandle')
+    .call(yCandleGridAxis);
 
   const yVolumeAxisGroup = svg
     .append<SVGGraphicsElement>('g')
@@ -330,7 +367,7 @@ function axes(
     .attr('transform', `translate(0, ${bothChartSize.height})`)
     .call(
       xGridAxis
-        .tickFormat((_d) => '')
+        .tickFormat(_d => '')
         .tickSizeOuter(0)
         .tickSizeInner(5),
     );
@@ -341,7 +378,7 @@ function axes(
     .attr('transform', `translate(${candleChartSize.width}, 0)`)
     .call(
       yCandleGridAxis
-        .tickFormat((_d) => '')
+        .tickFormat(_d => '')
         .tickSizeOuter(0)
         .tickSizeInner(0),
     );
@@ -352,7 +389,7 @@ function axes(
     .attr('transform', `translate(${bothChartSize.width}, ${bothChartSize.height - volumeChartSize.height})`)
     .call(
       yVolumeGridAxis
-        .tickFormat((_d) => '')
+        .tickFormat(_d => '')
         .tickSizeOuter(0)
         .tickSizeInner(0),
     );
@@ -370,7 +407,10 @@ function axes(
   yVolumeAxisGroup.selectAll('.tick').attr('visibility', 'hidden');
 
   // style x domain
-  xDomainAxisGroup.selectAll('.tick line').classed(styles.axisLineGrid, false).classed(styles.axisLineMain, true);
+  xDomainAxisGroup
+    .selectAll('.tick line')
+    .classed(styles.axisLineGrid, false)
+    .classed(styles.axisLineMain, true);
   xDomainAxisGroup.selectAll('.domain').classed(styles.axisLineMain, true);
 
   // style y domain

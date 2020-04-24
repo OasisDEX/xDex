@@ -19,7 +19,7 @@ describe('New trade', () => {
       // this test suite randomly fails on react error
       // can't reproduce it in real life
       // i imagine it is a cypress bug ¯\_(ツ)_/¯
-      cy.on('uncaught:exception', (_err) => {
+      cy.on('uncaught:exception', _err => {
         return false;
       });
 
@@ -136,7 +136,13 @@ describe('New trade', () => {
       const price = '50';
       const amount = '1';
 
-      new Order().buy().limit().amount(amount).atPrice(price).total(multiply(amount, price)).place();
+      new Order()
+        .buy()
+        .limit()
+        .amount(amount)
+        .atPrice(price)
+        .total(multiply(amount, price))
+        .place();
 
       const orders = Orderbook.list(OrderType.BUY);
       orders.countIs(4);
@@ -160,7 +166,13 @@ describe('New trade', () => {
       const price = '50';
       const amount = '1';
 
-      new Order().buy().limit().amount(amount).atPrice(price).total(multiply(amount, price)).place();
+      new Order()
+        .buy()
+        .limit()
+        .amount(amount)
+        .atPrice(price)
+        .total(multiply(amount, price))
+        .place();
 
       const orders = Orderbook.list(OrderType.BUY);
       orders.countIs(4);
@@ -187,7 +199,13 @@ describe('New trade', () => {
       const price = '50';
       const amount = '1';
 
-      new Order().buy().limit().amount(amount).atPrice(price).total(multiply(amount, price)).place();
+      new Order()
+        .buy()
+        .limit()
+        .amount(amount)
+        .atPrice(price)
+        .total(multiply(amount, price))
+        .place();
 
       const orders = Orderbook.list(OrderType.BUY);
       orders.countIs(4);

@@ -15,7 +15,6 @@ import { NavLink } from 'react-router-dom';
 import { theAppContext } from '../AppContext';
 import { account$ } from '../blockchain/network';
 import { WalletStatus, walletStatus$ } from '../blockchain/wallet';
-import { web3Status$ } from '../blockchain/web3';
 import chevronDownSvg from '../icons/chevron-down.svg';
 import { routerContext } from '../Main';
 import { connect } from '../utils/connect';
@@ -54,16 +53,16 @@ interface HeaderProps {
 const walletConnectionView$: Observable<WalletConnectionViewKind> = combineLatest(
   walletConnectionViewManual$,
   walletStatus$,
-  web3Status$,
+  // web3Status$,
 ).pipe(
-  map(([manualViewChange, walletStatus, web3Status]) => {
+  map(([manualViewChange, walletStatus]) => {
     if (manualViewChange) {
       return manualViewChange;
     }
 
-        // if (web3Status === 'readonly') {
-        //   return WalletConnectionViewKind.noClient;
-        // }
+    // if (web3Status === 'readonly') {
+    //   return WalletConnectionViewKind.noClient;
+    // }
 
     if (walletStatus === 'connected') {
       return WalletConnectionViewKind.connected;
@@ -92,7 +91,7 @@ const popup$ = combineLatest(walletStatus$, popup, walletConnectionView$).pipe(
   })),
 );
 
-walletStatus$.pipe().subscribe((status) => {
+walletStatus$.pipe().subscribe(status => {
   if (status === 'connected' || status === 'disconnected') {
     popup.next(false);
   }
@@ -184,7 +183,7 @@ class WalletConnectionStatus extends React.Component<WalletConnectionStatusProps
               className={classnames(styles.login, styles.connectWalletButton)}
             >
               <MediaQuery minWidth={880}>
-                {(matches) => {
+                {matches => {
                   if (matches) {
                     return (
                       <>

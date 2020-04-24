@@ -257,14 +257,14 @@ export function createWrapUnwrapForm$(
   const resetChange$ = new Subject<ProgressChange>();
 
   const ethBalanceChange$ = ethBalance$.pipe(
-    map((balance) => ({
+    map(balance => ({
       balance,
       kind: BalanceChangeKind.ethBalanceChange,
     })),
   );
 
   const wethBalanceChange$ = wethBalance$.pipe(
-    map((balance) => ({
+    map(balance => ({
       balance,
       kind: BalanceChangeKind.wethBalanceChange,
     })),
@@ -299,6 +299,6 @@ export function createWrapUnwrapForm$(
     map(checkIfCanPayGas),
     map(checkIfIsReadyToProceed),
     scan(freezeIfInProgress),
-    firstOfOrTrue((s) => s.gasEstimationStatus === GasEstimationStatus.calculating),
+    firstOfOrTrue(s => s.gasEstimationStatus === GasEstimationStatus.calculating),
   );
 }

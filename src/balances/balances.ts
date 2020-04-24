@@ -31,13 +31,13 @@ export interface DustLimits {
 export function balance$(context: NetworkConfig, token: string, account?: string): Observable<BigNumber> {
   if (account === undefined) {
     return account$.pipe(
-      switchMap((theAccount) => balance$(context, token, theAccount)),
+      switchMap(theAccount => balance$(context, token, theAccount)),
       first(),
     );
   }
   return from(context.tokens[token].contract.methods.balanceOf(account).call()).pipe(
     map((x: string) => new BigNumber(x)),
-    map((balance) => {
+    map(balance => {
       return amountFromWei(balance, token);
     }),
   );
@@ -54,10 +54,10 @@ export function createBalances$(
         ? of({})
         : forkJoin(
             tradingTokens
-              .filter((name) => name !== 'ETH')
+              .filter(name => name !== 'ETH')
               .map((token: string) =>
                 balance$(context, token, account).pipe(
-                  map((balance) => ({
+                  map(balance => ({
                     [token]: balance,
                   })),
                 ),
@@ -107,10 +107,10 @@ export function combineBalances(
   currentBlock: number,
   pricesInUsd: Ticker,
 ): CombinedBalances {
-  const balances = tradingTokens.map((name) => {
+  const balances = tradingTokens.map(name => {
     const walletBalance = name === 'ETH' ? etherBalance : walletBalances[name];
 
-    const asset = mta.marginableAssets.find((ma) => ma.name === name);
+    const asset = mta.marginableAssets.find(ma => ma.name === name);
 
     const mtAssetValueInDAI = asset
       ? // walletBalance.plus(asset.balance).times(
@@ -187,11 +187,11 @@ export function createDustLimits$(context$: Observable<NetworkConfig>): Observab
     switchMap(([context]) =>
       forkJoin(
         tradingTokens
-          .filter((name) => name !== 'ETH')
+          .filter(name => name !== 'ETH')
           .map((token: string) => {
             return from(context.otc.contract.methods.getMinSell(context.tokens[token].address).call()).pipe(
               map((x: string) => new BigNumber(x)),
-              map((dustLimit) => ({
+              map(dustLimit => ({
                 [token]: amountFromWei(dustLimit, token),
               })),
             );
@@ -216,7 +216,7 @@ export function createAllowances$(
     switchMap(([context, account]) =>
       forkJoin(
         tradingTokens
-          .filter((token) => token !== 'ETH')
+          .filter(token => token !== 'ETH')
           .map((token: string) =>
             from(context.tokens[token].contract.methods.allowance(account, context.otc.address).call()).pipe(
               map((balance: string) => new BigNumber(balance)),
@@ -243,7 +243,7 @@ export function createProxyAllowances$(
     switchMap(([context, account, proxy]) =>
       forkJoin(
         Object.keys(context.tokens)
-          .filter((token) => token !== 'ETH')
+          .filter(token => token !== 'ETH')
           .map((token: string) =>
             proxy
               ? from(context.tokens[token].contract.methods.allowance(account, proxy).call()).pipe(
@@ -266,7 +266,7 @@ export function createWalletApprove(calls$: Calls$, gasPrice$: GasPrice$) {
   return (token: string): Observable<TxState> => {
     const r = calls$.pipe(
       first(),
-      switchMap((calls) => {
+      switchMap(calls => {
         return calls.approveWallet(gasPrice$, { token });
       }),
     );
@@ -279,7 +279,7 @@ export function createWalletDisapprove(calls$: Calls$, gasPrice$: GasPrice$) {
   return (token: string): Observable<TxState> => {
     const r = calls$.pipe(
       first(),
-      switchMap((calls) => {
+      switchMap(calls => {
         return calls.disapproveWallet(gasPrice$, { token });
       }),
     );

@@ -25,7 +25,7 @@ const Navigation = ({ walletStatus, children }: any) => {
   );
 };
 
-export const NavigationTxRx = connect(Navigation, walletStatus$.pipe(map((walletStatus) => ({ walletStatus }))));
+export const NavigationTxRx = connect(Navigation, walletStatus$.pipe(map(walletStatus => ({ walletStatus }))));
 
 export const VerticalNav = ({ connected }: any) => {
   return (

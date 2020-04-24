@@ -42,7 +42,7 @@ function getInnerText(obj: any): string {
       }
       if (children) {
         if (Array.isArray(children)) {
-          children.forEach((o) => {
+          children.forEach(o => {
             buf += getInnerText(o);
           });
         } else {

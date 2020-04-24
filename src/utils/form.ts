@@ -195,7 +195,7 @@ export function progressChange(progress?: ProgressStage): ProgressChange {
 
 export function toEtherBalanceChange(etherBalance$: Observable<BigNumber>) {
   return etherBalance$.pipe(
-    map((etherBalance) => ({
+    map(etherBalance => ({
       etherBalance,
       kind: FormChangeKind.etherBalanceChange,
     })),
@@ -205,7 +205,7 @@ export function toEtherBalanceChange(etherBalance$: Observable<BigNumber>) {
 export function toGasPriceChange(gasPrice$: Observable<BigNumber>): Observable<GasPriceChange> {
   return gasPrice$.pipe(
     map(
-      (gasPrice) =>
+      gasPrice =>
         ({
           kind: FormChangeKind.gasPriceChange,
           value: gasPrice,
@@ -219,7 +219,7 @@ export function toEtherPriceUSDChange(
 ): Observable<EtherPriceUSDChange> {
   return etherPriceUsd$.pipe(
     map(
-      (value) =>
+      value =>
         ({
           value,
           kind: FormChangeKind.etherPriceUSDChange,
@@ -239,7 +239,7 @@ export function toAllowanceChange$(
 export function toOrderbookChange$(orderbook$: Observable<Orderbook>): Observable<OrderbookChange> {
   return orderbook$.pipe(
     map(
-      (orderbook) =>
+      orderbook =>
         ({
           orderbook,
           kind: FormChangeKind.orderbookChange,
@@ -255,7 +255,7 @@ export function toDustLimitChange$(
 ): Observable<DustLimitChange> {
   return dustLimits$.pipe(
     map(
-      (dustLimits) =>
+      dustLimits =>
         ({
           kind: FormChangeKind.dustLimitChange,
           dustLimitBase: dustLimits[base] || new BigNumber(0),
@@ -267,7 +267,7 @@ export function toDustLimitChange$(
 
 export function toMTAccountChange(mta$: Observable<MTAccount>) {
   return mta$.pipe(
-    map((mta) => {
+    map(mta => {
       return {
         mta,
         kind: FormChangeKind.marginTradingAccountChange,
@@ -279,7 +279,7 @@ export function toMTAccountChange(mta$: Observable<MTAccount>) {
 export function toMTAccountStateChange(mta$: Observable<MTAccount>) {
   return mta$.pipe(
     map(
-      (mta) =>
+      mta =>
         ({
           mtaState: mta.state,
           kind: FormChangeKind.marginTradingAccountStateChange,
@@ -292,7 +292,7 @@ export function toMTAccountStateChange(mta$: Observable<MTAccount>) {
 export function toBalancesChange(balances$: Observable<Balances>) {
   return balances$.pipe(
     map(
-      (balances) =>
+      balances =>
         ({
           balances,
           kind: FormChangeKind.balancesChange,
@@ -304,7 +304,7 @@ export function toBalancesChange(balances$: Observable<Balances>) {
 export function toUserChange(user$: Observable<User>) {
   return user$.pipe(
     map(
-      (user) =>
+      user =>
         ({
           user,
           kind: FormChangeKind.userChange,
@@ -315,7 +315,7 @@ export function toUserChange(user$: Observable<User>) {
 export function toAccountChange(account$: Observable<string | undefined>) {
   return account$.pipe(
     map(
-      (value) =>
+      value =>
         ({
           value,
           kind: FormChangeKind.accountChange,
@@ -325,7 +325,7 @@ export function toAccountChange(account$: Observable<string | undefined>) {
 }
 
 export function toOrdersChange(orders$: Observable<TradeWithStatus[]>) {
-  return orders$.pipe(map((orders) => ({ orders, kind: FormChangeKind.ordersChange })));
+  return orders$.pipe(map(orders => ({ orders, kind: FormChangeKind.ordersChange })));
 }
 
 type TransationStateToX<X> = (transactionState$: Observable<TxState>) => Observable<X>;
@@ -453,7 +453,7 @@ export function doGasEstimation<S extends HasGasEstimation>(
         }),
       );
     }),
-    catchError((error) => {
+    catchError(error => {
       console.warn('Error while estimating gas:', error.toString());
       return of({
         ...(state as object),

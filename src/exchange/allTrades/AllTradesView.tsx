@@ -70,7 +70,7 @@ export class AllTrades extends React.Component<AllTradesProps> {
                 <Scrollbar>
                   <Table align="right" className={styles.allTradesTable}>
                     <TransitionGroup component="tbody">
-                      {trades.map((trade) => (
+                      {trades.map(trade => (
                         <CSSTransition key={`${trade.tx}_${trade.idx}`} classNames="trade" timeout={1000}>
                           <RowClickable clickable={!!trade.tx} onClick={this.tradeDetails(trade)}>
                             <td className={tableStyles.numerical}>

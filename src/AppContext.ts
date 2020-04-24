@@ -121,7 +121,7 @@ export function setupAppContext() {
   const balances$ = createBalances$(context$, initializedAccount$, onEveryBlock$).pipe(shareReplay(1));
 
   const proxyAddress$ = onEveryBlock$.pipe(
-    switchMap(() => calls$.pipe(flatMap((calls) => calls.proxyAddress()))),
+    switchMap(() => calls$.pipe(flatMap(calls => calls.proxyAddress()))),
     distinctUntilChanged(isEqual),
   );
 
@@ -158,7 +158,7 @@ export function setupAppContext() {
 
   const wrapUnwrapForm$ = curry(createWrapUnwrapForm$)(gasPrice$, etherPriceUsd$, etherBalance$, wethBalance$, calls$);
 
-  const currentOrderbook$ = currentTradingPair$.pipe(switchMap((pair) => loadOrderbook(pair)));
+  const currentOrderbook$ = currentTradingPair$.pipe(switchMap(pair => loadOrderbook(pair)));
 
   const createMTFundForm$: CreateMTFundForm$ = curry(createMTTransferForm$)(
     mta$,
@@ -322,7 +322,7 @@ export function setupAppContext() {
       }),
     )
     .subscribe(([transactions, network]) => {
-      (transactions as TxState[]).forEach((tx) => {
+      (transactions as TxState[]).forEach(tx => {
         const tx_identify = `${tx.account}${tx.networkId}${tx.status}${tx.txNo}`;
         if (!transactionsLog.includes(tx_identify)) {
           transactionsLog.push(tx_identify);
@@ -345,7 +345,7 @@ export function setupAppContext() {
     allowances$: createProxyAllowances$(
       context$,
       initializedAccount$,
-      proxyAddress$.pipe(filter((address) => !!address)),
+      proxyAddress$.pipe(filter(address => !!address)),
       onEveryBlock$,
     ),
   });
@@ -444,7 +444,7 @@ function mtSimpleOrderForm(
   approveMTProxy: (args: { token: string; proxyAddress: string }) => Observable<TxState>,
 ) {
   const mtOrderForm$ = currentTradingPair$.pipe(
-    switchMap((tradingPair) =>
+    switchMap(tradingPair =>
       createMTSimpleOrderForm$(
         {
           gasPrice$,
@@ -464,9 +464,9 @@ function mtSimpleOrderForm(
   );
 
   const mtOrderFormLoadable$ = currentTradingPair$.pipe(
-    switchMap((tradingPair) =>
+    switchMap(tradingPair =>
       loadablifyLight(mtOrderForm$).pipe(
-        map((mtOrderFormLoadablified) => ({
+        map(mtOrderFormLoadablified => ({
           tradingPair,
           ...mtOrderFormLoadablified,
         })),
@@ -527,7 +527,7 @@ function mtSimpleOrderForm(
   const OrderbookViewTxRx = connect<Props, {}>(OrderbookView, orderbookForView$);
 
   const depthChartWithLoading$ = createDepthChartWithLoading$(
-    mtOrderForm$.pipe(map((f) => ({ ...f, matchType: OfferMatchType.direct }))),
+    mtOrderForm$.pipe(map(f => ({ ...f, matchType: OfferMatchType.direct }))),
     orderbook$,
     kindChange,
   );
@@ -554,7 +554,7 @@ function mtSimpleOrderForm(
 
 function offerMake(orderbook$: Observable<Orderbook>, balances$: Observable<Balances>) {
   const offerMake$: Observable<OfferFormState> = currentTradingPair$.pipe(
-    switchMap((tp) =>
+    switchMap(tp =>
       createFormController$(
         {
           gasPrice$,

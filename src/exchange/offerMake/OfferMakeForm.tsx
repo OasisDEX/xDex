@@ -571,7 +571,7 @@ const Error = ({ field, messages }: { field: string; messages?: Message[] }) => 
   const myMsg = (messages || [])
     .filter((message: Message) => message.field === field)
     .sort((m1, m2) => m2.priority - m1.priority)
-    .map((msg) => messageContent(msg));
+    .map(msg => messageContent(msg));
   return <ErrorMessage messages={myMsg} />;
 };
 

@@ -90,7 +90,7 @@ function txnToTrade(txn: TxState): TradeWithStatus {
 }
 
 function offerToTrade(tnxs: TxState[]): (offer: Offer) => TradeWithStatus {
-  return (offer) => ({
+  return offer => ({
     status: isBeingCancelled(offer, tnxs) ? TradeStatus.beingCancelled : undefined,
     offerId: offer.offerId,
     act: offer.type,
@@ -118,14 +118,19 @@ export function createMyOpenTrades$(
       const myOffer = (o: Offer) => o.ownerId === account;
       return txns
         .filter(
-          (txn) =>
+          txn =>
             txnPerOrderbook(txn, tradingPair) &&
             txnMetaOfKind(TxMetaKind.offerMake)(txn) &&
             txnInProgress(txn) &&
             txnEarlierThan(txn, orderbook.blockNumber),
         )
         .map(txnToTrade)
-        .concat(orderbook.buy.filter(myOffer).concat(orderbook.sell.filter(myOffer)).map(offerToTrade(txns)))
+        .concat(
+          orderbook.buy
+            .filter(myOffer)
+            .concat(orderbook.sell.filter(myOffer))
+            .map(offerToTrade(txns)),
+        )
         .sort(compareTrades);
     }),
     shareReplay(1),
@@ -147,12 +152,12 @@ export function aggregateMyOpenTradesFor$(
           { base: 'ZRX', quote: 'SAI' },
           { base: 'BAT', quote: 'SAI' },
         ]
-      : tradingPairs.filter((pair) => pair.quote === market);
+      : tradingPairs.filter(pair => pair.quote === market);
 
-  const matchingOrderbooks = matchingPairs.map((pair) => loadOrderbook(pair));
+  const matchingOrderbooks = matchingPairs.map(pair => loadOrderbook(pair));
 
   const aggregatedOrderbook = combineLatest(...matchingOrderbooks).pipe(
-    map((orderbooks) => {
+    map(orderbooks => {
       const orderbook = {
         buy: [] as Offer[],
         sell: [] as Offer[],

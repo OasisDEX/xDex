@@ -12,7 +12,7 @@ import { MTTransferFormState } from '../transfer/mtTransferForm';
 import { MTMyPositionPanel } from './MTMyPositionPanel';
 import { MTMyPositionView } from './MTMyPositionView';
 
-const stories = storiesOf('Leverage Trading/My Position Panel', module).addDecorator((story) => (
+const stories = storiesOf('Leverage Trading/My Position Panel', module).addDecorator(story => (
   <div style={{ width: '932px', background: '#ffffff' }}>{story()}</div>
 ));
 

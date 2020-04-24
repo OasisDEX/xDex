@@ -55,7 +55,7 @@ const controllerWithFakeOrderBook = (buys: any = [], sells: any = [], mta: MTAcc
   );
 };
 
-test('initial state', (done) => {
+test('initial state', done => {
   // const controller = createMTSimpleOrderForm$(defParams, tradingPair);
   const sells = [
     { price: 1, amount: 3 }, // 1
@@ -64,7 +64,7 @@ test('initial state', (done) => {
     { price: 5, amount: 4 }, // 4
   ];
   const controller = controllerWithFakeOrderBook([], sells);
-  controller.subscribe((state) => {
+  controller.subscribe(state => {
     expect(snapshotify(state)).toMatchSnapshot();
     done();
   });

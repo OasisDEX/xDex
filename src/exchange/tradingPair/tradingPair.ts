@@ -17,7 +17,7 @@ export function tradingPairResolver({ base, quote }: TradingPair) {
 }
 
 export function memoizeTradingPair<T>(f: (pair: TradingPair) => T): (pair: TradingPair) => T {
-  return memoize(f, (tp) => tradingPairResolver(tp));
+  return memoize(f, tp => tradingPairResolver(tp));
 }
 
 export function injectTradingPair$<T>(
@@ -25,9 +25,9 @@ export function injectTradingPair$<T>(
   f: (pair: TradingPair) => Observable<T>,
 ): Observable<{ tradingPair: TradingPair } & T> {
   return tradingPair$.pipe(
-    switchMap((tradingPair) => {
+    switchMap(tradingPair => {
       return f(tradingPair).pipe(
-        map((r) => ({
+        map(r => ({
           tradingPair,
           // @ts-ignore
           ...r,
@@ -41,7 +41,7 @@ export function loadablifyPlusTradingPair<T>(
   tradingPair: Observable<TradingPair>,
   f: (pair: TradingPair) => Observable<T>,
 ): Observable<LoadableWithTradingPair<T>> {
-  return injectTradingPair$(tradingPair, (pair) => loadablifyLight(f(pair)));
+  return injectTradingPair$(tradingPair, pair => loadablifyLight(f(pair)));
 }
 
 export const currentTradingPair$ = new BehaviorSubject<TradingPair>(first(tradingPairs) as TradingPair);

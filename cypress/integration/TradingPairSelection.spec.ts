@@ -81,15 +81,33 @@ describe('Trading pair dropdown', () => {
 
     const buyOrders = Orderbook.list(OrderType.BUY);
     buyOrders.countIs(3);
-    buyOrders.first().amount().should('have.text', '1.00000');
-    buyOrders.first().price().should('have.text', '110.0000');
-    buyOrders.first().total().should('have.text', '110.0000');
+    buyOrders
+      .first()
+      .amount()
+      .should('have.text', '1.00000');
+    buyOrders
+      .first()
+      .price()
+      .should('have.text', '110.0000');
+    buyOrders
+      .first()
+      .total()
+      .should('have.text', '110.0000');
 
     const sellOrders = Orderbook.list(OrderType.SELL);
     sellOrders.countIs(1);
-    sellOrders.first().amount().should('have.text', '1.00000');
-    sellOrders.first().price().should('have.text', '150.0000');
-    sellOrders.first().total().should('have.text', '150.0000');
+    sellOrders
+      .first()
+      .amount()
+      .should('have.text', '1.00000');
+    sellOrders
+      .first()
+      .price()
+      .should('have.text', '150.0000');
+    sellOrders
+      .first()
+      .total()
+      .should('have.text', '150.0000');
   });
 
   it('should place new buy order for selected pair', () => {
@@ -100,9 +118,18 @@ describe('Trading pair dropdown', () => {
     let sellOrders = Orderbook.list(OrderType.SELL);
 
     sellOrders.countIs(1);
-    sellOrders.first().amount().should('have.text', '1.00000');
-    sellOrders.first().price().should('have.text', '140.0000');
-    sellOrders.first().total().should('have.text', '140.0000');
+    sellOrders
+      .first()
+      .amount()
+      .should('have.text', '1.00000');
+    sellOrders
+      .first()
+      .price()
+      .should('have.text', '140.0000');
+    sellOrders
+      .first()
+      .total()
+      .should('have.text', '140.0000');
 
     let buyOrders = Orderbook.list(OrderType.BUY);
     buyOrders.countIs(0);
@@ -110,16 +137,31 @@ describe('Trading pair dropdown', () => {
     const amount = '2';
     const price = '70';
 
-    new Order().buy().limit().amount(amount).atPrice(price).total(multiply(amount, price)).place();
+    new Order()
+      .buy()
+      .limit()
+      .amount(amount)
+      .atPrice(price)
+      .total(multiply(amount, price))
+      .place();
 
     sellOrders = Orderbook.list(OrderType.SELL);
     sellOrders.countIs(1);
 
     buyOrders = Orderbook.list(OrderType.BUY);
     buyOrders.countIs(1);
-    buyOrders.first().amount().should('have.text', '2.00000');
-    buyOrders.first().price().should('have.text', '70.0000');
-    buyOrders.first().total().should('have.text', '140.0000');
+    buyOrders
+      .first()
+      .amount()
+      .should('have.text', '2.00000');
+    buyOrders
+      .first()
+      .price()
+      .should('have.text', '70.0000');
+    buyOrders
+      .first()
+      .total()
+      .should('have.text', '140.0000');
   });
 
   it('should place new sell order for selected pair', () => {
@@ -132,20 +174,44 @@ describe('Trading pair dropdown', () => {
     let sellOrders = Orderbook.list(OrderType.SELL);
 
     sellOrders.countIs(1);
-    sellOrders.first().amount().contains('1.00000');
-    sellOrders.first().price().should('have.text', '150.0000');
-    sellOrders.first().total().should('have.text', '150.0000');
+    sellOrders
+      .first()
+      .amount()
+      .contains('1.00000');
+    sellOrders
+      .first()
+      .price()
+      .should('have.text', '150.0000');
+    sellOrders
+      .first()
+      .total()
+      .should('have.text', '150.0000');
 
     const amount = '2';
     const price = '160';
 
-    new Order().sell().limit().amount(amount).atPrice(price).total(multiply(amount, price)).place();
+    new Order()
+      .sell()
+      .limit()
+      .amount(amount)
+      .atPrice(price)
+      .total(multiply(amount, price))
+      .place();
 
     sellOrders = Orderbook.list(OrderType.SELL);
     sellOrders.countIs(2);
-    sellOrders.first().amount().should('have.text', '2.00000');
-    sellOrders.first().price().should('have.text', '160.0000');
-    sellOrders.first().total().should('have.text', '320.0000');
+    sellOrders
+      .first()
+      .amount()
+      .should('have.text', '2.00000');
+    sellOrders
+      .first()
+      .price()
+      .should('have.text', '160.0000');
+    sellOrders
+      .first()
+      .total()
+      .should('have.text', '320.0000');
   });
 });
 

@@ -72,7 +72,7 @@ export function planFund(
     ...fundOps,
     ...flatten(
       orderDeltas(debts)
-        .filter((d) => !d.delta.eq(zero))
+        .filter(d => !d.delta.eq(zero))
         .map(deltaToOps),
     ),
   ];
@@ -104,7 +104,7 @@ export function planFundDai(
     ...fundOps,
     ...flatten(
       orderDeltas(debts)
-        .filter((d) => !d.delta.eq(zero))
+        .filter(d => !d.delta.eq(zero))
         .map(deltaToOps),
     ),
   ];

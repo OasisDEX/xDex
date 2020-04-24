@@ -38,7 +38,11 @@ export class DebtSlider extends React.Component<SliderProps> {
     const chart = createElement('div');
 
     // console.warn('debt slider props ', this.props);
-    const svgMainGraphic = d3.select(chart).append('svg').attr('width', svgProps.width).attr('height', svgProps.height);
+    const svgMainGraphic = d3
+      .select(chart)
+      .append('svg')
+      .attr('width', svgProps.width)
+      .attr('height', svgProps.height);
 
     const xScale = d3
       .scaleLinear()
@@ -93,7 +97,11 @@ export class DebtSlider extends React.Component<SliderProps> {
   }
 
   private drawBackgroundLine(slider: Selection<BaseType, any, null, undefined>, xScale: ScaleLinear<number, number>) {
-    slider.append('line').classed(styles.trackBg, true).attr('x1', xScale.range()[0]).attr('x2', xScale.range()[1]);
+    slider
+      .append('line')
+      .classed(styles.trackBg, true)
+      .attr('x1', xScale.range()[0])
+      .attr('x2', xScale.range()[1]);
   }
 
   private drawAvailableLine(slider: Selection<BaseType, any, null, undefined>, xScale: ScaleLinear<number, number>) {

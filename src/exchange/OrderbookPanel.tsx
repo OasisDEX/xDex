@@ -32,7 +32,7 @@ export function createOrderbookPanel$(): [(kind: OrderbookViewKind) => void, Obs
   return [
     kind$.next.bind(kind$),
     kind$.pipe(
-      map((kind) => ({
+      map(kind => ({
         kind,
       })),
     ),

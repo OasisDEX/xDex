@@ -388,13 +388,13 @@ stories.add('Three validations error on one element', () => {
 stories.add('Width of Create order and Order book panels', () => {
   const orderbook = fakeOrderBook;
   // console.warn(fakeOrderBook);
-  orderbook.sell.forEach((s) => {
+  orderbook.sell.forEach(s => {
     s.baseToken = 'WETH';
     s.quoteToken = 'DAI';
     // console.warn('tutaj sumato ', s.quoteAmount);
     return;
   });
-  orderbook.buy.forEach((s) => {
+  orderbook.buy.forEach(s => {
     s.baseToken = 'WETH';
     s.quoteToken = 'DAI';
     return;

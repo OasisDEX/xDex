@@ -74,11 +74,11 @@ export const FormatPriceOrder: React.SFC<any> = ({ kind, ...props }: any) =>
   );
 
 export const FormatFiat: React.SFC<any> = ({ ...props }: any) => (
-  <FormatAmount {...props} formatter={(amount) => formatFiatBalance(amount)} />
+  <FormatAmount {...props} formatter={amount => formatFiatBalance(amount)} />
 );
 
 export const FormatCrypto: React.SFC<any> = ({ ...props }: any) => (
-  <FormatAmount {...props} formatter={(amount) => formatCryptoBalance(amount)} />
+  <FormatAmount {...props} formatter={amount => formatCryptoBalance(amount)} />
 );
 
 // Format percent
@@ -118,7 +118,7 @@ export const Money = (props: FormatAmountProps) => {
 };
 
 export const CryptoMoney = (props: FormatAmountProps) => {
-  return <Money {...props} formatter={(amount) => formatCryptoBalance(amount)} />;
+  return <Money {...props} formatter={amount => formatCryptoBalance(amount)} />;
 };
 
 export const FormatQuoteToken = (props: { token: string }) => {

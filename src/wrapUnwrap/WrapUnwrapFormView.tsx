@@ -39,7 +39,7 @@ export class WrapUnwrapFormView extends React.Component<WrapUnwrapFormProps> {
         overlayClassName={styles.modalOverlay}
         closeTimeoutMS={250}
       >
-        <Panel className={classnames(styles.panel, styles.modalChild)} onClick={(event) => event.stopPropagation()}>
+        <Panel className={classnames(styles.panel, styles.modalChild)} onClick={event => event.stopPropagation()}>
           <PanelHeader bordered={true}>
             <div>
               {this.props.kind === WrapUnwrapFormKind.wrap && 'Wrap Ether'}
@@ -47,7 +47,7 @@ export class WrapUnwrapFormView extends React.Component<WrapUnwrapFormProps> {
             </div>
           </PanelHeader>
           <WithLoadingIndicator loadable={this.props}>
-            {(state) => (
+            {state => (
               <React.Fragment>
                 <PanelBody className={styles.panelBody}>
                   {this.summary(state)}

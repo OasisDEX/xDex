@@ -101,7 +101,7 @@ export function createTaxExport$(
   return combineLatest(context$, address$).pipe(
     switchMap(([context, addressChecksum]) => {
       return of(addressChecksum.toLowerCase()).pipe(
-        flatMap((address) => {
+        flatMap(address => {
           return queryTrades(context, [address]).pipe(
             mergeMap(
               (trades): Array<Observable<any>> => {

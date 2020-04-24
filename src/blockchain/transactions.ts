@@ -178,7 +178,7 @@ export function send(
           safeConfirmations: context.safeConfirmations,
         } as TxState),
       ),
-      takeWhileInclusive((state) => state.status === TxStatus.Success && state.confirmations < state.safeConfirmations),
+      takeWhileInclusive(state => state.status === TxStatus.Success && state.confirmations < state.safeConfirmations),
     );
   }
 
@@ -189,15 +189,15 @@ export function send(
     mergeMap(([txHash, broadcastedAt]: [string, Date]) =>
       timer(0, 1000).pipe(
         switchMap(() => bindNodeCallback(web3.eth.getTransaction as GetTransaction)(txHash)),
-        filter((transaction) => !!transaction),
+        filter(transaction => !!transaction),
         first(),
         mergeMap(
           (transaction: TransactionLike) =>
             (txRebroadcastStatus(transaction).pipe(
               switchMap(([hash, rebroadcast]) =>
                 bindNodeCallback(web3.eth.getTransactionReceipt as GetTransactionReceipt)(hash).pipe(
-                  filter((receipt) => receipt && !!receipt.blockNumber),
-                  mergeMap((receipt) => successOrFailure(hash, receipt, rebroadcast)),
+                  filter(receipt => receipt && !!receipt.blockNumber),
+                  mergeMap(receipt => successOrFailure(hash, receipt, rebroadcast)),
                 ),
               ),
               first(),
@@ -207,7 +207,7 @@ export function send(
                 txHash,
                 status: TxStatus.WaitingForConfirmation,
               } as TxState),
-              catchError((error) => {
+              catchError(error => {
                 return of({
                   ...common,
                   error,
@@ -232,7 +232,7 @@ export function send(
       status: TxStatus.WaitingForApproval,
     }),
     shareReplay(1),
-    catchError((error) => {
+    catchError(error => {
       if ((error.message as string).indexOf('User denied transaction signature') === -1) {
         console.error(error);
       }
@@ -245,7 +245,7 @@ export function send(
       });
     }),
   );
-  result.subscribe((state) => transactionObserver.next({ state, kind: 'newTx' }));
+  result.subscribe(state => transactionObserver.next({ state, kind: 'newTx' }));
 
   return result;
 }
@@ -271,7 +271,7 @@ export const transactions$: Observable<TxState[]> = combineLatest(
         case 'newTx': {
           const newState = change.state;
           const result = [...transactions];
-          const i = result.findIndex((t) => t.txNo === newState.txNo);
+          const i = result.findIndex(t => t.txNo === newState.txNo);
           if (i >= 0) {
             result[i] = newState;
           } else {
@@ -281,7 +281,7 @@ export const transactions$: Observable<TxState[]> = combineLatest(
         }
         case 'dismissed': {
           const result = [...transactions];
-          const i = result.findIndex((t) => t.txNo === change.txNo);
+          const i = result.findIndex(t => t.txNo === change.txNo);
 
           result[i].dismissed = true;
 
@@ -327,11 +327,11 @@ const externalNonce2tx$: Observable<ExternalNonce2tx> = combineLatest(
     fromPairs(
       _.map(
         transactions,
-        (tx) => [tx.nonce, { hash: tx.hash, callData: tx.input }] as [string, { hash: string; callData: string }],
+        tx => [tx.nonce, { hash: tx.hash, callData: tx.input }] as [string, { hash: string; callData: string }],
       ),
     ),
   ),
-  catchError((error) => {
+  catchError(error => {
     console.error(error);
     return of({});
   }),

@@ -44,7 +44,7 @@ export function cypressVisitWithWeb3(path = '', shouldRevert: boolean = true) {
       lastSnapshotId = parseInt(r.result, 16);
 
       return cy.visit(path, {
-        onBeforeLoad: (win) => {
+        onBeforeLoad: win => {
           (win as any).web3 = web3;
         },
       });
@@ -60,9 +60,9 @@ interface SimpleTx {
 export function verifySendTxs(expectedTxs: SimpleTx[]) {
   const spiedSendAsync = web3._requestManager.provider.sendAsync as sinon.SinonSpy;
 
-  const sendTxs = spiedSendAsync.getCalls().filter((c) => c.args[0].method === 'eth_sendTransaction');
+  const sendTxs = spiedSendAsync.getCalls().filter(c => c.args[0].method === 'eth_sendTransaction');
 
-  const simplifiedTxs: SimpleTx[] = sendTxs.map((tx) => {
+  const simplifiedTxs: SimpleTx[] = sendTxs.map(tx => {
     const params = tx.args[0].params[0];
 
     return {

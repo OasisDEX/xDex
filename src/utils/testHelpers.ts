@@ -4,10 +4,10 @@ export function unpack<T>(o: Observable<T>): any {
   let r;
 
   o.subscribe(
-    (v) => {
+    v => {
       r = v;
     },
-    (e) => {
+    e => {
       console.log('error', e, typeof e);
       r = e;
     },

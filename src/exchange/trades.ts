@@ -87,7 +87,7 @@ export const getTrades = (
     order,
     limit,
     offset,
-  }).pipe(map((trades) => trades.map(parseTrade(owner, baseToken, quoteToken))));
+  }).pipe(map(trades => trades.map(parseTrade(owner, baseToken, quoteToken))));
 };
 
 export function compareTrades(

@@ -23,7 +23,9 @@ export class Finalization {
   public shouldCreateProxy = () => {
     this.currentTx = 'proxyTx';
 
-    cy.get(tid('create-proxy')).as(this.currentTx).contains('Create Account');
+    cy.get(tid('create-proxy'))
+      .as(this.currentTx)
+      .contains('Create Account');
 
     return this;
   };
@@ -36,7 +38,10 @@ export class Finalization {
   public shouldSetAllowanceFor = (token: string) => {
     this.currentTx = 'allowanceTx';
 
-    cy.get(tid('set-token-allowance')).as(this.currentTx).find(tid('label')).contains(`Unlock ${token.toUpperCase()}`);
+    cy.get(tid('set-token-allowance'))
+      .as(this.currentTx)
+      .find(tid('label'))
+      .contains(`Unlock ${token.toUpperCase()}`);
 
     return this;
   };
@@ -64,9 +69,13 @@ export class Finalization {
     cy.get(tid('buy-token', tid('amount'))).contains(`${receive}`);
     cy.get(tid('buy-token', tid('currency'))).contains(`${to}`);
 
-    cy.get(tid('buy-token')).find(tid('amount')).contains(`${receive}`);
+    cy.get(tid('buy-token'))
+      .find(tid('amount'))
+      .contains(`${receive}`);
 
-    cy.get(tid('buy-token')).find(tid('currency')).contains(`${to}`);
+    cy.get(tid('buy-token'))
+      .find(tid('currency'))
+      .contains(`${to}`);
 
     cy.get(tid('summary'));
 
@@ -84,9 +93,13 @@ export class Finalization {
       cy.get(tid('buy-token', tid('currency'))).contains(`${to}`);
     });
 
-    cy.get(tid('buy-token')).find(tid('amount')).contains(`${receive}`);
+    cy.get(tid('buy-token'))
+      .find(tid('amount'))
+      .contains(`${receive}`);
 
-    cy.get(tid('buy-token')).find(tid('currency')).contains(`${to}`);
+    cy.get(tid('buy-token'))
+      .find(tid('currency'))
+      .contains(`${to}`);
 
     cy.get(tid('summary'));
 
@@ -94,6 +107,8 @@ export class Finalization {
   };
 
   public expectSuccess = () => {
-    cy.get(`@${this.currentTx}`).get(tid('status')).contains('Confirmed');
+    cy.get(`@${this.currentTx}`)
+      .get(tid('status'))
+      .contains('Confirmed');
   };
 }

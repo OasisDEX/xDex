@@ -36,7 +36,10 @@ export function prepareSellAllocationRequest(
 
   if (
     asset.assetKind === AssetKind.marginable &&
-    asset.balance.times(asset.referencePrice).div(asset.debt).lte(asset.minCollRatio)
+    asset.balance
+      .times(asset.referencePrice)
+      .div(asset.debt)
+      .lte(asset.minCollRatio)
   ) {
     return impossible('debt at max possible value');
   }
@@ -54,7 +57,7 @@ export function prepareSellAllocationRequest(
   }
 
   const assets: AllocationRequestAssetInfo[] = mta.marginableAssets
-    .map((ma) =>
+    .map(ma =>
       calculateMarginable(
         {
           ...ma,
@@ -63,7 +66,7 @@ export function prepareSellAllocationRequest(
         { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook,
       ),
     )
-    .map((ai) => ({
+    .map(ai => ({
       ...ai,
       ...{
         targetDebt: ai.name === baseToken ? BigNumber.min(ai.maxDebt, ai.debt) : ai.debt,
@@ -124,14 +127,14 @@ export function planSell(
     },
     ...flatten(
       orderDeltas(
-        debts.map((d) => {
+        debts.map(d => {
           if (getToken(name).assetKind === AssetKind.marginable && d.name === name) {
             return { ...d, delta: BigNumber.min(d.debt, maxTotal).plus(d.delta) };
           }
           return d;
         }),
       )
-        .filter((d) => !d.delta.eq(zero))
+        .filter(d => !d.delta.eq(zero))
         .map(deltaToOps),
     ),
   ];

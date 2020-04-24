@@ -4,19 +4,10 @@ import { BehaviorSubject } from 'rxjs';
 import { executeWeb3StatusCommand, WalletType, Web3StatusCommandKind } from '../blockchain/web3';
 import { Button } from '../utils/forms/Buttons';
 import { Checkbox } from '../utils/forms/Checkbox';
-import { LoadingIndicator } from '../utils/loadingIndicator/LoadingIndicator';
-import {
-  getCurrentProviderName,
-  Ledger,
-  Metamask,
-  Provider,
-  Trezor,
-  WalletConnect,
-  WalletLink
-} from '../utils/providers';
+import { Metamask, Provider, WalletConnect, WalletLink } from '../utils/providers';
 import * as styles from './WalletConnection.scss';
 
-const hwWallets = [Trezor, Ledger];
+// const hwWallets = [Trezor, Ledger];
 
 const {
   section,
@@ -64,12 +55,12 @@ const Panel = (props: { heading?: string | React.ReactNode; children?: any }) =>
   );
 };
 
-class NotConnected extends React.Component<{}, { isChecked: boolean, walletType?: WalletType }> {
+class NotConnected extends React.Component<{}, { isChecked: boolean; walletType?: WalletType }> {
   public constructor(props: any) {
     super(props);
     this.state = {
       isChecked: false,
-      walletType: undefined
+      walletType: undefined,
     };
   }
 
@@ -77,26 +68,29 @@ class NotConnected extends React.Component<{}, { isChecked: boolean, walletType?
     return (
       <Panel heading="Connect Wallet">
         <ul className={classnames(single, list)}>
-          <ListItem icon={Metamask.icon}
-                    name={Metamask.name}
-                    supported={true}
-                    isSelected={this.state.walletType === WalletType.browser}
-                    onSelect={() => this._selectWallet(WalletType.browser)}
-                    tid="web-wallet"
+          <ListItem
+            icon={Metamask.icon}
+            name={Metamask.name}
+            supported={true}
+            isSelected={this.state.walletType === WalletType.browser}
+            onSelect={() => this._selectWallet(WalletType.browser)}
+            tid="web-wallet"
           />
-          <ListItem icon={WalletLink.icon}
-                    name={WalletLink.name}
-                    supported={true}
-                    isSelected={this.state.walletType === WalletType.walletLink}
-                    onSelect={() => this._selectWallet(WalletType.walletLink)}
-                    tid="web-wallet"
+          <ListItem
+            icon={WalletLink.icon}
+            name={WalletLink.name}
+            supported={true}
+            isSelected={this.state.walletType === WalletType.walletLink}
+            onSelect={() => this._selectWallet(WalletType.walletLink)}
+            tid="web-wallet"
           />
-          <ListItem icon={WalletConnect.icon}
-                    name={WalletConnect.name}
-                    supported={true}
-                    isSelected={this.state.walletType === WalletType.walletConnect}
-                    onSelect={() => this._selectWallet(WalletType.walletConnect)}
-                    tid="web-wallet"
+          <ListItem
+            icon={WalletConnect.icon}
+            name={WalletConnect.name}
+            supported={true}
+            isSelected={this.state.walletType === WalletType.walletConnect}
+            onSelect={() => this._selectWallet(WalletType.walletConnect)}
+            tid="web-wallet"
           />
           {/*<ListItem icon={Trezor.icon}*/}
           {/*          name={Trezor.name}*/}
@@ -137,19 +131,19 @@ class NotConnected extends React.Component<{}, { isChecked: boolean, walletType?
 
   private _selectWallet = (walletType: WalletType) => {
     this.setState({ walletType });
-  }
+  };
 
   private _connect = () => {
     executeWeb3StatusCommand({
       kind: Web3StatusCommandKind.connect,
       type: this.state.walletType!,
-      network: sessionStorage.getItem('network')!
+      network: sessionStorage.getItem('network')!,
     });
-  }
+  };
 
   private _canConnect = () => {
     return this.state.isChecked && this.state.walletType;
-  }
+  };
 }
 
 class Connected extends React.Component {
@@ -158,11 +152,12 @@ class Connected extends React.Component {
       // <Panel heading={`${getCurrentProviderName().name} Connected`}>
       <Panel heading={`Connected`}>
         <div className={buttonPlaceholder}>
-          <Button size="md"
-                  color="secondaryOutlined"
-                  className={item}
-                  onClick={this._disconnect}
-                  data-test-id="connect-wallet"
+          <Button
+            size="md"
+            color="secondaryOutlined"
+            className={item}
+            onClick={this._disconnect}
+            data-test-id="connect-wallet"
           >
             Disconnect
           </Button>
@@ -174,26 +169,26 @@ class Connected extends React.Component {
     executeWeb3StatusCommand({
       kind: Web3StatusCommandKind.disconnect,
     });
-  }
+  };
 }
 
 const Connecting = (props: any) => {
-  const _connectingContainerStyles = () =>
-    ({
-      fontSize: '14px',
-      letterSpacing: '.4px',
-      lineHeight: '24px',
-      height: '216px',
-      color: '#828288',
-      width: '100%',
-      display: 'inline-flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderTop: '1px solid rgba(88, 88, 95, 0.2)',
-      borderBottom: '1px solid rgba(88, 88, 95, 0.2)',
-      flexDirection: 'column',
-      textAlign: 'center',
-    } as React.CSSProperties);
+  // const _connectingContainerStyles = () =>
+  //   ({
+  //     fontSize: '14px',
+  //     letterSpacing: '.4px',
+  //     lineHeight: '24px',
+  //     height: '216px',
+  //     color: '#828288',
+  //     width: '100%',
+  //     display: 'inline-flex',
+  //     alignItems: 'center',
+  //     justifyContent: 'center',
+  //     borderTop: '1px solid rgba(88, 88, 95, 0.2)',
+  //     borderBottom: '1px solid rgba(88, 88, 95, 0.2)',
+  //     flexDirection: 'column',
+  //     textAlign: 'center',
+  //   } as React.CSSProperties);
 
   return (
     <Panel heading="Connecting...">
@@ -228,8 +223,7 @@ export enum WalletConnectionViewKind {
 
 export const walletConnectionViewManual$ = new BehaviorSubject('');
 
-export const WalletConnectionViews = new Map<WalletConnectionViewKind, any>(
-[
+export const WalletConnectionViews = new Map<WalletConnectionViewKind, any>([
   [WalletConnectionViewKind.connected, Connected],
   [WalletConnectionViewKind.notConnected, NotConnected],
   [WalletConnectionViewKind.connecting, Connecting],

@@ -96,7 +96,7 @@ export type ExchangeMigrationState =
   | ExchangeMigrationFiascoState;
 
 function allowance$(allowances$: Observable<Allowances>, token: string) {
-  return allowances$.pipe(map((allowances) => allowances[token]));
+  return allowances$.pipe(map(allowances => allowances[token]));
 }
 
 function startTransaction(
@@ -117,8 +117,8 @@ function startTransaction(
     case ExchangeMigrationTxKind.sai2dai:
       return proxyAddress$.pipe(
         first(),
-        filter((proxyAddress) => !!proxyAddress),
-        switchMap((proxyAddress) => {
+        filter(proxyAddress => !!proxyAddress),
+        switchMap(proxyAddress => {
           return calls.swapSaiToDai({
             proxyAddress: proxyAddress!,
             amount: o.amount,
@@ -128,8 +128,8 @@ function startTransaction(
     case ExchangeMigrationTxKind.dai2sai:
       return proxyAddress$.pipe(
         first(),
-        filter((proxyAddress) => !!proxyAddress),
-        switchMap((proxyAddress) => {
+        filter(proxyAddress => !!proxyAddress),
+        switchMap(proxyAddress => {
           return calls.swapDaiToSai({
             proxyAddress: proxyAddress!,
             amount: o.amount,
@@ -139,8 +139,8 @@ function startTransaction(
     case ExchangeMigrationTxKind.allowance4Proxy:
       return proxyAddress$.pipe(
         first(),
-        filter((proxyAddress) => !!proxyAddress),
-        switchMap((proxyAddress) => {
+        filter(proxyAddress => !!proxyAddress),
+        switchMap(proxyAddress => {
           return calls.approveProxy({
             proxyAddress: proxyAddress!,
             token: o.token,
@@ -186,7 +186,7 @@ function next(
     const [current, ...pending] = state.pending;
     return start(proxyAddress$, calls, current, pending, []).pipe(
       map(
-        (newState) =>
+        newState =>
           ({
             ...state,
             ...newState,
@@ -201,7 +201,7 @@ function next(
       const done = [...state.done, state.current];
       return start(proxyAddress$, calls, current, pending, done).pipe(
         map(
-          (newState) =>
+          newState =>
             ({
               ...state,
               ...newState,

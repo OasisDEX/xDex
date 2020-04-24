@@ -149,7 +149,10 @@ describe('Selling', () => {
 
       const nextFinalization = secondTrade.execute();
 
-      nextFinalization.shouldNotCreateProxy().shouldSetAllowanceFor(to).expectSuccess();
+      nextFinalization
+        .shouldNotCreateProxy()
+        .shouldSetAllowanceFor(to)
+        .expectSuccess();
 
       const finalSummary = nextFinalization.shouldCommitATrade(willPayMore, to, willReceiveMore, from);
 
@@ -261,7 +264,10 @@ describe('Selling', () => {
 
       const nextFinalization = secondTrade.execute();
 
-      nextFinalization.shouldNotCreateProxy().shouldSetAllowanceFor(switchFrom).expectSuccess();
+      nextFinalization
+        .shouldNotCreateProxy()
+        .shouldSetAllowanceFor(switchFrom)
+        .expectSuccess();
 
       const finalSummary = nextFinalization.shouldCommitATrade(willPayMore, switchFrom, willReceiveMore, switchTo);
 

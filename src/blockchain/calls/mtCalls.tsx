@@ -84,7 +84,10 @@ function mtBalancePostprocess({ data }: { data: BigNumber[] }, { tokens }: MTBal
       referencePrice: amountFromWei(new BigNumber(data[row + 5]), 'DAI'),
       minCollRatio: amountFromWei(new BigNumber(data[row + 6]), 'ETH'),
       allowance: new BigNumber(data[row + 7]).gte(MIN_ALLOWANCE),
-      fee: new BigNumber(data[row + 8]).div(new BigNumber(10).pow(27)).pow(secondsPerYear).minus(one),
+      fee: new BigNumber(data[row + 8])
+        .div(new BigNumber(10).pow(27))
+        .pow(secondsPerYear)
+        .minus(one),
       liquidationPenalty: new BigNumber(data[row + 9]).div(new BigNumber(10).pow(27)),
       minDebt: amountFromWei(new BigNumber(data[row + 10]), 'DAI'),
     };
@@ -98,9 +101,9 @@ export const mtBalance = {
     return [
       proxyAddress,
       tokens.map(
-        (token) => (token !== 'DAI' ? Web3Utils.fromAscii(context.mcd.ilks[token]) : token), // DAI is temporary
+        token => (token !== 'DAI' ? Web3Utils.fromAscii(context.mcd.ilks[token]) : token), // DAI is temporary
       ),
-      tokens.map((token) => context.tokens[token].address),
+      tokens.map(token => context.tokens[token].address),
       context.mcd.vat,
       context.mcd.spot.address,
       context.mcd.jug.address,

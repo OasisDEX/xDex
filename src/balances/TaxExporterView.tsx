@@ -55,7 +55,7 @@ export class TaxExporterView extends React.Component<TaxExporterViewProps, TaxEx
         .pipe(take(1))
         .subscribe({
           next: (trades: TradeExport[]) => {
-            trades = trades.filter((trade) => trade.exchange !== '');
+            trades = trades.filter(trade => trade.exchange !== '');
             const url = 'data:text/csv;charset=utf-8,' + encodeURIComponent(toCSV(trades));
             downloadCSV(url);
           },
@@ -67,13 +67,13 @@ export class TaxExporterView extends React.Component<TaxExporterViewProps, TaxEx
 
 function toCSVRow(trade: any): string {
   return `"${Object.keys(trade)
-    .map((key) => trade[key])
+    .map(key => trade[key])
     .join('";"')}"`;
 }
 
 function toCSV(trades: any[]) {
   const header = '"Buy amount";"Buy currency";"Sell amount";"Sell currency";"Date";"Address";"Tx";"Exchange"';
-  return `${header}\r\n${trades.map((trade) => `${toCSVRow(trade)}\r\n`).join('')}`;
+  return `${header}\r\n${trades.map(trade => `${toCSVRow(trade)}\r\n`).join('')}`;
 }
 
 function downloadCSV(url: string) {

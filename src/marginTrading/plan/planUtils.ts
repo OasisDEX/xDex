@@ -14,7 +14,10 @@ export function getTotal(amount: BigNumber, orders: Offer[]): Impossible | BigNu
   for (const offer of orders) {
     const done = BigNumber.min(amountLeft, offer.baseAmount);
     // const paid = done.times(offer.price);
-    const paid = done.times(offer.quoteAmount).div(offer.baseAmount).toFixed(18, BigNumber.ROUND_DOWN);
+    const paid = done
+      .times(offer.quoteAmount)
+      .div(offer.baseAmount)
+      .toFixed(18, BigNumber.ROUND_DOWN);
 
     amountLeft = amountLeft.minus(done);
     total = total.plus(paid);

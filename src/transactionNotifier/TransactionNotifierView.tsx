@@ -21,13 +21,13 @@ export class TransactionNotifierView extends React.Component<TransactionNotifier
       <TransitionGroup className={styles.main}>
         {this.props.transactions
           .filter(
-            (transaction) =>
+            transaction =>
               !transaction.dismissed &&
               ((transaction.status === TxStatus.Success && transaction.confirmations < transaction.safeConfirmations) ||
                 !transaction.end ||
                 now - transaction.lastChange.getTime() < VISIBILITY_TIMEOUT * 1000),
           )
-          .map((transaction) => (
+          .map(transaction => (
             <CSSTransition key={transaction.txNo} classNames="transaction" timeout={1000}>
               <Notification
                 {...transaction}

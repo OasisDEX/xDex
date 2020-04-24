@@ -7,12 +7,18 @@ type Token = 'dai' | 'col';
 const execute = (operation: Operation, amount: number, token: Token) => {
   cy.get(tid(`${operation}-actions-dropdown`)).trigger('mouseover');
   cy.get(tid(`${operation}-${token}`)).click();
-  cy.get(tid(`modal`)).find(tid('header')).contains(new RegExp(operation, 'i'));
-  cy.get(tid(`modal`)).find(tid('amount-input')).type(`${amount}`);
+  cy.get(tid(`modal`))
+    .find(tid('header'))
+    .contains(new RegExp(operation, 'i'));
+  cy.get(tid(`modal`))
+    .find(tid('amount-input'))
+    .type(`${amount}`);
   cy.get(tid(`modal`))
     .find(tid(`${operation}-btn`))
     .click();
-  cy.get(tid(`modal`)).find(tid('tx-status')).contains('Confirmed');
+  cy.get(tid(`modal`))
+    .find(tid('tx-status'))
+    .contains('Confirmed');
   Modal.close();
 };
 

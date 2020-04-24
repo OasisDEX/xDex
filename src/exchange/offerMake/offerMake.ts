@@ -241,7 +241,14 @@ function directMatchState(
     amount,
     price,
     total,
-    priceImpact: price && orders[0] && price.minus(orders[0].price).dividedBy(orders[0].price).times(100).abs(),
+    priceImpact:
+      price &&
+      orders[0] &&
+      price
+        .minus(orders[0].price)
+        .dividedBy(orders[0].price)
+        .times(100)
+        .abs(),
     matchType: OfferMatchType.direct,
     gasEstimationStatus: GasEstimationStatus.unset,
   };
@@ -571,11 +578,11 @@ function addPositionGuess({ position, ...state }: OfferFormState): OfferFormStat
     state.kind === 'sell'
       ? orderBook.sell.length === 0
         ? undefined
-        : orderBook.sell.find((order) => order.price.gt(state.price as BigNumber)) ||
+        : orderBook.sell.find(order => order.price.gt(state.price as BigNumber)) ||
           orderBook.sell[orderBook.sell.length - 1]
       : orderBook.buy.length === 0
       ? undefined
-      : orderBook.buy.find((order) => order.price.lt(state.price as BigNumber)) ||
+      : orderBook.buy.find(order => order.price.lt(state.price as BigNumber)) ||
         orderBook.buy[orderBook.buy.length - 1];
 
   return offer ? { ...state, position: offer.offerId } : state;
@@ -619,7 +626,7 @@ function prepareSubmit(calls$: Calls$): [(state: OfferFormState) => void, Observ
           );
         }),
       )
-      .subscribe((change) => stageChange$.next(change));
+      .subscribe(change => stageChange$.next(change));
   }
 
   return [submit, stageChange$];
@@ -694,7 +701,7 @@ export function createFormController$(
     map(addPositionGuess),
     switchMap(curry(addGasEstimation)(params.calls$)),
     map(isReadyToProceed),
-    firstOfOrTrue((s) => s.gasEstimationStatus === GasEstimationStatus.calculating),
+    firstOfOrTrue(s => s.gasEstimationStatus === GasEstimationStatus.calculating),
     shareReplay(1),
   );
 }

@@ -73,7 +73,12 @@ function axes(
     .append('g')
     .classed('xAdditional', true)
     .attr('transform', `translate(0, ${chartCoords.top})`)
-    .call(d3.axisBottom(x).ticks(30).tickSize(chartSize.height));
+    .call(
+      d3
+        .axisBottom(x)
+        .ticks(30)
+        .tickSize(chartSize.height),
+    );
   xAdditionalAxe.select('.domain').classed(styles.hidden, true);
   xAdditionalAxe.selectAll('.tick line').classed(styles.axisLineAdditional, true);
   xAdditionalAxe.selectAll('.tick text').classed(styles.hidden, true);
@@ -92,7 +97,7 @@ function axes(
       .axisLeft(yBuy)
       .ticks(15)
       .tickSize(chartSize.width + yTickAddon)
-      .tickFormat((d) => d.toString()),
+      .tickFormat(d => d.toString()),
   );
 
   const yBuyTokenLabel = yAxis
@@ -105,7 +110,7 @@ function axes(
       .ticks(15)
       .tickSize(0)
       .tickPadding(yTokenMarginHorizontal)
-      .tickFormat((_d) => `${yToken}`),
+      .tickFormat(_d => `${yToken}`),
   );
 
   const sellAxis = yAxis.append('g').classed('sellAxis', true);
@@ -115,7 +120,7 @@ function axes(
       .axisRight(ySell)
       .ticks(15)
       .tickSize(chartSize.width + yTickAddon)
-      .tickFormat((d) => d.toString()),
+      .tickFormat(d => d.toString()),
   );
 
   const ySellTokenLabel = yAxis.append('g').attr('transform', `translate( ${chartCoords.right}, ${yTokenMarginTop})`);
@@ -125,7 +130,7 @@ function axes(
       .ticks(15)
       .tickSize(0)
       .tickPadding(yTokenMarginHorizontal)
-      .tickFormat((_d) => `${yToken}`),
+      .tickFormat(_d => `${yToken}`),
   );
 
   yAxis.selectAll('.tick line').classed(styles.axisLineMain, true);
@@ -147,8 +152,14 @@ function axes(
     });
 
   // volume axis: style token labels
-  yBuyTokenLabel.selectAll('.tick text').classed(styles.axisMainLabel, false).classed(styles.axisYTokenLabel, true);
-  ySellTokenLabel.selectAll('.tick text').classed(styles.axisMainLabel, false).classed(styles.axisYTokenLabel, true);
+  yBuyTokenLabel
+    .selectAll('.tick text')
+    .classed(styles.axisMainLabel, false)
+    .classed(styles.axisYTokenLabel, true);
+  ySellTokenLabel
+    .selectAll('.tick text')
+    .classed(styles.axisMainLabel, false)
+    .classed(styles.axisYTokenLabel, true);
 
   // -----------
   // main price axis
@@ -206,7 +217,10 @@ export class DepthChartView extends React.Component<DepthChartInternalProps> {
       .append('g')
       .classed('depthchart', true);
 
-    const x = d3.scaleLinear().domain([data.minPrice, data.maxPrice]).range([chartCoords.left, chartCoords.right]);
+    const x = d3
+      .scaleLinear()
+      .domain([data.minPrice, data.maxPrice])
+      .range([chartCoords.left, chartCoords.right]);
 
     const minYVolume = 1e-1;
     const minYVolumePlus = 1e-1 + 1e-2;
@@ -225,15 +239,15 @@ export class DepthChartView extends React.Component<DepthChartInternalProps> {
 
     const buyArea = d3
       .area<PriceVolume>()
-      .x((o) => x(o.price))
-      .y1((o) => yBuy(o.volume < minYVolume ? minYVolumePlus : o.volume))
+      .x(o => x(o.price))
+      .y1(o => yBuy(o.volume < minYVolume ? minYVolumePlus : o.volume))
       .curve(d3.curveStepAfter)
       .y0(chartCoords.verticalHalf);
 
     const sellArea = d3
       .area<PriceVolume>()
-      .x((o) => x(o.price))
-      .y1((o) => ySell(o.volume < minYVolume ? minYVolumePlus : o.volume))
+      .x(o => x(o.price))
+      .y1(o => ySell(o.volume < minYVolume ? minYVolumePlus : o.volume))
       .curve(d3.curveStepAfter)
       .y0(chartCoords.verticalHalf);
 
@@ -250,16 +264,19 @@ export class DepthChartView extends React.Component<DepthChartInternalProps> {
       [data.sellsExtra, sellArea, styles.sellChartDark],
     ].filter(([volumes]) => volumes !== undefined && volumes.length > 0) as any).forEach(
       ([volumes, area, style]: any) => {
-        return svgContainer.append('g').append('path').attr('d', area(volumes)).classed(style, true);
+        return svgContainer
+          .append('g')
+          .append('path')
+          .attr('d', area(volumes))
+          .classed(style, true);
       },
     );
 
     drawDotsAndLine(svgContainer, chartMode, x, yBuy, ySell, data);
 
-    const hasBuys = [data.buysBefore, data.buysAfter].filter((vol) => vol !== undefined && vol.length > 0).length > 0;
+    const hasBuys = [data.buysBefore, data.buysAfter].filter(vol => vol !== undefined && vol.length > 0).length > 0;
 
-    const hasSells =
-      [data.sellsBefore, data.sellsAfter].filter((vol) => vol !== undefined && vol.length > 0).length > 0;
+    const hasSells = [data.sellsBefore, data.sellsAfter].filter(vol => vol !== undefined && vol.length > 0).length > 0;
 
     return (
       <>
@@ -355,8 +372,8 @@ function drawDotsAndLine(
     .enter()
     .append('circle')
     .classed('glow', true)
-    .attr('cx', (_d) => cx)
-    .attr('cy', (d) => d[2](d[0]))
+    .attr('cx', _d => cx)
+    .attr('cy', d => d[2](d[0]))
     .attr('r', 8)
     .classed(styles.dotGlow, true);
   svg
@@ -365,10 +382,10 @@ function drawDotsAndLine(
     .enter()
     .append('circle')
     .classed('dot', true)
-    .attr('cx', (_d) => cx)
-    .attr('cy', (d) => d[2](d[0]))
+    .attr('cx', _d => cx)
+    .attr('cy', d => d[2](d[0]))
     .attr('r', 5)
-    .attr('class', (d) => d[1]);
+    .attr('class', d => d[1]);
 }
 
 function drawInfoBoxLine(
@@ -389,7 +406,13 @@ function drawInfoBoxLine(
   if (showLegendOnBottom) {
     const max = d3.max(yData) || 0;
     const y = max < bottom ? Math.min(bottom, max + 15) : Math.max(bottom, max - 15);
-    svg.append('line').attr('x1', x).attr('y1', y).attr('x2', x).attr('y2', bottom).classed(styles.infoBoxGreen, true);
+    svg
+      .append('line')
+      .attr('x1', x)
+      .attr('y1', y)
+      .attr('x2', x)
+      .attr('y2', bottom)
+      .classed(styles.infoBoxGreen, true);
     svg
       .append('line')
       .attr('x1', x)
@@ -400,8 +423,20 @@ function drawInfoBoxLine(
   } else {
     const min = d3.min(yData) || 0;
     const y = min > top ? Math.max(min - 15, top) : Math.min(min + 15, top);
-    svg.append('line').attr('x1', left).attr('y1', top).attr('x2', x).attr('y2', top).classed(styles.infoBoxRed, true);
-    svg.append('line').attr('x1', x).attr('y1', top).attr('x2', x).attr('y2', y).classed(styles.infoBoxRed, true);
+    svg
+      .append('line')
+      .attr('x1', left)
+      .attr('y1', top)
+      .attr('x2', x)
+      .attr('y2', top)
+      .classed(styles.infoBoxRed, true);
+    svg
+      .append('line')
+      .attr('x1', x)
+      .attr('y1', top)
+      .attr('x2', x)
+      .attr('y2', y)
+      .classed(styles.infoBoxRed, true);
   }
 }
 

@@ -504,8 +504,8 @@ function evaluateBuy(calls: ReadCalls, state: InstantFormState) {
       amount: buyAmount,
     })
     .pipe(
-      switchMap((sellAmount) => of(sellAmount.isZero() ? errorItem() : { sellAmount })),
-      catchError((error) => of(errorItem(error))),
+      switchMap(sellAmount => of(sellAmount.isZero() ? errorItem() : { sellAmount })),
+      catchError(error => of(errorItem(error))),
     );
 }
 
@@ -540,14 +540,14 @@ function evaluateSell(calls: ReadCalls, state: InstantFormState) {
       sellToken: sai2dai(sellToken),
     })
     .pipe(
-      switchMap((buyAmount) => of(buyAmount.isZero() ? errorItem() : { buyAmount })),
-      catchError((error) => of(errorItem(error))),
+      switchMap(buyAmount => of(buyAmount.isZero() ? errorItem() : { buyAmount })),
+      catchError(error => of(errorItem(error))),
     );
 }
 
 function getBestPrice(calls: ReadCalls, sellToken: string, buyToken: string): Observable<BigNumber> {
   return calls.otcGetBestOffer({ sellToken, buyToken }).pipe(
-    flatMap((offerId) => calls.otcOffers(offerId)),
+    flatMap(offerId => calls.otcOffers(offerId)),
     map(({ pay_amt, buy_amt }) => {
       return daiOrSAI(sellToken) || (eth2weth(sellToken) === 'WETH' && !daiOrSAI(buyToken))
         ? amountFromWei(new BigNumber(pay_amt), sellToken).div(amountFromWei(new BigNumber(buy_amt), buyToken))
@@ -574,7 +574,7 @@ function gasEstimation(
   state: InstantFormState,
 ): Observable<number> | undefined {
   return calls.proxyAddress().pipe(
-    switchMap((proxyAddress) => {
+    switchMap(proxyAddress => {
       const sell = state.sellToken === 'ETH' ? estimateTradePayWithETH : estimateTradePayWithERC20;
       return sell(calls, proxyAddress, state);
     }),
@@ -622,7 +622,7 @@ function evaluateTrade(
 
   return theCalls$.pipe(
     first(),
-    switchMap((calls) =>
+    switchMap(calls =>
       combineLatest(
         state.kind === OfferType.buy ? evaluateBuy(calls, state) : evaluateSell(calls, state),
         // tslint:disable-next-line:max-line-length
@@ -636,7 +636,7 @@ function evaluateTrade(
       tradeEvaluationStatus: TradeEvaluationStatus.calculated,
     })),
     startWith({ ...state, tradeEvaluationStatus: TradeEvaluationStatus.calculating }),
-    catchError((err) => {
+    catchError(err => {
       return of({
         ...(state.kind === OfferType.buy ? { sellAmount: undefined } : { buyAmount: undefined }),
         bestPrice: undefined,
@@ -718,7 +718,7 @@ function validate(state: InstantFormState): InstantFormState {
 
   if (manualAllowancesProgress) {
     const settingAllowanceInProgress = Object.keys(manualAllowancesProgress).find(
-      (token) => manualAllowancesProgress[token] && !manualAllowancesProgress[token].done,
+      token => manualAllowancesProgress[token] && !manualAllowancesProgress[token].done,
     );
 
     if (settingAllowanceInProgress) {
@@ -843,7 +843,14 @@ function calculatePriceAndImpact(state: InstantFormState): InstantFormState {
   const calculated = buyAmount && sellAmount ? calculateTradePrice(sellToken, sellAmount, buyToken, buyAmount) : null;
   const price = calculated ? calculated.price : undefined;
   const quotation = calculated ? calculated.quotation : undefined;
-  const priceImpact = price && bestPrice ? bestPrice.minus(price).abs().div(bestPrice).times(100) : undefined;
+  const priceImpact =
+    price && bestPrice
+      ? bestPrice
+          .minus(price)
+          .abs()
+          .div(bestPrice)
+          .times(100)
+      : undefined;
 
   return {
     ...state,
@@ -862,16 +869,16 @@ function prepareSubmit(
     theCalls$
       .pipe(
         first(),
-        flatMap((calls) =>
+        flatMap(calls =>
           calls.proxyAddress().pipe(
-            switchMap((proxyAddress) => {
+            switchMap(proxyAddress => {
               const sell = state.sellToken === 'ETH' ? tradePayWithETH : tradePayWithERC20;
               return sell(calls, proxyAddress, state);
             }),
           ),
         ),
       )
-      .subscribe((change) => stageChange$.next(change));
+      .subscribe(change => stageChange$.next(change));
   }
 
   return [submit, stageChange$];
@@ -901,7 +908,7 @@ export function manualAllowanceSetup(
     theCalls$
       .pipe(
         first(),
-        flatMap((calls) =>
+        flatMap(calls =>
           combineLatest(proxyAddress$, allowances$).pipe(
             take(1),
             flatMap(([proxyAddress, allowances]) =>
@@ -915,7 +922,7 @@ export function manualAllowanceSetup(
 
                   return allowances[token]
                     ? calls.disapproveProxy({ proxyAddress, token, ...gasCost }).pipe(
-                        flatMap((progress) =>
+                        flatMap(progress =>
                           of({
                             token,
                             progress,
@@ -924,7 +931,7 @@ export function manualAllowanceSetup(
                         ),
                       )
                     : calls.approveProxy({ proxyAddress, token, ...gasCost }).pipe(
-                        flatMap((progress) =>
+                        flatMap(progress =>
                           of({
                             token,
                             progress,
@@ -938,7 +945,7 @@ export function manualAllowanceSetup(
           ),
         ),
       )
-      .subscribe((txStatus) => {
+      .subscribe(txStatus => {
         transactionStatus$.next(txStatus);
       });
   }
@@ -946,7 +953,7 @@ export function manualAllowanceSetup(
   transactionStatus$
     .pipe(
       distinctUntilChanged(isEqual),
-      flatMap((txStatus) => allowances$.pipe(flatMap((allowances) => of([txStatus, allowances])))),
+      flatMap(txStatus => allowances$.pipe(flatMap(allowances => of([txStatus, allowances])))),
       map(([status, allowances]) => {
         const { token, direction, progress } = status;
 
@@ -971,7 +978,7 @@ export function manualAllowanceSetup(
           } as ManualAllowanceProgress,
         });
       }),
-      catchError((err) => {
+      catchError(err => {
         console.log('Error caught:', err);
         return of(undefined);
       }),
@@ -988,7 +995,7 @@ export function manualProxyCreation(theCalls$: Calls$, gasPrice$: GasPrice$): [(
     theCalls$
       .pipe(
         first(),
-        switchMap((calls) =>
+        switchMap(calls =>
           combineLatest(calls.setupProxyEstimateGas({}), gasPrice$).pipe(
             switchMap(([estimatedGas, gasPrice]) =>
               calls.setupProxy({
@@ -999,7 +1006,7 @@ export function manualProxyCreation(theCalls$: Calls$, gasPrice$: GasPrice$): [(
           ),
         ),
       )
-      .subscribe((progress) => {
+      .subscribe(progress => {
         proxyCreationChange$.next({
           kind: InstantFormChangeKind.progressChange,
           progress: {
@@ -1018,7 +1025,7 @@ export function manualProxyCreation(theCalls$: Calls$, gasPrice$: GasPrice$): [(
 function toDustLimitsChange(dustLimits$: Observable<DustLimits>): Observable<DustLimitsChange> {
   return dustLimits$.pipe(
     map(
-      (dustLimits) =>
+      dustLimits =>
         ({
           dustLimits,
           kind: InstantFormChangeKind.dustLimitsChange,
@@ -1030,7 +1037,7 @@ function toDustLimitsChange(dustLimits$: Observable<DustLimits>): Observable<Dus
 function toAllowancesChange(allowances$: Observable<Allowances>): Observable<AllowancesChange> {
   return allowances$.pipe(
     map(
-      (allowances) =>
+      allowances =>
         ({
           allowances,
           kind: InstantFormChangeKind.allowancesChange,
@@ -1042,7 +1049,7 @@ function toAllowancesChange(allowances$: Observable<Allowances>): Observable<All
 function toProxyChange(proxyAddress$: Observable<string>): Observable<ProxyChange> {
   return proxyAddress$.pipe(
     map(
-      (proxy) =>
+      proxy =>
         ({
           value: proxy,
           kind: InstantFormChangeKind.proxyChange,
@@ -1054,7 +1061,7 @@ function toProxyChange(proxyAddress$: Observable<string>): Observable<ProxyChang
 function toContextChange(context$: Observable<NetworkConfig>): Observable<ContextChange> {
   return context$.pipe(
     map(
-      (context) =>
+      context =>
         ({
           context,
           kind: InstantFormChangeKind.contextChange,

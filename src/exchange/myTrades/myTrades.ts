@@ -37,7 +37,7 @@ export function createMyCurrentTrades$(
   myClosedTrades$: Observable<LoadableWithTradingPair<Trade[]>>,
 ): Observable<Authorizable<LoadableWithTradingPair<TradeWithStatus[]>>> {
   return authorizablify(() =>
-    myTradesKind$.pipe(switchMap((kind) => (kind === MyTradesKind.open ? myOpenTrades$ : myClosedTrades$))),
+    myTradesKind$.pipe(switchMap(kind => (kind === MyTradesKind.open ? myOpenTrades$ : myClosedTrades$))),
   );
 }
 

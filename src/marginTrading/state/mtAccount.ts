@@ -252,7 +252,7 @@ export function createMTProxyApprove(calls$: Calls$) {
   return (args: { token: string; proxyAddress: string }): Observable<TxState> => {
     const r = calls$.pipe(
       first(),
-      switchMap((calls) => {
+      switchMap(calls => {
         return calls.approveMTProxy(args);
       }),
     );
@@ -273,7 +273,7 @@ export function findAsset(
   //   return mta.cash;
   // }
 
-  return mta.marginableAssets.find((a) => a.name === name);
+  return mta.marginableAssets.find(a => a.name === name);
   // || mta.nonMarginableAssets.find(a => a.name === name);
 }
 
@@ -282,7 +282,7 @@ export function findMarginableAsset(name: string, mta?: MTAccount): MarginableAs
     return undefined;
   }
 
-  return mta.marginableAssets.find((a) => a.name === name);
+  return mta.marginableAssets.find(a => a.name === name);
 }
 
 // export function findNonMarginableAsset(

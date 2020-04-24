@@ -18,7 +18,9 @@ class Trade {
   }
 
   public cancel() {
-    cy.get('@trade').find(tid('cancel')).click();
+    cy.get('@trade')
+      .find(tid('cancel'))
+      .click();
   }
 }
 
@@ -28,7 +30,9 @@ export class Trades {
   }
 
   public static first() {
-    cy.get(tid('my-trades')).first().as('trade');
+    cy.get(tid('my-trades'))
+      .first()
+      .as('trade');
 
     return new Trade();
   }

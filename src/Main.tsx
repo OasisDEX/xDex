@@ -21,7 +21,7 @@ const browserHistoryInstance = createBrowserHistory({
   basename: REACT_APP_SUBDIR ? REACT_APP_SUBDIR : '/',
 });
 
-browserHistoryInstance.listen((location) => {
+browserHistoryInstance.listen(location => {
   trackingEvents.pageView(location.pathname);
 });
 
@@ -76,7 +76,7 @@ class Routes extends React.Component<{ status: WalletStatus }> {
 const RoutesRx = connect<{ status: WalletStatus }, {}>(
   Routes,
   walletStatus$.pipe(
-    map((status) => ({
+    map(status => ({
       status,
     })),
   ),
