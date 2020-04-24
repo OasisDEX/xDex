@@ -16,12 +16,11 @@ import { DEFAULT_GAS } from './callsHelpers';
 import { TxMetaKind } from './txMeta';
 
 export const setupMTProxy = {
-  call: (_data: {}, context: NetworkConfig) =>
-    context.instantProxyRegistry.contract.methods['build()'],
+  call: (_data: {}, context: NetworkConfig) => context.instantProxyRegistry.contract.methods['build()'],
   prepareArgs: () => [],
   options: () => ({ gas: DEFAULT_GAS }), // this should be estimated as in setupProxy
   kind: TxMetaKind.setupMTProxy,
-  description: () => <React.Fragment>Setup MT proxy</React.Fragment>
+  description: () => <React.Fragment>Setup MT proxy</React.Fragment>,
 };
 
 export interface ApproveData {
@@ -33,15 +32,16 @@ export const approveMTProxy = {
   call: ({ token }: ApproveData, context: NetworkConfig) =>
     context.tokens[token].contract.methods['approve(address,uint256)'],
   prepareArgs: ({ token, proxyAddress }: ApproveData, context: NetworkConfig) => {
-    console.log('proxyAddress', proxyAddress,
-                'token', token,
-                context.tokens[token].contract.options.address);
+    console.log('proxyAddress', proxyAddress, 'token', token, context.tokens[token].contract.options.address);
     return [proxyAddress, -1];
   },
   options: () => ({ gas: DEFAULT_GAS }),
   kind: TxMetaKind.approveMTProxy,
-  description: ({ token }: ApproveData) =>
-    <React.Fragment>Approve MT proxy to transfer <Currency value={token}/></React.Fragment>
+  description: ({ token }: ApproveData) => (
+    <React.Fragment>
+      Approve MT proxy to transfer <Currency value={token} />
+    </React.Fragment>
+  ),
 };
 
 export interface MTBalanceData {
@@ -50,7 +50,7 @@ export interface MTBalanceData {
 }
 
 export interface MTBalanceResult {
-  [index:string]: {
+  [index: string]: {
     walletBalance: BigNumber;
     marginBalance: BigNumber;
     urnBalance: BigNumber;
@@ -70,8 +70,7 @@ const secondsPerYear = 60 * 60 * 24 * 365;
 
 BigNumber.config({ POW_PRECISION: 100 });
 
-function mtBalancePostprocess({ data }: { data: BigNumber[]}, { tokens }: MTBalanceData):
-MTBalanceResult {
+function mtBalancePostprocess({ data }: { data: BigNumber[] }, { tokens }: MTBalanceData): MTBalanceResult {
   const balanceResult: MTBalanceResult = {};
   tokens.forEach((token: string, i: number) => {
     const row = i * BalanceOuts;
@@ -85,27 +84,23 @@ MTBalanceResult {
       referencePrice: amountFromWei(new BigNumber(data[row + 5]), 'DAI'),
       minCollRatio: amountFromWei(new BigNumber(data[row + 6]), 'ETH'),
       allowance: new BigNumber(data[row + 7]).gte(MIN_ALLOWANCE),
-      fee: new BigNumber(data[row + 8])
-        .div(new BigNumber(10).pow(27))
-        .pow(secondsPerYear)
-        .minus(one),
+      fee: new BigNumber(data[row + 8]).div(new BigNumber(10).pow(27)).pow(secondsPerYear).minus(one),
       liquidationPenalty: new BigNumber(data[row + 9]).div(new BigNumber(10).pow(27)),
-      minDebt: amountFromWei(new BigNumber(data[row + 10]), 'DAI')
+      minDebt: amountFromWei(new BigNumber(data[row + 10]), 'DAI'),
     };
   });
   return balanceResult;
 }
 
 export const mtBalance = {
-  call: (_data: MTBalanceData, context: NetworkConfig) =>
-    context.proxyActions.contract.methods.balance,
+  call: (_data: MTBalanceData, context: NetworkConfig) => context.proxyActions.contract.methods.balance,
   prepareArgs: ({ proxyAddress, tokens }: MTBalanceData, context: NetworkConfig) => {
     return [
       proxyAddress,
-      tokens.map(token =>
-        token !== 'DAI' ? Web3Utils.fromAscii(context.mcd.ilks[token]) : token // DAI is temporary
+      tokens.map(
+        (token) => (token !== 'DAI' ? Web3Utils.fromAscii(context.mcd.ilks[token]) : token), // DAI is temporary
       ),
-      tokens.map(token => context.tokens[token].address),
+      tokens.map((token) => context.tokens[token].address),
       context.mcd.vat,
       context.mcd.spot.address,
       context.mcd.jug.address,
@@ -117,15 +112,10 @@ export const mtBalance = {
 };
 
 function toWei(name: string, amount?: BigNumber) {
-  return amount ?
-    amountToWei(amount, name).toFixed(0) :
-    undefined;
+  return amount ? amountToWei(amount, name).toFixed(0) : undefined;
 }
 
-function argsOfPerformOperations(
-  { plan }: { plan: Operation[] },
-  context: NetworkConfig,
-) {
+function argsOfPerformOperations({ plan }: { plan: Operation[] }, context: NetworkConfig) {
   if (plan.length !== 1) {
     throw new Error('plan must contain a single operation');
   }
@@ -138,8 +128,7 @@ function argsOfPerformOperations(
     context.mcd.joins[token],
   ];
 
-  const fundDaiArgs = (op: Operation, token:string) =>
-                      [...fundArgs(op, token), context.mcd.vat];
+  const fundDaiArgs = (op: Operation, token: string) => [...fundArgs(op, token), context.mcd.vat];
 
   const drawArgs = (op: Operation, token: string) => [
     context.cdpManager,
@@ -148,27 +137,35 @@ function argsOfPerformOperations(
     context.mcd.joins[token],
   ];
 
-  const drawDaiArgs = (op: Operation, token:string) =>
-    [...drawArgs(op, token), context.mcd.vat, context.mcd.jug.address];
+  const drawDaiArgs = (op: Operation, token: string) => [
+    ...drawArgs(op, token),
+    context.mcd.vat,
+    context.mcd.jug.address,
+  ];
 
   const buySellArgs = (op: Operation) => {
     const maxTotalAdjustedWithSlippage = (op as any).maxTotal.times(
-      op.kind === OperationKind.buyRecursively ?
-        one.plus((op as any).slippageLimit) :
-        one.minus((op as any).slippageLimit)
+      op.kind === OperationKind.buyRecursively
+        ? one.plus((op as any).slippageLimit)
+        : one.minus((op as any).slippageLimit),
     );
     console.log('amount:', (op as any).amount.toString());
     console.log(
       `adjusting maxTotal with slippage ${(op as any).slippageLimit.toString()}:`,
-      (op as any).maxTotal.toString(), '->',
-      maxTotalAdjustedWithSlippage.toString()
+      (op as any).maxTotal.toString(),
+      '->',
+      maxTotalAdjustedWithSlippage.toString(),
     );
     console.log('price:', maxTotalAdjustedWithSlippage.div((op as any).amount).toString());
     return [
       [
-        context.tokens[op.name].address, context.mcd.joins[op.name],
-        context.tokens.DAI.address, context.mcd.joins.DAI,
-        context.cdpManager, context.otc.address, context.mcd.vat,
+        context.tokens[op.name].address,
+        context.mcd.joins[op.name],
+        context.tokens.DAI.address,
+        context.mcd.joins.DAI,
+        context.cdpManager,
+        context.otc.address,
+        context.mcd.vat,
         ...(op.kind === OperationKind.buyRecursively ? [context.mcd.jug.address] : []),
       ],
       Web3Utils.fromAscii(context.mcd.ilks[op.name]),
@@ -195,10 +192,7 @@ function argsOfPerformOperations(
   if (!types[plan[0].kind]) {
     throw new Error(`unknown operation: ${plan[0].kind}`);
   }
-  return [
-    context.proxyActions.address,
-    types[plan[0].kind](),
-  ];
+  return [context.proxyActions.address, types[plan[0].kind]()];
 }
 
 interface PerformPlanData {
@@ -213,7 +207,7 @@ const mtPerformPlan = {
   },
   prepareArgs: argsOfPerformOperations,
   // options: () => ({ gas: DEFAULT_GAS * 6 }), // TODO
-  options: ({ gas }: PerformPlanData) => gas ? { gas } : {},
+  options: ({ gas }: PerformPlanData) => (gas ? { gas } : {}),
 };
 
 interface MTFundData extends PerformPlanData {
@@ -225,18 +219,18 @@ export const mtFund = {
   ...mtPerformPlan,
   kind: TxMetaKind.fundMTAccount,
   options: () => ({ gas: DEFAULT_GAS }),
-  description: ({ token, amount }: MTFundData) =>
+  description: ({ token, amount }: MTFundData) => (
     <React.Fragment>
       Fund margin account with <Money value={amount} token={token} />
     </React.Fragment>
+  ),
 };
 
 export const mtReallocate = {
   ...mtPerformPlan,
   kind: TxMetaKind.reallocateMTAccount,
   options: () => ({ gas: DEFAULT_GAS }),
-  description: () =>
-    <React.Fragment>Reallocate margin account</React.Fragment>
+  description: () => <React.Fragment>Reallocate margin account</React.Fragment>,
 };
 
 export interface MTDrawData extends PerformPlanData {
@@ -248,10 +242,11 @@ export const mtDraw = {
   ...mtPerformPlan,
   kind: TxMetaKind.drawMTAccount,
   options: () => ({ gas: DEFAULT_GAS }),
-  description: ({ token, amount }: MTDrawData) =>
+  description: ({ token, amount }: MTDrawData) => (
     <React.Fragment>
       Draw <Money value={amount} token={token} /> from margin account
     </React.Fragment>
+  ),
 };
 
 export interface MTBuyData extends PerformPlanData {
@@ -266,10 +261,11 @@ export const mtBuy = {
   ...mtPerformPlan,
   kind: TxMetaKind.buyMTAccount,
   options: () => ({ gas: DEFAULT_GAS }),
-  description: ({ baseToken, amount, total }: MTBuyData) =>
+  description: ({ baseToken, amount, total }: MTBuyData) => (
     <React.Fragment>
-      Buy <Money value={amount} token={baseToken}/> for <Money value={total} token={'DAI'}/>
+      Buy <Money value={amount} token={baseToken} /> for <Money value={total} token={'DAI'} />
     </React.Fragment>
+  ),
 };
 
 export interface MTSellData extends PerformPlanData {
@@ -284,10 +280,11 @@ export const mtSell = {
   ...mtPerformPlan,
   kind: TxMetaKind.sellMTAccount,
   options: () => ({ gas: DEFAULT_GAS }),
-  description: ({ baseToken, amount, total }: MTSellData) =>
+  description: ({ baseToken, amount, total }: MTSellData) => (
     <React.Fragment>
-      Sell <Money value={amount} token={baseToken}/> for <Money value={total} token={'DAI'}/>
+      Sell <Money value={amount} token={baseToken} /> for <Money value={total} token={'DAI'} />
     </React.Fragment>
+  ),
 };
 
 interface MTRedeemData {
@@ -303,19 +300,18 @@ export const mtRedeem = {
   prepareArgs: ({ token, amount }: MTRedeemData, context: NetworkConfig) => {
     return [
       context.proxyActions.address,
-      context.proxyActions.contract.methods.redeem(
-        context.cdpManager,
-        Web3Utils.fromAscii(context.mcd.ilks[token]),
-        amountToWei(amount, token).toFixed()
-      ).encodeABI(),
+      context.proxyActions.contract.methods
+        .redeem(context.cdpManager, Web3Utils.fromAscii(context.mcd.ilks[token]), amountToWei(amount, token).toFixed())
+        .encodeABI(),
     ];
   },
   kind: TxMetaKind.redeem,
   options: () => ({ gas: DEFAULT_GAS }),
-  description: ({ token, amount }: MTRedeemData) =>
+  description: ({ token, amount }: MTRedeemData) => (
     <React.Fragment>
       Redeem <Money value={amount} token={token} /> from Vat
     </React.Fragment>
+  ),
 };
 
 interface MTExportData {
@@ -330,19 +326,20 @@ export const mtExport = {
   prepareArgs: ({ token }: MTExportData, context: NetworkConfig) => {
     return [
       context.proxyActions.address,
-      context.proxyActions.contract.methods.export(
-        context.cdpManager,
-        Web3Utils.fromAscii(context.mcd.ilks[token]),
-        context.mcd.vat,
-        context.mcd.dssCdpManager,
-      ).encodeABI(),
+      context.proxyActions.contract.methods
+        .export(
+          context.cdpManager,
+          Web3Utils.fromAscii(context.mcd.ilks[token]),
+          context.mcd.vat,
+          context.mcd.dssCdpManager,
+        )
+        .encodeABI(),
     ];
   },
   kind: TxMetaKind.export,
-  description: ({ token }: MTExportData) =>
-    <React.Fragment>
-      Export {token} leveraged position to Oasis Borrow
-    </React.Fragment>
+  description: ({ token }: MTExportData) => (
+    <React.Fragment>Export {token} leveraged position to Oasis Borrow</React.Fragment>
+  ),
 };
 
 export const osmParams = {

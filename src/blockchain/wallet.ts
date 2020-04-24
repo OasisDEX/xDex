@@ -9,7 +9,7 @@ import {
   shareReplay,
   startWith,
   switchMap,
-  tap
+  tap,
 } from 'rxjs/operators';
 import {account$} from './network';
 // tslint:disable:import-name
@@ -26,7 +26,7 @@ const tosAccepted$: Observable<boolean> = interval(500).pipe(
   map(
     () => JSON.parse(localStorage.getItem('tos') || 'false')),
   startWith(JSON.parse(localStorage.getItem('tos') || 'false')),
-  distinctUntilChanged(isEqual)
+  distinctUntilChanged(isEqual),
 );
 
 export enum WalletStatus {

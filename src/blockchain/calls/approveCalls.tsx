@@ -2,7 +2,7 @@ import { BigNumber } from 'bignumber.js';
 import * as React from 'react';
 
 import { Currency } from '../../utils/text/Text';
-import { getToken, NetworkConfig, } from '../config';
+import { getToken, NetworkConfig } from '../config';
 import { TransactionDef } from './callsHelpers';
 import { TxMetaKind } from './txMeta';
 
@@ -53,12 +53,17 @@ export const approveProxy = {
   call: ({ token }: ApproveProxyData, context: NetworkConfig) =>
     context.tokens[token].contract.methods['approve(address,uint256)'],
   prepareArgs: ({ proxyAddress }: ApproveProxyData, _context: NetworkConfig) => [proxyAddress, -1],
-  options: ({ gasPrice, gasEstimation }: ApproveProxyData) =>
-    ({ ...gasPrice ? gasPrice : {}, ...gasEstimation ? { gas: gasEstimation } : {} }),
+  options: ({ gasPrice, gasEstimation }: ApproveProxyData) => ({
+    ...(gasPrice ? gasPrice : {}),
+    ...(gasEstimation ? { gas: gasEstimation } : {}),
+  }),
   kind: TxMetaKind.approveProxy,
   descriptionIcon: ({ token }: ApproveProxyData) => getToken(token).iconCircle,
-  description: ({ token }: ApproveProxyData) =>
-    <React.Fragment>Unlock <Currency value={token}/> on proxy</React.Fragment>
+  description: ({ token }: ApproveProxyData) => (
+    <React.Fragment>
+      Unlock <Currency value={token} /> on proxy
+    </React.Fragment>
+  ),
 };
 
 export const disapproveProxy: TransactionDef<ApproveProxyData> = {

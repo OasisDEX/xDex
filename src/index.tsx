@@ -4,7 +4,8 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { combineLatest } from 'rxjs';
 import {map, startWith} from 'rxjs/operators';
-import { mixpanelInit } from './analytics';
+import { mixpanelInit } from './analytics/mixpanel';
+import { fathomInit } from './analytics/fathom';
 import { networks } from './blockchain/config';
 import { networkId$ } from './blockchain/network';
 import { Web3Status, web3Status$ } from './blockchain/web3';
@@ -22,6 +23,7 @@ interface Props {
 }
 
 mixpanelInit();
+fathomInit();
 
 interface Web3StatusAndNetwork {
   // status: Web3Status;
@@ -47,10 +49,8 @@ const AppTxRx = connect(
 const root: HTMLElement = document.getElementById('root')!;
 
 if (process.env.NODE_ENV === 'production' && process.env.REACT_APP_SENTRY_DNS) {
-  Raven.config(
-    process.env.REACT_APP_SENTRY_DNS
-  ).install();
-  Raven.context(() => ReactDOM.render(<AppTxRx/>, root));
+  Raven.config(process.env.REACT_APP_SENTRY_DNS).install();
+  Raven.context(() => ReactDOM.render(<AppTxRx />, root));
 } else {
-  ReactDOM.render(<AppTxRx/>, root);
+  ReactDOM.render(<AppTxRx />, root);
 }

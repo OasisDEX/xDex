@@ -12,7 +12,7 @@ export class BigNumberInput extends React.Component<any> {
     if (e.target.value !== '0._') {
       this.props.onChange(e);
     }
-  }
+  };
 
   public render() {
     const currentValue: string | undefined = this.props.value;
@@ -20,22 +20,16 @@ export class BigNumberInput extends React.Component<any> {
     if (
       this.lastValue &&
       currentValue &&
-      new BigNumber(this.lastValue.replace(/\,/g, '')).eq(
-        new BigNumber(currentValue.replace(/\,/g, ''))
-      )
+      new BigNumber(this.lastValue.replace(/\,/g, '')).eq(new BigNumber(currentValue.replace(/\,/g, '')))
     ) {
       value = this.lastValue;
     } else {
       value = currentValue;
     }
 
-    const allowOnlyOneDot = (v: string, { rawValue }: { rawValue: string }) =>
-      rawValue.match(/\..*\./) ? false : v;
+    const allowOnlyOneDot = (v: string, { rawValue }: { rawValue: string }) => (rawValue.match(/\..*\./) ? false : v);
 
-    const pipe = [
-      allowOnlyOneDot,
-      ...this.props.pipe ? [this.props.pipe] : [],
-    ].reduce(composePipes, (v: any) => v);
+    const pipe = [allowOnlyOneDot, ...(this.props.pipe ? [this.props.pipe] : [])].reduce(composePipes, (v: any) => v);
 
     return (
       // @ts-ignore

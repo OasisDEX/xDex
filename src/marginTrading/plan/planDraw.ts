@@ -4,10 +4,7 @@ import { AssetKind } from '../../blockchain/config';
 import { impossible } from '../../utils/impossible';
 import { zero } from '../../utils/zero';
 import { EditableDebt } from '../allocate/mtOrderAllocateDebtForm';
-import {
-  findAsset, MTAccount, Operation,
-  OperationKind
-} from '../state/mtAccount';
+import { findAsset, MTAccount, Operation, OperationKind } from '../state/mtAccount';
 import { deltaToOps, Operations, orderDeltas } from './planUtils';
 
 // export function prepareDrawRequest(
@@ -59,7 +56,6 @@ export function planDraw(
   amount: BigNumber,
   debts: Array<Required<EditableDebt>>,
 ): Operations {
-
   const asset = findAsset(token, mta);
 
   if (asset === undefined) {
@@ -74,13 +70,15 @@ export function planDraw(
     return impossible(`not enough of ${token}`);
   }
 
-  const drawOps: Operation[] = [
-    { amount, name: asset.name, kind: OperationKind.drawGem },
-  ];
+  const drawOps: Operation[] = [{ amount, name: asset.name, kind: OperationKind.drawGem }];
 
   return [
     ...drawOps,
-    ...flatten(orderDeltas(debts).filter(d => !d.delta.eq(zero)).map(deltaToOps))
+    ...flatten(
+      orderDeltas(debts)
+        .filter((d) => !d.delta.eq(zero))
+        .map(deltaToOps),
+    ),
   ];
 }
 
@@ -90,16 +88,13 @@ export function planDrawDai(
   amount: BigNumber,
   debts: Array<Required<EditableDebt>>,
 ): Operations {
-
   const asset = findAsset(token, mta);
 
   if (asset === undefined) {
     return impossible('asset not setup');
   }
 
-  if (
-    asset.assetKind !== AssetKind.marginable
-  ) {
+  if (asset.assetKind !== AssetKind.marginable) {
     return impossible(`can't draw dai with ${token}`);
   }
 
@@ -111,6 +106,10 @@ export function planDrawDai(
 
   return [
     ...drawOps,
-    ...flatten(orderDeltas(debts).filter(d => !d.delta.eq(zero)).map(deltaToOps))
+    ...flatten(
+      orderDeltas(debts)
+        .filter((d) => !d.delta.eq(zero))
+        .map(deltaToOps),
+    ),
   ];
 }

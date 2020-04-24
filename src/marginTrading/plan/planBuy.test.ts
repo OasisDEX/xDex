@@ -9,8 +9,7 @@ import { AllocationRequestPilot } from '../allocate/allocate';
 import { OperationKind } from '../state/mtAccount';
 import { getMTAccount } from '../state/mtTestUtils';
 import { planBuy, prepareBuyAllocationRequest } from './planBuy';
-import { cash, dgx100, mtaOnlyWeth,
-  sell1, sell2, sellOffers, wethEmpty, wethEmptyWithDai } from './planFixtures';
+import { cash, dgx100, mtaOnlyWeth, sell1, sell2, sellOffers, wethEmpty, wethEmptyWithDai } from './planFixtures';
 
 describe('prepareBuyAllocationRequest', () => {
   test('no cash, no plan', () => {
@@ -22,7 +21,8 @@ describe('prepareBuyAllocationRequest', () => {
       new BigNumber('100'),
       new BigNumber('200'),
       zero,
-      zero);
+      zero,
+    );
     expect(request).toEqual(impossible('purchasing power too low'));
   });
 
@@ -34,8 +34,8 @@ describe('prepareBuyAllocationRequest', () => {
       new BigNumber('300'),
       new BigNumber('200'),
       mtaOnlyWeth.marginableAssets[0].dai.times(mtaOnlyWeth.marginableAssets[0].safeCollRatio),
-      zero
-      );
+      zero,
+    );
     expect(request).toEqual(impossible('orderbook too shallow'));
   });
 
@@ -48,7 +48,7 @@ describe('prepareBuyAllocationRequest', () => {
       new BigNumber('100'),
       new BigNumber('200'),
       new BigNumber('20000'),
-      zero
+      zero,
     );
 
     if (isImpossible(request)) {
@@ -67,7 +67,6 @@ describe('prepareBuyAllocationRequest', () => {
     const dgxInfo = request.assets[1];
     expect(dgxInfo.name).toEqual('DGX');
     expect(dgxInfo.balance).toEqual(new BigNumber('100'));
-
   });
 });
 
@@ -79,7 +78,7 @@ describe('planBuy', () => {
       new BigNumber('2000'),
       [
         {
-          name:'WETH',
+          name: 'WETH',
           balance: new BigNumber('10'),
           debt: zero,
           maxDebt: new BigNumber('1000'),
@@ -92,7 +91,7 @@ describe('planBuy', () => {
           currentCollRatio: zero,
         },
         {
-          name:'DGX',
+          name: 'DGX',
           balance: new BigNumber('10'),
           debt: zero,
           maxDebt: new BigNumber('333.3333'),
@@ -105,18 +104,16 @@ describe('planBuy', () => {
           currentCollRatio: zero,
         },
       ],
-      zero
+      zero,
     );
-    expect(plan).toEqual(
-      [
-        {
-          kind: OperationKind.buyRecursively,
-          amount: new BigNumber('10'),
-          maxTotal: new BigNumber('2000'),
-          name: 'WETH',
-          slippageLimit: zero
-        }
-      ]
-    );
+    expect(plan).toEqual([
+      {
+        kind: OperationKind.buyRecursively,
+        amount: new BigNumber('10'),
+        maxTotal: new BigNumber('2000'),
+        name: 'WETH',
+        slippageLimit: zero,
+      },
+    ]);
   });
 });

@@ -11,5 +11,5 @@ export const marketsOf = (token: string, allMarkets: TradingPair[]) => {
       possibleMarkets.add(eth2weth(pair.quote));
     }
     return possibleMarkets;
-  },                       new Set<string>());
+  }, new Set<string>());
 };

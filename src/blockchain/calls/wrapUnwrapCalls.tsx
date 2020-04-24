@@ -13,8 +13,7 @@ export interface WrapUnwrapData {
 }
 
 export const wrap: TransactionDef<WrapUnwrapData> = {
-  call: (_: WrapUnwrapData, context: NetworkConfig) =>
-    context.tokens.WETH.contract.methods.deposit,
+  call: (_: WrapUnwrapData, context: NetworkConfig) => context.tokens.WETH.contract.methods.deposit,
   options: ({ amount, gasPrice, gas }: WrapUnwrapData) => ({
     gas,
     gasPrice: gasPrice.toString(),
@@ -22,23 +21,23 @@ export const wrap: TransactionDef<WrapUnwrapData> = {
   }),
   kind: TxMetaKind.wrap,
   prepareArgs: (_: WrapUnwrapData) => [],
-  description: ({ amount }: WrapUnwrapData) =>
+  description: ({ amount }: WrapUnwrapData) => (
     <React.Fragment>
-      Wrap <Money value={amount} token={'ETH'}/>
-    </React.Fragment>,
+      Wrap <Money value={amount} token={'ETH'} />
+    </React.Fragment>
+  ),
   descriptionIcon: () => getToken('ETH').iconCircle,
 };
 
 export const unwrap: TransactionDef<WrapUnwrapData> = {
-  call: (_: WrapUnwrapData, context: NetworkConfig) =>
-    context.tokens.WETH.contract.methods.withdraw,
+  call: (_: WrapUnwrapData, context: NetworkConfig) => context.tokens.WETH.contract.methods.withdraw,
   options: ({ gasPrice, gas }) => ({ gas, gasPrice: gasPrice.toString() }),
   kind: TxMetaKind.unwrap,
-  prepareArgs: ({ amount }: WrapUnwrapData) =>
-    [amountToWei(amount, 'ETH').toFixed(0)],
-  description: ({ amount }: WrapUnwrapData) =>
+  prepareArgs: ({ amount }: WrapUnwrapData) => [amountToWei(amount, 'ETH').toFixed(0)],
+  description: ({ amount }: WrapUnwrapData) => (
     <React.Fragment>
-      Unwrap <Money value={amount} token={'WETH'}/>
-    </React.Fragment>,
+      Unwrap <Money value={amount} token={'WETH'} />
+    </React.Fragment>
+  ),
   descriptionIcon: () => getToken('ETH').iconCircle,
 };

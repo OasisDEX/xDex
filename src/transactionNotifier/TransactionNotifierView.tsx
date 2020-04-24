@@ -1,12 +1,7 @@
 import * as React from 'react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 
-import {
-  transactionObserver,
-  TxRebroadcastStatus,
-  TxState,
-  TxStatus
-} from '../blockchain/transactions';
+import { transactionObserver, TxRebroadcastStatus, TxState, TxStatus } from '../blockchain/transactions';
 import { CloseButton } from '../utils/forms/Buttons';
 import { Timer } from '../utils/Timer';
 import { UnreachableCaseError } from '../utils/UnreachableCaseError';
@@ -14,9 +9,9 @@ import * as styles from './TransactionNotifier.scss';
 
 const VISIBILITY_TIMEOUT: number = 5;
 
-export interface TransactionNotifierPros{
+export interface TransactionNotifierPros {
   transactions: TxState[];
-  etherscan: { url: string, apiUrl: string, apiKey: string };
+  etherscan: { url: string; apiUrl: string; apiKey: string };
 }
 
 export class TransactionNotifierView extends React.Component<TransactionNotifierPros> {
@@ -26,43 +21,36 @@ export class TransactionNotifierView extends React.Component<TransactionNotifier
       <TransitionGroup className={styles.main}>
         {this.props.transactions
           .filter(
-            transaction => !transaction.dismissed && (
-              (transaction.status === TxStatus.Success &&
-                transaction.confirmations < transaction.safeConfirmations) ||
-              !transaction.end ||
-              now - transaction.lastChange.getTime() < VISIBILITY_TIMEOUT * 1000)
+            (transaction) =>
+              !transaction.dismissed &&
+              ((transaction.status === TxStatus.Success && transaction.confirmations < transaction.safeConfirmations) ||
+                !transaction.end ||
+                now - transaction.lastChange.getTime() < VISIBILITY_TIMEOUT * 1000),
           )
-          .map(transaction =>
-            (
-              <CSSTransition key={transaction.txNo} classNames="transaction" timeout={1000}>
-                <Notification
-                  {...transaction}
-                  etherscan={this.props.etherscan}
-                  onDismiss={
-                    () => transactionObserver.next({
-                      kind: 'dismissed',
-                      txNo: transaction.txNo
-                    })
-                  }
-                  />
-              </CSSTransition>
-            )
-          )}
+          .map((transaction) => (
+            <CSSTransition key={transaction.txNo} classNames="transaction" timeout={1000}>
+              <Notification
+                {...transaction}
+                etherscan={this.props.etherscan}
+                onDismiss={() =>
+                  transactionObserver.next({
+                    kind: 'dismissed',
+                    txNo: transaction.txNo,
+                  })
+                }
+              />
+            </CSSTransition>
+          ))}
       </TransitionGroup>
     );
   }
 }
 
-export type NotificationProps = TxState & {etherscan: { url: string }, onDismiss: () => void};
+export type NotificationProps = TxState & { etherscan: { url: string }; onDismiss: () => void };
 
-export const Notification: React.SFC<NotificationProps> = ({
-    onDismiss,
-    etherscan,
-    ...transaction
-  }) => {
+export const Notification: React.SFC<NotificationProps> = ({ onDismiss, etherscan, ...transaction }) => {
   const description = transaction.meta.description(transaction.meta.args);
-  const icon =
-    transaction.meta.descriptionIcon && transaction.meta.descriptionIcon(transaction.meta.args);
+  const icon = transaction.meta.descriptionIcon && transaction.meta.descriptionIcon(transaction.meta.args);
 
   return (
     <div key={transaction.txNo} className={styles.block} data-vis-reg-hide={true}>
@@ -73,9 +61,7 @@ export const Notification: React.SFC<NotificationProps> = ({
       )}
       <div className={styles.title}>{description}</div>
       <div className={styles.description}>{describeTxStatus(transaction, etherscan)}</div>
-      <CloseButton onClick={onDismiss}
-                   className={styles.cross}
-                   data-test-id="notification-cross"/>
+      <CloseButton onClick={onDismiss} className={styles.cross} data-test-id="notification-cross" />
     </div>
   );
 };
@@ -83,16 +69,12 @@ export const Notification: React.SFC<NotificationProps> = ({
 export function describeTxStatus(tx: TxState, etherscan: { url: string }) {
   switch (tx.status) {
     case TxStatus.Success:
-      const rebroadcast: {[key in TxRebroadcastStatus]: string} = {
+      const rebroadcast: { [key in TxRebroadcastStatus]: string } = {
         speedup: 'gas price increased',
         cancel: 'cancelled',
       };
       return (
-        <a href={`${etherscan.url}/tx/${tx.txHash}`}
-           target="_blank"
-           rel="noopener noreferrer"
-           className={styles.link}
-        >
+        <a href={`${etherscan.url}/tx/${tx.txHash}`} target="_blank" rel="noopener noreferrer" className={styles.link}>
           Confirmed {tx.rebroadcast ? ` (${rebroadcast[tx.rebroadcast]})` : ''}
         </a>
       );
@@ -109,11 +91,7 @@ export function describeTxStatus(tx: TxState, etherscan: { url: string }) {
       );
     case TxStatus.WaitingForConfirmation:
       return (
-        <a href={`${etherscan.url}/tx/${tx.txHash}`}
-           target="_blank"
-           rel="noopener noreferrer"
-           className={styles.link}
-        >
+        <a href={`${etherscan.url}/tx/${tx.txHash}`} target="_blank" rel="noopener noreferrer" className={styles.link}>
           Unconfirmed <Timer start={tx.broadcastedAt} />
         </a>
       );

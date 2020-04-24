@@ -6,9 +6,7 @@ const goBack = () => {
 };
 
 describe('Wallet', () => {
-
   context('with no provider', () => {
-
     beforeEach(() => {
       cypressVisitWithoutProvider();
     });

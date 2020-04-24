@@ -32,30 +32,20 @@ const {
   buttonPlaceholder,
 } = styles;
 
-const ListItem = (props: Provider & {
-  className?: string,
-  isSelected?: boolean,
-  onSelect?: () => void, tid?: string
-}) => {
-  const {
-    supported,
-    isSelected,
-    className,
-    name: fullName,
-    icon: walletIcon,
-    onSelect,
-    tid
-  } = props;
+const ListItem = (
+  props: Provider & {
+    className?: string;
+    isSelected?: boolean;
+    onSelect?: () => void;
+    tid?: string;
+  },
+) => {
+  const { supported, isSelected, className, name: fullName, icon: walletIcon, onSelect, tid } = props;
   return (
-    <li className={
-      classnames(
-        item, wallet, className,
-        !supported && inactive,
-        isSelected && selected
-      )
-    }
-        onClick={onSelect}
-        data-test-id={tid}
+    <li
+      className={classnames(item, wallet, className, !supported && inactive, isSelected && selected)}
+      onClick={onSelect}
+      data-test-id={tid}
     >
       <div className={icon}>{walletIcon}</div>
       <span>{fullName}</span>
@@ -63,13 +53,13 @@ const ListItem = (props: Provider & {
   );
 };
 
-const Panel = (props: { heading?: string | React.ReactNode, children?: any }) => {
+const Panel = (props: { heading?: string | React.ReactNode; children?: any }) => {
   return (
     <section data-test-id="wallet-connection-panel" className={section}>
-      <h4 data-test-id="heading" className={heading}>{props.heading}</h4>
-      {
-        props.children
-      }
+      <h4 data-test-id="heading" className={heading}>
+        {props.heading}
+      </h4>
+      {props.children}
     </section>
   );
 };
@@ -116,25 +106,20 @@ class NotConnected extends React.Component<{}, { isChecked: boolean, walletType?
           {/*          tid="web-wallet"*/}
           {/*/>*/}
         </ul>
-        <Checkbox name="tos"
-                  data-test-id="accept-tos"
-                  onChange={this._toggle}
-                  className={termsAndConditions}
-        >
-          I accept&nbsp;<a target="_blank"
-                           rel="noopener noreferrer"
-                           href="/terms"
-        >
-          Terms of Service
-        </a>
+        <Checkbox name="tos" data-test-id="accept-tos" onChange={this._toggle} className={termsAndConditions}>
+          I accept&nbsp;
+          <a target="_blank" rel="noopener noreferrer" href="/terms">
+            Terms of Service
+          </a>
         </Checkbox>
         <div className={buttonPlaceholder}>
-          <Button size="md"
-                  color="secondaryOutlined"
-                  className={item}
-                  disabled={!this._canConnect()}
-                  onClick={this._connect}
-                  data-test-id="connect-wallet"
+          <Button
+            size="md"
+            color="secondaryOutlined"
+            className={item}
+            disabled={!this._canConnect()}
+            onClick={this._connect}
+            data-test-id="connect-wallet"
           >
             Connect
           </Button>
@@ -148,7 +133,7 @@ class NotConnected extends React.Component<{}, { isChecked: boolean, walletType?
       const isChecked = !state.isChecked;
       return { isChecked };
     });
-  }
+  };
 
   private _selectWallet = (walletType: WalletType) => {
     this.setState({ walletType });
@@ -193,21 +178,22 @@ class Connected extends React.Component {
 }
 
 const Connecting = (props: any) => {
-  const _connectingContainerStyles = () => ({
-    fontSize: '14px',
-    letterSpacing: '.4px',
-    lineHeight: '24px',
-    height: '216px',
-    color: '#828288',
-    width: '100%',
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderTop: '1px solid rgba(88, 88, 95, 0.2)',
-    borderBottom: '1px solid rgba(88, 88, 95, 0.2)',
-    flexDirection: 'column',
-    textAlign: 'center'
-  } as React.CSSProperties);
+  const _connectingContainerStyles = () =>
+    ({
+      fontSize: '14px',
+      letterSpacing: '.4px',
+      lineHeight: '24px',
+      height: '216px',
+      color: '#828288',
+      width: '100%',
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderTop: '1px solid rgba(88, 88, 95, 0.2)',
+      borderBottom: '1px solid rgba(88, 88, 95, 0.2)',
+      flexDirection: 'column',
+      textAlign: 'center',
+    } as React.CSSProperties);
 
   return (
     <Panel heading="Connecting...">
@@ -220,11 +206,12 @@ const Connecting = (props: any) => {
       {/*  </div>*/}
       {/*</div>*/}
       <div className={buttonPlaceholder}>
-        <Button size="md"
-                color="secondaryOutlined"
-                className={classnames(item)}
-                onClick={props.close}
-                data-test-id="connect-wallet"
+        <Button
+          size="md"
+          color="secondaryOutlined"
+          className={classnames(item)}
+          onClick={props.close}
+          data-test-id="connect-wallet"
         >
           Cancel
         </Button>

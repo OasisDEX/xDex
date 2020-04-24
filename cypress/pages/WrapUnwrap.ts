@@ -17,7 +17,6 @@ const type = (amount: string) => {
 };
 
 class Assertion {
-
   public static shouldProceed() {
     cy.get(tid('proceed')).click();
   }

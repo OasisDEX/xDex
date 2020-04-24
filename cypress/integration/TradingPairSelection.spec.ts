@@ -17,7 +17,7 @@ describe('Trading pair dropdown', () => {
     { base: 'WETH', quote: 'DAI' },
     { base: 'REP', quote: 'DAI' },
     { base: 'ZRX', quote: 'DAI' },
-    { base: 'BAT', quote: 'DAI' }
+    { base: 'BAT', quote: 'DAI' },
   ] as TradingPair[];
 
   beforeEach(() => {
@@ -110,13 +110,7 @@ describe('Trading pair dropdown', () => {
     const amount = '2';
     const price = '70';
 
-    new Order()
-      .buy()
-      .limit()
-      .amount(amount)
-      .atPrice(price)
-      .total(multiply(amount, price))
-      .place();
+    new Order().buy().limit().amount(amount).atPrice(price).total(multiply(amount, price)).place();
 
     sellOrders = Orderbook.list(OrderType.SELL);
     sellOrders.countIs(1);
@@ -145,13 +139,7 @@ describe('Trading pair dropdown', () => {
     const amount = '2';
     const price = '160';
 
-    new Order()
-      .sell()
-      .limit()
-      .amount(amount)
-      .atPrice(price)
-      .total(multiply(amount, price))
-      .place();
+    new Order().sell().limit().amount(amount).atPrice(price).total(multiply(amount, price)).place();
 
     sellOrders = Orderbook.list(OrderType.SELL);
     sellOrders.countIs(2);

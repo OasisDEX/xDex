@@ -12,5 +12,4 @@ export class TradeData {
   public static expectSlippageLimit(expected: string | RegExp) {
     cy.get(tid('trade-slippage-limit', tid('value')), timeout()).contains(expected);
   }
-
 }

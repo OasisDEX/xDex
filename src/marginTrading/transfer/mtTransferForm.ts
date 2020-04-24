@@ -1,23 +1,30 @@
 import { BigNumber } from 'bignumber.js';
 import { merge, Observable, of, Subject } from 'rxjs';
-import {
-  first,
-  map,
-  scan,
-  switchMap,
-  takeUntil,
-} from 'rxjs/operators';
+import { first, map, scan, switchMap, takeUntil } from 'rxjs/operators';
 
 import {
   AmountFieldChange,
-  BalancesChange, doGasEstimation, EtherPriceUSDChange,
-  FormChangeKind, FormResetChange,
-  GasEstimationStatus, GasPriceChange,
-  HasGasEstimation, MTAccountChange, MTAccountStateChange,
-  OrderbookChange, ProgressChange, progressChange,
-  ProgressStage, toBalancesChange,
-  toEtherPriceUSDChange, toGasPriceChange,
-  TokenChange, toMTAccountChange, toOrderbookChange$, transactionToX,
+  BalancesChange,
+  doGasEstimation,
+  EtherPriceUSDChange,
+  FormChangeKind,
+  FormResetChange,
+  GasEstimationStatus,
+  GasPriceChange,
+  HasGasEstimation,
+  MTAccountChange,
+  MTAccountStateChange,
+  OrderbookChange,
+  ProgressChange,
+  progressChange,
+  ProgressStage,
+  toBalancesChange,
+  toEtherPriceUSDChange,
+  toGasPriceChange,
+  TokenChange,
+  toMTAccountChange,
+  toOrderbookChange$,
+  transactionToX,
 } from '../../utils/form';
 
 import { curry } from 'ramda';
@@ -35,14 +42,15 @@ import { WrapUnwrapFormState } from '../../wrapUnwrap/wrapUnwrapForm';
 import { planDraw, planDrawDai } from '../plan/planDraw';
 import { planFund, planFundDai } from '../plan/planFund';
 import {
-  findAsset, findMarginableAsset, MarginableAsset,
-  MTAccount, MTAccountState,
-  Operation, UserActionKind
+  findAsset,
+  findMarginableAsset,
+  MarginableAsset,
+  MTAccount,
+  MTAccountState,
+  Operation,
+  UserActionKind,
 } from '../state/mtAccount';
-import {
-  calculateMarginable,
-  realPurchasingPowerMarginable,
-} from '../state/mtCalculate';
+import { calculateMarginable, realPurchasingPowerMarginable } from '../state/mtCalculate';
 
 export enum MessageKind {
   insufficientAmount = 'insufficientAmount',
@@ -53,24 +61,28 @@ export enum MessageKind {
   purchasingPowerEqZero = 'purchasingPowerEqZero',
 }
 
-export type Message = {
-  kind: MessageKind.insufficientAmount |
-    MessageKind.dustAmount
-} | {
-  kind: MessageKind.insufficientAvailableAmount;
-  token: string;
-}| {
-  kind: MessageKind.impossibleToPlan;
-  message: string;
-} | {
-  kind: MessageKind.minDebt;
-  field?: string;
-  message: string;
-} | {
-  kind: MessageKind.purchasingPowerEqZero,
-  minDepositAmount: BigNumber,
-  token: string;
-};
+export type Message =
+  | {
+      kind: MessageKind.insufficientAmount | MessageKind.dustAmount;
+    }
+  | {
+      kind: MessageKind.insufficientAvailableAmount;
+      token: string;
+    }
+  | {
+      kind: MessageKind.impossibleToPlan;
+      message: string;
+    }
+  | {
+      kind: MessageKind.minDebt;
+      field?: string;
+      message: string;
+    }
+  | {
+      kind: MessageKind.purchasingPowerEqZero;
+      minDepositAmount: BigNumber;
+      token: string;
+    };
 
 export type ManualChange = TokenChange | AmountFieldChange | IlkFieldChange;
 
@@ -113,13 +125,12 @@ export interface MTTransferFormState extends HasGasEstimation {
   withOnboarding?: boolean;
 }
 
-export type CreateMTFundForm$ =
-  (params: {
-    actionKind: UserActionKind,
-    token: string, ilk: string | undefined,
-    withOnboarding: boolean
-  })
-    => Observable<MTTransferFormState>;
+export type CreateMTFundForm$ = (params: {
+  actionKind: UserActionKind;
+  token: string;
+  ilk: string | undefined;
+  withOnboarding: boolean;
+}) => Observable<MTTransferFormState>;
 
 export enum TransferFormChangeKind {
   ilkFieldChange = 'ilkFieldChange',
@@ -131,24 +142,29 @@ export interface IlkFieldChange {
 }
 
 type EnvironmentChange =
-  MTAccountChange | MTAccountStateChange | OrderbookChange |
-  GasPriceChange | EtherPriceUSDChange | BalancesChange;
+  | MTAccountChange
+  | MTAccountStateChange
+  | OrderbookChange
+  | GasPriceChange
+  | EtherPriceUSDChange
+  | BalancesChange;
 
 // TODO: why not: ManualChange | EnvironmentChange | StageChange?
 type MTSetupFormChange =
-  TokenChange | AmountFieldChange | IlkFieldChange | FormResetChange |
-  EnvironmentChange |
-  ProgressChange;
+  | TokenChange
+  | AmountFieldChange
+  | IlkFieldChange
+  | FormResetChange
+  | EnvironmentChange
+  | ProgressChange;
 
 const formResetChange: FormResetChange = { kind: FormChangeKind.formResetChange };
 
 function initialTab(mta: MTAccount, name: string) {
   const { proxy, transfer } = MTTransferFormTab;
 
-  if (mta.proxy.options.address !==  nullAddress) {
-    const isAllowance = name === 'DAI'
-      ? mta.daiAllowance
-      : findMarginableAsset(name, mta)!.allowance;
+  if (mta.proxy.options.address !== nullAddress) {
+    const isAllowance = name === 'DAI' ? mta.daiAllowance : findMarginableAsset(name, mta)!.allowance;
     return isAllowance ? transfer : proxy;
     return isAllowance ? transfer : proxy;
   }
@@ -164,46 +180,39 @@ function applyChange(state: MTTransferFormState, change: MTSetupFormChange): MTT
         amount: undefined,
         daiBalancePost: undefined,
         realPurchasingPowerPost: undefined,
-        liquidationPricePost:undefined,
+        liquidationPricePost: undefined,
         balancePost: undefined,
         leveragePostPost: undefined,
         messages: [],
         progress: undefined,
       };
     case FormChangeKind.gasPriceChange:
-      return { ...state,
-        gasPrice: change.value,
-        gasEstimationStatus: GasEstimationStatus.unset };
+      return { ...state, gasPrice: change.value, gasEstimationStatus: GasEstimationStatus.unset };
     case FormChangeKind.orderbookChange:
-      return { ...state,
-        orderbook: change.orderbook };
+      return { ...state, orderbook: change.orderbook };
     case FormChangeKind.etherPriceUSDChange:
-      return { ...state,
-        etherPriceUsd: change.value,
-        gasEstimationStatus: GasEstimationStatus.unset };
+      return { ...state, etherPriceUsd: change.value, gasEstimationStatus: GasEstimationStatus.unset };
     case FormChangeKind.marginTradingAccountChange:
-      return { ...state,
+      return {
+        ...state,
         mta: change.mta,
         tab: !state.tab ? initialTab(change.mta, state.token) : state.tab,
         startTab: !state.startTab ? initialTab(change.mta, state.token) : state.startTab,
-        gasEstimationStatus: GasEstimationStatus.unset };
+        gasEstimationStatus: GasEstimationStatus.unset,
+      };
     case FormChangeKind.balancesChange:
-      return { ...state,
-        balances: change.balances,
-        gasEstimationStatus: GasEstimationStatus.unset };
+      return { ...state, balances: change.balances, gasEstimationStatus: GasEstimationStatus.unset };
     case FormChangeKind.amountFieldChange:
-      return { ...state,
-        amount: change.value,
-        gasEstimationStatus: GasEstimationStatus.unset };
+      return { ...state, amount: change.value, gasEstimationStatus: GasEstimationStatus.unset };
     case TransferFormChangeKind.ilkFieldChange:
-      return { ...state,
-        ilk: change.value,
-        gasEstimationStatus: GasEstimationStatus.unset };
+      return { ...state, ilk: change.value, gasEstimationStatus: GasEstimationStatus.unset };
     case FormChangeKind.progress:
       return {
         ...state,
-        progress: change.progress === ProgressStage.done &&
-        state.tab !== MTTransferFormTab.transfer ? undefined : change.progress
+        progress:
+          change.progress === ProgressStage.done && state.tab !== MTTransferFormTab.transfer
+            ? undefined
+            : change.progress,
       };
     // default:
     //   const _exhaustiveCheck: never = change; // tslint:disable-line
@@ -212,29 +221,24 @@ function applyChange(state: MTTransferFormState, change: MTSetupFormChange): MTT
 }
 
 function updatePlan(state: MTTransferFormState): MTTransferFormState {
-  const baseToken = state.token === 'DAI' && state.ilk || state.token;
+  const baseToken = (state.token === 'DAI' && state.ilk) || state.token;
   const asset = findMarginableAsset(baseToken, state.mta);
 
-  if (!state.mta
-    || state.mta.state !== MTAccountState.setup
-    || !state.orderbook
-    || !asset || asset.assetKind !== AssetKind.marginable
+  if (
+    !state.mta ||
+    state.mta.state !== MTAccountState.setup ||
+    !state.orderbook ||
+    !asset ||
+    asset.assetKind !== AssetKind.marginable
   ) {
     return state;
   }
 
   const liquidationPrice = asset.liquidationPrice;
-  const [, realPurchasingPower] = realPurchasingPowerMarginable(
-    asset,
-    state.orderbook.sell);
-  const daiBalance = asset.debt.gt(zero) ?
-    asset.debt.times(minusOne) : asset.dai;
+  const [, realPurchasingPower] = realPurchasingPowerMarginable(asset, state.orderbook.sell);
+  const daiBalance = asset.debt.gt(zero) ? asset.debt.times(minusOne) : asset.dai;
 
-  if (
-    state.amount === undefined ||
-    state.messages.length !== 0 ||
-    state.token === 'DAI' && state.ilk === undefined
-  ) {
+  if (state.amount === undefined || state.messages.length !== 0 || (state.token === 'DAI' && state.ilk === undefined)) {
     return {
       ...state,
       liquidationPrice,
@@ -245,29 +249,30 @@ function updatePlan(state: MTTransferFormState): MTTransferFormState {
       balancePost: undefined,
       daiBalancePost: undefined,
       realPurchasingPowerPost: undefined,
-      plan: impossible('state not ready') };
+      plan: impossible('state not ready'),
+    };
   }
 
-  const createPlan = state.actionKind === UserActionKind.fund ?
-    state.token === 'DAI' ? planFundDai : planFund :
-    state.token === 'DAI' ? planDrawDai : planDraw;
+  const createPlan =
+    state.actionKind === UserActionKind.fund
+      ? state.token === 'DAI'
+        ? planFundDai
+        : planFund
+      : state.token === 'DAI'
+      ? planDrawDai
+      : planDraw;
 
-  const plan = createPlan(
-    state.mta,
-    state.token === 'DAI' && state.ilk || state.token,
-    state.amount,
-    []);
+  const plan = createPlan(state.mta, (state.token === 'DAI' && state.ilk) || state.token, state.amount, []);
 
-  const messages: Message[] =
-    isImpossible(plan) ?
-    [
-      ...state.messages,
-      {
-        kind: MessageKind.impossibleToPlan,
-        message: description(plan),
-      }
-    ] :
-      state.messages;
+  const messages: Message[] = isImpossible(plan)
+    ? [
+        ...state.messages,
+        {
+          kind: MessageKind.impossibleToPlan,
+          message: description(plan),
+        },
+      ]
+    : state.messages;
 
   if (isImpossible(plan)) {
     return {
@@ -288,47 +293,46 @@ function updatePlan(state: MTTransferFormState): MTTransferFormState {
   if (state.token === 'DAI') {
     newAsset = {
       ...asset,
-      debt: state.actionKind === UserActionKind.fund ?
-        BigNumber.max(zero, asset.debt.minus(state.amount)) :
-        BigNumber.max(asset.debt.minus(state.amount), zero),
-      dai: state.actionKind === UserActionKind.fund ?
-        asset.dai.plus(BigNumber.max(zero, state.amount.minus(asset.debt))) :
-        BigNumber.max(asset.dai.minus(state.amount), zero)
+      debt:
+        state.actionKind === UserActionKind.fund
+          ? BigNumber.max(zero, asset.debt.minus(state.amount))
+          : BigNumber.max(asset.debt.minus(state.amount), zero),
+      dai:
+        state.actionKind === UserActionKind.fund
+          ? asset.dai.plus(BigNumber.max(zero, state.amount.minus(asset.debt)))
+          : BigNumber.max(asset.dai.minus(state.amount), zero),
     };
   } else {
     newAsset = {
       ...asset,
-      balance: (state.actionKind === UserActionKind.fund) ?
-        asset.balance.plus(state.amount) : asset.balance.minus(state.amount),
+      balance:
+        state.actionKind === UserActionKind.fund ? asset.balance.plus(state.amount) : asset.balance.minus(state.amount),
     };
   }
 
-  const postTradeAsset = calculateMarginable(
-    newAsset,
-    { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook
-  );
+  const postTradeAsset = calculateMarginable(newAsset, {
+    buy: [],
+    sell: [],
+    tradingPair: { base: '', quote: '' },
+    blockNumber: 0,
+  } as Orderbook);
 
   const isSafePost = postTradeAsset.safe;
   const liquidationPricePost = postTradeAsset.liquidationPrice;
   const leveragePost = postTradeAsset.leverage;
   const balancePost = postTradeAsset.balance;
-  const daiBalancePost = postTradeAsset.debt.gt(zero) ?
-    postTradeAsset.debt.times(minusOne) : postTradeAsset.dai;
-  const [, realPurchasingPowerPost] = realPurchasingPowerMarginable(
-    postTradeAsset,
-    state.orderbook.sell);
+  const daiBalancePost = postTradeAsset.debt.gt(zero) ? postTradeAsset.debt.times(minusOne) : postTradeAsset.dai;
+  const [, realPurchasingPowerPost] = realPurchasingPowerMarginable(postTradeAsset, state.orderbook.sell);
 
-  if (
-    daiBalancePost.lt(zero) &&
-    daiBalancePost.times(minusOne).lt(postTradeAsset.minDebt)
-  ) {
+  if (daiBalancePost.lt(zero) && daiBalancePost.times(minusOne).lt(postTradeAsset.minDebt)) {
     messages.push({
       kind: MessageKind.minDebt,
-      message: postTradeAsset.minDebt.toFixed(5)
+      message: postTradeAsset.minDebt.toFixed(5),
     });
   }
 
-  return { ...state,
+  return {
+    ...state,
     messages,
     liquidationPrice,
     liquidationPricePost,
@@ -339,17 +343,17 @@ function updatePlan(state: MTTransferFormState): MTTransferFormState {
     realPurchasingPower,
     realPurchasingPowerPost,
     isSafePost,
-    plan
+    plan,
   };
 }
 
 function estimateGasPrice(
-  calls$: Calls$, readCalls$: ReadCalls$, state: MTTransferFormState
+  calls$: Calls$,
+  readCalls$: ReadCalls$,
+  state: MTTransferFormState,
 ): Observable<MTTransferFormState> {
   return doGasEstimation(calls$, readCalls$, state, (calls: Calls, _readCalls: ReadCalls) => {
-    if (
-      state.mta === undefined ||
-      state.mta.state === MTAccountState.notSetup) {
+    if (state.mta === undefined || state.mta.state === MTAccountState.notSetup) {
       return undefined;
     }
 
@@ -360,8 +364,7 @@ function estimateGasPrice(
       return undefined;
     }
 
-    const call = state.actionKind === UserActionKind.draw ?
-      calls.mtDrawEstimateGas : calls.mtFundEstimateGas;
+    const call = state.actionKind === UserActionKind.draw ? calls.mtDrawEstimateGas : calls.mtFundEstimateGas;
     return call({ proxy, plan });
   });
 }
@@ -371,20 +374,19 @@ function transactionHandler() {
     progressChange(ProgressStage.waitingForApproval),
     progressChange(ProgressStage.waitingForConfirmation),
     progressChange(ProgressStage.fiasco),
-    () => of(progressChange(ProgressStage.done))
+    () => of(progressChange(ProgressStage.done)),
   );
 }
 
-function prepareTransfer(calls$: Calls$)
-  : [(state: MTTransferFormState) => void, () => void, Observable<ProgressChange>] {
-
+function prepareTransfer(
+  calls$: Calls$,
+): [(state: MTTransferFormState) => void, () => void, Observable<ProgressChange>] {
   const transferChange$ = new Subject<ProgressChange>();
 
   const cancel$ = new Subject<void>();
 
   function transfer(state: MTTransferFormState) {
-    if (state.mta === undefined ||
-      state.mta.state === MTAccountState.notSetup) {
+    if (state.mta === undefined || state.mta.state === MTAccountState.notSetup) {
       // should not happen!
       return;
     }
@@ -400,24 +402,16 @@ function prepareTransfer(calls$: Calls$)
     }
 
     const changes$: Observable<ProgressChange> = merge(
-      cancel$.pipe(
-        map(() => progressChange(ProgressStage.canceled))
-      ),
+      cancel$.pipe(map(() => progressChange(ProgressStage.canceled))),
       calls$.pipe(
         first(),
-        switchMap((calls): Observable<ProgressChange> => {
+        switchMap(
+          (calls): Observable<ProgressChange> => {
+            const call = actionKind === UserActionKind.draw ? calls.mtDraw : calls.mtFund;
 
-          const call =
-            actionKind === UserActionKind.draw ?
-              calls.mtDraw :
-              calls.mtFund;
-
-          return call({ proxy, plan, token, amount, })
-            .pipe(
-              transactionHandler(),
-              takeUntil(cancel$)
-            );
-        }),
+            return call({ proxy, plan, token, amount }).pipe(transactionHandler(), takeUntil(cancel$));
+          },
+        ),
       ),
     );
 
@@ -426,37 +420,35 @@ function prepareTransfer(calls$: Calls$)
     return changes$;
   }
 
-  return [
-    transfer,
-    cancel$.next.bind(cancel$),
-    transferChange$,
-  ];
+  return [transfer, cancel$.next.bind(cancel$), transferChange$];
 }
 
-function prepareSetup(calls$: Calls$, mta$: Observable<MTAccount>)
-  : [(state: MTTransferFormState) => void, Observable<ProgressChange>] {
-
+function prepareSetup(
+  calls$: Calls$,
+  mta$: Observable<MTAccount>,
+): [(state: MTTransferFormState) => void, Observable<ProgressChange>] {
   const setupChange$ = new Subject<ProgressChange>();
 
   function setup(_state: MTTransferFormState) {
-
     const changes$: Observable<ProgressChange> = calls$.pipe(
       first(),
-      switchMap((calls): Observable<ProgressChange> => {
-        return calls.setupMTProxy({}).pipe(
-          transactionHandler(),
-          switchMap(change => {
-            if (change.progress !== ProgressStage.done) {
-              return of(change);
-            }
-            return mta$.pipe(
-              filter(mta => mta.state === MTAccountState.setup),
-              first(),
-              map(() => change)
-            );
-          })
-        );
-      }),
+      switchMap(
+        (calls): Observable<ProgressChange> => {
+          return calls.setupMTProxy({}).pipe(
+            transactionHandler(),
+            switchMap((change) => {
+              if (change.progress !== ProgressStage.done) {
+                return of(change);
+              }
+              return mta$.pipe(
+                filter((mta) => mta.state === MTAccountState.setup),
+                first(),
+                map(() => change),
+              );
+            }),
+          );
+        },
+      ),
     );
 
     changes$.subscribe((change: ProgressChange) => setupChange$.next(change));
@@ -467,9 +459,10 @@ function prepareSetup(calls$: Calls$, mta$: Observable<MTAccount>)
   return [setup, setupChange$];
 }
 
-function prepareAllowance(calls$: Calls$, mta$: Observable<MTAccount>)
-  : [(state: MTTransferFormState) => void, Observable<ProgressChange>] {
-
+function prepareAllowance(
+  calls$: Calls$,
+  mta$: Observable<MTAccount>,
+): [(state: MTTransferFormState) => void, Observable<ProgressChange>] {
   const allowanceChange$ = new Subject<ProgressChange>();
 
   function allowance(state: MTTransferFormState) {
@@ -480,28 +473,30 @@ function prepareAllowance(calls$: Calls$, mta$: Observable<MTAccount>)
     const proxyAddress = state.mta.proxy.options.address;
     const changes$: Observable<ProgressChange> = calls$.pipe(
       first(),
-      switchMap((calls): Observable<ProgressChange> => {
-        return calls.approveMTProxy({
-          proxyAddress,
-          token: state.token
-        }).pipe(
-          transactionHandler(),
-          switchMap(change => {
-            if (change.progress !== ProgressStage.done) {
-              return of(change);
-            }
-            return mta$.pipe(
-              filter(mta => {
-                return state.token === 'DAI'
-                  ? mta.daiAllowance
-                  : findMarginableAsset(state.token, mta)!.allowance;
+      switchMap(
+        (calls): Observable<ProgressChange> => {
+          return calls
+            .approveMTProxy({
+              proxyAddress,
+              token: state.token,
+            })
+            .pipe(
+              transactionHandler(),
+              switchMap((change) => {
+                if (change.progress !== ProgressStage.done) {
+                  return of(change);
+                }
+                return mta$.pipe(
+                  filter((mta) => {
+                    return state.token === 'DAI' ? mta.daiAllowance : findMarginableAsset(state.token, mta)!.allowance;
+                  }),
+                  first(),
+                  map(() => change),
+                );
               }),
-              first(),
-              map(() => change)
             );
-          })
-        );
-      }),
+        },
+      ),
     );
 
     changes$.subscribe((change: ProgressChange) => allowanceChange$.next(change));
@@ -513,21 +508,23 @@ function prepareAllowance(calls$: Calls$, mta$: Observable<MTAccount>)
 }
 
 function validate(state: MTTransferFormState) {
-
   const messages: Message[] = [];
   const asset = findAsset(state.token, state.mta);
   const ilkAsset = state.ilk && findAsset(state.ilk, state.mta);
 
   if (state.balances && state.amount) {
-    const drawBalance = state.token !== 'DAI' ?
-      (asset && asset.assetKind === AssetKind.marginable ? asset.availableBalance : undefined) :
-      (ilkAsset && ilkAsset.assetKind === AssetKind.marginable ? ilkAsset.dai : undefined);
-    if (state.actionKind === UserActionKind.draw
-      && drawBalance && drawBalance.lt(state.amount)
-    ) {
+    const drawBalance =
+      state.token !== 'DAI'
+        ? asset && asset.assetKind === AssetKind.marginable
+          ? asset.availableBalance
+          : undefined
+        : ilkAsset && ilkAsset.assetKind === AssetKind.marginable
+        ? ilkAsset.dai
+        : undefined;
+    if (state.actionKind === UserActionKind.draw && drawBalance && drawBalance.lt(state.amount)) {
       messages.push({
         kind: MessageKind.insufficientAvailableAmount,
-        token: state.token
+        token: state.token,
       });
       // } else if (state.actionKind === UserActionKind.draw &&
       //   asset && asset.assetKind === AssetKind.nonMarginable &&
@@ -535,9 +532,7 @@ function validate(state: MTTransferFormState) {
       //   messages.push({
       //     kind: MessageKind.insufficientAmount,
       //   });
-    } else if (state.actionKind === UserActionKind.fund &&
-      state.balances[state.token].lt(state.amount)
-    ) {
+    } else if (state.actionKind === UserActionKind.fund && state.balances[state.token].lt(state.amount)) {
       messages.push({
         kind: MessageKind.insufficientAmount,
       });
@@ -566,10 +561,7 @@ function checkIfIsReadyToProceed(state: MTTransferFormState) {
   return { ...state, readyToProceed: false };
 }
 
-function freezeIfInProgress(
-  previous: WrapUnwrapFormState,
-  state: WrapUnwrapFormState
-): WrapUnwrapFormState {
+function freezeIfInProgress(previous: WrapUnwrapFormState, state: WrapUnwrapFormState): WrapUnwrapFormState {
   if (state.progress) {
     return {
       ...previous,
@@ -583,19 +575,18 @@ function freezeIfInProgress(
 export function createMTTransferForm$(
   mta$: Observable<MTAccount>,
   gasPrice$: Observable<BigNumber>,
-  etherPriceUsd$: Observable<BigNumber|undefined>,
+  etherPriceUsd$: Observable<BigNumber | undefined>,
   balances$: Observable<Balances>,
   orderbook$: Observable<Orderbook>,
   calls$: Calls$,
   readCalls$: ReadCalls$,
   params: {
-    actionKind: UserActionKind.fund | UserActionKind.draw,
-    token: string,
-    ilk: string,
-    withOnboarding: boolean,
-  }
+    actionKind: UserActionKind.fund | UserActionKind.draw;
+    token: string;
+    ilk: string;
+    withOnboarding: boolean;
+  },
 ): Observable<MTTransferFormState> {
-
   const { token, ilk, withOnboarding, actionKind } = params;
   const manualChange$ = new Subject<ManualChange>();
   const resetChange$ = new Subject<FormResetChange>();
@@ -643,6 +634,6 @@ export function createMTTransferForm$(
     switchMap(curry(estimateGasPrice)(calls$, readCalls$)),
     map(checkIfIsReadyToProceed),
     scan(freezeIfInProgress),
-    firstOfOrTrue(s => s.gasEstimationStatus === GasEstimationStatus.calculating),
+    firstOfOrTrue((s) => s.gasEstimationStatus === GasEstimationStatus.calculating),
   );
 }

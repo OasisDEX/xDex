@@ -6,7 +6,7 @@ import Web3 from 'web3';
 import { networks, networksByName } from './config';
 import { setupMaker, connectAccount, disconnectAccount } from './maker';
 
-export let web3 : Web3;
+export let web3: Web3;
 
 export enum Web3Status {
   ready = 'ready',

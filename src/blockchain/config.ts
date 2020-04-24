@@ -63,33 +63,44 @@ export const tradingPairs: TradingPair[] = [
   { base: 'REP', quote: 'DAI' },
   { base: 'ZRX', quote: 'DAI' },
   { base: 'BAT', quote: 'DAI' },
-  ...(hasNewMarketsAvailable ? [
-    { base: 'LINK', quote: 'DAI' },
-    { base: 'WBTC', quote: 'DAI' },
-  ] : []),
+  ...(hasNewMarketsAvailable
+    ? [
+        { base: 'LINK', quote: 'DAI' },
+        { base: 'WBTC', quote: 'DAI' },
+      ]
+    : []),
   { base: 'DAI', quote: 'USDC' },
-  ...(hasNewMarketsAvailable ? [
-    { base: 'DAI', quote: 'TUSD' },
-    { base: 'DAI', quote: 'PAX' },
-  ] : []),
+  ...(hasNewMarketsAvailable
+    ? [
+        { base: 'DAI', quote: 'TUSD' },
+        { base: 'DAI', quote: 'PAX' },
+      ]
+    : []),
   { base: 'REP', quote: 'WETH' },
   { base: 'ZRX', quote: 'WETH' },
   { base: 'BAT', quote: 'WETH' },
-  ...(hasNewMarketsAvailable ? [
-    { base: 'LINK', quote: 'WETH' },
-    { base: 'WBTC', quote: 'WETH' },
-  ] : []),
+  ...(hasNewMarketsAvailable
+    ? [
+        { base: 'LINK', quote: 'WETH' },
+        { base: 'WBTC', quote: 'WETH' },
+      ]
+    : []),
 ];
 
 function asMap<D>(key: string, data: D[]): { [key: string]: D } {
-  return fromPairs(zip(data.map((row: D) => (row as any)[key]), data));
+  return fromPairs(
+    zip(
+      data.map((row: D) => (row as any)[key]),
+      data,
+    ),
+  );
 }
 
 export enum AssetKind {
   unknown = 'unknown',
   cash = 'cash',
   marginable = 'marginable',
-  nonMarginable = 'nonMarginable'
+  nonMarginable = 'nonMarginable',
 }
 
 // ticker comes from coinpaprika api https://api.coinpaprika.com/v1/tickers
@@ -128,14 +139,14 @@ const tokens = asMap('symbol', [
     symbol: 'SAI',
     precision: 18,
     digits: 4,
-    digitsInstant: 2 ,
+    digitsInstant: 2,
     maxSell: '10000000',
     name: 'Sai',
     icon: SvgImageSimple(saiSvg),
     // iconInverse: SvgImageSimple(daiInverseSvg),
     iconCircle: SvgImageSimple(saiCircleSvg),
     iconColor: SvgImageSimple(saiColorSvg),
-    ticker: 'dai-dai'
+    ticker: 'dai-dai',
   },
   {
     symbol: 'DAI',
@@ -149,123 +160,126 @@ const tokens = asMap('symbol', [
     // iconInverse: SvgImageSimple(daiInverseSvg),
     iconCircle: SvgImageSimple(daiCircleSvg),
     iconColor: SvgImageSimple(daiColorSvg),
-    ticker: 'dai-dai'
+    ticker: 'dai-dai',
   },
-  ...process.env.REACT_APP_OASIS_DEX_ENABLED !== '1' ? [] : [
-    {
-      symbol: 'REP',
-      precision: 18,
-      digits: 5,
-      digitsInstant: 3,
-      safeCollRatio: 1.5,
-      maxSell: '1000000000000000',
-      name: 'Augur',
-      icon: SvgImageSimple(repSvg),
-    // iconInverse: SvgImageSimple(repInverseSvg),
-      iconCircle: SvgImageSimple(repCircleSvg),
-      iconColor: SvgImageSimple(repColorSvg),
-      ticker: 'rep-augur',
-      assetKind: AssetKind.nonMarginable,
-    },
-    {
-      symbol: 'ZRX',
-      precision: 18,
-      digits: 5,
-      digitsInstant: 3,
-      safeCollRatio: 1.5,
-      maxSell: '1000000000000000',
-      name: '0x',
-      icon: SvgImageSimple(zrxSvg),
-    // iconInverse: SvgImageSimple(mkrInverseSvg),
-      iconCircle: SvgImageSimple(zrxCircleSvg),
-      iconColor: SvgImageSimple(zrxColorSvg),
-      ticker: 'zrx-0x',
-      assetKind: AssetKind.nonMarginable,
-    },
-    {
-      symbol: 'BAT',
-      precision: 18,
-      digits: 5,
-      digitsInstant: 3,
-      safeCollRatio: 1.5,
-      maxSell: '1000000000000000',
-      name: 'Basic Attention Token',
-      icon: SvgImageSimple(batSvg),
-    // iconInverse: SvgImageSimple(batInverseSvg),
-      iconCircle: SvgImageSimple(batCircleSvg),
-      iconColor: SvgImageSimple(batColorSvg),
-      ticker: 'bat-basic-attention-token',
-      assetKind: AssetKind.nonMarginable,
-    },
-    {
-      symbol: 'USDC',
-      precision: 6,
-      digits: 6,
-      digitsInstant: 2,
-      safeCollRatio: 1.5,
-      maxSell: '1000000000000000',
-      name: 'USD Coin',
-      icon: SvgImageSimple(usdcSvg),
-        // iconInverse: SvgImageSimple(usdcInverseSvg),
-      iconCircle: SvgImageSimple(usdcCircleSvg),
-      iconColor: SvgImageSimple(usdcColorSvg),
-      ticker: 'usdc-usd-coin',
-      assetKind: AssetKind.unknown,
-        // address: 0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48
-    },
-    {
-      symbol: 'TUSD',
-      precision: 18,
-      digits: 5,
-      digitsInstant: 3,
-      safeCollRatio: 1.5,
-      maxSell: '1000000000000000',
-      name: 'True USD',
-      icon: SvgImageSimple(tusdSvg),
-      iconCircle: SvgImageSimple(tusdCircleSvg),
-      iconColor: SvgImageSimple(tusdColorSvg),
-      ticker: 'tusd-trueusd'
-    },
-    {
-      symbol: 'PAX',
-      precision: 18,
-      digits: 5,
-      digitsInstant: 3,
-      safeCollRatio: 1.5,
-      maxSell: '1000000000000000',
-      name: 'Paxos Standard',
-      icon: SvgImageSimple(paxSvg),
-      iconCircle: SvgImageSimple(paxCircleSvg),
-      iconColor: SvgImageSimple(paxColorSvg),
-      ticker: 'pax-paxos-standard-token'
-    },
-    {
-      symbol: 'LINK',
-      precision: 18,
-      digits: 5,
-      digitsInstant: 3,
-      safeCollRatio: 1.5,
-      maxSell: '1000000000000000',
-      name: 'Chainlink',
-      icon: SvgImageSimple(linkSvg),
-      iconCircle: SvgImageSimple(linkCircleSvg),
-      iconColor: SvgImageSimple(linkColorSvg),
-      ticker: 'link-chainlink'
-    },
-    {
-      symbol: 'WBTC',
-      precision: 8,
-      digits: 5,
-      digitsInstant: 3,
-      safeCollRatio: 1.5,
-      maxSell: '1000000000000000',
-      name: 'Wrapped Bitcoin',
-      icon: SvgImageSimple(wbtcSvg),
-      iconCircle: SvgImageSimple(wbtcCircleSvg),
-      iconColor: SvgImageSimple(wbtcColorSvg),
-      ticker: 'wbtc-wrapped-bitcoin'
-    }
-  ]]);
+  ...(process.env.REACT_APP_OASIS_DEX_ENABLED !== '1'
+    ? []
+    : [
+        {
+          symbol: 'REP',
+          precision: 18,
+          digits: 5,
+          digitsInstant: 3,
+          safeCollRatio: 1.5,
+          maxSell: '1000000000000000',
+          name: 'Augur',
+          icon: SvgImageSimple(repSvg),
+          // iconInverse: SvgImageSimple(repInverseSvg),
+          iconCircle: SvgImageSimple(repCircleSvg),
+          iconColor: SvgImageSimple(repColorSvg),
+          ticker: 'rep-augur',
+          assetKind: AssetKind.nonMarginable,
+        },
+        {
+          symbol: 'ZRX',
+          precision: 18,
+          digits: 5,
+          digitsInstant: 3,
+          safeCollRatio: 1.5,
+          maxSell: '1000000000000000',
+          name: '0x',
+          icon: SvgImageSimple(zrxSvg),
+          // iconInverse: SvgImageSimple(mkrInverseSvg),
+          iconCircle: SvgImageSimple(zrxCircleSvg),
+          iconColor: SvgImageSimple(zrxColorSvg),
+          ticker: 'zrx-0x',
+          assetKind: AssetKind.nonMarginable,
+        },
+        {
+          symbol: 'BAT',
+          precision: 18,
+          digits: 5,
+          digitsInstant: 3,
+          safeCollRatio: 1.5,
+          maxSell: '1000000000000000',
+          name: 'Basic Attention Token',
+          icon: SvgImageSimple(batSvg),
+          // iconInverse: SvgImageSimple(batInverseSvg),
+          iconCircle: SvgImageSimple(batCircleSvg),
+          iconColor: SvgImageSimple(batColorSvg),
+          ticker: 'bat-basic-attention-token',
+          assetKind: AssetKind.nonMarginable,
+        },
+        {
+          symbol: 'USDC',
+          precision: 6,
+          digits: 6,
+          digitsInstant: 2,
+          safeCollRatio: 1.5,
+          maxSell: '1000000000000000',
+          name: 'USD Coin',
+          icon: SvgImageSimple(usdcSvg),
+          // iconInverse: SvgImageSimple(usdcInverseSvg),
+          iconCircle: SvgImageSimple(usdcCircleSvg),
+          iconColor: SvgImageSimple(usdcColorSvg),
+          ticker: 'usdc-usd-coin',
+          assetKind: AssetKind.unknown,
+          // address: 0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48
+        },
+        {
+          symbol: 'TUSD',
+          precision: 18,
+          digits: 5,
+          digitsInstant: 3,
+          safeCollRatio: 1.5,
+          maxSell: '1000000000000000',
+          name: 'True USD',
+          icon: SvgImageSimple(tusdSvg),
+          iconCircle: SvgImageSimple(tusdCircleSvg),
+          iconColor: SvgImageSimple(tusdColorSvg),
+          ticker: 'tusd-trueusd',
+        },
+        {
+          symbol: 'PAX',
+          precision: 18,
+          digits: 5,
+          digitsInstant: 3,
+          safeCollRatio: 1.5,
+          maxSell: '1000000000000000',
+          name: 'Paxos Standard',
+          icon: SvgImageSimple(paxSvg),
+          iconCircle: SvgImageSimple(paxCircleSvg),
+          iconColor: SvgImageSimple(paxColorSvg),
+          ticker: 'pax-paxos-standard-token',
+        },
+        {
+          symbol: 'LINK',
+          precision: 18,
+          digits: 5,
+          digitsInstant: 3,
+          safeCollRatio: 1.5,
+          maxSell: '1000000000000000',
+          name: 'Chainlink',
+          icon: SvgImageSimple(linkSvg),
+          iconCircle: SvgImageSimple(linkCircleSvg),
+          iconColor: SvgImageSimple(linkColorSvg),
+          ticker: 'link-chainlink',
+        },
+        {
+          symbol: 'WBTC',
+          precision: 8,
+          digits: 5,
+          digitsInstant: 3,
+          safeCollRatio: 1.5,
+          maxSell: '1000000000000000',
+          name: 'Wrapped Bitcoin',
+          icon: SvgImageSimple(wbtcSvg),
+          iconCircle: SvgImageSimple(wbtcCircleSvg),
+          iconColor: SvgImageSimple(wbtcColorSvg),
+          ticker: 'wbtc-wrapped-bitcoin',
+        },
+      ]),
+]);
 
 export function isDAIEnabled() {
   return tradingTokens.indexOf('DAI') >= 0;
@@ -279,18 +293,18 @@ export function getToken(token: string) {
   return tokens[token];
 }
 
-export const tradingTokens = Array.from(tradingPairs.reduce(
-  (tkns: Set<string>, { base, quote }) => {
-    tkns.add(base);
-    tkns.add(quote);
-    return tkns;
-  },
-  new Set<string>(['ETH'])
-));
-
-tradingTokens.sort((t1, t2) =>
-  Object.keys(tokens).indexOf(t1) - Object.keys(tokens).indexOf(t2)
+export const tradingTokens = Array.from(
+  tradingPairs.reduce(
+    (tkns: Set<string>, { base, quote }) => {
+      tkns.add(base);
+      tkns.add(quote);
+      return tkns;
+    },
+    new Set<string>(['ETH']),
+  ),
 );
+
+tradingTokens.sort((t1, t2) => Object.keys(tokens).indexOf(t1) - Object.keys(tokens).indexOf(t2));
 
 const web3s: any[] = [];
 const loadInternal = memoize(
@@ -339,7 +353,9 @@ const protoMain = {
   safeConfirmations: 0,
   avgBlocksPerDay: 5760 * 1.05,
   startingBlock: 4751582,
-  get otc() { return load(otc, '0x794e6e91555438aFc3ccF1c5076A74F42133d08D'); },
+  get otc() {
+    return load(otc, '0x794e6e91555438aFc3ccF1c5076A74F42133d08D');
+  },
   // get saiTub() { return load(saiTub, '0x448a5065aebb8e423f0896e6c5d525c040f59af3'); },
   get tokens() {
     return asMap('token', [
@@ -390,7 +406,7 @@ const protoMain = {
       get WETH() {
         return load(mcdOsm, '0x81FE72B5A8d1A857d176C3E7d5Bd2679A9B85763');
       },
-    }
+    },
   } as { [key: string]: any },
   get otcSupportMethods() {
     return load(otcSupport, '0x9b3f075b12513afe56ca2ed838613b7395f57839');
@@ -405,7 +421,7 @@ const protoMain = {
     return load(proxyCreationAndExecute, '0x793ebbe21607e4f04788f89c7a9b97320773ec59');
   },
   get proxyActions() {
-    return load(proxyActions, '0xb81f7ca8f12c2d433dcde39270de849e2475abb9');
+    return load(proxyActions, '0x4fb2f29608b05dfc935c20c076f0b1a022407e3e');
   },
   get migration() {
     return '0xc73e0383F3Aff3215E6f04B0331D58CeCf0Ab849';
@@ -420,7 +436,7 @@ const protoMain = {
     return load(tokenRecovery, '0xc06a269e3370f582df2dbb6cf0271c267badf99d');
   },
   oasisDataService: {
-    url: 'https://cache.eth2dai.com/api/v1'
+    url: 'https://cache.eth2dai.com/api/v1',
   },
   etherscan: {
     url: 'https://etherscan.io',
@@ -434,7 +450,7 @@ const protoMain = {
   get txManager() {
     console.error('TxManager not deployed on mainnnet');
     return load(txManager, nullAddress);
-  }
+  },
 };
 
 export type NetworkConfig = typeof protoMain;
@@ -459,7 +475,9 @@ const kovan: NetworkConfig = {
   safeConfirmations: 0,
   avgBlocksPerDay: 21600 * 0.55,
   startingBlock: 5216718,
-  get otc() { return load(otc, '0xe325acB9765b02b8b418199bf9650972299235F4'); },
+  get otc() {
+    return load(otc, '0xe325acB9765b02b8b418199bf9650972299235F4');
+  },
   // get saiTub() { return load(saiTub, '0xa71937147b55deb8a530c7229c442fd3f31b7db2'); },
   get tokens() {
     return asMap('token', [
@@ -557,7 +575,7 @@ const kovan: NetworkConfig = {
     return load(proxyCreationAndExecute, '0xee419971e63734fed782cfe49110b1544ae8a773');
   },
   get proxyActions() {
-    return load(proxyActions, '0x9cbb4e9de5024bf702bc83f00a0dd22953531f77');
+    return load(proxyActions, '0x2347ba6fa55e128d8918c6de361e8c1277453ab8');
   },
   get migration() {
     return '0x411b2faa662c8e3e5cf8f01dfdae0aee482ca7b0';
@@ -572,7 +590,7 @@ const kovan: NetworkConfig = {
     return load(tokenRecovery, '0x225da3848f57248148d3faa1625d0beb66902de3');
   },
   oasisDataService: {
-    url: 'https://kovan-cache.eth2dai.com/api/v1'
+    url: 'https://kovan-cache.eth2dai.com/api/v1',
   },
   etherscan: {
     url: 'https://kovan.etherscan.io',
@@ -585,10 +603,10 @@ const kovan: NetworkConfig = {
   },
   get txManager() {
     return load(txManager, '0x371015546206585d438d0cd655dbee7d86c7d4f2');
-  }
+  },
 };
 
-const localnet: NetworkConfig =  {
+const localnet: NetworkConfig = {
   id: '420',
   name: '   localnet',
   label: 'Localnet',
@@ -607,7 +625,9 @@ const localnet: NetworkConfig =  {
   safeConfirmations: 0,
   avgBlocksPerDay: 1000,
   startingBlock: 1,
-  get otc() { return load(otc, '0x177b74CB6679C145Bb428Cc3E16F4a3d3ED905a3'); },
+  get otc() {
+    return load(otc, '0x177b74CB6679C145Bb428Cc3E16F4a3d3ED905a3');
+  },
   // get saiTub() { return { address: '', contract: null }; },
   get tokens() {
     return asMap('token', [
@@ -718,7 +738,7 @@ const localnet: NetworkConfig =  {
     return load(tokenRecovery, nullAddress);
   },
   oasisDataService: {
-    url: 'http://localhost:3001/v1'
+    url: 'http://localhost:3001/v1',
   },
   etherscan: {
     url: 'https://kovan.etherscan.io',

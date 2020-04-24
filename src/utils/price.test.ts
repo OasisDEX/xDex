@@ -51,25 +51,19 @@ test('(SELLING) ETH should be used as quote if DAI is not presented', () => {
 });
 
 test('using formatter that rounds up to 2 digits', () => {
-  const sell = new BigNumber(19.1010);
+  const sell = new BigNumber(19.101);
   const buy = new BigNumber(4);
   const sellToken = 'DAI';
   const buyToken = 'ETH';
 
-  const { price, quotation } = calculateTradePrice(
-    sellToken,
-    sell,
-    buyToken,
-    buy,
-    formatPriceInstant
-  );
+  const { price, quotation } = calculateTradePrice(sellToken, sell, buyToken, buy, formatPriceInstant);
 
   expect(price).toEqual(new BigNumber(4.78));
   expect(quotation).toEqual('ETH/DAI');
 });
 
 test('using formatter that rounds up to 4 digits', () => {
-  const sell = new BigNumber(19.1010);
+  const sell = new BigNumber(19.101);
   const buy = new BigNumber(4);
   const sellToken = 'DAI';
   const buyToken = 'ETH';

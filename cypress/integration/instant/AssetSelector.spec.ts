@@ -4,7 +4,6 @@ import { WalletConnection } from '../../pages/WalletConnection';
 import { cypressVisitWithWeb3 } from '../../utils';
 
 describe('Selecting an asset', () => {
-
   beforeEach(() => {
     cypressVisitWithWeb3();
     WalletConnection.connect();
@@ -47,7 +46,7 @@ describe('Selecting an asset', () => {
       Trade.expectAssetLocked(token);
     });
 
-    it('should not be able to select current receive token',  () => {
+    it('should not be able to select current receive token', () => {
       const token = 'DAI';
 
       Trade.openAssetSelectorFor(TradingSide.SELL);

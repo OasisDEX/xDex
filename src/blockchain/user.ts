@@ -13,7 +13,7 @@ export const user$: Observable<User> = combineLatest(account$, walletStatus$).pi
   map(([account, walletStatus]) => {
     return {
       account: walletStatus === 'connected' ? account : undefined,
-      authorized: undefined
+      authorized: undefined,
     };
   }),
 );

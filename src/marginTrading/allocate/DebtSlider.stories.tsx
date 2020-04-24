@@ -15,13 +15,15 @@ stories.add('DebtSlider', () => {
     change: () => null,
   };
 
-  return (<div>
-    <DebtSlider {...sliderProps} />
-    <DebtSlider {...sliderProps} currentValue={100} />
-    <DebtSlider {...sliderProps} currentValue={5} />
-    <DebtSlider {...sliderProps} currentValue={150} />
-    <DebtSlider {...sliderProps} maxAvailable={150} />
-    <DebtSlider {...sliderProps} originalValue={5} />
-    <DebtSlider {...sliderProps} originalValue={6} />
-  </div>);
+  return (
+    <div>
+      <DebtSlider {...sliderProps} />
+      <DebtSlider {...sliderProps} currentValue={100} />
+      <DebtSlider {...sliderProps} currentValue={5} />
+      <DebtSlider {...sliderProps} currentValue={150} />
+      <DebtSlider {...sliderProps} maxAvailable={150} />
+      <DebtSlider {...sliderProps} originalValue={5} />
+      <DebtSlider {...sliderProps} originalValue={6} />
+    </div>
+  );
 });

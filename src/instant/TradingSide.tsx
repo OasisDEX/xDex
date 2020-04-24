@@ -32,7 +32,7 @@ class TradingSide extends React.Component<TradingSideProps> {
     return (
       <div className={styles.tradingSide} data-test-id={this.props.dataTestId}>
         <div className={styles.tradingAsset}>
-          <Asset currency={asset} balance={balance} user={user} onClick={this.changeToken}/>
+          <Asset currency={asset} balance={balance} user={user} onClick={this.changeToken} />
         </div>
         {/* TODO: Make it parameterized like the tokens in offerMakeForm.*/}
         <ApproximateInputValue shouldApproximate={approx}>
@@ -43,13 +43,10 @@ class TradingSide extends React.Component<TradingSideProps> {
             mask={createNumberMask({
               decimalLimit,
               allowDecimal: true,
-              prefix: ''
+              prefix: '',
             })}
             onChange={onAmountChange}
-            value={
-              (amount || null) &&
-              formatAmountInstant(amount, asset)
-            }
+            value={(amount || null) && formatAmountInstant(amount, asset)}
             guide={true}
             placeholder={placeholder}
           />
@@ -61,24 +58,14 @@ class TradingSide extends React.Component<TradingSideProps> {
   private changeToken = () => {
     this.props.change({
       kind: InstantFormChangeKind.viewChange,
-      view: this.props.side === OfferType.buy
-        ? ViewKind.buyAssetSelector
-        : ViewKind.sellAssetSelector,
+      view: this.props.side === OfferType.buy ? ViewKind.buyAssetSelector : ViewKind.sellAssetSelector,
     });
-  }
+  };
 }
 
 export const Selling = (props: any) => (
-  <TradingSide dataTestId="selling-token"
-               side={OfferType.sell}
-               placeholder="Deposit Amount"
-               {...props}
-  />
+  <TradingSide dataTestId="selling-token" side={OfferType.sell} placeholder="Deposit Amount" {...props} />
 );
 export const Buying = (props: any) => (
-  <TradingSide dataTestId="buying-token"
-               side={OfferType.buy}
-               placeholder="Receive Amount"
-               {...props}
-  />
+  <TradingSide dataTestId="buying-token" side={OfferType.buy} placeholder="Receive Amount" {...props} />
 );
