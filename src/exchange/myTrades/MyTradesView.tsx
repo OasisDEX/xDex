@@ -6,6 +6,7 @@ import classnames from 'classnames';
 import * as React from 'react';
 
 import { BigNumber } from 'bignumber.js';
+import { trackingEvents } from '../../analytics/analytics';
 import { etherscan } from '../../blockchain/etherscan';
 import { formatDateTime } from '../../utils/formatters/format';
 import { FormatAmount, FormatPriceOrder } from '../../utils/formatters/Formatters';
@@ -128,6 +129,7 @@ export class MyTradesTable extends React.Component<MyTradesPropsLoadable> {
   public cancelOffer = (offerId: BigNumber, type: TradeAct, amount: BigNumber, token: string) => {
     return (): void => {
       this.props.cancelOffer({ offerId, type, amount, token });
+      trackingEvents.cancelOffer();
     };
   };
 

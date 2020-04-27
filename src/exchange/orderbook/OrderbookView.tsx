@@ -10,7 +10,7 @@ import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import { combineLatest, Observable } from 'rxjs';
 import { distinctUntilKeyChanged, map, startWith } from 'rxjs/operators';
 
-import * as mixpanel from 'mixpanel-browser';
+import { trackingEvents } from '../../analytics/analytics';
 import { FormChangeKind, PickOfferChange } from '../../utils/form';
 import { FormatAmount, FormatPercent, FormatPriceOrder } from '../../utils/formatters/Formatters';
 import { Button } from '../../utils/forms/Buttons';
@@ -125,12 +125,7 @@ export class OrderbookView extends React.Component<Props> {
                   <Button
                     className={styles.switchBtn}
                     onClick={() => {
-                      mixpanel.track('btn-click', {
-                        id: 'change-orderbook-view',
-                        product: 'oasis-trade',
-                        page: 'Market',
-                        section: 'orderbook',
-                      });
+                      trackingEvents.changeOrderbookType();
                       this.changeChartListView();
                     }}
                     data-test-id="orderbook-type-list"

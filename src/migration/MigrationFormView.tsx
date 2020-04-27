@@ -16,7 +16,6 @@ import { TopRightCorner } from '../utils/panel/TopRightCorner';
 import { ExchangeMigrationStatus, ExchangeMigrationTxKind } from './migration';
 
 import { BigNumber } from 'bignumber.js';
-import * as mixpanel from 'mixpanel-browser';
 import { default as MediaQuery } from 'react-responsive';
 import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
 import { getToken, isDAIEnabled } from '../blockchain/config';
@@ -97,12 +96,6 @@ export class MigrationButton extends React.Component<MigrationButtonProps & Moda
               data-test-id={tid}
               onClick={() => {
                 this.setup();
-                mixpanel.track('btn-click', {
-                  id: 'initiate-sai-dai-migration',
-                  product: 'oasis-trade',
-                  page: 'Sitewide',
-                  section: 'sitewide',
-                });
               }}
             >
               {label}
@@ -374,12 +367,6 @@ export class MigrationModal extends React.Component<MigrationFormState & ModalPr
         btnDisabled={!ordersCount}
         btnAction={() => {
           this.setState({ view: MigrationViews.cancelOrders });
-          mixpanel.track('btn-click', {
-            id: 'cancel-offers',
-            product: 'oasis-trade',
-            page: 'Sitewide',
-            section: 'sai-dai-migration',
-          });
         }}
         tid="cfa-cancel-orders"
         className={styles.callForAction}
@@ -411,12 +398,6 @@ export class MigrationModal extends React.Component<MigrationFormState & ModalPr
         btnAction={() => {
           this.setState({ view: MigrationViews.initial });
           proceed(this.props);
-          mixpanel.track('btn-click', {
-            id: `${fromToken === 'SAI' ? 'upgrade' : 'swap'}-${fromToken}`,
-            product: 'oasis-trade',
-            page: 'Sitewide',
-            section: 'sai-dai-migration',
-          });
         }}
         tid="cfa-upgrade-balance"
         className={styles.callForAction}
@@ -549,13 +530,6 @@ export class MigrationModal extends React.Component<MigrationFormState & ModalPr
       type: order.act,
       amount: order.baseAmount,
       token: order.baseToken,
-    });
-
-    mixpanel.track('btn-click', {
-      id: 'cancel-single-offer',
-      product: 'oasis-trade',
-      page: 'Sitewide',
-      section: 'sai-dai-migration',
     });
   };
 }

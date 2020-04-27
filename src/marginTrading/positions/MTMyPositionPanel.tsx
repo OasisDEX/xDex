@@ -2,7 +2,6 @@
  * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
  */
 
-import * as mixpanel from 'mixpanel-browser';
 import * as React from 'react';
 import * as styles from '../../balances/mtBalancesView.scss';
 import { SvgImage } from '../../utils/icons/utils';
@@ -16,6 +15,7 @@ import { MTMyPositionView } from './MTMyPositionView';
 
 import { default as BigNumber } from 'bignumber.js';
 import { Observable } from 'rxjs';
+import { trackingEvents } from '../../analytics/analytics';
 import { AssetDropdownMenu } from '../../balances/AssetDropdownMenu';
 import { TxMetaKind } from '../../blockchain/calls/txMeta';
 import { isDone, TxState } from '../../blockchain/transactions';
@@ -225,13 +225,7 @@ export class MTMyPositionPanelInternal extends React.Component<
             blocked={this.state.blocked}
             onClick={() => {
               this.setState((prevState) => ({ blocked: !prevState.blocked }));
-              mixpanel.track('btn-click', {
-                id: 'dai-usd-toggle',
-                product: 'oasis-trade',
-                page: 'Leverage',
-                section: 'my-position',
-                currency: this.state.blocked ? 'usd' : 'dai',
-              });
+              trackingEvents.daiUsdToggle(this.state.blocked);
             }}
             optionOne="DAI"
             optionTwo="USD"
@@ -289,12 +283,7 @@ export class MTMyPositionPanelInternal extends React.Component<
             data-test-id="deposit-col"
             onClick={() => {
               this.transfer(UserActionKind.fund, ma.name, undefined);
-              mixpanel.track('btn-click', {
-                id: 'fund-collateral-open',
-                product: 'oasis-trade',
-                page: 'Leverage',
-                section: 'my-position',
-              });
+              trackingEvents.depositCollateral();
             }}
           >
             Deposit {ma.name}
@@ -321,12 +310,7 @@ export class MTMyPositionPanelInternal extends React.Component<
             className={styles.actionButton}
             onClick={() => {
               this.transfer(UserActionKind.fund, 'DAI', ma.name);
-              mixpanel.track('btn-click', {
-                id: 'fund-dai-open',
-                product: 'oasis-trade',
-                page: 'Leverage',
-                section: 'my-position',
-              });
+              trackingEvents.depositDai();
             }}
           >
             Deposit DAI
@@ -355,12 +339,7 @@ export class MTMyPositionPanelInternal extends React.Component<
           className={styles.actionButton}
           onClick={() => {
             this.transfer(UserActionKind.draw, ma.name, undefined);
-            mixpanel.track('btn-click', {
-              id: 'draw-collateral-open',
-              product: 'oasis-trade',
-              page: 'Leverage',
-              section: 'my-position',
-            });
+            trackingEvents.withdrawCollateral();
           }}
         >
           Withdraw {ma.name}
@@ -376,12 +355,7 @@ export class MTMyPositionPanelInternal extends React.Component<
           title={ma.dai.eq(zero) ? `You don't have any DAI to withdraw` : ''}
           onClick={() => {
             this.transfer(UserActionKind.draw, 'DAI', ma.name);
-            mixpanel.track('btn-click', {
-              id: 'draw-dai-open',
-              product: 'oasis-trade',
-              page: 'Leverage',
-              section: 'my-position',
-            });
+            trackingEvents.withdrawDai();
           }}
         >
           Withdraw DAI

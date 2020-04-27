@@ -2,10 +2,10 @@
  * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
  */
 
-import * as mixpanel from 'mixpanel-browser';
 import * as React from 'react';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/internal/operators';
+import { trackingEvents } from '../analytics/analytics';
 import { Button } from '../utils/forms/Buttons';
 import { ProgressIcon } from '../utils/icons/Icons';
 import { Panel, PanelBody, PanelHeader } from '../utils/panel/Panel';
@@ -39,13 +39,8 @@ export class TaxExporterView extends React.Component<TaxExporterViewProps, TaxEx
             size="sm"
             color="secondaryOutlined"
             onClick={() => {
-              mixpanel.track('btn-click', {
-                id: 'export-trades',
-                product: 'oasis-trade',
-                page: 'Account',
-                section: 'history-export',
-              });
               this.exportTrades();
+              trackingEvents.taxExport();
             }}
             className={styles.taxExporterButton}
           >

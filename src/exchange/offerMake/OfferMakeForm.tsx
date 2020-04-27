@@ -8,7 +8,7 @@ import * as ReactDOM from 'react-dom';
 import { Link } from 'react-router-dom';
 import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
 
-import * as mixpanel from 'mixpanel-browser';
+import { trackingEvents } from '../../analytics/analytics';
 import { getToken, isDAIEnabled } from '../../blockchain/config';
 import { routerContext } from '../../Main';
 import { BigNumberInput, lessThanOrEqual } from '../../utils/bigNumberInput/BigNumberInput';
@@ -386,22 +386,19 @@ export class OfferMakeForm extends React.Component<OfferFormState> {
   }
 
   private submitButton() {
+    const { stage, kind, total, baseToken, quoteToken } = this.props;
     return (
       <Button
         data-test-id="place-order"
         className={styles.confirmButton}
         type="submit"
         value="submit"
-        color={this.props.kind === OfferType.buy ? 'primary' : 'danger'}
-        disabled={this.props.stage !== 'readyToProceed'}
+        color={kind === OfferType.buy ? 'primary' : 'danger'}
+        disabled={stage !== 'readyToProceed'}
         onClick={() => {
-          mixpanel.track('btn-click', {
-            id: 'initiate-trade',
-            product: 'oasis-trade',
-            page: 'Market',
-            section: 'create-order',
-            kind: this.props.kind,
-          });
+          if (total) {
+            trackingEvents.initiateTradeMarket(kind, total.toNumber(), `${baseToken}${quoteToken}`);
+          }
         }}
       >
         {this.props.kind} {this.props.baseToken}
@@ -423,12 +420,7 @@ export class OfferMakeForm extends React.Component<OfferFormState> {
         color={this.props.kind === 'buy' ? 'primary' : 'danger'}
         disabled={disabled}
         onClick={() => {
-          mixpanel.track('btn-click', {
-            id: 'submit-order-type',
-            product: 'oasis-trade',
-            page: 'Market',
-            section: 'choose-order-type',
-          });
+          trackingEvents.changeOrderType();
           this.handleOpenPicker();
         }}
       >
