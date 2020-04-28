@@ -799,7 +799,9 @@ export class MtSimpleOrderFormView extends React.Component<
 
     return (
       <div className={styles.onboardingPanel}>
-        {orderFormMessageContent(message)}
+        <div className={styles.onboardingParagraph}>
+          {orderFormMessageContent(message)}
+        </div>
         <Button
           size="md"
           color="primary"
