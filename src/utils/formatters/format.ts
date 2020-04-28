@@ -16,14 +16,16 @@ BigNumber.config({
 });
 
 export function toShorthandNumber(amount: BigNumber, suffix: string = '', precision?: number) {
-  return new BigNumber(amount.toString()
-    .split('.')
-    .map((part, index) => {
-      if (index === 0) return part;
-      return part.substr(0, precision);
-    })
-    .filter(el => el)
-    .join('.')
+  return new BigNumber(
+    amount
+      .toString()
+      .split('.')
+      .map((part, index) => {
+        if (index === 0) return part;
+        return part.substr(0, precision);
+      })
+      .filter(el => el)
+      .join('.'),
   )
     .toFixed(precision)
     .concat(suffix);

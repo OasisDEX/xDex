@@ -82,10 +82,7 @@ export function tid(id: string, rest = '') {
 
 export const promisify = (func: any) => async (...args: any[]) =>
   new Promise<any>((accept: any, reject: any) =>
-                     func(
-                       ...args,
-                       (error: any, result: any) => (error ? reject(error) : accept(result))
-                      ),
+    func(...args, (error: any, result: any) => (error ? reject(error) : accept(result))),
   );
 
 export const rpcCommand = (method: any) => (web3Instance: any) => (...params: any[]) => {

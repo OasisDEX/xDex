@@ -16,12 +16,14 @@ import walletLinkSvg from '../icons/providers/wallet-link.svg';
 import webWalletSvg from '../icons/providers/web-wallet.svg';
 import { SvgImage } from './icons/utils';
 
-const SvgImageSimple = (image: string) => SvgImage({
-  image, style: {
-    width: '100%',
-    height: '100%',
-  }
-});
+const SvgImageSimple = (image: string) =>
+  SvgImage({
+    image,
+    style: {
+      width: '100%',
+      height: '100%',
+    },
+  });
 
 export interface Provider {
   id?: number;
@@ -47,7 +49,7 @@ export const Metamask = {
   alias: 'metamask',
   name: 'MetaMask',
   supported: true,
-  website: 'https://metamask.io/'
+  website: 'https://metamask.io/',
 };
 
 export const WalletConnect = {
@@ -57,7 +59,7 @@ export const WalletConnect = {
   alias: 'walletConnect',
   name: 'WalletConnect',
   supported: true,
-  website: 'https://metamask.io/'
+  website: 'https://metamask.io/',
 };
 
 export const WalletLink = {
@@ -67,7 +69,7 @@ export const WalletLink = {
   alias: 'walletLink',
   name: 'WalletLink',
   supported: true,
-  website: 'https://metamask.io/'
+  website: 'https://metamask.io/',
 };
 
 export const Trust = {
@@ -77,7 +79,7 @@ export const Trust = {
   icon: SvgImageSimple(trustSvg),
   iconWhite: SvgImageSimple(trustBlackSvg),
   supported: true,
-  website: 'https://trustwallet.com/'
+  website: 'https://trustwallet.com/',
 };
 
 export const Status = {
@@ -87,7 +89,7 @@ export const Status = {
   icon: SvgImageSimple(statusSvg),
   iconWhite: SvgImageSimple(statusBlackSvg),
   supported: true,
-  website: 'https://status.im/'
+  website: 'https://status.im/',
 };
 
 export const Coinbase = {
@@ -105,7 +107,7 @@ export const Parity = {
   icon: SvgImageSimple(paritySvg),
   iconWhite: SvgImageSimple(parityBlackSvg),
   supported: true,
-  website: 'https://www.parity.io/'
+  website: 'https://www.parity.io/',
 };
 
 export const ImToken = {
@@ -129,13 +131,11 @@ export const Ledger = {
   icon: SvgImageSimple(ledgerSvg),
   alias: 'ledger',
   name: 'Ledger',
-  supported: false
+  supported: false,
 };
 
-export const getCurrentProviderName = (provider = (
-  (window as Web3Window).web3
-    ? (window as Web3Window).web3.currentProvider
-    : null)
+export const getCurrentProviderName = (
+  provider = (window as Web3Window).web3 ? (window as Web3Window).web3.currentProvider : null,
 ): Provider => {
   if (!provider) {
     return WebWallet;

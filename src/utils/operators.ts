@@ -4,15 +4,30 @@ export const withSingleFrom = <U>(other: Observable<U>) => <T>(source: Observabl
   new Observable<[T, U?]>(observer => {
     let latest: T;
     const subscription = source.subscribe({
-      next(t) { latest = t; observer.next([t, undefined]); },
-      error(err) { observer.error(err); },
-      complete() { observer.complete(); }
+      next(t) {
+        latest = t;
+        observer.next([t, undefined]);
+      },
+      error(err) {
+        observer.error(err);
+      },
+      complete() {
+        observer.complete();
+      },
     });
-    subscription.add(other.subscribe({
-      next(u) { observer.next([latest, u]); },
-      error(err) { observer.error(err); },
-      complete() { observer.complete(); }
-    }));
+    subscription.add(
+      other.subscribe({
+        next(u) {
+          observer.next([latest, u]);
+        },
+        error(err) {
+          observer.error(err);
+        },
+        complete() {
+          observer.complete();
+        },
+      }),
+    );
     return subscription;
   });
 
@@ -29,7 +44,11 @@ export const firstOfOrTrue = <T>(predicate: (item: T) => boolean) => (source: Ob
           observer.next(t);
         }
       },
-      error(err) { observer.error(err); },
-      complete() { observer.complete(); }
+      error(err) {
+        observer.error(err);
+      },
+      complete() {
+        observer.complete();
+      },
     });
   });

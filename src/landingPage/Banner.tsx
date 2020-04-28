@@ -17,18 +17,12 @@ export class Banner extends React.Component<BannerProps> {
     return (
       <section className={styles.section}>
         <div className={classnames(styles.panel, styles[theme])}>
-          <div>
-            {content}
-          </div>
-          {
-            buttonLabel && (
-              <Button data-test-id="banner-btn"
-                      size="xs"
-                      className={styles.btn}
-                      onClick={onContinue}>
-                {buttonLabel}
-              </Button>
-            )}
+          <div>{content}</div>
+          {buttonLabel && (
+            <Button data-test-id="banner-btn" size="xs" className={styles.btn} onClick={onContinue}>
+              {buttonLabel}
+            </Button>
+          )}
         </div>
       </section>
     );

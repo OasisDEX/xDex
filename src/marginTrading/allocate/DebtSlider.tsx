@@ -23,7 +23,7 @@ interface SliderProps {
 
 const svgProps = {
   width: 404,
-  height: 18
+  height: 18,
 };
 
 const sliderProps = {
@@ -33,25 +33,25 @@ const sliderProps = {
 };
 
 export class DebtSlider extends React.Component<SliderProps> {
-
   public render() {
-
     const buffer = this.calculateBuffer();
     const chart = createElement('div');
 
     // console.warn('debt slider props ', this.props);
-    const svgMainGraphic = d3.select(chart)
+    const svgMainGraphic = d3
+      .select(chart)
       .append('svg')
       .attr('width', svgProps.width)
       .attr('height', svgProps.height);
 
-    const xScale = d3.scaleLinear()
+    const xScale = d3
+      .scaleLinear()
       .domain([this.props.min - buffer, this.props.max + buffer])
       .range([0, sliderProps.width]);
 
-    const slider = svgMainGraphic.append('g')
-      .attr('transform', `translate(${(svgProps.width - sliderProps.width) / 2}, ` +
-        `${(svgProps.height / 2)})`);
+    const slider = svgMainGraphic
+      .append('g')
+      .attr('transform', `translate(${(svgProps.width - sliderProps.width) / 2}, ` + `${svgProps.height / 2})`);
 
     this.drawBackgroundLine(slider, xScale);
 
@@ -76,12 +76,14 @@ export class DebtSlider extends React.Component<SliderProps> {
 
     this.drawHandler(slider, xScale);
 
-    slider.append('line')
+    slider
+      .append('line')
       .classed(styles.trackOverlay, true)
       .attr('x1', xScale.range()[0])
       .attr('x2', xScale.range()[1])
       .on('mousemove', () => {
-        if (d3.event.buttons === 1) { // primary key
+        if (d3.event.buttons === 1) {
+          // primary key
           const newValue = this.calculateNewCurrentValue(xScale, d3.event.offsetX);
           this.props.change(newValue);
         }
@@ -91,66 +93,53 @@ export class DebtSlider extends React.Component<SliderProps> {
         this.props.change(newValue);
       });
 
-    return (<div>
-      { chart.toReact() }
-    </div>);
+    return <div>{chart.toReact()}</div>;
   }
 
-  private drawBackgroundLine(
-    slider: Selection<BaseType, any, null, undefined>,
-    xScale: ScaleLinear<number, number>
-  ) {
-    slider.append('line')
+  private drawBackgroundLine(slider: Selection<BaseType, any, null, undefined>, xScale: ScaleLinear<number, number>) {
+    slider
+      .append('line')
       .classed(styles.trackBg, true)
       .attr('x1', xScale.range()[0])
       .attr('x2', xScale.range()[1]);
   }
 
-  private drawAvailableLine(
-    slider: Selection<BaseType, any, null, undefined>,
-    xScale: ScaleLinear<number, number>
-  ) {
+  private drawAvailableLine(slider: Selection<BaseType, any, null, undefined>, xScale: ScaleLinear<number, number>) {
     if (this.props.maxAvailable === undefined) {
       return;
     }
-    slider.append('line')
+    slider
+      .append('line')
       .classed(styles.trackAvailable, true)
       .attr('x1', xScale(this.props.originalValue))
       .attr('x2', xScale(this.props.maxAvailable));
   }
 
-  private drawOriginalLine(
-    slider: Selection<BaseType, any, null, undefined>,
-    xScale: ScaleLinear<number, number>
-  ) {
+  private drawOriginalLine(slider: Selection<BaseType, any, null, undefined>, xScale: ScaleLinear<number, number>) {
     if (this.props.originalValue >= this.props.min) {
-      slider.append('line')
+      slider
+        .append('line')
         .classed(styles.trackOriginal, true)
         .attr('x1', xScale.range()[0])
         .attr('x2', xScale(this.props.originalValue));
     }
   }
 
-  private drawModifiedLine(
-    slider: Selection<BaseType, any, null, undefined>,
-    xScale: ScaleLinear<number, number>
-  ) {
+  private drawModifiedLine(slider: Selection<BaseType, any, null, undefined>, xScale: ScaleLinear<number, number>) {
     if (this.props.currentValue === undefined) {
       return;
     }
     const scaledCurrentValue = xScale(this.props.currentValue);
-    const scaledOriginalValue = this.props.originalValue === this.props.min ?
-      xScale.range()[0] : xScale(this.props.originalValue);
-    slider.append('line')
+    const scaledOriginalValue =
+      this.props.originalValue === this.props.min ? xScale.range()[0] : xScale(this.props.originalValue);
+    slider
+      .append('line')
       .classed(styles.trackModified, true)
       .attr('x1', Math.min(scaledCurrentValue, scaledOriginalValue))
       .attr('x2', Math.max(scaledCurrentValue, scaledOriginalValue));
   }
 
-  private drawHandler(
-    slider: Selection<BaseType, any, null, undefined>,
-    xScale: ScaleLinear<number, number>
-  ) {
+  private drawHandler(slider: Selection<BaseType, any, null, undefined>, xScale: ScaleLinear<number, number>) {
     if (this.props.currentValue === undefined) {
       return;
     }
@@ -167,15 +156,12 @@ export class DebtSlider extends React.Component<SliderProps> {
 
   private calculateBuffer() {
     const range = this.props.max - this.props.min;
-    const viewBuffer = sliderProps.handleR - (sliderProps.height / 2);
+    const viewBuffer = sliderProps.handleR - sliderProps.height / 2;
     const viewRange = sliderProps.width - 2 * viewBuffer;
-    return viewBuffer * range / viewRange;
+    return (viewBuffer * range) / viewRange;
   }
 
-  private calculateNewCurrentValue(
-    xScale: ScaleLinear<number, number>,
-    offsetX: number
-  ): number {
+  private calculateNewCurrentValue(xScale: ScaleLinear<number, number>, offsetX: number): number {
     if (offsetX === undefined) {
       console.error('offsetX is undefined ');
     }
@@ -187,16 +173,16 @@ export class DebtSlider extends React.Component<SliderProps> {
     const swapToMaxAvailable = this.props.swapToMaxAvailable || true;
     const canExtendAvailable = this.props.canExtendAvailable || true;
     const canExtendMinMax = this.props.canExtendMinMax || false;
-    const swapRange = (this.props.max - this.props.min) * swapSizePercent / 100;
+    const swapRange = ((this.props.max - this.props.min) * swapSizePercent) / 100;
 
     const closeToOrig = Math.abs(this.props.originalValue - xValue) < swapRange;
     const closeToMax = Math.abs(this.props.maxAvailable - xValue) < swapRange;
 
     if (swapToOriginalValue && swapToMaxAvailable && closeToMax && closeToOrig) {
       xValue =
-        Math.abs(this.props.originalValue - xValue)
-        < Math.abs(this.props.maxAvailable - xValue) ?
-          this.props.originalValue : this.props.maxAvailable;
+        Math.abs(this.props.originalValue - xValue) < Math.abs(this.props.maxAvailable - xValue)
+          ? this.props.originalValue
+          : this.props.maxAvailable;
     } else if (swapToOriginalValue && closeToOrig) {
       xValue = this.props.originalValue;
     } else if (swapToMaxAvailable && closeToMax) {

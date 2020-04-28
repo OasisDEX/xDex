@@ -45,61 +45,39 @@ class Content extends React.Component<ContentProps, { pairPickerOpen: boolean }>
     return (
       <div>
         <FlexLayoutRow>
-          <Panel className={classnames(
-            styles.tradingPairPanel,
-            this.state.pairPickerOpen && styles.pairPickerOpen,
-          )}>
+          <Panel className={classnames(styles.tradingPairPanel, this.state.pairPickerOpen && styles.pairPickerOpen)}>
             <theAppContext.Consumer>
-              { ({ TradingPairsTxRx }) =>
+              {({ TradingPairsTxRx }) => (
                 <TradingPairsTxRx
-                 // @ts-ignore
+                  // @ts-ignore
                   parentMatch={parentMatch}
                   setPairPickerOpen={(pairPickerOpen: boolean) => this.setState({ pairPickerOpen })}
                 />
-              }
+              )}
             </theAppContext.Consumer>
           </Panel>
         </FlexLayoutRow>
         <FlexLayoutRow>
           <Panel className={styles.priceChartPanel} footerBordered={true}>
             <theAppContext.Consumer>
-              { ({ PriceChartWithLoadingTxRx }) =>
-                <PriceChartWithLoadingTxRx />
-              }
+              {({ PriceChartWithLoadingTxRx }) => <PriceChartWithLoadingTxRx />}
             </theAppContext.Consumer>
           </Panel>
           <Panel className={styles.allTradesPanel} footerBordered={true}>
-            <theAppContext.Consumer>
-              { ({ AllTradesTxRx }) =>
-                <AllTradesTxRx />
-              }
-            </theAppContext.Consumer>
+            <theAppContext.Consumer>{({ AllTradesTxRx }) => <AllTradesTxRx />}</theAppContext.Consumer>
           </Panel>
         </FlexLayoutRow>
         <FlexLayoutRow>
           <Panel className={styles.offerMakePanel}>
-
-            <theAppContext.Consumer>
-              { ({ OfferMakePanelTxRx }) =>
-                <OfferMakePanelTxRx />
-              }
-            </theAppContext.Consumer>
+            <theAppContext.Consumer>{({ OfferMakePanelTxRx }) => <OfferMakePanelTxRx />}</theAppContext.Consumer>
           </Panel>
           <Panel footerBordered={true} className={styles.orderbookPanel}>
-            <theAppContext.Consumer>
-              { ({ OrderbookPanelTxRx }) =>
-                <OrderbookPanelTxRx />
-              }
-            </theAppContext.Consumer>
+            <theAppContext.Consumer>{({ OrderbookPanelTxRx }) => <OrderbookPanelTxRx />}</theAppContext.Consumer>
           </Panel>
         </FlexLayoutRow>
         <FlexLayoutRow>
           <Panel className={styles.myOrdersPanel} footerBordered={true}>
-            <theAppContext.Consumer>
-              { ({ MyTradesTxRx }) =>
-                <MyTradesTxRx />
-              }
-            </theAppContext.Consumer>
+            <theAppContext.Consumer>{({ MyTradesTxRx }) => <MyTradesTxRx />}</theAppContext.Consumer>
           </Panel>
         </FlexLayoutRow>
       </div>
@@ -120,23 +98,15 @@ export class ExchangeView extends React.Component<ExchangeViewProps> {
           <Route
             path={`${matchUrl}/:base/:quote`}
             render={props => {
-
-              const valid = tradingPairs.find(t =>
-                t.base === tp.base && t.quote === tp.quote);
+              const valid = tradingPairs.find(t => t.base === tp.base && t.quote === tp.quote);
 
               if (!valid) {
                 // It should be a redirect, but I can't make it work!
-                window.location.href =
-                  `${matchUrl}/${tradingPairs[0].base}/${tradingPairs[0].quote}`;
+                window.location.href = `${matchUrl}/${tradingPairs[0].base}/${tradingPairs[0].quote}`;
                 return;
               }
 
-              return <Content
-                {...props}
-                tp={tp}
-                parentMatch={matchUrl}
-                setTradingPair={this.props.setTradingPair}
-              />;
+              return <Content {...props} tp={tp} parentMatch={matchUrl} setTradingPair={this.props.setTradingPair} />;
             }}
           />
           <Redirect push={false} from={'/market'} to={`/market/${tp.base}/${tp.quote}`} />
@@ -148,8 +118,10 @@ export class ExchangeView extends React.Component<ExchangeViewProps> {
 
 export const ExchangeViewTxRx = connect<ExchangeViewOwnProps, RouteComponentProps<any>>(
   ExchangeView,
-  currentTradingPair$.pipe(map((tp: TradingPair) => ({
-    tp,
-    setTradingPair: currentTradingPair$.next.bind(currentTradingPair$),
-  })))
+  currentTradingPair$.pipe(
+    map((tp: TradingPair) => ({
+      tp,
+      setTradingPair: currentTradingPair$.next.bind(currentTradingPair$),
+    })),
+  ),
 );

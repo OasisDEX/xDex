@@ -3,24 +3,32 @@ import * as React from 'react';
 
 import * as styles from './Table.scss';
 
-export const Table = ({ children, align, className }:
-      { children: any,
-        align?: 'right' | 'left' | 'center',
-        className?: any }) => (
-  <table className={ classnames({ [styles.table] : true,
-    [styles.extendOnBorders]: true,
-    [styles[align || 'left']]: align,
-    [className]: className
-  }) }>
+export const Table = ({
+  children,
+  align,
+  className,
+}: {
+  children: any;
+  align?: 'right' | 'left' | 'center';
+  className?: any;
+}) => (
+  <table
+    className={classnames({
+      [styles.table]: true,
+      [styles.extendOnBorders]: true,
+      [styles[align || 'left']]: align,
+      [className]: className,
+    })}
+  >
     {children}
   </table>
 );
 
 export type RowClickableProps = React.HTMLAttributes<HTMLTableRowElement> & {
-  clickable: boolean,
-  onClick?: () => void,
-  children: any,
-  highlighted?: boolean,
+  clickable: boolean;
+  onClick?: () => void;
+  children: any;
+  highlighted?: boolean;
 };
 
 // Required:
@@ -47,10 +55,7 @@ export const RowClickable = (props: RowClickableProps) => {
 export const RowHighlighted = (props: React.HTMLAttributes<HTMLTableRowElement>) => {
   const { children, className, ...trProps } = props;
   return (
-    <tr
-      className={classnames(styles.trHighlighted, className)}
-      {...trProps}
-    >
+    <tr className={classnames(styles.trHighlighted, className)} {...trProps}>
       {children}
     </tr>
   );

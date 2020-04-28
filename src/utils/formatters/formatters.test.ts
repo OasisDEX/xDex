@@ -28,7 +28,7 @@ describe('Formatting numbers as shorthand ones', () => {
   });
 
   it('should format billions and not remove the trailing zeroes', () => {
-    const number = new BigNumber(123.6780000).times(billion);
+    const number = new BigNumber(123.678).times(billion);
     expect(formatAsShorthandNumbers(number, 5)).toEqual('123.67800B');
   });
 
@@ -59,7 +59,7 @@ describe('Formatting numbers as shorthand ones', () => {
   });
 
   it('should format millions and not remove trailing zeroes', () => {
-    const number = new BigNumber(999.6780000).times(million);
+    const number = new BigNumber(999.678).times(million);
     expect(formatAsShorthandNumbers(number, 5)).toEqual('999.67800M');
   });
 
@@ -90,7 +90,7 @@ describe('Formatting numbers as shorthand ones', () => {
   });
 
   it('should format thousands and not remove trailing zeroes', () => {
-    const number = new BigNumber(23.459000000).times(thousand);
+    const number = new BigNumber(23.459).times(thousand);
     expect(formatAsShorthandNumbers(number, 4)).toEqual('23.4590K');
   });
 
@@ -111,7 +111,7 @@ describe('Formatting numbers as shorthand ones', () => {
   });
 
   it('should not shorthand the number but remove trailing zeroes', () => {
-    const number = new BigNumber(923.459000);
+    const number = new BigNumber(923.459);
     expect(formatAsShorthandNumbers(number)).toEqual('923.459');
   });
 

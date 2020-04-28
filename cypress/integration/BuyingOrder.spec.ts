@@ -8,7 +8,6 @@ import { Trades } from '../pages/Trades';
 import { WalletConnection } from '../pages/WalletConnection';
 
 describe('Buy Order', () => {
-
   beforeEach(() => {
     cypressVisitWithWeb3();
     WalletConnection.connect();

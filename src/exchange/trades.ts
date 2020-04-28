@@ -26,22 +26,8 @@ export interface Trade {
 }
 
 // TODO: move to all trades?
-const parseTrade = (
-  account: string | undefined,
-  baseToken: string,
-  quoteToken: string,
-) => {
-  return ({
-    offerId,
-    maker,
-    baseAmt,
-    quoteAmt,
-    price,
-    type,
-    timestamp,
-    tx,
-    logIndex,
-  }: any): Trade => {
+const parseTrade = (account: string | undefined, baseToken: string, quoteToken: string) => {
+  return ({ offerId, maker, baseAmt, quoteAmt, price, type, timestamp, tx, logIndex }: any): Trade => {
     return {
       baseToken,
       quoteToken,
@@ -64,42 +50,35 @@ export const getTrades = (
   baseToken: string,
   quoteToken: string,
   operation: string,
-  filters: {account?: string, from?: Date, to?: Date, offset?: number, limit?: number},
+  filters: { account?: string; from?: Date; to?: Date; offset?: number; limit?: number },
 ): Observable<Trade[]> => {
   const owner = filters.account && filters.account.toLowerCase();
 
-  const fields = ['offerId', 'maker', 'baseAmt', 'quoteAmt', 'price', 'type', 'timestamp',
-    'tx', 'logIndex'];
+  const fields = ['offerId', 'maker', 'baseAmt', 'quoteAmt', 'price', 'type', 'timestamp', 'tx', 'logIndex'];
   const order = `[TIMESTAMP_DESC, LOG_INDEX_DESC]`;
   const filter = {
     and: [
       { baseGem: { equalTo: new Placeholder('baseGem', 'String', baseToken) } },
       { quoteGem: { equalTo: new Placeholder('quoteGem', 'String', quoteToken) } },
     ],
-    ...owner ? {
-      or: [
-        { maker: { equalTo: new Placeholder('owner', 'String', owner) } },
-        { taker: { equalTo: new Placeholder('owner', 'String', owner) } },
-      ]
-    } : {},
-    ...(filters.from || filters.to) ? {
-      timestamp: {
-        ...filters.from
-          ? { greaterThan: new Placeholder(
-            'timestampFrom',
-            'Datetime',
-            filters.from.toISOString())
-          }
-          : {},
-        ...filters.to
-          ? { lessThan: new Placeholder(
-            'timestampTo',
-            'Datetime',
-            filters.to.toISOString())
-          }
-        : {},
-      }
-    } : {},
+    ...(owner
+      ? {
+          or: [
+            { maker: { equalTo: new Placeholder('owner', 'String', owner) } },
+            { taker: { equalTo: new Placeholder('owner', 'String', owner) } },
+          ],
+        }
+      : {}),
+    ...(filters.from || filters.to
+      ? {
+          timestamp: {
+            ...(filters.from
+              ? { greaterThan: new Placeholder('timestampFrom', 'Datetime', filters.from.toISOString()) }
+              : {}),
+            ...(filters.to ? { lessThan: new Placeholder('timestampTo', 'Datetime', filters.to.toISOString()) } : {}),
+          },
+        }
+      : {}),
   };
 
   const { limit, offset } = filters;
@@ -108,20 +87,18 @@ export const getTrades = (
     order,
     limit,
     offset,
-  }).pipe(
-    map(trades => trades.map(parseTrade(owner, baseToken, quoteToken)))
-  );
+  }).pipe(map(trades => trades.map(parseTrade(owner, baseToken, quoteToken))));
 };
 
 export function compareTrades(
   { act: type1, price: price1, time: t1 }: Trade,
-  { act: type2, price: price2, time: t2 }: Trade
+  { act: type2, price: price2, time: t2 }: Trade,
 ) {
   /* Sorting the trades in the following order:
-  * - Sell orders are before buy orders
-  * - For each order type we sort by price (DESC)
-  * - For each order with the same price we order by timestamp (DESC)
-  * */
+   * - Sell orders are before buy orders
+   * - For each order type we sort by price (DESC)
+   * - For each order with the same price we order by timestamp (DESC)
+   * */
   if (type1 === type2) {
     if (price2.gt(price1)) return 1;
     if (price2.lt(price1)) return -1;

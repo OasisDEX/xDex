@@ -2,7 +2,7 @@ import { tid } from '../utils/index';
 
 export enum ALLOWANCE_STATE {
   ENABLED = 'enabled',
-  DISABLED = 'disabled'
+  DISABLED = 'disabled',
 }
 
 export const checkProxyAllowances = () => {
@@ -18,8 +18,7 @@ export const expectAllowanceStatusFor = (token: string, hasAllowance: 'true' | '
 };
 
 export const expectAllowedTokensCount = (count: number) => {
-  cy.get(tid('active-allowances'))
-    .contains(`${count} ${count === 1 ? 'Token' : 'Tokens'} enabled for Trading`);
+  cy.get(tid('active-allowances')).contains(`${count} ${count === 1 ? 'Token' : 'Tokens'} enabled for Trading`);
 };
 
 export class Allowance {
@@ -53,7 +52,7 @@ export class Allowance {
               .should('have.attr', 'data-toggle-state', ALLOWANCE_STATE.ENABLED);
             break;
         }
-      }
+      },
     };
-  }
+  };
 }

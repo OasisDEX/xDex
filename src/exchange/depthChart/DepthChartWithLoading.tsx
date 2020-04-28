@@ -29,16 +29,17 @@ export class DepthChartWithLoading extends React.Component<DepthChartProps> {
       const orderbook = this.props.value as Orderbook;
       return (
         <div className={styles.depthChartWithLoading}>
-          <DepthChartView  orderbook={orderbook}
-                           kind={this.props.kind}
-                           amount={this.props.amount}
-                           price={this.props.price}
-                           zoom={this.props.zoom}
-                           base={orderbook.tradingPair.base}
-                           quote={orderbook.tradingPair.quote}
-                           matchType={this.props.matchType}
-                           zoomChange={this.props.zoomChange}
-                           kindChange={this.props.kindChange}
+          <DepthChartView
+            orderbook={orderbook}
+            kind={this.props.kind}
+            amount={this.props.amount}
+            price={this.props.price}
+            zoom={this.props.zoom}
+            base={orderbook.tradingPair.base}
+            quote={orderbook.tradingPair.quote}
+            matchType={this.props.matchType}
+            zoomChange={this.props.zoomChange}
+            kindChange={this.props.kindChange}
           />
         </div>
       );
@@ -49,13 +50,10 @@ export class DepthChartWithLoading extends React.Component<DepthChartProps> {
         <PanelHeader bordered={true}>
           <span>Depth chart</span>
         </PanelHeader>
-        <WithLoadingIndicator loadable={this.props}>
-          { (_orderbook: Orderbook) => (<div />)}
-      </WithLoadingIndicator>
+        <WithLoadingIndicator loadable={this.props}>{(_orderbook: Orderbook) => <div />}</WithLoadingIndicator>
       </div>
     );
   }
-
 }
 
 export interface FormState {
@@ -71,25 +69,16 @@ export function createDepthChartWithLoading$(
   orderbook$: Observable<Orderbook>,
   kindChange: (kind: OrderbookViewKind) => void,
 ): Observable<DepthChartProps> {
-
   const [zoomChange, zoom$] = createZoom$(
     orderbook$.pipe(
       map(orderbook => orderbook.tradingPair),
       distinctUntilChanged(),
     ),
-    orderbook$
+    orderbook$,
   );
 
-  return combineLatest(
-    currentOfferForm$,
-    loadablifyLight(orderbook$),
-    zoom$,
-  ).pipe(
-    map(([
-      { kind, matchType, amount, price },
-      orderbook,
-      zoom,
-    ]) => {
+  return combineLatest(currentOfferForm$, loadablifyLight(orderbook$), zoom$).pipe(
+    map(([{ kind, matchType, amount, price }, orderbook, zoom]) => {
       return {
         ...orderbook,
         zoom,
@@ -100,6 +89,6 @@ export function createDepthChartWithLoading$(
         price,
         kindChange,
       };
-    })
+    }),
   );
 }

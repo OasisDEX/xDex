@@ -1,16 +1,17 @@
 import { Observable } from 'rxjs';
 
 export function unpack<T>(o: Observable<T>): any {
-
   let r;
 
   o.subscribe(
-    v => { r = v; },
+    v => {
+      r = v;
+    },
     e => {
-      console.log('error', e, typeof(e));
+      console.log('error', e, typeof e);
       r = e;
-    }
-    );
+    },
+  );
 
   console.assert(r !== undefined);
 

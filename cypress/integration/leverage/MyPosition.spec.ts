@@ -6,7 +6,6 @@ import { WalletConnection } from '../../pages/WalletConnection';
 import { cypressVisitWithWeb3 } from '../../utils';
 
 describe('My Position panel', () => {
-
   beforeEach(() => {
     cypressVisitWithWeb3();
     WalletConnection.connect();
@@ -15,7 +14,6 @@ describe('My Position panel', () => {
   });
 
   context('with proxy and DAI allowance', () => {
-
     beforeEach(() => {
       Modal.open(Position.new('DAI'));
       Account.setupProxy();

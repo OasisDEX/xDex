@@ -21,13 +21,7 @@ import { eth2weth, weth2eth } from '../blockchain/calls/instant';
 import { getToken, isDAIEnabled, NetworkConfig } from '../blockchain/config';
 import { EtherscanConfig } from '../blockchain/etherscan';
 import { GasPrice$ } from '../blockchain/network';
-import {
-  isDone,
-  isDoneButNotSuccessful,
-  isSuccess,
-  TxState,
-  TxStatus
-} from '../blockchain/transactions';
+import { isDone, isDoneButNotSuccessful, isSuccess, TxState, TxStatus } from '../blockchain/transactions';
 import { User } from '../blockchain/user';
 import { amountFromWei } from '../blockchain/utils';
 import { OfferType } from '../exchange/orderbook/orderbook';
@@ -80,24 +74,26 @@ export interface TxInProgressMessage {
   etherscan?: EtherscanConfig;
 }
 
-export type Message = {
-  kind: MessageKind.dustAmount
-    | MessageKind.insufficientAmount
-    | MessageKind.incredibleAmount;
-  field: string;
-  token: string;
-  amount: BigNumber;
-} | {
-  kind: MessageKind.orderbookTotalExceeded
-  field: string;
-  side: OfferType
-  amount: BigNumber,
-  token: string;
-  error: any
-} | {
-  kind: MessageKind.notConnected;
-  field: string;
-} | TxInProgressMessage;
+export type Message =
+  | {
+      kind: MessageKind.dustAmount | MessageKind.insufficientAmount | MessageKind.incredibleAmount;
+      field: string;
+      token: string;
+      amount: BigNumber;
+    }
+  | {
+      kind: MessageKind.orderbookTotalExceeded;
+      field: string;
+      side: OfferType;
+      amount: BigNumber;
+      token: string;
+      error: any;
+    }
+  | {
+      kind: MessageKind.notConnected;
+      field: string;
+    }
+  | TxInProgressMessage;
 
 export enum TradeEvaluationStatus {
   unset = 'unset',
@@ -125,7 +121,7 @@ export enum ViewKind {
   account = 'account',
   finalization = 'finalization',
   priceImpactWarning = 'priceImpactWarning',
-  summary = 'summary'
+  summary = 'summary',
 }
 
 interface GenericProgress {
@@ -151,28 +147,31 @@ export interface ManualAllowanceProgress extends GenericProgress {
   tradeTxStatus?: TxStatus;
 }
 
-export type Progress = GenericProgress & ({
-  kind: ProgressKind.proxyPayWithETH
-    | ProgressKind.noProxyPayWithETH
-    | ProgressKind.proxyAllowancePayWithERC20
-  tradeTxStatus: TxStatus;
-  tradeTxHash?: string;
-} | {
-  kind: ProgressKind.noProxyNoAllowancePayWithERC20
-  proxyTxStatus: TxStatus;
-  proxyTxHash?: string
-  allowanceTxStatus?: TxStatus;
-  allowanceTxHash?: string
-  tradeTxStatus?: TxStatus;
-  tradeTxHash?: string
-} | {
-  kind: ProgressKind.proxyNoAllowancePayWithERC20;
-  allowanceTxStatus: TxStatus;
-  allowanceTxHash?: string
-  tradeTxStatus?: TxStatus;
-  tradeTxHash?: string
-} | ManualProxyProgress
-  | ManualAllowanceProgress
+export type Progress = GenericProgress &
+  (
+    | {
+        kind: ProgressKind.proxyPayWithETH | ProgressKind.noProxyPayWithETH | ProgressKind.proxyAllowancePayWithERC20;
+        tradeTxStatus: TxStatus;
+        tradeTxHash?: string;
+      }
+    | {
+        kind: ProgressKind.noProxyNoAllowancePayWithERC20;
+        proxyTxStatus: TxStatus;
+        proxyTxHash?: string;
+        allowanceTxStatus?: TxStatus;
+        allowanceTxHash?: string;
+        tradeTxStatus?: TxStatus;
+        tradeTxHash?: string;
+      }
+    | {
+        kind: ProgressKind.proxyNoAllowancePayWithERC20;
+        allowanceTxStatus: TxStatus;
+        allowanceTxHash?: string;
+        tradeTxStatus?: TxStatus;
+        tradeTxHash?: string;
+      }
+    | ManualProxyProgress
+    | ManualAllowanceProgress
   );
 
 interface TradeEvaluationState {
@@ -188,9 +187,7 @@ export interface ManualAllowanceProgressState {
   manualAllowancesProgress?: { [token: string]: ManualAllowanceProgress };
 }
 
-export interface InstantFormState extends HasGasEstimation,
-  TradeEvaluationState,
-  ManualAllowanceProgressState {
+export interface InstantFormState extends HasGasEstimation, TradeEvaluationState, ManualAllowanceProgressState {
   view: ViewKind;
   readyToProceed?: boolean;
   progress?: Progress;
@@ -230,7 +227,7 @@ export enum InstantFormChangeKind {
   allowancesChange = 'allowancesChange',
   slippageLimitChange = 'slippageLimitChange',
   contextChange = 'contextChange',
-  manualAllowanceChange = 'manualAllowanceChange'
+  manualAllowanceChange = 'manualAllowanceChange',
 }
 
 export interface ProgressChange {
@@ -298,30 +295,27 @@ export interface ManualAllowanceChange {
 }
 
 export type ManualChange =
-  BuyAmountChange |
-  SellAmountChange |
-  PairChange |
-  TokenChange |
-  FormResetChange |
-  ViewChange |
-  SlippageLimitChange |
-  ManualAllowanceChange;
+  | BuyAmountChange
+  | SellAmountChange
+  | PairChange
+  | TokenChange
+  | FormResetChange
+  | ViewChange
+  | SlippageLimitChange
+  | ManualAllowanceChange;
 
 export type EnvironmentChange =
-  GasPriceChange |
-  EtherPriceUSDChange |
-  BalancesChange |
-  DustLimitsChange |
-  AllowancesChange |
-  ProxyChange |
-  EtherBalanceChange |
-  UserChange |
-  ContextChange;
+  | GasPriceChange
+  | EtherPriceUSDChange
+  | BalancesChange
+  | DustLimitsChange
+  | AllowancesChange
+  | ProxyChange
+  | EtherBalanceChange
+  | UserChange
+  | ContextChange;
 
-export type InstantFormChange =
-  ManualChange |
-  EnvironmentChange |
-  ProgressChange;
+export type InstantFormChange = ManualChange | EnvironmentChange | ProgressChange;
 
 function applyChange(state: InstantFormState, change: InstantFormChange): InstantFormState {
   switch (change.kind) {
@@ -334,10 +328,7 @@ function applyChange(state: InstantFormState, change: InstantFormChange): Instan
         buyAmount: undefined,
         sellAmount: undefined,
         slippageLimit: state.context
-          ? getSlippageLimit(
-            state.context,
-            getQuote(weth2eth(state.sellToken), weth2eth(state.buyToken))
-          )
+          ? getSlippageLimit(state.context, getQuote(weth2eth(state.sellToken), weth2eth(state.buyToken)))
           : state.slippageLimit,
         tradeEvaluationStatus: TradeEvaluationStatus.unset,
       };
@@ -378,10 +369,7 @@ function applyChange(state: InstantFormState, change: InstantFormChange): Instan
         buyAmount: shouldClearInputs ? undefined : state.buyAmount,
         sellAmount: shouldClearInputs ? undefined : state.sellAmount,
         slippageLimit: state.context
-          ? getSlippageLimit(
-            state.context,
-            getQuote(weth2eth(state.sellToken), weth2eth(state.buyToken))
-          )
+          ? getSlippageLimit(state.context, getQuote(weth2eth(state.sellToken), weth2eth(state.buyToken)))
           : state.slippageLimit,
         tradeEvaluationStatus: TradeEvaluationStatus.unset,
       };
@@ -415,22 +403,19 @@ function applyChange(state: InstantFormState, change: InstantFormChange): Instan
     case InstantFormChangeKind.dustLimitsChange:
       return {
         ...state,
-        dustLimits: change.dustLimits
+        dustLimits: change.dustLimits,
       };
     case InstantFormChangeKind.allowancesChange:
       return {
         ...state,
-        allowances: change.allowances
+        allowances: change.allowances,
       };
     case InstantFormChangeKind.progressChange:
-
       if (change.progress) {
         return {
           ...state,
           progress: change.progress,
-          view: change.progress.tradeTxStatus === TxStatus.Success
-            ? ViewKind.summary
-            : state.view
+          view: change.progress.tradeTxStatus === TxStatus.Success ? ViewKind.summary : state.view,
         };
       }
 
@@ -442,25 +427,23 @@ function applyChange(state: InstantFormState, change: InstantFormChange): Instan
         progress: undefined,
         buyAmount: undefined,
         sellAmount: undefined,
-        gasEstimationStatus: GasEstimationStatus.unset
+        gasEstimationStatus: GasEstimationStatus.unset,
       };
     case FormChangeKind.etherBalanceChange:
       return {
         ...state,
-        etherBalance: change.etherBalance
+        etherBalance: change.etherBalance,
       };
     case InstantFormChangeKind.viewChange:
       return {
         ...state,
-        view: change.view
+        view: change.view,
       };
     case InstantFormChangeKind.proxyChange:
       return {
         ...state,
-        view: state.view === ViewKind.allowances && !change.value
-          ? ViewKind.account
-          : state.view,
-        proxyAddress: change.value
+        view: state.view === ViewKind.allowances && !change.value ? ViewKind.account : state.view,
+        proxyAddress: change.value,
       };
     case InstantFormChangeKind.contextChange:
       return {
@@ -470,24 +453,24 @@ function applyChange(state: InstantFormState, change: InstantFormChange): Instan
     case FormChangeKind.userChange:
       return {
         ...state,
-        view: !change.user.account && [
-          ViewKind.priceImpactWarning,
-          ViewKind.allowances,
-          ViewKind.account
-        ].includes(state.view) ? ViewKind.new : state.view,
-        user: change.user
+        view:
+          !change.user.account &&
+          [ViewKind.priceImpactWarning, ViewKind.allowances, ViewKind.account].includes(state.view)
+            ? ViewKind.new
+            : state.view,
+        user: change.user,
       };
     case InstantFormChangeKind.slippageLimitChange:
       return {
         ...state,
-        slippageLimit: change.value
+        slippageLimit: change.value,
       };
     case InstantFormChangeKind.manualAllowanceChange:
       const manualAllowancesProgress = ({ ...state.manualAllowancesProgress } || {}) as any;
       manualAllowancesProgress[change.token] = change.progress;
       return {
         ...state,
-        manualAllowancesProgress
+        manualAllowancesProgress,
       };
   }
 
@@ -495,7 +478,6 @@ function applyChange(state: InstantFormState, change: InstantFormChange): Instan
 }
 
 function evaluateBuy(calls: ReadCalls, state: InstantFormState) {
-
   const { buyToken, sellToken, buyAmount } = state;
 
   if (!buyToken || !sellToken || !buyAmount) {
@@ -511,18 +493,20 @@ function evaluateBuy(calls: ReadCalls, state: InstantFormState) {
         amount: buyAmount,
         side: 'buy',
         token: buyToken,
-      }
-    }
+      },
+    },
   });
 
-  return calls.otcGetPayAmount({
-    buyToken,
-    sellToken: sai2dai(sellToken),
-    amount: buyAmount,
-  }).pipe(
-    switchMap(sellAmount => of(sellAmount.isZero() ? errorItem() : { sellAmount })),
-    catchError(error => of(errorItem(error))),
-  );
+  return calls
+    .otcGetPayAmount({
+      buyToken,
+      sellToken: sai2dai(sellToken),
+      amount: buyAmount,
+    })
+    .pipe(
+      switchMap(sellAmount => of(sellAmount.isZero() ? errorItem() : { sellAmount })),
+      catchError(error => of(errorItem(error))),
+    );
 }
 
 export function sai2dai(token: string) {
@@ -530,7 +514,6 @@ export function sai2dai(token: string) {
 }
 
 function evaluateSell(calls: ReadCalls, state: InstantFormState) {
-
   const { buyToken, sellToken, sellAmount } = state;
 
   if (!buyToken || !sellToken || !sellAmount) {
@@ -546,95 +529,88 @@ function evaluateSell(calls: ReadCalls, state: InstantFormState) {
         amount: sellAmount,
         side: 'sell',
         token: sellToken,
-      }
-    }
+      },
+    },
   });
 
-  return calls.otcGetBuyAmount({
-    buyToken,
-    amount: sellAmount,
-    sellToken: sai2dai(sellToken)
-  }).pipe(
-    switchMap(buyAmount => of(buyAmount.isZero() ? errorItem() : { buyAmount })),
-    catchError(error => of(errorItem(error))),
-  );
+  return calls
+    .otcGetBuyAmount({
+      buyToken,
+      amount: sellAmount,
+      sellToken: sai2dai(sellToken),
+    })
+    .pipe(
+      switchMap(buyAmount => of(buyAmount.isZero() ? errorItem() : { buyAmount })),
+      catchError(error => of(errorItem(error))),
+    );
 }
 
-function getBestPrice(
-  calls: ReadCalls,
-  sellToken: string,
-  buyToken: string
-): Observable<BigNumber> {
+function getBestPrice(calls: ReadCalls, sellToken: string, buyToken: string): Observable<BigNumber> {
   return calls.otcGetBestOffer({ sellToken, buyToken }).pipe(
     flatMap(offerId => calls.otcOffers(offerId)),
     map(({ pay_amt, buy_amt }) => {
       return daiOrSAI(sellToken) || (eth2weth(sellToken) === 'WETH' && !daiOrSAI(buyToken))
-        ? amountFromWei(new BigNumber(pay_amt), sellToken)
-          .div(amountFromWei(new BigNumber(buy_amt), buyToken))
-        : amountFromWei(new BigNumber(buy_amt), buyToken)
-          .div(amountFromWei(new BigNumber(pay_amt), sellToken));
+        ? amountFromWei(new BigNumber(pay_amt), sellToken).div(amountFromWei(new BigNumber(buy_amt), buyToken))
+        : amountFromWei(new BigNumber(buy_amt), buyToken).div(amountFromWei(new BigNumber(pay_amt), sellToken));
     }),
   );
 }
 
 function estimateGas(calls$_: Calls$, state: InstantFormState) {
-  if (state.tradeEvaluationStatus !== TradeEvaluationStatus.calculated
-    || !state.buyAmount
-    || !state.sellAmount) {
+  if (state.tradeEvaluationStatus !== TradeEvaluationStatus.calculated || !state.buyAmount || !state.sellAmount) {
     return of(state);
   }
   return state.user &&
-  state.user.account &&
-  !state.message &&
-  (state.sellToken === 'ETH' ||
-    (!!state.proxyAddress && state.allowances && state.allowances[state.sellToken])
-  ) ?
-    doGasEstimation(calls$_, undefined, state, gasEstimation) :
-    of({ ...state, gasEstimationStatus: GasEstimationStatus.unknown });
+    state.user.account &&
+    !state.message &&
+    (state.sellToken === 'ETH' || (!!state.proxyAddress && state.allowances && state.allowances[state.sellToken]))
+    ? doGasEstimation(calls$_, undefined, state, gasEstimation)
+    : of({ ...state, gasEstimationStatus: GasEstimationStatus.unknown });
 }
 
 function gasEstimation(
   calls: Calls,
   _readCalls: ReadCalls | undefined,
-  state: InstantFormState
+  state: InstantFormState,
 ): Observable<number> | undefined {
   return calls.proxyAddress().pipe(
     switchMap(proxyAddress => {
-      const sell = state.sellToken === 'ETH'
-        ? estimateTradePayWithETH
-        : estimateTradePayWithERC20;
+      const sell = state.sellToken === 'ETH' ? estimateTradePayWithETH : estimateTradePayWithERC20;
       return sell(calls, proxyAddress, state);
-    })
+    }),
   );
 }
 
 function evaluateTrade(
-  theCalls$: ReadCalls$, previousState: InstantFormState, state: InstantFormState
+  theCalls$: ReadCalls$,
+  previousState: InstantFormState,
+  state: InstantFormState,
 ): Observable<TradeEvaluationState> | undefined {
-
   if (
-    state.kind === OfferType.buy &&
-    state.kind === previousState.kind &&
-    state.buyAmount && previousState.buyAmount &&
-    state.buyAmount.eq(previousState.buyAmount)
-    ||
-    state.kind === OfferType.sell &&
-    state.kind === previousState.kind &&
-    state.sellAmount && previousState.sellAmount &&
-    state.sellAmount.eq(previousState.sellAmount)
+    (state.kind === OfferType.buy &&
+      state.kind === previousState.kind &&
+      state.buyAmount &&
+      previousState.buyAmount &&
+      state.buyAmount.eq(previousState.buyAmount)) ||
+    (state.kind === OfferType.sell &&
+      state.kind === previousState.kind &&
+      state.sellAmount &&
+      previousState.sellAmount &&
+      state.sellAmount.eq(previousState.sellAmount))
   ) {
     return undefined;
   }
 
   if (
-    !state.kind || state.kind === OfferType.buy && !state.buyAmount
-    || state.buyAmount && state.buyAmount.eq(new BigNumber(0))
-    || state.kind === OfferType.sell && !state.sellAmount
-    || state.sellAmount && state.sellAmount.eq(new BigNumber(0))
+    !state.kind ||
+    (state.kind === OfferType.buy && !state.buyAmount) ||
+    (state.buyAmount && state.buyAmount.eq(new BigNumber(0))) ||
+    (state.kind === OfferType.sell && !state.sellAmount) ||
+    (state.sellAmount && state.sellAmount.eq(new BigNumber(0)))
   ) {
     return of({
       tradeEvaluationStatus: TradeEvaluationStatus.unset,
-      ...state.kind === OfferType.buy ? { sellAmount: undefined } : { buyAmount: undefined }
+      ...(state.kind === OfferType.buy ? { sellAmount: undefined } : { buyAmount: undefined }),
     });
   }
 
@@ -651,8 +627,8 @@ function evaluateTrade(
         state.kind === OfferType.buy ? evaluateBuy(calls, state) : evaluateSell(calls, state),
         // tslint:disable-next-line:max-line-length
         // This is some suspicious case. This way it works like we had on OD but needs in-depth investigation.
-        getBestPrice(calls, state.buyToken, sai2dai(state.sellToken))
-      )
+        getBestPrice(calls, state.buyToken, sai2dai(state.sellToken)),
+      ),
     ),
     map(([evaluation, bestPrice]) => ({
       ...evaluation,
@@ -671,15 +647,13 @@ function evaluateTrade(
   );
 }
 
-function mergeTradeEvaluation(
-  state: InstantFormState, trade: TradeEvaluationState | undefined
-): InstantFormState {
+function mergeTradeEvaluation(state: InstantFormState, trade: TradeEvaluationState | undefined): InstantFormState {
   if (!trade) {
     return state;
   }
   return {
     ...state,
-    ...trade
+    ...trade,
   };
 }
 
@@ -688,10 +662,12 @@ function validate(state: InstantFormState): InstantFormState {
     return state;
   }
 
-  let message: {
-    top?: Message,
-    bottom?: Message
-  } | undefined = state.message;
+  let message:
+    | {
+        top?: Message;
+        bottom?: Message;
+      }
+    | undefined = state.message;
 
   const [spendField, receiveField] = ['sellToken', 'buyToken'];
   const [spendToken, receiveToken] = [state.sellToken, state.buyToken];
@@ -707,7 +683,7 @@ function validate(state: InstantFormState): InstantFormState {
       bottom: {
         kind: MessageKind.notConnected,
         field: spendField,
-      }
+      },
     };
 
     return {
@@ -731,18 +707,18 @@ function validate(state: InstantFormState): InstantFormState {
         etherscan: state.context && state.context.etherscan,
         progress: state.progress,
         field: spendField,
-      }
+      },
     };
 
     return {
       ...state,
-      message
+      message,
     };
   }
 
   if (manualAllowancesProgress) {
-    const settingAllowanceInProgress = Object.keys(manualAllowancesProgress).find((token) =>
-      manualAllowancesProgress[token] && !manualAllowancesProgress[token].done
+    const settingAllowanceInProgress = Object.keys(manualAllowancesProgress).find(
+      token => manualAllowancesProgress[token] && !manualAllowancesProgress[token].done,
     );
 
     if (settingAllowanceInProgress) {
@@ -753,13 +729,13 @@ function validate(state: InstantFormState): InstantFormState {
           etherscan: state.context && state.context.etherscan,
           progress: manualAllowancesProgress[settingAllowanceInProgress],
           field: spendField,
-        }
+        },
       };
     }
 
     return {
       ...state,
-      message
+      message,
     };
   }
 
@@ -768,10 +744,10 @@ function validate(state: InstantFormState): InstantFormState {
   // that means we don't have any errors for the top
 
   if (
-    spendAmount
-    && dustLimits
-    && dustLimits[eth2weth(spendToken)]
-    && dustLimits[eth2weth(spendToken)].gt(spendAmount)
+    spendAmount &&
+    dustLimits &&
+    dustLimits[eth2weth(spendToken)] &&
+    dustLimits[eth2weth(spendToken)].gt(spendAmount)
   ) {
     message = {
       bottom: {
@@ -779,37 +755,34 @@ function validate(state: InstantFormState): InstantFormState {
         amount: dustLimits[eth2weth(spendToken)],
         field: spendField,
         token: spendToken,
-      }
+      },
     };
     return {
       ...state,
-      message
+      message,
     };
   }
 
-  if (
-    spendAmount
-    && new BigNumber(getToken(eth2weth(spendToken)).maxSell).lt(spendAmount)
-  ) {
+  if (spendAmount && new BigNumber(getToken(eth2weth(spendToken)).maxSell).lt(spendAmount)) {
     message = {
       bottom: {
         kind: MessageKind.incredibleAmount,
         field: spendField,
         token: spendToken,
         amount: new BigNumber(getToken(eth2weth(spendToken)).maxSell),
-      }
+      },
     };
     return {
       ...state,
-      message
+      message,
     };
   }
 
   if (
-    receiveAmount
-    && dustLimits
-    && dustLimits[eth2weth(receiveToken)]
-    && dustLimits[eth2weth(receiveToken)].gt(receiveAmount)
+    receiveAmount &&
+    dustLimits &&
+    dustLimits[eth2weth(receiveToken)] &&
+    dustLimits[eth2weth(receiveToken)].gt(receiveAmount)
   ) {
     message = {
       bottom: {
@@ -817,52 +790,45 @@ function validate(state: InstantFormState): InstantFormState {
         amount: dustLimits[eth2weth(receiveToken)],
         field: receiveField,
         token: receiveToken,
-      }
+      },
     };
     return {
       ...state,
-      message
+      message,
     };
   }
 
-  if (
-    receiveAmount
-    && new BigNumber(getToken(eth2weth(receiveToken)).maxSell).lt(receiveAmount)
-  ) {
+  if (receiveAmount && new BigNumber(getToken(eth2weth(receiveToken)).maxSell).lt(receiveAmount)) {
     message = {
       bottom: {
         kind: MessageKind.incredibleAmount,
         field: receiveField,
         token: receiveToken,
         amount: new BigNumber(getToken(eth2weth(receiveToken)).maxSell),
-      }
+      },
     };
     return {
       ...state,
-      message
+      message,
     };
   }
 
-  if (spendAmount && (
-    spendToken === 'ETH'
-    && state.etherBalance
-    && state.etherBalance.lt(spendAmount)
-    ||
-    state.balances
-    && state.balances[spendToken]
-    && state.balances[spendToken].lt(spendAmount)
-  )) {
+  if (
+    spendAmount &&
+    ((spendToken === 'ETH' && state.etherBalance && state.etherBalance.lt(spendAmount)) ||
+      (state.balances && state.balances[spendToken] && state.balances[spendToken].lt(spendAmount)))
+  ) {
     message = {
       bottom: {
         kind: MessageKind.insufficientAmount,
         field: spendField,
         amount: spendAmount,
         token: spendToken,
-      }
+      },
     };
     return {
       ...state,
-      message
+      message,
     };
   }
 
@@ -870,50 +836,49 @@ function validate(state: InstantFormState): InstantFormState {
 }
 
 function calculatePriceAndImpact(state: InstantFormState): InstantFormState {
-
   const { buyAmount, buyToken, sellAmount, sellToken, bestPrice } = state;
 
-  const formatToken = daiOrSAI(sellToken) || (eth2weth(sellToken) === 'WETH' && !daiOrSAI(buyToken))
-    ? sellToken
-    : buyToken;
-  const calculated = buyAmount && sellAmount
-    ? calculateTradePrice(sellToken, sellAmount, buyToken, buyAmount)
-    : null;
+  const formatToken =
+    daiOrSAI(sellToken) || (eth2weth(sellToken) === 'WETH' && !daiOrSAI(buyToken)) ? sellToken : buyToken;
+  const calculated = buyAmount && sellAmount ? calculateTradePrice(sellToken, sellAmount, buyToken, buyAmount) : null;
   const price = calculated ? calculated.price : undefined;
   const quotation = calculated ? calculated.quotation : undefined;
-  const priceImpact = price && bestPrice ?
-    bestPrice
-      .minus(price)
-      .abs()
-      .div(bestPrice)
-      .times(100) :
-    undefined;
+  const priceImpact =
+    price && bestPrice
+      ? bestPrice
+          .minus(price)
+          .abs()
+          .div(bestPrice)
+          .times(100)
+      : undefined;
 
   return {
     ...state,
     quotation,
     priceImpact,
-    price: price ? new BigNumber(formatPriceInstant(price, formatToken)) : undefined
+    price: price ? new BigNumber(formatPriceInstant(price, formatToken)) : undefined,
   };
 }
 
 function prepareSubmit(
   theCalls$: Calls$,
 ): [(state: InstantFormState) => void, Observable<ProgressChange | FormResetChange>] {
-
   const stageChange$ = new Subject<ProgressChange | FormResetChange>();
 
   function submit(state: InstantFormState) {
-    theCalls$.pipe(
-      first(),
-      flatMap((calls) =>
-        calls.proxyAddress().pipe(
-          switchMap(proxyAddress => {
-            const sell = state.sellToken === 'ETH' ? tradePayWithETH : tradePayWithERC20;
-            return sell(calls, proxyAddress, state);
-          })
-        )
-      )).subscribe(change => stageChange$.next(change));
+    theCalls$
+      .pipe(
+        first(),
+        flatMap(calls =>
+          calls.proxyAddress().pipe(
+            switchMap(proxyAddress => {
+              const sell = state.sellToken === 'ETH' ? tradePayWithETH : tradePayWithERC20;
+              return sell(calls, proxyAddress, state);
+            }),
+          ),
+        ),
+      )
+      .subscribe(change => stageChange$.next(change));
   }
 
   return [submit, stageChange$];
@@ -934,121 +899,124 @@ export function manualAllowanceSetup(
   theCalls$: Calls$,
   gasPrice$: GasPrice$,
   proxyAddress$: Observable<string>,
-  allowances$: Observable<Allowances>
+  allowances$: Observable<Allowances>,
 ): [(token: string) => void, Observable<ManualAllowanceChange>] {
   const manualAllowanceProgressChanges$ = new Subject<ManualAllowanceChange>();
   const transactionStatus$ = new Subject<UnidirectionalManualAllowanceStatus>();
 
   function toggleAllowance(token: string) {
-    theCalls$.pipe(
-      first(),
-      flatMap((calls) =>
-        combineLatest(proxyAddress$, allowances$).pipe(
-          take(1),
-          flatMap(([proxyAddress, allowances]) =>
-            combineLatest(calls.approveProxyEstimateGas({ token, proxyAddress }), gasPrice$).pipe(
-              take(1),
-              flatMap(([estimation, gasPrice]) => {
-                const gasCost = {
-                  gasPrice,
-                  gasEstimation: estimation,
-                };
+    theCalls$
+      .pipe(
+        first(),
+        flatMap(calls =>
+          combineLatest(proxyAddress$, allowances$).pipe(
+            take(1),
+            flatMap(([proxyAddress, allowances]) =>
+              combineLatest(calls.approveProxyEstimateGas({ token, proxyAddress }), gasPrice$).pipe(
+                take(1),
+                flatMap(([estimation, gasPrice]) => {
+                  const gasCost = {
+                    gasPrice,
+                    gasEstimation: estimation,
+                  };
 
-                return allowances[token]
-                  ? calls.disapproveProxy({ proxyAddress, token, ...gasCost }).pipe(
-                    flatMap(progress => of({
-                      token,
-                      progress,
-                      direction: AllowanceDirection.locking,
-                    }))
-                  )
-                  : calls.approveProxy({ proxyAddress, token, ...gasCost }).pipe(
-                    flatMap(progress => of({
-                      token,
-                      progress,
-                      direction: AllowanceDirection.unlocking
-                    }))
-                  );
-              })
-            )
-          )
-        )
-      ),
-    ).subscribe((txStatus) => {
-      transactionStatus$.next(txStatus);
-    });
+                  return allowances[token]
+                    ? calls.disapproveProxy({ proxyAddress, token, ...gasCost }).pipe(
+                        flatMap(progress =>
+                          of({
+                            token,
+                            progress,
+                            direction: AllowanceDirection.locking,
+                          }),
+                        ),
+                      )
+                    : calls.approveProxy({ proxyAddress, token, ...gasCost }).pipe(
+                        flatMap(progress =>
+                          of({
+                            token,
+                            progress,
+                            direction: AllowanceDirection.unlocking,
+                          }),
+                        ),
+                      );
+                }),
+              ),
+            ),
+          ),
+        ),
+      )
+      .subscribe(txStatus => {
+        transactionStatus$.next(txStatus);
+      });
   }
 
-  transactionStatus$.pipe(
-    distinctUntilChanged(isEqual),
-    flatMap((txStatus) => allowances$
-      .pipe(
-        flatMap(allowances => of([txStatus, allowances]))
-      )),
-    map(([status, allowances]) => {
-      const { token, direction, progress } = status;
+  transactionStatus$
+    .pipe(
+      distinctUntilChanged(isEqual),
+      flatMap(txStatus => allowances$.pipe(flatMap(allowances => of([txStatus, allowances])))),
+      map(([status, allowances]) => {
+        const { token, direction, progress } = status;
 
-      manualAllowanceProgressChanges$.next({
-        token,
-        kind: InstantFormChangeKind.manualAllowanceChange,
-        progress: {
+        manualAllowanceProgressChanges$.next({
           token,
-          direction,
-          kind: ProgressKind.onlyAllowance,
-          allowanceTxStatus: progress.status,
-          txHash: (progress as { txHash: string; }).txHash,
-          done: isSuccess(progress) && (
-            // If we are unlocking the given token, we wait until it's
-            // allowed which will be visible on the next block check.
-            (direction === 'unlocking' && allowances[token])
-            // If we are locking the given token, we wait until it's
-            // not allowed which will be visible on the next block check.
-            || (direction === 'locking' && !allowances[token])
-          ) || isDoneButNotSuccessful(progress)
-        } as ManualAllowanceProgress
-      });
-    }),
-    catchError(err => {
-      console.log('Error caught:', err);
-      return of(undefined);
-    })
-  ).subscribe();
+          kind: InstantFormChangeKind.manualAllowanceChange,
+          progress: {
+            token,
+            direction,
+            kind: ProgressKind.onlyAllowance,
+            allowanceTxStatus: progress.status,
+            txHash: (progress as { txHash: string }).txHash,
+            done:
+              (isSuccess(progress) &&
+                // If we are unlocking the given token, we wait until it's
+                // allowed which will be visible on the next block check.
+                ((direction === 'unlocking' && allowances[token]) ||
+                  // If we are locking the given token, we wait until it's
+                  // not allowed which will be visible on the next block check.
+                  (direction === 'locking' && !allowances[token]))) ||
+              isDoneButNotSuccessful(progress),
+          } as ManualAllowanceProgress,
+        });
+      }),
+      catchError(err => {
+        console.log('Error caught:', err);
+        return of(undefined);
+      }),
+    )
+    .subscribe();
 
   return [toggleAllowance, manualAllowanceProgressChanges$];
 }
 
-export function manualProxyCreation(
-  theCalls$: Calls$,
-  gasPrice$: GasPrice$,
-): [() => void, Observable<ProgressChange>] {
-
+export function manualProxyCreation(theCalls$: Calls$, gasPrice$: GasPrice$): [() => void, Observable<ProgressChange>] {
   const proxyCreationChange$ = new Subject<ProgressChange>();
 
   function createProxy() {
-    theCalls$.pipe(
-      first(),
-      switchMap(calls =>
-        combineLatest(calls.setupProxyEstimateGas({}), gasPrice$)
-          .pipe(
+    theCalls$
+      .pipe(
+        first(),
+        switchMap(calls =>
+          combineLatest(calls.setupProxyEstimateGas({}), gasPrice$).pipe(
             switchMap(([estimatedGas, gasPrice]) =>
               calls.setupProxy({
                 gasPrice,
-                gasEstimation: estimatedGas
-              })
-            )
-          )
-      ),
-    ).subscribe(progress => {
-      proxyCreationChange$.next({
-        kind: InstantFormChangeKind.progressChange,
-        progress: {
-          kind: ProgressKind.onlyProxy,
-          proxyTxStatus: progress.status,
-          txHash: (progress as { txHash: string; }).txHash,
-          done: isDone(progress)
-        }
+                gasEstimation: estimatedGas,
+              }),
+            ),
+          ),
+        ),
+      )
+      .subscribe(progress => {
+        proxyCreationChange$.next({
+          kind: InstantFormChangeKind.progressChange,
+          progress: {
+            kind: ProgressKind.onlyProxy,
+            proxyTxStatus: progress.status,
+            txHash: (progress as { txHash: string }).txHash,
+            done: isDone(progress),
+          },
+        });
       });
-    });
   }
 
   return [createProxy, proxyCreationChange$];
@@ -1056,47 +1024,59 @@ export function manualProxyCreation(
 
 function toDustLimitsChange(dustLimits$: Observable<DustLimits>): Observable<DustLimitsChange> {
   return dustLimits$.pipe(
-    map(dustLimits => ({
-      dustLimits,
-      kind: InstantFormChangeKind.dustLimitsChange,
-    } as DustLimitsChange))
+    map(
+      dustLimits =>
+        ({
+          dustLimits,
+          kind: InstantFormChangeKind.dustLimitsChange,
+        } as DustLimitsChange),
+    ),
   );
 }
 
 function toAllowancesChange(allowances$: Observable<Allowances>): Observable<AllowancesChange> {
   return allowances$.pipe(
-    map(allowances => ({
-      allowances,
-      kind: InstantFormChangeKind.allowancesChange,
-    } as AllowancesChange))
+    map(
+      allowances =>
+        ({
+          allowances,
+          kind: InstantFormChangeKind.allowancesChange,
+        } as AllowancesChange),
+    ),
   );
 }
 
 function toProxyChange(proxyAddress$: Observable<string>): Observable<ProxyChange> {
   return proxyAddress$.pipe(
-    map(proxy => ({
-      value: proxy,
-      kind: InstantFormChangeKind.proxyChange,
-    } as ProxyChange))
+    map(
+      proxy =>
+        ({
+          value: proxy,
+          kind: InstantFormChangeKind.proxyChange,
+        } as ProxyChange),
+    ),
   );
 }
 
 function toContextChange(context$: Observable<NetworkConfig>): Observable<ContextChange> {
   return context$.pipe(
-    map(context => ({
-      context,
-      kind: InstantFormChangeKind.contextChange,
-    } as ContextChange))
+    map(
+      context =>
+        ({
+          context,
+          kind: InstantFormChangeKind.contextChange,
+        } as ContextChange),
+    ),
   );
 }
 
 function isReadyToProceed(state: InstantFormState): InstantFormState {
   return {
     ...state,
-    readyToProceed: !state.message && (
-      state.gasEstimationStatus === GasEstimationStatus.calculated ||
-      state.gasEstimationStatus === GasEstimationStatus.unknown
-    ),
+    readyToProceed:
+      !state.message &&
+      (state.gasEstimationStatus === GasEstimationStatus.calculated ||
+        state.gasEstimationStatus === GasEstimationStatus.unknown),
   };
 }
 
@@ -1105,28 +1085,25 @@ function freezeIfInProgress(previous: InstantFormState, state: InstantFormState)
     return {
       ...previous,
       progress: state.progress,
-      view: state.view
+      view: state.view,
     };
   }
   return state;
 }
 
-export function createFormController$(
-  params: {
-    gasPrice$: Observable<BigNumber>;
-    allowances$: Observable<Allowances>;
-    balances$: Observable<Balances>;
-    etherBalance$: Observable<BigNumber>
-    dustLimits$: Observable<DustLimits>;
-    proxyAddress$: Observable<string>;
-    calls$: Calls$;
-    readCalls$: ReadCalls$;
-    etherPriceUsd$: Observable<BigNumber|undefined>;
-    user$: Observable<User>;
-    context$: Observable<NetworkConfig>
-  }
-): Observable<InstantFormState> {
-
+export function createFormController$(params: {
+  gasPrice$: Observable<BigNumber>;
+  allowances$: Observable<Allowances>;
+  balances$: Observable<Balances>;
+  etherBalance$: Observable<BigNumber>;
+  dustLimits$: Observable<DustLimits>;
+  proxyAddress$: Observable<string>;
+  calls$: Calls$;
+  readCalls$: ReadCalls$;
+  etherPriceUsd$: Observable<BigNumber | undefined>;
+  user$: Observable<User>;
+  context$: Observable<NetworkConfig>;
+}): Observable<InstantFormState> {
   const manualChange$ = new Subject<ManualChange>();
 
   const environmentChange$ = merge(
@@ -1144,16 +1121,14 @@ export function createFormController$(
   );
 
   const [submit, submitChange$] = prepareSubmit(params.calls$);
-  const [createProxy, createProxyManuallyChange$] =
-    manualProxyCreation(params.calls$, params.gasPrice$);
+  const [createProxy, createProxyManuallyChange$] = manualProxyCreation(params.calls$, params.gasPrice$);
 
-  const [toggleAllowance, setAllowanceManuallyChange$] =
-    manualAllowanceSetup(
-      params.calls$,
-      params.gasPrice$,
-      params.proxyAddress$,
-      params.allowances$
-    );
+  const [toggleAllowance, setAllowanceManuallyChange$] = manualAllowanceSetup(
+    params.calls$,
+    params.gasPrice$,
+    params.proxyAddress$,
+    params.allowances$,
+  );
 
   const initialState: InstantFormState = {
     submit,
@@ -1182,10 +1157,7 @@ export function createFormController$(
   ).pipe(
     scan(applyChange, initialState),
     distinctUntilChanged(isEqual),
-    switchSpread(
-      evaluateTradeWithCalls(params.readCalls$),
-      mergeTradeEvaluation
-    ),
+    switchSpread(evaluateTradeWithCalls(params.readCalls$), mergeTradeEvaluation),
     map(validate),
     switchMap(curry(estimateGas)(params.calls$)),
     map(calculatePriceAndImpact),

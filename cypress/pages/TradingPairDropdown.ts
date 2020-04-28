@@ -8,10 +8,8 @@ export interface TradingPair {
 }
 
 export class TradingPairInfo {
-  public static lastPrice = () =>
-    cy.get(tid('trading-pair-info', tid('last-price', tid('value'))))
-  public static dailyVolume = () =>
-    cy.get(tid('trading-pair-info', tid('24h-volume', tid('value'))))
+  public static lastPrice = () => cy.get(tid('trading-pair-info', tid('last-price', tid('value'))));
+  public static dailyVolume = () => cy.get(tid('trading-pair-info', tid('24h-volume', tid('value'))));
 }
 
 export class TradingPairDropdown {
@@ -20,7 +18,7 @@ export class TradingPairDropdown {
   }
 
   public static hasMarkets(tradingPairs: TradingPair[]) {
-    tradingPairs.forEach((pair) => {
+    tradingPairs.forEach(pair => {
       cy.get(tid(`${pair.base}-${pair.quote}`, tid('base'))).contains(pair.base);
       cy.get(tid(`${pair.base}-${pair.quote}`, tid('quote'))).contains(pair.quote);
     });
@@ -29,7 +27,6 @@ export class TradingPairDropdown {
   public static expectActivePAir(tradingPair: TradingPair) {
     cy.get(tid('active-pair', tid('base'))).contains(tradingPair.base);
     cy.get(tid('active-pair', tid('quote'))).contains(tradingPair.quote);
-
   }
 
   public static select(tradingPair: TradingPair) {

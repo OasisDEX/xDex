@@ -8,7 +8,7 @@ import { LoadableWithTradingPair } from '../../utils/loadable';
 import { WithLoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
 import { ServerUnreachable } from '../../utils/loadingIndicator/ServerUnreachable';
 import { PanelHeader } from '../../utils/panel/Panel';
-import { GroupMode, PriceChartDataPoint, } from './pricechart';
+import { GroupMode, PriceChartDataPoint } from './pricechart';
 import { PriceChartView } from './PriceChartView';
 import * as styles from './PriceChartWithLoading.scss';
 
@@ -18,10 +18,9 @@ export interface PriceChartProps extends LoadableWithTradingPair<PriceChartDataP
 }
 
 export class PriceChartWithLoading extends React.Component<PriceChartProps> {
-  public handleKindChange = (groupMode: GroupMode) =>
-    () => {
-      this.props.groupMode$.next(groupMode);
-    }
+  public handleKindChange = (groupMode: GroupMode) => () => {
+    this.props.groupMode$.next(groupMode);
+  };
 
   public render() {
     return (
@@ -29,28 +28,14 @@ export class PriceChartWithLoading extends React.Component<PriceChartProps> {
         <PanelHeader bordered={true}>
           Price chart
           <ButtonGroup style={{ marginLeft: 'auto' }}>
-            {
-              this.button('1M', 'byMonth')
-            }
-            {
-              this.button('1W', 'byWeek')
-            }
-            {
-              this.button('1D', 'byDay')
-            }
-            {
-              this.button('1H', 'byHour')
-            }
+            {this.button('1M', 'byMonth')}
+            {this.button('1W', 'byWeek')}
+            {this.button('1D', 'byDay')}
+            {this.button('1H', 'byHour')}
           </ButtonGroup>
         </PanelHeader>
-        <WithLoadingIndicator
-          error={<ServerUnreachable/>}
-          size="lg"
-          loadable={this.props}
-        >
-          {(points: PriceChartDataPoint[]) => (
-            <PriceChartView data={points} groupMode={this.props.groupMode}/>
-          )}
+        <WithLoadingIndicator error={<ServerUnreachable />} size="lg" loadable={this.props}>
+          {(points: PriceChartDataPoint[]) => <PriceChartView data={points} groupMode={this.props.groupMode} />}
         </WithLoadingIndicator>
       </>
     );
@@ -62,21 +47,28 @@ export class PriceChartWithLoading extends React.Component<PriceChartProps> {
       size="sm"
       className={classnames(styles.btn)}
       onClick={this.handleKindChange(groupMode)}
-    >{label}</Button>
-  )
+    >
+      {label}
+    </Button>
+  );
 }
 
 export function createPriceChartLoadable$(
   groupMode$: Observable<GroupMode>,
-  dataSources$: { [key in GroupMode]: Observable<LoadableWithTradingPair<PriceChartDataPoint[]>> }
+  dataSources$: { [key in GroupMode]: Observable<LoadableWithTradingPair<PriceChartDataPoint[]>> },
 ): Observable<PriceChartProps> {
   return groupMode$.pipe(
-    switchMap((groupMode: GroupMode) => dataSources$[groupMode].pipe(
-      map(tradeHistory => ({
-        ...tradeHistory,
-        groupMode,
-        groupMode$,
-      } as PriceChartProps)),
-    )),
+    switchMap((groupMode: GroupMode) =>
+      dataSources$[groupMode].pipe(
+        map(
+          tradeHistory =>
+            ({
+              ...tradeHistory,
+              groupMode,
+              groupMode$,
+            } as PriceChartProps),
+        ),
+      ),
+    ),
   );
 }

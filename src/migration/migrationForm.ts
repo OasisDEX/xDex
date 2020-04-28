@@ -8,7 +8,7 @@ import { EtherscanConfig } from '../blockchain/etherscan';
 import { TradeWithStatus } from '../exchange/myTrades/openTrades';
 import { ContextChange, InstantFormChangeKind } from '../instant/instantForm';
 import { combineAndMerge } from '../utils/combineAndMerge';
-import { AmountFieldChange, FormChangeKind, OrdersChange, toOrdersChange, } from '../utils/form';
+import { AmountFieldChange, FormChangeKind, OrdersChange, toOrdersChange } from '../utils/form';
 import { zero } from '../utils/zero';
 import { ExchangeMigrationState, ExchangeMigrationStatus } from './migration';
 
@@ -61,10 +61,7 @@ export interface MigrationFormState {
   cancelOffer: (cancelData: CancelData) => void;
 }
 
-function applyChange(
-  state: MigrationFormState,
-  change: MigrationFormChange
-): MigrationFormState {
+function applyChange(state: MigrationFormState, change: MigrationFormChange): MigrationFormState {
   switch (change.kind) {
     case BalanceChangeKind.balanceChange:
       return { ...state, balance: change.balance };
@@ -98,9 +95,7 @@ function validate(state: MigrationFormState) {
 }
 
 function checkIfIsReadyToProceed(state: MigrationFormState) {
-
-  const readyToProceed = state.amount &&
-    state.messages.length === 0;
+  const readyToProceed = state.amount && state.messages.length === 0;
 
   return {
     ...state,
@@ -110,15 +105,13 @@ function checkIfIsReadyToProceed(state: MigrationFormState) {
 
 function prepareProceed(
   migrate$: (amount: BigNumber) => Observable<ExchangeMigrationState>,
-  balance$: Observable<BigNumber>
-): [((state: MigrationFormState) => void), Observable<MigrationFormChange>] {
-
+  balance$: Observable<BigNumber>,
+): [(state: MigrationFormState) => void, Observable<MigrationFormChange>] {
   const proceedChange$ = new Subject<MigrationFormChange>();
 
   let progressSubscription: Subscription | undefined;
 
   function proceed(state: MigrationFormState) {
-
     const amount = state.amount;
 
     if (!amount) {
@@ -129,9 +122,7 @@ function prepareProceed(
       first(),
       switchMap(balanceBeforeMigration =>
         migrate$(amount).pipe(
-          map(progress => (
-            { progress, kind: FormChangeKind.progress } as ProgressChange
-          )),
+          map(progress => ({ progress, kind: FormChangeKind.progress } as ProgressChange)),
           switchMap((change: ProgressChange) => {
             if (change.progress && change.progress.status === ExchangeMigrationStatus.done) {
               return concat(
@@ -139,22 +130,24 @@ function prepareProceed(
                 balance$.pipe(
                   filter(balance => !balanceBeforeMigration.eq(balance)),
                   first(),
-                  map((value) => ({
-                    value,
-                    kind: FormChangeKind.amountFieldChange,
-                  } as AmountFieldChange))
+                  map(
+                    value =>
+                      ({
+                        value,
+                        kind: FormChangeKind.amountFieldChange,
+                      } as AmountFieldChange),
+                  ),
                 ),
-                of(change)
+                of(change),
               );
             }
             return of(change);
-          })
-        )
-      )
+          }),
+        ),
+      ),
     );
 
     progressSubscription = changes$.subscribe(change => proceedChange$.next(change));
-
   }
 
   const progressChanges$ = new Observable<MigrationFormChange>(subscriber => {
@@ -171,10 +164,7 @@ function prepareProceed(
   return [proceed, progressChanges$];
 }
 
-function freezeIfInProgress(
-  previous: MigrationFormState,
-  state: MigrationFormState
-): MigrationFormState {
+function freezeIfInProgress(previous: MigrationFormState, state: MigrationFormState): MigrationFormState {
   if (state.progress && state.progress.status !== ExchangeMigrationStatus.done) {
     return {
       ...previous,
@@ -184,23 +174,20 @@ function freezeIfInProgress(
   return state;
 }
 
-function toBalanceChange(
-  balance$: Observable<BigNumber>
-) {
+function toBalanceChange(balance$: Observable<BigNumber>) {
   return balance$.pipe(
-    map(balance => ({
-      balance,
-      kind: BalanceChangeKind.balanceChange
-    } as BalanceChange))
+    map(
+      balance =>
+        ({
+          balance,
+          kind: BalanceChangeKind.balanceChange,
+        } as BalanceChange),
+    ),
   );
 }
 
-function toContextChange(
-  context$: Observable<NetworkConfig>
-) {
-  return context$.pipe(
-    map(context => ({  context, kind: InstantFormChangeKind.contextChange }))
-  );
+function toContextChange(context$: Observable<NetworkConfig>) {
+  return context$.pipe(map(context => ({ context, kind: InstantFormChangeKind.contextChange })));
 }
 
 export function createMigrationForm$(
@@ -209,27 +196,21 @@ export function createMigrationForm$(
   kind: MigrationFormKind,
   migrate$: (amount: BigNumber) => Observable<ExchangeMigrationState>,
   calls$: Calls$,
-  orders$: Observable<TradeWithStatus[]>
+  orders$: Observable<TradeWithStatus[]>,
 ): Observable<MigrationFormState> {
-
   const manualChange$ = new Subject<ManualChange>();
 
   const balanceChange$ = toBalanceChange(balance$);
 
-  const environmentChange$ = combineAndMerge(
-    balanceChange$,
-    toContextChange(context$),
-    toOrdersChange(orders$)
-  );
+  const environmentChange$ = combineAndMerge(balanceChange$, toContextChange(context$), toOrdersChange(orders$));
 
-  const [proceed, proceedProgressChange$] =
-    prepareProceed(migrate$, balance$);
+  const [proceed, proceedProgressChange$] = prepareProceed(migrate$, balance$);
 
   const change = manualChange$.next.bind(manualChange$);
 
   return balance$.pipe(
     first(),
-    switchMap((balance) => {
+    switchMap(balance => {
       const initialState = {
         kind,
         change,
@@ -240,22 +221,20 @@ export function createMigrationForm$(
         orders: [],
         fromToken: kind === MigrationFormKind.sai2dai ? 'SAI' : 'DAI',
         cancelOffer: (cancelData: CancelData) =>
-          calls$.pipe(
-            first(),
-            switchMap(calls => calls.cancelOffer2(cancelData))
-          ).subscribe()
+          calls$
+            .pipe(
+              first(),
+              switchMap(calls => calls.cancelOffer2(cancelData)),
+            )
+            .subscribe(),
       };
 
-      return merge(
-        manualChange$,
-        environmentChange$,
-        proceedProgressChange$
-      ).pipe(
+      return merge(manualChange$, environmentChange$, proceedProgressChange$).pipe(
         scan<any>(applyChange, initialState),
         map(validate),
         map(checkIfIsReadyToProceed),
         scan(freezeIfInProgress),
       );
-    })
+    }),
   );
 }

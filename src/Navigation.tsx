@@ -25,15 +25,11 @@ const Navigation = ({ walletStatus, children }: any) => {
   );
 };
 
-export const NavigationTxRx = connect(Navigation, walletStatus$.pipe(
-  map(walletStatus => ({ walletStatus }))
-));
+export const NavigationTxRx = connect(Navigation, walletStatus$.pipe(map(walletStatus => ({ walletStatus }))));
 
 export const VerticalNav = ({ connected }: any) => {
   return (
-    <div className={
-      classnames(styles.verticalContent, connected ? styles.connected : styles.disconnected)
-    }>
+    <div className={classnames(styles.verticalContent, connected ? styles.connected : styles.disconnected)}>
       <a href="/save">
         <SvgImage image={saveSvg} />
         Save
@@ -52,9 +48,7 @@ export const VerticalNav = ({ connected }: any) => {
 
 export const HorizontalNav = ({ connected }: any) => {
   return (
-    <div className={
-      classnames(styles.horizontalContent, connected ? styles.connected : styles.disconnected)
-    }>
+    <div className={classnames(styles.horizontalContent, connected ? styles.connected : styles.disconnected)}>
       <a href="/save">
         <SvgImage image={saveSvg} />
         Save

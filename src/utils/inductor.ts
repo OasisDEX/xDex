@@ -22,7 +22,7 @@ export function inductor<T>(seed: T, next: (p: T) => Observable<T> | undefined):
           } else {
             switchTo(nextObservable);
           }
-        }
+        },
       });
     };
 

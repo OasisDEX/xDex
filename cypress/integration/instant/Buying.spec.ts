@@ -38,14 +38,14 @@ describe('Buying', () => {
 
       const finalization = trade.execute();
 
-      const summary = finalization
-        .shouldCreateProxy()
-        .shouldCommitATrade(willPay, from, willReceive, to);
+      const summary = finalization.shouldCreateProxy().shouldCommitATrade(willPay, from, willReceive, to);
 
       summary.expectProxyBeingCreated();
       summary.expectBought(willReceive, to);
       summary.expectSold(willPay, from);
-      summary.expectPriceOf(price); /* TODO .then(() => {
+      summary.expectPriceOf(
+        price,
+      ); /* TODO .then(() => {
         verifySendTxs([{
           from: ACCOUNT_3_PUBLIC,
           to: INSTANT_PROXY_CREATE_AND_EXECUTE_ADDRESS,
@@ -77,9 +77,7 @@ describe('Buying', () => {
 
       const finalization = trade.execute();
 
-      const summary = finalization
-        .shouldNotCreateProxy()
-        .shouldCommitATrade(willPay, from, willReceiveMore, to);
+      const summary = finalization.shouldNotCreateProxy().shouldCommitATrade(willPay, from, willReceiveMore, to);
 
       summary.expectProxyNotBeingCreated();
       summary.expectBought(willReceiveMore, to);
@@ -148,8 +146,7 @@ describe('Buying', () => {
         .shouldSetAllowanceFor(nextFrom)
         .expectSuccess();
 
-      const finalSummary = nextFinalization
-        .shouldCommitATrade(nextWillPay, nextFrom, nextWillReceive, nextTo);
+      const finalSummary = nextFinalization.shouldCommitATrade(nextWillPay, nextFrom, nextWillReceive, nextTo);
 
       finalSummary.expectProxyNotBeingCreated();
       finalSummary.expectBought(nextWillReceive, nextTo);
@@ -248,10 +245,10 @@ describe('Buying', () => {
 
       nextFinalization
         .shouldNotCreateProxy()
-        .shouldSetAllowanceFor(nextFrom).expectSuccess();
+        .shouldSetAllowanceFor(nextFrom)
+        .expectSuccess();
 
-      const finalSummary = nextFinalization
-        .shouldCommitATrade(nextWillPay, nextFrom, nextWillReceive, nextTo);
+      const finalSummary = nextFinalization.shouldCommitATrade(nextWillPay, nextFrom, nextWillReceive, nextTo);
 
       finalSummary.expectProxyNotBeingCreated();
       finalSummary.expectBought(nextWillReceive, nextTo);

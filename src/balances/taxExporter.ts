@@ -22,22 +22,28 @@ function queryTrades(context: NetworkConfig, addresses: string[]) {
       { maker: { in: new Placeholder('addresses', '[String!]', addresses) } },
       { taker: { in: new Placeholder('addresses', '[String!]', addresses) } },
       { fromAddress: { in: new Placeholder('addresses', '[String!]', addresses) } },
-    ]
+    ],
   };
   const order = '[TIME_DESC]';
-  const fields = ['offerId', 'maker', 'taker', 'quoteTkn', 'baseTkn', 'quoteAmt', 'baseAmt',
-    'proxyName', 'proxyExecName', 'tx', 'time', 'type'];
+  const fields = [
+    'offerId',
+    'maker',
+    'taker',
+    'quoteTkn',
+    'baseTkn',
+    'quoteAmt',
+    'baseAmt',
+    'proxyName',
+    'proxyExecName',
+    'tx',
+    'time',
+    'type',
+  ];
 
-  return vulcan0x<any>(
-    context.oasisDataService.url,
-    'allOasisTradeProxies',
-    'allOasisTradeProxies',
-    fields,
-    {
-      filter,
-      order,
-    }
-  );
+  return vulcan0x<any>(context.oasisDataService.url, 'allOasisTradeProxies', 'allOasisTradeProxies', fields, {
+    filter,
+    order,
+  });
 }
 
 function getExchangeNameByProxy(proxyName: string, proxyExecName: string): Observable<string> {
@@ -55,22 +61,20 @@ function getExchangeNameByProxy(proxyName: string, proxyExecName: string): Obser
 
 function getTradeInfoWithProxy(
   { time, maker, quoteTkn, quoteAmt, baseTkn, baseAmt, tx, type, proxyName, proxyExecName }: any,
-  address: string
+  address: string,
 ): Observable<TradeExport> {
   const date: string = new Date(time).toLocaleString();
   const isMaker = address === maker;
-  const buyAmount = (isMaker && type === 'buy') || (!isMaker && type === 'buy')
-    ? new BigNumber(quoteAmt).toFormat(18)
-    : new BigNumber(baseAmt).toFormat(18);
-  const sellAmount = (isMaker && type === 'sell') || (!isMaker && type === 'sell')
-    ? new BigNumber(quoteAmt).toFormat(18)
-    : new BigNumber(baseAmt).toFormat(18);
-  const buyToken = (isMaker && type === 'buy') || (!isMaker && type === 'buy')
-    ? quoteTkn
-    : baseTkn;
-  const sellToken = (isMaker && type === 'sell') || (!isMaker && type === 'sell')
-    ? quoteTkn
-    : baseTkn;
+  const buyAmount =
+    (isMaker && type === 'buy') || (!isMaker && type === 'buy')
+      ? new BigNumber(quoteAmt).toFormat(18)
+      : new BigNumber(baseAmt).toFormat(18);
+  const sellAmount =
+    (isMaker && type === 'sell') || (!isMaker && type === 'sell')
+      ? new BigNumber(quoteAmt).toFormat(18)
+      : new BigNumber(baseAmt).toFormat(18);
+  const buyToken = (isMaker && type === 'buy') || (!isMaker && type === 'buy') ? quoteTkn : baseTkn;
+  const sellToken = (isMaker && type === 'sell') || (!isMaker && type === 'sell') ? quoteTkn : baseTkn;
 
   proxyName = proxyName === null ? '' : proxyName;
   proxyExecName = proxyExecName === null ? '' : proxyExecName;
@@ -84,31 +88,33 @@ function getTradeInfoWithProxy(
         date,
         address,
         tx,
-        exchange
+        exchange,
       } as TradeExport;
-    })
+    }),
   );
 }
 
 export function createTaxExport$(
   context$: Observable<NetworkConfig>,
-  address$: Observable<string>
+  address$: Observable<string>,
 ): Observable<TradeExport[]> {
   return combineLatest(context$, address$).pipe(
     switchMap(([context, addressChecksum]) => {
       return of(addressChecksum.toLowerCase()).pipe(
-        flatMap((address) => {
-          return queryTrades(context, [address])
-            .pipe(
-            mergeMap((trades): Array<Observable<any>> => {
-              if (trades.length) {
-                return (trades.map((trade:any) => getTradeInfoWithProxy(trade, address)));
-              }
-              return [of('')];
-            }),
-            combineAll());
-        })
+        flatMap(address => {
+          return queryTrades(context, [address]).pipe(
+            mergeMap(
+              (trades): Array<Observable<any>> => {
+                if (trades.length) {
+                  return trades.map((trade: any) => getTradeInfoWithProxy(trade, address));
+                }
+                return [of('')];
+              },
+            ),
+            combineAll(),
+          );
+        }),
       );
-    })
+    }),
   );
 }

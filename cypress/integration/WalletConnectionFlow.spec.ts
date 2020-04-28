@@ -6,9 +6,7 @@ const goBack = () => {
 };
 
 describe('Wallet', () => {
-
   context('with no provider', () => {
-
     beforeEach(() => {
       cypressVisitWithoutProvider();
     });
@@ -22,7 +20,9 @@ describe('Wallet', () => {
 
       WalletConnection.headingIs('Get a Wallet');
 
-      cy.get(tid('suggested-clients')).find('li').should('have.length', 4);
+      cy.get(tid('suggested-clients'))
+        .find('li')
+        .should('have.length', 4);
     });
 
     it('should display connect wallet view if go back is clicked in suggested clients view', () => {
@@ -108,7 +108,9 @@ describe('Wallet', () => {
 
     // tslint:disable-next-line:max-line-length
     it('should clear selected wallet and accepted tos if dropdown is closed and wallet not connected', () => {
-      WalletConnection.open().web().acceptToS();
+      WalletConnection.open()
+        .web()
+        .acceptToS();
 
       WalletConnection.close();
 

@@ -14,13 +14,12 @@ const waitForBalancesToLoad = () => {
 };
 
 describe('New trade', () => {
-
   context('with connected wallet', () => {
     beforeEach(() => {
       // this test suite randomly fails on react error
       // can't reproduce it in real life
       // i imagine it is a cypress bug ¯\_(ツ)_/¯
-      cy.on('uncaught:exception', (_err) => {
+      cy.on('uncaught:exception', _err => {
         return false;
       });
 
@@ -153,8 +152,7 @@ describe('New trade', () => {
       Tab.instant();
 
       const trade = new Trade();
-      trade.sell('ETH')
-        .amount('5');
+      trade.sell('ETH').amount('5');
 
       trade.expectPriceImpact(`19.29%`, true);
 
@@ -182,8 +180,7 @@ describe('New trade', () => {
       Tab.instant();
 
       const trade = new Trade();
-      trade.sell('ETH')
-        .amount('5');
+      trade.sell('ETH').amount('5');
 
       trade.expectPriceImpact(`19.29%`, true);
 
@@ -216,8 +213,7 @@ describe('New trade', () => {
       Tab.instant();
 
       const trade = new Trade();
-      trade.sell('ETH')
-        .amount('5');
+      trade.sell('ETH').amount('5');
 
       trade.expectToReceive('1,130.00');
       trade.expectToPay('5');
@@ -234,14 +230,12 @@ describe('New trade', () => {
 
     it('should clear receive input if 0 is provided to deposit input', () => {
       const trade = new Trade();
-      trade.buy('DAI')
-        .amount('2');
+      trade.buy('DAI').amount('2');
 
       trade.expectToReceive('2');
       trade.expectToPay('0.007');
 
-      trade.sell('ETH')
-        .type('{selectall}0');
+      trade.sell('ETH').type('{selectall}0');
 
       trade.expectToReceive('');
       trade.expectToPay('0');
@@ -249,14 +243,12 @@ describe('New trade', () => {
 
     it('should clear deposit input if 0 is provided to receive input', () => {
       const trade = new Trade();
-      trade.sell('ETH')
-        .amount('1');
+      trade.sell('ETH').amount('1');
 
       trade.expectToReceive('280.00');
       trade.expectToPay('1');
 
-      trade.buy('DAI')
-        .type('{selectall}0');
+      trade.buy('DAI').type('{selectall}0');
 
       trade.expectToReceive('0');
       trade.expectToPay('');
@@ -264,7 +256,6 @@ describe('New trade', () => {
   });
 
   context('with not connected wallet', () => {
-
     beforeEach(() => {
       cypressVisitWithWeb3();
       Tab.instant();

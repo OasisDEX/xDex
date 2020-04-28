@@ -18,13 +18,9 @@ export function loadablifyLight<T>(observable: Observable<T>): Observable<Loadab
     startWith({ status: 'loading' } as Loadable<T>),
     catchError((error, source) => {
       console.log(error);
-      return concat(
-        of({ error, status: 'error' }),
-        onEveryBlock$.pipe(skip(1), first()),
-        source,
-      );
-    })
+      return concat(of({ error, status: 'error' }), onEveryBlock$.pipe(skip(1), first()), source);
+    }),
   );
 }
 
-export type LoadableWithTradingPair<T> = Loadable<T> & {tradingPair: TradingPair};
+export type LoadableWithTradingPair<T> = Loadable<T> & { tradingPair: TradingPair };

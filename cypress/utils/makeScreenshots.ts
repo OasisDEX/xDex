@@ -12,7 +12,7 @@ const commonScreenshotOptions = { capture: 'fullPage' };
 
 export function makeScreenshots(
   name: string,
-  viewports: string[] = ['macbook-15', 'iphone-6+', 'iphone-6', 'iphone-5']
+  viewports: string[] = ['macbook-15', 'iphone-6+', 'iphone-6', 'iphone-5'],
 ): void {
   cy.get('html > head').then(e => e.append(blackoutStyle));
 
@@ -22,16 +22,20 @@ export function makeScreenshots(
   } else {
     // see: https://docs.cypress.io/api/commands/viewport.html#Argumentsvalues
 
-    cy.get('body')
-      .then(e => e.append('<textarea style="position: absolute; top: 0; opacity: 0" />'));
+    cy.get('body').then(e => e.append('<textarea style="position: absolute; top: 0; opacity: 0" />'));
     for (const viewport of viewports) {
       cy.viewport(viewport as any);
-      cy.get('textarea').last().focus().blur();
+      cy.get('textarea')
+        .last()
+        .focus()
+        .blur();
       // tslint:disable-next-line:max-line-length
       cy.wait(100); // this is needed to give some type to browser to redraw after viewport changing :shrug:
       cy.screenshot(`${name}-${normalizeViewportName(viewport)}`, commonScreenshotOptions as any);
     }
-    cy.get('textarea').last().then(e => e.remove());
+    cy.get('textarea')
+      .last()
+      .then(e => e.remove());
   }
 
   cy.get('#cypress-blackout').then(e => e.remove());

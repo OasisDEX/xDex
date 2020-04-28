@@ -3,24 +3,21 @@ import * as React from 'react';
 
 import * as styles from './ErrorMessage.scss';
 
-type ErrorMessageProps =
-  React.HTMLAttributes<HTMLDivElement>
-  & {
-    // array of error messages, sorted from most important:
-    // the first one will be visible, others are shown on hover as list in given order
-    messages: React.ReactChild[],
-  };
+type ErrorMessageProps = React.HTMLAttributes<HTMLDivElement> & {
+  // array of error messages, sorted from most important:
+  // the first one will be visible, others are shown on hover as list in given order
+  messages: React.ReactChild[];
+};
 
 export function ErrorMessage(props: ErrorMessageProps) {
   const { className, messages, ...otherProps } = props;
   return (
-    <div className={classnames(styles.errors, className)}
-         title={messages
-           .reduce((title: string, msg: React.ReactChild) => `${title}\n${getInnerText(msg)}`, '')
-         }
-         {...otherProps}
+    <div
+      className={classnames(styles.errors, className)}
+      title={messages.reduce((title: string, msg: React.ReactChild) => `${title}\n${getInnerText(msg)}`, '')}
+      {...otherProps}
     >
-      { messages.length > 0 && messages[0] }
+      {messages.length > 0 && messages[0]}
     </div>
   );
 }
@@ -30,7 +27,7 @@ export function ErrorMessage(props: ErrorMessageProps) {
 function getInnerText(obj: any): string {
   let buf = '';
   if (obj) {
-    const type = typeof(obj);
+    const type = typeof obj;
     if (type === 'string' || type === 'number') {
       buf += obj;
     } else if (type === 'object') {
@@ -45,7 +42,7 @@ function getInnerText(obj: any): string {
       }
       if (children) {
         if (Array.isArray(children)) {
-          children.forEach((o) => {
+          children.forEach(o => {
             buf += getInnerText(o);
           });
         } else {

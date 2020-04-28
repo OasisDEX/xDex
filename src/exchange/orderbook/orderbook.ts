@@ -32,11 +32,10 @@ export interface Orderbook {
   buy: Offer[];
 }
 
-class InconsistentLoadingError extends Error {
-}
+class InconsistentLoadingError extends Error {}
 
 function parseOffers(sellToken: string, buyToken: string, type: OfferType, firstPage: boolean) {
-  return (data: any[][]): { lastOfferId: BigNumber, offers: Offer[] } => {
+  return (data: any[][]): { lastOfferId: BigNumber; offers: Offer[] } => {
     if (!firstPage && data[0][0] === '0') {
       throw new InconsistentLoadingError('empty orderbook page loaded');
     }
@@ -48,28 +47,29 @@ function parseOffers(sellToken: string, buyToken: string, type: OfferType, first
           const sellAmount = amountFromWei(new BigNumber(sellAmt), sellToken);
           const buyAmount = amountFromWei(new BigNumber(buyAmt), buyToken);
           return {
-            ...type === 'sell' ?
-              {
-                price: buyAmount.div(sellAmount),
-                baseAmount: sellAmount,
-                baseToken: sellToken,
-                quoteAmount: buyAmount,
-                quoteToken: buyToken,
-              } :
-              {
-                price: sellAmount.div(buyAmount),
-                baseAmount: buyAmount,
-                baseToken: buyToken,
-                quoteAmount: sellAmount,
-                quoteToken: sellToken,
-              }, ...{
-                type,
-                offerId: new BigNumber(offerId),
-                ownerId: ownerId as string,
-                timestamp: new Date(1000 * Number(timestamp)),
-              }
+            ...(type === 'sell'
+              ? {
+                  price: buyAmount.div(sellAmount),
+                  baseAmount: sellAmount,
+                  baseToken: sellToken,
+                  quoteAmount: buyAmount,
+                  quoteToken: buyToken,
+                }
+              : {
+                  price: sellAmount.div(buyAmount),
+                  baseAmount: buyAmount,
+                  baseToken: buyToken,
+                  quoteAmount: sellAmount,
+                  quoteToken: sellToken,
+                }),
+            ...{
+              type,
+              offerId: new BigNumber(offerId),
+              ownerId: ownerId as string,
+              timestamp: new Date(1000 * Number(timestamp)),
+            },
           } as Offer;
-        })
+        }),
     };
   };
 }
@@ -78,32 +78,37 @@ function loadOffersAllAtOnce(
   context: NetworkConfig,
   sellToken: string,
   buyToken: string,
-  type: OfferType
+  type: OfferType,
 ): Observable<Offer[]> {
-  return from(context.otcSupportMethods.contract.methods['getOffers(address,address,address)'](
-    context.otc.address,
-    context.tokens[sellToken].address,
-    context.tokens[buyToken].address,
-  ).call()).pipe(
+  return from(
+    context.otcSupportMethods.contract.methods['getOffers(address,address,address)'](
+      context.otc.address,
+      context.tokens[sellToken].address,
+      context.tokens[buyToken].address,
+    ).call(),
+  ).pipe(
     map(parseOffers(sellToken, buyToken, type, true)),
-    expand<{ lastOfferId: BigNumber; offers: Offer[] }>(({ lastOfferId }) => lastOfferId.isZero() ?
-      of() :
-      from(context.otcSupportMethods.contract.methods['getOffers(address,uint256)'](
-        context.otc.address,
-        lastOfferId.toString(),
-      ).call()).pipe(
-        map(parseOffers(sellToken, buyToken, type, false)),
-      )
+    expand<{ lastOfferId: BigNumber; offers: Offer[] }>(({ lastOfferId }) =>
+      lastOfferId.isZero()
+        ? of()
+        : from(
+            context.otcSupportMethods.contract.methods['getOffers(address,uint256)'](
+              context.otc.address,
+              lastOfferId.toString(),
+            ).call(),
+          ).pipe(map(parseOffers(sellToken, buyToken, type, false))),
     ),
-    retryWhen((errors) => errors.pipe(
-      switchMap((e) => {
-        if (e instanceof InconsistentLoadingError) {
-          console.log(e.message);
-          return errors;
-        }
-        throw e;
-      }),
-    )),
+    retryWhen(errors =>
+      errors.pipe(
+        switchMap(e => {
+          if (e instanceof InconsistentLoadingError) {
+            console.log(e.message);
+            return errors;
+          }
+          throw e;
+        }),
+      ),
+    ),
     reduce<{ offers: Offer[] }, Offer[]>((result, { offers }) => result.concat(offers), []),
     map(offers => uniqBy(offers, ({ offerId }) => offerId.toString())),
   );
@@ -112,34 +117,33 @@ function loadOffersAllAtOnce(
 export function loadOrderbook$(
   context$: Observable<NetworkConfig>,
   onEveryBlock$: Observable<number>,
-  tradingPair: TradingPair
+  tradingPair: TradingPair,
 ): Observable<Orderbook> {
   return combineLatest(context$, onEveryBlock$).pipe(
     switchMap(([context, blockNumber]) =>
       zip(
         loadOffersAllAtOnce(context, tradingPair.quote, tradingPair.base, OfferType.buy),
-        loadOffersAllAtOnce(context, tradingPair.base, tradingPair.quote, OfferType.sell)
+        loadOffersAllAtOnce(context, tradingPair.base, tradingPair.quote, OfferType.sell),
       ).pipe(
         map(hideDusts),
         map(([buy, sell]) => ({
           blockNumber,
           buy,
-          sell
+          sell,
         })),
-      )
+      ),
     ),
-    scan(
-      ({ buy: prevBuy, sell: prevSell }, current) => ({ prevBuy, prevSell, ...current }),
-      {
-        blockNumber: 0,
-        buy: [], sell: [],
-        prevBuy: [] as Offer[], prevSell: [] as Offer[]
-      }
-    ),
+    scan(({ buy: prevBuy, sell: prevSell }, current) => ({ prevBuy, prevSell, ...current }), {
+      blockNumber: 0,
+      buy: [],
+      sell: [],
+      prevBuy: [] as Offer[],
+      prevSell: [] as Offer[],
+    }),
     map(({ blockNumber, buy, sell, prevBuy, prevSell }) => ({
       blockNumber,
-      buy: buy.length > 0 || buy.length === 0 && prevBuy.length === 0 ? buy : prevBuy,
-      sell: sell.length > 0 || sell.length === 0 && prevSell.length === 0 ? sell : prevSell,
+      buy: buy.length > 0 || (buy.length === 0 && prevBuy.length === 0) ? buy : prevBuy,
+      sell: sell.length > 0 || (sell.length === 0 && prevSell.length === 0) ? sell : prevSell,
     })),
     map(({ blockNumber, buy, sell }) => {
       // console.log('corrected orderbook length for block:', blockNumber, buy.length, sell.length);
@@ -148,7 +152,7 @@ export function loadOrderbook$(
         tradingPair,
         blockNumber,
         buy,
-        sell
+        sell,
       });
     }),
     shareReplay(1),
@@ -157,15 +161,15 @@ export function loadOrderbook$(
 
 export function addSpread({ buy, sell, ...rest }: Orderbook) {
   if (!isEmpty(sell) && !isEmpty(buy)) {
-    const spread =  sell[0].price.minus(buy[0].price);
+    const spread = sell[0].price.minus(buy[0].price);
     const midPrice = sell[0].price.plus(buy[0].price).div(2);
-    const spreadPercentage =  spread.div(midPrice);
+    const spreadPercentage = spread.div(midPrice);
     return {
       buy,
       sell,
       ...rest,
       spread,
-      spreadPercentage
+      spreadPercentage,
     };
   }
   return {
@@ -182,7 +186,7 @@ function isDustOrder(o: Offer): boolean {
 }
 
 function hideDusts(dusts: Offer[][]): Offer[][] {
-  return dusts.map(offers => offers.filter((o) => !isDustOrder(o)));
+  return dusts.map(offers => offers.filter(o => !isDustOrder(o)));
 }
 
 // export function createPickableOrderBookFromMTSimpleFormState$(

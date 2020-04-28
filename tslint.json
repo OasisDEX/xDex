@@ -1,5 +1,5 @@
 {
-  "extends": ["typestrict", "tslint:recommended", "tslint-react", "tslint-config-prettier", "tslint-config-airbnb"],
+  "extends": ["typestrict", "tslint:recommended", "tslint-react", "tslint-config-airbnb", "tslint-config-prettier"],
   "linterOptions": {
     "exclude": ["config/**/*.js", "node_modules/**/*.ts"]
   },
@@ -17,6 +17,9 @@
     "ter-arrow-parens": false,
     "no-default-export": true,
     "no-var-requires": false,
-    "prefer-array-literal": [true, { "allow-type-parameters": true }]
+    "prefer-array-literal": [true, { "allow-type-parameters": true }],
+    "no-else-after-return": [true, "allow-else-if"],
+    "import-name": [false, "ignore-modules"]
+
   }
 }

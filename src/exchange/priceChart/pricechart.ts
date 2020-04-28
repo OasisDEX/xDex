@@ -18,7 +18,7 @@ export interface PriceChartDataPoint {
 
 export type GroupMode = 'byMonth' | 'byWeek' | 'byDay' | 'byHour';
 
-export const groupModeMapper: { [key in GroupMode]: {addUnit: string, format: string} } = {
+export const groupModeMapper: { [key in GroupMode]: { addUnit: string; format: string } } = {
   byMonth: { addUnit: 'month', format: 'YYYY MMM' },
   byWeek: { addUnit: 'weeks', format: 'MMM' },
   byDay: { addUnit: 'days', format: 'MMM DD' },
@@ -26,12 +26,16 @@ export const groupModeMapper: { [key in GroupMode]: {addUnit: string, format: st
 };
 
 export function loadAggregatedTrades(
-  interval: number, unit: IntervalUnit,
+  interval: number,
+  unit: IntervalUnit,
   context$$: Observable<NetworkConfig>,
   onEveryBlock$$: Observable<number>,
   { base, quote }: TradingPair,
 ): Observable<PriceChartDataPoint[]> {
-  const borderline = moment().subtract(interval, unit).startOf('day').toDate();
+  const borderline = moment()
+    .subtract(interval, unit)
+    .startOf('day')
+    .toDate();
   const params = [
     new Placeholder('timeUnit', 'String!', unit),
     new Placeholder('tzOffset', 'IntervalInput!', { minutes: -new Date().getTimezoneOffset() }),
@@ -45,15 +49,13 @@ export function loadAggregatedTrades(
     switchMap(([context]) =>
       vulcan0x(context.oasisDataService.url, 'priceChart', 'tradesAggregated', fields, {
         params,
-      })
+      }),
     ),
     map(aggrs => aggrs.map(parseAggregatedData)),
   );
 }
 
-function parseAggregatedData(
-  { date, open, close, min, max, volumeBase }: any
-): PriceChartDataPoint {
+function parseAggregatedData({ date, open, close, min, max, volumeBase }: any): PriceChartDataPoint {
   return {
     open: Number(open),
     close: Number(close),
