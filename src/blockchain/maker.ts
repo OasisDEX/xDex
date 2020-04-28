@@ -72,7 +72,7 @@ export async function disconnectAccount() {
     subprovider.resetAndReload();
     return;
   } else if (subprovider.isWalletConnect) {
-    await subprovider.getWalletConnector().killSession();
+    (await subprovider.getWalletConnector()).killSession();
   } else if (sessionStorage.getItem('lastConnectedWalletType') === WalletType.browser) {
     ['lastConnectedWalletType', 'lastConnectedWalletAddress'].forEach(x => sessionStorage.removeItem(x));
   }
