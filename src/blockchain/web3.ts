@@ -1,4 +1,4 @@
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, of } from 'rxjs';
 import { fromPromise } from 'rxjs/internal-compatibility';
 import { catchError, distinctUntilChanged, map, shareReplay, startWith, switchMap } from 'rxjs/operators';
 // tslint:disable:import-name
@@ -30,6 +30,7 @@ export enum WalletType {
 export enum Web3StatusCommandKind {
   connect = 'connect',
   connectReadOnly = 'connectReadOnly',
+  accountChanged = 'accountChanged',
   disconnect = 'disconnect',
 }
 
@@ -43,6 +44,9 @@ export type Web3StatusCommand =
       kind: Web3StatusCommandKind.connect;
       network: string;
       type: WalletType;
+    }
+  | {
+      kind: Web3StatusCommandKind.accountChanged;
     }
   | {
       kind: Web3StatusCommandKind.disconnect;
@@ -89,6 +93,10 @@ export const web3Status$: Observable<Web3Status> = web3StatusCommand.pipe(
         }),
         // TODO: error handling if any
         startWith(Web3Status.disconnecting),
+      );
+    } else if (command.kind === Web3StatusCommandKind.accountChanged) {
+      return of(Web3Status.ready).pipe(
+        startWith(Web3Status.connecting)
       );
     }
     throw new Error('Should not get here!');

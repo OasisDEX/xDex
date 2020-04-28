@@ -9,7 +9,7 @@ import { networksByName } from './config';
 // import trezorPlugin from '@makerdao/dai-plugin-trezor-web';
 
 import Web3 from 'web3';
-import { WalletType } from './web3';
+import { WalletType, executeWeb3StatusCommand, Web3StatusCommandKind } from './web3';
 
 let maker: any; // TODO: is there a type def for Maker object?
 export async function setupMaker(networkId: string): Promise<Web3> {
@@ -36,12 +36,15 @@ export async function setupMaker(networkId: string): Promise<Web3> {
 
   console.log('Initialized maker instance');
 
-  // maker.on('accounts/CHANGE', (e: any) => {
-  //   const { account } = e.payload;
-  //   sessionStorage.setItem('lastConnectedWalletType', account.type);
-  //   sessionStorage.setItem('lastConnectedWalletAddress', account.address.toLowerCase());
-  //   console.log(`Account changed to: ${account.address}`);
-  // });
+  maker.on('accounts/CHANGE', (e: any) => {
+    const { account } = e.payload;
+    console.log(`Account changed to: ${account.address}`);
+    sessionStorage.setItem('lastConnectedWalletType', account.type);
+    sessionStorage.setItem('lastConnectedWalletAddress', account.address.toLowerCase());
+    executeWeb3StatusCommand({
+      kind: Web3StatusCommandKind.accountChanged,
+    });
+  });
 
   return maker.service('web3')._web3 as Web3;
 }
@@ -73,9 +76,11 @@ export async function disconnectAccount() {
     return;
   } else if (subprovider.isWalletConnect) {
     (await subprovider.getWalletConnector()).killSession();
-  } else if (sessionStorage.getItem('lastConnectedWalletType') === WalletType.browser) {
-    ['lastConnectedWalletType', 'lastConnectedWalletAddress'].forEach(x => sessionStorage.removeItem(x));
   }
+
+  sessionStorage.removeItem('lastConnectedWalletType');
+  sessionStorage.removeItem('lastConnectedWalletAddress');
+
   // Remove this subprovider from the engine
   maker
     .service('accounts')
