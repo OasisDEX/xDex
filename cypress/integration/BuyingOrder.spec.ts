@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { cypressVisitWithWeb3, multiply } from '../utils/index';
 
 import { Balance } from '../pages/Balance';

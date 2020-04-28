@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { eth2weth } from '../blockchain/calls/instant';
 import { TradingPair } from '../exchange/tradingPair/tradingPair';
 

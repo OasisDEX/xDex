@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { setupFakeWeb3ForTesting } from '../../blockchain/web3';
 
 setupFakeWeb3ForTesting();

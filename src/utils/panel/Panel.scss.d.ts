@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 export const panel: string;
 export const panelWithFooterBordered: string;
 export const panelHeader: string;

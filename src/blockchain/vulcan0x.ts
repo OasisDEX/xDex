@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { flattenDepth, fromPairs, isEmpty, toPairs, uniqBy } from 'lodash';
 import { Observable, throwError } from 'rxjs';
 import { ajax } from 'rxjs/ajax';

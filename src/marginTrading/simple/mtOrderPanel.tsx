@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import * as React from 'react';
 import { Link } from 'react-router-dom';
 import { AssetKind, getToken, tradingPairs } from '../../blockchain/config';

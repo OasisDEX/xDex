@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { fromPairs, memoize, zip } from 'lodash';
 
 import { TradingPair } from '../exchange/tradingPair/tradingPair';

@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import * as React from 'react';
 
 export function inject<A, B extends {}>(Wrapped: React.ComponentType<A & B>, props: B): React.ComponentType<A> {

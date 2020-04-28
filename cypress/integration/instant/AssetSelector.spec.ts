@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { Tab } from '../../pages/Tab';
 import { instantForm, Trade, TradingSide } from '../../pages/Trade';
 import { WalletConnection } from '../../pages/WalletConnection';

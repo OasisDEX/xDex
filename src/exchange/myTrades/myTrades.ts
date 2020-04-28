@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { BigNumber } from 'bignumber.js';
 import { BehaviorSubject, combineLatest, noop, Observable } from 'rxjs';
 import { map, startWith, switchMap } from 'rxjs/operators';

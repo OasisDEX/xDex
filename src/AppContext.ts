@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { isEqual } from 'lodash';
 import { curry } from 'ramda';
 import * as React from 'react';

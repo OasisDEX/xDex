@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import * as React from 'react';
 import * as styles from '../../balances/mtBalancesView.scss';
 import { SvgImage } from '../../utils/icons/utils';

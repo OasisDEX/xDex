@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import * as d3 from 'd3';
 import { ScaleLinear, ScaleTime } from 'd3-scale';
 import { BaseType, Selection } from 'd3-selection';

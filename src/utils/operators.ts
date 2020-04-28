@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { Observable } from 'rxjs';
 
 export const withSingleFrom = <U>(other: Observable<U>) => <T>(source: Observable<T>) =>

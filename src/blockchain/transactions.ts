@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import * as _ from 'lodash';
 import { fromPairs } from 'ramda';
 import { bindNodeCallback, combineLatest, fromEvent, merge, Observable, of, Subject, timer } from 'rxjs';

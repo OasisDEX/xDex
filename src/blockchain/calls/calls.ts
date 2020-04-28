@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ObservableItem } from '../../utils/observableItem';

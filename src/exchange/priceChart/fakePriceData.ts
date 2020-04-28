@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import * as moment from 'moment';
 import { GroupMode, groupModeMapper, PriceChartDataPoint } from './pricechart';
 

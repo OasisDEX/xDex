@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 // tslint:disable:no-console
 import { BigNumber } from 'bignumber.js';
 import { bindNodeCallback, combineLatest, concat, forkJoin, from, interval, Observable, of } from 'rxjs';

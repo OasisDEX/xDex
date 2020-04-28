@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import classnames from 'classnames';
 import { isEqual } from 'lodash';
 import * as React from 'react';

@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import * as React from 'react';
 import OasisDexLogoSvg from '../header/OasisDexLogo.svg';
 import networkSvg from '../icons/network.svg';

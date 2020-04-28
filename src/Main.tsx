@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import createBrowserHistory from 'history/createBrowserHistory';
 import * as React from 'react';
 import { Redirect, Route, Router, Switch } from 'react-router';

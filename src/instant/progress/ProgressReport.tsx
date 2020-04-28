@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import * as React from 'react';
 import { TxStatus } from '../../blockchain/transactions';
 import { ProgressIcon } from '../../utils/icons/Icons';

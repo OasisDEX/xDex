@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import apolloBoost, { gql } from 'apollo-boost';
 import { BigNumber } from 'bignumber.js';
 import { from, Observable } from 'rxjs';

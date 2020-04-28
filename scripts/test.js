@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 'use strict';
 
 // Do this as the first thing so that any code reading it knows the right env.

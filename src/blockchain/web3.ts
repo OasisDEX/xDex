@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { from, Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
 // tslint:disable:import-name

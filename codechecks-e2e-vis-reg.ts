@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { join } from 'path';
 import { codechecks } from '@codechecks/client';
 // tslint:disable-next-line

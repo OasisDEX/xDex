@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { marketsOf } from './markets';
 
 test('should return all possible markets for a given token', () => {

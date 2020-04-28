@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 // const path = require("path");
 // const TSDocgenPlugin = require("react-docgen-typescript-webpack-plugin");
 

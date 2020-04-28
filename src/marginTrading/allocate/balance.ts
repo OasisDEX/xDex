@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 // from https://github.com/livnev/cdp-balance/blob/master/balance.py
 // tslint:disable:max-line-length
 import { BigNumber } from 'bignumber.js';

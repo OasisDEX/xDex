@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 const { join } = require("path")
 // ***********************************************************
 // This example plugins/index.js can be used to load plugins

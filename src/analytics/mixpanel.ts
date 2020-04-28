@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import * as mixpanel from 'mixpanel-browser';
 
 const env = process.env.NODE_ENV === 'production' ? 'prod' : 'test';

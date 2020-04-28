@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { storiesOf } from '@storybook/react';
 import * as React from 'react';
 import { ignoreDuringVisualRegression } from '../../storybookUtils';

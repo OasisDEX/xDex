@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { Allowance, ALLOWANCE_STATE } from '../pages/Allowance';
 import { Order } from '../pages/Order';
 import { Orderbook, OrderType } from '../pages/Orderbook';
