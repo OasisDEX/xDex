@@ -616,7 +616,7 @@ export class MTSimpleOrderBuyPanel extends React.Component<
 
     return (
       <div className={stylesOrder.orderPanel}>
-        <PanelHeader>Manage Your Leverage</PanelHeader>
+        <PanelHeader>Manage Your Position</PanelHeader>
         <LoadingIndicator size="lg" />
       </div>
     );

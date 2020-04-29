@@ -341,7 +341,7 @@ export const mtExport = {
   },
   kind: TxMetaKind.export,
   description: ({ token }: MTExportData) => (
-    <React.Fragment>Export {token} leveraged position to Oasis Borrow</React.Fragment>
+    <React.Fragment>Export {token} multiplied position to Oasis Borrow</React.Fragment>
   ),
 };
 

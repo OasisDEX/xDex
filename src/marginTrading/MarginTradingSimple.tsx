@@ -47,7 +47,7 @@ const Content = (props: any | { parentMatch: string }) => {
           content={
             <div style={bannerStyle}>
               You are currently accessing a <strong>beta version</strong> of Oasis Trade. This includes an early access
-              to Leverage Trading, which may contain bugs and usability issues. Please use this feature with caution.
+              to Multiply Trading, which may contain bugs and usability issues. Please use this feature with caution.
             </div>
           }
           theme="warning"
@@ -119,7 +119,7 @@ export class MarginTradingSimple extends React.Component<MarginTradingProps> {
               <Content {...props} tp={tp} parentMatch={matchUrl} setTradingPair={this.props.setTradingPair} />
             )}
           />
-          <Redirect push={true} from={'/leverage'} to={`/leverage/${tp.base}/${tp.quote}`} />
+          <Redirect push={true} from={'/multiply'} to={`/multiply/${tp.base}/${tp.quote}`} />
         </Switch>
       </div>
     );

@@ -49,7 +49,7 @@ export class MTBalancesView extends React.Component<Loadable<MTBalancesProps> & 
 
     return (
       <Panel className={styles.balancesPanel}>
-        <PanelHeader>Leverage Account</PanelHeader>
+        <PanelHeader>Multiply Account</PanelHeader>
         <WithLoadingIndicator loadable={this.props}>
           {(combinedBalances) =>
             combinedBalances.ma && combinedBalances.mta.state === MTAccountState.setup ? (
@@ -110,7 +110,7 @@ export class MTBalancesViewInternalImpl extends React.Component<MTBalancesProps 
         <thead>
           <tr>
             <th>Asset</th>
-            <th className={styles.amount}>Leverage</th>
+            <th className={styles.amount}>Multiple</th>
             <th className={styles.amount}>Equity (DAI)</th>
             <th className={styles.amount}>Mark Price (DAI)</th>
             <th className={styles.amount}>Liq. Price (DAI)</th>
@@ -145,7 +145,7 @@ export class MTBalancesViewInternalImpl extends React.Component<MTBalancesProps 
                     onClick={() =>
                       this.props.mta.state === MTAccountState.setup
                         ? this.props.selectMa(asset)
-                        : this.props.history.push(`leverage/${asset.name}/DAI`)
+                        : this.props.history.push(`multiply/${asset.name}/DAI`)
                     }
                     data-test-id={`${combinedBalance.name}-overview`}
                     key={combinedBalance.name}

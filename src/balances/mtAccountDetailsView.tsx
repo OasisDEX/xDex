@@ -38,7 +38,7 @@ export class MtAccountDetailsView extends React.Component<MTAccount> {
               <th style={{ width: '10%' }}>Current coll. ratio</th>
               <th style={{ width: '10%' }}>Min coll. ratio</th>
               <th style={{ width: '10%' }}>Safe coll. ratio</th>
-              <th style={{ width: '10%' }}>Max safe leverage</th>
+              <th style={{ width: '10%' }}>Max safe multiply</th>
               <th style={{ width: '15%' }}>Purchasing power</th>
             </tr>
           </thead>

@@ -46,13 +46,13 @@ import { MTSimpleOrderPanelProps } from './mtOrderPanel';
 
 /* tslint:disable */
 const collateralBalanceTooltip = (collateral: string) => `
-  This is the amount of ${collateral} you currently have locked within your Leverage Account.
+  This is the amount of ${collateral} you currently have locked within your Multiply Account.
   This ${collateral} is used as collateral against any debt you have, and may be sold 
   if the Mark Price falls below your Liquidation Price.
 `;
 
 const daiBalanceTooltip = `
-  This is the amount of Dai you have in your Leverage Account.
+  This is the amount of Dai you have in your Multiply Account.
   When negative, this represents your debt, and how much you owe.
   When positive, this is how much Dai is available for you to withdraw.
 `;
@@ -517,7 +517,7 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState & {
           leveragePost ? styles.visible : styles.hidden,
         )}
       >
-        <div className={styles.orderSummaryLabel}>Leverage</div>
+        <div className={styles.orderSummaryLabel}>Multiple</div>
         <div className={styles.orderSummaryValue}>
           {leverageDisplay.gt(zero) ? <>{formatPrecision(leverageDisplay, 1)}x</> : <span>-</span>}
           {leveragePost && (
@@ -855,7 +855,7 @@ export class MtSimpleOrderFormView extends React.Component<
         <PanelHeader>
           {this.props.view === ViewKind.instantTradeForm ? (
             <>
-              Manage your Leverage
+              Manage your Position
               {this.headerButtons()}
             </>
           ) : (
@@ -994,10 +994,10 @@ function orderFormMessageContent(msg: OrderFormMessage) {
     case OrderFormMessageKind.onboarding:
       return (
         <>
-          <h3>Deposit into Leverage Account</h3>
+          <h3>Deposit into Multiply Account</h3>
           Before opening a new position, deposit {msg.baseToken}
           <br />
-          or DAI into your Leverage Trading Account
+          or DAI into your Multiply Trading Account
         </>
       );
 

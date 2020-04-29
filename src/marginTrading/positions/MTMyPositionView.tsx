@@ -38,19 +38,19 @@ const markPriceTooltip = `
 `;
 
 const collateralBalanceTooltip = (collateral: string) => `
-  This is the amount of ${collateral} you currently have locked within your Leverage Account.
+  This is the amount of ${collateral} you currently have locked within your Multiply Account.
   This ${collateral} is used as collateral against any debt you have, and may be sold 
   if the Mark Price falls below your Liquidation Price.
 `;
 
 const daiBalanceTooltip = `
-  This is the amount of Dai you have in your Leverage Account.
+  This is the amount of Dai you have in your Multiply Account.
   When negative, this represents your debt, and how much you owe.
   When positive, this is how much Dai is available for you to withdraw.
 `;
 
 const equityTooltip = `
-  This represents the current value of your Leveraged Position.
+  This represents the current value of your Multiplied Position.
   It is calculated as the sum of your WETH and DAI balances.
   Another way to look at it, is if you were to sell your entire position,
   this would approximately be the value you could withdraw at the end.
@@ -146,7 +146,7 @@ export class MTMyPositionView extends React.Component<MTMyPositionViewProps & Mo
         <div className={styles.MTPositionPanel} data-test-id="summary">
           <div className={styles.MTPositionColumn}>
             <div className={styles.summaryRow}>
-              <div className={styles.summaryLabel}>Leverage</div>
+              <div className={styles.summaryLabel}>Multiple</div>
               <div className={styles.summaryValue}>
                 {leverage.gt(zero) ? <> Long - {formatPrecision(leverage, 1)}x</> : <span>-</span>}
               </div>
