@@ -96,6 +96,10 @@ export function formatPriceInstant(amount: BigNumber, token: string): string {
   return amount.toFormat(getToken(token).digitsInstant, BigNumber.ROUND_HALF_UP);
 }
 
+export function formatPriceInstantBN(amount: BigNumber, token: string): BigNumber {
+  return amount.decimalPlaces(getToken(token).digitsInstant, BigNumber.ROUND_HALF_UP);
+}
+
 export function formatPriceUp(amount: BigNumber, token: string): string {
   return amount.toFormat(getToken(token).digits, BigNumber.ROUND_UP);
 }
