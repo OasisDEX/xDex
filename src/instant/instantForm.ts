@@ -46,7 +46,7 @@ import {
   toUserChange,
   UserChange,
 } from '../utils/form';
-import { formatPriceInstant } from '../utils/formatters/format';
+import { formatPriceInstantBN } from '../utils/formatters/format';
 import { calculateTradePrice, daiOrSAI, getQuote } from '../utils/price';
 import { getSlippageLimit } from '../utils/slippage';
 import { switchSpread } from '../utils/switchSpread';
@@ -853,7 +853,7 @@ function calculatePriceAndImpact(state: InstantFormState): InstantFormState {
     ...state,
     quotation,
     priceImpact,
-    price: price ? new BigNumber(formatPriceInstant(price, formatToken)) : undefined,
+    price: price ? formatPriceInstantBN(price, formatToken) : undefined,
   };
 }
 
