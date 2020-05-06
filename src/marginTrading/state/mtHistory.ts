@@ -1,12 +1,16 @@
-import apolloBoost, { gql } from 'apollo-boost'
-import { BigNumber } from 'bignumber.js'
-import { from, Observable } from 'rxjs'
-import { map } from 'rxjs/operators'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
 
-import { NetworkConfig } from '../../blockchain/config'
-import { MTHistoryEvent } from './mtAccount'
+import apolloBoost, { gql } from 'apollo-boost';
+import { BigNumber } from 'bignumber.js';
+import { from, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
-export type RawMTHistoryEvent = Exclude<MTHistoryEvent, 'dAmount' | 'dDAIAmount'>
+import { NetworkConfig } from '../../blockchain/config';
+import { MTHistoryEvent } from './mtAccount';
+
+export type RawMTHistoryEvent = Exclude<MTHistoryEvent, 'dAmount' | 'dDAIAmount'>;
 
 export function createRawMTHistoryFromCache(
   proxy: string,
@@ -15,7 +19,7 @@ export function createRawMTHistoryFromCache(
 ): Observable<RawMTHistoryEvent[]> {
   const client = new apolloBoost({
     uri: context.oasisDataService.url,
-  })
+  });
 
   const q = gql`
     query allLeveragedEvents($token: String, $proxy: String) {
@@ -39,13 +43,13 @@ export function createRawMTHistoryFromCache(
         }
       }
     }
-  `
+  `;
 
   const variables = {
     // devMode: config.devMode,
     proxy: proxy.toLowerCase(),
     token: context.mcd.ilks[token],
-  }
+  };
 
   return from(client.query({ variables, query: q })).pipe(
     map((result: any) =>
@@ -86,5 +90,5 @@ export function createRawMTHistoryFromCache(
         }),
       ),
     ),
-  )
+  );
 }

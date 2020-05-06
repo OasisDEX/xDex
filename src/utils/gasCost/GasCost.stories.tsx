@@ -1,14 +1,18 @@
-import { storiesOf } from '@storybook/react'
-import { BigNumber } from 'bignumber.js'
-import * as React from 'react'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
 
-import { GasEstimationStatus } from '../form'
-import { GasCost } from './GasCost'
+import { storiesOf } from '@storybook/react';
+import { BigNumber } from 'bignumber.js';
+import * as React from 'react';
 
-const stories = storiesOf('Form inputs and buttons/Gas price', module)
+import { GasEstimationStatus } from '../form';
+import { GasCost } from './GasCost';
 
-const thStyle = { fontSize: 'smaller', color: '#aaa', padding: '0 10px' }
-const tdStyle = { padding: '5px 15px' }
+const stories = storiesOf('Form inputs and buttons/Gas price', module);
+
+const thStyle = { fontSize: 'smaller', color: '#aaa', padding: '0 10px' };
+const tdStyle = { padding: '5px 15px' };
 
 stories.add('Gas cost states', () => (
   <div>
@@ -57,4 +61,4 @@ stories.add('Gas cost states', () => (
       </tbody>
     </table>
   </div>
-))
+));

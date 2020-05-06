@@ -1,20 +1,24 @@
-import classnames from 'classnames'
-import * as React from 'react'
-import { Button } from '../utils/forms/Buttons'
-import * as panelStyling from '../utils/panel/Panel.scss'
-import * as styles from './Instant.scss'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
+import classnames from 'classnames';
+import * as React from 'react';
+import { Button } from '../utils/forms/Buttons';
+import * as panelStyling from '../utils/panel/Panel.scss';
+import * as styles from './Instant.scss';
 
 interface InstantFormProps {
-  heading: string | React.ReactNode
-  btnLabel?: string
-  btnAction?: () => void
-  btnDisabled?: boolean
-  btnDataTestId?: string
+  heading: string | React.ReactNode;
+  btnLabel?: string;
+  btnAction?: () => void;
+  btnDisabled?: boolean;
+  btnDataTestId?: string;
 }
 
 export class InstantFormWrapper extends React.Component<InstantFormProps> {
   public render() {
-    const { heading, btnLabel, btnAction, btnDisabled, btnDataTestId, children } = this.props
+    const { heading, btnLabel, btnAction, btnDisabled, btnDataTestId, children } = this.props;
 
     return (
       <section className={classnames(styles.panel, panelStyling.panel)} data-test-id="instant-form">
@@ -37,6 +41,6 @@ export class InstantFormWrapper extends React.Component<InstantFormProps> {
           </footer>
         )}
       </section>
-    )
+    );
   }
 }

@@ -1,39 +1,43 @@
-import * as React from 'react'
-import { Redirect, Route, RouteComponentProps, Switch } from 'react-router'
-import { map } from 'rxjs/operators'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
 
-import { theAppContext } from '../AppContext'
+import * as React from 'react';
+import { Redirect, Route, RouteComponentProps, Switch } from 'react-router';
+import { map } from 'rxjs/operators';
+
+import { theAppContext } from '../AppContext';
 // import { MyTradesTxRx } from '../exchange/myTrades/MyTradesView';
 // import { OrderbookPanelTxRx } from '../exchange/OrderbookPanel';
 // import { PriceChartWithLoadingTxRx } from '../exchange/priceChart/PriceChartWithLoading';
-import { currentTradingPair$, TradingPair } from '../exchange/tradingPair/tradingPair'
-import { connect } from '../utils/connect'
-import { FlexLayoutRow } from '../utils/layout/FlexLayoutRow'
-import { Panel } from '../utils/panel/Panel'
+import { currentTradingPair$, TradingPair } from '../exchange/tradingPair/tradingPair';
+import { connect } from '../utils/connect';
+import { FlexLayoutRow } from '../utils/layout/FlexLayoutRow';
+import { Panel } from '../utils/panel/Panel';
 
-import { Banner } from '../landingPage/Banner'
-import * as styles from './MarginTradingSimple.scss'
+import { Banner } from '../landingPage/Banner';
+import * as styles from './MarginTradingSimple.scss';
 
 export interface MarginTradingOwnProps {
-  setTradingPair: (tp: TradingPair) => void
-  tp: TradingPair
+  setTradingPair: (tp: TradingPair) => void;
+  tp: TradingPair;
 }
 
-export type MarginTradingProps = RouteComponentProps<any> & MarginTradingOwnProps
+export type MarginTradingProps = RouteComponentProps<any> & MarginTradingOwnProps;
 
 const bannerStyle: React.CSSProperties = {
   width: '85%',
   textAlign: 'center',
   margin: 'auto',
-}
+};
 
 const Content = (props: any | { parentMatch: string }) => {
   const {
     match: { params },
     parentMatch,
-  } = props
+  } = props;
   if (props.tp.base !== params.base || props.tp.quote !== params.quote) {
-    props.setTradingPair(params)
+    props.setTradingPair(params);
   }
 
   return (
@@ -96,15 +100,15 @@ const Content = (props: any | { parentMatch: string }) => {
         </theAppContext.Consumer>
       </FlexLayoutRow>
     </div>
-  )
-}
+  );
+};
 
 export class MarginTradingSimple extends React.Component<MarginTradingProps> {
   public render() {
     const {
       match: { url: matchUrl },
       tp,
-    } = this.props
+    } = this.props;
 
     return (
       <div>
@@ -118,7 +122,7 @@ export class MarginTradingSimple extends React.Component<MarginTradingProps> {
           <Redirect push={true} from={'/leverage'} to={`/leverage/${tp.base}/${tp.quote}`} />
         </Switch>
       </div>
-    )
+    );
   }
 }
 
@@ -130,4 +134,4 @@ export const MarginTradingSimpleTxRx = connect<MarginTradingOwnProps, RouteCompo
       setTradingPair: currentTradingPair$.next.bind(currentTradingPair$),
     })),
   ),
-)
+);

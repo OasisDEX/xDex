@@ -1,12 +1,16 @@
-import { combineLatest, Observable } from 'rxjs'
-import { map } from 'rxjs/operators'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
 
-import { account$ } from './network'
-import { walletStatus$ } from './wallet'
+import { combineLatest, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+
+import { account$ } from './network';
+import { walletStatus$ } from './wallet';
 
 export interface User {
-  account?: string
-  authorized?: boolean
+  account?: string;
+  authorized?: boolean;
 }
 
 export const user$: Observable<User> = combineLatest(account$, walletStatus$).pipe(
@@ -14,6 +18,6 @@ export const user$: Observable<User> = combineLatest(account$, walletStatus$).pi
     return {
       account: walletStatus === 'connected' ? account : undefined,
       authorized: undefined,
-    }
+    };
   }),
-)
+);

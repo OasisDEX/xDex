@@ -1,14 +1,18 @@
-import * as React from 'react'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
+import * as React from 'react';
 
 interface GateProps {
-  children: React.ReactElement<any>
-  isOpen: boolean
-  closed?: React.ReactElement<any>
+  children: React.ReactElement<any>;
+  isOpen: boolean;
+  closed?: React.ReactElement<any>;
 }
 
 export function Gate({ isOpen, closed, children }: GateProps) {
   if (!isOpen) {
-    return closed || <p>ooops!</p>
+    return closed || <p>ooops!</p>;
   }
-  return children
+  return children;
 }

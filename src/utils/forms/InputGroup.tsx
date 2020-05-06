@@ -1,17 +1,21 @@
-import * as React from 'react'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
 
-import classnames from 'classnames'
-import * as styles from './InputGroup.scss'
+import * as React from 'react';
+
+import classnames from 'classnames';
+import * as styles from './InputGroup.scss';
 
 type InputGroupProps = React.HTMLAttributes<HTMLDivElement> & {
-  color?: 'danger' | 'grey'
-  sizer?: 'sm' | 'md' | 'lg' | 'unsized'
-  disabled?: boolean
-  hasError?: boolean
-}
+  color?: 'danger' | 'grey';
+  sizer?: 'sm' | 'md' | 'lg' | 'unsized';
+  disabled?: boolean;
+  hasError?: boolean;
+};
 
 export const InputGroup = (props: InputGroupProps) => {
-  const { children, className, color, sizer, hasError, disabled, ...otherProps } = props
+  const { children, className, color, sizer, hasError, disabled, ...otherProps } = props;
   return (
     <div
       className={classnames(styles.inputGroup, className, styles[color || 'grey'], {
@@ -23,8 +27,8 @@ export const InputGroup = (props: InputGroupProps) => {
     >
       {children}
     </div>
-  )
-}
+  );
+};
 
 export const InputGroupAddon = ({
   children,
@@ -42,4 +46,4 @@ export const InputGroupAddon = ({
   >
     {children}
   </div>
-)
+);

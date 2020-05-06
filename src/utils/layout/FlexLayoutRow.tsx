@@ -1,5 +1,9 @@
-import * as React from 'react'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
 
-import * as styles from './FlexLayoutRow.scss'
+import * as React from 'react';
 
-export const FlexLayoutRow = ({ children }: { children: any }) => <div className={styles.flr}>{children}</div>
+import * as styles from './FlexLayoutRow.scss';
+
+export const FlexLayoutRow = ({ children }: { children: any }) => <div className={styles.flr}>{children}</div>;

@@ -1,28 +1,32 @@
-// tslint:disable:no-console
-import { equals } from 'ramda'
-import * as React from 'react'
-import { default as MediaQuery } from 'react-responsive'
-import { CSSTransition, TransitionGroup } from 'react-transition-group'
-import { combineLatest, Observable } from 'rxjs'
-import { distinctUntilKeyChanged, map, startWith } from 'rxjs/operators'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
 
-import * as mixpanel from 'mixpanel-browser'
-import { FormChangeKind, PickOfferChange } from '../../utils/form'
-import { FormatAmount, FormatPercent, FormatPriceOrder } from '../../utils/formatters/Formatters'
-import { Button } from '../../utils/forms/Buttons'
-import { SvgImage } from '../../utils/icons/utils'
-import { Loadable, LoadableStatus, loadablifyLight } from '../../utils/loadable'
-import { WithLoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator'
-import { PanelHeader } from '../../utils/panel/Panel'
-import { Scrollbar } from '../../utils/Scrollbar/Scrollbar'
-import { RowClickable, RowHighlighted, Table } from '../../utils/table/Table'
-import * as tableStyles from '../../utils/table/Table.scss'
-import { Currency, InfoLabel, Muted, SellBuySpan } from '../../utils/text/Text'
-import { OrderbookViewKind } from '../OrderbookPanel'
-import { TradingPair, tradingPairResolver } from '../tradingPair/tradingPair'
-import depthChartSvg from './depth-chart.svg'
-import { Offer, Orderbook } from './orderbook'
-import * as styles from './OrderbookView.scss'
+// tslint:disable:no-console
+import { equals } from 'ramda';
+import * as React from 'react';
+import { default as MediaQuery } from 'react-responsive';
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
+import { combineLatest, Observable } from 'rxjs';
+import { distinctUntilKeyChanged, map, startWith } from 'rxjs/operators';
+
+import { trackingEvents } from '../../analytics/analytics';
+import { FormChangeKind, PickOfferChange } from '../../utils/form';
+import { FormatAmount, FormatPercent, FormatPriceOrder } from '../../utils/formatters/Formatters';
+import { Button } from '../../utils/forms/Buttons';
+import { SvgImage } from '../../utils/icons/utils';
+import { Loadable, LoadableStatus, loadablifyLight } from '../../utils/loadable';
+import { WithLoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
+import { PanelHeader } from '../../utils/panel/Panel';
+import { Scrollbar } from '../../utils/Scrollbar/Scrollbar';
+import { RowClickable, RowHighlighted, Table } from '../../utils/table/Table';
+import * as tableStyles from '../../utils/table/Table.scss';
+import { Currency, InfoLabel, Muted, SellBuySpan } from '../../utils/text/Text';
+import { OrderbookViewKind } from '../OrderbookPanel';
+import { TradingPair, tradingPairResolver } from '../tradingPair/tradingPair';
+import depthChartSvg from './depth-chart.svg';
+import { Offer, Orderbook } from './orderbook';
+import * as styles from './OrderbookView.scss';
 
 export function createOrderbookForView(
   currentOrderBook$: Observable<Orderbook>,
@@ -39,71 +43,71 @@ export function createOrderbookForView(
       change,
       kindChange,
     })),
-  )
+  );
 }
 
 export interface Props extends Loadable<Orderbook> {
-  change: (ch: PickOfferChange) => void
-  kindChange: (kind: OrderbookViewKind) => void
-  tradingPair: TradingPair
+  change: (ch: PickOfferChange) => void;
+  kindChange: (kind: OrderbookViewKind) => void;
+  tradingPair: TradingPair;
 }
 
 export class OrderbookView extends React.Component<Props> {
-  private lastTradingPair?: TradingPair
-  private lastStatus?: LoadableStatus
-  private centerRow?: HTMLElement
-  private scrollbar?: Scrollbar
-  private autoScroll: boolean = false
-  private centerRowOffset: number = 0
+  private lastTradingPair?: TradingPair;
+  private lastStatus?: LoadableStatus;
+  private centerRow?: HTMLElement;
+  private scrollbar?: Scrollbar;
+  private autoScroll: boolean = false;
+  private centerRowOffset: number = 0;
 
   public center() {
-    this.autoScroll = true
+    this.autoScroll = true;
     if (this.scrollbar && this.centerRow) {
-      this.scrollbar.center(this.centerRow.offsetTop - this.centerRowOffset, this.centerRow.clientHeight)
+      this.scrollbar.center(this.centerRow.offsetTop - this.centerRowOffset, this.centerRow.clientHeight);
     }
   }
 
   public componentDidMount() {
-    this.center()
+    this.center();
   }
 
   public enter = () => {
-    this.center()
-  }
+    this.center();
+  };
 
   public exit = () => {
     setTimeout(() => {
-      this.center()
-    })
-  }
+      this.center();
+    });
+  };
 
   public scrolled = () => {
     if (!this.autoScroll && this.scrollbar && this.centerRow) {
-      const { scrollTop, clientHeight } = this.scrollbar.scrollState()
-      this.centerRowOffset = this.centerRow.offsetTop - scrollTop - (clientHeight - this.centerRow.clientHeight) / 2
+      const { scrollTop, clientHeight } = this.scrollbar.scrollState();
+      this.centerRowOffset = this.centerRow.offsetTop - scrollTop - (clientHeight - this.centerRow.clientHeight) / 2;
     }
-    this.autoScroll = false
-  }
+    this.autoScroll = false;
+  };
 
   public shouldComponentUpdate(nextProps: Props): boolean {
-    return !equals(nextProps, this.props)
+    return !equals(nextProps, this.props);
   }
 
   public render() {
     const tradingPairChanged =
-      this.lastTradingPair && tradingPairResolver(this.lastTradingPair) !== tradingPairResolver(this.props.tradingPair)
-    this.lastTradingPair = this.props.tradingPair
+      this.lastTradingPair && tradingPairResolver(this.lastTradingPair) !== tradingPairResolver(this.props.tradingPair);
+    this.lastTradingPair = this.props.tradingPair;
 
-    const justLoaded = (!this.lastStatus || this.lastStatus === 'loading') && this.props.status === 'loaded'
-    this.lastStatus = this.props.status
+    const justLoaded = (!this.lastStatus || this.lastStatus === 'loading') && this.props.status === 'loaded';
+    this.lastStatus = this.props.status;
 
-    const skipTransition = justLoaded || tradingPairChanged
+    const skipTransition = justLoaded || tradingPairChanged;
     if (skipTransition) {
       setTimeout(() => {
         this.forceUpdate(() => {
-          this.center()
-        })
-      })
+          this.center();
+        });
+      });
     }
 
     return (
@@ -114,26 +118,21 @@ export class OrderbookView extends React.Component<Props> {
             <MediaQuery maxWidth={992}>
               {(matches) => {
                 if (matches) {
-                  return <></>
+                  return <></>;
                 }
 
                 return (
                   <Button
                     className={styles.switchBtn}
                     onClick={() => {
-                      mixpanel.track('btn-click', {
-                        id: 'change-orderbook-view',
-                        product: 'oasis-trade',
-                        page: 'Market',
-                        section: 'orderbook',
-                      })
-                      this.changeChartListView()
+                      trackingEvents.changeOrderbookType();
+                      this.changeChartListView();
                     }}
                     data-test-id="orderbook-type-list"
                   >
                     <SvgImage image={depthChartSvg} />
                   </Button>
-                )
+                );
               }}
             </MediaQuery>
           </div>
@@ -163,11 +162,11 @@ export class OrderbookView extends React.Component<Props> {
                 this.props.change({
                   offer,
                   kind: FormChangeKind.pickOfferChange,
-                })
-              }
-            }
+                });
+              };
+            };
 
-            const { base, quote } = orderbook.tradingPair
+            const { base, quote } = orderbook.tradingPair;
             return (
               <>
                 {/*
@@ -230,11 +229,11 @@ export class OrderbookView extends React.Component<Props> {
                   </Table>
                 </Scrollbar>
               </>
-            )
+            );
           }}
         </WithLoadingIndicator>
       </>
-    )
+    );
   }
 
   public OfferRow({ offer, kind, onClick }: { offer: Offer; kind: string; onClick: (attr: any) => any }) {
@@ -252,12 +251,12 @@ export class OrderbookView extends React.Component<Props> {
           <FormatAmount value={offer.quoteAmount} token={offer.quoteToken} />
         </td>
       </RowClickable>
-    )
+    );
   }
 
   private changeChartListView = () => {
     if (this.props.kindChange) {
-      this.props.kindChange(OrderbookViewKind.depthChart)
+      this.props.kindChange(OrderbookViewKind.depthChart);
     }
-  }
+  };
 }

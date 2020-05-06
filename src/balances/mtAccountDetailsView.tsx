@@ -1,11 +1,15 @@
-import * as React from 'react'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
 
-import { MTAccount, MTAccountState } from '../marginTrading/state/mtAccount'
-import { FormatAmount, FormatCrypto, FormatFiat, FormatPercent } from '../utils/formatters/Formatters'
-import { Panel, PanelHeader } from '../utils/panel/Panel'
-import { Table } from '../utils/table/Table'
-import { Currency } from '../utils/text/Text'
-import * as styles from './mtAccountDetailsView.scss'
+import * as React from 'react';
+
+import { MTAccount, MTAccountState } from '../marginTrading/state/mtAccount';
+import { FormatAmount, FormatCrypto, FormatFiat, FormatPercent } from '../utils/formatters/Formatters';
+import { Panel, PanelHeader } from '../utils/panel/Panel';
+import { Table } from '../utils/table/Table';
+import { Currency } from '../utils/text/Text';
+import * as styles from './mtAccountDetailsView.scss';
 
 export class MtAccountDetailsView extends React.Component<MTAccount> {
   public render() {
@@ -15,7 +19,7 @@ export class MtAccountDetailsView extends React.Component<MTAccount> {
           <PanelHeader>MCD Margin Trading table</PanelHeader>
           <p>Sorry, you have no setup Margin Trading Account</p>
         </Panel>
-      )
+      );
     }
     return (
       <Panel>
@@ -112,6 +116,6 @@ export class MtAccountDetailsView extends React.Component<MTAccount> {
           </tbody>
         </Table>
       </Panel>
-    )
+    );
   }
 }

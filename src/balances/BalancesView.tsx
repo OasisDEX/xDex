@@ -1,9 +1,13 @@
-import * as React from 'react'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
 
-import { theAppContext } from '../AppContext'
-import { FlexLayoutRow } from '../utils/layout/FlexLayoutRow'
+import * as React from 'react';
 
-const { REACT_APP_TAX_EXPORTER_ENABLED, REACT_APP_LT_ENABLED } = process.env
+import { theAppContext } from '../AppContext';
+import { FlexLayoutRow } from '../utils/layout/FlexLayoutRow';
+
+const { REACT_APP_TAX_EXPORTER_ENABLED, REACT_APP_LT_ENABLED } = process.env;
 
 export class BalancesView extends React.Component<{}> {
   public render() {
@@ -29,6 +33,6 @@ export class BalancesView extends React.Component<{}> {
           )}
         </theAppContext.Consumer>
       </div>
-    )
+    );
   }
 }

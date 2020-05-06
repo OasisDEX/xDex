@@ -1,21 +1,25 @@
-import { storiesOf } from '@storybook/react'
-import * as React from 'react'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
 
-import { ignoreDuringVisualRegression } from '../../storybookUtils'
-import { Panel } from '../panel/Panel'
-import { InfoLabel } from '../text/Text'
-import { LoadingIndicator, WithLoadingIndicator, WithLoadingIndicatorInline } from './LoadingIndicator'
-import { ServerUnreachable, ServerUnreachableInline } from './ServerUnreachable'
+import { storiesOf } from '@storybook/react';
+import * as React from 'react';
 
-const stories = storiesOf('Loading indicator', module)
+import { ignoreDuringVisualRegression } from '../../storybookUtils';
+import { Panel } from '../panel/Panel';
+import { InfoLabel } from '../text/Text';
+import { LoadingIndicator, WithLoadingIndicator, WithLoadingIndicatorInline } from './LoadingIndicator';
+import { ServerUnreachable, ServerUnreachableInline } from './ServerUnreachable';
+
+const stories = storiesOf('Loading indicator', module);
 
 const StoryWithLoading = ({ loadable }: { loadable: any }) => {
   return (
     <Panel style={{ height: '150px', width: '300px', padding: '15px' }}>
       <WithLoadingIndicator loadable={loadable}>{(data: any) => <p>{data.text}</p>}</WithLoadingIndicator>
     </Panel>
-  )
-}
+  );
+};
 
 ignoreDuringVisualRegression(() => {
   stories.add('Loading indicator', () => (
@@ -40,10 +44,10 @@ ignoreDuringVisualRegression(() => {
         <LoadingIndicator light={true} />
       </Panel>
     </div>
-  ))
+  ));
 
   stories.add('WithLoadingIndicator component', () => {
-    const value = { text: 'It loaded successfully!' }
+    const value = { text: 'It loaded successfully!' };
     return (
       <div>
         <h1>Loading</h1>
@@ -55,11 +59,11 @@ ignoreDuringVisualRegression(() => {
         <h1>Error</h1>
         <StoryWithLoading loadable={{ value, status: 'error' }} />
       </div>
-    )
-  })
+    );
+  });
 
   stories.add('ServerUnreachable error', () => {
-    const value = { text: 'It loaded successfully!' }
+    const value = { text: 'It loaded successfully!' };
     return (
       <div>
         <h1>Error block</h1>
@@ -81,6 +85,6 @@ ignoreDuringVisualRegression(() => {
           </div>
         </Panel>
       </div>
-    )
-  })
-})
+    );
+  });
+});

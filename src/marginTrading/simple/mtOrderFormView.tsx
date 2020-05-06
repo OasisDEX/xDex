@@ -1,34 +1,38 @@
-import { BigNumber } from 'bignumber.js'
-import * as classnames from 'classnames'
-import * as mixpanel from 'mixpanel-browser'
-import * as React from 'react'
-import * as ReactDOM from 'react-dom'
-import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons'
-import { getToken } from '../../blockchain/config'
-import * as formStyles from '../../exchange/offerMake/OfferMakeForm.scss'
-import { OfferType } from '../../exchange/orderbook/orderbook'
-import { ApproximateInputValue } from '../../utils/Approximate'
-import { BigNumberInput, lessThanOrEqual } from '../../utils/bigNumberInput/BigNumberInput'
-import { connect } from '../../utils/connect'
-import { FormChangeKind, ProgressStage } from '../../utils/form'
-import { formatAmount, formatPrecision, formatPrice } from '../../utils/formatters/format'
-import { CryptoMoney, FormatPercent, Money } from '../../utils/formatters/Formatters'
-import { Button, ButtonGroup } from '../../utils/forms/Buttons'
-import { Checkbox } from '../../utils/forms/Checkbox'
-import { ErrorMessage } from '../../utils/forms/ErrorMessage'
-import { InputGroup, InputGroupAddon } from '../../utils/forms/InputGroup'
-import { Radio } from '../../utils/forms/Radio'
-import { SettingsIcon } from '../../utils/icons/Icons'
-import { Hr } from '../../utils/layout/LayoutHelpers'
-import { LoggedOut } from '../../utils/loadingIndicator/LoggedOut'
-import { ModalOpenerProps, ModalProps } from '../../utils/modal'
-import { PanelBody, PanelFooter, PanelHeader } from '../../utils/panel/Panel'
-import { Muted } from '../../utils/text/Text'
-import { WarningTooltip } from '../../utils/tooltip/Tooltip'
-import { minusOne, zero } from '../../utils/zero'
-import { findMarginableAsset, MarginableAsset, MTAccountState, UserActionKind } from '../state/mtAccount'
-import { MTTransferFormState } from '../transfer/mtTransferForm'
-import { MtTransferFormView } from '../transfer/mtTransferFormView'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
+import { BigNumber } from 'bignumber.js';
+import * as classnames from 'classnames';
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
+import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
+import { trackingEvents } from '../../analytics/analytics';
+import { getToken } from '../../blockchain/config';
+import * as formStyles from '../../exchange/offerMake/OfferMakeForm.scss';
+import { OfferType } from '../../exchange/orderbook/orderbook';
+import { ApproximateInputValue } from '../../utils/Approximate';
+import { BigNumberInput, lessThanOrEqual } from '../../utils/bigNumberInput/BigNumberInput';
+import { connect } from '../../utils/connect';
+import { FormChangeKind, ProgressStage } from '../../utils/form';
+import { formatAmount, formatPrecision, formatPrice } from '../../utils/formatters/format';
+import { CryptoMoney, FormatPercent, Money } from '../../utils/formatters/Formatters';
+import { Button, ButtonGroup } from '../../utils/forms/Buttons';
+import { Checkbox } from '../../utils/forms/Checkbox';
+import { ErrorMessage } from '../../utils/forms/ErrorMessage';
+import { InputGroup, InputGroupAddon } from '../../utils/forms/InputGroup';
+import { Radio } from '../../utils/forms/Radio';
+import { SettingsIcon } from '../../utils/icons/Icons';
+import { Hr } from '../../utils/layout/LayoutHelpers';
+import { LoggedOut } from '../../utils/loadingIndicator/LoggedOut';
+import { ModalOpenerProps, ModalProps } from '../../utils/modal';
+import { PanelBody, PanelFooter, PanelHeader } from '../../utils/panel/Panel';
+import { Muted } from '../../utils/text/Text';
+import { WarningTooltip } from '../../utils/tooltip/Tooltip';
+import { minusOne, zero } from '../../utils/zero';
+import { findMarginableAsset, MarginableAsset, MTAccountState, UserActionKind } from '../state/mtAccount';
+import { MTTransferFormState } from '../transfer/mtTransferForm';
+import { MtTransferFormView } from '../transfer/mtTransferFormView';
 import {
   Message,
   MessageKind,
@@ -36,27 +40,27 @@ import {
   OrderFormMessage,
   OrderFormMessageKind,
   ViewKind,
-} from './mtOrderForm'
-import * as styles from './mtOrderFormView.scss'
-import { MTSimpleOrderPanelProps } from './mtOrderPanel'
+} from './mtOrderForm';
+import * as styles from './mtOrderFormView.scss';
+import { MTSimpleOrderPanelProps } from './mtOrderPanel';
 
 /* tslint:disable */
 const collateralBalanceTooltip = (collateral: string) => `
   This is the amount of ${collateral} you currently have locked within your Leverage Account.
   This ${collateral} is used as collateral against any debt you have, and may be sold 
   if the Mark Price falls below your Liquidation Price.
-`
+`;
 
 const daiBalanceTooltip = `
   This is the amount of Dai you have in your Leverage Account.
   When negative, this represents your debt, and how much you owe.
   When positive, this is how much Dai is available for you to withdraw.
-`
+`;
 const slippageLimitTooltip = `
   This is the maximum amount that the final price you are buying or selling your collateral for
   can change between the point your order is placed and when it is settled.
   If the final price does exceed this value, your trade will be cancelled.
-`
+`;
 /* tslint:enable*/
 
 // const DevInfos = ({ value }: { value: MTSimpleFormState }) => {
@@ -153,49 +157,49 @@ const slippageLimitTooltip = `
 // };
 
 export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState & { close?: () => void }> {
-  private amountInput?: HTMLElement
-  private priceInput?: HTMLElement
-  private slippageLimitInput?: HTMLElement
+  private amountInput?: HTMLElement;
+  private priceInput?: HTMLElement;
+  private slippageLimitInput?: HTMLElement;
 
   public handleKindChange(kind: OfferType) {
     this.props.change({
       kind: FormChangeKind.kindChange,
       newKind: kind,
-    })
+    });
   }
 
   public handleTotalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/,/g, '')
+    const value = e.target.value.replace(/,/g, '');
     this.props.change({
       kind: FormChangeKind.totalFieldChange,
       value: value === '' ? undefined : new BigNumber(value),
-    })
-  }
+    });
+  };
 
   public handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/,/g, '')
+    const value = e.target.value.replace(/,/g, '');
     this.props.change({
       kind: FormChangeKind.amountFieldChange,
       value: value === '' ? undefined : new BigNumber(value),
-    })
-  }
+    });
+  };
 
   public handleSlippageLimitChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = new BigNumber(e.target.value.replace(/,/g, ''))
+    const value = new BigNumber(e.target.value.replace(/,/g, ''));
     if (!value.isNaN()) {
       this.props.change({
         kind: FormChangeKind.slippageLimitChange,
         value: value.div(100),
-      })
+      });
     }
-  }
+  };
 
-  public handleSetMaxTotal = () => this.handleSetMax(this.props.maxTotal, FormChangeKind.totalFieldChange)
+  public handleSetMaxTotal = () => this.handleSetMax(this.props.maxTotal, FormChangeKind.totalFieldChange);
 
-  public handleSetMaxAmount = () => this.handleSetMax(this.props.maxAmount, FormChangeKind.amountFieldChange)
+  public handleSetMaxAmount = () => this.handleSetMax(this.props.maxAmount, FormChangeKind.amountFieldChange);
 
   public handleProceed = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+    e.preventDefault();
     if (
       !this.props.mta ||
       this.props.mta.state === MTAccountState.notSetup ||
@@ -204,74 +208,74 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState & {
       !this.props.price ||
       !this.props.total
     ) {
-      return
+      return;
     }
-    const submitCall$ = this.props.submit(this.props)
+    const submitCall$ = this.props.submit(this.props);
     if (this.props.close) {
       submitCall$.subscribe((next: any) => {
         if (next.progress === ProgressStage.waitingForConfirmation) {
           if (this.props.close) {
-            this.props.close()
+            this.props.close();
           }
         }
-      })
+      });
     }
-  }
+  };
 
   public handleAmountFocus = () => {
     if (this.amountInput) {
-      this.amountInput.focus()
+      this.amountInput.focus();
     }
-  }
+  };
 
   public handlePriceFocus = () => {
     if (this.priceInput) {
-      this.priceInput.focus()
+      this.priceInput.focus();
     }
-  }
+  };
 
   public handleSlippageLimitFocus = () => {
     if (this.slippageLimitInput) {
-      this.slippageLimitInput.focus()
+      this.slippageLimitInput.focus();
     }
-  }
+  };
 
   public render() {
-    return this.props.view === ViewKind.instantTradeForm ? this.instantOrderForm() : this.advancedSettings()
+    return this.props.view === ViewKind.instantTradeForm ? this.instantOrderForm() : this.advancedSettings();
   }
 
   private handlecheckboxChange = () => {
     this.props.change({
       kind: FormChangeKind.checkboxChange,
       value: !this.props.riskComplianceCurrent,
-    })
-  }
+    });
+  };
 
   private handleSetMax = (
     value: BigNumber,
     kind: FormChangeKind.amountFieldChange | FormChangeKind.totalFieldChange,
   ) => {
-    this.props.change({ kind, value })
-  }
+    this.props.change({ kind, value });
+  };
 
   private switchToInstantOrderForm = () => {
-    this.props.change({ kind: FormChangeKind.viewChange, value: ViewKind.instantTradeForm })
-  }
+    this.props.change({ kind: FormChangeKind.viewChange, value: ViewKind.instantTradeForm });
+  };
 
   private switchToSettings = () => {
-    this.props.change({ kind: FormChangeKind.viewChange, value: ViewKind.settings })
-  }
+    this.props.change({ kind: FormChangeKind.viewChange, value: ViewKind.settings });
+  };
 
   private renderAccountInfo = () => {
-    const accountNotConnected = !this.props.account
-    const accountNotSetup = this.props.mta && this.props.mta.state === MTAccountState.notSetup
+    const accountNotConnected = !this.props.account;
+    const accountNotSetup = this.props.mta && this.props.mta.state === MTAccountState.notSetup;
 
     if (accountNotConnected) {
       return (
         <div className={styles.notSetupBorder} data-test-id="locked-form">
           <LoggedOut view="Balances" />
         </div>
-      )
+      );
     }
 
     if (accountNotSetup) {
@@ -279,7 +283,7 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState & {
         <div className={styles.notSetupBorder} data-test-id="locked-form">
           <Muted>Deploy your Proxy and enable {this.props.baseToken}</Muted>
         </div>
-      )
+      );
     }
 
     return (
@@ -292,8 +296,8 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState & {
         {this.price()}
         {this.liquidationPrice()}
       </div>
-    )
-  }
+    );
+  };
 
   private instantOrderForm = () => {
     return (
@@ -307,8 +311,8 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState & {
           {this.proceedButton()}
         </form>
       </>
-    )
-  }
+    );
+  };
 
   private advancedSettings = () => (
     <>
@@ -331,10 +335,10 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState & {
         Done
       </Button>
     </>
-  )
+  );
 
   private riskCompliance = () => {
-    const { riskComplianceAccepted, riskComplianceCurrent, progress, kind } = this.props
+    const { riskComplianceAccepted, riskComplianceCurrent, progress, kind } = this.props;
     return (
       !riskComplianceAccepted &&
       kind === OfferType.buy && (
@@ -356,13 +360,13 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState & {
           </Checkbox>
         </div>
       )
-    )
-  }
+    );
+  };
   private liquidationPrice() {
-    const liquidationPrice = this.props.liquidationPrice ? this.props.liquidationPrice : zero
-    const liquidationPricePost = this.props.liquidationPricePost ? this.props.liquidationPricePost : zero
+    const liquidationPrice = this.props.liquidationPrice ? this.props.liquidationPrice : zero;
+    const liquidationPricePost = this.props.liquidationPricePost ? this.props.liquidationPricePost : zero;
 
-    const baseTokenAsset = findMarginableAsset(this.props.baseToken, this.props.mta)
+    const baseTokenAsset = findMarginableAsset(this.props.baseToken, this.props.mta);
     return (
       <div
         className={classnames(
@@ -408,11 +412,11 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState & {
           )}
         </div>
       </div>
-    )
+    );
   }
 
   private price() {
-    const { price, priceImpact, quoteToken, messages } = this.props
+    const { price, priceImpact, quoteToken, messages } = this.props;
     return (
       <div
         className={classnames(
@@ -431,11 +435,11 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState & {
           )}
         </div>
       </div>
-    )
+    );
   }
 
   private slippageLimit() {
-    const { slippageLimit } = this.props
+    const { slippageLimit } = this.props;
     return (
       <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
         <div className={styles.orderSummaryLabel}>
@@ -447,11 +451,11 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState & {
           {slippageLimit && <FormatPercent value={slippageLimit} fallback="-" precision={2} multiply={true} />}
         </div>
       </div>
-    )
+    );
   }
 
   private slippageLimitForm() {
-    const slippageLimit = this.props.slippageLimit ? this.props.slippageLimit.times(100).valueOf() : ''
+    const slippageLimit = this.props.slippageLimit ? this.props.slippageLimit.times(100).valueOf() : '';
     return (
       <InputGroup sizer="lg" style={{ marginTop: '24px' }}>
         <InputGroupAddon className={formStyles.inputHeader}>Slippage limit</InputGroupAddon>
@@ -479,12 +483,12 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState & {
           </InputGroupAddon>
         </div>
       </InputGroup>
-    )
+    );
   }
 
   private stabilityFee() {
-    const { baseToken, mta } = this.props
-    const baseTokenAsset = findMarginableAsset(baseToken, mta)
+    const { baseToken, mta } = this.props;
+    const baseTokenAsset = findMarginableAsset(baseToken, mta);
 
     return (
       <div className={classnames(styles.orderSummaryRow, styles.orderSummaryRowDark)}>
@@ -497,14 +501,14 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState & {
           )}
         </div>
       </div>
-    )
+    );
   }
 
   private leverage() {
-    const { leverage, leveragePost } = this.props
-    const leverageDisplay = leverage && leverage.gt(zero) ? leverage : leveragePost ? zero : minusOne
+    const { leverage, leveragePost } = this.props;
+    const leverageDisplay = leverage && leverage.gt(zero) ? leverage : leveragePost ? zero : minusOne;
 
-    const leveragePostDisplay = leveragePost && leveragePost.gt(zero) ? leveragePost : minusOne
+    const leveragePostDisplay = leveragePost && leveragePost.gt(zero) ? leveragePost : minusOne;
     return (
       <div
         className={classnames(
@@ -524,7 +528,7 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState & {
           )}
         </div>
       </div>
-    )
+    );
   }
 
   private purchasingPower() {
@@ -562,12 +566,12 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState & {
           </>
         </div>
       </div>
-    ) : null
+    ) : null;
   }
 
   private accountBalance() {
-    const baseTokenAsset = findMarginableAsset(this.props.baseToken, this.props.mta)
-    const { balancePost, daiBalancePost, baseToken, quoteToken, kind } = this.props
+    const baseTokenAsset = findMarginableAsset(this.props.baseToken, this.props.mta);
+    const { balancePost, daiBalancePost, baseToken, quoteToken, kind } = this.props;
 
     return (
       <>
@@ -647,7 +651,7 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState & {
           </div>
         </div>
       </>
-    )
+    );
   }
 
   private amount() {
@@ -656,11 +660,11 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState & {
         {this.amountGroup()}
         <Error field="amount" messages={this.props.messages} tid="amount-error" />
       </div>
-    )
+    );
   }
 
   private total() {
-    const { total, quoteToken, maxTotal } = this.props
+    const { total, quoteToken, maxTotal } = this.props;
 
     return (
       <div>
@@ -700,36 +704,33 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState & {
         </InputGroup>
         <Error field="total" messages={this.props.messages} tid="total-error" />
       </div>
-    )
+    );
   }
 
   private proceedButton() {
-    const label = this.props.kind === 'buy' ? 'Place Buy Order' : 'Place Sell Order'
+    const { kind, total, readyToProceed, progress } = this.props;
+    const label = kind === 'buy' ? 'Place Buy Order' : 'Place Sell Order';
     return (
       <Button
         className={styles.confirmButton}
         data-test-id="place-order"
         type="submit"
         value="submit"
-        color={this.props.kind === OfferType.buy ? 'primary' : 'danger'}
-        disabled={!this.props.readyToProceed || !!this.props.progress}
+        color={kind === OfferType.buy ? 'primary' : 'danger'}
+        disabled={!readyToProceed || !!progress}
         onClick={() => {
-          mixpanel.track('btn-click', {
-            id: 'initiate-trade',
-            product: 'oasis-trade',
-            page: 'Leverage',
-            section: 'manage-leverage',
-            kind: this.props.kind,
-          })
+          if (total) {
+            trackingEvents.initiateTradeLeverage(kind, total.toNumber());
+          }
         }}
       >
         {label}
       </Button>
-    )
+    );
   }
 
   private amountGroup() {
-    const { amount, baseToken, maxAmount } = this.props
+    const { amount, baseToken, maxAmount } = this.props;
 
     return (
       <InputGroup>
@@ -765,44 +766,46 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState & {
           {baseToken}
         </InputGroupAddon>
       </InputGroup>
-    )
+    );
   }
 }
 
 export class MtSimpleOrderFormView extends React.Component<
   MTSimpleFormState & MTSimpleOrderPanelProps & ModalOpenerProps
 > {
-  private slippageLimitInput?: HTMLElement
+  private slippageLimitInput?: HTMLElement;
 
   public handleKindChange(kind: OfferType) {
     this.props.change({
       kind: FormChangeKind.kindChange,
       newKind: kind,
-    })
+    });
   }
 
   public handleSlippageLimitChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = new BigNumber(e.target.value.replace(/,/g, ''))
+    const value = new BigNumber(e.target.value.replace(/,/g, ''));
     if (!value.isNaN()) {
       this.props.change({
         kind: FormChangeKind.slippageLimitChange,
         value: value.div(100),
-      })
+      });
     }
-  }
+  };
 
   public handleSlippageLimitFocus = () => {
     if (this.slippageLimitInput) {
-      this.slippageLimitInput.focus()
+      this.slippageLimitInput.focus();
     }
-  }
+  };
 
   public CallForDeposit(message: OrderFormMessage, ma?: MarginableAsset) {
-    const transferWithOnboarding = message ? message.kind === OrderFormMessageKind.onboarding : false
+    const transferWithOnboarding = message ? message.kind === OrderFormMessageKind.onboarding : false;
 
     return (
       <div className={styles.onboardingPanel}>
-        {orderFormMessageContent(message)}
+        <div className={styles.onboardingParagraph}>
+          {orderFormMessageContent(message)}
+        </div>
         <Button
           size="md"
           color="primary"
@@ -823,7 +826,7 @@ export class MtSimpleOrderFormView extends React.Component<
           Deposit {ma && ma.name}
         </Button>
       </div>
-    )
+    );
   }
 
   public transfer(actionKind: UserActionKind, token: string, withOnboarding: boolean, ilk?: string) {
@@ -832,20 +835,20 @@ export class MtSimpleOrderFormView extends React.Component<
       token,
       ilk,
       withOnboarding,
-    })
-    const MTFundFormViewRxTx = connect<MTTransferFormState, ModalProps>(MtTransferFormView, fundForm$)
-    this.props.open(MTFundFormViewRxTx)
+    });
+    const MTFundFormViewRxTx = connect<MTTransferFormState, ModalProps>(MtTransferFormView, fundForm$);
+    this.props.open(MTFundFormViewRxTx);
   }
 
   public MainContent() {
-    const { mta, baseToken, orderFormMessage } = this.props
-    const ma = findMarginableAsset(baseToken, mta)
+    const { mta, baseToken, orderFormMessage } = this.props;
+    const ma = findMarginableAsset(baseToken, mta);
 
     if (orderFormMessage) {
-      return this.CallForDeposit(orderFormMessage, ma)
+      return this.CallForDeposit(orderFormMessage, ma);
     }
 
-    return <MtSimpleOrderFormBody {...this.props} />
+    return <MtSimpleOrderFormBody {...this.props} />;
   }
 
   public render() {
@@ -872,12 +875,12 @@ export class MtSimpleOrderFormView extends React.Component<
           </PanelFooter>
         )}
       </>
-    )
+    );
   }
 
   private switchToInstantOrderForm = () => {
-    this.props.change({ kind: FormChangeKind.viewChange, value: ViewKind.instantTradeForm })
-  }
+    this.props.change({ kind: FormChangeKind.viewChange, value: ViewKind.instantTradeForm });
+  };
 
   private advancedSettings = () => (
     <>
@@ -892,7 +895,7 @@ export class MtSimpleOrderFormView extends React.Component<
         {this.slippageLimitForm()}
       </div>
     </>
-  )
+  );
 
   private headerButtons() {
     return (
@@ -918,11 +921,11 @@ export class MtSimpleOrderFormView extends React.Component<
           </Button>
         </ButtonGroup>
       </>
-    )
+    );
   }
 
   private slippageLimitForm() {
-    const slippageLimit = this.props.slippageLimit ? this.props.slippageLimit.times(100).valueOf() : ''
+    const slippageLimit = this.props.slippageLimit ? this.props.slippageLimit.times(100).valueOf() : '';
     return (
       <InputGroup sizer="lg" style={{ marginTop: '24px' }}>
         <InputGroupAddon className={formStyles.inputHeader}>Slippage limit</InputGroupAddon>
@@ -950,7 +953,7 @@ export class MtSimpleOrderFormView extends React.Component<
           </InputGroupAddon>
         </div>
       </InputGroup>
-    )
+    );
   }
 }
 
@@ -958,34 +961,34 @@ const Error = ({ field, messages, tid }: { field: string; messages?: Message[]; 
   const myMsg = (messages || [])
     .filter((message: Message) => message.field === field)
     .sort((m1, m2) => m2.priority - m1.priority)
-    .map((msg) => messageContent(msg))
-  return <ErrorMessage messages={myMsg} style={{ height: '28px' }} data-test-id={tid} />
-}
+    .map((msg) => messageContent(msg));
+  return <ErrorMessage messages={myMsg} style={{ height: '28px' }} data-test-id={tid} />;
+};
 
 function messageContent(msg: Message) {
   switch (msg.kind) {
     case MessageKind.insufficientAmount:
-      return `Your ${msg.token} balance is too low to fund this order`
+      return `Your ${msg.token} balance is too low to fund this order`;
     case MessageKind.dustAmount:
-      return `Order below ${msg.amount} ${msg.token} limit`
+      return `Order below ${msg.amount} ${msg.token} limit`;
     case MessageKind.incredibleAmount:
-      return `Your order exceeds max amount for ${msg.token} token`
+      return `Your order exceeds max amount for ${msg.token} token`;
     case MessageKind.dustTotal:
-      return `Your order must be greater than 0`
+      return `Your order must be greater than 0`;
     case MessageKind.impossibleToPlan:
-      return `Can't plan operation: ${msg.message}`
+      return `Can't plan operation: ${msg.message}`;
     case MessageKind.impossibleCalculateTotal:
-      return `Can't calculate: ${msg.message}. Type smaller amount`
+      return `Can't calculate: ${msg.message}. Type smaller amount`;
     case MessageKind.minDebt:
-      return `Dai debt below ${msg.message} DAI limit`
+      return `Dai debt below ${msg.message} DAI limit`;
     case MessageKind.unsellable:
-      return `Your position is unsellable. ${msg.message}`
+      return `Your position is unsellable. ${msg.message}`;
   }
 }
 
 function orderFormMessageContent(msg: OrderFormMessage) {
   if (!msg) {
-    return null
+    return null;
   }
 
   switch (msg.kind) {
@@ -998,7 +1001,7 @@ function orderFormMessageContent(msg: OrderFormMessage) {
           <br />
           or DAI into your Leverage Trading Account
         </>
-      )
+      );
 
     case OrderFormMessageKind.collRatioUnsafe:
       return (
@@ -1008,7 +1011,7 @@ function orderFormMessageContent(msg: OrderFormMessage) {
           To sell your position, you must first
           <br /> deposit DAI or {msg.baseToken}.
         </div>
-      )
+      );
 
     case OrderFormMessageKind.liquidationImminent:
       return (
@@ -1022,7 +1025,7 @@ function orderFormMessageContent(msg: OrderFormMessage) {
             </>
           }
         </div>
-      )
+      );
 
     case OrderFormMessageKind.bitable:
       return (
@@ -1030,7 +1033,7 @@ function orderFormMessageContent(msg: OrderFormMessage) {
           Your {msg.baseToken} leveraged position is now at risk of being liquidated. You can still avoid auction by{' '}
           <br /> depositing {msg.baseToken} or DAI.
         </div>
-      )
+      );
     // tslint:enable
   }
 }

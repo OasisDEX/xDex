@@ -1,30 +1,34 @@
-import { BigNumber } from 'bignumber.js'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
 
-import { setupFakeWeb3ForTesting } from '../../blockchain/web3'
-setupFakeWeb3ForTesting()
+import { BigNumber } from 'bignumber.js';
 
-import { MTAccount, OperationKind } from '../state/mtAccount'
-import { getMTAccount } from '../state/mtTestUtils'
-import { dgx100, wethEmpty } from './planFixtures'
-import { planFund, planFundDai } from './planFund'
+import { setupFakeWeb3ForTesting } from '../../blockchain/web3';
+setupFakeWeb3ForTesting();
+
+import { MTAccount, OperationKind } from '../state/mtAccount';
+import { getMTAccount } from '../state/mtTestUtils';
+import { dgx100, wethEmpty } from './planFixtures';
+import { planFund, planFundDai } from './planFund';
 
 describe('plan fund', () => {
   describe('cash', () => {
     test('no cash', () => {
-      const mta = getMTAccount({ marginableAssets: [wethEmpty] })
+      const mta = getMTAccount({ marginableAssets: [wethEmpty] });
 
-      const plan = planFundDai(mta, 'WETH', new BigNumber('100'), [])
+      const plan = planFundDai(mta, 'WETH', new BigNumber('100'), []);
 
-      expect(plan).toEqual([{ amount: new BigNumber('100'), kind: OperationKind.fundDai, name: 'WETH' }])
-    })
+      expect(plan).toEqual([{ amount: new BigNumber('100'), kind: OperationKind.fundDai, name: 'WETH' }]);
+    });
 
     test('some dgx, no debt', () => {
-      const mta = getMTAccount({ marginableAssets: [dgx100] })
+      const mta = getMTAccount({ marginableAssets: [dgx100] });
 
-      const plan = planFundDai(mta, 'DGX', new BigNumber('100'), [])
+      const plan = planFundDai(mta, 'DGX', new BigNumber('100'), []);
 
-      expect(plan).toEqual([{ amount: new BigNumber('100'), kind: OperationKind.fundDai, name: 'DGX' }])
-    })
+      expect(plan).toEqual([{ amount: new BigNumber('100'), kind: OperationKind.fundDai, name: 'DGX' }]);
+    });
 
     // test('dgx with debt, little cash', () => {
     //
@@ -84,14 +88,14 @@ describe('plan fund', () => {
     //     { ddai: new BigNumber('-50'), kind: OperationKind.adjust, name: 'DGX' }
     //   ]);
     // });
-  })
+  });
   describe('marginable', () => {
     test('empty weth', () => {
-      const mta: MTAccount = getMTAccount({ marginableAssets: [wethEmpty] })
+      const mta: MTAccount = getMTAccount({ marginableAssets: [wethEmpty] });
 
-      const plan = planFund(mta, 'WETH', new BigNumber('25'), [])
+      const plan = planFund(mta, 'WETH', new BigNumber('25'), []);
 
-      expect(plan).toEqual([{ amount: new BigNumber('25'), kind: OperationKind.fundGem, name: 'WETH' }])
-    })
-  })
-})
+      expect(plan).toEqual([{ amount: new BigNumber('25'), kind: OperationKind.fundGem, name: 'WETH' }]);
+    });
+  });
+});

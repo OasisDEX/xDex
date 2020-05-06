@@ -1,10 +1,14 @@
-import { storiesOf } from '@storybook/react'
-import * as React from 'react'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
 
-import { Panel, PanelHeader } from '../panel/Panel'
-import { RowClickable, RowHighlighted, Table } from './Table'
+import { storiesOf } from '@storybook/react';
+import * as React from 'react';
 
-const stories = storiesOf('Table', module)
+import { Panel, PanelHeader } from '../panel/Panel';
+import { RowClickable, RowHighlighted, Table } from './Table';
+
+const stories = storiesOf('Table', module);
 
 stories.add('Table', () => (
   <Table>
@@ -58,7 +62,7 @@ stories.add('Table', () => (
       </RowHighlighted>
     </tbody>
   </Table>
-))
+));
 
 stories.add('Table in panel', () => (
   <Panel>
@@ -106,4 +110,4 @@ stories.add('Table in panel', () => (
       </tbody>
     </Table>
   </Panel>
-))
+));

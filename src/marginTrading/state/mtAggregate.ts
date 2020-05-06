@@ -1,7 +1,11 @@
-import { BigNumber } from 'bignumber.js'
-import { isEqual } from 'lodash'
-import { bindNodeCallback, combineLatest, forkJoin, from, Observable, of } from 'rxjs'
-import { first } from 'rxjs/internal/operators'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
+import { BigNumber } from 'bignumber.js';
+import { isEqual } from 'lodash';
+import { bindNodeCallback, combineLatest, forkJoin, from, Observable, of } from 'rxjs';
+import { first } from 'rxjs/internal/operators';
 import {
   catchError,
   concatAll,
@@ -13,24 +17,24 @@ import {
   shareReplay,
   startWith,
   switchMap,
-} from 'rxjs/operators'
-import { Contract } from 'web3-eth-contract'
-import * as dsProxy from '../../blockchain/abi/ds-proxy.abi.json'
-import { ReadCalls, readCalls$, ReadCalls$ } from '../../blockchain/calls/calls'
-import { AssetKind, getToken, NetworkConfig, tradingTokens } from '../../blockchain/config'
-import { MIN_ALLOWANCE } from '../../blockchain/network'
-import { amountFromWei, nullAddress, storageHexToBigNumber } from '../../blockchain/utils'
-import { web3 } from '../../blockchain/web3'
-import { Orderbook } from '../../exchange/orderbook/orderbook'
-import { TradingPair } from '../../exchange/tradingPair/tradingPair'
-import { zero } from '../../utils/zero'
-import { MTAccount } from './mtAccount'
-import { calculateMTAccount } from './mtCalculate'
-import { createRawMTHistoryFromCache, RawMTHistoryEvent } from './mtHistory'
-import { getMarginableCore } from './mtTestUtils'
+} from 'rxjs/operators';
+import { Contract } from 'web3-eth-contract';
+import * as dsProxy from '../../blockchain/abi/ds-proxy.abi.json';
+import { ReadCalls, readCalls$, ReadCalls$ } from '../../blockchain/calls/calls';
+import { AssetKind, getToken, NetworkConfig, tradingTokens } from '../../blockchain/config';
+import { MIN_ALLOWANCE } from '../../blockchain/network';
+import { amountFromWei, nullAddress, storageHexToBigNumber } from '../../blockchain/utils';
+import { web3 } from '../../blockchain/web3';
+import { Orderbook } from '../../exchange/orderbook/orderbook';
+import { TradingPair } from '../../exchange/tradingPair/tradingPair';
+import { zero } from '../../utils/zero';
+import { MTAccount } from './mtAccount';
+import { calculateMTAccount } from './mtCalculate';
+import { createRawMTHistoryFromCache, RawMTHistoryEvent } from './mtHistory';
+import { getMarginableCore } from './mtTestUtils';
 
 interface MTHistories {
-  [index: string]: RawMTHistoryEvent[]
+  [index: string]: RawMTHistoryEvent[];
 }
 
 function rawMTHistories$(context: NetworkConfig, proxy: string, assets: string[]): Observable<MTHistories> {
@@ -41,16 +45,16 @@ function rawMTHistories$(context: NetworkConfig, proxy: string, assets: string[]
   ).pipe(
     concatAll(),
     catchError((error) => {
-      console.log('error', error)
+      console.log('error', error);
       return of(
         assets.reduce((r, t) => {
-          r[t] = []
-          return r
+          r[t] = [];
+          return r;
         }, {} as MTHistories),
-      )
+      );
     }),
     reduce((a, e) => ({ ...a, ...e }), {}),
-  )
+  );
 }
 
 function osms$(context: NetworkConfig, assets: string[]) {
@@ -61,7 +65,7 @@ function osms$(context: NetworkConfig, assets: string[]) {
   ).pipe(
     concatAll(),
     reduce((a, e) => ({ ...a, ...e }), {}),
-  )
+  );
 }
 
 function osmsParams$(context: NetworkConfig, assets: string[]) {
@@ -70,9 +74,9 @@ function osmsParams$(context: NetworkConfig, assets: string[]) {
       return forkJoin(assets.map((token) => (context.mcd.osms[token] ? calls.osmParams({ token }) : of({})))).pipe(
         concatAll(),
         reduce((a, e) => ({ ...a, ...e }), {}),
-      )
+      );
     }),
-  )
+  );
 }
 
 function orderbooks$(assetNames: string[], loadOrderbook: (pair: TradingPair) => Observable<Orderbook>) {
@@ -81,12 +85,12 @@ function orderbooks$(assetNames: string[], loadOrderbook: (pair: TradingPair) =>
       return loadOrderbook({ base: token, quote: 'DAI' }).pipe(
         first(),
         map((obk) => ({ [obk.tradingPair.base]: obk })),
-      )
+      );
     }),
   ).pipe(
     concatAll(),
     reduce((a, e) => ({ ...a, ...e }), {}),
-  )
+  );
 }
 
 export function aggregateMTAccountState(
@@ -99,7 +103,7 @@ export function aggregateMTAccountState(
   const assetNames: string[] = tradingTokens
     .map((symbol: string) => getToken(symbol))
     .filter((t: any) => t.assetKind === AssetKind.marginable)
-    .map((t) => t.symbol)
+    .map((t) => t.symbol);
 
   return combineLatest(
     calls.mtBalance({ tokens: assetNames, proxyAddress: proxy.options.address }),
@@ -122,11 +126,11 @@ export function aggregateMTAccountState(
           zzz: (osmParams as any)[token] as BigNumber,
           rawHistory: rawHistories[token],
           liquidationPenalty: balanceResult[token].liquidationPenalty,
-        })
-      })
-      return calculateMTAccount(proxy, marginables, daiAllowance, orderbooks)
+        });
+      });
+      return calculateMTAccount(proxy, marginables, daiAllowance, orderbooks);
     }),
-  )
+  );
 }
 
 export function createProxyAllowance$(
@@ -145,7 +149,7 @@ export function createProxyAllowance$(
         : of(zero),
     ),
     map((x: BigNumber) => x.gte(MIN_ALLOWANCE)),
-  )
+  );
 }
 
 export function createProxyAddress$(
@@ -158,17 +162,17 @@ export function createProxyAddress$(
       return from(context.instantProxyRegistry.contract.methods.proxies(account).call()).pipe(
         mergeMap((proxyAddress: string) => {
           if (proxyAddress === nullAddress) {
-            return of(undefined)
+            return of(undefined);
           }
-          const proxy = new web3.eth.Contract(dsProxy as any, proxyAddress)
+          const proxy = new web3.eth.Contract(dsProxy as any, proxyAddress);
           return from(proxy.methods.owner().call()).pipe(
             mergeMap((ownerAddress: string) => (ownerAddress === account ? of(proxyAddress) : of(undefined))),
-          )
+          );
         }),
-      )
+      );
     }),
     distinctUntilChanged(),
-  )
+  );
 }
 
 export function createMta$(
@@ -178,35 +182,35 @@ export function createMta$(
   calls$: ReadCalls$,
   loadOrderbook: (pair: TradingPair) => Observable<Orderbook>,
 ): Observable<MTAccount> {
-  const proxyAddress$ = createProxyAddress$(context$, initializedAccount$, onEveryBlock$)
+  const proxyAddress$ = createProxyAddress$(context$, initializedAccount$, onEveryBlock$);
 
-  const daiAllowance$ = createProxyAllowance$(context$, initializedAccount$, onEveryBlock$, proxyAddress$, 'DAI')
+  const daiAllowance$ = createProxyAllowance$(context$, initializedAccount$, onEveryBlock$, proxyAddress$, 'DAI');
 
   return combineLatest(context$, calls$, proxyAddress$, daiAllowance$, onEveryBlock$).pipe(
     switchMap(([context, calls, proxyAddress, daiAllowance]) => {
       if (proxyAddress === undefined) {
-        proxyAddress = nullAddress
+        proxyAddress = nullAddress;
       }
 
-      const proxy = new web3.eth.Contract(dsProxy as any, proxyAddress)
-      return aggregateMTAccountState(context, proxy, calls, daiAllowance, loadOrderbook)
+      const proxy = new web3.eth.Contract(dsProxy as any, proxyAddress);
+      return aggregateMTAccountState(context, proxy, calls, daiAllowance, loadOrderbook);
     }),
     distinctUntilChanged(isEqual),
     shareReplay(1),
-  )
+  );
 }
 
 export function readOsm(context: NetworkConfig, token: string): Observable<{ next: number | undefined }> {
   // const slotCurrent = 3;
-  const slotNext = 4
+  const slotNext = 4;
   return combineLatest(bindNodeCallback(web3.eth.getStorageAt)(context.mcd.osms[token].address, slotNext)).pipe(
     map(([nxt]: [string, string]) => {
-      const next = storageHexToBigNumber(nxt)
+      const next = storageHexToBigNumber(nxt);
       return {
         // current: current[0].isZero() ? undefined : amountFromWei(current[1], token),
         next: next[0].isZero() ? undefined : amountFromWei(next[1], token),
-      }
+      };
     }),
     startWith({}),
-  )
+  );
 }

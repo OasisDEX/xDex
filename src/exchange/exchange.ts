@@ -1,18 +1,22 @@
-import { BigNumber } from 'bignumber.js'
-import * as moment from 'moment'
-import { combineLatest, forkJoin, Observable } from 'rxjs'
-import { concatAll, first, map, reduce, switchMap } from 'rxjs/operators'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
 
-import { tradingPairs } from '../blockchain/config'
-import { Trade } from './trades'
-import { TradingPair, tradingPairResolver } from './tradingPair/tradingPair'
+import { BigNumber } from 'bignumber.js';
+import * as moment from 'moment';
+import { combineLatest, forkJoin, Observable } from 'rxjs';
+import { concatAll, first, map, reduce, switchMap } from 'rxjs/operators';
+
+import { tradingPairs } from '../blockchain/config';
+import { Trade } from './trades';
+import { TradingPair, tradingPairResolver } from './tradingPair/tradingPair';
 
 export function createCurrentPrice$(tradeHistory$: Observable<Trade[]>): Observable<BigNumber | undefined> {
-  return tradeHistory$.pipe(map((trades) => trades[0] && trades[0].price))
+  return tradeHistory$.pipe(map((trades) => trades[0] && trades[0].price));
 }
 
 export function createYesterdayPrice$(tradeHistory$: Observable<Trade[]>): Observable<BigNumber | undefined> {
-  return tradeHistory$.pipe(map((trades) => trades[0] && trades[0].price))
+  return tradeHistory$.pipe(map((trades) => trades[0] && trades[0].price));
 }
 
 export function createYesterdayPriceChange$(
@@ -25,26 +29,26 @@ export function createYesterdayPriceChange$(
         ? currentPrice.minus(yesterdayPrice).dividedBy(yesterdayPrice).times(100)
         : undefined,
     ),
-  )
+  );
 }
 
 export function createDailyVolume$(tradeHistory$: Observable<Trade[]>): Observable<BigNumber> {
   return tradeHistory$.pipe(
     map((trades) => {
-      const borderline = moment().subtract(1, 'days').toDate()
-      const daily = trades.filter((t: Trade) => t.time >= borderline)
-      return daily.reduce((volume: BigNumber, trade: Trade) => volume.plus(trade.quoteAmount), new BigNumber(0))
+      const borderline = moment().subtract(1, 'days').toDate();
+      const daily = trades.filter((t: Trade) => t.time >= borderline);
+      return daily.reduce((volume: BigNumber, trade: Trade) => volume.plus(trade.quoteAmount), new BigNumber(0));
     }),
-  )
+  );
 }
 
 export interface MarketDetails {
-  tradingPair: TradingPair
-  price: BigNumber | undefined
-  priceDiff: BigNumber | undefined
+  tradingPair: TradingPair;
+  price: BigNumber | undefined;
+  priceDiff: BigNumber | undefined;
 }
 export interface MarketsDetails {
-  [key: string]: MarketDetails
+  [key: string]: MarketDetails;
 }
 
 export function createMarketDetails$(
@@ -73,5 +77,5 @@ export function createMarketDetails$(
         reduce((a, e) => ({ ...a, ...e })),
       ),
     ),
-  )
+  );
 }

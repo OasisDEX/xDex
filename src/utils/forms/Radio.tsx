@@ -1,20 +1,24 @@
-import * as React from 'react'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
 
-import classnames from 'classnames'
-import * as styles from './Radio.scss'
+import * as React from 'react';
+
+import classnames from 'classnames';
+import * as styles from './Radio.scss';
 
 type RadioProps = React.HTMLAttributes<HTMLInputElement> & {
   // sizer?: 'sm',
-  hasError?: boolean
-  name: string
-  value?: string | string[] | number
-  checked?: boolean
-  disabled?: boolean
-  dataTestId?: string
-}
+  hasError?: boolean;
+  name: string;
+  value?: string | string[] | number;
+  checked?: boolean;
+  disabled?: boolean;
+  dataTestId?: string;
+};
 
 export const Radio = (props: RadioProps) => {
-  const { children, className, hasError, dataTestId, ...otherProps } = props
+  const { children, className, hasError, dataTestId, ...otherProps } = props;
 
   return (
     <label
@@ -26,5 +30,5 @@ export const Radio = (props: RadioProps) => {
       <input type="radio" {...otherProps} />
       <span>{children}</span>
     </label>
-  )
-}
+  );
+};

@@ -1,17 +1,21 @@
-import classnames from 'classnames'
-import * as React from 'react'
-import { map } from 'rxjs/operators'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
 
-import { walletStatus$ } from './blockchain/wallet'
-import borrowSvg from './icons/navigation/borrow.svg'
-import saveSvg from './icons/navigation/save.svg'
-import tradeSvg from './icons/navigation/trade.svg'
-import * as styles from './Navigation.scss'
-import { connect } from './utils/connect'
-import { SvgImage } from './utils/icons/utils'
+import classnames from 'classnames';
+import * as React from 'react';
+import { map } from 'rxjs/operators';
+
+import { walletStatus$ } from './blockchain/wallet';
+import borrowSvg from './icons/navigation/borrow.svg';
+import saveSvg from './icons/navigation/save.svg';
+import tradeSvg from './icons/navigation/trade.svg';
+import * as styles from './Navigation.scss';
+import { connect } from './utils/connect';
+import { SvgImage } from './utils/icons/utils';
 
 const Navigation = ({ walletStatus, children }: any) => {
-  const connected = walletStatus === 'connected'
+  const connected = walletStatus === 'connected';
   return (
     <div className={styles.container}>
       <div className={styles.horizontal}>
@@ -22,10 +26,10 @@ const Navigation = ({ walletStatus, children }: any) => {
       </div>
       <div>{children}</div>
     </div>
-  )
-}
+  );
+};
 
-export const NavigationTxRx = connect(Navigation, walletStatus$.pipe(map((walletStatus) => ({ walletStatus }))))
+export const NavigationTxRx = connect(Navigation, walletStatus$.pipe(map((walletStatus) => ({ walletStatus }))));
 
 export const VerticalNav = ({ connected }: any) => {
   return (
@@ -43,8 +47,8 @@ export const VerticalNav = ({ connected }: any) => {
         Trade
       </a>
     </div>
-  )
-}
+  );
+};
 
 export const HorizontalNav = ({ connected }: any) => {
   return (
@@ -62,5 +66,5 @@ export const HorizontalNav = ({ connected }: any) => {
         Trade
       </a>
     </div>
-  )
-}
+  );
+};

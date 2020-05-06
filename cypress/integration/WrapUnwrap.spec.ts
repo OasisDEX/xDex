@@ -1,138 +1,142 @@
-import { Balance } from '../pages/Balance'
-import { Tab } from '../pages/Tab'
-import { WalletConnection } from '../pages/WalletConnection'
-import { unwrapping, wrapping } from '../pages/WrapUnwrap'
-import { cypressVisitWithWeb3 } from '../utils'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
+import { Balance } from '../pages/Balance';
+import { Tab } from '../pages/Tab';
+import { WalletConnection } from '../pages/WalletConnection';
+import { unwrapping, wrapping } from '../pages/WrapUnwrap';
+import { cypressVisitWithWeb3 } from '../utils';
 
 describe('Wrapping ETH', () => {
   beforeEach(() => {
-    cypressVisitWithWeb3()
-    WalletConnection.connect()
-    Tab.balances()
-  })
+    cypressVisitWithWeb3();
+    WalletConnection.connect();
+    Tab.balances();
+  });
 
   it('should succeed', () => {
-    Tab.balances()
+    Tab.balances();
 
-    Balance.of('ETH').shouldBe(/8999.../)
-    Balance.of('WETH').shouldBe(/1001.../)
+    Balance.of('ETH').shouldBe(/8999.../);
+    Balance.of('WETH').shouldBe(/1001.../);
 
-    wrapping('100').shouldProceed()
+    wrapping('100').shouldProceed();
 
-    Balance.of('ETH').shouldBe(/8899.../)
-    Balance.of('WETH').shouldBe(/1101.../)
-  })
+    Balance.of('ETH').shouldBe(/8899.../);
+    Balance.of('WETH').shouldBe(/1101.../);
+  });
 
   it('should not proceed when trying to wrap more than the balance', () => {
-    Tab.balances()
+    Tab.balances();
 
-    Balance.of('ETH').shouldBe(/8999.../)
-    Balance.of('WETH').shouldBe(/1001.../)
+    Balance.of('ETH').shouldBe(/8999.../);
+    Balance.of('WETH').shouldBe(/1001.../);
 
     // extract constants from the WrapUnwrapFromView
-    wrapping('10000').shouldFailWith(`Your ETH balance is too low`)
+    wrapping('10000').shouldFailWith(`Your ETH balance is too low`);
 
-    Balance.of('ETH').shouldBe(/8999.../)
-    Balance.of('WETH').shouldBe(/1001.../)
-  })
+    Balance.of('ETH').shouldBe(/8999.../);
+    Balance.of('WETH').shouldBe(/1001.../);
+  });
 
   it('should not proceed when trying to wrap 0', () => {
-    Tab.balances()
+    Tab.balances();
 
-    Balance.of('ETH').shouldBe(/8999.../)
-    Balance.of('WETH').shouldBe(/1001.../)
+    Balance.of('ETH').shouldBe(/8999.../);
+    Balance.of('WETH').shouldBe(/1001.../);
 
     // extract constants from the WrapUnwrapFromView
-    wrapping('0').shouldFailWith(`Amount is too low`)
+    wrapping('0').shouldFailWith(`Amount is too low`);
 
-    Balance.of('ETH').shouldBe(/8999.../)
-    Balance.of('WETH').shouldBe(/1001.../)
-  })
+    Balance.of('ETH').shouldBe(/8999.../);
+    Balance.of('WETH').shouldBe(/1001.../);
+  });
 
   // tslint:disable-next-line:max-line-length
   it('should not proceed when trying to wrap ETH and gas cost amount', () => {
-    const gasCost = 0.00092
-    const amountToWrap = 8999.96703 - gasCost + 0.00001
+    const gasCost = 0.00092;
+    const amountToWrap = 8999.96703 - gasCost + 0.00001;
 
-    Tab.balances()
+    Tab.balances();
 
-    Balance.of('ETH').shouldBe(/8999.96/)
-    Balance.of('WETH').shouldBe(/1001.../)
+    Balance.of('ETH').shouldBe(/8999.96/);
+    Balance.of('WETH').shouldBe(/1001.../);
 
-    wrapping(`${amountToWrap}`).shouldFailWith(`You will not be able to pay the gas cost`)
+    wrapping(`${amountToWrap}`).shouldFailWith(`You will not be able to pay the gas cost`);
 
-    Balance.of('ETH').shouldBe(/8999.96/)
-    Balance.of('WETH').shouldBe(/1001.../)
-  })
+    Balance.of('ETH').shouldBe(/8999.96/);
+    Balance.of('WETH').shouldBe(/1001.../);
+  });
 
   it('should not proceed when trying to wrap exact ETH balance', () => {
-    const amountToWrap = 8999.96703
-    Tab.balances()
+    const amountToWrap = 8999.96703;
+    Tab.balances();
 
-    Balance.of('ETH').shouldBe(/8999\.96/)
-    Balance.of('WETH').shouldBe(/1001.../)
+    Balance.of('ETH').shouldBe(/8999\.96/);
+    Balance.of('WETH').shouldBe(/1001.../);
 
-    wrapping(`${amountToWrap}`).shouldFailWith(`You will not be able to pay the gas cost`)
+    wrapping(`${amountToWrap}`).shouldFailWith(`You will not be able to pay the gas cost`);
 
-    Balance.of('ETH').shouldBe(/8999\.96/)
-    Balance.of('WETH').shouldBe(/1001.../)
-  })
-})
+    Balance.of('ETH').shouldBe(/8999\.96/);
+    Balance.of('WETH').shouldBe(/1001.../);
+  });
+});
 
 describe('Unwrapping ETH', () => {
   beforeEach(() => {
-    cypressVisitWithWeb3()
-    WalletConnection.connect()
-    Tab.balances()
-  })
+    cypressVisitWithWeb3();
+    WalletConnection.connect();
+    Tab.balances();
+  });
 
   it('should succeeed', () => {
-    Tab.balances()
+    Tab.balances();
 
-    Balance.of('ETH').shouldBe(/8999.../)
-    Balance.of('WETH').shouldBe(/1001.../)
+    Balance.of('ETH').shouldBe(/8999.../);
+    Balance.of('WETH').shouldBe(/1001.../);
 
-    unwrapping('100').shouldProceed()
+    unwrapping('100').shouldProceed();
 
-    Balance.of('ETH').shouldBe(/9099.../)
-    Balance.of('WETH').shouldBe(/901.../)
-  })
+    Balance.of('ETH').shouldBe(/9099.../);
+    Balance.of('WETH').shouldBe(/901.../);
+  });
 
   it('should succeed when unwrapping whole balance ', () => {
-    Tab.balances()
+    Tab.balances();
 
-    Balance.of('ETH').shouldBe(/8999.../)
-    Balance.of('WETH').shouldBe(/1001.../)
+    Balance.of('ETH').shouldBe(/8999.../);
+    Balance.of('WETH').shouldBe(/1001.../);
 
-    unwrapping('1001').shouldProceed()
+    unwrapping('1001').shouldProceed();
 
-    Balance.of('ETH').shouldBe(/10000.../)
-    Balance.of('WETH').shouldBe(/0.../)
-  })
+    Balance.of('ETH').shouldBe(/10000.../);
+    Balance.of('WETH').shouldBe(/0.../);
+  });
 
   it('should not proceed when trying to unwrap more than the balance', () => {
-    Tab.balances()
+    Tab.balances();
 
-    Balance.of('ETH').shouldBe(/8999.../)
-    Balance.of('WETH').shouldBe(/1001.../)
+    Balance.of('ETH').shouldBe(/8999.../);
+    Balance.of('WETH').shouldBe(/1001.../);
 
     // extract constants from the WrapUnwrapFromView
-    unwrapping('10000').shouldFailWith(`Your WETH balance is too low`)
+    unwrapping('10000').shouldFailWith(`Your WETH balance is too low`);
 
-    Balance.of('ETH').shouldBe(/8999.../)
-    Balance.of('WETH').shouldBe(/1001.../)
-  })
+    Balance.of('ETH').shouldBe(/8999.../);
+    Balance.of('WETH').shouldBe(/1001.../);
+  });
 
   it('should not proceed when trying to unwrap 0', () => {
-    Tab.balances()
+    Tab.balances();
 
-    Balance.of('ETH').shouldBe(/8999.../)
-    Balance.of('WETH').shouldBe(/1001.../)
+    Balance.of('ETH').shouldBe(/8999.../);
+    Balance.of('WETH').shouldBe(/1001.../);
 
     // extract constants from the WrapUnwrapFromView
-    unwrapping('0').shouldFailWith(`Amount is too low`)
+    unwrapping('0').shouldFailWith(`Amount is too low`);
 
-    Balance.of('ETH').shouldBe(/8999.../)
-    Balance.of('WETH').shouldBe(/1001.../)
-  })
-})
+    Balance.of('ETH').shouldBe(/8999.../);
+    Balance.of('WETH').shouldBe(/1001.../);
+  });
+});

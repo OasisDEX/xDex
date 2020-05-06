@@ -1,8 +1,12 @@
-import { storiesOf } from '@storybook/react'
-import * as React from 'react'
-import { InfoIcon, ProgressIcon } from './Icons'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
 
-const stories = storiesOf('Icons', module)
+import { storiesOf } from '@storybook/react';
+import * as React from 'react';
+import { InfoIcon, ProgressIcon } from './Icons';
+
+const stories = storiesOf('Icons', module);
 
 stories.add('Icons', () => (
   <div>
@@ -15,4 +19,4 @@ stories.add('Icons', () => (
     <h4>ProgressIcon Small</h4>
     <ProgressIcon size="sm" />
   </div>
-))
+));

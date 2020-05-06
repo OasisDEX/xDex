@@ -1,11 +1,15 @@
-import { BigNumber } from 'bignumber.js'
-import { flatten } from 'lodash'
-import { AssetKind } from '../../blockchain/config'
-import { impossible } from '../../utils/impossible'
-import { zero } from '../../utils/zero'
-import { EditableDebt } from '../allocate/mtOrderAllocateDebtForm'
-import { findAsset, MTAccount, Operation, OperationKind } from '../state/mtAccount'
-import { deltaToOps, Operations, orderDeltas } from './planUtils'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
+import { BigNumber } from 'bignumber.js';
+import { flatten } from 'lodash';
+import { AssetKind } from '../../blockchain/config';
+import { impossible } from '../../utils/impossible';
+import { zero } from '../../utils/zero';
+import { EditableDebt } from '../allocate/mtOrderAllocateDebtForm';
+import { findAsset, MTAccount, Operation, OperationKind } from '../state/mtAccount';
+import { deltaToOps, Operations, orderDeltas } from './planUtils';
 
 // export function prepareDrawRequest(
 //   ilk: string | undefined,
@@ -56,21 +60,21 @@ export function planDraw(
   amount: BigNumber,
   debts: Array<Required<EditableDebt>>,
 ): Operations {
-  const asset = findAsset(token, mta)
+  const asset = findAsset(token, mta);
 
   if (asset === undefined) {
-    return impossible('asset not setup')
+    return impossible('asset not setup');
   }
 
   if (asset.assetKind !== AssetKind.marginable) {
-    return impossible(`can't draw with ${token}`)
+    return impossible(`can't draw with ${token}`);
   }
 
   if (amount.gt(asset.balance)) {
-    return impossible(`not enough of ${token}`)
+    return impossible(`not enough of ${token}`);
   }
 
-  const drawOps: Operation[] = [{ amount, name: asset.name, kind: OperationKind.drawGem }]
+  const drawOps: Operation[] = [{ amount, name: asset.name, kind: OperationKind.drawGem }];
 
   return [
     ...drawOps,
@@ -79,7 +83,7 @@ export function planDraw(
         .filter((d) => !d.delta.eq(zero))
         .map(deltaToOps),
     ),
-  ]
+  ];
 }
 
 export function planDrawDai(
@@ -88,21 +92,21 @@ export function planDrawDai(
   amount: BigNumber,
   debts: Array<Required<EditableDebt>>,
 ): Operations {
-  const asset = findAsset(token, mta)
+  const asset = findAsset(token, mta);
 
   if (asset === undefined) {
-    return impossible('asset not setup')
+    return impossible('asset not setup');
   }
 
   if (asset.assetKind !== AssetKind.marginable) {
-    return impossible(`can't draw dai with ${token}`)
+    return impossible(`can't draw dai with ${token}`);
   }
 
   if (amount.gt(asset.dai)) {
-    return impossible(`not enough of DAI on ${token}`)
+    return impossible(`not enough of DAI on ${token}`);
   }
 
-  const drawOps: Operation[] = [{ amount, name: asset.name, kind: OperationKind.drawDai }]
+  const drawOps: Operation[] = [{ amount, name: asset.name, kind: OperationKind.drawDai }];
 
   return [
     ...drawOps,
@@ -111,5 +115,5 @@ export function planDrawDai(
         .filter((d) => !d.delta.eq(zero))
         .map(deltaToOps),
     ),
-  ]
+  ];
 }

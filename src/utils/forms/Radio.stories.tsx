@@ -1,8 +1,12 @@
-import { storiesOf } from '@storybook/react'
-import * as React from 'react'
-import { Radio } from './Radio'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
 
-const stories = storiesOf('Form inputs and buttons', module)
+import { storiesOf } from '@storybook/react';
+import * as React from 'react';
+import { Radio } from './Radio';
+
+const stories = storiesOf('Form inputs and buttons', module);
 
 stories.add('Radio', () => (
   <div>
@@ -22,4 +26,4 @@ stories.add('Radio', () => (
       Label e
     </Radio>
   </div>
-))
+));

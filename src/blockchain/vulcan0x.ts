@@ -1,14 +1,18 @@
-import { flattenDepth, fromPairs, isEmpty, toPairs, uniqBy } from 'lodash'
-import { Observable, throwError } from 'rxjs'
-import { ajax } from 'rxjs/ajax'
-import { catchError, map } from 'rxjs/operators'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
+import { flattenDepth, fromPairs, isEmpty, toPairs, uniqBy } from 'lodash';
+import { Observable, throwError } from 'rxjs';
+import { ajax } from 'rxjs/ajax';
+import { catchError, map } from 'rxjs/operators';
 
 function filterize(filter: any): string {
   switch (typeof filter) {
     case 'number':
-      return `${filter}`
+      return `${filter}`;
     case 'string':
-      return `"${filter}"`
+      return `"${filter}"`;
     case 'object':
       return filter instanceof Placeholder
         ? `$${filter.name}`
@@ -18,9 +22,9 @@ function filterize(filter: any): string {
             .map(([k, v]) => `${k}: ${filterize(v)}`)
             .join(', ') +
           '}'
-        : '[' + (filter as []).map((v: any) => filterize(v)).join(', ') + ']'
+        : '[' + (filter as []).map((v: any) => filterize(v)).join(', ') + ']';
     default:
-      throw new Error(`unknown filter type: ${typeof filter}`)
+      throw new Error(`unknown filter type: ${typeof filter}`);
   }
 }
 
@@ -37,20 +41,20 @@ function placeholders(object: any): Placeholder[] {
         : flattenDepth(
             object.map((o: any) => placeholders(o)),
             1,
-          )
+          );
     default:
-      return []
+      return [];
   }
 }
 
 export class Placeholder {
-  public name: string
-  public type: string
-  public value: any
+  public name: string;
+  public type: string;
+  public value: any;
   constructor(name: string, type: string, value: any) {
-    this.name = name
-    this.type = type
-    this.value = value
+    this.name = name;
+    this.type = type;
+    this.value = value;
   }
 }
 
@@ -60,7 +64,7 @@ const optionsMap = {
   dateFrom: 'dateArg',
   baseGem: 'baseGemArg',
   quoteGem: 'quoteGemArg',
-} as { [param: string]: string }
+} as { [param: string]: string };
 
 export function vulcan0x<R>(
   url: string,
@@ -74,11 +78,11 @@ export function vulcan0x<R>(
     limit,
     offset,
   }: {
-    params?: Placeholder[]
-    filter?: any
-    order?: string
-    limit?: number
-    offset?: number
+    params?: Placeholder[];
+    filter?: any;
+    order?: string;
+    limit?: number;
+    offset?: number;
   },
 ): Observable<R[]> {
   const options = toPairs({
@@ -89,14 +93,16 @@ export function vulcan0x<R>(
     ...(offset ? { offset: '$offset' } : {}),
   })
     .map(([k, v]) => `${k}: ${v}`)
-    .join('\n')
+    .join('\n');
   const variables = [
     ...(params ? params : []),
     ...uniqBy(placeholders(filter), 'name'),
     ...(limit ? [new Placeholder('limit', 'Int', limit)] : []),
     ...(offset ? [new Placeholder('offset', 'Int', offset)] : []),
-  ]
-  const queryParams = isEmpty(variables) ? '' : `(${variables.map(({ name, type }) => `$${name}: ${type}`).join(', ')})`
+  ];
+  const queryParams = isEmpty(variables)
+    ? ''
+    : `(${variables.map(({ name, type }) => `$${name}: ${type}`).join(', ')})`;
 
   // console.log('process.env.REACT_APP_GRAPHQL_DEVMODE', process.env.REACT_APP_GRAPHQL_DEVMODE);
 
@@ -122,14 +128,14 @@ export function vulcan0x<R>(
   }).pipe(
     map(({ response }) => {
       if (response.errors && response.errors[0]) {
-        console.log('Vulcan0x error', response.errors)
-        throw new Error(response.errors[0].message)
+        console.log('Vulcan0x error', response.errors);
+        throw new Error(response.errors[0].message);
       }
-      return (Object.values(response.data)[0] as { nodes: R[] }).nodes
+      return (Object.values(response.data)[0] as { nodes: R[] }).nodes;
     }),
     catchError((error) => {
-      console.error('Vulcan0x error...', error)
-      return throwError(error)
+      console.error('Vulcan0x error...', error);
+      return throwError(error);
     }),
-  )
+  );
 }

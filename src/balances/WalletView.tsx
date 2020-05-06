@@ -1,35 +1,39 @@
-import * as classnames from 'classnames'
-import * as React from 'react'
-import { Observable } from 'rxjs'
-import { getToken } from '../blockchain/config'
-import { TxState } from '../blockchain/transactions'
-import { connect } from '../utils/connect'
-import { formatCryptoBalance, formatFiatBalance } from '../utils/formatters/format'
-import { FormatAmount } from '../utils/formatters/Formatters'
-import { Button } from '../utils/forms/Buttons'
-import { Slider } from '../utils/forms/Slider'
-import { inject } from '../utils/inject'
-import { Loadable, loadablifyLight } from '../utils/loadable'
-import { WithLoadingIndicator } from '../utils/loadingIndicator/LoadingIndicator'
-import { ModalOpenerProps, ModalProps } from '../utils/modal'
-import { Panel, PanelHeader } from '../utils/panel/Panel'
-import { Table } from '../utils/table/Table'
-import { Currency } from '../utils/text/Text'
-import { minusOne, zero } from '../utils/zero'
-import { WrapUnwrapFormKind, WrapUnwrapFormState } from '../wrapUnwrap/wrapUnwrapForm'
-import { WrapUnwrapFormView } from '../wrapUnwrap/WrapUnwrapFormView'
-import { CombinedBalances } from './balances'
-import * as styles from './mtBalancesView.scss'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
+import * as classnames from 'classnames';
+import * as React from 'react';
+import { Observable } from 'rxjs';
+import { getToken } from '../blockchain/config';
+import { TxState } from '../blockchain/transactions';
+import { connect } from '../utils/connect';
+import { formatCryptoBalance, formatFiatBalance } from '../utils/formatters/format';
+import { FormatAmount } from '../utils/formatters/Formatters';
+import { Button } from '../utils/forms/Buttons';
+import { Slider } from '../utils/forms/Slider';
+import { inject } from '../utils/inject';
+import { Loadable, loadablifyLight } from '../utils/loadable';
+import { WithLoadingIndicator } from '../utils/loadingIndicator/LoadingIndicator';
+import { ModalOpenerProps, ModalProps } from '../utils/modal';
+import { Panel, PanelHeader } from '../utils/panel/Panel';
+import { Table } from '../utils/table/Table';
+import { Currency } from '../utils/text/Text';
+import { minusOne, zero } from '../utils/zero';
+import { WrapUnwrapFormKind, WrapUnwrapFormState } from '../wrapUnwrap/wrapUnwrapForm';
+import { WrapUnwrapFormView } from '../wrapUnwrap/WrapUnwrapFormView';
+import { CombinedBalances } from './balances';
+import * as styles from './mtBalancesView.scss';
 
 export type WalletViewProps = ModalOpenerProps & {
-  wrapUnwrapForm$: (formKind: WrapUnwrapFormKind) => Observable<WrapUnwrapFormState>
-  approveWallet: (token: string) => Observable<TxState>
-  disapproveWallet: (token: string) => Observable<TxState>
-}
+  wrapUnwrapForm$: (formKind: WrapUnwrapFormKind) => Observable<WrapUnwrapFormState>;
+  approveWallet: (token: string) => Observable<TxState>;
+  disapproveWallet: (token: string) => Observable<TxState>;
+};
 
 export class WalletView extends React.Component<Loadable<CombinedBalances> & WalletViewProps> {
   public render() {
-    const { status, value, error, ...walletViewProps } = this.props
+    const { status, value, error, ...walletViewProps } = this.props;
     return (
       <Panel className={styles.balancesPanel}>
         <PanelHeader>My Wallet</PanelHeader>
@@ -37,7 +41,7 @@ export class WalletView extends React.Component<Loadable<CombinedBalances> & Wal
           {(combinedBalances) => <WalletViewInternal {...{ ...combinedBalances, ...walletViewProps }} />}
         </WithLoadingIndicator>
       </Panel>
-    )
+    );
   }
 }
 
@@ -140,11 +144,11 @@ export class WalletViewInternal extends React.Component<CombinedBalances & Walle
                     </div>
                   </td>
                 </tr>
-              )
+              );
             })}
         </tbody>
       </Table>
-    )
+    );
   }
 
   private openWrapUnwrap(kind: WrapUnwrapFormKind) {
@@ -153,14 +157,14 @@ export class WalletViewInternal extends React.Component<CombinedBalances & Walle
         inject<Loadable<WrapUnwrapFormState> & ModalProps, { kind: WrapUnwrapFormKind }>(WrapUnwrapFormView, { kind }),
         loadablifyLight(this.props.wrapUnwrapForm$(kind)),
       ),
-    )
+    );
   }
 
   private wrap() {
-    this.openWrapUnwrap(WrapUnwrapFormKind.wrap)
+    this.openWrapUnwrap(WrapUnwrapFormKind.wrap);
   }
 
   private unwrap() {
-    this.openWrapUnwrap(WrapUnwrapFormKind.unwrap)
+    this.openWrapUnwrap(WrapUnwrapFormKind.unwrap);
   }
 }

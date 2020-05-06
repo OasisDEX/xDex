@@ -1,8 +1,12 @@
-import { storiesOf } from '@storybook/react'
-import * as React from 'react'
-import { Select } from './Select'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
 
-const stories = storiesOf('Form inputs and buttons/Select', module)
+import { storiesOf } from '@storybook/react';
+import * as React from 'react';
+import { Select } from './Select';
+
+const stories = storiesOf('Form inputs and buttons/Select', module);
 
 stories.add('Default select', () => (
   <div>
@@ -17,7 +21,7 @@ stories.add('Default select', () => (
       <option>Width second option</option>
     </Select>
   </div>
-))
+));
 
 stories.add('Bordered select', () => (
   <div>
@@ -32,7 +36,7 @@ stories.add('Bordered select', () => (
       <option>Width second option</option>
     </Select>
   </div>
-))
+));
 
 stories.add('Disabled select', () => (
   <div>
@@ -47,7 +51,7 @@ stories.add('Disabled select', () => (
       <option>Width second option</option>
     </Select>
   </div>
-))
+));
 
 stories.add('Sizes of select', () => (
   <div>
@@ -76,4 +80,4 @@ stories.add('Sizes of select', () => (
       <option>Width second option</option>
     </Select>
   </div>
-))
+));

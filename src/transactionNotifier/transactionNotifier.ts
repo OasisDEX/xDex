@@ -1,8 +1,12 @@
-import { combineLatest, Observable } from 'rxjs'
-import { map } from 'rxjs/operators'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
 
-import { NetworkConfig } from '../blockchain/config'
-import { TxState } from '../blockchain/transactions'
+import { combineLatest, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+
+import { NetworkConfig } from '../blockchain/config';
+import { TxState } from '../blockchain/transactions';
 
 export function createTransactionNotifier$(
   transactions$: Observable<TxState[]>,
@@ -11,5 +15,5 @@ export function createTransactionNotifier$(
 ) {
   return combineLatest(transactions$, context$, interval$).pipe(
     map(([transactions, { etherscan }]) => ({ transactions, etherscan })),
-  )
+  );
 }

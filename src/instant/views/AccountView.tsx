@@ -1,37 +1,41 @@
-import classnames from 'classnames'
-import * as React from 'react'
-import { TxStatus } from '../../blockchain/transactions'
-import accountSvg from '../../icons/account.svg'
-import warningSvg from '../../icons/warning.svg'
-import { Button } from '../../utils/forms/Buttons'
-import { BackIcon, ProgressIcon } from '../../utils/icons/Icons'
-import { SvgImage } from '../../utils/icons/utils'
-import { TopLeftCorner } from '../../utils/panel/TopRightCorner'
-import { WarningTooltip, WarningTooltipType } from '../../utils/tooltip/Tooltip'
-import * as instantStyles from '../Instant.scss'
-import { InstantFormChangeKind, InstantFormState, ViewKind } from '../instantForm'
-import { InstantFormWrapper } from '../InstantFormWrapper'
-import * as styles from './AccountView.scss'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
+import classnames from 'classnames';
+import * as React from 'react';
+import { TxStatus } from '../../blockchain/transactions';
+import accountSvg from '../../icons/account.svg';
+import warningSvg from '../../icons/warning.svg';
+import { Button } from '../../utils/forms/Buttons';
+import { BackIcon, ProgressIcon } from '../../utils/icons/Icons';
+import { SvgImage } from '../../utils/icons/utils';
+import { TopLeftCorner } from '../../utils/panel/TopRightCorner';
+import { WarningTooltip, WarningTooltipType } from '../../utils/tooltip/Tooltip';
+import * as instantStyles from '../Instant.scss';
+import { InstantFormChangeKind, InstantFormState, ViewKind } from '../instantForm';
+import { InstantFormWrapper } from '../InstantFormWrapper';
+import * as styles from './AccountView.scss';
 
 // tslint:disable
 const proxyToolTip = {
   id: 'proxy-tooltip',
   text: 'Proxy is a supporting contract owned by you that groups different actions as one Ethereum transaction.',
   iconColor: 'grey',
-} as WarningTooltipType
+} as WarningTooltipType;
 
-const activeProxyTooltip = { ...proxyToolTip, iconColor: 'green' as 'green' }
+const activeProxyTooltip = { ...proxyToolTip, iconColor: 'green' as 'green' };
 
 // tslint:enable
 
 const box = {
   display: 'inline-flex',
   alignItems: 'center',
-}
+};
 
 export class AccountView extends React.Component<InstantFormState> {
   public render() {
-    const { proxyAddress, progress } = this.props
+    const { proxyAddress, progress } = this.props;
 
     return (
       <InstantFormWrapper heading={'Account Overview'}>
@@ -48,11 +52,11 @@ export class AccountView extends React.Component<InstantFormState> {
             : this.onMissingProxy()}
         </div>
       </InstantFormWrapper>
-    )
+    );
   }
 
   private onHavingProxy = () => {
-    const allowedTokensCount = this.allowedTokens()
+    const allowedTokensCount = this.allowedTokens();
     return (
       <>
         <div className={classnames(styles.row, styles.proxyAvailable)}>
@@ -79,12 +83,12 @@ export class AccountView extends React.Component<InstantFormState> {
           </Button>
         </div>
       </>
-    )
-  }
+    );
+  };
 
   private onMissingProxy = () => {
-    const progress = this.props.progress
-    const isInProgress = progress && !progress.done && !this.props.proxyAddress
+    const progress = this.props.progress;
+    const isInProgress = progress && !progress.done && !this.props.proxyAddress;
     return (
       <>
         <div className={classnames(styles.row, styles.proxyMissing)}>
@@ -120,28 +124,28 @@ export class AccountView extends React.Component<InstantFormState> {
           </>
         </div>
       </>
-    )
-  }
+    );
+  };
 
   private switchToAllowances = () =>
     this.props.change({
       kind: InstantFormChangeKind.viewChange,
       view: ViewKind.allowances,
-    })
+    });
 
   private switchToNewTrade = () =>
     this.props.change({
       kind: InstantFormChangeKind.viewChange,
       view: ViewKind.new,
-    })
+    });
 
   private allowedTokens = () => {
     if (!this.props.allowances) {
-      return 0
+      return 0;
     }
 
     return Object.values(this.props.allowances).reduce((allowedTokensCount: number, isAllowed: boolean) => {
-      return isAllowed ? allowedTokensCount + 1 : allowedTokensCount
-    }, 0)
-  }
+      return isAllowed ? allowedTokensCount + 1 : allowedTokensCount;
+    }, 0);
+  };
 }

@@ -1,3 +1,7 @@
-import { Observable } from 'rxjs'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
 
-export type ObservableItem<T> = T extends Observable<infer U> ? U : never
+import { Observable } from 'rxjs';
+
+export type ObservableItem<T> = T extends Observable<infer U> ? U : never;

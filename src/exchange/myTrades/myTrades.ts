@@ -1,34 +1,38 @@
-import { BigNumber } from 'bignumber.js'
-import { BehaviorSubject, combineLatest, noop, Observable } from 'rxjs'
-import { map, startWith, switchMap } from 'rxjs/operators'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
 
-import { Calls$ } from '../../blockchain/calls/calls'
-import { CancelData } from '../../blockchain/calls/offerMake'
-import { NetworkConfig } from '../../blockchain/config'
-import { EtherscanConfig } from '../../blockchain/etherscan'
-import { Authorizable, authorizablify } from '../../utils/authorizable'
-import { Loadable, LoadableWithTradingPair } from '../../utils/loadable'
-import { Trade } from '../trades'
-import { TradingPair } from '../tradingPair/tradingPair'
-import { TradeWithStatus } from './openTrades'
+import { BigNumber } from 'bignumber.js';
+import { BehaviorSubject, combineLatest, noop, Observable } from 'rxjs';
+import { map, startWith, switchMap } from 'rxjs/operators';
+
+import { Calls$ } from '../../blockchain/calls/calls';
+import { CancelData } from '../../blockchain/calls/offerMake';
+import { NetworkConfig } from '../../blockchain/config';
+import { EtherscanConfig } from '../../blockchain/etherscan';
+import { Authorizable, authorizablify } from '../../utils/authorizable';
+import { Loadable, LoadableWithTradingPair } from '../../utils/loadable';
+import { Trade } from '../trades';
+import { TradingPair } from '../tradingPair/tradingPair';
+import { TradeWithStatus } from './openTrades';
 
 export enum MyTradesKind {
   open = 'open',
   closed = 'closed',
 }
 
-export type MyTradesKindKeys = keyof typeof MyTradesKind
+export type MyTradesKindKeys = keyof typeof MyTradesKind;
 
 export interface MyTradesPropsLoadable extends Authorizable<Loadable<TradeWithStatus[]>> {
-  kind: MyTradesKind
-  changeKind: (kind: MyTradesKindKeys) => void
-  cancelOffer: (args: CancelData) => any
-  tradingPair: TradingPair
-  etherscan: EtherscanConfig
+  kind: MyTradesKind;
+  changeKind: (kind: MyTradesKindKeys) => void;
+  cancelOffer: (args: CancelData) => any;
+  tradingPair: TradingPair;
+  etherscan: EtherscanConfig;
 }
 
 export function createMyTradesKind$(): BehaviorSubject<MyTradesKind> {
-  return new BehaviorSubject<MyTradesKind>(MyTradesKind.open)
+  return new BehaviorSubject<MyTradesKind>(MyTradesKind.open);
 }
 
 export function createMyCurrentTrades$(
@@ -38,7 +42,7 @@ export function createMyCurrentTrades$(
 ): Observable<Authorizable<LoadableWithTradingPair<TradeWithStatus[]>>> {
   return authorizablify(() =>
     myTradesKind$.pipe(switchMap((kind) => (kind === MyTradesKind.open ? myOpenTrades$ : myClosedTrades$))),
-  )
+  );
 }
 
 export function createMyTrades$(
@@ -64,5 +68,5 @@ export function createMyTrades$(
       etherscan: context.etherscan,
       changeKind: (k: MyTradesKindKeys) => myTradesKind$.next(MyTradesKind[k]),
     })),
-  )
+  );
 }

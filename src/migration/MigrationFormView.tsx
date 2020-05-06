@@ -1,51 +1,54 @@
-import * as classnames from 'classnames'
-import * as React from 'react'
-import * as ReactModal from 'react-modal'
-import { Observable } from 'rxjs'
-import { Button, CloseButton } from '../utils/forms/Buttons'
-import { Loadable } from '../utils/loadable'
-import { LoadingIndicator, WithLoadingIndicator } from '../utils/loadingIndicator/LoadingIndicator'
-import { ModalOpenerProps, ModalProps } from '../utils/modal'
-import { Panel, PanelBody, PanelFooter, PanelHeader } from '../utils/panel/Panel'
-import { TopRightCorner } from '../utils/panel/TopRightCorner'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
 
-import { ExchangeMigrationStatus, ExchangeMigrationTxKind } from './migration'
+import * as classnames from 'classnames';
+import * as React from 'react';
+import * as ReactModal from 'react-modal';
+import { Observable } from 'rxjs';
+import { Button, CloseButton } from '../utils/forms/Buttons';
+import { Loadable } from '../utils/loadable';
+import { LoadingIndicator, WithLoadingIndicator } from '../utils/loadingIndicator/LoadingIndicator';
+import { ModalOpenerProps, ModalProps } from '../utils/modal';
+import { Panel, PanelBody, PanelFooter, PanelHeader } from '../utils/panel/Panel';
+import { TopRightCorner } from '../utils/panel/TopRightCorner';
 
-import { BigNumber } from 'bignumber.js'
-import * as mixpanel from 'mixpanel-browser'
-import { default as MediaQuery } from 'react-responsive'
-import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons'
-import { getToken, isDAIEnabled } from '../blockchain/config'
-import { TradeStatus, TradeWithStatus } from '../exchange/myTrades/openTrades'
-import accountSvg from '../icons/account.svg'
-import doneSvg from '../icons/done.svg'
-import tickSvg from '../icons/tick.svg'
-import { TradeData } from '../instant/details/TradeData'
-import { TxStatusRow } from '../instant/details/TxStatusRow'
-import { ProgressReport, Report } from '../instant/progress/ProgressReport'
-import { BigNumberInput } from '../utils/bigNumberInput/BigNumberInput'
-import { connect } from '../utils/connect'
-import { AmountFieldChange, FormChangeKind } from '../utils/form'
-import { formatAmount } from '../utils/formatters/format'
-import { Money } from '../utils/formatters/Formatters'
-import { ErrorMessage } from '../utils/forms/ErrorMessage'
-import { InputGroup, InputGroupAddon } from '../utils/forms/InputGroup'
-import { SvgImage } from '../utils/icons/utils'
-import { Scrollbar } from '../utils/Scrollbar/Scrollbar'
-import { RowClickable, Table } from '../utils/table/Table'
-import { SellBuySpan } from '../utils/text/Text'
-import { WarningTooltipType } from '../utils/tooltip/Tooltip'
-import { zero } from '../utils/zero'
-import { CallForAction } from './CallForAction'
-import * as styles from './Migration.scss'
-import { Message, MessageKind, MigrationFormKind, MigrationFormState } from './migrationForm'
+import { ExchangeMigrationStatus, ExchangeMigrationTxKind } from './migration';
+
+import { BigNumber } from 'bignumber.js';
+import { default as MediaQuery } from 'react-responsive';
+import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
+import { getToken, isDAIEnabled } from '../blockchain/config';
+import { TradeStatus, TradeWithStatus } from '../exchange/myTrades/openTrades';
+import accountSvg from '../icons/account.svg';
+import doneSvg from '../icons/done.svg';
+import tickSvg from '../icons/tick.svg';
+import { TradeData } from '../instant/details/TradeData';
+import { TxStatusRow } from '../instant/details/TxStatusRow';
+import { ProgressReport, Report } from '../instant/progress/ProgressReport';
+import { BigNumberInput } from '../utils/bigNumberInput/BigNumberInput';
+import { connect } from '../utils/connect';
+import { AmountFieldChange, FormChangeKind } from '../utils/form';
+import { formatAmount } from '../utils/formatters/format';
+import { Money } from '../utils/formatters/Formatters';
+import { ErrorMessage } from '../utils/forms/ErrorMessage';
+import { InputGroup, InputGroupAddon } from '../utils/forms/InputGroup';
+import { SvgImage } from '../utils/icons/utils';
+import { Scrollbar } from '../utils/Scrollbar/Scrollbar';
+import { RowClickable, Table } from '../utils/table/Table';
+import { SellBuySpan } from '../utils/text/Text';
+import { WarningTooltipType } from '../utils/tooltip/Tooltip';
+import { zero } from '../utils/zero';
+import { CallForAction } from './CallForAction';
+import * as styles from './Migration.scss';
+import { Message, MessageKind, MigrationFormKind, MigrationFormState } from './migrationForm';
 
 export type MigrationButtonProps = Loadable<MigrationFormState> & {
-  label: string
-  migration$: Observable<MigrationFormState>
-  className?: string
-  tid?: string
-}
+  label: string;
+  migration$: Observable<MigrationFormState>;
+  className?: string;
+  tid?: string;
+};
 
 // TODO: Probably extract all Tooltip Definitions in a separate file.
 
@@ -54,22 +57,22 @@ const proxyTooltip = {
   id: 'proxy-tooltip',
   text: 'Proxy is a supporting contract owned by you that groups different actions as one Ethereum transaction.',
   iconColor: 'grey',
-} as WarningTooltipType
+} as WarningTooltipType;
 
 const allowanceTooltip = {
   id: 'allowance-tooltip',
   text: 'Enabling token trading allows your Proxy to take tokens from you and trade them on the exchange.',
   iconColor: 'grey',
-} as WarningTooltipType
+} as WarningTooltipType;
 
 const messageContent = (msg: Message) => {
   switch (msg.kind) {
     case MessageKind.amount2Big:
-      return <span> You don't have enough funds</span>
+      return <span> You don't have enough funds</span>;
     default:
-      return <></>
+      return <></>;
   }
-}
+};
 
 // tslint:enable
 
@@ -82,9 +85,9 @@ export class MigrationButton extends React.Component<MigrationButtonProps & Moda
             (isDAIEnabled() &&
               migrationState.kind === MigrationFormKind.sai2dai &&
               (migrationState.balance.gt(zero) || migrationState.orders.length > 0)) ||
-            (migrationState.kind === MigrationFormKind.dai2sai && migrationState.balance.gt(zero))
+            (migrationState.kind === MigrationFormKind.dai2sai && migrationState.balance.gt(zero));
 
-          const { tid, className, label } = this.props
+          const { tid, className, label } = this.props;
 
           return visible ? (
             <Button
@@ -92,29 +95,23 @@ export class MigrationButton extends React.Component<MigrationButtonProps & Moda
               className={classnames(styles.redeemBtn, className)}
               data-test-id={tid}
               onClick={() => {
-                this.setup()
-                mixpanel.track('btn-click', {
-                  id: 'initiate-sai-dai-migration',
-                  product: 'oasis-trade',
-                  page: 'Sitewide',
-                  section: 'sitewide',
-                })
+                this.setup();
               }}
             >
               {label}
             </Button>
           ) : (
             <></>
-          )
+          );
         }}
       </WithLoadingIndicator>
-    )
+    );
   }
 
   private setup() {
-    const migration$ = this.props.migration$
-    const MigrationModalRxTx = connect<MigrationFormState, ModalProps>(MigrationModal, migration$)
-    this.props.open(MigrationModalRxTx)
+    const migration$ = this.props.migration$;
+    const MigrationModalRxTx = connect<MigrationFormState, ModalProps>(MigrationModal, migration$);
+    this.props.open(MigrationModalRxTx);
   }
 }
 
@@ -126,24 +123,24 @@ enum MigrationViews {
 
 export class MigrationModal extends React.Component<MigrationFormState & ModalProps, { view: MigrationViews }> {
   public constructor(props: any) {
-    super(props)
+    super(props);
     this.state = {
       view: MigrationViews.initial,
-    }
+    };
   }
 
   public render() {
     const view = (() => {
       switch (this.state.view) {
         case MigrationViews.cancelOrders:
-          return !this.props.orders.length ? this.initialView() : this.cancelOrders()
+          return !this.props.orders.length ? this.initialView() : this.cancelOrders();
         default:
           if (this.props.progress && this.props.progress.status !== ExchangeMigrationStatus.done) {
-            return this.migration()
+            return this.migration();
           }
-          return this.initialView()
+          return this.initialView();
       }
-    })()
+    })();
 
     return (
       <ReactModal
@@ -157,11 +154,11 @@ export class MigrationModal extends React.Component<MigrationFormState & ModalPr
           {view}
         </section>
       </ReactModal>
-    )
+    );
   }
 
   private initialView = () => {
-    const { fromToken } = this.props
+    const { fromToken } = this.props;
     return (
       <Panel footerBordered={true} className={styles.panel}>
         <PanelHeader bordered={true} className={styles.panelHeader}>
@@ -177,11 +174,11 @@ export class MigrationModal extends React.Component<MigrationFormState & ModalPr
           {this.callToRedeem()}
         </PanelBody>
       </Panel>
-    )
-  }
+    );
+  };
 
   private cancelOrders = () => {
-    const { orders } = this.props
+    const { orders } = this.props;
     return (
       <Panel className={styles.panel}>
         <PanelHeader bordered={true} className={styles.panelHeader}>
@@ -243,7 +240,7 @@ export class MigrationModal extends React.Component<MigrationFormState & ModalPr
                                     data-test-id="cancel"
                                     onClick={() => this.cancel(order)}
                                   />
-                                )
+                                );
                               }
 
                               return (
@@ -255,13 +252,13 @@ export class MigrationModal extends React.Component<MigrationFormState & ModalPr
                                 >
                                   Cancel
                                 </Button>
-                              )
+                              );
                             }}
                           </MediaQuery>
                         )}
                       </td>
                     </RowClickable>
-                  )
+                  );
                 })}
               </tbody>
             </Table>
@@ -279,15 +276,15 @@ export class MigrationModal extends React.Component<MigrationFormState & ModalPr
           </Button>
         </PanelFooter>
       </Panel>
-    )
-  }
+    );
+  };
 
   private migration = () => {
-    const { fromToken, amount, progress, change } = this.props
-    const formattedAmount = formatAmount(amount || new BigNumber(0), fromToken)
+    const { fromToken, amount, progress, change } = this.props;
+    const formattedAmount = formatAmount(amount || new BigNumber(0), fromToken);
 
     if (!progress) {
-      throw new Error('Should not get here!')
+      throw new Error('Should not get here!');
     }
 
     // TODO: Extract duplicated parts ( the panel + close button )
@@ -313,12 +310,12 @@ export class MigrationModal extends React.Component<MigrationFormState & ModalPr
           )}
           {progress.status === ExchangeMigrationStatus.ready &&
             progress.pending.map((operation) => {
-              return this.txRow(operation)
+              return this.txRow(operation);
             })}
           {(progress.status === ExchangeMigrationStatus.inProgress ||
             progress.status === ExchangeMigrationStatus.fiasco) &&
             progress.done.map((operation) => {
-              return this.txRow(operation)
+              return this.txRow(operation);
             })}
 
           {(progress.status === ExchangeMigrationStatus.inProgress ||
@@ -328,7 +325,7 @@ export class MigrationModal extends React.Component<MigrationFormState & ModalPr
           {(progress.status === ExchangeMigrationStatus.inProgress ||
             progress.status === ExchangeMigrationStatus.fiasco) &&
             progress.pending.map((operation) => {
-              return this.txRow(operation)
+              return this.txRow(operation);
             })}
 
           {progress.status === ExchangeMigrationStatus.done &&
@@ -355,11 +352,11 @@ export class MigrationModal extends React.Component<MigrationFormState & ModalPr
           </Button>
         </PanelFooter>
       </Panel>
-    )
-  }
+    );
+  };
 
   private callToCancelOrders = () => {
-    const ordersCount = this.props.orders.length
+    const ordersCount = this.props.orders.length;
     return (
       <CallForAction
         title="Cancel Open Orders"
@@ -369,22 +366,16 @@ export class MigrationModal extends React.Component<MigrationFormState & ModalPr
         btnLabel={ordersCount ? 'Cancel Orders' : <SvgImage data-test-id="step-completed" image={tickSvg} />}
         btnDisabled={!ordersCount}
         btnAction={() => {
-          this.setState({ view: MigrationViews.cancelOrders })
-          mixpanel.track('btn-click', {
-            id: 'cancel-offers',
-            product: 'oasis-trade',
-            page: 'Sitewide',
-            section: 'sai-dai-migration',
-          })
+          this.setState({ view: MigrationViews.cancelOrders });
         }}
         tid="cfa-cancel-orders"
         className={styles.callForAction}
       />
-    )
-  }
+    );
+  };
 
   private callToRedeem = () => {
-    const { fromToken, amount, balance, readyToProceed, proceed, messages } = this.props
+    const { fromToken, amount, balance, readyToProceed, proceed, messages } = this.props;
     return (
       <CallForAction
         title={fromToken === 'SAI' ? 'Upgrade your Single-Collateral Sai' : 'Swap your Multi-Collateral Dai'}
@@ -405,14 +396,8 @@ export class MigrationModal extends React.Component<MigrationFormState & ModalPr
         }
         btnDisabled={!readyToProceed}
         btnAction={() => {
-          this.setState({ view: MigrationViews.initial })
-          proceed(this.props)
-          mixpanel.track('btn-click', {
-            id: `${fromToken === 'SAI' ? 'upgrade' : 'swap'}-${fromToken}`,
-            product: 'oasis-trade',
-            page: 'Sitewide',
-            section: 'sai-dai-migration',
-          })
+          this.setState({ view: MigrationViews.initial });
+          proceed(this.props);
         }}
         tid="cfa-upgrade-balance"
         className={styles.callForAction}
@@ -449,22 +434,22 @@ export class MigrationModal extends React.Component<MigrationFormState & ModalPr
           <ErrorMessage messages={messages.map(messageContent)} data-test-id="error-message" />
         </div>
       </CallForAction>
-    )
-  }
+    );
+  };
 
   private handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/,/g, '')
+    const value = e.target.value.replace(/,/g, '');
     this.props.change({
       kind: FormChangeKind.amountFieldChange,
       value: value === '' ? null : new BigNumber(value),
-    } as AmountFieldChange)
-  }
+    } as AmountFieldChange);
+  };
 
   private txRow = (operation: any) => {
     const status = {
       ...operation,
       etherscanURI: this.props.etherscan && this.props.etherscan.url,
-    } as Report
+    } as Report;
 
     switch (operation.kind) {
       case ExchangeMigrationTxKind.createProxy:
@@ -478,7 +463,7 @@ export class MigrationModal extends React.Component<MigrationFormState & ModalPr
               status={<ProgressReport report={status} />}
             />
           </div>
-        )
+        );
       case ExchangeMigrationTxKind.allowance4Proxy:
         return (
           <div key={operation.kind} className={styles.txRow} data-test-id="tx-row">
@@ -495,7 +480,7 @@ export class MigrationModal extends React.Component<MigrationFormState & ModalPr
               status={<ProgressReport report={status} />}
             />
           </div>
-        )
+        );
       case ExchangeMigrationTxKind.sai2dai:
         return (
           <div key={operation.kind} className={styles.txRow} data-test-id="tx-row">
@@ -512,7 +497,7 @@ export class MigrationModal extends React.Component<MigrationFormState & ModalPr
               status={<ProgressReport report={status} />}
             />
           </div>
-        )
+        );
       case ExchangeMigrationTxKind.dai2sai:
         return (
           <div key={operation.kind} className={styles.txRow} data-test-id="tx-row">
@@ -529,15 +514,15 @@ export class MigrationModal extends React.Component<MigrationFormState & ModalPr
               status={<ProgressReport report={status} />}
             />
           </div>
-        )
+        );
       default:
-        return <></>
+        return <></>;
     }
-  }
+  };
 
   private close = () => {
-    this.props.close()
-  }
+    this.props.close();
+  };
 
   private cancel = (order: TradeWithStatus) => {
     this.props.cancelOffer({
@@ -545,13 +530,6 @@ export class MigrationModal extends React.Component<MigrationFormState & ModalPr
       type: order.act,
       amount: order.baseAmount,
       token: order.baseToken,
-    })
-
-    mixpanel.track('btn-click', {
-      id: 'cancel-single-offer',
-      product: 'oasis-trade',
-      page: 'Sitewide',
-      section: 'sai-dai-migration',
-    })
-  }
+    });
+  };
 }

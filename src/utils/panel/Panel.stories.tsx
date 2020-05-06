@@ -1,10 +1,14 @@
-import { storiesOf } from '@storybook/react'
-import * as React from 'react'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
 
-import { Table } from '../table/Table'
-import { Panel, PanelBody, PanelHeader } from './Panel'
+import { storiesOf } from '@storybook/react';
+import * as React from 'react';
 
-const stories = storiesOf('Panel', module)
+import { Table } from '../table/Table';
+import { Panel, PanelBody, PanelHeader } from './Panel';
+
+const stories = storiesOf('Panel', module);
 
 stories.add('Panel', () => (
   <div>
@@ -112,4 +116,4 @@ stories.add('Panel', () => (
       </PanelBody>
     </Panel>
   </div>
-))
+));

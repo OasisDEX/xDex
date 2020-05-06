@@ -1,28 +1,32 @@
-import { BigNumber } from 'bignumber.js'
-import * as React from 'react'
-import { amountFromWei } from '../../blockchain/utils'
-import { OfferType } from '../../exchange/orderbook/orderbook'
-import { formatPriceInstant } from '../../utils/formatters/format'
-import { calculateTradePrice } from '../../utils/price'
-import { CurrentPrice } from '../CurrentPrice'
-import { TradeSummary } from '../details/TradeSummary'
-import { InstantFormChangeKind, InstantFormState, ProgressKind, ViewKind } from '../instantForm'
-import { InstantFormWrapper } from '../InstantFormWrapper'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
+import { BigNumber } from 'bignumber.js';
+import * as React from 'react';
+import { amountFromWei } from '../../blockchain/utils';
+import { OfferType } from '../../exchange/orderbook/orderbook';
+import { formatPriceInstant } from '../../utils/formatters/format';
+import { calculateTradePrice } from '../../utils/price';
+import { CurrentPrice } from '../CurrentPrice';
+import { TradeSummary } from '../details/TradeSummary';
+import { InstantFormChangeKind, InstantFormState, ProgressKind, ViewKind } from '../instantForm';
+import { InstantFormWrapper } from '../InstantFormWrapper';
 
 export class TradeSummaryView extends React.Component<InstantFormState> {
   public render() {
-    const { progress, kind, sellToken, buyToken, context, gasPrice, etherPriceUsd } = this.props
+    const { progress, kind, sellToken, buyToken, context, gasPrice, etherPriceUsd } = this.props;
     if (!progress || !context || !gasPrice || !etherPriceUsd) {
-      return <div />
+      return <div />;
     }
 
-    const { sold, bought, gasUsed } = progress
-    let calcPrice = new BigNumber(0)
-    let quotation = ''
+    const { sold, bought, gasUsed } = progress;
+    let calcPrice = new BigNumber(0);
+    let quotation = '';
     if (sold && bought) {
-      const quote = calculateTradePrice(sellToken, sold, buyToken, bought, formatPriceInstant)
-      calcPrice = quote.price
-      quotation = quote.quotation
+      const quote = calculateTradePrice(sellToken, sold, buyToken, bought, formatPriceInstant);
+      calcPrice = quote.price;
+      quotation = quote.quotation;
     }
 
     return (
@@ -51,17 +55,17 @@ export class TradeSummaryView extends React.Component<InstantFormState> {
           />
         )}
       </InstantFormWrapper>
-    )
+    );
   }
 
   private resetForm = () => {
     this.props.change({
       kind: InstantFormChangeKind.formResetChange,
-    })
+    });
 
     this.props.change({
       kind: InstantFormChangeKind.viewChange,
       view: ViewKind.new,
-    })
-  }
+    });
+  };
 }

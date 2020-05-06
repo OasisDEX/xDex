@@ -1,8 +1,12 @@
-import { storiesOf } from '@storybook/react'
-import * as React from 'react'
-import { Slider } from './Slider'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
 
-const stories = storiesOf('Form inputs and buttons', module)
+import { storiesOf } from '@storybook/react';
+import * as React from 'react';
+import { Slider } from './Slider';
+
+const stories = storiesOf('Form inputs and buttons', module);
 
 stories.add('Slider', () => (
   <div>
@@ -16,4 +20,4 @@ stories.add('Slider', () => (
     <h3>Default in progress</h3>
     <Slider blocked={false} inProgress={true} /> <Slider blocked={true} inProgress={true} />
   </div>
-))
+));

@@ -1,19 +1,23 @@
-import { BigNumber } from 'bignumber.js'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
 
-import { setupFakeWeb3ForTesting } from '../../blockchain/web3'
-setupFakeWeb3ForTesting()
+import { BigNumber } from 'bignumber.js';
 
-import { Impossible, impossible, isImpossible } from '../../utils/impossible'
-import { zero } from '../../utils/zero'
-import { AllocationRequestPilot } from '../allocate/allocate'
-import { OperationKind } from '../state/mtAccount'
-import { getMTAccount } from '../state/mtTestUtils'
-import { planBuy, prepareBuyAllocationRequest } from './planBuy'
-import { cash, dgx100, mtaOnlyWeth, sell1, sell2, sellOffers, wethEmpty, wethEmptyWithDai } from './planFixtures'
+import { setupFakeWeb3ForTesting } from '../../blockchain/web3';
+setupFakeWeb3ForTesting();
+
+import { Impossible, impossible, isImpossible } from '../../utils/impossible';
+import { zero } from '../../utils/zero';
+import { AllocationRequestPilot } from '../allocate/allocate';
+import { OperationKind } from '../state/mtAccount';
+import { getMTAccount } from '../state/mtTestUtils';
+import { planBuy, prepareBuyAllocationRequest } from './planBuy';
+import { cash, dgx100, mtaOnlyWeth, sell1, sell2, sellOffers, wethEmpty, wethEmptyWithDai } from './planFixtures';
 
 describe('prepareBuyAllocationRequest', () => {
   test('no cash, no plan', () => {
-    const mta = getMTAccount({ marginableAssets: [wethEmpty] })
+    const mta = getMTAccount({ marginableAssets: [wethEmpty] });
     const request = prepareBuyAllocationRequest(
       mta,
       sellOffers,
@@ -22,9 +26,9 @@ describe('prepareBuyAllocationRequest', () => {
       new BigNumber('200'),
       zero,
       zero,
-    )
-    expect(request).toEqual(impossible('purchasing power too low'))
-  })
+    );
+    expect(request).toEqual(impossible('purchasing power too low'));
+  });
 
   test('orderbook too shallow', () => {
     const request = prepareBuyAllocationRequest(
@@ -35,12 +39,12 @@ describe('prepareBuyAllocationRequest', () => {
       new BigNumber('200'),
       mtaOnlyWeth.marginableAssets[0].dai.times(mtaOnlyWeth.marginableAssets[0].safeCollRatio),
       zero,
-    )
-    expect(request).toEqual(impossible('orderbook too shallow'))
-  })
+    );
+    expect(request).toEqual(impossible('orderbook too shallow'));
+  });
 
   test('just buy', () => {
-    const mta = getMTAccount({ cash, marginableAssets: [wethEmptyWithDai, dgx100] })
+    const mta = getMTAccount({ cash, marginableAssets: [wethEmptyWithDai, dgx100] });
     const request: AllocationRequestPilot | Impossible = prepareBuyAllocationRequest(
       mta,
       sellOffers,
@@ -49,26 +53,26 @@ describe('prepareBuyAllocationRequest', () => {
       new BigNumber('200'),
       new BigNumber('20000'),
       zero,
-    )
+    );
 
     if (isImpossible(request)) {
-      expect(true).toBeFalsy()
-      return
+      expect(true).toBeFalsy();
+      return;
     }
 
-    expect(request.cashBalance).toEqual(new BigNumber('30000'))
-    expect(request.defaultTargetCash).toEqual(new BigNumber('30000'))
-    expect(request.targetDaiBalance).toEqual(new BigNumber('10000'))
+    expect(request.cashBalance).toEqual(new BigNumber('30000'));
+    expect(request.defaultTargetCash).toEqual(new BigNumber('30000'));
+    expect(request.targetDaiBalance).toEqual(new BigNumber('10000'));
 
-    const wethInfo = request.assets[0]
-    expect(wethInfo.name).toEqual('WETH')
-    expect(wethInfo.balance).toEqual(new BigNumber('100'))
+    const wethInfo = request.assets[0];
+    expect(wethInfo.name).toEqual('WETH');
+    expect(wethInfo.balance).toEqual(new BigNumber('100'));
 
-    const dgxInfo = request.assets[1]
-    expect(dgxInfo.name).toEqual('DGX')
-    expect(dgxInfo.balance).toEqual(new BigNumber('100'))
-  })
-})
+    const dgxInfo = request.assets[1];
+    expect(dgxInfo.name).toEqual('DGX');
+    expect(dgxInfo.balance).toEqual(new BigNumber('100'));
+  });
+});
 
 describe('planBuy', () => {
   test('just buy', () => {
@@ -105,7 +109,7 @@ describe('planBuy', () => {
         },
       ],
       zero,
-    )
+    );
     expect(plan).toEqual([
       {
         kind: OperationKind.buyRecursively,
@@ -114,6 +118,6 @@ describe('planBuy', () => {
         name: 'WETH',
         slippageLimit: zero,
       },
-    ])
-  })
-})
+    ]);
+  });
+});

@@ -1,8 +1,12 @@
-import { BigNumber } from 'bignumber.js'
-import { flatten } from 'lodash'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
 
-import { AssetKind } from '../../blockchain/config'
-import { Offer, Orderbook } from '../../exchange/orderbook/orderbook'
+import { BigNumber } from 'bignumber.js';
+import { flatten } from 'lodash';
+
+import { AssetKind } from '../../blockchain/config';
+import { Offer, Orderbook } from '../../exchange/orderbook/orderbook';
 import {
   findAsset,
   findMarginableAsset,
@@ -11,17 +15,17 @@ import {
   MTAccount,
   Operation,
   OperationKind,
-} from '../state/mtAccount'
+} from '../state/mtAccount';
 
-import { Observable } from 'rxjs'
-import { Calls } from '../../blockchain/calls/calls'
-import { TxState } from '../../blockchain/transactions'
-import { Impossible, impossible, isImpossible } from '../../utils/impossible'
-import { minusOne, zero } from '../../utils/zero'
-import { AllocationRequestPilot } from '../allocate/allocate'
-import { EditableDebt } from '../allocate/mtOrderAllocateDebtForm'
-import { calculateMarginable } from '../state/mtCalculate'
-import { deltaToOps, getTotal, Operations, orderDeltas } from './planUtils'
+import { Observable } from 'rxjs';
+import { Calls } from '../../blockchain/calls/calls';
+import { TxState } from '../../blockchain/transactions';
+import { Impossible, impossible, isImpossible } from '../../utils/impossible';
+import { minusOne, zero } from '../../utils/zero';
+import { AllocationRequestPilot } from '../allocate/allocate';
+import { EditableDebt } from '../allocate/mtOrderAllocateDebtForm';
+import { calculateMarginable } from '../state/mtCalculate';
+import { deltaToOps, getTotal, Operations, orderDeltas } from './planUtils';
 
 export function prepareBuyAllocationRequest(
   mta: MTAccount,
@@ -32,32 +36,32 @@ export function prepareBuyAllocationRequest(
   realPurchasingPower: BigNumber,
   slippageLimit: BigNumber,
 ): AllocationRequestPilot | Impossible {
-  const asset = findAsset(baseToken, mta)
+  const asset = findAsset(baseToken, mta);
 
   if (asset === undefined) {
-    return impossible('asset not setup')
+    return impossible('asset not setup');
   }
 
-  const maxTotal = getTotal(amount, sellOffers)
+  const maxTotal = getTotal(amount, sellOffers);
 
   if (isImpossible(maxTotal)) {
-    return maxTotal
+    return maxTotal;
   }
 
   if (asset.assetKind === AssetKind.marginable) {
     if (realPurchasingPower.lt(maxTotal)) {
-      return impossible('purchasing power too low')
+      return impossible('purchasing power too low');
     }
   }
 
-  const avgPrice = maxTotal.div(amount)
+  const avgPrice = maxTotal.div(amount);
 
   if (price.lt(avgPrice)) {
-    return impossible('price too low')
+    return impossible('price too low');
   }
 
   const assets: MarginableAsset[] = mta.marginableAssets.map((ma) => {
-    const balance = ma.name === baseToken ? ma.balance.plus(amount) : ma.balance
+    const balance = ma.name === baseToken ? ma.balance.plus(amount) : ma.balance;
 
     return calculateMarginable(
       {
@@ -65,19 +69,19 @@ export function prepareBuyAllocationRequest(
         balance,
       } as MarginableAssetCore,
       { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook,
-    )
-  })
+    );
+  });
 
-  const baseAsset = findMarginableAsset(baseToken, mta)
-  const cashBalance = baseAsset!.dai
-  const debt = baseAsset!.debt
+  const baseAsset = findMarginableAsset(baseToken, mta);
+  const cashBalance = baseAsset!.dai;
+  const debt = baseAsset!.debt;
 
-  const targetDaiBalance = debt.eq(zero) ? cashBalance.minus(maxTotal) : maxTotal.times(minusOne)
+  const targetDaiBalance = debt.eq(zero) ? cashBalance.minus(maxTotal) : maxTotal.times(minusOne);
 
-  const defaultTargetCash = cashBalance
+  const defaultTargetCash = cashBalance;
 
   const createPlan = (debts: Array<Required<EditableDebt>>): Operations =>
-    planBuy(baseToken, amount, maxTotal, debts, slippageLimit)
+    planBuy(baseToken, amount, maxTotal, debts, slippageLimit);
 
   const execute = (calls: Calls, proxy: any, plan: Operation[], gas: number): Observable<TxState> =>
     calls.mtBuy({
@@ -89,9 +93,9 @@ export function prepareBuyAllocationRequest(
       gas,
       slippageLimit,
       total: maxTotal,
-    })
+    });
 
-  const estimateGas = (calls: Calls, proxy: any, plan: Operation[]) => calls.mtBuyEstimateGas({ proxy, plan })
+  const estimateGas = (calls: Calls, proxy: any, plan: Operation[]) => calls.mtBuyEstimateGas({ proxy, plan });
 
   return {
     assets,
@@ -101,7 +105,7 @@ export function prepareBuyAllocationRequest(
     createPlan,
     execute,
     estimateGas,
-  }
+  };
 }
 
 export function planBuy(
@@ -113,8 +117,8 @@ export function planBuy(
 ): Operation[] {
   // console.log(JSON.stringify(debts));
 
-  const otherAllocations = debts.filter((a) => a.name !== name)
-  const otherOps: Operation[] = flatten(orderDeltas(otherAllocations).map(deltaToOps))
+  const otherAllocations = debts.filter((a) => a.name !== name);
+  const otherOps: Operation[] = flatten(orderDeltas(otherAllocations).map(deltaToOps));
 
   return [
     ...otherOps,
@@ -125,5 +129,5 @@ export function planBuy(
       slippageLimit,
       kind: OperationKind.buyRecursively,
     },
-  ]
+  ];
 }

@@ -1,10 +1,14 @@
-import { storiesOf } from '@storybook/react'
-import { BigNumber } from 'bignumber.js'
-import * as React from 'react'
-import { formatAmount } from './format'
-import { FormatAmount, Money } from './Formatters'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
 
-const stories = storiesOf('Text utils', module)
+import { storiesOf } from '@storybook/react';
+import { BigNumber } from 'bignumber.js';
+import * as React from 'react';
+import { formatAmount } from './format';
+import { FormatAmount, Money } from './Formatters';
+
+const stories = storiesOf('Text utils', module);
 
 const SampleRow = ({ value, token }: { value: number; token: string }) => (
   <tr>
@@ -25,7 +29,7 @@ const SampleRow = ({ value, token }: { value: number; token: string }) => (
       <Money value={new BigNumber(value)} token={token} greyedNonSignZeros={true} />
     </td>
   </tr>
-)
+);
 
 stories.add('Number formatter', () => (
   <table>
@@ -78,4 +82,4 @@ stories.add('Number formatter', () => (
       <SampleRow value={987654321} token="ETH" />
     </tbody>
   </table>
-))
+));

@@ -1,4 +1,8 @@
-import { marketsOf } from './markets'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
+import { marketsOf } from './markets';
 
 test('should return all possible markets for a given token', () => {
   const pairs = [
@@ -7,12 +11,12 @@ test('should return all possible markets for a given token', () => {
     { base: 'MKR', quote: 'USDC' },
     { base: 'WETH', quote: 'USDC' },
     { base: 'WETH', quote: 'WBTC' },
-  ]
+  ];
 
-  const availableMarkets = new Set<string>(['WETH', 'DAI', 'USDC'])
+  const availableMarkets = new Set<string>(['WETH', 'DAI', 'USDC']);
 
-  expect(marketsOf('MKR', pairs)).toEqual(availableMarkets)
-})
+  expect(marketsOf('MKR', pairs)).toEqual(availableMarkets);
+});
 
 test('should return empty set if no markets are found for the given token', () => {
   const pairs = [
@@ -21,26 +25,26 @@ test('should return empty set if no markets are found for the given token', () =
     { base: 'MKR', quote: 'USDC' },
     { base: 'WETH', quote: 'USDC' },
     { base: 'WETH', quote: 'WBTC' },
-  ]
+  ];
 
-  const availableMarkets = new Set<string>([])
+  const availableMarkets = new Set<string>([]);
 
-  expect(marketsOf('DGD', pairs)).toEqual(availableMarkets)
-})
+  expect(marketsOf('DGD', pairs)).toEqual(availableMarkets);
+});
 
 test('should return empty set if no markets are available at all', () => {
-  const availableMarkets = new Set<string>([])
+  const availableMarkets = new Set<string>([]);
 
-  expect(marketsOf('DGD', [])).toEqual(availableMarkets)
-})
+  expect(marketsOf('DGD', [])).toEqual(availableMarkets);
+});
 
 test('should include ETH token as WETH', () => {
   const pairs = [
     { base: 'ETH', quote: 'MKR' },
     { base: 'MKR', quote: 'DAI' },
-  ]
+  ];
 
-  const availableMarkets = new Set<string>(['WETH', 'DAI'])
+  const availableMarkets = new Set<string>(['WETH', 'DAI']);
 
-  expect(marketsOf('MKR', pairs)).toEqual(availableMarkets)
-})
+  expect(marketsOf('MKR', pairs)).toEqual(availableMarkets);
+});

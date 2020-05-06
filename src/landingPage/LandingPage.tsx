@@ -1,9 +1,13 @@
-import * as React from 'react'
-import OasisDexLogoSvg from '../header/OasisDexLogo.svg'
-import networkSvg from '../icons/network.svg'
-import { SvgImage } from '../utils/icons/utils'
-import { Client } from './client/Client'
-import * as styles from './LandingPage.scss'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
+import * as React from 'react';
+import OasisDexLogoSvg from '../header/OasisDexLogo.svg';
+import networkSvg from '../icons/network.svg';
+import { SvgImage } from '../utils/icons/utils';
+import { Client } from './client/Client';
+import * as styles from './LandingPage.scss';
 
 export class LoadingState {
   public static get INITIALIZATION() {
@@ -11,7 +15,7 @@ export class LoadingState {
       <section className={styles.section}>
         <h4> Initializing </h4>
       </section>
-    )
+    );
   }
 
   public static get MISSING_PROVIDER() {
@@ -31,7 +35,7 @@ export class LoadingState {
           </div>
         </div>
       </section>
-    )
+    );
   }
 
   public static get UNSUPPORTED() {
@@ -49,6 +53,6 @@ export class LoadingState {
           </div>
         </div>
       </section>
-    )
+    );
   }
 }

@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 // import { Trade } from '../trades';
 
 // import { priceChartDataPoints } from './pricechart';
@@ -7,8 +11,8 @@
 // });
 
 test('hello', () => {
-  expect(1 + 1).toEqual(2)
-})
+  expect(1 + 1).toEqual(2);
+});
 
 // // const trades: Trade[] {
 // //   { baseAmount: }

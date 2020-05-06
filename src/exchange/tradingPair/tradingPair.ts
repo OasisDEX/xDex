@@ -1,23 +1,27 @@
-import { BigNumber } from 'bignumber.js'
-import { first, memoize } from 'lodash'
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs'
-import { map, switchMap } from 'rxjs/operators'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
 
-import { tradingPairs } from '../../blockchain/config'
-import { Loadable, LoadableWithTradingPair, loadablifyLight } from '../../utils/loadable'
-import { MarketsDetails } from '../exchange'
+import { BigNumber } from 'bignumber.js';
+import { first, memoize } from 'lodash';
+import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
+
+import { tradingPairs } from '../../blockchain/config';
+import { Loadable, LoadableWithTradingPair, loadablifyLight } from '../../utils/loadable';
+import { MarketsDetails } from '../exchange';
 
 export interface TradingPair {
-  readonly base: string
-  readonly quote: string
+  readonly base: string;
+  readonly quote: string;
 }
 
 export function tradingPairResolver({ base, quote }: TradingPair) {
-  return `${base}/${quote}`
+  return `${base}/${quote}`;
 }
 
 export function memoizeTradingPair<T>(f: (pair: TradingPair) => T): (pair: TradingPair) => T {
-  return memoize(f, (tp) => tradingPairResolver(tp))
+  return memoize(f, (tp) => tradingPairResolver(tp));
 }
 
 export function injectTradingPair$<T>(
@@ -32,30 +36,30 @@ export function injectTradingPair$<T>(
           // @ts-ignore
           ...r,
         })),
-      )
+      );
     }),
-  )
+  );
 }
 
 export function loadablifyPlusTradingPair<T>(
   tradingPair: Observable<TradingPair>,
   f: (pair: TradingPair) => Observable<T>,
 ): Observable<LoadableWithTradingPair<T>> {
-  return injectTradingPair$(tradingPair, (pair) => loadablifyLight(f(pair)))
+  return injectTradingPair$(tradingPair, (pair) => loadablifyLight(f(pair)));
 }
 
-export const currentTradingPair$ = new BehaviorSubject<TradingPair>(first(tradingPairs) as TradingPair)
+export const currentTradingPair$ = new BehaviorSubject<TradingPair>(first(tradingPairs) as TradingPair);
 
 export interface TradingPairsProps {
-  parentMatch?: string
-  select: (pair: TradingPair) => void
-  base: string
-  quote: string
-  currentPrice: Loadable<BigNumber | undefined>
-  yesterdayPriceChange: Loadable<BigNumber | undefined>
-  weeklyVolume: Loadable<BigNumber>
-  marketsDetails: Loadable<MarketsDetails>
-  setPairPickerOpen?: (open: boolean) => void
+  parentMatch?: string;
+  select: (pair: TradingPair) => void;
+  base: string;
+  quote: string;
+  currentPrice: Loadable<BigNumber | undefined>;
+  yesterdayPriceChange: Loadable<BigNumber | undefined>;
+  weeklyVolume: Loadable<BigNumber>;
+  marketsDetails: Loadable<MarketsDetails>;
+  setPairPickerOpen?: (open: boolean) => void;
 }
 
 export function createTradingPair$(
@@ -80,5 +84,5 @@ export function createTradingPair$(
       marketsDetails,
       select: currentTradingPair$$.next.bind(currentTradingPair$$),
     })),
-  )
+  );
 }

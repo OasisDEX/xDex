@@ -1,23 +1,27 @@
-import * as moment from 'moment'
-import * as React from 'react'
-import { default as MediaQuery } from 'react-responsive'
-import { from, Observable } from 'rxjs'
-import { map, switchMap } from 'rxjs/operators'
-import { NetworkConfig } from '../blockchain/config'
-import { Github, Reddit, RocketChat } from '../utils/icons/SocialIcons'
-import { Loadable, loadablifyLight } from '../utils/loadable'
-import { WithLoadingIndicatorInline } from '../utils/loadingIndicator/LoadingIndicator'
-import * as styles from './Footer.scss'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
+import * as moment from 'moment';
+import * as React from 'react';
+import { default as MediaQuery } from 'react-responsive';
+import { from, Observable } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
+import { NetworkConfig } from '../blockchain/config';
+import { Github, Reddit, RocketChat } from '../utils/icons/SocialIcons';
+import { Loadable, loadablifyLight } from '../utils/loadable';
+import { WithLoadingIndicatorInline } from '../utils/loadingIndicator/LoadingIndicator';
+import * as styles from './Footer.scss';
 
 export interface FooterProps {
-  etherscan: any
-  address: string
-  expirationDate: Loadable<Date>
+  etherscan: any;
+  address: string;
+  expirationDate: Loadable<Date>;
 }
 
 export class TheFooter extends React.Component<FooterProps> {
   public render() {
-    const { etherscan, address, expirationDate } = this.props
+    const { etherscan, address, expirationDate } = this.props;
     return (
       <div>
         <hr className={styles.footerSeparator} />
@@ -142,7 +146,7 @@ export class TheFooter extends React.Component<FooterProps> {
           </MediaQuery>
         </div>
       </div>
-    )
+    );
   }
 }
 
@@ -161,5 +165,5 @@ export function createFooter$(context$: Observable<NetworkConfig>): Observable<F
         })),
       ),
     ),
-  )
+  );
 }

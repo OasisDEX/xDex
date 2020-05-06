@@ -1,13 +1,17 @@
-import { storiesOf } from '@storybook/react'
-import { BigNumber } from 'bignumber.js'
-import * as React from 'react'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
 
-import { GasEstimationStatus, ProgressStage } from '../utils/form'
-import { LoadableStatus } from '../utils/loadable'
-import { MessageKind, WrapUnwrapFormKind, WrapUnwrapFormState } from './wrapUnwrapForm'
-import { WrapUnwrapFormView } from './WrapUnwrapFormView'
+import { storiesOf } from '@storybook/react';
+import { BigNumber } from 'bignumber.js';
+import * as React from 'react';
 
-const stories = storiesOf('Wrap&Unwrap modal', module)
+import { GasEstimationStatus, ProgressStage } from '../utils/form';
+import { LoadableStatus } from '../utils/loadable';
+import { MessageKind, WrapUnwrapFormKind, WrapUnwrapFormState } from './wrapUnwrapForm';
+import { WrapUnwrapFormView } from './WrapUnwrapFormView';
+
+const stories = storiesOf('Wrap&Unwrap modal', module);
 
 function wrapDefaultProps(overrides: any = {}) {
   return {
@@ -25,12 +29,12 @@ function wrapDefaultProps(overrides: any = {}) {
       ...overrides,
     } as WrapUnwrapFormState,
     close: () => null,
-  }
+  };
 }
 
-stories.add('Base wrap modal', () => <WrapUnwrapFormView kind={WrapUnwrapFormKind.wrap} {...wrapDefaultProps()} />)
+stories.add('Base wrap modal', () => <WrapUnwrapFormView kind={WrapUnwrapFormKind.wrap} {...wrapDefaultProps()} />);
 
-stories.add('Base unwrap modal', () => <WrapUnwrapFormView kind={WrapUnwrapFormKind.unwrap} {...wrapDefaultProps()} />)
+stories.add('Base unwrap modal', () => <WrapUnwrapFormView kind={WrapUnwrapFormKind.unwrap} {...wrapDefaultProps()} />);
 
 stories.add('Base wrap modal with error', () => (
   <WrapUnwrapFormView
@@ -40,7 +44,7 @@ stories.add('Base wrap modal with error', () => (
       messages: [{ kind: MessageKind.insufficientAmount }],
     })}
   />
-))
+));
 
 stories.add('Base wrap modal filled and ready to proceed', () => (
   <WrapUnwrapFormView
@@ -53,7 +57,7 @@ stories.add('Base wrap modal filled and ready to proceed', () => (
       gasEstimationUsd: new BigNumber('0.3'),
     })}
   />
-))
+));
 
 stories.add('Base wrap modal waitingForApproval', () => (
   <WrapUnwrapFormView
@@ -67,7 +71,7 @@ stories.add('Base wrap modal waitingForApproval', () => (
       gasEstimationUsd: new BigNumber('0.3'),
     })}
   />
-))
+));
 
 stories.add('Base wrap modal waitingForConfirmation', () => (
   <WrapUnwrapFormView
@@ -81,7 +85,7 @@ stories.add('Base wrap modal waitingForConfirmation', () => (
       gasEstimationUsd: new BigNumber('0.3'),
     })}
   />
-))
+));
 
 stories.add('Base wrap modal done', () => (
   <WrapUnwrapFormView
@@ -95,7 +99,7 @@ stories.add('Base wrap modal done', () => (
       gasEstimationUsd: new BigNumber('0.3'),
     })}
   />
-))
+));
 
 stories.add('Base wrap modal fiasco', () => (
   <WrapUnwrapFormView
@@ -109,7 +113,7 @@ stories.add('Base wrap modal fiasco', () => (
       gasEstimationUsd: new BigNumber('0.3'),
     })}
   />
-))
+));
 
 stories.add('Base wrap modal canceled', () => (
   <WrapUnwrapFormView
@@ -123,4 +127,4 @@ stories.add('Base wrap modal canceled', () => (
       gasEstimationUsd: new BigNumber('0.3'),
     })}
   />
-))
+));

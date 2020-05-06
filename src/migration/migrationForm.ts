@@ -1,16 +1,20 @@
-import { BigNumber } from 'bignumber.js'
-import { concat, merge, Observable, of, Subject, Subscription } from 'rxjs'
-import { filter, first, map, scan, switchMap } from 'rxjs/operators'
-import { Calls$ } from '../blockchain/calls/calls'
-import { CancelData } from '../blockchain/calls/offerMake'
-import { NetworkConfig } from '../blockchain/config'
-import { EtherscanConfig } from '../blockchain/etherscan'
-import { TradeWithStatus } from '../exchange/myTrades/openTrades'
-import { ContextChange, InstantFormChangeKind } from '../instant/instantForm'
-import { combineAndMerge } from '../utils/combineAndMerge'
-import { AmountFieldChange, FormChangeKind, OrdersChange, toOrdersChange } from '../utils/form'
-import { zero } from '../utils/zero'
-import { ExchangeMigrationState, ExchangeMigrationStatus } from './migration'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
+import { BigNumber } from 'bignumber.js';
+import { concat, merge, Observable, of, Subject, Subscription } from 'rxjs';
+import { filter, first, map, scan, switchMap } from 'rxjs/operators';
+import { Calls$ } from '../blockchain/calls/calls';
+import { CancelData } from '../blockchain/calls/offerMake';
+import { NetworkConfig } from '../blockchain/config';
+import { EtherscanConfig } from '../blockchain/etherscan';
+import { TradeWithStatus } from '../exchange/myTrades/openTrades';
+import { ContextChange, InstantFormChangeKind } from '../instant/instantForm';
+import { combineAndMerge } from '../utils/combineAndMerge';
+import { AmountFieldChange, FormChangeKind, OrdersChange, toOrdersChange } from '../utils/form';
+import { zero } from '../utils/zero';
+import { ExchangeMigrationState, ExchangeMigrationStatus } from './migration';
 
 export enum MessageKind {
   amount2Big = 'amount2Big',
@@ -18,7 +22,7 @@ export enum MessageKind {
 }
 
 export interface Message {
-  kind: MessageKind.amount2Big | MessageKind.amount2Small
+  kind: MessageKind.amount2Big | MessageKind.amount2Small;
 }
 
 export enum MigrationFormKind {
@@ -30,92 +34,92 @@ enum BalanceChangeKind {
   balanceChange = 'balanceChange',
 }
 
-export type ManualChange = AmountFieldChange
+export type ManualChange = AmountFieldChange;
 
 interface BalanceChange {
-  kind: BalanceChangeKind
-  balance: BigNumber
+  kind: BalanceChangeKind;
+  balance: BigNumber;
 }
 
-type EnvironmentChange = BalanceChange | OrdersChange | ContextChange
+type EnvironmentChange = BalanceChange | OrdersChange | ContextChange;
 
 export interface ProgressChange {
-  kind: FormChangeKind.progress
-  progress?: ExchangeMigrationState
+  kind: FormChangeKind.progress;
+  progress?: ExchangeMigrationState;
 }
 
-type MigrationFormChange = ManualChange | EnvironmentChange | ProgressChange
+type MigrationFormChange = ManualChange | EnvironmentChange | ProgressChange;
 
 export interface MigrationFormState {
-  etherscan?: EtherscanConfig
-  kind: MigrationFormKind
-  fromToken: string
-  balance: BigNumber
-  orders: TradeWithStatus[]
-  amount?: BigNumber
-  messages: Message[]
-  readyToProceed?: boolean
-  progress?: ExchangeMigrationState
-  change: (change: ManualChange | ProgressChange) => void
-  proceed: (state: MigrationFormState) => void
-  cancelOffer: (cancelData: CancelData) => void
+  etherscan?: EtherscanConfig;
+  kind: MigrationFormKind;
+  fromToken: string;
+  balance: BigNumber;
+  orders: TradeWithStatus[];
+  amount?: BigNumber;
+  messages: Message[];
+  readyToProceed?: boolean;
+  progress?: ExchangeMigrationState;
+  change: (change: ManualChange | ProgressChange) => void;
+  proceed: (state: MigrationFormState) => void;
+  cancelOffer: (cancelData: CancelData) => void;
 }
 
 function applyChange(state: MigrationFormState, change: MigrationFormChange): MigrationFormState {
   switch (change.kind) {
     case BalanceChangeKind.balanceChange:
-      return { ...state, balance: change.balance }
+      return { ...state, balance: change.balance };
     case FormChangeKind.amountFieldChange:
-      return { ...state, amount: change.value }
+      return { ...state, amount: change.value };
     case FormChangeKind.progress:
-      return { ...state, progress: change.progress }
+      return { ...state, progress: change.progress };
     case FormChangeKind.ordersChange:
-      return { ...state, orders: change.orders }
+      return { ...state, orders: change.orders };
     case InstantFormChangeKind.contextChange:
-      return { ...state, etherscan: change.context.etherscan }
+      return { ...state, etherscan: change.context.etherscan };
   }
-  return state
+  return state;
 }
 
 function validate(state: MigrationFormState) {
-  const messages: Message[] = []
+  const messages: Message[] = [];
 
   if (state.amount && state.amount.gt(state.balance)) {
-    messages.push({ kind: MessageKind.amount2Big })
+    messages.push({ kind: MessageKind.amount2Big });
   }
 
   if (state.amount && state.amount.lte(zero)) {
-    messages.push({ kind: MessageKind.amount2Small })
+    messages.push({ kind: MessageKind.amount2Small });
   }
 
   return {
     ...state,
     messages,
-  }
+  };
 }
 
 function checkIfIsReadyToProceed(state: MigrationFormState) {
-  const readyToProceed = state.amount && state.messages.length === 0
+  const readyToProceed = state.amount && state.messages.length === 0;
 
   return {
     ...state,
     readyToProceed,
-  }
+  };
 }
 
 function prepareProceed(
   migrate$: (amount: BigNumber) => Observable<ExchangeMigrationState>,
   balance$: Observable<BigNumber>,
 ): [(state: MigrationFormState) => void, Observable<MigrationFormChange>] {
-  const proceedChange$ = new Subject<MigrationFormChange>()
+  const proceedChange$ = new Subject<MigrationFormChange>();
 
-  let progressSubscription: Subscription | undefined
+  let progressSubscription: Subscription | undefined;
 
   function proceed(state: MigrationFormState) {
-    const amount = state.amount
+    const amount = state.amount;
 
     if (!amount) {
-      return
+      return;
     }
 
     const changes$ = balance$.pipe(
@@ -139,29 +143,29 @@ function prepareProceed(
                   ),
                 ),
                 of(change),
-              )
+              );
             }
-            return of(change)
+            return of(change);
           }),
         ),
       ),
-    )
+    );
 
-    progressSubscription = changes$.subscribe((change) => proceedChange$.next(change))
+    progressSubscription = changes$.subscribe((change) => proceedChange$.next(change));
   }
 
   const progressChanges$ = new Observable<MigrationFormChange>((subscriber) => {
-    const subs = proceedChange$.subscribe((change) => subscriber.next(change))
+    const subs = proceedChange$.subscribe((change) => subscriber.next(change));
     return () => {
-      subs.unsubscribe()
+      subs.unsubscribe();
       if (progressSubscription) {
-        progressSubscription.unsubscribe()
-        progressSubscription = undefined
+        progressSubscription.unsubscribe();
+        progressSubscription = undefined;
       }
-    }
-  })
+    };
+  });
 
-  return [proceed, progressChanges$]
+  return [proceed, progressChanges$];
 }
 
 function freezeIfInProgress(previous: MigrationFormState, state: MigrationFormState): MigrationFormState {
@@ -169,9 +173,9 @@ function freezeIfInProgress(previous: MigrationFormState, state: MigrationFormSt
     return {
       ...previous,
       progress: state.progress,
-    }
+    };
   }
-  return state
+  return state;
 }
 
 function toBalanceChange(balance$: Observable<BigNumber>) {
@@ -183,11 +187,11 @@ function toBalanceChange(balance$: Observable<BigNumber>) {
           kind: BalanceChangeKind.balanceChange,
         } as BalanceChange),
     ),
-  )
+  );
 }
 
 function toContextChange(context$: Observable<NetworkConfig>) {
-  return context$.pipe(map((context) => ({ context, kind: InstantFormChangeKind.contextChange })))
+  return context$.pipe(map((context) => ({ context, kind: InstantFormChangeKind.contextChange })));
 }
 
 export function createMigrationForm$(
@@ -198,15 +202,15 @@ export function createMigrationForm$(
   calls$: Calls$,
   orders$: Observable<TradeWithStatus[]>,
 ): Observable<MigrationFormState> {
-  const manualChange$ = new Subject<ManualChange>()
+  const manualChange$ = new Subject<ManualChange>();
 
-  const balanceChange$ = toBalanceChange(balance$)
+  const balanceChange$ = toBalanceChange(balance$);
 
-  const environmentChange$ = combineAndMerge(balanceChange$, toContextChange(context$), toOrdersChange(orders$))
+  const environmentChange$ = combineAndMerge(balanceChange$, toContextChange(context$), toOrdersChange(orders$));
 
-  const [proceed, proceedProgressChange$] = prepareProceed(migrate$, balance$)
+  const [proceed, proceedProgressChange$] = prepareProceed(migrate$, balance$);
 
-  const change = manualChange$.next.bind(manualChange$)
+  const change = manualChange$.next.bind(manualChange$);
 
   return balance$.pipe(
     first(),
@@ -227,14 +231,14 @@ export function createMigrationForm$(
               switchMap((calls) => calls.cancelOffer2(cancelData)),
             )
             .subscribe(),
-      }
+      };
 
       return merge(manualChange$, environmentChange$, proceedProgressChange$).pipe(
         scan<any>(applyChange, initialState),
         map(validate),
         map(checkIfIsReadyToProceed),
         scan(freezeIfInProgress),
-      )
+      );
     }),
-  )
+  );
 }

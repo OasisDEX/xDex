@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 (() => {
   const $iframe = document.getElementById("storybook-preview-iframe");
   const $doc = $iframe.contentDocument;

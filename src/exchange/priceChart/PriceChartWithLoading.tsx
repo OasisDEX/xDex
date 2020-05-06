@@ -1,26 +1,30 @@
-import * as React from 'react'
-import { BehaviorSubject, Observable } from 'rxjs'
-import { map, switchMap } from 'rxjs/operators'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
 
-import classnames from 'classnames'
-import { Button, ButtonGroup } from '../../utils/forms/Buttons'
-import { LoadableWithTradingPair } from '../../utils/loadable'
-import { WithLoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator'
-import { ServerUnreachable } from '../../utils/loadingIndicator/ServerUnreachable'
-import { PanelHeader } from '../../utils/panel/Panel'
-import { GroupMode, PriceChartDataPoint } from './pricechart'
-import { PriceChartView } from './PriceChartView'
-import * as styles from './PriceChartWithLoading.scss'
+import * as React from 'react';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
+
+import classnames from 'classnames';
+import { Button, ButtonGroup } from '../../utils/forms/Buttons';
+import { LoadableWithTradingPair } from '../../utils/loadable';
+import { WithLoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
+import { ServerUnreachable } from '../../utils/loadingIndicator/ServerUnreachable';
+import { PanelHeader } from '../../utils/panel/Panel';
+import { GroupMode, PriceChartDataPoint } from './pricechart';
+import { PriceChartView } from './PriceChartView';
+import * as styles from './PriceChartWithLoading.scss';
 
 export interface PriceChartProps extends LoadableWithTradingPair<PriceChartDataPoint[]> {
-  groupMode: GroupMode
-  groupMode$: BehaviorSubject<GroupMode>
+  groupMode: GroupMode;
+  groupMode$: BehaviorSubject<GroupMode>;
 }
 
 export class PriceChartWithLoading extends React.Component<PriceChartProps> {
   public handleKindChange = (groupMode: GroupMode) => () => {
-    this.props.groupMode$.next(groupMode)
-  }
+    this.props.groupMode$.next(groupMode);
+  };
 
   public render() {
     return (
@@ -38,7 +42,7 @@ export class PriceChartWithLoading extends React.Component<PriceChartProps> {
           {(points: PriceChartDataPoint[]) => <PriceChartView data={points} groupMode={this.props.groupMode} />}
         </WithLoadingIndicator>
       </>
-    )
+    );
   }
 
   private button = (label: string, groupMode: GroupMode) => (
@@ -50,7 +54,7 @@ export class PriceChartWithLoading extends React.Component<PriceChartProps> {
     >
       {label}
     </Button>
-  )
+  );
 }
 
 export function createPriceChartLoadable$(
@@ -70,5 +74,5 @@ export function createPriceChartLoadable$(
         ),
       ),
     ),
-  )
+  );
 }

@@ -1,14 +1,18 @@
-import classnames from 'classnames'
-import * as React from 'react'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
 
-import * as styles from './Panel.scss'
+import classnames from 'classnames';
+import * as React from 'react';
+
+import * as styles from './Panel.scss';
 
 export type PanelProps = React.HTMLAttributes<HTMLDivElement> & {
-  footerBordered?: boolean
-}
+  footerBordered?: boolean;
+};
 
 export const Panel = (props: PanelProps) => {
-  const { className, children, footerBordered, ...divProps } = props
+  const { className, children, footerBordered, ...divProps } = props;
   return (
     <div
       className={classnames(className, {
@@ -19,15 +23,15 @@ export const Panel = (props: PanelProps) => {
     >
       {children}
     </div>
-  )
-}
+  );
+};
 
 export type PanelHeaderProps = React.HTMLAttributes<HTMLDivElement> & {
-  bordered?: boolean
-  children?: any
-}
+  bordered?: boolean;
+  children?: any;
+};
 export const PanelHeader = (props: PanelHeaderProps) => {
-  const { className, bordered, children, ...divProps } = props
+  const { className, bordered, children, ...divProps } = props;
   return (
     <div
       className={classnames(className, {
@@ -38,19 +42,19 @@ export const PanelHeader = (props: PanelHeaderProps) => {
     >
       {children}
     </div>
-  )
-}
+  );
+};
 
 export type PanelBodyProps = React.HTMLAttributes<HTMLDivElement> & {
-  children?: any
-  paddingVertical?: boolean
-  paddingTop?: boolean
-  paddingBottom?: boolean
-  scrollable?: boolean
-}
+  children?: any;
+  paddingVertical?: boolean;
+  paddingTop?: boolean;
+  paddingBottom?: boolean;
+  scrollable?: boolean;
+};
 
 export const PanelBody = (props: PanelBodyProps) => {
-  const { children, paddingVertical, paddingTop, paddingBottom, scrollable, className, ...divProps } = props
+  const { children, paddingVertical, paddingTop, paddingBottom, scrollable, className, ...divProps } = props;
   return (
     <div
       className={classnames(styles.panelBodyHorizontal, className, {
@@ -62,8 +66,8 @@ export const PanelBody = (props: PanelBodyProps) => {
     >
       {children}
     </div>
-  )
-}
+  );
+};
 
 export const PanelFooter = ({
   children,
@@ -80,4 +84,4 @@ export const PanelFooter = ({
   >
     {children}
   </div>
-)
+);

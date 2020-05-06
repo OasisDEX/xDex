@@ -1,10 +1,14 @@
-import { BigNumber } from 'bignumber.js'
-import { at, isEmpty, uniqBy, unzip } from 'lodash'
-import { combineLatest, from, Observable, of, zip } from 'rxjs'
-import { expand, map, reduce, retryWhen, scan, shareReplay, switchMap } from 'rxjs/operators'
-import { NetworkConfig } from '../../blockchain/config'
-import { amountFromWei } from '../../blockchain/utils'
-import { TradingPair } from '../tradingPair/tradingPair'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
+import { BigNumber } from 'bignumber.js';
+import { at, isEmpty, uniqBy, unzip } from 'lodash';
+import { combineLatest, from, Observable, of, zip } from 'rxjs';
+import { expand, map, reduce, retryWhen, scan, shareReplay, switchMap } from 'rxjs/operators';
+import { NetworkConfig } from '../../blockchain/config';
+import { amountFromWei } from '../../blockchain/utils';
+import { TradingPair } from '../tradingPair/tradingPair';
 
 export enum OfferType {
   buy = 'buy',
@@ -12,24 +16,24 @@ export enum OfferType {
 }
 
 export interface Offer {
-  offerId: BigNumber
-  baseAmount: BigNumber
-  baseToken: string
-  quoteAmount: BigNumber
-  quoteToken: string
-  price: BigNumber
-  ownerId: string
-  timestamp: Date
-  type: OfferType
+  offerId: BigNumber;
+  baseAmount: BigNumber;
+  baseToken: string;
+  quoteAmount: BigNumber;
+  quoteToken: string;
+  price: BigNumber;
+  ownerId: string;
+  timestamp: Date;
+  type: OfferType;
 }
 
 export interface Orderbook {
-  tradingPair: TradingPair
-  blockNumber: number
-  sell: Offer[]
-  spread?: BigNumber
-  spreadPercentage?: BigNumber
-  buy: Offer[]
+  tradingPair: TradingPair;
+  blockNumber: number;
+  sell: Offer[];
+  spread?: BigNumber;
+  spreadPercentage?: BigNumber;
+  buy: Offer[];
 }
 
 class InconsistentLoadingError extends Error {}
@@ -37,15 +41,15 @@ class InconsistentLoadingError extends Error {}
 function parseOffers(sellToken: string, buyToken: string, type: OfferType, firstPage: boolean) {
   return (data: any[][]): { lastOfferId: BigNumber; offers: Offer[] } => {
     if (!firstPage && data[0][0] === '0') {
-      throw new InconsistentLoadingError('empty orderbook page loaded')
+      throw new InconsistentLoadingError('empty orderbook page loaded');
     }
     return {
       lastOfferId: new BigNumber(data[0][data[0].length - 1]),
       offers: unzip(at(data, 'ids', 'payAmts', 'buyAmts', 'owners', 'timestamps'))
         .filter(([id]) => id !== '0')
         .map(([offerId, sellAmt, buyAmt, ownerId, timestamp]) => {
-          const sellAmount = amountFromWei(new BigNumber(sellAmt), sellToken)
-          const buyAmount = amountFromWei(new BigNumber(buyAmt), buyToken)
+          const sellAmount = amountFromWei(new BigNumber(sellAmt), sellToken);
+          const buyAmount = amountFromWei(new BigNumber(buyAmt), buyToken);
           return {
             ...(type === 'sell'
               ? {
@@ -68,10 +72,10 @@ function parseOffers(sellToken: string, buyToken: string, type: OfferType, first
               ownerId: ownerId as string,
               timestamp: new Date(1000 * Number(timestamp)),
             },
-          } as Offer
+          } as Offer;
         }),
-    }
-  }
+    };
+  };
 }
 
 function loadOffersAllAtOnce(
@@ -102,16 +106,16 @@ function loadOffersAllAtOnce(
       errors.pipe(
         switchMap((e) => {
           if (e instanceof InconsistentLoadingError) {
-            console.log(e.message)
-            return errors
+            console.log(e.message);
+            return errors;
           }
-          throw e
+          throw e;
         }),
       ),
     ),
     reduce<{ offers: Offer[] }, Offer[]>((result, { offers }) => result.concat(offers), []),
     map((offers) => uniqBy(offers, ({ offerId }) => offerId.toString())),
-  )
+  );
 }
 
 export function loadOrderbook$(
@@ -153,40 +157,40 @@ export function loadOrderbook$(
         blockNumber,
         buy,
         sell,
-      })
+      });
     }),
     shareReplay(1),
-  )
+  );
 }
 
 export function addSpread({ buy, sell, ...rest }: Orderbook) {
   if (!isEmpty(sell) && !isEmpty(buy)) {
-    const spread = sell[0].price.minus(buy[0].price)
-    const midPrice = sell[0].price.plus(buy[0].price).div(2)
-    const spreadPercentage = spread.div(midPrice)
+    const spread = sell[0].price.minus(buy[0].price);
+    const midPrice = sell[0].price.plus(buy[0].price).div(2);
+    const spreadPercentage = spread.div(midPrice);
     return {
       buy,
       sell,
       ...rest,
       spread,
       spreadPercentage,
-    }
+    };
   }
   return {
     buy,
     sell,
     ...rest,
-  }
+  };
 }
 
-const DUST_ORDER_THRESHOLD = '0.000000000001' // 10^15
+const DUST_ORDER_THRESHOLD = '0.000000000001'; // 10^15
 
 function isDustOrder(o: Offer): boolean {
-  return o.quoteAmount.lt(DUST_ORDER_THRESHOLD) || o.baseAmount.lt(DUST_ORDER_THRESHOLD)
+  return o.quoteAmount.lt(DUST_ORDER_THRESHOLD) || o.baseAmount.lt(DUST_ORDER_THRESHOLD);
 }
 
 function hideDusts(dusts: Offer[][]): Offer[][] {
-  return dusts.map((offers) => offers.filter((o) => !isDustOrder(o)))
+  return dusts.map((offers) => offers.filter((o) => !isDustOrder(o)));
 }
 
 // export function createPickableOrderBookFromMTSimpleFormState$(

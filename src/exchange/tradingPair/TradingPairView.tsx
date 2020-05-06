@@ -1,28 +1,32 @@
-import { BigNumber } from 'bignumber.js'
-import classnames from 'classnames'
-import * as mixpanel from 'mixpanel-browser'
-import * as React from 'react'
-import { NavLink } from 'react-router-dom'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
 
-import { getToken, tradingPairs } from '../../blockchain/config'
-import { FormatAmount, FormatPercent, FormatPrice, FormatQuoteToken } from '../../utils/formatters/Formatters'
-import { Loadable } from '../../utils/loadable'
-import { WithLoadingIndicatorInline } from '../../utils/loadingIndicator/LoadingIndicator'
-import { ServerUnreachableInline } from '../../utils/loadingIndicator/ServerUnreachable'
-import { Scrollbar } from '../../utils/Scrollbar/Scrollbar'
-import { BoundarySpan, InfoLabel } from '../../utils/text/Text'
-import { MarketsDetails } from '../exchange'
-import { TradingPair, tradingPairResolver, TradingPairsProps } from './tradingPair'
-import * as styles from './TradingPairView.scss'
+import { BigNumber } from 'bignumber.js';
+import classnames from 'classnames';
+import * as React from 'react';
+import { NavLink } from 'react-router-dom';
+
+import { trackingEvents } from '../../analytics/analytics';
+import { getToken, tradingPairs } from '../../blockchain/config';
+import { FormatAmount, FormatPercent, FormatPrice, FormatQuoteToken } from '../../utils/formatters/Formatters';
+import { Loadable } from '../../utils/loadable';
+import { WithLoadingIndicatorInline } from '../../utils/loadingIndicator/LoadingIndicator';
+import { ServerUnreachableInline } from '../../utils/loadingIndicator/ServerUnreachable';
+import { Scrollbar } from '../../utils/Scrollbar/Scrollbar';
+import { BoundarySpan, InfoLabel } from '../../utils/text/Text';
+import { MarketsDetails } from '../exchange';
+import { TradingPair, tradingPairResolver, TradingPairsProps } from './tradingPair';
+import * as styles from './TradingPairView.scss';
 
 interface PairInfoVP {
-  value: any
-  label: string
-  dataTestId?: string
+  value: any;
+  label: string;
+  dataTestId?: string;
 }
 
 interface TradingPairViewState {
-  showMenu: boolean
+  showMenu: boolean;
 }
 
 export class TradingPairView extends React.Component<TradingPairsProps, TradingPairViewState> {
@@ -32,12 +36,12 @@ export class TradingPairView extends React.Component<TradingPairsProps, TradingP
     marketsDetailsLoadable,
     clickHandler,
   }: {
-    pair: TradingPair
-    parentMatch?: string
-    marketsDetailsLoadable: Loadable<MarketsDetails>
-    clickHandler: () => void
+    pair: TradingPair;
+    parentMatch?: string;
+    marketsDetailsLoadable: Loadable<MarketsDetails>;
+    clickHandler: () => void;
   }) {
-    const pathname = `${parentMatch}/${pair.base}/${pair.quote}`
+    const pathname = `${parentMatch}/${pair.base}/${pair.quote}`;
 
     return (
       <li data-test-id={`${pair.base}-${pair.quote}`} className={styles.dropdownItem}>
@@ -47,30 +51,24 @@ export class TradingPairView extends React.Component<TradingPairsProps, TradingP
           activeClassName={styles.active}
           className={classnames(styles.dropdownItemLink, styles.pairView)}
           onClick={() => {
-            clickHandler()
-            mixpanel.track('btn-click', {
-              pair: `${pair.base}${pair.quote}`,
-              id: 'change-asset-pair',
-              product: 'oasis-trade',
-              page: 'Market',
-              section: 'asset-picker',
-            })
+            clickHandler();
+            trackingEvents.changeAssetPair(pair.base, pair.quote);
           }}
         >
           <TradingPairView.PairView {...{ pair, marketsDetailsLoadable }} />
         </NavLink>
       </li>
-    )
+    );
   }
 
   public static PairView({
     pair,
     marketsDetailsLoadable,
   }: {
-    pair: TradingPair
-    marketsDetailsLoadable: Loadable<MarketsDetails>
+    pair: TradingPair;
+    marketsDetailsLoadable: Loadable<MarketsDetails>;
   }) {
-    const { base, quote } = pair
+    const { base, quote } = pair;
     return (
       <>
         <div className={styles.iconBase}>{getToken(base).icon}</div>
@@ -82,7 +80,7 @@ export class TradingPairView extends React.Component<TradingPairsProps, TradingP
         </div>
         <WithLoadingIndicatorInline loadable={marketsDetailsLoadable}>
           {(marketsDetails) => {
-            const { price, priceDiff } = marketsDetails[tradingPairResolver(pair)]
+            const { price, priceDiff } = marketsDetails[tradingPairResolver(pair)];
             return (
               <>
                 <div data-test-id="price" className={styles.price}>
@@ -97,11 +95,11 @@ export class TradingPairView extends React.Component<TradingPairsProps, TradingP
                   )) || <> - </>}
                 </div>
               </>
-            )
+            );
           }}
         </WithLoadingIndicatorInline>
       </>
-    )
+    );
   }
 
   public static ActivePairView({ base, quote }: any) {
@@ -116,7 +114,7 @@ export class TradingPairView extends React.Component<TradingPairsProps, TradingP
         </span>
         <span className={styles.dropdownIcon} />
       </div>
-    )
+    );
   }
 
   public static YesterdayPriceVP({ yesterdayPriceChange }: { yesterdayPriceChange: BigNumber | undefined }) {
@@ -124,7 +122,7 @@ export class TradingPairView extends React.Component<TradingPairsProps, TradingP
       <BoundarySpan value={yesterdayPriceChange}>
         <FormatPercent value={yesterdayPriceChange} plus={true} fallback="" />
       </BoundarySpan>
-    )
+    );
   }
 
   public static PairInfoVP({ value, label, dataTestId }: PairInfoVP) {
@@ -137,19 +135,19 @@ export class TradingPairView extends React.Component<TradingPairsProps, TradingP
           <InfoLabel className={styles.pairInfoLabel}>{label}</InfoLabel>
         </div>
       </div>
-    )
+    );
   }
 
   public constructor(props: TradingPairsProps) {
-    super(props)
+    super(props);
     this.state = {
       showMenu: false,
-    }
+    };
   }
 
   public render() {
-    const { parentMatch = '/', base, currentPrice, quote, weeklyVolume, yesterdayPriceChange } = this.props
-    const dropdownDisabled = tradingPairs.length <= 1
+    const { parentMatch = '/', base, currentPrice, quote, weeklyVolume, yesterdayPriceChange } = this.props;
+    const dropdownDisabled = tradingPairs.length <= 1;
 
     return (
       <>
@@ -233,34 +231,34 @@ export class TradingPairView extends React.Component<TradingPairsProps, TradingP
           />
         </div>
       </>
-    )
+    );
   }
 
   private showMenu = (event: any) => {
-    event.preventDefault()
+    event.preventDefault();
 
     this.setState({ showMenu: true }, () => {
-      document.addEventListener('click', this.closeMenu)
-    })
+      document.addEventListener('click', this.closeMenu);
+    });
 
     if (this.props.setPairPickerOpen) {
-      this.props.setPairPickerOpen(true)
+      this.props.setPairPickerOpen(true);
     }
-  }
+  };
 
   private closeMenu = (_event: any) => {
     if (_event.path.filter((p: any) => p.className === styles.dropdown).length === 0) {
-      this.closeMenuHandler()
+      this.closeMenuHandler();
     }
-  }
+  };
 
   private closeMenuHandler = () => {
     this.setState({ showMenu: false }, () => {
-      document.removeEventListener('click', this.closeMenu)
-    })
+      document.removeEventListener('click', this.closeMenu);
+    });
 
     if (this.props.setPairPickerOpen) {
-      this.props.setPairPickerOpen(false)
+      this.props.setPairPickerOpen(false);
     }
-  }
+  };
 }

@@ -1,15 +1,19 @@
-import { combineLatest } from 'rxjs'
-import { map } from 'rxjs/operators'
-import { ObservableItem } from '../../utils/observableItem'
-import { NetworkConfig } from '../config'
-import { account$, context$, initializedAccount$ } from '../network'
-import { approveProxy, approveWallet, disapproveProxy, disapproveWallet } from './approveCalls'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
+import { combineLatest } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { ObservableItem } from '../../utils/observableItem';
+import { NetworkConfig } from '../config';
+import { account$, context$, initializedAccount$ } from '../network';
+import { approveProxy, approveWallet, disapproveProxy, disapproveWallet } from './approveCalls';
 import {
   callCurried,
   estimateGasCurried,
   sendTransactionCurried,
   sendTransactionWithGasConstraintsCurried,
-} from './callsHelpers'
+} from './callsHelpers';
 import {
   cancelAllOffers,
   changePrice,
@@ -20,7 +24,7 @@ import {
   pokeSpotter,
   printOsmInfo,
   readPrice,
-} from './devCalls'
+} from './devCalls';
 import {
   getBestOffer,
   getBuyAmount,
@@ -34,7 +38,7 @@ import {
   tradePayWithERC20,
   tradePayWithETHNoProxy,
   tradePayWithETHWithProxy,
-} from './instant'
+} from './instant';
 import {
   approveMTProxy,
   mtBalance,
@@ -47,16 +51,16 @@ import {
   mtSell,
   osmParams,
   setupMTProxy,
-} from './mtCalls'
-import { cancelOffer, offerMake, offerMakeDirect } from './offerMake'
-import { swapDaiToSai, swapSaiToDai } from './swapCalls'
-import { proxyERC20Balance, recoverERC20 } from './tokenRecovery'
-import { unwrap, wrap } from './wrapUnwrapCalls'
+} from './mtCalls';
+import { cancelOffer, offerMake, offerMakeDirect } from './offerMake';
+import { swapDaiToSai, swapSaiToDai } from './swapCalls';
+import { proxyERC20Balance, recoverERC20 } from './tokenRecovery';
+import { unwrap, wrap } from './wrapUnwrapCalls';
 
 function calls([context, account]: [NetworkConfig, string]) {
-  const estimateGas = estimateGasCurried(context, account)
-  const sendTransaction = sendTransactionCurried(context, account)
-  const sendTransactionWithGasConstraints = sendTransactionWithGasConstraintsCurried(context, account)
+  const estimateGas = estimateGasCurried(context, account);
+  const sendTransaction = sendTransactionCurried(context, account);
+  const sendTransactionWithGasConstraints = sendTransactionWithGasConstraintsCurried(context, account);
 
   return {
     cancelOffer: sendTransactionWithGasConstraints(cancelOffer),
@@ -114,11 +118,11 @@ function calls([context, account]: [NetworkConfig, string]) {
     changePriceAndPoke: sendTransaction(changePriceAndPoke),
     printOsmInfo: printOsmInfo(context),
     recoverERC20: sendTransaction(recoverERC20),
-  }
+  };
 }
 
 function readCalls([context, account]: [NetworkConfig, string | undefined]) {
-  const call = callCurried(context, account)
+  const call = callCurried(context, account);
 
   return {
     mtBalance: call(mtBalance),
@@ -130,17 +134,17 @@ function readCalls([context, account]: [NetworkConfig, string | undefined]) {
     readPrice: call(readPrice),
     osmParams: call(osmParams),
     proxyERC20Balance: call(proxyERC20Balance),
-  }
+  };
 }
 
-export const calls$ = combineLatest(context$, initializedAccount$).pipe(map(calls))
+export const calls$ = combineLatest(context$, initializedAccount$).pipe(map(calls));
 
-export const readCalls$ = combineLatest(context$, account$).pipe(map(readCalls))
+export const readCalls$ = combineLatest(context$, account$).pipe(map(readCalls));
 
-export type Calls$ = typeof calls$
+export type Calls$ = typeof calls$;
 
-export type Calls = ObservableItem<Calls$>
+export type Calls = ObservableItem<Calls$>;
 
-export type ReadCalls$ = typeof readCalls$
+export type ReadCalls$ = typeof readCalls$;
 
-export type ReadCalls = ObservableItem<ReadCalls$>
+export type ReadCalls = ObservableItem<ReadCalls$>;

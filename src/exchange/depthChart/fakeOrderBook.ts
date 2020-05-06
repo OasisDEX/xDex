@@ -1,7 +1,11 @@
-import { BigNumber } from 'bignumber.js'
-import { of } from 'rxjs/index'
-import { addSpread, Offer, OfferType, Orderbook } from '../orderbook/orderbook'
-import { currentTradingPair$, loadablifyPlusTradingPair } from '../tradingPair/tradingPair'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
+import { BigNumber } from 'bignumber.js';
+import { of } from 'rxjs/index';
+import { addSpread, Offer, OfferType, Orderbook } from '../orderbook/orderbook';
+import { currentTradingPair$, loadablifyPlusTradingPair } from '../tradingPair/tradingPair';
 
 const buy = [
   { price: 256.12524, amount: 123.45522838748731 },
@@ -29,7 +33,7 @@ const buy = [
   { price: 226, amount: 186 },
   { price: 225, amount: 15.866666666666667 },
   { price: 220, amount: 100 },
-]
+];
 
 const sell = [
   { price: 263.005524, amount: 50 },
@@ -59,7 +63,7 @@ const sell = [
   // { price: 0.1111111111111111, amount: 13.268 },
   // { price: 0.111, amount: 14.86109763945268 },
   // { price: 0.001, amount: 1.80740079125783 }
-]
+];
 
 function priceAmountToOffer({
   price,
@@ -67,10 +71,10 @@ function priceAmountToOffer({
   quoteToken,
   baseToken,
 }: {
-  price: number
-  amount: number
-  quoteToken: string
-  baseToken: string
+  price: number;
+  amount: number;
+  quoteToken: string;
+  baseToken: string;
 }): Offer {
   return {
     baseToken,
@@ -82,7 +86,7 @@ function priceAmountToOffer({
     ownerId: '',
     timestamp: new Date('2019-10-01 00:00:00Z'),
     type: OfferType.buy,
-  }
+  };
 }
 
 export const createFakeOrderbook = (buys: any, sells: any): Orderbook => {
@@ -90,15 +94,15 @@ export const createFakeOrderbook = (buys: any, sells: any): Orderbook => {
     sell: sells.map(priceAmountToOffer),
     buy: buys.map(priceAmountToOffer),
     blockNumber: 1,
-  } as Orderbook)
-}
+  } as Orderbook);
+};
 
-export const fakeOrderBook: Orderbook = createFakeOrderbook(buy, sell)
-export const emptyOrderBook: Orderbook = createFakeOrderbook([], [])
+export const fakeOrderBook: Orderbook = createFakeOrderbook(buy, sell);
+export const emptyOrderBook: Orderbook = createFakeOrderbook([], []);
 
 export const fakeOrderbookWithOutliers = createFakeOrderbook(
   buy.concat([{ price: 0.0001, amount: 5.8 }]),
   sell.concat([{ price: 9999, amount: 1.8 }]),
-)
+);
 
-export const fakeOrderBook$ = loadablifyPlusTradingPair(currentTradingPair$, () => of(fakeOrderBook))
+export const fakeOrderBook$ = loadablifyPlusTradingPair(currentTradingPair$, () => of(fakeOrderBook));

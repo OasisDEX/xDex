@@ -1,21 +1,25 @@
-import * as React from 'react'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
+import * as React from 'react';
 
 interface SvgImageProps extends React.HTMLAttributes<HTMLSpanElement> {
-  image: string
+  image: string;
 }
 
 export function SvgImage({ image, ...props }: SvgImageProps) {
-  return <span style={{ fontSize: '0' }} dangerouslySetInnerHTML={{ __html: loadDataUrl(image) }} {...props} />
+  return <span style={{ fontSize: '0' }} dangerouslySetInnerHTML={{ __html: loadDataUrl(image) }} {...props} />;
 }
 
 export function SvgImageSimple(image: string) {
-  return <SvgImage image={image} />
+  return <SvgImage image={image} />;
 }
 
 export function loadDataUrl(dataUrl: string): string {
-  const a = dataUrl.match(/^data:.*?;base64,(.*)$/)
+  const a = dataUrl.match(/^data:.*?;base64,(.*)$/);
   if (!a) {
-    throw new Error(`malformed data url: ${dataUrl.substr(0, 30)} ...`)
+    throw new Error(`malformed data url: ${dataUrl.substr(0, 30)} ...`);
   }
-  return atob(a[1]).replace(/^\<\?xml.*?\?>\n?/, '')
+  return atob(a[1]).replace(/^\<\?xml.*?\?>\n?/, '');
 }

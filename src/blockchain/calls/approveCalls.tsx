@@ -1,13 +1,17 @@
-import { BigNumber } from 'bignumber.js'
-import * as React from 'react'
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
 
-import { Currency } from '../../utils/text/Text'
-import { getToken, NetworkConfig } from '../config'
-import { TransactionDef } from './callsHelpers'
-import { TxMetaKind } from './txMeta'
+import { BigNumber } from 'bignumber.js';
+import * as React from 'react';
+
+import { Currency } from '../../utils/text/Text';
+import { getToken, NetworkConfig } from '../config';
+import { TransactionDef } from './callsHelpers';
+import { TxMetaKind } from './txMeta';
 
 export interface ApproveWalletData {
-  token: string
+  token: string;
 }
 
 export const approveWallet: TransactionDef<ApproveWalletData> = {
@@ -22,9 +26,9 @@ export const approveWallet: TransactionDef<ApproveWalletData> = {
       <React.Fragment>
         Unlock <Currency value={token} /> for Trading
       </React.Fragment>
-    )
+    );
   },
-}
+};
 
 export const disapproveWallet: TransactionDef<ApproveWalletData> = {
   call: ({ token }: ApproveWalletData, context: NetworkConfig) =>
@@ -38,15 +42,15 @@ export const disapproveWallet: TransactionDef<ApproveWalletData> = {
       <React.Fragment>
         Lock <Currency value={token} /> for Trading
       </React.Fragment>
-    )
+    );
   },
-}
+};
 
 export interface ApproveProxyData {
-  token: string
-  proxyAddress: string
-  gasPrice?: BigNumber
-  gasEstimation?: number
+  token: string;
+  proxyAddress: string;
+  gasPrice?: BigNumber;
+  gasEstimation?: number;
 }
 
 export const approveProxy = {
@@ -64,7 +68,7 @@ export const approveProxy = {
       Unlock <Currency value={token} /> on proxy
     </React.Fragment>
   ),
-}
+};
 
 export const disapproveProxy: TransactionDef<ApproveProxyData> = {
   call: ({ token }: ApproveWalletData, context: NetworkConfig) =>
@@ -78,6 +82,6 @@ export const disapproveProxy: TransactionDef<ApproveProxyData> = {
       <React.Fragment>
         Lock <Currency value={token} /> for trading by proxy
       </React.Fragment>
-    )
+    );
   },
-}
+};
