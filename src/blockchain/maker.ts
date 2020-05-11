@@ -18,7 +18,7 @@ export async function setupMaker(networkId: string): Promise<Web3> {
     log: false,
     plugins: [
       [walletLinkPlugin, { rpcUrl: infuraUrl, appName: 'Oasis' }],
-      walletConnectPlugin,
+      [walletConnectPlugin, { waitForInitialUpdateTime: 2000 }]
       // trezorPlugin
     ],
     provider: {
@@ -36,13 +36,38 @@ export async function setupMaker(networkId: string): Promise<Web3> {
 
   console.log('Initialized maker instance');
 
-  maker.on('accounts/CHANGE', (e: any) => {
-    const { account } = e.payload;
-    console.log(`Account changed to: ${account.address}`);
-    sessionStorage.setItem('lastConnectedWalletType', account.type);
-    sessionStorage.setItem('lastConnectedWalletAddress', account.address.toLowerCase());
+  const accountsService = maker.service('accounts');
+  const engine = accountsService.getProvider();
+
+  // Prevent MetaMask from auto-refreshing on network change
+  // See: https://metamask.github.io/metamask-docs/API_Reference/Ethereum_Provider#ethereum.autorefreshonnetworkchange'
+  // if (window.ethereum) window.ethereum.autoRefreshOnNetworkChange = false;
+
+  // Subscribe to accounts change
+  engine.on('accountsChanged', (accounts: string[]) => {
+    if (accounts.length !== 0) {
+      const address = accounts[0].toLowerCase();
+      console.log(`Active account address changed to ${address}`);
+      executeWeb3StatusCommand({
+        kind: Web3StatusCommandKind.accountChanged,
+        address
+      });
+    }
+  });
+  // Subscribe to networkId change
+  engine.on('networkChanged', (networkId: number) => {
+    console.log(`Active networkId changed to ${networkId}`);
     executeWeb3StatusCommand({
-      kind: Web3StatusCommandKind.accountChanged,
+      kind: Web3StatusCommandKind.chainChanged,
+      chainId: networkId
+    });
+  });
+  // Subscribe to chainId change
+  engine.on('chainChanged', (chainId: number) => {
+    console.log(`Active chainId changed to ${chainId}`);
+    executeWeb3StatusCommand({
+      kind: Web3StatusCommandKind.chainChanged,
+      chainId
     });
   });
 
@@ -50,8 +75,8 @@ export async function setupMaker(networkId: string): Promise<Web3> {
 }
 
 export async function connectAccount(type: WalletType): Promise<string> {
-  // If connecting MetaMask (or another browser provider) check the networkId
-  // is the same as the Maker instance one (set via network query param)
+  // If connecting MetaMask (or another browser provider) we can immediately check
+  // if the networkId is the same as the Maker instance one (set via network query param)
   if (type === 'browser') {
     if (!window.web3?.currentProvider?.networkVersion) throw new Error('Unable to find browser provider network id');
     const browserProviderNetworkId = parseInt(window.web3.currentProvider.networkVersion, 10);
@@ -63,33 +88,46 @@ export async function connectAccount(type: WalletType): Promise<string> {
 
   const autoSwitch = type === 'browser';
   const account = await maker.service('accounts').addAccount({ type, autoSwitch });
-  maker.useAccountWithAddress(account.address);
+
+  if (type !== 'browser') {
+    const providerChainId = account.subprovider.chainId;
+    const makerChainId = maker.service('web3').networkId();
+    if (providerChainId !== makerChainId) {
+      disconnectAccount(false);
+      throw new Error("Network mismatch: The connected wallet provider's network is different than the current network");
+    }
+  }
+
+  sessionStorage.setItem('lastConnectedWalletType', type);
+  sessionStorage.setItem('lastConnectedWalletAddress', account.address);
+
   return account.address;
 }
 
-export async function disconnectAccount() {
-  if (!maker) return;
+function removeSubprovider(subprovider: any) {
+  // Remove subprovider from the engine
+  maker.service('accounts').getProvider().removeProvider(subprovider);
+  const account = maker.service('accounts').currentAccount();
+  delete maker.service('accounts')._accounts[account.address];
+  maker.service('accounts')._currentAccount = '';
+}
 
-  const subprovider = maker.service('accounts').currentWallet();
-  if (subprovider.isWalletLink) {
-    subprovider.resetAndReload();
-    return;
-  } else if (subprovider.isWalletConnect) {
-    (await subprovider.getWalletConnector()).killSession();
-  }
+export async function disconnectAccount(killSession: boolean = true) {
+  if (!maker) return;
 
   sessionStorage.removeItem('lastConnectedWalletType');
   sessionStorage.removeItem('lastConnectedWalletAddress');
 
-  // Remove this subprovider from the engine
-  maker
-    .service('accounts')
-    .getProvider()
-    .removeProvider(subprovider);
+  const { address } = maker.service('accounts').currentAccount();
+  const subprovider = maker.service('accounts').currentWallet();
+  if (subprovider.isWalletLink) {
+    return subprovider.resetAndReload();
+  } else if (subprovider.isWalletConnect) {
+    const wc = await subprovider.getWalletConnector();
+    if (killSession) wc.killSession();
+    else wc._transport.close();
+  }
+  removeSubprovider(subprovider);
 
-  const account = maker.service('accounts').currentAccount();
-  delete maker.service('accounts')._accounts[account.address];
-  maker.service('accounts')._currentAccount = '';
-
-  console.log(`Disconnected account: ${account.address}`);
+  console.log(`Disconnected account: ${address}`);
 }

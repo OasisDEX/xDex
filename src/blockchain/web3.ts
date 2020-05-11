@@ -31,6 +31,7 @@ export enum Web3StatusCommandKind {
   connect = 'connect',
   connectReadOnly = 'connectReadOnly',
   accountChanged = 'accountChanged',
+  chainChanged = 'chainChanged',
   disconnect = 'disconnect',
 }
 
@@ -47,6 +48,11 @@ export type Web3StatusCommand =
     }
   | {
       kind: Web3StatusCommandKind.accountChanged;
+      address: string;
+    }
+  | {
+      kind: Web3StatusCommandKind.chainChanged;
+      chainId: number;
     }
   | {
       kind: Web3StatusCommandKind.disconnect;
@@ -73,7 +79,6 @@ export const web3Status$: Observable<Web3Status> = web3StatusCommand.pipe(
         }),
       );
     } else if (command.kind === Web3StatusCommandKind.connect) {
-      // networkReadOnly = command.network;
       return fromPromise(connectAccount(command.type)).pipe(
         map(address => {
           console.log(`Connected account: ${address}`);
@@ -91,13 +96,15 @@ export const web3Status$: Observable<Web3Status> = web3StatusCommand.pipe(
         map(() => {
           return Web3Status.readonly;
         }),
-        // TODO: error handling if any
         startWith(Web3Status.disconnecting),
       );
     } else if (command.kind === Web3StatusCommandKind.accountChanged) {
-      return of(Web3Status.ready).pipe(
-        startWith(Web3Status.connecting)
-      );
+      sessionStorage.setItem('lastConnectedWalletAddress', command.address);
+      return of(Web3Status.ready);
+    } else if (command.kind === Web3StatusCommandKind.chainChanged) {
+      if (document.location.href.indexOf('network=') !== -1) document.location.href = document.location.href.replace(/network=[a-z]+/i, 'network=' + (command.chainId === 1 ? 'main' : 'kovan'));
+      else document.location.href = document.location.href + '?network=' + (command.chainId === 1 ? 'main' : 'kovan');
+      return of(Web3Status.disconnecting);
     }
     throw new Error('Should not get here!');
   }),

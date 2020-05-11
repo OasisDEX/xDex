@@ -27,11 +27,11 @@
     "storybook:screenshots": "storybook-chrome-screenshot -p 9001 --inject-files ./.storybook/disable-animations.js"
   },
   "dependencies": {
-    "@makerdao/dai": "^0.28.3",
+    "@makerdao/dai": "0.28.3",
     "@makerdao/dai-plugin-mcd": "^1.3.7",
     "@makerdao/dai-plugin-trezor-web": "^0.9.6",
-    "@makerdao/dai-plugin-walletconnect": "^0.0.8",
-    "@makerdao/dai-plugin-walletlink": "^0.0.8",
+    "@makerdao/dai-plugin-walletconnect": "0.0.10",
+    "@makerdao/dai-plugin-walletlink": "0.0.9",
     "@types/mixpanel-browser": "^2.23.1",
     "@types/ramda": "^0.25.38",
     "@types/react-responsive": "^3.0.2",
