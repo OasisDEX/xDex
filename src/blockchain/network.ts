@@ -1,6 +1,6 @@
 // tslint:disable:no-console
 import { BigNumber } from 'bignumber.js';
-import { bindNodeCallback, combineLatest, concat, forkJoin, from, interval, Observable, of } from 'rxjs';
+import { bindNodeCallback, combineLatest, concat, forkJoin, from, interval, Observable, of, fromEvent } from 'rxjs';
 import { takeWhileInclusive } from 'rxjs-take-while-inclusive';
 import { ajax } from 'rxjs/ajax';
 import {
@@ -71,12 +71,14 @@ combineLatest(account$, context$)
     trackingEvents.accountChange(account!, network!);
   });
 
-export const onEveryBlock$ = combineLatest(every5Seconds$, context$).pipe(
-  switchMap(() => bindNodeCallback(web3.eth.getBlockNumber)()),
-  catchError((error, source) => {
-    console.log(error);
-    return concat(every5Seconds$.pipe(skip(1), first()), source);
-  }),
+export const onEveryBlock$ = web3Status$.pipe(
+  filter((web3Status) => web3Status === Web3Status.readonly),
+  switchMap(() =>
+    fromEvent(window.maker.service('accounts').getProvider(), 'block').pipe(
+      map((block: any) => parseInt(block.number.toString('hex'), 16)),
+      startWith(window.maker.service('web3')._currentBlock),
+    ),
+  ),
   distinctUntilChanged(),
   shareReplay(1),
 );
