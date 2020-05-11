@@ -120,7 +120,7 @@ export class MTMyPositionView extends React.Component<MTMyPositionViewProps & Mo
   public render() {
     const { ma, inDai, daiPrice } = this.props;
     const { liquidationPenalty } = ma;
-    const leverage = ma.leverage ? ma.leverage : ma.balance.gt(zero) ? one : zero;
+    const multiple = ma.multiple ? ma.multiple : ma.balance.gt(zero) ? one : zero;
     const liquidationPrice = ma.liquidationPrice ? ma.liquidationPrice : zero;
     const liquidationPriceMarket =
       ma.liquidationPrice && ma.midpointPrice && daiPrice.gt(zero) ? ma.liquidationPrice.div(daiPrice) : zero;
@@ -148,7 +148,7 @@ export class MTMyPositionView extends React.Component<MTMyPositionViewProps & Mo
             <div className={styles.summaryRow}>
               <div className={styles.summaryLabel}>Multiple</div>
               <div className={styles.summaryValue}>
-                {leverage.gt(zero) ? <> Long - {formatPrecision(leverage, 1)}x</> : <span>-</span>}
+                {multiple.gt(zero) ? <> Long - {formatPrecision(multiple, 1)}x</> : <span>-</span>}
               </div>
             </div>
             <div className={styles.summaryRow}>

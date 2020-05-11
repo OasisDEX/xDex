@@ -205,7 +205,7 @@ describe('Purchasing power marginable', () => {
   });
 });
 
-test('Events history - BuyLev', () => {
+test('Events history - BuyMultiple', () => {
   const history = calculateMTHistoryEvents(rawHistoryBuy, weth2);
 
   expect(history[2].debtDelta).toEqual(new BigNumber('100'));
@@ -213,7 +213,7 @@ test('Events history - BuyLev', () => {
   expect(history[2].dAmount).toEqual(new BigNumber('1'));
 });
 
-test('Events history - SellLev', () => {
+test('Events history - SellMultiple', () => {
   const history = calculateMTHistoryEvents(rawHistoryBuySell, weth2);
 
   expect(history[3].debtDelta).toEqual(new BigNumber('-100'));

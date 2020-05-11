@@ -110,8 +110,8 @@ export interface MTTransferFormState extends HasGasEstimation {
   realPurchasingPowerPost?: BigNumber;
   liquidationPrice?: BigNumber;
   liquidationPricePost?: BigNumber;
-  leveragePost?: BigNumber;
-  leveragePostPost?: BigNumber;
+  multiplePost?: BigNumber;
+  multiplePostPost?: BigNumber;
   daiBalance?: BigNumber;
   daiBalancePost?: BigNumber;
   balancePost?: BigNumber;
@@ -186,7 +186,7 @@ function applyChange(state: MTTransferFormState, change: MTSetupFormChange): MTT
         realPurchasingPowerPost: undefined,
         liquidationPricePost: undefined,
         balancePost: undefined,
-        leveragePostPost: undefined,
+        multiplePostPost: undefined,
         messages: [],
         progress: undefined,
       };
@@ -249,7 +249,7 @@ function updatePlan(state: MTTransferFormState): MTTransferFormState {
       realPurchasingPower,
       daiBalance,
       liquidationPricePost: undefined,
-      leveragePost: undefined,
+      multiplePost: undefined,
       balancePost: undefined,
       daiBalancePost: undefined,
       realPurchasingPowerPost: undefined,
@@ -287,7 +287,7 @@ function updatePlan(state: MTTransferFormState): MTTransferFormState {
       daiBalance,
       liquidationPrice,
       liquidationPricePost: undefined,
-      leveragePost: undefined,
+      multiplePost: undefined,
       balancePost: undefined,
       daiBalancePost: undefined,
       realPurchasingPowerPost: undefined,
@@ -323,7 +323,7 @@ function updatePlan(state: MTTransferFormState): MTTransferFormState {
 
   const isSafePost = postTradeAsset.safe;
   const liquidationPricePost = postTradeAsset.liquidationPrice;
-  const leveragePost = postTradeAsset.leverage;
+  const multiplePost = postTradeAsset.multiple;
   const balancePost = postTradeAsset.balance;
   const daiBalancePost = postTradeAsset.debt.gt(zero) ? postTradeAsset.debt.times(minusOne) : postTradeAsset.dai;
   const [, realPurchasingPowerPost] = realPurchasingPowerMarginable(postTradeAsset, state.orderbook.sell);
@@ -340,7 +340,7 @@ function updatePlan(state: MTTransferFormState): MTTransferFormState {
     messages,
     liquidationPrice,
     liquidationPricePost,
-    leveragePost,
+    multiplePost,
     balancePost,
     daiBalance,
     daiBalancePost,

@@ -76,7 +76,7 @@ const slippageLimitTooltip = `
 //   let debt = null;
 //   let cash = null;
 //   let referencePrice = null;
-//   let leverage = null;
+//   let multiple = null;
 //   let urnBalance = null;
 //
 //   if (value.mta && value.mta.state === MTAccountState.setup) {
@@ -86,7 +86,7 @@ const slippageLimitTooltip = `
 //     cash = ma!.dai;
 //     urnBalance = ma!.urnBalance;
 //     referencePrice = ma!.referencePrice;
-//     leverage = balance.times(referencePrice).div(balance.times(referencePrice).minus(debt));
+//     multiple = balance.times(referencePrice).div(balance.times(referencePrice).minus(debt));
 //   }
 //   return (<div style={{
 //     position: 'fixed',
@@ -140,7 +140,7 @@ const slippageLimitTooltip = `
 //         {referencePrice && referencePrice.toString()}
 //         <br/>
 //         LEVERAGE:
-//         {leverage && leverage.toString()}
+//         {multiple && multiple.toString()}
 //         <br/>
 //       </> : null
 //
@@ -292,7 +292,7 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState & {
         {this.slippageLimit()}
         {this.stabilityFee()}
         {this.accountBalance()}
-        {this.leverage()}
+        {this.multiple()}
         {this.price()}
         {this.liquidationPrice()}
       </div>
@@ -504,26 +504,26 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState & {
     );
   }
 
-  private leverage() {
-    const { leverage, leveragePost } = this.props;
-    const leverageDisplay = leverage && leverage.gt(zero) ? leverage : leveragePost ? zero : minusOne;
+  private multiple() {
+    const { multiple, multiplePost } = this.props;
+    const multipleDisplay = multiple && multiple.gt(zero) ? multiple : multiplePost ? zero : minusOne;
 
-    const leveragePostDisplay = leveragePost && leveragePost.gt(zero) ? leveragePost : minusOne;
+    const multiplePostDisplay = multiplePost && multiplePost.gt(zero) ? multiplePost : minusOne;
     return (
       <div
         className={classnames(
           styles.orderSummaryRow,
           styles.orderSummaryRowDark,
-          leveragePost ? styles.visible : styles.hidden,
+          multiplePost ? styles.visible : styles.hidden,
         )}
       >
         <div className={styles.orderSummaryLabel}>Multiple</div>
         <div className={styles.orderSummaryValue}>
-          {leverageDisplay.gt(zero) ? <>{formatPrecision(leverageDisplay, 1)}x</> : <span>-</span>}
-          {leveragePost && (
+          {multipleDisplay.gt(zero) ? <>{formatPrecision(multipleDisplay, 1)}x</> : <span>-</span>}
+          {multiplePost && (
             <>
               <span className={styles.transitionArrow} />
-              {leveragePostDisplay.gte(zero) ? <>{formatPrecision(leveragePostDisplay, 1)}x</> : <span>-</span>}
+              {multiplePostDisplay.gte(zero) ? <>{formatPrecision(multiplePostDisplay, 1)}x</> : <span>-</span>}
             </>
           )}
         </div>
@@ -1030,7 +1030,7 @@ function orderFormMessageContent(msg: OrderFormMessage) {
     case OrderFormMessageKind.bitable:
       return (
         <div className={styles.warningMessage}>
-          Your {msg.baseToken} leveraged position is now at risk of being liquidated. You can still avoid auction by{' '}
+          Your {msg.baseToken} multiply position is now at risk of being liquidated. You can still avoid auction by{' '}
           <br /> depositing {msg.baseToken} or DAI.
         </div>
       );

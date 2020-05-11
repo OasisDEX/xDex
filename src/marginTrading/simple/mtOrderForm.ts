@@ -209,8 +209,8 @@ export interface MTSimpleFormState extends HasGasEstimation {
   plan?: Operation[] | Impossible;
   collRatio?: BigNumber;
   collRatioPost?: BigNumber;
-  leverage?: BigNumber;
-  leveragePost?: BigNumber;
+  multiple?: BigNumber;
+  multiplePost?: BigNumber;
   liquidationPrice?: BigNumber;
   liquidationPricePost?: BigNumber;
   balancePost?: BigNumber;
@@ -606,7 +606,7 @@ type PlanInfo = [
   {
     collRatioPost?: BigNumber;
     liquidationPricePost?: BigNumber;
-    leveragePost?: BigNumber;
+    multiplePost?: BigNumber;
     balancePost?: BigNumber;
     daiBalancePost?: BigNumber;
     realPurchasingPowerPost?: BigNumber;
@@ -649,7 +649,7 @@ function getBuyPlan(
       {
         collRatioPost: undefined,
         liquidationPricePost: undefined,
-        leveragePost: undefined,
+        multiplePost: undefined,
         balancePost: undefined,
         daiBalancePost: undefined,
         realPurchasingPowerPost: undefined,
@@ -683,7 +683,7 @@ function getBuyPlan(
   const collRatioPost = postTradeAsset.currentCollRatio;
   const liquidationPricePost = postTradeAsset.liquidationPrice;
   const isSafePost = postTradeAsset.safe;
-  const leveragePost = postTradeAsset.leverage;
+  const multiplePost = postTradeAsset.multiple;
   const balancePost = postTradeAsset.balance;
   const daiBalancePost = postTradeAsset.debt.gt(zero) ? postTradeAsset.debt.times(minusOne) : postTradeAsset.dai;
 
@@ -701,7 +701,7 @@ function getBuyPlan(
       collRatioPost,
       liquidationPricePost,
       isSafePost,
-      leveragePost,
+      multiplePost,
       balancePost,
       daiBalancePost,
       realPurchasingPowerPost,
@@ -726,7 +726,7 @@ function getSellPlan(
       {
         collRatioPost: undefined,
         liquidationPricePost: undefined,
-        leveragePost: undefined,
+        multiplePost: undefined,
         balancePost: undefined,
         daiBalancePost: undefined,
         isSafePost: undefined,
@@ -750,7 +750,7 @@ function getSellPlan(
   const collRatioPost = postTradeAsset.currentCollRatio;
   const liquidationPricePost = postTradeAsset.liquidationPrice;
   const isSafePost = postTradeAsset.safe;
-  const leveragePost = postTradeAsset.leverage;
+  const multiplePost = postTradeAsset.multiple;
   const balancePost = postTradeAsset.balance;
   const daiBalancePost = postTradeAsset.debt.gt(zero) ? postTradeAsset.debt.times(minusOne) : postTradeAsset.dai;
 
@@ -761,7 +761,7 @@ function getSellPlan(
         delta,
       } as Required<EditableDebt>,
     ]),
-    { collRatioPost, liquidationPricePost, leveragePost, isSafePost, balancePost, daiBalancePost },
+    { collRatioPost, liquidationPricePost, multiplePost, isSafePost, balancePost, daiBalancePost },
   ];
 }
 
@@ -1073,7 +1073,7 @@ function addPreTradeInfo(state: MTSimpleFormState): MTSimpleFormState {
 
   const collRatio = ma && ma.currentCollRatio;
   const liquidationPrice = ma && ma.liquidationPrice;
-  const leverage = ma && ma.leverage;
+  const multiple = ma && ma.multiple;
   const isSafeCollRatio = ma && ma.isSafeCollRatio;
 
   return {
@@ -1081,7 +1081,7 @@ function addPreTradeInfo(state: MTSimpleFormState): MTSimpleFormState {
     collRatio,
     isSafeCollRatio,
     liquidationPrice,
-    leverage,
+    multiple,
   };
 }
 

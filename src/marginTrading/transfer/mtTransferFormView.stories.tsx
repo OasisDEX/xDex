@@ -34,7 +34,7 @@ const defaultParams = {
       rawLiquidationHistory: [],
     },
     liquidationPricePost: new BigNumber(2),
-    leveragePost: new BigNumber(4),
+    multiplePost: new BigNumber(4),
     balancePost: new BigNumber(5),
     daiBalance: new BigNumber(6),
     daiBalancePost: new BigNumber(6),

@@ -30,9 +30,9 @@ const assetCore = {
   safeCollRatio: new BigNumber(2),
 };
 
-const leverageHistory: RawMTHistoryEvent[] = [
+const multipleHistory: RawMTHistoryEvent[] = [
   {
-    kind: MTHistoryEventKind.buyLev,
+    kind: MTHistoryEventKind.buyMultiple,
     amount: new BigNumber(20),
     payAmount: new BigNumber(3000),
     timestamp: 1573140000,
@@ -72,7 +72,7 @@ const ethMarginableAsset = calculateMarginable(
     ...assetCore,
     referencePrice: new BigNumber(250),
     osmPriceNext: new BigNumber(250),
-    rawHistory: leverageHistory,
+    rawHistory: multipleHistory,
   }),
   { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook,
 );
@@ -102,7 +102,7 @@ const ethMarginableAsset2 = calculateMarginable(
     osmPriceNext: new BigNumber(130),
     // zzz: moment(new Date()).add(67, 'minutes').toDate(),
     zzz: new BigNumber(1),
-    rawHistory: leverageHistory,
+    rawHistory: multipleHistory,
   }),
   { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook,
 );
@@ -130,7 +130,7 @@ const ethMarginableAsset3 = calculateMarginable(
     ...assetCore,
     referencePrice: new BigNumber(130),
     osmPriceNext: new BigNumber(130),
-    rawHistory: [...leverageHistory, ...liquidationHistory],
+    rawHistory: [...multipleHistory, ...liquidationHistory],
   }),
   { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook,
 );
@@ -174,7 +174,7 @@ const ethMarginableAsset4 = calculateMarginable(
     referencePrice: new BigNumber(130),
     osmPriceNext: new BigNumber(130),
     redeemable: new BigNumber(0.8),
-    rawHistory: [...leverageHistory, ...liquidationHistory],
+    rawHistory: [...multipleHistory, ...liquidationHistory],
   }),
   { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook,
 );
@@ -203,7 +203,7 @@ const ethMarginableAsset5 = calculateMarginable(
     referencePrice: new BigNumber(250),
     osmPriceNext: new BigNumber(250),
     redeemable: new BigNumber(0.8),
-    rawHistory: [...leverageHistory, ...liquidationHistory],
+    rawHistory: [...multipleHistory, ...liquidationHistory],
   }),
   { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook,
 );
@@ -240,7 +240,7 @@ const ethMarginableAsset6 = calculateMarginable(
     referencePrice: new BigNumber(250),
     osmPriceNext: new BigNumber(250),
     redeemable: new BigNumber(0),
-    rawHistory: [...leverageHistory, ...liquidationHistory],
+    rawHistory: [...multipleHistory, ...liquidationHistory],
   }),
   { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook,
 );

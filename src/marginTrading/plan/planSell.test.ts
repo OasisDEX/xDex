@@ -110,7 +110,7 @@ describe('planSell', () => {
     expect(plan).toEqual([
       {
         amount: new BigNumber('10'),
-        kind: 'sellLev',
+        kind: 'sellMultiple',
         maxTotal: new BigNumber('2000'),
         name: 'WETH',
         slippageLimit: zero,
@@ -143,7 +143,7 @@ describe('planSell', () => {
     expect(plan).toEqual([
       {
         amount: new BigNumber('10'),
-        kind: 'sellLev',
+        kind: 'sellMultiple',
         maxTotal: new BigNumber('2000'),
         name: 'WETH',
         slippageLimit: zero,
@@ -176,7 +176,7 @@ describe('planSell', () => {
     expect(plan).toEqual([
       {
         amount: new BigNumber('1'),
-        kind: 'sellLev',
+        kind: 'sellMultiple',
         maxTotal: new BigNumber('200'),
         name: 'WETH',
         slippageLimit: zero,
@@ -210,7 +210,7 @@ describe('planSell', () => {
     expect(plan).toEqual([
       {
         amount: new BigNumber('1'),
-        kind: 'sellLev',
+        kind: 'sellMultiple',
         maxTotal: new BigNumber('200'),
         name: 'WETH',
         slippageLimit: zero,
@@ -244,7 +244,7 @@ describe('planSell', () => {
     expect(plan).toEqual([
       {
         amount: new BigNumber('2'),
-        kind: 'sellLev',
+        kind: 'sellMultiple',
         maxTotal: new BigNumber('400'),
         name: 'WETH',
         slippageLimit: zero,

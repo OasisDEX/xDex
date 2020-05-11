@@ -187,13 +187,13 @@ export function calculateMTHistoryEvents(rawHistory: RawMTHistoryEvent[], ma: Ma
       cash = cash.minus(h.amount);
       event = { ...h, token: ma.name, dDAIAmount: h.amount };
     }
-    if (h.kind === MTHistoryEventKind.buyLev) {
+    if (h.kind === MTHistoryEventKind.buyMultiple) {
       const priceDai = h.payAmount.div(h.amount);
       balance = balance.plus(h.amount);
       cash = cash.minus(h.payAmount);
       event = { ...h, priceDai, token: ma.name, dAmount: h.amount, dDAIAmount: h.payAmount };
     }
-    if (h.kind === MTHistoryEventKind.sellLev) {
+    if (h.kind === MTHistoryEventKind.sellMultiple) {
       const priceDai = h.payAmount.div(h.amount);
       balance = balance.minus(h.amount);
       cash = cash.plus(h.payAmount);
@@ -301,7 +301,7 @@ export function calculateMarginable(ma: MarginableAssetCore, orderbook: Orderboo
 
   const liquidationInProgress = biteLastIndex >= 0 && biteLastIndex > dentLastIndex;
 
-  const leverage = ma.balance.times(ma.referencePrice).div(ma.balance.times(ma.referencePrice).minus(ma.debt));
+  const multiple = ma.balance.times(ma.referencePrice).div(ma.balance.times(ma.referencePrice).minus(ma.debt));
 
   let bitable = mtBitable.no;
   if (ma.osmPriceNext && ma.osmPriceNext.lte(liquidationPrice)) {
@@ -353,7 +353,7 @@ export function calculateMarginable(ma: MarginableAssetCore, orderbook: Orderboo
     maxSafeLeverage,
     liquidationPrice,
     markPrice,
-    leverage,
+    multiple,
     lockedBalance,
     availableBalance,
     safe,

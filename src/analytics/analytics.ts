@@ -49,10 +49,10 @@ export const trackingEvents = {
       id: 'initiate-trade',
       product: 'oasis-trade',
       page: 'Leverage',
-      section: 'manage-leverage',
+      section: 'manage-multiple',
     });
 
-    const fathomGoal = kind === OfferType.buy ? Fathom.fathomGoals.leverageBuy : Fathom.fathomGoals.leverageSell;
+    const fathomGoal = kind === OfferType.buy ? Fathom.fathomGoals.multipleBuy : Fathom.fathomGoals.multipleSell;
 
     Fathom.trackGoal(fathomGoal, total);
   },

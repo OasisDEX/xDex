@@ -106,7 +106,7 @@ export function createBalancesView$(
 export class MTBalancesViewInternalImpl extends React.Component<MTBalancesProps & MTBalancesOwnProps & RouterProps> {
   public render() {
     return (
-      <Table className={classnames(styles.table, styles.leveragedAssets)} align="left">
+      <Table className={classnames(styles.table, styles.multipleAssets)} align="left">
         <thead>
           <tr>
             <th>Asset</th>
@@ -132,7 +132,7 @@ export class MTBalancesViewInternalImpl extends React.Component<MTBalancesProps 
                 const asset: MarginableAsset = combinedBalance.asset!;
                 const lastEvent = asset.rawHistory.slice(-1)[0] || undefined;
                 const daiPrice = this.props.daiPrice;
-                const leverage = asset.leverage ? asset.leverage : asset.balance.gt(zero) ? one : zero;
+                const multiple = asset.multiple ? asset.multiple : asset.balance.gt(zero) ? one : zero;
                 const liquidationPrice = asset.liquidationPrice ? asset.liquidationPrice : zero;
                 const liquidationPriceMarket =
                   liquidationPrice && asset.midpointPrice ? liquidationPrice.times(daiPrice) : zero;
@@ -159,7 +159,7 @@ export class MTBalancesViewInternalImpl extends React.Component<MTBalancesProps 
                       </div>
                     </td>
                     <td className={styles.amount}>
-                      {leverage.gt(zero) ? <> Long - {formatPrecision(leverage, 1)}x</> : <span>-</span>}
+                      {multiple.gt(zero) ? <> Long - {formatPrecision(multiple, 1)}x</> : <span>-</span>}
                     </td>
                     <td className={styles.amount}>
                       {asset.equity && <CryptoMoney value={asset.equity} token="DAI" fallback="-" />}
