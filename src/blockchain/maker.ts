@@ -9,7 +9,7 @@ import { networksByName } from './config';
 // import trezorPlugin from '@makerdao/dai-plugin-trezor-web';
 
 import Web3 from 'web3';
-import { WalletType, executeWeb3StatusCommand, Web3StatusCommandKind } from './web3';
+import { executeWeb3StatusCommand, WalletType, Web3StatusCommandKind } from './web3';
 
 let maker: any; // TODO: is there a type def for Maker object?
 export async function setupMaker(networkId: string): Promise<Web3> {

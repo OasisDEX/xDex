@@ -1,18 +1,16 @@
 // tslint:disable:no-console
 import { BigNumber } from 'bignumber.js';
-import { bindNodeCallback, combineLatest, concat, forkJoin, from, interval, Observable, of, fromEvent } from 'rxjs';
+import { bindNodeCallback, combineLatest, forkJoin, from, fromEvent, interval, Observable, of } from 'rxjs';
 import { takeWhileInclusive } from 'rxjs-take-while-inclusive';
 import { ajax } from 'rxjs/ajax';
 import {
   catchError,
   distinctUntilChanged,
   filter,
-  first,
   last,
   map,
   mergeMap,
   shareReplay,
-  skip,
   startWith,
   switchMap,
 } from 'rxjs/operators';
