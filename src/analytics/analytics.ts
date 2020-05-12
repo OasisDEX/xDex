@@ -43,12 +43,12 @@ export const trackingEvents = {
 
     Fathom.trackGoal(fathomGoal[pair], total);
   },
-  initiateTradeLeverage: (kind: OfferType, total: number) => {
+  initiateTradeMultiply: (kind: OfferType, total: number) => {
     mixpanel.track('btn-click', {
       kind,
       id: 'initiate-trade',
       product: 'oasis-trade',
-      page: 'Leverage',
+      page: 'Multiply',
       section: 'manage-multiple',
     });
 
@@ -95,7 +95,7 @@ export const trackingEvents = {
     mixpanel.track('btn-click', {
       id: `${actionKind}-${token === 'DAI' ? 'dai' : 'collateral'}-submit`,
       product: 'oasis-trade',
-      page: 'Leverage',
+      page: 'Multiply',
       section: 'deposit-withdraw-modal',
       currency: token,
     });
@@ -110,7 +110,7 @@ export const trackingEvents = {
     mixpanel.track('btn-click', {
       id: 'dai-usd-toggle',
       product: 'oasis-trade',
-      page: 'Leverage',
+      page: 'Multiply',
       section: 'my-position',
       currency: toggle ? 'usd' : 'dai',
     });
@@ -119,7 +119,7 @@ export const trackingEvents = {
     mixpanel.track('btn-click', {
       id: 'fund-collateral-open',
       product: 'oasis-trade',
-      page: 'Leverage',
+      page: 'Multiply',
       section: 'my-position',
     });
   },
@@ -127,7 +127,7 @@ export const trackingEvents = {
     mixpanel.track('btn-click', {
       id: 'fund-dai-open',
       product: 'oasis-trade',
-      page: 'Leverage',
+      page: 'Multiply',
       section: 'my-position',
     });
   },
@@ -135,7 +135,7 @@ export const trackingEvents = {
     mixpanel.track('btn-click', {
       id: 'draw-collateral-open',
       product: 'oasis-trade',
-      page: 'Leverage',
+      page: 'Multiply',
       section: 'my-position',
     });
   },
@@ -143,7 +143,7 @@ export const trackingEvents = {
     mixpanel.track('btn-click', {
       id: 'draw-dai-open',
       product: 'oasis-trade',
-      page: 'Leverage',
+      page: 'Multiply',
       section: 'my-position',
     });
   },

@@ -202,7 +202,7 @@ export interface MarginableAsset extends MarginableAssetCore {
   markPrice: BigNumber;
   multiple: BigNumber;
   availableDebt: BigNumber;
-  maxSafeLeverage: BigNumber;
+  maxSafeMultiply: BigNumber;
   availableActions: UserActionKind[];
   availableBalance: BigNumber;
   lockedBalance: BigNumber;

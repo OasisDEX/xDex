@@ -274,7 +274,7 @@ export function calculateMarginable(ma: MarginableAssetCore, orderbook: Orderboo
   const lockedBalance = BigNumber.min(balance, debt.div(ma.referencePrice).times(ma.safeCollRatio));
   const availableBalance = BigNumber.max(zero, balance.minus(lockedBalance));
   const currentCollRatio = debt.gt(0) ? balanceInCash.dividedBy(debt) : undefined;
-  const maxSafeLeverage = one.div(one.minus(one.div(ma.safeCollRatio)));
+  const maxSafeMultiply = one.div(one.minus(one.div(ma.safeCollRatio)));
   const maxDebt = balanceInCash.div(ma.safeCollRatio);
   const availableDebt = BigNumber.max(zero, maxDebt.minus(debt));
 
@@ -350,7 +350,7 @@ export function calculateMarginable(ma: MarginableAssetCore, orderbook: Orderboo
     maxDebt,
     availableDebt,
     currentCollRatio,
-    maxSafeLeverage,
+    maxSafeMultiply,
     liquidationPrice,
     markPrice,
     multiple,

@@ -46,7 +46,7 @@ const defaultParams = {
     totalAssetValue: new BigNumber(3),
     totalDebt: new BigNumber(4),
     totalAvailableDebt: new BigNumber(0),
-    totalLeverage: new BigNumber(5),
+    totalMultiply: new BigNumber(5),
     proxy: null,
     approve: () => of({} as TxState),
   } as MTAccount,
