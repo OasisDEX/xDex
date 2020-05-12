@@ -159,6 +159,24 @@ function findAuctionBite(rawHistory: RawMTHistoryEvent[], auctionId: number) {
   })[0] as MTLiquidationEvent;
 }
 
+function findAuctionWinningLot(rawHistory: RawMTHistoryEvent[], auctionId: number) {
+  let lot: BigNumber | undefined;
+  rawHistory.forEach((h: any) => {
+    if (h.id === auctionId && h.kind === MTHistoryEventKind.dent) {
+      lot = h.lot;
+    }
+  });
+  if (!lot) {
+    rawHistory.forEach((h: any) => {
+      if (h.id === auctionId && h.kind === MTHistoryEventKind.tend) {
+        lot = h.lot;
+      }
+    });
+  }
+
+  return lot;
+}
+
 export function calculateMTHistoryEvents(rawHistory: RawMTHistoryEvent[], ma: MarginableAssetCore): MTHistoryEvent[] {
   let balance = zero;
   let cash = zero;
@@ -209,12 +227,18 @@ export function calculateMTHistoryEvents(rawHistory: RawMTHistoryEvent[], ma: Ma
       event = { ...h, token: ma.name, redeemable: bite.ink.minus(h.lot) };
     }
 
+    if (h.kind === MTHistoryEventKind.deal) {
+      const lot: BigNumber | undefined = findAuctionWinningLot(rawHistory, h.id);
+      // @ts-ignore
+      event = { ...h, token: ma.name, dAmount: lot };
+    }
+
     if (h.kind === MTHistoryEventKind.redeem) {
       balance = balance.plus(h.amount);
       event = { ...h, token: ma.name, dAmount: h.amount };
     }
     if (h.kind === MTHistoryEventKind.bite) {
-      event = { ...h, token: ma.name, dAmount: h.ink.times(minusOne), dDAIAmount: h.tab };
+      event = { ...h, token: ma.name, dAmount: h.ink, dDAIAmount: h.tab };
     }
 
     const prevDebt = debt;
@@ -242,10 +266,10 @@ export function calculateMTHistoryEvents(rawHistory: RawMTHistoryEvent[], ma: Ma
     const prevLiquidationPrice = liquidationPrice;
 
     liquidationPrice = debt.gt(zero) && balance.gt(zero) ? ma.minCollRatio.times(debt).div(balance) : zero;
-
+    event = { ...event, liquidationPrice };
     if (prevLiquidationPrice.gte(zero) && !liquidationPrice.isEqualTo(prevLiquidationPrice)) {
       const liquidationPriceDelta = prevLiquidationPrice.minus(liquidationPrice).times(minusOne);
-      event = { ...event, liquidationPriceDelta, liquidationPrice };
+      event = { ...event, liquidationPriceDelta };
     }
 
     equity = h.price && h.price.gt(zero) ? balance.times(h.price).plus(cash) : zero;

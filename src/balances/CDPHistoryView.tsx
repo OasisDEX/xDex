@@ -125,6 +125,11 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
                   break;
                 case MTHistoryEventKind.deal:
                   displayName = `Deal (#${e.auctionId})`;
+                  amount = (
+                    <>
+                      <FormatFiat value={dAmount} token={e.token} /> {e.token}
+                    </>
+                  );
                   break;
                 case MTHistoryEventKind.redeem:
                   amount = (
