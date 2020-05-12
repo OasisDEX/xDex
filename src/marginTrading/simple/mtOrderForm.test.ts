@@ -294,7 +294,7 @@ test('buy with multiple - add more to actual debt', () => {
 });
 
 // Below happens with the current OTC contract. Dusty amount of dai may rest in urn after
-// an OTC transaction during buyMultiple/sellMultiple procedure.
+// an OTC transaction during buy/sell procedure.
 test('buy with multiple - with debt and dusty dai balance (edge case)', () => {
   const weth = {
     ...wethEmpty,

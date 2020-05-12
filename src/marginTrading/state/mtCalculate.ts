@@ -187,13 +187,13 @@ export function calculateMTHistoryEvents(rawHistory: RawMTHistoryEvent[], ma: Ma
       cash = cash.minus(h.amount);
       event = { ...h, token: ma.name, dDAIAmount: h.amount };
     }
-    if (h.kind === MTHistoryEventKind.buyMultiple) {
+    if (h.kind === MTHistoryEventKind.buy) {
       const priceDai = h.payAmount.div(h.amount);
       balance = balance.plus(h.amount);
       cash = cash.minus(h.payAmount);
       event = { ...h, priceDai, token: ma.name, dAmount: h.amount, dDAIAmount: h.payAmount };
     }
-    if (h.kind === MTHistoryEventKind.sellMultiple) {
+    if (h.kind === MTHistoryEventKind.sell) {
       const priceDai = h.payAmount.div(h.amount);
       balance = balance.minus(h.amount);
       cash = cash.plus(h.payAmount);

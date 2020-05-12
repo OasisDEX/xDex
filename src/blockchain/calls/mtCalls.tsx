@@ -187,9 +187,9 @@ function argsOfPerformOperations({ plan }: { plan: Operation[] }, context: Netwo
     [OperationKind.drawDai]: () =>
       context.proxyActions.contract.methods.drawDai(...drawDaiArgs(plan[0], 'DAI')).encodeABI(),
     [OperationKind.buyRecursively]: () =>
-      context.proxyActions.contract.methods.buyMultiple(...buySellArgs(plan[0])).encodeABI(),
+      context.proxyActions.contract.methods.buy(...buySellArgs(plan[0])).encodeABI(),
     [OperationKind.sellRecursively]: () =>
-      context.proxyActions.contract.methods.sellMultiple(...buySellArgs(plan[0])).encodeABI(),
+      context.proxyActions.contract.methods.sell(...buySellArgs(plan[0])).encodeABI(),
   };
 
   if (!types[plan[0].kind]) {

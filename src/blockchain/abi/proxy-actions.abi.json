@@ -27,7 +27,7 @@
         "type": "uint256"
       }
     ],
-    "name": "BuyMultiple",
+    "name": "Buy",
     "type": "event"
   },
   {
@@ -203,7 +203,7 @@
         "type": "uint256"
       }
     ],
-    "name": "SellMultiple",
+    "name": "Sell",
     "type": "event"
   },
   {
@@ -291,7 +291,7 @@
         "type": "uint256"
       }
     ],
-    "name": "buyMultiple",
+    "name": "buy",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
@@ -567,7 +567,7 @@
         "type": "uint256"
       }
     ],
-    "name": "sellMultiple",
+    "name": "sell",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",

@@ -32,7 +32,7 @@ const assetCore = {
 
 const multipleHistory: RawMTHistoryEvent[] = [
   {
-    kind: MTHistoryEventKind.buyMultiple,
+    kind: MTHistoryEventKind.buy,
     amount: new BigNumber(20),
     payAmount: new BigNumber(3000),
     timestamp: 1573140000,

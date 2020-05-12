@@ -15,8 +15,8 @@ export enum OperationKind {
   fundDai = 'fundDai',
   drawGem = 'drawGem',
   drawDai = 'drawDai',
-  buyRecursively = 'buyMultiple',
-  sellRecursively = 'sellMultiple',
+  buyRecursively = 'buy',
+  sellRecursively = 'sell',
 }
 
 export type Operation =
@@ -80,8 +80,8 @@ export enum MTHistoryEventKind {
   drawGem = 'DrawGem',
   drawDai = 'DrawDai',
   adjust = 'Adjust',
-  buyMultiple = 'BuyMultiple',
-  sellMultiple = 'SellMultiple',
+  buy = 'Buy',
+  sell = 'Sell',
   bite = 'Bite',
   kick = 'Kick',
   tend = 'Tend',
@@ -132,7 +132,7 @@ export type MTMarginEvent = {
       ddai: BigNumber;
     }
   | {
-      kind: MTHistoryEventKind.buyMultiple | MTHistoryEventKind.sellMultiple;
+      kind: MTHistoryEventKind.buy | MTHistoryEventKind.sell;
       amount: BigNumber;
       payAmount: BigNumber;
     }
