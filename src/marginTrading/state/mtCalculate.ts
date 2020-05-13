@@ -6,6 +6,8 @@ import { BigNumber } from 'bignumber.js';
 import { findLastIndex } from 'lodash';
 import * as moment from 'moment';
 import { Dictionary } from 'ramda';
+import { last } from 'rxjs/operators';
+import { tokenPricesInUSD$ } from '../../blockchain/network';
 import { nullAddress } from '../../blockchain/utils';
 import { Offer, OfferType, Orderbook } from '../../exchange/orderbook/orderbook';
 import { minusOne, one, zero } from '../../utils/zero';
@@ -327,15 +329,6 @@ export function calculateMarginable(ma: MarginableAssetCore, orderbook: Orderboo
 
   const multiple = ma.balance.times(ma.referencePrice).div(ma.balance.times(ma.referencePrice).minus(ma.debt));
 
-  let bitable = mtBitable.no;
-  if (ma.osmPriceNext && ma.osmPriceNext.lte(liquidationPrice)) {
-    bitable = mtBitable.imminent;
-  }
-
-  if (ma.referencePrice.lte(liquidationPrice)) {
-    bitable = mtBitable.yes;
-  }
-
   let runningAuctions = 0;
   ma.rawHistory.forEach((h) => {
     if (h.kind === MTHistoryEventKind.bite) {
@@ -353,15 +346,28 @@ export function calculateMarginable(ma: MarginableAssetCore, orderbook: Orderboo
     }
   });
 
-  const lastPriceUpdate = moment.unix(ma.zzz.toNumber());
-  const duration = moment.duration(lastPriceUpdate.add(1, 'hours').diff(moment(new Date())));
+  const ONE_HOUR = 60 * 60;
+  const nowTs = Math.round(Date.now()/1000);
+  const lastUpdateTs = ma.zzz.toNumber();
+  const priceUpdateDelta =  lastUpdateTs + ONE_HOUR - nowTs;
+  const nextPriceUpdateDelta = moment.utc(priceUpdateDelta * 1000).format('mm:ss');
 
-  const nextPriceUpdateDelta = moment.utc(Math.abs(duration.asMilliseconds())).format('mm:ss');
+  let bitable = mtBitable.no;
+  if (ma.osmPriceNext && ma.osmPriceNext.lte(liquidationPrice)) {
+    bitable = mtBitable.imminent;
+  }
+
+  if (ma.referencePrice.lte(liquidationPrice)) {
+    bitable = mtBitable.yes;
+  }
+
+  if (priceUpdateDelta <= 0 && ma.osmPriceNext && ma.osmPriceNext.lte(liquidationPrice)) {
+    bitable = mtBitable.yes;
+  }
+
   const fee = ma.fee.times(100);
   const liquidationPenalty = ma.liquidationPenalty.gt(zero) ? ma.liquidationPenalty.minus(1).times(100) : zero;
-
   const isSafeCollRatio = !(currentCollRatio && currentCollRatio.lt(SAFE_COLL_RATIO_SELL));
-
   const markPrice = ma.osmPriceNext ? ma.osmPriceNext : zero;
 
   return {
