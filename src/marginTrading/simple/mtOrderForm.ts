@@ -79,7 +79,7 @@ export enum LiquidationMessageKind {
   imminent = 'imminent',
   inProgress = 'inProgress',
   redeemable = 'redeemable',
-  priceDrop = 'priceDrop'
+  priceDrop = 'priceDrop',
 }
 
 export enum OrderFormMessageKind {

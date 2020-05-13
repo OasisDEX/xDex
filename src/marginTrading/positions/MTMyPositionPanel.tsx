@@ -101,17 +101,19 @@ export class MTLiquidationNotification extends React.Component<Loadable<MTMyPosi
                 transactions={transactions}
               />
             )}
-          </div>
+          </div>,
         );
       }
 
-      warnings.push(
-        <div className={myPositionStyles.warningMessage} key="price-drop-warning">
-          {liquidationMessageContent({kind: LiquidationMessageKind.priceDrop})}
-        </div>
-      )
+      if (ma.priceDropWarning) {
+        warnings.push(
+          <div className={myPositionStyles.warningMessage} key="price-drop-warning">
+            {liquidationMessageContent({ kind: LiquidationMessageKind.priceDrop })}
+          </div>,
+        );
+      }
 
-      return <div className={myPositionStyles.messagesWrapper}>{warnings}</div>
+      return <div className={myPositionStyles.messagesWrapper}>{warnings}</div>;
     }
     return null;
   }
@@ -123,8 +125,8 @@ function liquidationMessageContent(msg: LiquidationMessage) {
     case LiquidationMessageKind.bitable:
       return (
         <>
-          Your {msg.baseToken} multiplied position is now at risk of being liquidated. You can still avoid auction by depositing{' '}
-          {msg.baseToken} or DAI.
+          Your {msg.baseToken} multiplied position is now at risk of being liquidated. You can still avoid auction by
+          depositing {msg.baseToken} or DAI.
         </>
       );
 
@@ -158,7 +160,8 @@ function liquidationMessageContent(msg: LiquidationMessage) {
     case LiquidationMessageKind.priceDrop:
       return (
         <>
-          Market price has dropped below the liquidation price. Your multiplied position might be at risk of being liquidated shortly.
+          Market price has dropped below the liquidation price. Your multiplied position might be at risk of being
+          liquidated shortly.
         </>
       );
     // tslint:enable
@@ -216,7 +219,7 @@ export class MTMyPositionPanel extends React.Component<Loadable<MTMyPositionPane
 export class MTMyPositionPanelInternal extends React.Component<
   MTMyPositionPanelInternalProps & ModalOpenerProps,
   { blocked: boolean }
-  > {
+> {
   public constructor(props: any) {
     super(props);
     // TODO: this should come from the pipeline;

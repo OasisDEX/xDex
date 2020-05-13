@@ -6,8 +6,6 @@ import { BigNumber } from 'bignumber.js';
 import { findLastIndex } from 'lodash';
 import * as moment from 'moment';
 import { Dictionary } from 'ramda';
-import { last } from 'rxjs/operators';
-import { tokenPricesInUSD$ } from '../../blockchain/network';
 import { nullAddress } from '../../blockchain/utils';
 import { Offer, OfferType, Orderbook } from '../../exchange/orderbook/orderbook';
 import { minusOne, one, zero } from '../../utils/zero';
@@ -293,10 +291,11 @@ export function calculateMarginable(ma: MarginableAssetCore, orderbook: Orderboo
   const { debt, dai, balance } = ma;
   const [, purchasingPower] = realPurchasingPowerMarginable(ma, orderbook.sell);
   const midpointPrice = calculateMidpointPrice(orderbook);
-  const equity = midpointPrice && midpointPrice.gt(zero) ? balance.times(midpointPrice).minus(debt).plus(dai) : undefined;
+  const equity =
+    midpointPrice && midpointPrice.gt(zero) ? balance.times(midpointPrice).minus(debt).plus(dai) : undefined;
   const availableActions = marginableAvailableActions(ma);
   const balanceInCash = balance.times(ma.referencePrice);
-  const balanceInDai = midpointPrice ? balance.times(midpointPrice): undefined;
+  const balanceInDai = midpointPrice ? balance.times(midpointPrice) : undefined;
   const lockedBalance = BigNumber.min(balance, debt.div(ma.referencePrice).times(ma.safeCollRatio));
   const availableBalance = BigNumber.max(zero, balance.minus(lockedBalance));
   const currentCollRatio = debt.gt(0) ? balanceInCash.dividedBy(debt) : undefined;
@@ -347,9 +346,9 @@ export function calculateMarginable(ma: MarginableAssetCore, orderbook: Orderboo
   });
 
   const ONE_HOUR = 60 * 60;
-  const nowTs = Math.round(Date.now()/1000);
+  const nowTs = Math.round(Date.now() / 1000);
   const lastUpdateTs = ma.zzz.toNumber();
-  const priceUpdateDelta =  lastUpdateTs + ONE_HOUR - nowTs;
+  const priceUpdateDelta = (lastUpdateTs as number) + ONE_HOUR - nowTs;
   const nextPriceUpdateDelta = moment.utc(priceUpdateDelta * 1000).format('mm:ss');
 
   let bitable = mtBitable.no;
@@ -365,9 +364,15 @@ export function calculateMarginable(ma: MarginableAssetCore, orderbook: Orderboo
     bitable = mtBitable.yes;
   }
 
-    let priceDropWarning = false;
-  if (ma.osmPriceNext && ma.osmPriceNext.gt(liquidationPrice) && ma.referencePrice.gt(liquidationPrice)
-    && midpointPrice.gt(zero) && midpointPrice.lt(liquidationPrice)) {
+  let priceDropWarning = false;
+  if (
+    ma.osmPriceNext &&
+    ma.osmPriceNext.gt(liquidationPrice) &&
+    ma.referencePrice.gt(liquidationPrice) &&
+    midpointPrice &&
+    midpointPrice.gt(zero) &&
+    midpointPrice.lt(liquidationPrice)
+  ) {
     priceDropWarning = true;
   }
 
@@ -404,7 +409,7 @@ export function calculateMarginable(ma: MarginableAssetCore, orderbook: Orderboo
     fee,
     liquidationPenalty,
     isSafeCollRatio,
-    priceDropWarning
+    priceDropWarning,
   };
 }
 

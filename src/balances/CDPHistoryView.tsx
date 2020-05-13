@@ -143,11 +143,7 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
                   displayName = e.kind;
               }
 
-              const price = e.priceDai
-                ? e.priceDai
-                : e.price && e.price.gt(zero)
-                  ? e.price
-                  : undefined;
+              const price = e.priceDai ? e.priceDai : e.price && e.price.gt(zero) ? e.price : undefined;
 
               return (
                 <tr key={i}>
