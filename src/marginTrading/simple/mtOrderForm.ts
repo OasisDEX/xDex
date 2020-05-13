@@ -79,6 +79,7 @@ export enum LiquidationMessageKind {
   imminent = 'imminent',
   inProgress = 'inProgress',
   redeemable = 'redeemable',
+  priceDrop = 'priceDrop'
 }
 
 export enum OrderFormMessageKind {
@@ -108,6 +109,9 @@ export type LiquidationMessage =
       kind: LiquidationMessageKind.redeemable;
       baseToken?: string;
       redeemable?: string;
+    }
+  | {
+      kind: LiquidationMessageKind.priceDrop;
     };
 
 export type OrderFormMessage =

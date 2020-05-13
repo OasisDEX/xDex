@@ -365,6 +365,12 @@ export function calculateMarginable(ma: MarginableAssetCore, orderbook: Orderboo
     bitable = mtBitable.yes;
   }
 
+    let priceDropWarning = false;
+  if (ma.osmPriceNext && ma.osmPriceNext.gt(liquidationPrice) && ma.referencePrice.gt(liquidationPrice)
+    && midpointPrice.gt(zero) && midpointPrice.lt(liquidationPrice)) {
+    priceDropWarning = true;
+  }
+
   const fee = ma.fee.times(100);
   const liquidationPenalty = ma.liquidationPenalty.gt(zero) ? ma.liquidationPenalty.minus(1).times(100) : zero;
   const isSafeCollRatio = !(currentCollRatio && currentCollRatio.lt(SAFE_COLL_RATIO_SELL));
@@ -398,6 +404,7 @@ export function calculateMarginable(ma: MarginableAssetCore, orderbook: Orderboo
     fee,
     liquidationPenalty,
     isSafeCollRatio,
+    priceDropWarning
   };
 }
 

@@ -76,14 +76,15 @@ export class MTLiquidationNotification extends React.Component<Loadable<MTMyPosi
     if (this.props.value && this.props.status === 'loaded' && this.props.value.mta) {
       const { mta, ma, redeem, transactions, liquidationMessage } = this.props.value;
 
+      const warnings = [];
       if (liquidationMessage) {
         const warningClass =
           liquidationMessage.kind === LiquidationMessageKind.redeemable
             ? myPositionStyles.infoMessage
-            : myPositionStyles.warningMessage;
+            : myPositionStyles.dangerMessage;
 
-        return (
-          <div className={warningClass}>
+        warnings.push(
+          <div className={warningClass} key="liquidation-warning">
             <>{liquidationMessage.kind !== LiquidationMessageKind.redeemable && <SvgImage image={warningIconSvg} />}</>
             <span className={myPositionStyles.warningText}>{liquidationMessageContent(liquidationMessage)}</span>
             {liquidationMessage.kind === LiquidationMessageKind.redeemable && ma.redeemable.gt(zero) && (
@@ -103,6 +104,14 @@ export class MTLiquidationNotification extends React.Component<Loadable<MTMyPosi
           </div>
         );
       }
+
+      warnings.push(
+        <div className={myPositionStyles.warningMessage} key="price-drop-warning">
+          {liquidationMessageContent({kind: LiquidationMessageKind.priceDrop})}
+        </div>
+      )
+
+      return <div className={myPositionStyles.messagesWrapper}>{warnings}</div>
     }
     return null;
   }
@@ -114,7 +123,7 @@ function liquidationMessageContent(msg: LiquidationMessage) {
     case LiquidationMessageKind.bitable:
       return (
         <>
-          Your WETH multiplied position is now at risk of being liquidated. You can still avoid auction by depositing{' '}
+          Your {msg.baseToken} multiplied position is now at risk of being liquidated. You can still avoid auction by depositing{' '}
           {msg.baseToken} or DAI.
         </>
       );
@@ -143,6 +152,13 @@ function liquidationMessageContent(msg: LiquidationMessage) {
         <>
           Your {msg.baseToken} multiplied position has been liquidated and sold to cover your debt. You have{' '}
           {msg.redeemable} {msg.baseToken} that was not sold and can now be reclaimed.
+        </>
+      );
+
+    case LiquidationMessageKind.priceDrop:
+      return (
+        <>
+          Market price has dropped below the liquidation price. Your multiplied position might be at risk of being liquidated shortly.
         </>
       );
     // tslint:enable
@@ -200,7 +216,7 @@ export class MTMyPositionPanel extends React.Component<Loadable<MTMyPositionPane
 export class MTMyPositionPanelInternal extends React.Component<
   MTMyPositionPanelInternalProps & ModalOpenerProps,
   { blocked: boolean }
-> {
+  > {
   public constructor(props: any) {
     super(props);
     // TODO: this should come from the pipeline;

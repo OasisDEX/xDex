@@ -217,6 +217,7 @@ export interface MarginableAsset extends MarginableAssetCore {
   purchasingPower: BigNumber;
   equity?: BigNumber;
   isSafeCollRatio?: boolean;
+  priceDropWarning: boolean;
 }
 
 // export interface NonMarginableAssetCore extends Core {
