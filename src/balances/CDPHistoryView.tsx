@@ -99,7 +99,7 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
                   );
                   displayName = 'Deposit';
                   break;
-                case MTHistoryEventKind.buyLev:
+                case MTHistoryEventKind.buy:
                   amount = (
                     <>
                       <FormatFiat value={dAmount} token={e.token} /> {e.token}
@@ -107,7 +107,7 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
                   );
                   displayName = <span className={styles.eventPositive}>Buy</span>;
                   break;
-                case MTHistoryEventKind.sellLev:
+                case MTHistoryEventKind.sell:
                   amount = (
                     <>
                       <FormatFiat value={dAmount} token={e.token} /> {e.token}

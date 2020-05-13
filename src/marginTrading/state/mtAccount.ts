@@ -15,8 +15,8 @@ export enum OperationKind {
   fundDai = 'fundDai',
   drawGem = 'drawGem',
   drawDai = 'drawDai',
-  buyRecursively = 'buyLev',
-  sellRecursively = 'sellLev',
+  buyRecursively = 'buy',
+  sellRecursively = 'sell',
 }
 
 export type Operation =
@@ -80,8 +80,8 @@ export enum MTHistoryEventKind {
   drawGem = 'DrawGem',
   drawDai = 'DrawDai',
   adjust = 'Adjust',
-  buyLev = 'BuyLev',
-  sellLev = 'SellLev',
+  buy = 'Buy',
+  sell = 'Sell',
   bite = 'Bite',
   kick = 'Kick',
   tend = 'Tend',
@@ -132,7 +132,7 @@ export type MTMarginEvent = {
       ddai: BigNumber;
     }
   | {
-      kind: MTHistoryEventKind.buyLev | MTHistoryEventKind.sellLev;
+      kind: MTHistoryEventKind.buy | MTHistoryEventKind.sell;
       amount: BigNumber;
       payAmount: BigNumber;
     }
@@ -200,9 +200,9 @@ export interface MarginableAsset extends MarginableAssetCore {
   maxDebt: BigNumber; // max possible targetDebt for this asset
   liquidationPrice: BigNumber;
   markPrice: BigNumber;
-  leverage: BigNumber;
+  multiple: BigNumber;
   availableDebt: BigNumber;
-  maxSafeLeverage: BigNumber;
+  maxSafeMultiply: BigNumber;
   availableActions: UserActionKind[];
   availableBalance: BigNumber;
   lockedBalance: BigNumber;

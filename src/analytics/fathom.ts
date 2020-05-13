@@ -37,8 +37,8 @@ export const fathomGoals = {
     depositDai: 'QQGIWR0R',
     withdrawCollateral: 'NJG1JWOJ',
     withdrawDai: 'IC8TSNAA',
-    leverageBuy: '3TGKODAK',
-    leverageSell: '0PSP0BEL',
+    multipleBuy: '3TGKODAK',
+    multipleSell: '0PSP0BEL',
     cancelOffer: 'TCMOKFV5',
     marketBuy: {
       WETHDAI: 'EP8EB5IX',
@@ -113,8 +113,8 @@ export const fathomGoals = {
     depositDai: 'ZD54GJG1',
     withdrawCollateral: 'UXWVPG9Z',
     withdrawDai: 'SWTMAAQR',
-    leverageBuy: 'BVXABG0M',
-    leverageSell: 'RXR1CBEW',
+    multipleBuy: 'BVXABG0M',
+    multipleSell: 'RXR1CBEW',
     cancelOffer: 'G2LFKS7F',
     marketBuy: {
       WETHDAI: 'ZY3MCZGL',

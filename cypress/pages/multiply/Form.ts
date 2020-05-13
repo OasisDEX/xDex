@@ -36,7 +36,7 @@ export class Form {
   public static estimatedLiquidationPrice = (value: string | RegExp) =>
     orderForm('estimated-liquidation-price').contains(value);
 
-  public static leverageIs = (value: string | RegExp) => orderForm('leverage').contains(value);
+  public static multiplyIs = (value: string | RegExp) => orderForm('multiply').contains(value);
 
   public static interestRateIs = (value: string | RegExp) => orderForm('interest-rate').contains(value);
 

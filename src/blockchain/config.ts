@@ -561,7 +561,7 @@ const kovan: NetworkConfig = {
     return load(proxyCreationAndExecute, '0xee419971e63734fed782cfe49110b1544ae8a773');
   },
   get proxyActions() {
-    return load(proxyActions, '0x2347ba6fa55e128d8918c6de361e8c1277453ab8');
+    return load(proxyActions, '0x28365f385cf87504be417db2e9b1ba558a389bbf');
   },
   get migration() {
     return '0x411b2faa662c8e3e5cf8f01dfdae0aee482ca7b0';
@@ -706,7 +706,7 @@ const localnet: NetworkConfig = {
     return load(proxyCreationAndExecute, '0x39E338aDC718b67585AC4bE1A69Db0EE6C186487');
   },
   get proxyActions() {
-    return load(proxyActions, '0x5d25fcd10aadf3068d1bda950f10e24bf4107419');
+    return load(proxyActions, '0xcfdebAc944Ed643e2d0ce30C94ef314cf4Db176b');
   },
   get migration() {
     return '0xc1199D132f6B6B72C37F817d103a4E62590e3DC1';

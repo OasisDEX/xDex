@@ -187,9 +187,9 @@ function argsOfPerformOperations({ plan }: { plan: Operation[] }, context: Netwo
     [OperationKind.drawDai]: () =>
       context.proxyActions.contract.methods.drawDai(...drawDaiArgs(plan[0], 'DAI')).encodeABI(),
     [OperationKind.buyRecursively]: () =>
-      context.proxyActions.contract.methods.buyLev(...buySellArgs(plan[0])).encodeABI(),
+      context.proxyActions.contract.methods.buy(...buySellArgs(plan[0])).encodeABI(),
     [OperationKind.sellRecursively]: () =>
-      context.proxyActions.contract.methods.sellLev(...buySellArgs(plan[0])).encodeABI(),
+      context.proxyActions.contract.methods.sell(...buySellArgs(plan[0])).encodeABI(),
   };
 
   if (!types[plan[0].kind]) {
@@ -341,7 +341,7 @@ export const mtExport = {
   },
   kind: TxMetaKind.export,
   description: ({ token }: MTExportData) => (
-    <React.Fragment>Export {token} leveraged position to Oasis Borrow</React.Fragment>
+    <React.Fragment>Export {token} multiplied position to Oasis Borrow</React.Fragment>
   ),
 };
 
