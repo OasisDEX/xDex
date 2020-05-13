@@ -106,7 +106,7 @@ export function createBalancesView$(
 export class MTBalancesViewInternalImpl extends React.Component<MTBalancesProps & MTBalancesOwnProps & RouterProps> {
   public render() {
     return (
-      <Table className={classnames(styles.table, styles.multipleAssets)} align="left">
+      <Table className={classnames(styles.table, styles.assets)} align="left">
         <thead>
           <tr>
             <th>Asset</th>
