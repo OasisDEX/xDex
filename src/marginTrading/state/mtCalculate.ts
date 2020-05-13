@@ -286,17 +286,17 @@ function calculateMidpointPrice(ob: Orderbook) {
   if (ob.sell[0] && ob.buy[0] && ob.sell[0].price.gt(zero) && ob.buy[0].price.gt(zero)) {
     return ob.sell[0].price.plus(ob.buy[0].price).div(2);
   }
-  return zero;
+  return undefined;
 }
 
 export function calculateMarginable(ma: MarginableAssetCore, orderbook: Orderbook): MarginableAsset {
   const { debt, dai, balance } = ma;
   const [, purchasingPower] = realPurchasingPowerMarginable(ma, orderbook.sell);
   const midpointPrice = calculateMidpointPrice(orderbook);
-  const equity = midpointPrice.gt(zero) ? balance.times(midpointPrice).minus(debt).plus(dai) : zero;
+  const equity = midpointPrice && midpointPrice.gt(zero) ? balance.times(midpointPrice).minus(debt).plus(dai) : undefined;
   const availableActions = marginableAvailableActions(ma);
   const balanceInCash = balance.times(ma.referencePrice);
-  const balanceInDai = balance.times(midpointPrice);
+  const balanceInDai = midpointPrice ? balance.times(midpointPrice): undefined;
   const lockedBalance = BigNumber.min(balance, debt.div(ma.referencePrice).times(ma.safeCollRatio));
   const availableBalance = BigNumber.max(zero, balance.minus(lockedBalance));
   const currentCollRatio = debt.gt(0) ? balanceInCash.dividedBy(debt) : undefined;

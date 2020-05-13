@@ -192,8 +192,8 @@ export interface MarginableAssetCore extends Core {
 export interface MarginableAsset extends MarginableAssetCore {
   // balance: BigNumber;
   balanceInCash: BigNumber;
-  balanceInDai: BigNumber;
-  midpointPrice: BigNumber;
+  balanceInDai?: BigNumber;
+  midpointPrice?: BigNumber;
   currentCollRatio?: BigNumber;
   cash: BigNumber;
   // maxDebtForOther: BigNumber; // max possible debt for other assets
@@ -215,7 +215,7 @@ export interface MarginableAsset extends MarginableAssetCore {
   amountBeingLiquidated: BigNumber;
   nextPriceUpdateDelta: string;
   purchasingPower: BigNumber;
-  equity: BigNumber;
+  equity?: BigNumber;
   isSafeCollRatio?: boolean;
 }
 
