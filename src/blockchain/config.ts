@@ -409,7 +409,7 @@ const protoMain = {
     return load(proxyCreationAndExecute, '0x793ebbe21607e4f04788f89c7a9b97320773ec59');
   },
   get proxyActions() {
-    return load(proxyActions, '0x4fb2f29608b05dfc935c20c076f0b1a022407e3e');
+    return load(proxyActions, '0xccE58F2aCc7deF001DdB51ffB1D2acCdea6dAb4D');
   },
   get migration() {
     return '0xc73e0383F3Aff3215E6f04B0331D58CeCf0Ab849';
