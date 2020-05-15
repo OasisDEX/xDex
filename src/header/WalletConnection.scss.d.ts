@@ -27,5 +27,6 @@ export const wallet: string;
 export const icon: string;
 export const selected: string;
 export const inactive: string;
+export const walletHeader: string;
 export const termsAndConditions: string;
 export const buttonPlaceholder: string;

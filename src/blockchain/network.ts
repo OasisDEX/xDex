@@ -19,7 +19,7 @@ import { trackingEvents } from '../analytics/analytics';
 import { mixpanelIdentify } from '../analytics/mixpanel';
 import { getToken, NetworkConfig, networks, tradingTokens } from './config';
 import { amountFromWei } from './utils';
-import { web3, Web3Status, web3Status$ } from './web3';
+import { web3, Web3Status, web3Status$, web3StatusConnected$ } from "./web3";
 
 export const maxGasPerBlock = 8e6;
 export const every3Seconds$ = interval(3000).pipe(startWith(0));
@@ -27,24 +27,29 @@ export const every5Seconds$ = interval(5000).pipe(startWith(0));
 export const every10Seconds$ = interval(10000).pipe(startWith(0));
 export const every30Seconds$ = interval(30000).pipe(startWith(0));
 
-export const networkId$ = web3Status$.pipe(
-  filter(web3Status => web3Status === Web3Status.readonly || web3Status === Web3Status.ready),
-  switchMap(() => {
-    return bindNodeCallback(web3.eth.net.getId)();
-  }),
+export const networkId$ = every3Seconds$.pipe(
+  startWith(0),
+  switchMap(() =>
+    web3StatusConnected$.pipe(
+      switchMap(() => bindNodeCallback(web3.eth.net.getId)())
+    )
+  ),
   distinctUntilChanged(),
   shareReplay(1),
 );
 
-export const account$: Observable<string | undefined> = web3Status$.pipe(
-  filter(web3Status => web3Status === Web3Status.readonly || web3Status === Web3Status.ready),
-  switchMap(() => {
-    return bindNodeCallback(web3.eth.getAccounts)();
-  }),
+networkId$.subscribe( next => console.log('networkId$', next));
+
+export const account$: Observable<string | undefined> = every3Seconds$.pipe(
+  switchMap(() =>
+    web3StatusConnected$.pipe(
+      switchMap(() => bindNodeCallback(web3.eth.getAccounts)())
+    )
+  ),
   map(([account]) => account),
   distinctUntilChanged(),
   shareReplay(1),
-);
+)
 
 account$.subscribe(console.log);
 
@@ -70,7 +75,6 @@ combineLatest(account$, context$)
   });
 
 export const onEveryBlock$ = web3Status$.pipe(
-  filter((web3Status) => web3Status === Web3Status.readonly),
   switchMap(() =>
     fromEvent(window.maker.service('accounts').getProvider(), 'block').pipe(
       map((block: any) => parseInt(block.number.toString('hex'), 16)),

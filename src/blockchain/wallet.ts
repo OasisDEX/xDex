@@ -20,7 +20,7 @@ export enum WalletStatus {
 }
 export const walletStatus$: Observable<WalletStatus> = combineLatest(tosAccepted$, web3Status$, account$).pipe(
   map(([tosAccepted, web3Status, account]) =>
-    [Web3Status.connecting, Web3Status.disconnecting].indexOf(web3Status) >= 0
+    [Web3Status.connecting, Web3Status.disconnecting].indexOf(web3Status.status) >= 0
       ? WalletStatus.connecting
       : tosAccepted
       ? account

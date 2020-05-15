@@ -25,6 +25,7 @@ import { WithLoadingIndicatorInline } from '../utils/loadingIndicator/LoadingInd
 import * as styles from './Header.scss';
 import OasisDexLogo from './OasisDexLogo.svg';
 import { WalletConnectionViewKind, walletConnectionViewManual$, WalletConnectionViews } from './WalletConnectionView';
+import { Web3ObjectConnected, web3Status$ } from "../blockchain/web3";
 
 const { REACT_APP_INSTANT_ENABLED, REACT_APP_LT_ENABLED, REACT_APP_SUBDIR } = process.env;
 
@@ -75,20 +76,25 @@ const walletConnectionView$: Observable<WalletConnectionViewKind> = combineLates
 
 const popup = new BehaviorSubject(false);
 
-const popup$ = combineLatest(walletStatus$, popup, walletConnectionView$).pipe(
-  map(([status, isOpen, view]) => ({
-    view,
-    isOpen,
-    open: () => popup.next(true),
-    close: () => {
-      popup.next(false);
-      setTimeout(() => {
-        walletConnectionViewManual$.next('');
-      }, 500);
-    },
-    isConnected: status === 'connected',
-    isConnecting: status === 'connecting',
-  })),
+const popup$ = combineLatest(walletStatus$, web3Status$, popup, walletConnectionView$).pipe(
+  map(([status, web3Object, isOpen, view]) => {
+      return ({
+        view,
+        isOpen,
+        open: () => popup.next(true),
+        close: () => {
+          popup.next(false);
+          setTimeout(() => {
+            walletConnectionViewManual$.next('');
+          }, 500);
+        },
+        isConnected: status === 'connected',
+        isConnecting: status === 'connecting',
+        walletName: (web3Object as Web3ObjectConnected).walletName,
+        walletIcon: (web3Object as Web3ObjectConnected).walletIcon
+      })
+    }
+  ),
 );
 
 walletStatus$.pipe().subscribe(status => {
@@ -144,11 +150,13 @@ interface WalletConnectionStatusProps {
   isConnected: boolean;
   isConnecting: boolean;
   view: any;
+  walletName?: string;
+  walletIcon?: string;
 }
 
 class WalletConnectionStatus extends React.Component<WalletConnectionStatusProps> {
   public render(): JSX.Element {
-    const { open, close, view, isConnected, isConnecting, isOpen } = this.props;
+    const { open, close, view, isConnected, isConnecting, isOpen, walletName, walletIcon } = this.props;
     const View = WalletConnectionViews.get(isConnecting ? WalletConnectionViewKind.connecting : view);
 
     return (
@@ -159,7 +167,7 @@ class WalletConnectionStatus extends React.Component<WalletConnectionStatusProps
         onOuterAction={close}
         className="noWallet"
         enterExitTransitionDistancePx={-10}
-        body={<View close={close} />}
+        body={<View {...{close, walletName, walletIcon}}  />}
       >
         <div className={walletConnection}>
           <theAppContext.Consumer>

@@ -1,9 +1,11 @@
 import { Observable, of, Subject } from 'rxjs';
 import { fromPromise } from 'rxjs/internal-compatibility';
-import { catchError, distinctUntilChanged, map, shareReplay, startWith, switchMap } from 'rxjs/operators';
+import { catchError, distinctUntilChanged, filter, map, shareReplay, startWith, switchMap } from "rxjs/operators";
 // tslint:disable:import-name
 import Web3 from 'web3';
+import { networks } from './config'
 import { connectAccount, disconnectAccount, setupMaker } from './maker';
+import { getCurrentProviderName } from "./providers";
 
 export let web3: Web3;
 
@@ -14,6 +16,27 @@ export enum Web3Status {
   connecting = 'connecting',
   disconnecting = 'disconnecting',
 }
+
+export type Web3ObjectConnected = {
+  status: Web3Status.readonly;
+  network: string;
+  web3: Web3;
+  walletType: WalletType,
+  walletName?: string,
+  walletIcon?: string
+} | {
+  status: Web3Status.ready;
+  network: string;
+  account: string;
+  web3: Web3
+  walletType: WalletType,
+  walletName?: string,
+  walletIcon?: string
+};
+
+export type Web3Object = Web3ObjectConnected | {
+  status: Web3Status.connecting | Web3Status.disconnecting;
+};
 
 export interface Web3Window {
   web3?: any;
@@ -69,20 +92,31 @@ function setWeb3(newWeb3: Web3) {
   (window as any)._web3 = newWeb3;
 }
 // let networkReadOnly: string;
-export const web3Status$: Observable<Web3Status> = web3StatusCommand.pipe(
+export const web3Status$: Observable<Web3Object> = web3StatusCommand.pipe(
   switchMap((command: Web3StatusCommand) => {
     if (command.kind === Web3StatusCommandKind.connectReadOnly) {
       return fromPromise(setupMaker(command.network)).pipe(
         map(connectedWeb3 => {
           setWeb3(connectedWeb3);
-          return Web3Status.readonly;
+          return {
+            status: Web3Status.readonly,
+            network: command.network,
+            walletType: WalletType.browser,
+          };
         }),
       );
     } else if (command.kind === Web3StatusCommandKind.connect) {
       return fromPromise(connectAccount(command.type)).pipe(
         map(address => {
-          console.log(`Connected account: ${address}`);
-          return Web3Status.ready;
+          const provider = window.maker.service('accounts')._engine._providers[0];
+          const providerParams = getCurrentProviderName(provider);
+          return {
+            status: Web3Status.ready,
+            network: command.network,
+            walletType: WalletType.browser,
+            walletName: providerParams.name,
+            walletIcon: providerParams.icon,
+          }
         }),
         startWith(Web3Status.connecting),
         catchError(error => {
@@ -93,8 +127,12 @@ export const web3Status$: Observable<Web3Status> = web3StatusCommand.pipe(
       );
     } else if (command.kind === Web3StatusCommandKind.disconnect) {
       return fromPromise(disconnectAccount()).pipe(
-        map(() => {
-          return Web3Status.readonly;
+        map(([networkId]) => {
+          return {
+            status: Web3Status.readonly,
+            network: networks[networkId].name,
+            walletType: WalletType.browser,
+          }
         }),
         startWith(Web3Status.disconnecting),
       );
@@ -119,6 +157,12 @@ function getParameterByName(name: string) {
 }
 
 web3Status$.subscribe();
+
+export const web3StatusConnected$: Observable<Web3ObjectConnected> = web3Status$.pipe(
+  filter(web3Status =>
+    web3Status.status === Web3Status.readonly || web3Status.status === Web3Status.ready
+  )
+) as Observable<Web3ObjectConnected>;
 
 sessionStorage.setItem('network', getParameterByName('network') || 'main');
 executeWeb3StatusCommand({

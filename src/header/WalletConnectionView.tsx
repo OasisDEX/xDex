@@ -21,6 +21,7 @@ const {
   selected,
   termsAndConditions,
   buttonPlaceholder,
+  walletHeader,
 } = styles;
 
 const ListItem = (
@@ -147,11 +148,17 @@ class NotConnected extends React.Component<{}, { isChecked: boolean; walletType?
   };
 }
 
-class Connected extends React.Component {
+class Connected extends React.Component<{walletName?: string, walletIcon?: string}> {
   public render() {
+    const {walletName, walletIcon} = this.props;
+    
+    const panelHeading = <div className={classnames(wallet, walletHeader)}>
+      <div className={icon}>{walletIcon}</div> {`${walletName} Connected`}
+    </div>
     return (
       // <Panel heading={`${getCurrentProviderName().name} Connected`}>
-      <Panel heading={`Connected`}>
+      <>
+        <Panel heading={panelHeading}>
         <div className={buttonPlaceholder}>
           <Button
             size="md"
@@ -164,6 +171,7 @@ class Connected extends React.Component {
           </Button>
         </div>
       </Panel>
+        </>
     );
   }
   private _disconnect = () => {

@@ -130,4 +130,5 @@ export async function disconnectAccount(killSession: boolean = true) {
   removeSubprovider(subprovider);
 
   console.log(`Disconnected account: ${address}`);
+  return [maker.service('web3').networkId()];
 }
