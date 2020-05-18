@@ -1,7 +1,3 @@
-/*
- * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
- */
-
 export const button: string;
 export const disabled: string;
 export const buttonGroup: string;

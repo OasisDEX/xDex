@@ -253,7 +253,7 @@ export class MTMyPositionView extends React.Component<MTMyPositionViewProps & Mo
                 <WarningTooltip id="equity" text={equityTooltip} />
               </div>
               <div className={styles.summaryValue}>
-                {ma.equity && <CryptoMoney value={ma.equity} token="DAI" fallback="-" />}
+                {ma.equity ? <CryptoMoney value={ma.equity} token="DAI" fallback="-" /> : <>N/A</>}
               </div>
             </div>
           </div>
