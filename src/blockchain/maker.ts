@@ -74,16 +74,30 @@ export async function setupMaker(networkId: string): Promise<Web3> {
   return maker.service('web3')._web3 as Web3;
 }
 
+async function checkEthereumProvider() {
+  let provider;
+  if (typeof window.ethereum !== 'undefined') {
+    await window.ethereum.enable();
+    provider = window.ethereum;
+  } else if (window.web3) {
+    provider = window.web3.currentProvider;
+  } else {
+    throw new Error('No web3 provider detected');
+  }
+
+  const web3 = new Web3(provider);
+  const networkId = await web3.eth.net.getId();
+  const address = (await web3.eth.getAccounts())[0];
+
+  return { networkId, address };
+}
+
 export async function connectAccount(type: WalletType): Promise<string> {
-  // If connecting MetaMask (or another browser provider) we can immediately check
-  // if the networkId is the same as the Maker instance one (set via network query param)
+  const makerNetworkId = maker.service('web3').networkId();
+
   if (type === 'browser') {
-    if (!window.web3?.currentProvider?.networkVersion) throw new Error('Unable to find browser provider network id');
-    const browserProviderNetworkId = parseInt(window.web3.currentProvider.networkVersion, 10);
-    const networkId = maker.service('web3').networkId();
-    if (browserProviderNetworkId !== networkId) {
-      throw new Error('Browser provider network and URL network param do not match');
-    }
+    const browserProvider = await checkEthereumProvider();
+    if (browserProvider.networkId !== makerNetworkId) throw new Error('Browser provider network and URL network param do not match.');
   }
 
   const autoSwitch = type === 'browser';
@@ -91,8 +105,7 @@ export async function connectAccount(type: WalletType): Promise<string> {
 
   if (type !== 'browser') {
     const providerChainId = account.subprovider.chainId;
-    const makerChainId = maker.service('web3').networkId();
-    if (providerChainId !== makerChainId) {
+    if (providerChainId !== makerNetworkId) {
       disconnectAccount(false);
       throw new Error("Network mismatch: The connected wallet provider's network is different than the current network");
     }
