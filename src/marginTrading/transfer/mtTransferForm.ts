@@ -3,8 +3,8 @@
  */
 
 import { BigNumber } from 'bignumber.js';
-import { merge, Observable, of, Subject } from 'rxjs';
-import { first, map, scan, switchMap, takeUntil } from 'rxjs/operators';
+import { combineLatest, merge, Observable, of, Subject } from 'rxjs';
+import { first, map, scan, switchMap, take, takeUntil } from 'rxjs/operators';
 
 import {
   AmountFieldChange,
@@ -430,6 +430,7 @@ function prepareTransfer(
 function prepareSetup(
   calls$: Calls$,
   mta$: Observable<MTAccount>,
+  gasPrice$: Observable<BigNumber>,
 ): [(state: MTTransferFormState) => void, Observable<ProgressChange>] {
   const setupChange$ = new Subject<ProgressChange>();
 
@@ -437,21 +438,25 @@ function prepareSetup(
     const changes$: Observable<ProgressChange> = calls$.pipe(
       first(),
       switchMap(
-        (calls): Observable<ProgressChange> => {
-          return calls.setupMTProxy({}).pipe(
-            transactionHandler(),
-            switchMap((change) => {
-              if (change.progress !== ProgressStage.done) {
-                return of(change);
-              }
-              return mta$.pipe(
-                filter((mta) => mta.state === MTAccountState.setup),
-                first(),
-                map(() => change),
+        (calls): Observable<ProgressChange> =>
+          combineLatest(calls.setupMTProxyEstimateGas({}), gasPrice$).pipe(
+            take(1),
+            switchMap(([gasEstimation, gasPrice]) => {
+              return calls.setupMTProxy({ gasEstimation, gasPrice }).pipe(
+                transactionHandler(),
+                switchMap((change) => {
+                  if (change.progress !== ProgressStage.done) {
+                    return of(change);
+                  }
+                  return mta$.pipe(
+                    filter((mta) => mta.state === MTAccountState.setup),
+                    first(),
+                    map(() => change),
+                  );
+                }),
               );
             }),
-          );
-        },
+          ),
       ),
     );
 
@@ -604,7 +609,7 @@ export function createMTTransferForm$(
   );
 
   const [transfer, cancel, transferProgressChange$] = prepareTransfer(calls$);
-  const [setup, setupProgressChange$] = prepareSetup(calls$, mta$);
+  const [setup, setupProgressChange$] = prepareSetup(calls$, mta$, gasPrice$);
   const [allowance, allowanceProgressChange$] = prepareAllowance(calls$, mta$);
 
   const change = manualChange$.next.bind(manualChange$);

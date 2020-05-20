@@ -89,6 +89,7 @@ function calls([context, account]: [NetworkConfig, string]) {
     approveProxy: sendTransaction(approveProxy),
     approveProxyEstimateGas: estimateGas(approveProxy),
     approveMTProxy: sendTransaction(approveMTProxy),
+    approveMTProxyEstimateGas: estimateGas(approveMTProxy),
     disapproveProxy: sendTransaction(disapproveProxy),
     swapSaiToDai: sendTransaction(swapSaiToDai),
     swapSaiToDaiEstimateGas: estimateGas(swapSaiToDai),

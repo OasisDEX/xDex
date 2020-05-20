@@ -3,8 +3,8 @@
  */
 
 import { BigNumber } from 'bignumber.js';
-import { Observable } from 'rxjs';
-import { first, switchMap } from 'rxjs/operators';
+import { combineLatest, Observable } from 'rxjs';
+import { first, switchMap, take } from 'rxjs/operators';
 import { Calls$ } from '../../blockchain/calls/calls';
 import { AssetKind } from '../../blockchain/config';
 import { TxState } from '../../blockchain/transactions';
@@ -253,13 +253,18 @@ export interface MTAccount {
   proxy: any;
 }
 
-export function createMTProxyApprove(calls$: Calls$) {
+export function createMTProxyApprove(calls$: Calls$, gasPrice$: Observable<BigNumber>) {
   return (args: { token: string; proxyAddress: string }): Observable<TxState> => {
     const r = calls$.pipe(
       first(),
-      switchMap((calls) => {
-        return calls.approveMTProxy(args);
-      }),
+      switchMap((calls) =>
+        combineLatest(calls.approveMTProxyEstimateGas(args), gasPrice$).pipe(
+          take(1),
+          switchMap(([gasEstimation, gasPrice]) => {
+            return calls.approveMTProxy({ ...args, gasEstimation, gasPrice });
+          }),
+        ),
+      ),
     );
     r.subscribe();
     return r;

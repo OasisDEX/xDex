@@ -18,10 +18,18 @@ import { web3 } from '../web3';
 import { DEFAULT_GAS } from './callsHelpers';
 import { TxMetaKind } from './txMeta';
 
+export interface SetupData {
+  gasPrice?: BigNumber;
+  gasEstimation?: number;
+}
+
 export const setupMTProxy = {
   call: (_data: {}, context: NetworkConfig) => context.instantProxyRegistry.contract.methods['build()'],
   prepareArgs: () => [],
-  options: () => ({ gas: DEFAULT_GAS }), // this should be estimated as in setupProxy
+  options: ({ gasPrice, gasEstimation }: SetupData) => ({
+    ...(gasPrice ? gasPrice : {}),
+    ...(gasEstimation ? { gas: gasEstimation } : {}),
+  }),
   kind: TxMetaKind.setupMTProxy,
   description: () => <React.Fragment>Setup MT proxy</React.Fragment>,
 };
@@ -29,6 +37,8 @@ export const setupMTProxy = {
 export interface ApproveData {
   token: string;
   proxyAddress: string;
+  gasPrice?: BigNumber;
+  gasEstimation?: number;
 }
 
 export const approveMTProxy = {
@@ -38,7 +48,10 @@ export const approveMTProxy = {
     console.log('proxyAddress', proxyAddress, 'token', token, context.tokens[token].contract.options.address);
     return [proxyAddress, -1];
   },
-  options: () => ({ gas: DEFAULT_GAS }),
+  options: ({ gasPrice, gasEstimation }: ApproveData) => ({
+    ...(gasPrice ? gasPrice : {}),
+    ...(gasEstimation ? { gas: gasEstimation } : {}),
+  }),
   kind: TxMetaKind.approveMTProxy,
   description: ({ token }: ApproveData) => (
     <React.Fragment>
@@ -209,19 +222,19 @@ const mtPerformPlan = {
     return proxy.methods['execute(address,bytes)'];
   },
   prepareArgs: argsOfPerformOperations,
-  // options: () => ({ gas: DEFAULT_GAS * 6 }), // TODO
   options: ({ gas }: PerformPlanData) => (gas ? { gas } : {}),
 };
 
 interface MTFundData extends PerformPlanData {
   token: string;
   amount: BigNumber;
+  gas?: number;
 }
 
 export const mtFund = {
   ...mtPerformPlan,
   kind: TxMetaKind.fundMTAccount,
-  options: () => ({ gas: DEFAULT_GAS }),
+  options: ({ gas }: PerformPlanData) => (gas ? { gas } : {}),
   description: ({ token, amount }: MTFundData) => (
     <React.Fragment>
       Fund margin account with <Money value={amount} token={token} />
@@ -239,12 +252,14 @@ export const mtReallocate = {
 export interface MTDrawData extends PerformPlanData {
   token: string;
   amount: BigNumber;
+  gas?: number;
 }
 
 export const mtDraw = {
   ...mtPerformPlan,
   kind: TxMetaKind.drawMTAccount,
-  options: () => ({ gas: DEFAULT_GAS }),
+  options: ({ gas }: PerformPlanData) => (gas ? { gas } : {}),
+  prepareArgs: argsOfPerformOperations,
   description: ({ token, amount }: MTDrawData) => (
     <React.Fragment>
       Draw <Money value={amount} token={token} /> from margin account
@@ -263,7 +278,7 @@ export interface MTBuyData extends PerformPlanData {
 export const mtBuy = {
   ...mtPerformPlan,
   kind: TxMetaKind.buyMTAccount,
-  options: () => ({ gas: DEFAULT_GAS }),
+  options: ({ gas }: PerformPlanData) => (gas ? { gas } : {}),
   description: ({ baseToken, amount, total }: MTBuyData) => (
     <React.Fragment>
       Buy <Money value={amount} token={baseToken} /> for <Money value={total} token={'DAI'} />
@@ -282,7 +297,7 @@ export interface MTSellData extends PerformPlanData {
 export const mtSell = {
   ...mtPerformPlan,
   kind: TxMetaKind.sellMTAccount,
-  options: () => ({ gas: DEFAULT_GAS }),
+  options: ({ gas }: PerformPlanData) => (gas ? { gas } : {}),
   description: ({ baseToken, amount, total }: MTSellData) => (
     <React.Fragment>
       Sell <Money value={amount} token={baseToken} /> for <Money value={total} token={'DAI'} />
