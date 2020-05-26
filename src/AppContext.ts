@@ -174,7 +174,7 @@ export function setupAppContext() {
     readCalls$,
   );
 
-  const approveMTProxy = createMTProxyApprove(calls$);
+  const approveMTProxy = createMTProxyApprove(gasPrice$, calls$);
 
   const approveWallet = createWalletApprove(calls$, gasPrice$);
   const disapproveWallet = createWalletDisapprove(calls$, gasPrice$);

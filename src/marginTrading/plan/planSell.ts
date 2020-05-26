@@ -5,6 +5,7 @@
 import { BigNumber } from 'bignumber.js';
 
 import { AssetKind, getToken } from '../../blockchain/config';
+import { gasPrice$ } from '../../blockchain/network';
 import { Offer, Orderbook } from '../../exchange/orderbook/orderbook';
 import { findMarginableAsset, MarginableAssetCore, MTAccount, Operation, OperationKind } from '../state/mtAccount';
 
@@ -87,7 +88,7 @@ export function prepareSellAllocationRequest(
     planSell(baseToken, amount, maxTotal, debts, slippageLimit);
 
   const execute = (calls: Calls, proxy: any, plan: Operation[], gas: number): Observable<TxState> =>
-    calls.mtSell({
+    calls.mtSell(gasPrice$, {
       amount,
       baseToken,
       price,

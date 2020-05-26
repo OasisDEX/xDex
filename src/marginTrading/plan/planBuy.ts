@@ -6,6 +6,7 @@ import { BigNumber } from 'bignumber.js';
 import { flatten } from 'lodash';
 
 import { AssetKind } from '../../blockchain/config';
+import { gasPrice$ } from '../../blockchain/network';
 import { Offer, Orderbook } from '../../exchange/orderbook/orderbook';
 import {
   findAsset,
@@ -84,7 +85,7 @@ export function prepareBuyAllocationRequest(
     planBuy(baseToken, amount, maxTotal, debts, slippageLimit);
 
   const execute = (calls: Calls, proxy: any, plan: Operation[], gas: number): Observable<TxState> =>
-    calls.mtBuy({
+    calls.mtBuy(gasPrice$, {
       amount,
       baseToken,
       price,
