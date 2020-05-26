@@ -11,6 +11,7 @@ import { distinctUntilChanged, first, map, scan, switchMap, takeUntil } from 'rx
 import { DustLimits } from '../../balances/balances';
 import { Calls, Calls$, ReadCalls$ } from '../../blockchain/calls/calls';
 import { getToken } from '../../blockchain/config';
+import { GasPrice$ } from '../../blockchain/network';
 import { localStorageGetDict, localStorageStoreDict } from '../../blockchain/utils';
 import { Offer, OfferType, Orderbook } from '../../exchange/orderbook/orderbook';
 import { TradingPair } from '../../exchange/tradingPair/tradingPair';
@@ -960,6 +961,7 @@ function freezeGasEstimation(previous: MTSimpleFormState, state: MTSimpleFormSta
 }
 
 function prepareSubmit(
+  gasPrice$: GasPrice$,
   calls$: Calls$,
 ): [(state: MTSimpleFormState) => void, () => void, Observable<ProgressChange | FormResetChange>] {
   const progressChange$ = new Subject<ProgressChange | FormResetChange>();
@@ -991,7 +993,7 @@ function prepareSubmit(
       first(),
       switchMap((calls) => {
         const call = state.kind === OfferType.buy ? calls.mtBuy : calls.mtSell;
-        return call({
+        return call(gasPrice$, {
           amount,
           baseToken,
           price,
@@ -1155,7 +1157,7 @@ export function createMTSimpleOrderForm$(
     toMTAccountChange(mta$),
   );
 
-  const [submit, , stageChange$] = prepareSubmit(calls$);
+  const [submit, , stageChange$] = prepareSubmit(gasPrice$, calls$);
 
   const initialState: MTSimpleFormState = {
     submit,

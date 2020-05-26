@@ -7,6 +7,7 @@ import { Observable } from 'rxjs';
 import { first, switchMap } from 'rxjs/operators';
 import { Calls$ } from '../../blockchain/calls/calls';
 import { AssetKind } from '../../blockchain/config';
+import { GasPrice$ } from '../../blockchain/network';
 import { TxState } from '../../blockchain/transactions';
 import { RawMTHistoryEvent } from './mtHistory';
 
@@ -253,12 +254,12 @@ export interface MTAccount {
   proxy: any;
 }
 
-export function createMTProxyApprove(calls$: Calls$) {
+export function createMTProxyApprove(gasPrice$: GasPrice$, calls$: Calls$) {
   return (args: { token: string; proxyAddress: string }): Observable<TxState> => {
     const r = calls$.pipe(
       first(),
       switchMap((calls) => {
-        return calls.approveMTProxy(args);
+        return calls.approveMTProxy(gasPrice$, args);
       }),
     );
     r.subscribe();
