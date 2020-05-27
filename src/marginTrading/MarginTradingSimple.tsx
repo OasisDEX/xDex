@@ -45,10 +45,13 @@ const Content = (props: any | { parentMatch: string }) => {
       <div style={{ marginBottom: '1.75rem' }}>
         <Banner
           content={
+            /* tslint:disable */
             <div style={bannerStyle}>
-              You are currently accessing a <strong>beta version</strong> of Oasis Trade. This includes an early access
-              to Multiply Trading, which may contain bugs and usability issues. Please use this feature with caution.
+              You are currently accessing a <strong>beta version</strong> of Oasis Multiply Trading, which may contain
+              bugs and usability issues. Please use this feature with caution.
+              You can read more about this release <a href="https://blog.oasis.app/introducing-multiply-on-oasis-trade/" target="_blank">here</a>.
             </div>
+            /* tslint:enable */
           }
           theme="warning"
         />
