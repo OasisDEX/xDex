@@ -142,7 +142,7 @@ test('calculate position in orderbook for sell', () => {
   expect(unpack(controller).total).toEqual(new BigNumber(3));
 });
 
-test('buy with leverage - match exactly one order', () => {
+test('buy with multiple - match exactly one order', () => {
   const cash: CashAssetCore = {
     ...noCash,
   };
@@ -175,7 +175,7 @@ test('buy with leverage - match exactly one order', () => {
   expect(unpack(controller).realPurchasingPowerPost).toEqual(new BigNumber(179.98779296875));
 });
 
-test('buy with leverage - match more than one order', () => {
+test('buy with multiple - match more than one order', () => {
   const weth = {
     ...wethEmpty,
     referencePrice: new BigNumber(10),
@@ -201,7 +201,7 @@ test('buy with leverage - match more than one order', () => {
   expect(s.realPurchasingPowerPost.toFixed(0)).toEqual(new BigNumber('275').toFixed());
 });
 
-test('buy with leverage - purchasing power too low', () => {
+test('buy with multiple - purchasing power too low', () => {
   const weth = {
     ...wethEmpty,
     referencePrice: new BigNumber('100'),
@@ -219,7 +219,7 @@ test('buy with leverage - purchasing power too low', () => {
   expect(unpack(controller).messages[0].kind).toEqual(MessageKind.insufficientAmount);
 });
 
-test('buy with leverage - orderbook too shallow', () => {
+test('buy with multiple - orderbook too shallow', () => {
   const weth = {
     ...wethEmpty,
     referencePrice: new BigNumber('1'),
@@ -237,7 +237,7 @@ test('buy with leverage - orderbook too shallow', () => {
   expect(unpack(controller).messages[0].message).toEqual('orderbook too shallow');
 });
 
-test('buy with leverage - collateral and cash', () => {
+test('buy with multiple - collateral and cash', () => {
   const weth = {
     ...wethEmpty,
     referencePrice: new BigNumber(100),
@@ -251,12 +251,12 @@ test('buy with leverage - collateral and cash', () => {
   const controller = controllerWithFakeOrderBook([], sells, mta);
   const { change } = unpack(controller);
 
-  expect(unpack(controller).leverage).toEqual(new BigNumber(1));
+  expect(unpack(controller).multiple).toEqual(new BigNumber(1));
   change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(14.98) });
-  expect(unpack(controller).leveragePost).toEqual(new BigNumber(1.499));
+  expect(unpack(controller).multiplePost).toEqual(new BigNumber(1.499));
 });
 
-test('buy with leverage - cash only', () => {
+test('buy with multiple - cash only', () => {
   const weth = {
     ...wethEmpty,
     referencePrice: new BigNumber(100),
@@ -271,10 +271,10 @@ test('buy with leverage - cash only', () => {
   const { change } = unpack(controller);
 
   change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(15) });
-  expect(unpack(controller).leveragePost).toEqual(new BigNumber(1.5));
+  expect(unpack(controller).multiplePost).toEqual(new BigNumber(1.5));
 });
 
-test('buy with leverage - add more to actual debt', () => {
+test('buy with multiple - add more to actual debt', () => {
   const weth = {
     ...wethEmpty,
     referencePrice: new BigNumber(100),
@@ -290,12 +290,12 @@ test('buy with leverage - add more to actual debt', () => {
 
   change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(5) });
 
-  expect(unpack(controller).leveragePost).toEqual(new BigNumber(1.875));
+  expect(unpack(controller).multiplePost).toEqual(new BigNumber(1.875));
 });
 
 // Below happens with the current OTC contract. Dusty amount of dai may rest in urn after
-// an OTC transaction during buyLev/sellLev procedure.
-test('buy with leverage - with debt and dusty dai balance (edge case)', () => {
+// an OTC transaction during buy/sell procedure.
+test('buy with multiple - with debt and dusty dai balance (edge case)', () => {
   const weth = {
     ...wethEmpty,
     referencePrice: new BigNumber(100),
@@ -311,10 +311,10 @@ test('buy with leverage - with debt and dusty dai balance (edge case)', () => {
 
   change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(5) });
 
-  expect(unpack(controller).leveragePost).toEqual(new BigNumber(1.875));
+  expect(unpack(controller).multiplePost).toEqual(new BigNumber(1.875));
 });
 
-test('sell leverage - partial debt repayment', () => {
+test('sell multiple - partial debt repayment', () => {
   const weth = {
     ...wethEmpty,
     referencePrice: new BigNumber(100),
@@ -331,11 +331,11 @@ test('sell leverage - partial debt repayment', () => {
   change({ kind: FormChangeKind.kindChange, newKind: OfferType.sell });
   change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(1) });
 
-  expect(unpack(controller).leveragePost).toEqual(new BigNumber(1.125));
+  expect(unpack(controller).multiplePost).toEqual(new BigNumber(1.125));
   expect(unpack(controller).daiBalancePost).toEqual(new BigNumber(-100));
 });
 
-test('sell leverage - full debt repayment', () => {
+test('sell multiple - full debt repayment', () => {
   const weth = {
     ...wethEmpty,
     referencePrice: new BigNumber(100),
@@ -352,11 +352,11 @@ test('sell leverage - full debt repayment', () => {
   change({ kind: FormChangeKind.kindChange, newKind: OfferType.sell });
   change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(2) });
 
-  expect(unpack(controller).leveragePost).toEqual(new BigNumber(1));
+  expect(unpack(controller).multiplePost).toEqual(new BigNumber(1));
   expect(unpack(controller).daiBalancePost).toEqual(new BigNumber(0));
 });
 
-test('sell without leverage', () => {
+test('sell without multiple', () => {
   const weth = {
     ...wethEmpty,
     referencePrice: new BigNumber(100),
@@ -373,6 +373,6 @@ test('sell without leverage', () => {
   change({ kind: FormChangeKind.kindChange, newKind: OfferType.sell });
   change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(2) });
 
-  expect(unpack(controller).leveragePost).toEqual(new BigNumber(1));
+  expect(unpack(controller).multiplePost).toEqual(new BigNumber(1));
   expect(unpack(controller).daiBalancePost).toEqual(new BigNumber(200));
 });

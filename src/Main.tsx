@@ -68,7 +68,7 @@ class Routes extends React.Component<{ status: WalletStatus }> {
         {REACT_APP_INSTANT_ENABLED === '1' && <Route exact={false} path={'/instant'} component={InstantExchange} />}
         {this.props.status === 'connected' && <Route path={'/balances'} component={BalancesView} />}
         {REACT_APP_LT_ENABLED === '1' && this.props.status === 'connected' && (
-          <Route path={'/leverage'} component={MarginTradingSimpleTxRx} />
+          <Route path={'/multiply'} component={MarginTradingSimpleTxRx} />
         )}
         <Redirect from={'/account'} to={'/balances'} />
         <Redirect from={'/'} to={'/market'} />

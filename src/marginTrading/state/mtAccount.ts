@@ -7,6 +7,7 @@ import { Observable } from 'rxjs';
 import { first, switchMap } from 'rxjs/operators';
 import { Calls$ } from '../../blockchain/calls/calls';
 import { AssetKind } from '../../blockchain/config';
+import { GasPrice$ } from '../../blockchain/network';
 import { TxState } from '../../blockchain/transactions';
 import { RawMTHistoryEvent } from './mtHistory';
 
@@ -15,8 +16,8 @@ export enum OperationKind {
   fundDai = 'fundDai',
   drawGem = 'drawGem',
   drawDai = 'drawDai',
-  buyRecursively = 'buyLev',
-  sellRecursively = 'sellLev',
+  buyRecursively = 'buy',
+  sellRecursively = 'sell',
 }
 
 export type Operation =
@@ -80,8 +81,8 @@ export enum MTHistoryEventKind {
   drawGem = 'DrawGem',
   drawDai = 'DrawDai',
   adjust = 'Adjust',
-  buyLev = 'BuyLev',
-  sellLev = 'SellLev',
+  buy = 'Buy',
+  sell = 'Sell',
   bite = 'Bite',
   kick = 'Kick',
   tend = 'Tend',
@@ -132,7 +133,7 @@ export type MTMarginEvent = {
       ddai: BigNumber;
     }
   | {
-      kind: MTHistoryEventKind.buyLev | MTHistoryEventKind.sellLev;
+      kind: MTHistoryEventKind.buy | MTHistoryEventKind.sell;
       amount: BigNumber;
       payAmount: BigNumber;
     }
@@ -192,17 +193,17 @@ export interface MarginableAssetCore extends Core {
 export interface MarginableAsset extends MarginableAssetCore {
   // balance: BigNumber;
   balanceInCash: BigNumber;
-  balanceInDai: BigNumber;
-  midpointPrice: BigNumber;
+  balanceInDai?: BigNumber;
+  midpointPrice?: BigNumber;
   currentCollRatio?: BigNumber;
   cash: BigNumber;
   // maxDebtForOther: BigNumber; // max possible debt for other assets
   maxDebt: BigNumber; // max possible targetDebt for this asset
   liquidationPrice: BigNumber;
   markPrice: BigNumber;
-  leverage: BigNumber;
+  multiple: BigNumber;
   availableDebt: BigNumber;
-  maxSafeLeverage: BigNumber;
+  maxSafeMultiply: BigNumber;
   availableActions: UserActionKind[];
   availableBalance: BigNumber;
   lockedBalance: BigNumber;
@@ -215,8 +216,9 @@ export interface MarginableAsset extends MarginableAssetCore {
   amountBeingLiquidated: BigNumber;
   nextPriceUpdateDelta: string;
   purchasingPower: BigNumber;
-  equity: BigNumber;
+  equity?: BigNumber;
   isSafeCollRatio?: boolean;
+  priceDropWarning: boolean;
 }
 
 // export interface NonMarginableAssetCore extends Core {
@@ -252,12 +254,12 @@ export interface MTAccount {
   proxy: any;
 }
 
-export function createMTProxyApprove(calls$: Calls$) {
+export function createMTProxyApprove(gasPrice$: GasPrice$, calls$: Calls$) {
   return (args: { token: string; proxyAddress: string }): Observable<TxState> => {
     const r = calls$.pipe(
       first(),
       switchMap((calls) => {
-        return calls.approveMTProxy(args);
+        return calls.approveMTProxy(gasPrice$, args);
       }),
     );
     r.subscribe();

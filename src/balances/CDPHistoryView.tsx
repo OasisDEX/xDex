@@ -99,7 +99,7 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
                   );
                   displayName = 'Deposit';
                   break;
-                case MTHistoryEventKind.buyLev:
+                case MTHistoryEventKind.buy:
                   amount = (
                     <>
                       <FormatFiat value={dAmount} token={e.token} /> {e.token}
@@ -107,7 +107,7 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
                   );
                   displayName = <span className={styles.eventPositive}>Buy</span>;
                   break;
-                case MTHistoryEventKind.sellLev:
+                case MTHistoryEventKind.sell:
                   amount = (
                     <>
                       <FormatFiat value={dAmount} token={e.token} /> {e.token}
@@ -125,6 +125,11 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
                   break;
                 case MTHistoryEventKind.deal:
                   displayName = `Deal (#${e.auctionId})`;
+                  amount = (
+                    <>
+                      <FormatFiat value={dAmount} token={e.token} /> {e.token}
+                    </>
+                  );
                   break;
                 case MTHistoryEventKind.redeem:
                   amount = (
@@ -138,13 +143,13 @@ export class CDPHistoryView extends React.Component<MarginableAsset> {
                   displayName = e.kind;
               }
 
-              const price = e.priceDai ? e.priceDai : e.price;
+              const price = e.priceDai ? e.priceDai : e.price && e.price.gt(zero) ? e.price : undefined;
 
               return (
                 <tr key={i}>
                   <td className={classnames(styles.eventName, styles.cellLeftAligned)}>{displayName}</td>
                   <td>{amount}</td>
-                  <td>{price ? <FormatAmount value={price} token="DAI" /> : <>-</>}</td>
+                  <td>{price ? <FormatAmount value={price} token="DAI" /> : <>N/A</>}</td>
                   <td>{e.balance && <FormatCrypto value={e.balance} token={e.token} />}</td>
                   <td>{e.daiBalance && <FormatCrypto value={e.daiBalance} token="DAI" />}</td>
                   <td>

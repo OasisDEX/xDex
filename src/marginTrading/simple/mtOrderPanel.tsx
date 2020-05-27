@@ -33,15 +33,15 @@ export class MTSimpleOrderPanel extends React.Component<
 
       return (
         <>
-          <PanelHeader>Manage Your Leverage</PanelHeader>
+          <PanelHeader>Manage Your Position</PanelHeader>
           <PanelBody className={styles.orderPanel}>
-            Leverage trading is enabled only on following markets:
+            Multiply trading is enabled only on following markets:
             {marginablePairs.map(({ base, quote }) => (
               <routerContext.Consumer key={base}>
                 {({ rootUrl }) => (
                   <>
                     {marginablePairs.length > 1 && <>, </>}
-                    <Link to={`${rootUrl}leverage/${base}/${quote}`} style={{ whiteSpace: 'nowrap' }}>
+                    <Link to={`${rootUrl}multiply/${base}/${quote}`} style={{ whiteSpace: 'nowrap' }}>
                       {base}
                     </Link>
                   </>
@@ -60,7 +60,7 @@ export class MTSimpleOrderPanel extends React.Component<
 
     return (
       <div className={styles.orderPanel}>
-        <PanelHeader style={{ width: '100%' }}>Manage Your Leverage</PanelHeader>
+        <PanelHeader style={{ width: '100%' }}>Manage Your Position</PanelHeader>
         <LoadingIndicator size="lg" />
       </div>
     );

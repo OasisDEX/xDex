@@ -46,13 +46,13 @@ import { MTSimpleOrderPanelProps } from './mtOrderPanel';
 
 /* tslint:disable */
 const collateralBalanceTooltip = (collateral: string) => `
-  This is the amount of ${collateral} you currently have locked within your Leverage Account.
+  This is the amount of ${collateral} you currently have locked within your Multiply Account.
   This ${collateral} is used as collateral against any debt you have, and may be sold 
   if the Mark Price falls below your Liquidation Price.
 `;
 
 const daiBalanceTooltip = `
-  This is the amount of Dai you have in your Leverage Account.
+  This is the amount of Dai you have in your Multiply Account.
   When negative, this represents your debt, and how much you owe.
   When positive, this is how much Dai is available for you to withdraw.
 `;
@@ -76,7 +76,7 @@ const slippageLimitTooltip = `
 //   let debt = null;
 //   let cash = null;
 //   let referencePrice = null;
-//   let leverage = null;
+//   let multiple = null;
 //   let urnBalance = null;
 //
 //   if (value.mta && value.mta.state === MTAccountState.setup) {
@@ -86,7 +86,7 @@ const slippageLimitTooltip = `
 //     cash = ma!.dai;
 //     urnBalance = ma!.urnBalance;
 //     referencePrice = ma!.referencePrice;
-//     leverage = balance.times(referencePrice).div(balance.times(referencePrice).minus(debt));
+//     multiple = balance.times(referencePrice).div(balance.times(referencePrice).minus(debt));
 //   }
 //   return (<div style={{
 //     position: 'fixed',
@@ -140,7 +140,7 @@ const slippageLimitTooltip = `
 //         {referencePrice && referencePrice.toString()}
 //         <br/>
 //         LEVERAGE:
-//         {leverage && leverage.toString()}
+//         {multiple && multiple.toString()}
 //         <br/>
 //       </> : null
 //
@@ -292,7 +292,7 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState & {
         {this.slippageLimit()}
         {this.stabilityFee()}
         {this.accountBalance()}
-        {this.leverage()}
+        {this.multiple()}
         {this.price()}
         {this.liquidationPrice()}
       </div>
@@ -504,26 +504,26 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState & {
     );
   }
 
-  private leverage() {
-    const { leverage, leveragePost } = this.props;
-    const leverageDisplay = leverage && leverage.gt(zero) ? leverage : leveragePost ? zero : minusOne;
+  private multiple() {
+    const { multiple, multiplePost } = this.props;
+    const multipleDisplay = multiple && multiple.gt(zero) ? multiple : multiplePost ? zero : minusOne;
 
-    const leveragePostDisplay = leveragePost && leveragePost.gt(zero) ? leveragePost : minusOne;
+    const multiplePostDisplay = multiplePost && multiplePost.gt(zero) ? multiplePost : minusOne;
     return (
       <div
         className={classnames(
           styles.orderSummaryRow,
           styles.orderSummaryRowDark,
-          leveragePost ? styles.visible : styles.hidden,
+          multiplePost ? styles.visible : styles.hidden,
         )}
       >
-        <div className={styles.orderSummaryLabel}>Leverage</div>
+        <div className={styles.orderSummaryLabel}>Multiple</div>
         <div className={styles.orderSummaryValue}>
-          {leverageDisplay.gt(zero) ? <>{formatPrecision(leverageDisplay, 1)}x</> : <span>-</span>}
-          {leveragePost && (
+          {multipleDisplay.gt(zero) ? <>{formatPrecision(multipleDisplay, 1)}x</> : <span>-</span>}
+          {multiplePost && (
             <>
               <span className={styles.transitionArrow} />
-              {leveragePostDisplay.gte(zero) ? <>{formatPrecision(leveragePostDisplay, 1)}x</> : <span>-</span>}
+              {multiplePostDisplay.gte(zero) ? <>{formatPrecision(multiplePostDisplay, 1)}x</> : <span>-</span>}
             </>
           )}
         </div>
@@ -720,7 +720,7 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState & {
         disabled={!readyToProceed || !!progress}
         onClick={() => {
           if (total) {
-            trackingEvents.initiateTradeLeverage(kind, total.toNumber());
+            trackingEvents.initiateTradeMultiply(kind, total.toNumber());
           }
         }}
       >
@@ -803,9 +803,7 @@ export class MtSimpleOrderFormView extends React.Component<
 
     return (
       <div className={styles.onboardingPanel}>
-        <div className={styles.onboardingParagraph}>
-          {orderFormMessageContent(message)}
-        </div>
+        <div className={styles.onboardingParagraph}>{orderFormMessageContent(message)}</div>
         <Button
           size="md"
           color="primary"
@@ -857,7 +855,7 @@ export class MtSimpleOrderFormView extends React.Component<
         <PanelHeader>
           {this.props.view === ViewKind.instantTradeForm ? (
             <>
-              Manage your Leverage
+              Manage your Position
               {this.headerButtons()}
             </>
           ) : (
@@ -996,10 +994,10 @@ function orderFormMessageContent(msg: OrderFormMessage) {
     case OrderFormMessageKind.onboarding:
       return (
         <>
-          <h3>Deposit into Leverage Account</h3>
+          <h3>Deposit into Multiply Account</h3>
           Before opening a new position, deposit {msg.baseToken}
           <br />
-          or DAI into your Leverage Trading Account
+          or DAI into your Multiply Trading Account
         </>
       );
 
@@ -1030,7 +1028,7 @@ function orderFormMessageContent(msg: OrderFormMessage) {
     case OrderFormMessageKind.bitable:
       return (
         <div className={styles.warningMessage}>
-          Your {msg.baseToken} leveraged position is now at risk of being liquidated. You can still avoid auction by{' '}
+          Your {msg.baseToken} multiply position is now at risk of being liquidated. You can still avoid auction by{' '}
           <br /> depositing {msg.baseToken} or DAI.
         </div>
       );

@@ -4,6 +4,13 @@ import { OfferType } from '../exchange/orderbook/orderbook';
 import { UserActionKind } from '../marginTrading/state/mtAccount';
 import * as Fathom from './fathom';
 
+export enum Pages {
+  instant = 'Instant',
+  market = 'Market',
+  mt = 'Multiply',
+  account = 'Account',
+}
+
 export const trackingEvents = {
   pageView: (location: string) => {
     mixpanel.track('Pageview', {
@@ -16,7 +23,7 @@ export const trackingEvents = {
     mixpanel.track('btn-click', {
       id: 'initiate-trade',
       product: 'oasis-trade',
-      page: 'Instant',
+      page: Pages.instant,
       section: 'order-details',
     });
 
@@ -30,9 +37,9 @@ export const trackingEvents = {
   initiateTradeMarket: (kind: OfferType, total: number, pair: string) => {
     mixpanel.track('btn-click', {
       kind,
+      page: Pages.market,
       id: 'initiate-trade',
       product: 'oasis-trade',
-      page: 'Market',
       section: 'create-order',
     });
 
@@ -43,49 +50,49 @@ export const trackingEvents = {
 
     Fathom.trackGoal(fathomGoal[pair], total);
   },
-  initiateTradeLeverage: (kind: OfferType, total: number) => {
+  initiateTradeMultiply: (kind: OfferType, total: number) => {
     mixpanel.track('btn-click', {
       kind,
+      page: Pages.mt,
       id: 'initiate-trade',
       product: 'oasis-trade',
-      page: 'Leverage',
-      section: 'manage-leverage',
+      section: 'manage-multiple',
     });
 
-    const fathomGoal = kind === OfferType.buy ? Fathom.fathomGoals.leverageBuy : Fathom.fathomGoals.leverageSell;
+    const fathomGoal = kind === OfferType.buy ? Fathom.fathomGoals.multipleBuy : Fathom.fathomGoals.multipleSell;
 
     Fathom.trackGoal(fathomGoal, total);
   },
   taxExport: () => {
     mixpanel.track('btn-click', {
+      page: Pages.account,
       id: 'export-trades',
       product: 'oasis-trade',
-      page: 'Account',
       section: 'history-export',
     });
   },
   changeOrderType: () => {
     mixpanel.track('btn-click', {
+      page: Pages.market,
       id: 'submit-order-type',
       product: 'oasis-trade',
-      page: 'Market',
       section: 'choose-order-type',
     });
   },
   changeOrderbookType: () => {
     mixpanel.track('btn-click', {
+      page: Pages.market,
       id: 'change-orderbook-view',
       product: 'oasis-trade',
-      page: 'Market',
       section: 'orderbook',
     });
   },
   changeAssetPair: (base: string, quote: string) => {
     mixpanel.track('btn-click', {
+      page: Pages.market,
       pair: `${base}${quote}`,
       id: 'change-asset-pair',
       product: 'oasis-trade',
-      page: 'Market',
       section: 'asset-picker',
     });
   },
@@ -93,9 +100,9 @@ export const trackingEvents = {
     const { depositDai, depositCollateral, withdrawDai, withdrawCollateral } = Fathom.fathomGoals;
 
     mixpanel.track('btn-click', {
+      page: Pages.mt,
       id: `${actionKind}-${token === 'DAI' ? 'dai' : 'collateral'}-submit`,
       product: 'oasis-trade',
-      page: 'Leverage',
       section: 'deposit-withdraw-modal',
       currency: token,
     });
@@ -108,42 +115,42 @@ export const trackingEvents = {
   },
   daiUsdToggle: (toggle: boolean) => {
     mixpanel.track('btn-click', {
+      page: Pages.mt,
       id: 'dai-usd-toggle',
       product: 'oasis-trade',
-      page: 'Leverage',
       section: 'my-position',
       currency: toggle ? 'usd' : 'dai',
     });
   },
   depositCollateral: () => {
     mixpanel.track('btn-click', {
+      page: Pages.mt,
       id: 'fund-collateral-open',
       product: 'oasis-trade',
-      page: 'Leverage',
       section: 'my-position',
     });
   },
   depositDai: () => {
     mixpanel.track('btn-click', {
+      page: Pages.mt,
       id: 'fund-dai-open',
       product: 'oasis-trade',
-      page: 'Leverage',
       section: 'my-position',
     });
   },
   withdrawCollateral: () => {
     mixpanel.track('btn-click', {
+      page: Pages.mt,
       id: 'draw-collateral-open',
       product: 'oasis-trade',
-      page: 'Leverage',
       section: 'my-position',
     });
   },
   withdrawDai: () => {
     mixpanel.track('btn-click', {
+      page: Pages.mt,
       id: 'draw-dai-open',
       product: 'oasis-trade',
-      page: 'Leverage',
       section: 'my-position',
     });
   },

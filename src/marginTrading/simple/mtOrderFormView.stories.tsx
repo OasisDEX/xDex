@@ -22,7 +22,7 @@
 // } from './mtOrderForm';
 // import { MtSimpleOrderFormView } from './mtOrderFormView';
 //
-// const stories = storiesOf('Leverage Trading/Order Form', module)
+// const stories = storiesOf('Multiply Trading/Order Form', module)
 //   .addDecorator(story => (
 //     <div style={{ width: '932px', background: '#ffffff' }}>
 //       {story()}

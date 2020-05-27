@@ -11,6 +11,7 @@ import { distinctUntilChanged, first, map, scan, switchMap, takeUntil } from 'rx
 import { DustLimits } from '../../balances/balances';
 import { Calls, Calls$, ReadCalls$ } from '../../blockchain/calls/calls';
 import { getToken } from '../../blockchain/config';
+import { GasPrice$ } from '../../blockchain/network';
 import { localStorageGetDict, localStorageStoreDict } from '../../blockchain/utils';
 import { Offer, OfferType, Orderbook } from '../../exchange/orderbook/orderbook';
 import { TradingPair } from '../../exchange/tradingPair/tradingPair';
@@ -79,6 +80,7 @@ export enum LiquidationMessageKind {
   imminent = 'imminent',
   inProgress = 'inProgress',
   redeemable = 'redeemable',
+  priceDrop = 'priceDrop',
 }
 
 export enum OrderFormMessageKind {
@@ -108,6 +110,9 @@ export type LiquidationMessage =
       kind: LiquidationMessageKind.redeemable;
       baseToken?: string;
       redeemable?: string;
+    }
+  | {
+      kind: LiquidationMessageKind.priceDrop;
     };
 
 export type OrderFormMessage =
@@ -209,8 +214,8 @@ export interface MTSimpleFormState extends HasGasEstimation {
   plan?: Operation[] | Impossible;
   collRatio?: BigNumber;
   collRatioPost?: BigNumber;
-  leverage?: BigNumber;
-  leveragePost?: BigNumber;
+  multiple?: BigNumber;
+  multiplePost?: BigNumber;
   liquidationPrice?: BigNumber;
   liquidationPricePost?: BigNumber;
   balancePost?: BigNumber;
@@ -606,7 +611,7 @@ type PlanInfo = [
   {
     collRatioPost?: BigNumber;
     liquidationPricePost?: BigNumber;
-    leveragePost?: BigNumber;
+    multiplePost?: BigNumber;
     balancePost?: BigNumber;
     daiBalancePost?: BigNumber;
     realPurchasingPowerPost?: BigNumber;
@@ -649,7 +654,7 @@ function getBuyPlan(
       {
         collRatioPost: undefined,
         liquidationPricePost: undefined,
-        leveragePost: undefined,
+        multiplePost: undefined,
         balancePost: undefined,
         daiBalancePost: undefined,
         realPurchasingPowerPost: undefined,
@@ -683,7 +688,7 @@ function getBuyPlan(
   const collRatioPost = postTradeAsset.currentCollRatio;
   const liquidationPricePost = postTradeAsset.liquidationPrice;
   const isSafePost = postTradeAsset.safe;
-  const leveragePost = postTradeAsset.leverage;
+  const multiplePost = postTradeAsset.multiple;
   const balancePost = postTradeAsset.balance;
   const daiBalancePost = postTradeAsset.debt.gt(zero) ? postTradeAsset.debt.times(minusOne) : postTradeAsset.dai;
 
@@ -701,7 +706,7 @@ function getBuyPlan(
       collRatioPost,
       liquidationPricePost,
       isSafePost,
-      leveragePost,
+      multiplePost,
       balancePost,
       daiBalancePost,
       realPurchasingPowerPost,
@@ -726,7 +731,7 @@ function getSellPlan(
       {
         collRatioPost: undefined,
         liquidationPricePost: undefined,
-        leveragePost: undefined,
+        multiplePost: undefined,
         balancePost: undefined,
         daiBalancePost: undefined,
         isSafePost: undefined,
@@ -750,7 +755,7 @@ function getSellPlan(
   const collRatioPost = postTradeAsset.currentCollRatio;
   const liquidationPricePost = postTradeAsset.liquidationPrice;
   const isSafePost = postTradeAsset.safe;
-  const leveragePost = postTradeAsset.leverage;
+  const multiplePost = postTradeAsset.multiple;
   const balancePost = postTradeAsset.balance;
   const daiBalancePost = postTradeAsset.debt.gt(zero) ? postTradeAsset.debt.times(minusOne) : postTradeAsset.dai;
 
@@ -761,7 +766,7 @@ function getSellPlan(
         delta,
       } as Required<EditableDebt>,
     ]),
-    { collRatioPost, liquidationPricePost, leveragePost, isSafePost, balancePost, daiBalancePost },
+    { collRatioPost, liquidationPricePost, multiplePost, isSafePost, balancePost, daiBalancePost },
   ];
 }
 
@@ -956,6 +961,7 @@ function freezeGasEstimation(previous: MTSimpleFormState, state: MTSimpleFormSta
 }
 
 function prepareSubmit(
+  gasPrice$: GasPrice$,
   calls$: Calls$,
 ): [(state: MTSimpleFormState) => void, () => void, Observable<ProgressChange | FormResetChange>] {
   const progressChange$ = new Subject<ProgressChange | FormResetChange>();
@@ -987,7 +993,7 @@ function prepareSubmit(
       first(),
       switchMap((calls) => {
         const call = state.kind === OfferType.buy ? calls.mtBuy : calls.mtSell;
-        return call({
+        return call(gasPrice$, {
           amount,
           baseToken,
           price,
@@ -1073,7 +1079,7 @@ function addPreTradeInfo(state: MTSimpleFormState): MTSimpleFormState {
 
   const collRatio = ma && ma.currentCollRatio;
   const liquidationPrice = ma && ma.liquidationPrice;
-  const leverage = ma && ma.leverage;
+  const multiple = ma && ma.multiple;
   const isSafeCollRatio = ma && ma.isSafeCollRatio;
 
   return {
@@ -1081,7 +1087,7 @@ function addPreTradeInfo(state: MTSimpleFormState): MTSimpleFormState {
     collRatio,
     isSafeCollRatio,
     liquidationPrice,
-    leverage,
+    multiple,
   };
 }
 
@@ -1151,7 +1157,7 @@ export function createMTSimpleOrderForm$(
     toMTAccountChange(mta$),
   );
 
-  const [submit, , stageChange$] = prepareSubmit(calls$);
+  const [submit, , stageChange$] = prepareSubmit(gasPrice$, calls$);
 
   const initialState: MTSimpleFormState = {
     submit,

@@ -22,8 +22,8 @@ export function createRawMTHistoryFromCache(
   });
 
   const q = gql`
-    query allLeveragedEvents($token: String, $proxy: String) {
-      allLeveragedEvents(filter: { ilk: { equalTo: $token }, owner: { equalTo: $proxy } }) {
+    query allMultiplyEvents($token: String, $proxy: String) {
+      allMultiplyEvents(filter: { ilk: { equalTo: $token }, owner: { equalTo: $proxy } }) {
         nodes {
           type
           ilk
@@ -53,7 +53,7 @@ export function createRawMTHistoryFromCache(
 
   return from(client.query({ variables, query: q })).pipe(
     map((result: any) =>
-      result.data.allLeveragedEvents.nodes.map(
+      result.data.allMultiplyEvents.nodes.map(
         ({
           type,
           ilk,

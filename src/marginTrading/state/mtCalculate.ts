@@ -159,6 +159,24 @@ function findAuctionBite(rawHistory: RawMTHistoryEvent[], auctionId: number) {
   })[0] as MTLiquidationEvent;
 }
 
+function findAuctionWinningLot(rawHistory: RawMTHistoryEvent[], auctionId: number) {
+  let lot: BigNumber | undefined;
+  rawHistory.forEach((h: any) => {
+    if (h.id === auctionId && h.kind === MTHistoryEventKind.dent) {
+      lot = h.lot;
+    }
+  });
+  if (!lot) {
+    rawHistory.forEach((h: any) => {
+      if (h.id === auctionId && h.kind === MTHistoryEventKind.tend) {
+        lot = h.lot;
+      }
+    });
+  }
+
+  return lot;
+}
+
 export function calculateMTHistoryEvents(rawHistory: RawMTHistoryEvent[], ma: MarginableAssetCore): MTHistoryEvent[] {
   let balance = zero;
   let cash = zero;
@@ -187,13 +205,13 @@ export function calculateMTHistoryEvents(rawHistory: RawMTHistoryEvent[], ma: Ma
       cash = cash.minus(h.amount);
       event = { ...h, token: ma.name, dDAIAmount: h.amount };
     }
-    if (h.kind === MTHistoryEventKind.buyLev) {
+    if (h.kind === MTHistoryEventKind.buy) {
       const priceDai = h.payAmount.div(h.amount);
       balance = balance.plus(h.amount);
       cash = cash.minus(h.payAmount);
       event = { ...h, priceDai, token: ma.name, dAmount: h.amount, dDAIAmount: h.payAmount };
     }
-    if (h.kind === MTHistoryEventKind.sellLev) {
+    if (h.kind === MTHistoryEventKind.sell) {
       const priceDai = h.payAmount.div(h.amount);
       balance = balance.minus(h.amount);
       cash = cash.plus(h.payAmount);
@@ -209,12 +227,18 @@ export function calculateMTHistoryEvents(rawHistory: RawMTHistoryEvent[], ma: Ma
       event = { ...h, token: ma.name, redeemable: bite.ink.minus(h.lot) };
     }
 
+    if (h.kind === MTHistoryEventKind.deal) {
+      const lot: BigNumber | undefined = findAuctionWinningLot(rawHistory, h.id);
+      // @ts-ignore
+      event = { ...h, token: ma.name, dAmount: lot };
+    }
+
     if (h.kind === MTHistoryEventKind.redeem) {
       balance = balance.plus(h.amount);
       event = { ...h, token: ma.name, dAmount: h.amount };
     }
     if (h.kind === MTHistoryEventKind.bite) {
-      event = { ...h, token: ma.name, dAmount: h.ink.times(minusOne), dDAIAmount: h.tab };
+      event = { ...h, token: ma.name, dAmount: h.ink, dDAIAmount: h.tab };
     }
 
     const prevDebt = debt;
@@ -242,10 +266,10 @@ export function calculateMTHistoryEvents(rawHistory: RawMTHistoryEvent[], ma: Ma
     const prevLiquidationPrice = liquidationPrice;
 
     liquidationPrice = debt.gt(zero) && balance.gt(zero) ? ma.minCollRatio.times(debt).div(balance) : zero;
-
+    event = { ...event, liquidationPrice };
     if (prevLiquidationPrice.gte(zero) && !liquidationPrice.isEqualTo(prevLiquidationPrice)) {
       const liquidationPriceDelta = prevLiquidationPrice.minus(liquidationPrice).times(minusOne);
-      event = { ...event, liquidationPriceDelta, liquidationPrice };
+      event = { ...event, liquidationPriceDelta };
     }
 
     equity = h.price && h.price.gt(zero) ? balance.times(h.price).plus(cash) : zero;
@@ -260,21 +284,22 @@ function calculateMidpointPrice(ob: Orderbook) {
   if (ob.sell[0] && ob.buy[0] && ob.sell[0].price.gt(zero) && ob.buy[0].price.gt(zero)) {
     return ob.sell[0].price.plus(ob.buy[0].price).div(2);
   }
-  return zero;
+  return undefined;
 }
 
 export function calculateMarginable(ma: MarginableAssetCore, orderbook: Orderbook): MarginableAsset {
   const { debt, dai, balance } = ma;
   const [, purchasingPower] = realPurchasingPowerMarginable(ma, orderbook.sell);
   const midpointPrice = calculateMidpointPrice(orderbook);
-  const equity = midpointPrice.gt(zero) ? balance.times(midpointPrice).minus(debt).plus(dai) : zero;
+  const equity =
+    midpointPrice && midpointPrice.gt(zero) ? balance.times(midpointPrice).minus(debt).plus(dai) : undefined;
   const availableActions = marginableAvailableActions(ma);
   const balanceInCash = balance.times(ma.referencePrice);
-  const balanceInDai = balance.times(midpointPrice);
+  const balanceInDai = midpointPrice ? balance.times(midpointPrice) : undefined;
   const lockedBalance = BigNumber.min(balance, debt.div(ma.referencePrice).times(ma.safeCollRatio));
   const availableBalance = BigNumber.max(zero, balance.minus(lockedBalance));
   const currentCollRatio = debt.gt(0) ? balanceInCash.dividedBy(debt) : undefined;
-  const maxSafeLeverage = one.div(one.minus(one.div(ma.safeCollRatio)));
+  const maxSafeMultiply = one.div(one.minus(one.div(ma.safeCollRatio)));
   const maxDebt = balanceInCash.div(ma.safeCollRatio);
   const availableDebt = BigNumber.max(zero, maxDebt.minus(debt));
 
@@ -301,16 +326,7 @@ export function calculateMarginable(ma: MarginableAssetCore, orderbook: Orderboo
 
   const liquidationInProgress = biteLastIndex >= 0 && biteLastIndex > dentLastIndex;
 
-  const leverage = ma.balance.times(ma.referencePrice).div(ma.balance.times(ma.referencePrice).minus(ma.debt));
-
-  let bitable = mtBitable.no;
-  if (ma.osmPriceNext && ma.osmPriceNext.lte(liquidationPrice)) {
-    bitable = mtBitable.imminent;
-  }
-
-  if (ma.referencePrice.lte(liquidationPrice)) {
-    bitable = mtBitable.yes;
-  }
+  const multiple = ma.balance.times(ma.referencePrice).div(ma.balance.times(ma.referencePrice).minus(ma.debt));
 
   let runningAuctions = 0;
   ma.rawHistory.forEach((h) => {
@@ -329,15 +345,40 @@ export function calculateMarginable(ma: MarginableAssetCore, orderbook: Orderboo
     }
   });
 
-  const lastPriceUpdate = moment.unix(ma.zzz.toNumber());
-  const duration = moment.duration(lastPriceUpdate.add(1, 'hours').diff(moment(new Date())));
+  const ONE_HOUR = 60 * 60;
+  const nowTs = Math.round(Date.now() / 1000);
+  const lastUpdateTs = ma.zzz.toNumber();
+  const priceUpdateDelta = (lastUpdateTs as number) + ONE_HOUR - nowTs;
+  const nextPriceUpdateDelta = moment.utc(priceUpdateDelta * 1000).format('mm:ss');
 
-  const nextPriceUpdateDelta = moment.utc(Math.abs(duration.asMilliseconds())).format('mm:ss');
+  let bitable = mtBitable.no;
+  if (ma.osmPriceNext && ma.osmPriceNext.lte(liquidationPrice)) {
+    bitable = mtBitable.imminent;
+  }
+
+  if (ma.referencePrice.lte(liquidationPrice)) {
+    bitable = mtBitable.yes;
+  }
+
+  if (priceUpdateDelta <= 0 && ma.osmPriceNext && ma.osmPriceNext.lte(liquidationPrice)) {
+    bitable = mtBitable.yes;
+  }
+
+  let priceDropWarning = false;
+  if (
+    ma.osmPriceNext &&
+    ma.osmPriceNext.gt(liquidationPrice) &&
+    ma.referencePrice.gt(liquidationPrice) &&
+    midpointPrice &&
+    midpointPrice.gt(zero) &&
+    midpointPrice.lt(liquidationPrice)
+  ) {
+    priceDropWarning = true;
+  }
+
   const fee = ma.fee.times(100);
   const liquidationPenalty = ma.liquidationPenalty.gt(zero) ? ma.liquidationPenalty.minus(1).times(100) : zero;
-
   const isSafeCollRatio = !(currentCollRatio && currentCollRatio.lt(SAFE_COLL_RATIO_SELL));
-
   const markPrice = ma.osmPriceNext ? ma.osmPriceNext : zero;
 
   return {
@@ -350,10 +391,10 @@ export function calculateMarginable(ma: MarginableAssetCore, orderbook: Orderboo
     maxDebt,
     availableDebt,
     currentCollRatio,
-    maxSafeLeverage,
+    maxSafeMultiply,
     liquidationPrice,
     markPrice,
-    leverage,
+    multiple,
     lockedBalance,
     availableBalance,
     safe,
@@ -368,6 +409,7 @@ export function calculateMarginable(ma: MarginableAssetCore, orderbook: Orderboo
     fee,
     liquidationPenalty,
     isSafeCollRatio,
+    priceDropWarning,
   };
 }
 

@@ -5,6 +5,7 @@
 import { BigNumber } from 'bignumber.js';
 import { merge, Observable, of, Subject } from 'rxjs';
 import { first, map, scan, switchMap, takeUntil } from 'rxjs/operators';
+import { GasPrice$ } from '../../blockchain/network';
 
 import {
   AmountFieldChange,
@@ -110,8 +111,8 @@ export interface MTTransferFormState extends HasGasEstimation {
   realPurchasingPowerPost?: BigNumber;
   liquidationPrice?: BigNumber;
   liquidationPricePost?: BigNumber;
-  leveragePost?: BigNumber;
-  leveragePostPost?: BigNumber;
+  multiplePost?: BigNumber;
+  multiplePostPost?: BigNumber;
   daiBalance?: BigNumber;
   daiBalancePost?: BigNumber;
   balancePost?: BigNumber;
@@ -186,7 +187,7 @@ function applyChange(state: MTTransferFormState, change: MTSetupFormChange): MTT
         realPurchasingPowerPost: undefined,
         liquidationPricePost: undefined,
         balancePost: undefined,
-        leveragePostPost: undefined,
+        multiplePostPost: undefined,
         messages: [],
         progress: undefined,
       };
@@ -249,7 +250,7 @@ function updatePlan(state: MTTransferFormState): MTTransferFormState {
       realPurchasingPower,
       daiBalance,
       liquidationPricePost: undefined,
-      leveragePost: undefined,
+      multiplePost: undefined,
       balancePost: undefined,
       daiBalancePost: undefined,
       realPurchasingPowerPost: undefined,
@@ -287,7 +288,7 @@ function updatePlan(state: MTTransferFormState): MTTransferFormState {
       daiBalance,
       liquidationPrice,
       liquidationPricePost: undefined,
-      leveragePost: undefined,
+      multiplePost: undefined,
       balancePost: undefined,
       daiBalancePost: undefined,
       realPurchasingPowerPost: undefined,
@@ -323,7 +324,7 @@ function updatePlan(state: MTTransferFormState): MTTransferFormState {
 
   const isSafePost = postTradeAsset.safe;
   const liquidationPricePost = postTradeAsset.liquidationPrice;
-  const leveragePost = postTradeAsset.leverage;
+  const multiplePost = postTradeAsset.multiple;
   const balancePost = postTradeAsset.balance;
   const daiBalancePost = postTradeAsset.debt.gt(zero) ? postTradeAsset.debt.times(minusOne) : postTradeAsset.dai;
   const [, realPurchasingPowerPost] = realPurchasingPowerMarginable(postTradeAsset, state.orderbook.sell);
@@ -340,7 +341,7 @@ function updatePlan(state: MTTransferFormState): MTTransferFormState {
     messages,
     liquidationPrice,
     liquidationPricePost,
-    leveragePost,
+    multiplePost,
     balancePost,
     daiBalance,
     daiBalancePost,
@@ -383,6 +384,7 @@ function transactionHandler() {
 }
 
 function prepareTransfer(
+  gasPrice$: GasPrice$,
   calls$: Calls$,
 ): [(state: MTTransferFormState) => void, () => void, Observable<ProgressChange>] {
   const transferChange$ = new Subject<ProgressChange>();
@@ -413,7 +415,7 @@ function prepareTransfer(
           (calls): Observable<ProgressChange> => {
             const call = actionKind === UserActionKind.draw ? calls.mtDraw : calls.mtFund;
 
-            return call({ proxy, plan, token, amount }).pipe(transactionHandler(), takeUntil(cancel$));
+            return call(gasPrice$, { proxy, plan, token, amount }).pipe(transactionHandler(), takeUntil(cancel$));
           },
         ),
       ),
@@ -428,6 +430,7 @@ function prepareTransfer(
 }
 
 function prepareSetup(
+  gasPrice$: GasPrice$,
   calls$: Calls$,
   mta$: Observable<MTAccount>,
 ): [(state: MTTransferFormState) => void, Observable<ProgressChange>] {
@@ -438,7 +441,7 @@ function prepareSetup(
       first(),
       switchMap(
         (calls): Observable<ProgressChange> => {
-          return calls.setupMTProxy({}).pipe(
+          return calls.setupMTProxy(gasPrice$, {}).pipe(
             transactionHandler(),
             switchMap((change) => {
               if (change.progress !== ProgressStage.done) {
@@ -464,6 +467,7 @@ function prepareSetup(
 }
 
 function prepareAllowance(
+  gasPrice$: GasPrice$,
   calls$: Calls$,
   mta$: Observable<MTAccount>,
 ): [(state: MTTransferFormState) => void, Observable<ProgressChange>] {
@@ -480,7 +484,7 @@ function prepareAllowance(
       switchMap(
         (calls): Observable<ProgressChange> => {
           return calls
-            .approveMTProxy({
+            .approveMTProxy(gasPrice$, {
               proxyAddress,
               token: state.token,
             })
@@ -603,9 +607,9 @@ export function createMTTransferForm$(
     toBalancesChange(balances$),
   );
 
-  const [transfer, cancel, transferProgressChange$] = prepareTransfer(calls$);
-  const [setup, setupProgressChange$] = prepareSetup(calls$, mta$);
-  const [allowance, allowanceProgressChange$] = prepareAllowance(calls$, mta$);
+  const [transfer, cancel, transferProgressChange$] = prepareTransfer(gasPrice$, calls$);
+  const [setup, setupProgressChange$] = prepareSetup(gasPrice$, calls$, mta$);
+  const [allowance, allowanceProgressChange$] = prepareAllowance(gasPrice$, calls$, mta$);
 
   const change = manualChange$.next.bind(manualChange$);
 

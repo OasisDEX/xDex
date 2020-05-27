@@ -86,7 +86,7 @@ export const rawHistoryBuy: RawMTHistoryEvent[] = [
   {
     timestamp: 1567693285,
     token: 'WETH',
-    kind: MTHistoryEventKind.buyLev,
+    kind: MTHistoryEventKind.buy,
     amount: new BigNumber('1'),
     ddai: new BigNumber('0'),
     dgem: new BigNumber('0'),
@@ -119,7 +119,7 @@ export const rawHistoryBuySell: RawMTHistoryEvent[] = [
   {
     timestamp: 1567693285,
     token: 'WETH',
-    kind: MTHistoryEventKind.buyLev,
+    kind: MTHistoryEventKind.buy,
     amount: new BigNumber('1'),
     ddai: new BigNumber('0'),
     dgem: new BigNumber('0'),
@@ -131,7 +131,7 @@ export const rawHistoryBuySell: RawMTHistoryEvent[] = [
   {
     timestamp: 1567693285,
     token: 'WETH',
-    kind: MTHistoryEventKind.sellLev,
+    kind: MTHistoryEventKind.sell,
     amount: new BigNumber('1'),
     ddai: new BigNumber('0'),
     dgem: new BigNumber('0'),

@@ -76,14 +76,15 @@ export class MTLiquidationNotification extends React.Component<Loadable<MTMyPosi
     if (this.props.value && this.props.status === 'loaded' && this.props.value.mta) {
       const { mta, ma, redeem, transactions, liquidationMessage } = this.props.value;
 
+      const warnings = [];
       if (liquidationMessage) {
         const warningClass =
           liquidationMessage.kind === LiquidationMessageKind.redeemable
             ? myPositionStyles.infoMessage
-            : myPositionStyles.warningMessage;
+            : myPositionStyles.dangerMessage;
 
-        return (
-          <div className={warningClass}>
+        warnings.push(
+          <div className={warningClass} key="liquidation-warning">
             <>{liquidationMessage.kind !== LiquidationMessageKind.redeemable && <SvgImage image={warningIconSvg} />}</>
             <span className={myPositionStyles.warningText}>{liquidationMessageContent(liquidationMessage)}</span>
             {liquidationMessage.kind === LiquidationMessageKind.redeemable && ma.redeemable.gt(zero) && (
@@ -100,9 +101,19 @@ export class MTLiquidationNotification extends React.Component<Loadable<MTMyPosi
                 transactions={transactions}
               />
             )}
-          </div>
+          </div>,
         );
       }
+
+      if (ma.priceDropWarning) {
+        warnings.push(
+          <div className={myPositionStyles.warningMessage} key="price-drop-warning">
+            {liquidationMessageContent({ kind: LiquidationMessageKind.priceDrop })}
+          </div>,
+        );
+      }
+
+      return <div className={myPositionStyles.messagesWrapper}>{warnings}</div>;
     }
     return null;
   }
@@ -114,15 +125,15 @@ function liquidationMessageContent(msg: LiquidationMessage) {
     case LiquidationMessageKind.bitable:
       return (
         <>
-          Your WETH leveraged position is now at risk of being liquidated. You can still avoid auction by depositing{' '}
-          {msg.baseToken} or DAI.
+          Your {msg.baseToken} multiplied position is now at risk of being liquidated. You can still avoid auction by
+          depositing {msg.baseToken} or DAI.
         </>
       );
 
     case LiquidationMessageKind.imminent:
       return (
         <>
-          Your {msg.baseToken} leveraged position has entered the liquidation phase and your collateral will be
+          Your {msg.baseToken} multiplied position has entered the liquidation phase and your collateral will be
           auctioned in {msg.nextPriceUpdateDelta} minutes.
           <br />
           You can still avoid auction by {msg.isSafeCollRatio ? 'selling, or ' : ' '}
@@ -133,7 +144,7 @@ function liquidationMessageContent(msg: LiquidationMessage) {
     case LiquidationMessageKind.inProgress:
       return (
         <>
-          Your {msg.baseToken} leveraged position has been liquidated and your assets are currently being sold at
+          Your {msg.baseToken} multiplied position has been liquidated and your assets are currently being sold at
           auction to cover your debt. Check back soon for further details for the auction result.
         </>
       );
@@ -141,8 +152,16 @@ function liquidationMessageContent(msg: LiquidationMessage) {
     case LiquidationMessageKind.redeemable:
       return (
         <>
-          Your {msg.baseToken} leveraged position has been liquidated and sold to cover your debt. You have{' '}
+          Your {msg.baseToken} multiplied position has been liquidated and sold to cover your debt. You have{' '}
           {msg.redeemable} {msg.baseToken} that was not sold and can now be reclaimed.
+        </>
+      );
+
+    case LiquidationMessageKind.priceDrop:
+      return (
+        <>
+          Market price has dropped below the liquidation price. Your multiplied position might be at risk of being
+          liquidated shortly.
         </>
       );
     // tslint:enable
@@ -153,7 +172,7 @@ export class MTMyPositionPanel extends React.Component<Loadable<MTMyPositionPane
   public render() {
     if (this.props.value) {
       const panelTitle =
-        this.props.value.ma && this.props.value.ma.name ? `${this.props.value.ma.name} Position` : 'My Position';
+        this.props.value.ma && this.props.value.ma.name ? `${this.props.value.ma.name} Position` : 'Your Position';
       if (this.props.value && !this.props.value.account) {
         return (
           <Panel style={{ flexGrow: 1 }}>
@@ -220,7 +239,7 @@ export class MTMyPositionPanelInternal extends React.Component<
               <SvgImage image={backArrowSvg} />
             </div>
           )}
-          <span>My Position</span>
+          <span>Your Position</span>
           <Switch
             blocked={this.state.blocked}
             onClick={() => {

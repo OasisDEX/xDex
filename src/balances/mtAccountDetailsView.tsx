@@ -38,7 +38,7 @@ export class MtAccountDetailsView extends React.Component<MTAccount> {
               <th style={{ width: '10%' }}>Current coll. ratio</th>
               <th style={{ width: '10%' }}>Min coll. ratio</th>
               <th style={{ width: '10%' }}>Safe coll. ratio</th>
-              <th style={{ width: '10%' }}>Max safe leverage</th>
+              <th style={{ width: '10%' }}>Max safe multiply</th>
               <th style={{ width: '15%' }}>Purchasing power</th>
             </tr>
           </thead>
@@ -77,7 +77,7 @@ export class MtAccountDetailsView extends React.Component<MTAccount> {
                 <td>
                   <FormatPercent value={ma.safeCollRatio} multiply={true} />
                 </td>
-                <td>{ma.maxSafeLeverage.toFixed(1)}</td>
+                <td>{ma.maxSafeMultiply.toFixed(1)}</td>
                 <td>
                   <FormatAmount value={undefined} token="DAI" />
                 </td>
