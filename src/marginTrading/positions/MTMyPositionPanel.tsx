@@ -105,7 +105,7 @@ export class MTLiquidationNotification extends React.Component<Loadable<MTMyPosi
         );
       }
 
-      if (ma.priceDropWarning) {
+      if (ma && ma.priceDropWarning) {
         warnings.push(
           <div className={myPositionStyles.warningMessage} key="price-drop-warning">
             {liquidationMessageContent({ kind: LiquidationMessageKind.priceDrop })}
@@ -191,7 +191,7 @@ export class MTMyPositionPanel extends React.Component<Loadable<MTMyPositionPane
 
         const hasHistoryEvents = ma && ma.rawHistory.length > 0;
 
-        if (hasHistoryEvents || ma.balance.gt(zero) || ma.dai.gt(zero)) {
+        if (ma && (hasHistoryEvents || ma.balance.gt(zero) || ma.dai.gt(zero))) {
           return (
             <Panel style={{ flexGrow: 1 }}>
               <MTMyPositionPanelInternal {...this.props.value} {...{ open: this.props.open }} />
