@@ -139,7 +139,7 @@ const slippageLimitTooltip = `
 //         referencePrice:
 //         {referencePrice && referencePrice.toString()}
 //         <br/>
-//         LEVERAGE:
+//         Multiply:
 //         {multiple && multiple.toString()}
 //         <br/>
 //       </> : null

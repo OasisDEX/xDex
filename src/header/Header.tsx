@@ -119,7 +119,7 @@ const Header = ({ walletStatus }: HeaderProps) => {
                 <HeaderNavLink to={`${rootUrl}market`} name="Market" />
                 {REACT_APP_INSTANT_ENABLED === '1' && <HeaderNavLink to={`${rootUrl}instant`} name="Instant" />}
                 {REACT_APP_LT_ENABLED === '1' && walletStatus === 'connected' && (
-                  <HeaderNavLink to={`${rootUrl}Multiply`} name="Multiply" />
+                    <HeaderNavLink to={`${rootUrl}multiply`} name="Multiply" />
                 )}
                 {walletStatus === 'connected' && <HeaderNavLink to={`${rootUrl}balances`} name="Balances" />}
               </div>

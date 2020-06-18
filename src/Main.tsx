@@ -76,7 +76,7 @@ const Routes = ({ status }: { status: WalletStatus }) => {
       {REACT_APP_INSTANT_ENABLED === '1' && <Route exact={false} path={'/instant'} component={InstantExchange} />}
       {status === 'connected' && <Route path={'/balances'} component={BalancesView} />}
       {REACT_APP_LT_ENABLED === '1' && status === 'connected' && (
-        <Route path={'/leverage'} component={MarginTradingSimpleTxRx} />
+        <Route path={'/multiply'} component={MarginTradingSimpleTxRx} />
       )}
       <Redirect from={'/account'} to={'/balances'} />
       <Redirect from={'/'} to={'/market'} />
