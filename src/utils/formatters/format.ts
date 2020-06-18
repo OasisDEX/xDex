@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { BigNumber } from 'bignumber.js';
 import moment from 'moment';
 
@@ -16,14 +20,16 @@ BigNumber.config({
 });
 
 export function toShorthandNumber(amount: BigNumber, suffix: string = '', precision?: number) {
-  return new BigNumber(amount.toString()
-    .split('.')
-    .map((part, index) => {
-      if (index === 0) return part;
-      return part.substr(0, precision);
-    })
-    .filter(el => el)
-    .join('.')
+  return new BigNumber(
+    amount
+      .toString()
+      .split('.')
+      .map((part, index) => {
+        if (index === 0) return part;
+        return part.substr(0, precision);
+      })
+      .filter((el) => el)
+      .join('.'),
   )
     .toFixed(precision)
     .concat(suffix);
@@ -88,6 +94,10 @@ export function formatPrice(amount: BigNumber, token: string): string {
 
 export function formatPriceInstant(amount: BigNumber, token: string): string {
   return amount.toFormat(getToken(token).digitsInstant, BigNumber.ROUND_HALF_UP);
+}
+
+export function formatPriceInstantBN(amount: BigNumber, token: string): BigNumber {
+  return amount.decimalPlaces(getToken(token).digitsInstant, BigNumber.ROUND_HALF_UP);
 }
 
 export function formatPriceUp(amount: BigNumber, token: string): string {

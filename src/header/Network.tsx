@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import React, { useContext } from 'react';
 import { theAppContext } from 'src/AppContext';
 import { useObservable } from 'src/utils/observableHook';
@@ -6,7 +10,7 @@ import * as styles from './Header.scss';
 
 const Networks = {
   kovan: 'Kovan',
-  main: 'Main'
+  main: 'Main',
 };
 
 export const NetworkHooked = () => {
@@ -18,11 +22,7 @@ export const NetworkHooked = () => {
   const id = 'status';
   return (
     <Tooltip id={id} text={`${Networks[network]} Network`}>
-      <span
-        data-tip={true}
-        data-for={id}
-        className={`${styles.networkIndicator} ${styles[network]}`}
-      />
+      <span data-tip={true} data-for={id} className={`${styles.networkIndicator} ${styles[network]}`} />
     </Tooltip>
   );
 };

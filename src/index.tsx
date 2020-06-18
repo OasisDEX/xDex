@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { isEqual } from 'lodash';
 import 'normalize.css';
 import * as Raven from 'raven-js';
@@ -6,7 +10,8 @@ import * as ReactDOM from 'react-dom';
 import { combineLatest, Observable, of } from 'rxjs';
 import { distinctUntilChanged, startWith, switchMap, tap } from 'rxjs/internal/operators';
 import { map } from 'rxjs/operators';
-import { mixpanelInit } from './analytics';
+import { fathomInit } from './analytics/fathom';
+import { mixpanelInit } from './analytics/mixpanel';
 import { networks } from './blockchain/config';
 import { account$, networkId$ } from './blockchain/network';
 import { Web3Status, web3Status$ } from './blockchain/web3';
@@ -22,9 +27,9 @@ interface Props {
 }
 
 mixpanelInit();
+fathomInit();
 
 const App = ({ network, status }: Props) => {
-
   switch (status) {
     case 'initializing':
       return LoadingState.INITIALIZATION;
@@ -35,31 +40,35 @@ const App = ({ network, status }: Props) => {
       if (network !== undefined && !networks[network]) {
         return LoadingState.UNSUPPORTED;
       }
-      return <NavigationTxRx><Main/></NavigationTxRx>;
+      return (
+        <NavigationTxRx>
+          <Main />
+        </NavigationTxRx>
+      );
     default:
       throw new UnreachableCaseError(status);
   }
 };
 
 const web3StatusResolve$: Observable<Props> = web3Status$.pipe(
-  switchMap(status =>
-    status === 'ready' || status === 'readonly' ?
-      combineLatest(networkId$, account$).pipe(
-        tap(([network, account]) =>
-          console.log(`status: ${status}, network: ${network}, account: ${account}`)),
-        map(([network, _account]) => ({ status, network })),
-      ) : of({ status })
+  switchMap((status) =>
+    status === 'ready' || status === 'readonly'
+      ? combineLatest(networkId$, account$).pipe(
+          tap(([network, account]) => console.log(`status: ${status}, network: ${network}, account: ${account}`)),
+          map(([network, _account]) => ({ status, network })),
+        )
+      : of({ status }),
   ),
-  startWith({ status: 'initializing' as Web3Status })
+  startWith({ status: 'initializing' as Web3Status }),
 );
 
 const props$: Observable<Props> = web3StatusResolve$.pipe(
   map((web3Status) => {
     return {
-      ...web3Status
+      ...web3Status,
     } as Props;
   }),
-  distinctUntilChanged(isEqual)
+  distinctUntilChanged(isEqual),
 );
 
 const AppHooked = () => {
@@ -67,16 +76,14 @@ const AppHooked = () => {
 
   if (!state) return null;
 
-  return <App {...state}/>;
+  return <App {...state} />;
 };
 
 const root: HTMLElement = document.getElementById('root')!;
 
 if (process.env.NODE_ENV === 'production' && process.env.REACT_APP_SENTRY_DNS) {
-  Raven.config(
-    process.env.REACT_APP_SENTRY_DNS
-  ).install();
-  Raven.context(() => ReactDOM.render(<AppHooked/>, root));
+  Raven.config(process.env.REACT_APP_SENTRY_DNS).install();
+  Raven.context(() => ReactDOM.render(<AppHooked />, root));
 } else {
-  ReactDOM.render(<AppHooked/>, root);
+  ReactDOM.render(<AppHooked />, root);
 }

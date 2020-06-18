@@ -1,10 +1,14 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import classnames from 'classnames';
 import * as React from 'react';
 import * as styles from './Panel.scss';
 
 /*
-* This component is used to place icons / button / indicators in the top right corner.
-* */
+ * This component is used to place icons / button / indicators in the top right corner.
+ * */
 export class TopRightCorner extends React.Component<any> {
   public render() {
     const className = this.props.className;

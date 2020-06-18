@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { eth2weth } from '../blockchain/calls/instant';
 import { TradingPair } from '../exchange/tradingPair/tradingPair';
 
@@ -11,5 +15,5 @@ export const marketsOf = (token: string, allMarkets: TradingPair[]) => {
       possibleMarkets.add(eth2weth(pair.quote));
     }
     return possibleMarkets;
-  },                       new Set<string>());
+  }, new Set<string>());
 };

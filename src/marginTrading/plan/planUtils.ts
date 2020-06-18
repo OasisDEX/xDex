@@ -1,5 +1,9 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { BigNumber } from 'bignumber.js';
-import { Offer } from '../../exchange/orderbook/orderbook';
+import { Offer, OfferType } from '../../exchange/orderbook/orderbook';
 import { Impossible, impossible } from '../../utils/impossible';
 import { zero } from '../../utils/zero';
 import { DebtDelta } from '../allocate/allocate';
@@ -8,15 +12,13 @@ import { Operation } from '../state/mtAccount';
 export type Operations = Operation[] | Impossible;
 
 export function getTotal(amount: BigNumber, orders: Offer[]): Impossible | BigNumber {
-
   let total = zero;
   let amountLeft = amount;
 
   for (const offer of orders) {
     const done = BigNumber.min(amountLeft, offer.baseAmount);
     // const paid = done.times(offer.price);
-    const paid = done.times(offer.quoteAmount).div(offer.baseAmount)
-      .toFixed(18, BigNumber.ROUND_DOWN);
+    const paid = done.times(offer.quoteAmount).div(offer.baseAmount).toFixed(18, BigNumber.ROUND_DOWN);
 
     amountLeft = amountLeft.minus(done);
     total = total.plus(paid);
@@ -33,9 +35,7 @@ export function getTotal(amount: BigNumber, orders: Offer[]): Impossible | BigNu
   return total;
 }
 
-export function getPriceImpact(amount: BigNumber, orders: Offer[]):
-  Impossible | BigNumber {
-
+export function getPriceImpact(amount: BigNumber, orders: Offer[]): Impossible | BigNumber {
   let total = zero;
   let amountLeft = amount;
   let priceImpact = zero;
@@ -68,10 +68,7 @@ export function getPriceImpact(amount: BigNumber, orders: Offer[]):
   return priceImpact;
 }
 
-export function buy(
-  cash: BigNumber, offers: Offer[]
-): [BigNumber, BigNumber, Offer[]] {
-
+export function buy(cash: BigNumber, offers: Offer[], kind: OfferType): [BigNumber, BigNumber, Offer[]] {
   let totalBought = zero;
   let cashLeft = cash;
   let i = 0;
@@ -79,8 +76,9 @@ export function buy(
     i += 1;
     const paid = BigNumber.min(cashLeft, offer.quoteAmount);
     // const bought = paid.div(offer.price);
-    const bought = paid.div(offer.quoteAmount.div(offer.baseAmount))
-      .toFixed(18, BigNumber.ROUND_DOWN);
+    const bought = paid
+      .div(offer.quoteAmount.div(offer.baseAmount))
+      .toFixed(18, kind === OfferType.buy ? BigNumber.ROUND_DOWN : BigNumber.ROUND_UP);
     // console.log('bought2', bought2.toString());
 
     totalBought = totalBought.plus(bought);
@@ -131,10 +129,7 @@ export function buy(
 //   return [totalSold, cashLeftToBeEarned, offers.slice(i)];
 // }
 
-export function sellAll(
-  amountToBeSold: BigNumber, offers: Offer[]
-): [BigNumber, BigNumber, Offer[]] {
-
+export function sellAll(amountToBeSold: BigNumber, offers: Offer[]): [BigNumber, BigNumber, Offer[]] {
   let i = 0;
   let totalSold = zero;
   let totalEarned = zero;
@@ -154,11 +149,7 @@ export function sellAll(
       }
 
       const quoteAmount = offer.quoteAmount.minus(earned);
-      return [totalSold, totalEarned,
-        [{ ...offer, quoteAmount, baseAmount },
-          ...offers.slice(i)
-        ]
-      ];
+      return [totalSold, totalEarned, [{ ...offer, quoteAmount, baseAmount }, ...offers.slice(i)]];
     }
   }
 
@@ -170,6 +161,5 @@ export function deltaToOps(_delta: DebtDelta): Operation[] {
 }
 
 export function orderDeltas(deltas: DebtDelta[]): DebtDelta[] {
-  return [...deltas]
-    .sort((d1, d2) => d2.delta.comparedTo(d1.delta));
+  return [...deltas].sort((d1, d2) => d2.delta.comparedTo(d1.delta));
 }

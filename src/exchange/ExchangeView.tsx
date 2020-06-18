@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import * as React from 'react';
 import { Redirect, Route, RouteComponentProps, Switch } from 'react-router';
 import { map } from 'rxjs/operators';
@@ -28,7 +32,7 @@ interface ContentProps extends RouteComponentProps<any> {
   setTradingPair: (tp: TradingPair) => void;
 }
 
-export const Content  = (props: ContentProps) => {
+export const Content = (props: ContentProps) => {
   const {
     match: { params },
     parentMatch,
@@ -43,27 +47,27 @@ export const Content  = (props: ContentProps) => {
   return (
     <div>
       <FlexLayoutRow>
-        <TradingPairViewHook parentMatch={parentMatch}/>
+        <TradingPairViewHook parentMatch={parentMatch} />
       </FlexLayoutRow>
       <FlexLayoutRow>
         <Panel className={styles.priceChartPanel} footerBordered={true}>
-          <PriceChartWithLoading/>
+          <PriceChartWithLoading />
         </Panel>
         <Panel className={styles.allTradesPanel} footerBordered={true}>
-          <AllTradesHooked/>
+          <AllTradesHooked />
         </Panel>
       </FlexLayoutRow>
       <FlexLayoutRow>
         <Panel className={styles.offerMakePanel}>
-          <OfferMakePanelHooked/>
+          <OfferMakePanelHooked />
         </Panel>
         <Panel footerBordered={true} className={styles.orderbookPanel}>
-          <OrderbookHooked/>
+          <OrderbookHooked />
         </Panel>
       </FlexLayoutRow>
       <FlexLayoutRow>
         <Panel className={styles.myOrdersPanel} footerBordered={true}>
-          <MyTradesHooked/>
+          <MyTradesHooked />
         </Panel>
       </FlexLayoutRow>
     </div>
@@ -74,7 +78,7 @@ export const ExchangeView = (props: ExchangeViewProps) => {
   const {
     match: { url: matchUrl },
     tp,
-    setTradingPair
+    setTradingPair,
   } = props;
 
   return (
@@ -82,24 +86,16 @@ export const ExchangeView = (props: ExchangeViewProps) => {
       <Switch>
         <Route
           path={`${matchUrl}/:base/:quote`}
-          render={localProps => {
-
-            const valid = tradingPairs.find(t =>
-              t.base === tp.base && t.quote === tp.quote);
+          render={(localProps) => {
+            const valid = tradingPairs.find((t) => t.base === tp.base && t.quote === tp.quote);
 
             if (!valid) {
               // It should be a redirect, but I can't make it work!
-              window.location.href =
-                `${matchUrl}/${tradingPairs[0].base}/${tradingPairs[0].quote}`;
+              window.location.href = `${matchUrl}/${tradingPairs[0].base}/${tradingPairs[0].quote}`;
               return;
             }
 
-            return <Content
-              {...localProps}
-              tp={tp}
-              parentMatch={matchUrl}
-              setTradingPair={setTradingPair}
-            />;
+            return <Content {...localProps} tp={tp} parentMatch={matchUrl} setTradingPair={setTradingPair} />;
           }}
         />
         <Redirect push={false} from={'/market'} to={`/market/${tp.base}/${tp.quote}`} />
@@ -109,13 +105,13 @@ export const ExchangeView = (props: ExchangeViewProps) => {
 };
 
 export const ExchangeViewHooked = (props: RouteComponentProps<any>) => {
-  const state:ExchangeViewOwnProps | undefined = useObservable(
+  const state: ExchangeViewOwnProps | undefined = useObservable(
     currentTradingPair$.pipe(
       map((tp: TradingPair) => ({
         tp,
-        setTradingPair: currentTradingPair$.next.bind(currentTradingPair$)
-      }))
-    )
+        setTradingPair: currentTradingPair$.next.bind(currentTradingPair$),
+      })),
+    ),
   );
   if (!state) return null;
 

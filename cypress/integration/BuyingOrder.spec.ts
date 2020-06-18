@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { cypressVisitWithWeb3, multiply } from '../utils/index';
 
 import { Balance } from '../pages/Balance';
@@ -8,7 +12,6 @@ import { Trades } from '../pages/Trades';
 import { WalletConnection } from '../pages/WalletConnection';
 
 describe('Buy Order', () => {
-
   beforeEach(() => {
     cypressVisitWithWeb3();
     WalletConnection.connect();
@@ -22,13 +25,7 @@ describe('Buy Order', () => {
     const orders = Orderbook.list(OrderType.BUY);
     orders.countIs(3);
 
-    new Order()
-      .buy()
-      .limit()
-      .amount(amount)
-      .atPrice(price)
-      .total(multiply(amount, price))
-      .place();
+    new Order().buy().limit().amount(amount).atPrice(price).total(multiply(amount, price)).place();
 
     orders.countIs(4);
     const lastOrder = orders.first();
@@ -45,13 +42,7 @@ describe('Buy Order', () => {
     const orders = Orderbook.list(OrderType.BUY);
     orders.countIs(3);
 
-    new Order()
-      .buy()
-      .limit()
-      .amount(amount)
-      .atPrice(price)
-      .total(multiply(amount, price))
-      .place();
+    new Order().buy().limit().amount(amount).atPrice(price).total(multiply(amount, price)).place();
 
     orders.countIs(4);
     const lastOrder = orders.number(3);
@@ -147,13 +138,7 @@ describe('Buy Order', () => {
 
     Trades.countIs(2);
 
-    new Order()
-      .buy()
-      .limit()
-      .amount(amount)
-      .atPrice(price)
-      .total(multiply(amount, price))
-      .place();
+    new Order().buy().limit().amount(amount).atPrice(price).total(multiply(amount, price)).place();
 
     Trades.countIs(3);
     Orderbook.list(OrderType.BUY).countIs(4);
@@ -171,13 +156,7 @@ describe('Buy Order', () => {
 
     Trades.countIs(2);
 
-    new Order()
-      .buy()
-      .limit()
-      .amount(amount)
-      .atPrice(price)
-      .total(multiply(amount, price))
-      .place();
+    new Order().buy().limit().amount(amount).atPrice(price).total(multiply(amount, price)).place();
 
     Trades.countIs(3);
     const trade = Trades.first();

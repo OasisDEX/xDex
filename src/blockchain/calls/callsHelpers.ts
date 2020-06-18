@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { combineLatest, from, Observable } from 'rxjs';
 import { first, map, switchMap } from 'rxjs/internal/operators';
 import { NetworkConfig } from '../config';
@@ -29,10 +33,8 @@ export interface TransactionDef<A> extends GasDef<A> {
 export function callCurried(context: NetworkConfig, account: string | undefined) {
   return <D, R>({ call, prepareArgs, postprocess }: CallDef<D, R>) => {
     return (args: D) => {
-      return from(call(args, context)(
-        ...prepareArgs(args, context),
-      ).call({ from: account })).pipe(
-        map(i => (postprocess ? postprocess(i, args) : i))
+      return from(call(args, context)(...prepareArgs(args, context)).call({ from: account })).pipe(
+        map((i) => (postprocess ? postprocess(i, args) : i)),
       ) as Observable<R>;
     };
   };
@@ -41,11 +43,18 @@ export function callCurried(context: NetworkConfig, account: string | undefined)
 export function estimateGasCurried(context: NetworkConfig, account: string) {
   return <D>(callData: GasDef<D>) => {
     return (args: D) => {
-      const result = from((callData.call)(args, context, account)(
-        ...callData.prepareArgs(args, context, account),
-      ).estimateGas({
-        from: account, ...(callData.options ? callData.options(args) : {})
-      })).pipe(
+      const result = from(
+        callData
+          .call(
+            args,
+            context,
+            account,
+          )(...callData.prepareArgs(args, context, account))
+          .estimateGas({
+            from: account,
+            ...(callData.options ? callData.options(args) : {}),
+          }),
+      ).pipe(
         map((e: number) => {
           return Math.floor(e * GAS_ESTIMATION_MULTIPLIER);
         }),
@@ -61,14 +70,7 @@ export function estimateGasCurried(context: NetworkConfig, account: string) {
 const GAS_ESTIMATION_MULTIPLIER = 1.3;
 
 export function sendTransactionCurried(context: NetworkConfig, account: string) {
-  return <D>({
-    kind,
-    description,
-    descriptionIcon,
-    call,
-    prepareArgs,
-    options,
-  }: TransactionDef<D>) => {
+  return <D>({ kind, description, descriptionIcon, call, prepareArgs, options }: TransactionDef<D>) => {
     return (args: D) => {
       return send(
         account,
@@ -79,11 +81,12 @@ export function sendTransactionCurried(context: NetworkConfig, account: string) 
           descriptionIcon,
           args,
         },
-        () => call(args, context, account)(
-          ...prepareArgs(args, context, account)
-        ).send(
-          { from: account, ...(options ? options(args) : {}) }
-        ),
+        () =>
+          call(
+            args,
+            context,
+            account,
+          )(...prepareArgs(args, context, account)).send({ from: account, ...(options ? options(args) : {}) }),
       );
     };
   };
@@ -106,14 +109,17 @@ export function sendTransactionWithGasConstraintsCurried(context: NetworkConfig,
               descriptionIcon,
               args,
             },
-            () => call(args, context, account)(
-              ...prepareArgs(args, context, account)
-            ).send({
-              from: account,
-              ...(options ? options(args) : {}),
-              gas,
-              gasPrice,
-            }),
+            () =>
+              call(
+                args,
+                context,
+                account,
+              )(...prepareArgs(args, context, account)).send({
+                from: account,
+                ...(options ? options(args) : {}),
+                gas,
+                gasPrice,
+              }),
           );
         }),
       );

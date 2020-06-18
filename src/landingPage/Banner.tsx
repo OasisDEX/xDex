@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import * as classnames from 'classnames';
 import * as React from 'react';
 import { Button } from '../utils/forms/Buttons';
@@ -18,12 +22,7 @@ export const Banner = (props: BannerProps) => {
       <div className={classnames(styles.panel, styles[theme])}>
         <div>{content}</div>
         {buttonLabel && (
-          <Button
-            data-test-id="banner-btn"
-            size="xs"
-            className={styles.btn}
-            onClick={onContinue}
-          >
+          <Button data-test-id="banner-btn" size="xs" className={styles.btn} onClick={onContinue}>
             {buttonLabel}
           </Button>
         )}

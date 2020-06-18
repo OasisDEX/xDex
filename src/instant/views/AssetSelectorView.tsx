@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { BigNumber } from 'bignumber.js';
 import classnames from 'classnames';
 import * as React from 'react';
@@ -19,33 +23,27 @@ class AssetSelectorView extends React.Component<InstantFormState & { side: Offer
     return (
       <section className={classnames(instantStyles.panel, panelStyling.panel)}>
         <TopRightCorner>
-          <CloseButton theme="danger"
-                       onClick={this.hideAssets}
-          />
+          <CloseButton theme="danger" onClick={this.hideAssets} />
         </TopRightCorner>
         <section className={styles.assetsContainer}>
           <div className={styles.assets}>
             <ul className={styles.list}>
-              {
-                tradingTokens.map((token, index) => {
-                  const balance = user && user.account
-                    ? balances ? balances[token] : new BigNumber(0)
-                    : new BigNumber(0);
+              {tradingTokens.map((token, index) => {
+                const balance =
+                  user && user.account ? (balances ? balances[token] : new BigNumber(0)) : new BigNumber(0);
 
-                  return (
-                    <li data-test-id={token.toLowerCase()}
-                        className={styles.listItem}
-                        key={index}
-                    >
-                      <Asset currency={token}
-                             balance={balance}
-                             user={user}
-                             isLocked={this.isLocked(token)}
-                             onClick={() => this.selectAsset(token)}/>
-                    </li>
-                  );
-                })
-              }
+                return (
+                  <li data-test-id={token.toLowerCase()} className={styles.listItem} key={index}>
+                    <Asset
+                      currency={token}
+                      balance={balance}
+                      user={user}
+                      isLocked={this.isLocked(token)}
+                      onClick={() => this.selectAsset(token)}
+                    />
+                  </li>
+                );
+              })}
             </ul>
           </div>
         </section>
@@ -56,9 +54,9 @@ class AssetSelectorView extends React.Component<InstantFormState & { side: Offer
   private hideAssets = () => {
     this.props.change({
       kind: InstantFormChangeKind.viewChange,
-      view: ViewKind.new
+      view: ViewKind.new,
     });
-  }
+  };
 
   private selectAsset = (asset: string) => {
     this.props.change({
@@ -68,14 +66,12 @@ class AssetSelectorView extends React.Component<InstantFormState & { side: Offer
     });
 
     this.hideAssets();
-  }
+  };
 
   private isLocked = (asset: string): boolean => {
     const { side, buyToken, sellToken } = this.props;
 
-    const markets = side === OfferType.sell
-      ? marketsOf(buyToken, tradingPairs)
-      : marketsOf(sellToken, tradingPairs);
+    const markets = side === OfferType.sell ? marketsOf(buyToken, tradingPairs) : marketsOf(sellToken, tradingPairs);
 
     if (side === OfferType.buy) {
       markets.delete('SAI');
@@ -89,15 +85,14 @@ class AssetSelectorView extends React.Component<InstantFormState & { side: Offer
      * 3) is the same token that is already selected
      * */
 
-    return !markets.has(eth2weth(asset))
-      && asset !== eth2weth(side === OfferType.sell ? sellToken : buyToken);
-  }
+    return !markets.has(eth2weth(asset)) && asset !== eth2weth(side === OfferType.sell ? sellToken : buyToken);
+  };
 }
 
 export const SellAssetSelectorView: React.SFC<InstantFormState> = (props) => (
-  <AssetSelectorView side={OfferType.sell} {...props}/>
+  <AssetSelectorView side={OfferType.sell} {...props} />
 );
 
 export const BuyAssetSelectorView: React.SFC<InstantFormState> = (props) => (
-  <AssetSelectorView side={OfferType.buy} {...props}/>
+  <AssetSelectorView side={OfferType.buy} {...props} />
 );

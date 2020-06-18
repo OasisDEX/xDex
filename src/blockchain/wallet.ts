@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { combineLatest, from, interval, Observable, of, Subject } from 'rxjs';
 import {
   catchError,
@@ -8,7 +12,7 @@ import {
   shareReplay,
   startWith,
   switchMap,
-  tap
+  tap,
 } from 'rxjs/operators';
 // tslint:disable:import-name
 import Web3 from 'web3';
@@ -22,7 +26,7 @@ export type WalletStatus = 'disconnected' | 'connecting' | 'connected' | 'denied
 export const accepted$ = interval(500).pipe(
   map(() => JSON.parse(localStorage.getItem('tos') || 'false')),
   startWith(JSON.parse(localStorage.getItem('tos') || 'false')),
-  distinctUntilChanged(isEqual)
+  distinctUntilChanged(isEqual),
 );
 
 const connectToWallet$: Subject<number> = new Subject();
@@ -38,36 +42,34 @@ const connecting$ = connectToWallet$.pipe(
     if (win.ethereum) {
       win.web3 = new Web3(win.ethereum);
       return from(win.ethereum.enable()).pipe(
-        switchMap(([enabled]) => account$.pipe(
-          filter(account => (account && account.toLowerCase()) === enabled),
-          first(),
-          map(() => {
-            return undefined;
-          }),
-        )),
+        switchMap(([enabled]) =>
+          account$.pipe(
+            filter((account) => (account && account.toLowerCase()) === enabled),
+            first(),
+            map(() => {
+              return undefined;
+            }),
+          ),
+        ),
         startWith('connecting'),
         catchError(() => of('denied')),
       );
     }
     return of();
   }),
-  startWith(undefined)
+  startWith(undefined),
 );
 
-export const walletStatus$: Observable<WalletStatus> = combineLatest(
-  account$,
-  accepted$,
-  connecting$
-).pipe(
+export const walletStatus$: Observable<WalletStatus> = combineLatest(account$, accepted$, connecting$).pipe(
   map(([account, hasAcceptedToS, connecting]) =>
     connecting
       ? connecting
       : account && hasAcceptedToS
-        ? 'connected'
-        : (window as Web3Window).ethereum
-          ? 'disconnected'
-          : 'missing'
+      ? 'connected'
+      : (window as Web3Window).ethereum
+      ? 'disconnected'
+      : 'missing',
   ),
   tap(console.log),
-  shareReplay(1)
+  shareReplay(1),
 );

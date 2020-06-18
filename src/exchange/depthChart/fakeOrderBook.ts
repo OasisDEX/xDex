@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { BigNumber } from 'bignumber.js';
 import { of } from 'rxjs/index';
 import { addSpread, Offer, OfferType, Orderbook } from '../orderbook/orderbook';
@@ -51,7 +55,7 @@ const sell = [
   { price: 310, amount: 10 },
   { price: 313, amount: 2 },
   { price: 315, amount: 20 },
-  { price: 320, amount: 20 }
+  { price: 320, amount: 20 },
 
   // { price: 255, amount: 2.65 },
   // { price: 5, amount: 11 },
@@ -61,9 +65,17 @@ const sell = [
   // { price: 0.001, amount: 1.80740079125783 }
 ];
 
-function priceAmountToOffer(
-  { price, amount, quoteToken, baseToken }:
-    { price: number, amount: number, quoteToken: string, baseToken: string  }): Offer {
+function priceAmountToOffer({
+  price,
+  amount,
+  quoteToken,
+  baseToken,
+}: {
+  price: number;
+  amount: number;
+  quoteToken: string;
+  baseToken: string;
+}): Offer {
   return {
     baseToken,
     quoteToken,
@@ -73,7 +85,7 @@ function priceAmountToOffer(
     price: new BigNumber(price),
     ownerId: '',
     timestamp: new Date('2019-10-01 00:00:00Z'),
-    type: OfferType.buy
+    type: OfferType.buy,
   };
 }
 
@@ -81,7 +93,7 @@ export const createFakeOrderbook = (buys: any, sells: any): Orderbook => {
   return addSpread({
     sell: sells.map(priceAmountToOffer),
     buy: buys.map(priceAmountToOffer),
-    blockNumber: 1
+    blockNumber: 1,
   } as Orderbook);
 };
 
@@ -89,11 +101,8 @@ export const fakeOrderBook: Orderbook = createFakeOrderbook(buy, sell);
 export const emptyOrderBook: Orderbook = createFakeOrderbook([], []);
 
 export const fakeOrderbookWithOutliers = createFakeOrderbook(
-  buy.concat([{ price: 0.0001, amount: 5.80 }]),
-  sell.concat([{ price: 9999, amount: 1.80 }])
+  buy.concat([{ price: 0.0001, amount: 5.8 }]),
+  sell.concat([{ price: 9999, amount: 1.8 }]),
 );
 
-export const fakeOrderBook$ = loadablifyPlusTradingPair(
-  currentTradingPair$,
-  () => of(fakeOrderBook)
-);
+export const fakeOrderBook$ = loadablifyPlusTradingPair(currentTradingPair$, () => of(fakeOrderBook));

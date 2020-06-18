@@ -1,7 +1,11 @@
-import { Account } from '../../pages/leverage/Account';
-import { Form } from '../../pages/leverage/Form';
-import { Modal } from '../../pages/leverage/Modal';
-import { Position } from '../../pages/leverage/Position';
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
+import { Account } from '../../pages/multiply/Account';
+import { Form } from '../../pages/multiply/Form';
+import { Modal } from '../../pages/multiply/Modal';
+import { Position } from '../../pages/multiply/Position';
 import { Tab } from '../../pages/Tab';
 import { WalletConnection } from '../../pages/WalletConnection';
 import { cypressVisitWithoutProvider, cypressVisitWithWeb3 } from '../../utils';
@@ -13,7 +17,7 @@ describe('New Leverage Position', () => {
     WalletConnection.connect();
     WalletConnection.isConnected();
 
-    Tab.leverage();
+    Tab.multiply();
   });
 
   it('by depositing collateral', () => {
@@ -49,7 +53,7 @@ describe('Leverage form', () => {
   context.skip('without provider', () => {
     beforeEach(() => {
       cypressVisitWithoutProvider();
-      Tab.leverage();
+      Tab.multiply();
     });
 
     it('should ask the user to connect the wallet', () => {
@@ -60,7 +64,7 @@ describe('Leverage form', () => {
       Form.amountInput().type('12345');
       Form.shouldAskUserToConnect();
       Form.totalInput().should('be.empty');
-      Form.leverageIs('-');
+      Form.multiplyIs('-');
       Form.interestRateIs('-');
       Form.placeOrderBtn().should('be.disabled');
     });
@@ -69,18 +73,18 @@ describe('Leverage form', () => {
       Form.totalInput().type('12345');
       Form.shouldAskUserToConnect();
       Form.amountInput().should('be.empty');
-      Form.leverageIs('-');
+      Form.multiplyIs('-');
       Form.interestRateIs('-');
       Form.placeOrderBtn().should('be.disabled');
     });
   });
 
-    // TODO: Skip for now because of misimplementation. Account should be taken from user
-    // The behavior of those tests should be line the ones in missing provider.
+  // TODO: Skip for now because of misimplementation. Account should be taken from user
+  // The behavior of those tests should be line the ones in missing provider.
   context.skip('without wallet connected', () => {
     beforeEach(() => {
       cypressVisitWithWeb3();
-      Tab.leverage();
+      Tab.multiply();
     });
 
     it('should ask the user to connect the wallet', () => {
@@ -91,7 +95,7 @@ describe('Leverage form', () => {
       Form.amountInput().type('12345');
       Form.shouldAskUserToConnect();
       Form.totalInput().should('be.empty');
-      Form.leverageIs('-');
+      Form.multiplyIs('-');
       Form.interestRateIs('-');
       Form.placeOrderBtn().should('be.disabled');
     });
@@ -100,15 +104,13 @@ describe('Leverage form', () => {
       Form.totalInput().type('12345');
       Form.shouldAskUserToConnect();
       Form.amountInput().should('be.empty');
-      Form.leverageIs('-');
+      Form.multiplyIs('-');
       Form.interestRateIs('-');
       Form.placeOrderBtn().should('be.disabled');
     });
 
     // tslint:disable:no-empty
-    it('should be or not be able to switch to sell order form', () => {
-
-    });
+    it('should be or not be able to switch to sell order form', () => {});
     // tslint:disable:no-empty
     it('should be or not be able to check form settings ( slippage )', () => {});
   });
@@ -118,7 +120,7 @@ describe('Leverage form', () => {
       cypressVisitWithWeb3();
       WalletConnection.connect();
       WalletConnection.isConnected();
-      Tab.leverage();
+      Tab.multiply();
     });
 
     context('buying collateral using DAI', () => {
@@ -151,7 +153,7 @@ describe('Leverage form', () => {
         Position.expectAmountOfCollateral(`0.5000`);
         Position.expectAmountOfDAI(`150.50`);
 
-        Position.withdrawDAI(150.50);
+        Position.withdrawDAI(150.5);
         Position.expectAmountOfCollateral(`0.5000`);
         Position.expectAmountOfDAI(`0.00`);
       });
@@ -267,7 +269,6 @@ describe('Leverage form', () => {
     });
 
     context('selling collateral', () => {
-
       beforeEach(() => {
         Modal.open(Position.new('WETH'));
         Account.setupProxy();
@@ -348,7 +349,6 @@ describe('Leverage form', () => {
         Position.expectAmountOfDAI('799.37');
         // IN DAI - will change when default value is USD
         Position.expectLiquidationPrice('-');
-
       });
     });
   });

@@ -1,7 +1,10 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { tid } from '../utils/index';
 
 class Order {
-
   public price() {
     return cy.get('@order').find(tid('price'));
   }
@@ -16,9 +19,7 @@ class Order {
 }
 
 class Orders {
-
-  constructor(public type: OrderType) {
-  }
+  constructor(public type: OrderType) {}
 
   public countIs(number: number) {
     cy.get(tid(this.type), { timeout: 60000 }).should('have.length', number);
@@ -31,7 +32,9 @@ class Orders {
   }
 
   public number(number: number) {
-    cy.get(tid(this.type)).eq(number - 1).as('order');
+    cy.get(tid(this.type))
+      .eq(number - 1)
+      .as('order');
 
     return new Order();
   }
@@ -45,7 +48,7 @@ class Orders {
 
 export enum OrderType {
   BUY = 'buy',
-  SELL = 'sell'
+  SELL = 'sell',
 }
 
 export class Orderbook {

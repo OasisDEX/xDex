@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { Balance } from '../pages/Balance';
 import { Tab } from '../pages/Tab';
 import { WalletConnection } from '../pages/WalletConnection';
@@ -5,7 +9,6 @@ import { unwrapping, wrapping } from '../pages/WrapUnwrap';
 import { cypressVisitWithWeb3 } from '../utils';
 
 describe('Wrapping ETH', () => {
-
   beforeEach(() => {
     cypressVisitWithWeb3();
     WalletConnection.connect();
@@ -30,7 +33,7 @@ describe('Wrapping ETH', () => {
     Balance.of('ETH').shouldBe(/8999.../);
     Balance.of('WETH').shouldBe(/1001.../);
 
-   // extract constants from the WrapUnwrapFromView
+    // extract constants from the WrapUnwrapFromView
     wrapping('10000').shouldFailWith(`Your ETH balance is too low`);
 
     Balance.of('ETH').shouldBe(/8999.../);
@@ -51,9 +54,9 @@ describe('Wrapping ETH', () => {
   });
 
   // tslint:disable-next-line:max-line-length
-  it('should not proceed when trying to wrap ETH and gas cost amount',  () => {
+  it('should not proceed when trying to wrap ETH and gas cost amount', () => {
     const gasCost = 0.00092;
-    const amountToWrap = 8999.96703 - gasCost + 0.00001 ;
+    const amountToWrap = 8999.96703 - gasCost + 0.00001;
 
     Tab.balances();
 
@@ -66,7 +69,7 @@ describe('Wrapping ETH', () => {
     Balance.of('WETH').shouldBe(/1001.../);
   });
 
-  it('should not proceed when trying to wrap exact ETH balance',  () => {
+  it('should not proceed when trying to wrap exact ETH balance', () => {
     const amountToWrap = 8999.96703;
     Tab.balances();
 
@@ -81,7 +84,6 @@ describe('Wrapping ETH', () => {
 });
 
 describe('Unwrapping ETH', () => {
-
   beforeEach(() => {
     cypressVisitWithWeb3();
     WalletConnection.connect();
@@ -100,7 +102,7 @@ describe('Unwrapping ETH', () => {
     Balance.of('WETH').shouldBe(/901.../);
   });
 
-  it('should succeed when unwrapping whole balance ',  () => {
+  it('should succeed when unwrapping whole balance ', () => {
     Tab.balances();
 
     Balance.of('ETH').shouldBe(/8999.../);

@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 // This should be taken from src/exchange/tradingPair/tradingPair.ts
 // but for now there are issues with importing project ( src ) files.
 import { tid } from '../utils';
@@ -8,10 +12,8 @@ export interface TradingPair {
 }
 
 export class TradingPairInfo {
-  public static lastPrice = () =>
-    cy.get(tid('trading-pair-info', tid('last-price', tid('value'))))
-  public static dailyVolume = () =>
-    cy.get(tid('trading-pair-info', tid('24h-volume', tid('value'))))
+  public static lastPrice = () => cy.get(tid('trading-pair-info', tid('last-price', tid('value'))));
+  public static dailyVolume = () => cy.get(tid('trading-pair-info', tid('24h-volume', tid('value'))));
 }
 
 export class TradingPairDropdown {
@@ -29,7 +31,6 @@ export class TradingPairDropdown {
   public static expectActivePAir(tradingPair: TradingPair) {
     cy.get(tid('active-pair', tid('base'))).contains(tradingPair.base);
     cy.get(tid('active-pair', tid('quote'))).contains(tradingPair.quote);
-
   }
 
   public static select(tradingPair: TradingPair) {

@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 // import { storiesOf } from '@storybook/react';
 // import { BigNumber } from 'bignumber.js';
 // import * as React from 'react';
@@ -18,7 +22,7 @@
 // } from './mtOrderForm';
 // import { MtSimpleOrderFormView } from './mtOrderFormView';
 //
-// const stories = storiesOf('Leverage Trading/Order Form', module)
+// const stories = storiesOf('Multiply Trading/Order Form', module)
 //   .addDecorator(story => (
 //     <div style={{ width: '932px', background: '#ffffff' }}>
 //       {story()}

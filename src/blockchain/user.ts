@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { combineLatest, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -13,7 +17,7 @@ export const user$: Observable<User> = combineLatest(account$, walletStatus$).pi
   map(([account, walletStatus]) => {
     return {
       account: walletStatus === 'connected' ? account : undefined,
-      authorized: undefined
+      authorized: undefined,
     };
   }),
 );

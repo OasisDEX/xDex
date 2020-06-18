@@ -12,7 +12,6 @@ Object {
   "gasPrice": "0.01",
   "isSafeCollRatio": undefined,
   "kind": "buy",
-  "leverage": undefined,
   "liquidationPrice": undefined,
   "maxAmount": "0",
   "maxTotal": "0",
@@ -30,6 +29,7 @@ Object {
     "totalAvailableDebt": "0",
     "totalDebt": "0",
   },
+  "multiple": undefined,
   "orderbook": Object {
     "blockNumber": 1,
     "buy": Array [],
@@ -104,7 +104,6 @@ Object {
   "gasPrice": "0.01",
   "isSafeCollRatio": undefined,
   "kind": "buy",
-  "leverage": undefined,
   "liquidationPrice": undefined,
   "maxAmount": "0",
   "maxTotal": "0",
@@ -122,6 +121,7 @@ Object {
     "totalAvailableDebt": "0",
     "totalDebt": "0",
   },
+  "multiple": undefined,
   "orderbook": Object {
     "blockNumber": 1,
     "buy": Array [],

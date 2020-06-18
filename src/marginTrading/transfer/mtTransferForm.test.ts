@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { BigNumber } from 'bignumber.js';
 import { Observable, of } from 'rxjs';
 import { shareReplay } from 'rxjs/internal/operators';
@@ -10,28 +14,25 @@ import { unpack } from '../../utils/testHelpers';
 import { UserActionKind } from '../state/mtAccount';
 import { calculateMTAccount } from '../state/mtCalculate';
 import { getMarginableCore } from '../state/mtTestUtils';
-import {
-  createMTTransferForm$,
-  MessageKind,
-  MTTransferFormState,
-  TransferFormChangeKind
-} from './mtTransferForm';
+import { createMTTransferForm$, MessageKind, MTTransferFormState, TransferFormChangeKind } from './mtTransferForm';
 setupFakeWeb3ForTesting();
 
 const defParams = {
   mta$: calculateMTAccount(
     { options: {} },
-    [getMarginableCore({
-      name: 'WETH',
-      balance: new BigNumber(20),
-      walletBalance: new BigNumber(0),
-      allowance: true,
-      referencePrice: new BigNumber(500),
-    })],
+    [
+      getMarginableCore({
+        name: 'WETH',
+        balance: new BigNumber(20),
+        walletBalance: new BigNumber(0),
+        allowance: true,
+        referencePrice: new BigNumber(500),
+      }),
+    ],
     true,
     {
-      WETH: { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook
-    }
+      WETH: { buy: [], sell: [], tradingPair: { base: '', quote: '' }, blockNumber: 0 } as Orderbook,
+    },
   ),
   gasPrice$: of(new BigNumber(100)),
   etherPriceUsd$: of(new BigNumber(13)),
@@ -46,7 +47,7 @@ const defaultBalances = {
 // @ts-ignore
 const defaultCalls: Calls = {
   mtDraw: () => of({ status: TxStatus.WaitingForApproval } as TxState),
-// @ts-ignore
+  // @ts-ignore
   mtDrawEstimateGas: () => of(new BigNumber(200000000)),
   mtFund: () => of({ status: TxStatus.WaitingForApproval } as TxState),
   // @ts-ignore
@@ -84,10 +85,8 @@ function createForm(props?: {}): Observable<MTTransferFormState> {
       token: params.token,
       ilk: params.ilk,
       withOnboarding: params.withOnboarding,
-    }
-  ).pipe(
-    shareReplay(1)
-  );
+    },
+  ).pipe(shareReplay(1));
 }
 
 test('initial fund state', () => {
@@ -139,9 +138,7 @@ test('validation -- too big amount for draw DAI', () => {
   expect(unpack(transferForm).progress).toBeUndefined();
   expect(unpack(transferForm).gasEstimationStatus).toEqual(GasEstimationStatus.unset);
   expect(unpack(transferForm).messages.length).toEqual(1);
-  expect(unpack(transferForm).messages).toEqual([
-    { kind: MessageKind.insufficientAvailableAmount, token: 'DAI' },
-  ]);
+  expect(unpack(transferForm).messages).toEqual([{ kind: MessageKind.insufficientAvailableAmount, token: 'DAI' }]);
 });
 
 test('proceed fund DAI', () => {
@@ -149,7 +146,7 @@ test('proceed fund DAI', () => {
     calls: of({
       ...defaultCalls,
       mtPerformOperations: () => of({ status: TxStatus.WaitingForApproval } as TxState),
-    })
+    }),
   });
   const { change, transfer } = unpack(transferForm);
 
@@ -164,11 +161,9 @@ test('proceed fund DAI confirmed', () => {
   const transferForm = createForm({
     calls: of({
       ...defaultCalls,
-      mtFund: () => of(
-        { status: TxStatus.WaitingForApproval } as TxState,
-        { status: TxStatus.WaitingForConfirmation } as TxState,
-      ),
-    })
+      mtFund: () =>
+        of({ status: TxStatus.WaitingForApproval } as TxState, { status: TxStatus.WaitingForConfirmation } as TxState),
+    }),
   });
   const { change, transfer } = unpack(transferForm);
 
@@ -183,12 +178,13 @@ test('proceed fund DAI success', () => {
   const transferForm = createForm({
     calls: of({
       ...defaultCalls,
-      mtFund: () => of(
-        { status: TxStatus.WaitingForApproval } as TxState,
-        { status: TxStatus.WaitingForConfirmation } as TxState,
-        { status: TxStatus.Success } as TxState,
-      ),
-    })
+      mtFund: () =>
+        of(
+          { status: TxStatus.WaitingForApproval } as TxState,
+          { status: TxStatus.WaitingForConfirmation } as TxState,
+          { status: TxStatus.Success } as TxState,
+        ),
+    }),
   });
   const { change, transfer } = unpack(transferForm);
 
@@ -203,12 +199,13 @@ test('reset after fund DAI success', () => {
   const transferForm = createForm({
     calls: of({
       ...defaultCalls,
-      mtFund: () => of(
-        { status: TxStatus.WaitingForApproval } as TxState,
-        { status: TxStatus.WaitingForConfirmation } as TxState,
-        { status: TxStatus.Success } as TxState,
-      ),
-    })
+      mtFund: () =>
+        of(
+          { status: TxStatus.WaitingForApproval } as TxState,
+          { status: TxStatus.WaitingForConfirmation } as TxState,
+          { status: TxStatus.Success } as TxState,
+        ),
+    }),
   });
   const { change, transfer, reset } = unpack(transferForm);
 

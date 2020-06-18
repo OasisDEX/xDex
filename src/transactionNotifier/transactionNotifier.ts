@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { combineLatest, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -10,6 +14,6 @@ export function createTransactionNotifier$(
   context$: Observable<NetworkConfig>,
 ) {
   return combineLatest(transactions$, context$, interval$).pipe(
-    map(([transactions, { etherscan }]) => ({ transactions, etherscan }))
+    map(([transactions, { etherscan }]) => ({ transactions, etherscan })),
   );
 }

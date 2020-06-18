@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { BigNumber } from 'bignumber.js';
 
 import { setupFakeWeb3ForTesting } from '../../blockchain/web3';
@@ -8,23 +12,24 @@ import { one, zero } from '../../utils/zero';
 import { CashAssetCore, MarginableAssetCore, MTAccount } from './mtAccount';
 import {
   calculateMarginable,
-  calculateMTHistoryEvents, maxSellable,
-  realPurchasingPowerMarginable, sellable
+  calculateMTHistoryEvents,
+  maxSellable,
+  realPurchasingPowerMarginable,
+  sellable,
 } from './mtCalculate';
 import {
   dai100,
   rawHistoryBuy,
-  rawHistoryBuySell, sell1, sell2, sell3,
+  rawHistoryBuySell,
+  sell1,
+  sell2,
+  sell3,
   sellOffers,
   sellOffersShort,
   weth1dai100,
-  weth2
+  weth2,
 } from './mtCalculateFixtures';
-import {
-  getCashCore,
-  getMarginableCore,
-  getMTAccount,
-} from './mtTestUtils';
+import { getCashCore, getMarginableCore, getMTAccount } from './mtTestUtils';
 
 const noCash: CashAssetCore = getCashCore({
   name: 'DAI',
@@ -52,7 +57,6 @@ const dgxEmpty: MarginableAssetCore = getMarginableCore({
 });
 
 test('no cash, no assets', () => {
-
   const mta: MTAccount = getMTAccount();
 
   expect(mta.totalAssetValue).toEqual(zero);
@@ -60,11 +64,10 @@ test('no cash, no assets', () => {
 });
 
 test('weth with debt', () => {
-
   const wethWithDebt = {
     ...wethEmpty,
     balance: new BigNumber('100'),
-    debt: new BigNumber('2000')
+    debt: new BigNumber('2000'),
   };
 
   const mta: MTAccount = getMTAccount({ marginableAssets: [wethWithDebt] });
@@ -76,11 +79,10 @@ test('weth with debt', () => {
 });
 
 test('weth with full debt', () => {
-
   const wethWithDebt = {
     ...wethEmpty,
     balance: new BigNumber('100'),
-    debt: new BigNumber('10000')
+    debt: new BigNumber('10000'),
   };
 
   const mta: MTAccount = getMTAccount({ marginableAssets: [wethWithDebt] });
@@ -92,11 +94,10 @@ test('weth with full debt', () => {
 });
 
 test('weth and dgx with debt', () => {
-
   const wethWithDebt = {
     ...wethEmpty,
     balance: new BigNumber('100'),
-    debt: new BigNumber('2000')
+    debt: new BigNumber('2000'),
   };
 
   const dgxAsset = {
@@ -110,14 +111,12 @@ test('weth and dgx with debt', () => {
   const weth = mta.marginableAssets[0];
   const dgx = mta.marginableAssets[1];
 
-  expect(mta.totalAssetValue)
-    .toEqual(weth.balanceInCash.plus(dgx.balanceInCash));
+  expect(mta.totalAssetValue).toEqual(weth.balanceInCash.plus(dgx.balanceInCash));
 
   expect(mta.totalDebt).toEqual(weth.debt.plus(dgx.debt));
 });
 
 test('weth, dgx and mkr, no debt', () => {
-
   const wethAsset = {
     ...wethEmpty,
     balance: new BigNumber('100'),
@@ -140,68 +139,51 @@ test('weth, dgx and mkr, no debt', () => {
   const dgx = mta.marginableAssets[1];
   // const mkr = mta.nonMarginableAssets[0];
 
-  expect(mta.totalAssetValue)
-    .toEqual(weth.balanceInCash.plus(dgx.balanceInCash));
+  expect(mta.totalAssetValue).toEqual(weth.balanceInCash.plus(dgx.balanceInCash));
 
   expect(mta.totalDebt).toEqual(zero);
 });
 
 describe('Purchasing power marginable', () => {
-
   test('Collateral only', () => {
-    const [, purchasingPower] = realPurchasingPowerMarginable(
-      calculateMarginable(weth2, fakeOrderbook),
-      sellOffers
-    );
+    const [, purchasingPower] = realPurchasingPowerMarginable(calculateMarginable(weth2, fakeOrderbook), sellOffers);
     expect(purchasingPower).toEqual(new BigNumber(299.981689453125));
   });
 
   test('Shallow orderbook', () => {
     const [, purchasingPower] = realPurchasingPowerMarginable(
       calculateMarginable(weth2, fakeOrderbook),
-      sellOffersShort
+      sellOffersShort,
     );
     expect(purchasingPower).toEqual(new BigNumber(299.981689453125));
   });
 
   test('Cash only', () => {
-    const [, purchasingPower] = realPurchasingPowerMarginable(
-      calculateMarginable(dai100, fakeOrderbook),
-      sellOffers
-    );
+    const [, purchasingPower] = realPurchasingPowerMarginable(calculateMarginable(dai100, fakeOrderbook), sellOffers);
     expect(purchasingPower.toFixed(0)).toEqual(new BigNumber(150).toFixed());
   });
 
   test('A bit of cash only', () => {
     const [, purchasingPower] = realPurchasingPowerMarginable(
-      calculateMarginable(
-      { ...dai100, referencePrice: new BigNumber('300'), dai: new BigNumber('5') },
-      fakeOrderbook
-      ),
-      sellOffers
+      calculateMarginable({ ...dai100, referencePrice: new BigNumber('300'), dai: new BigNumber('5') }, fakeOrderbook),
+      sellOffers,
     );
     expect(purchasingPower.toFixed(0)).toEqual(new BigNumber(5).toFixed());
   });
 
   test('A bit of cash only 2', () => {
     const [, purchasingPower] = realPurchasingPowerMarginable(
-      calculateMarginable(
-        { ...dai100, referencePrice: new BigNumber('300'), dai: new BigNumber('20') },
-        fakeOrderbook
-      ),
-      sellOffers
+      calculateMarginable({ ...dai100, referencePrice: new BigNumber('300'), dai: new BigNumber('20') }, fakeOrderbook),
+      sellOffers,
     );
     expect(purchasingPower.toFixed(0)).toEqual(new BigNumber(20).toFixed());
   });
 
   test('A bit of cash only 3', () => {
     const [, purchasingPower] = realPurchasingPowerMarginable(
-      calculateMarginable(
-        { ...dai100, referencePrice: new BigNumber('300'), dai: new BigNumber('31') },
-        fakeOrderbook
-      ),
+      calculateMarginable({ ...dai100, referencePrice: new BigNumber('300'), dai: new BigNumber('31') }, fakeOrderbook),
       // sellOffers
-      [sell1, sell1, sell1, sell1, sell2, sell3]
+      [sell1, sell1, sell1, sell1, sell2, sell3],
     );
     expect(purchasingPower.toFixed(0)).toEqual(new BigNumber(62).toFixed());
   });
@@ -209,7 +191,7 @@ describe('Purchasing power marginable', () => {
   test('Cash + collateral', () => {
     const [, purchasingPower] = realPurchasingPowerMarginable(
       calculateMarginable(weth1dai100, fakeOrderbook),
-      sellOffers
+      sellOffers,
     );
     expect(purchasingPower.toFixed(0)).toEqual(new BigNumber(300).toFixed());
   });
@@ -217,14 +199,13 @@ describe('Purchasing power marginable', () => {
   test('Debt', () => {
     const [, purchasingPower] = realPurchasingPowerMarginable(
       calculateMarginable({ ...weth2, debt: new BigNumber('140') }, fakeOrderbook),
-      sellOffers
+      sellOffers,
     );
     expect(purchasingPower.toFixed(0)).toEqual(new BigNumber(20).toFixed());
   });
 });
 
-test('Events history - BuyLev', () => {
-
+test('Events history - Buy', () => {
   const history = calculateMTHistoryEvents(rawHistoryBuy, weth2);
 
   expect(history[2].debtDelta).toEqual(new BigNumber('100'));
@@ -232,8 +213,7 @@ test('Events history - BuyLev', () => {
   expect(history[2].dAmount).toEqual(new BigNumber('1'));
 });
 
-test('Events history - SellLev', () => {
-
+test('Events history - Sell', () => {
   const history = calculateMTHistoryEvents(rawHistoryBuySell, weth2);
 
   expect(history[3].debtDelta).toEqual(new BigNumber('-100'));
@@ -243,33 +223,28 @@ test('Events history - SellLev', () => {
 
 describe('Is position sellable', () => {
   test('No debt, prices match', () => {
-
     const ma = calculateMarginable(weth2, fakeOrderbook);
 
     const [result] = sellable(ma, sellOffers, one);
 
     expect(result).toBeTruthy();
-
   });
 
   test('No debt, prices match - partial sell', () => {
-
     const ma = calculateMarginable(weth2, fakeOrderbook);
 
     const [result] = sellable(ma, sellOffers, new BigNumber(0.9));
 
     expect(result).toBeTruthy();
-
   });
 
   test('Avg debt, prices match', () => {
-
     const ma = calculateMarginable(
       {
         ...weth2,
-        debt: new BigNumber('150')
+        debt: new BigNumber('150'),
       },
-      fakeOrderbook
+      fakeOrderbook,
     );
 
     const [result] = sellable(ma, sellOffers, one);
@@ -278,13 +253,12 @@ describe('Is position sellable', () => {
   });
 
   test('Large debt, prices match', () => {
-
     const ma = calculateMarginable(
       {
         ...weth2,
-        debt: new BigNumber('199')
+        debt: new BigNumber('199'),
       },
-      fakeOrderbook
+      fakeOrderbook,
     );
 
     const [result] = sellable(ma, sellOffers, one);
@@ -293,14 +267,13 @@ describe('Is position sellable', () => {
   });
 
   test('Avg debt, prices match', () => {
-
     const ma = calculateMarginable(
       {
         ...weth2,
         debt: new BigNumber('300'),
-        referencePrice: new BigNumber('600')
+        referencePrice: new BigNumber('600'),
       },
-      fakeOrderbook
+      fakeOrderbook,
     );
 
     const [result] = sellable(ma, sellOffers, one);
@@ -308,7 +281,7 @@ describe('Is position sellable', () => {
     expect(result).toBeFalsy();
   });
 
-  test('Don\'t jump over dust', () => {
+  test("Don't jump over dust", () => {
     const ma = calculateMarginable(
       getMarginableCore({
         name: 'WETH',
@@ -318,13 +291,13 @@ describe('Is position sellable', () => {
         balance: new BigNumber('0.11'),
         debt: new BigNumber('21'),
       }),
-      fakeOrderbook
+      fakeOrderbook,
     );
 
     const sellableAmount = new BigNumber('0.011');
     const [result, , , message] = sellable(ma, sellOffers, sellableAmount);
     expect(result).toBeFalsy();
-    expect(message).toEqual('Can\'t jump over dust');
+    expect(message).toEqual("Can't jump over dust");
   });
 });
 
@@ -339,7 +312,7 @@ describe('Calculate maxSellable', () => {
         balance: new BigNumber('0.11'),
         debt: new BigNumber('21'),
       }),
-      fakeOrderbook
+      fakeOrderbook,
     );
     const result = maxSellable(ma, sellOffers);
     expect(result).toEqual(new BigNumber('0.009998626708984375'));
@@ -355,7 +328,7 @@ describe('Calculate maxSellable', () => {
         balance: new BigNumber('1'),
         debt: new BigNumber('199'),
       }),
-      fakeOrderbook
+      fakeOrderbook,
     );
     const result = maxSellable(ma, sellOffers);
     expect(result.gt(zero)).toBeTruthy();
@@ -371,7 +344,7 @@ describe('Calculate maxSellable', () => {
         balance: new BigNumber('0.11'),
         debt: new BigNumber('0'),
       }),
-      fakeOrderbook
+      fakeOrderbook,
     );
     const result = maxSellable(ma, sellOffers);
     expect(result).toEqual(new BigNumber('0.11'));
@@ -387,10 +360,9 @@ describe('Calculate maxSellable', () => {
         balance: new BigNumber('0.11'),
         debt: new BigNumber('0.001'),
       }),
-      fakeOrderbook
+      fakeOrderbook,
     );
     const result = maxSellable(ma, sellOffers);
     expect(result).toEqual(new BigNumber('0.11'));
   });
-
 });

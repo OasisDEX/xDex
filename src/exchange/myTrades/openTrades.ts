@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { find } from 'lodash';
 import { combineLatest, Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
@@ -6,10 +10,7 @@ import { BigNumber } from 'bignumber.js';
 import { Error } from 'tslint/lib/error';
 import { TxMetaKind } from '../../blockchain/calls/txMeta';
 import { tradingPairs } from '../../blockchain/config';
-import {
-  TxState,
-  TxStatus
-} from '../../blockchain/transactions';
+import { TxState, TxStatus } from '../../blockchain/transactions';
 import { Omit } from '../../utils/omit';
 import { Offer, OfferType, Orderbook } from '../orderbook/orderbook';
 import { compareTrades, Trade, TradeRole } from '../trades';
@@ -17,11 +18,11 @@ import { TradingPair } from '../tradingPair/tradingPair';
 
 export enum TradeStatus {
   beingCancelled = 'beingCancelled',
-  beingCreated = 'beingCreated'
+  beingCreated = 'beingCreated',
 }
 
 export type TradeWithStatus = Trade & {
-  status?: TradeStatus
+  status?: TradeStatus;
 };
 
 function txnInProgress(txn: TxState): boolean {
@@ -47,31 +48,32 @@ function txnPerOrderbook(txn: TxState, pair?: TradingPair) {
     return txn;
   }
 
-  return (buyToken === pair.quote || buyToken === pair.base)
-    && (sellToken === pair.base || sellToken === pair.quote);
+  return (buyToken === pair.quote || buyToken === pair.base) && (sellToken === pair.base || sellToken === pair.quote);
 }
 
 function isBeingCancelled(offer: Offer, transactions: TxState[]): boolean {
-  return !!find(transactions, (t: TxState) =>
-    t.meta.kind === TxMetaKind.cancel &&
-    t.meta.args.offerId.eq(offer.offerId) &&
-    txnInProgress(t)
+  return !!find(
+    transactions,
+    (t: TxState) => t.meta.kind === TxMetaKind.cancel && t.meta.args.offerId.eq(offer.offerId) && txnInProgress(t),
   );
 }
 
 function txnToTrade(txn: TxState): TradeWithStatus {
-
   if (txn.meta.kind !== TxMetaKind.offerMake) {
     throw new Error('Should not get here!');
   }
 
-  const baseAmount = txn.meta.args.baseAmount ||
+  const baseAmount =
+    txn.meta.args.baseAmount ||
     (txn.meta.args.kind === OfferType.buy ? txn.meta.args.buyAmount : txn.meta.args.sellAmount);
-  const baseToken = txn.meta.args.baseToken ||
+  const baseToken =
+    txn.meta.args.baseToken ||
     (txn.meta.args.kind === OfferType.buy ? txn.meta.args.buyToken : txn.meta.args.sellToken);
-  const quoteAmount = txn.meta.args.quoteAmount ||
+  const quoteAmount =
+    txn.meta.args.quoteAmount ||
     (txn.meta.args.kind === OfferType.sell ? txn.meta.args.buyAmount : txn.meta.args.sellAmount);
-  const quoteToken = txn.meta.args.quoteToken ||
+  const quoteToken =
+    txn.meta.args.quoteToken ||
     (txn.meta.args.kind === OfferType.sell ? txn.meta.args.buyToken : txn.meta.args.sellToken);
 
   return {
@@ -87,12 +89,12 @@ function txnToTrade(txn: TxState): TradeWithStatus {
     price: quoteAmount.div(baseAmount),
     block: -1,
     time: new Date(),
-    ownerId: 1
+    ownerId: 1,
   } as TradeWithStatus;
 }
 
 function offerToTrade(tnxs: TxState[]): (offer: Offer) => TradeWithStatus {
-  return offer => ({
+  return (offer) => ({
     status: isBeingCancelled(offer, tnxs) ? TradeStatus.beingCancelled : undefined,
     offerId: offer.offerId,
     act: offer.type,
@@ -104,7 +106,7 @@ function offerToTrade(tnxs: TxState[]): (offer: Offer) => TradeWithStatus {
     quoteToken: offer.quoteToken,
     price: offer.price,
     block: -1,
-    time: offer.timestamp
+    time: offer.timestamp,
   });
 }
 
@@ -119,17 +121,15 @@ export function createMyOpenTrades$(
     map(([orderbook, account, txns]) => {
       const myOffer = (o: Offer) => o.ownerId === account;
       return txns
-        .filter(txn =>
-          txnPerOrderbook(txn, tradingPair) &&
-          txnMetaOfKind(TxMetaKind.offerMake)(txn) &&
-          txnInProgress(txn) &&
-          txnEarlierThan(txn, orderbook.blockNumber))
-        .map(txnToTrade)
-        .concat(
-          orderbook.buy.filter(myOffer)
-            .concat(orderbook.sell.filter(myOffer))
-            .map(offerToTrade(txns))
+        .filter(
+          (txn) =>
+            txnPerOrderbook(txn, tradingPair) &&
+            txnMetaOfKind(TxMetaKind.offerMake)(txn) &&
+            txnInProgress(txn) &&
+            txnEarlierThan(txn, orderbook.blockNumber),
         )
+        .map(txnToTrade)
+        .concat(orderbook.buy.filter(myOffer).concat(orderbook.sell.filter(myOffer)).map(offerToTrade(txns)))
         .sort(compareTrades);
     }),
     shareReplay(1),
@@ -140,39 +140,38 @@ export function aggregateMyOpenTradesFor$(
   market: 'SAI' | 'DAI',
   account$: Observable<string | undefined>,
   txns$: Observable<TxState[]>,
-  loadOrderbook: (pair: TradingPair) => Observable<Orderbook>
+  loadOrderbook: (pair: TradingPair) => Observable<Orderbook>,
 ) {
   // since removing SAI markets from the market picker we use hardcoded list here
-  const matchingPairs = market === 'SAI' ? [
-    { base: 'WETH', quote: 'SAI' },
-    { base: 'REP', quote: 'SAI' },
-    { base: 'ZRX', quote: 'SAI' },
-    { base: 'BAT', quote: 'SAI' },
-  ] : tradingPairs
-    .filter(pair => pair.quote === market);
+  const matchingPairs =
+    market === 'SAI'
+      ? [
+          { base: 'WETH', quote: 'SAI' },
+          { base: 'REP', quote: 'SAI' },
+          { base: 'ZRX', quote: 'SAI' },
+          { base: 'BAT', quote: 'SAI' },
+        ]
+      : tradingPairs.filter((pair) => pair.quote === market);
 
-  const matchingOrderbooks = matchingPairs.map(pair => loadOrderbook(pair));
+  const matchingOrderbooks = matchingPairs.map((pair) => loadOrderbook(pair));
 
-  const aggregatedOrderbook = combineLatest(...matchingOrderbooks)
-    .pipe(
-      map((orderbooks) => {
-        const orderbook = {
-          buy: [] as Offer[],
-          sell: [] as Offer[],
-          blockNumber: 0,
-        };
+  const aggregatedOrderbook = combineLatest(...matchingOrderbooks).pipe(
+    map((orderbooks) => {
+      const orderbook = {
+        buy: [] as Offer[],
+        sell: [] as Offer[],
+        blockNumber: 0,
+      };
 
-        return orderbooks.reduce(
-          (aggregate, currentOrderbook) => {
-            aggregate.buy = [...aggregate.buy, ...currentOrderbook.buy];
-            aggregate.sell = [...aggregate.sell, ...currentOrderbook.sell];
-            // the blockNumber is the same for all of them
-            aggregate.blockNumber = currentOrderbook.blockNumber;
-            return aggregate;
-          },
-          orderbook
-        );
-      }));
+      return orderbooks.reduce((aggregate, currentOrderbook) => {
+        aggregate.buy = [...aggregate.buy, ...currentOrderbook.buy];
+        aggregate.sell = [...aggregate.sell, ...currentOrderbook.sell];
+        // the blockNumber is the same for all of them
+        aggregate.blockNumber = currentOrderbook.blockNumber;
+        return aggregate;
+      }, orderbook);
+    }),
+  );
 
   return createMyOpenTrades$(aggregatedOrderbook, account$, txns$);
 }

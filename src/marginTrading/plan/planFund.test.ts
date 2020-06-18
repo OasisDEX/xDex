@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { BigNumber } from 'bignumber.js';
 
 import { setupFakeWeb3ForTesting } from '../../blockchain/web3';
@@ -15,8 +19,7 @@ describe('plan fund', () => {
 
       const plan = planFundDai(mta, 'WETH', new BigNumber('100'), []);
 
-      expect(plan).toEqual([
-        { amount: new BigNumber('100'), kind: OperationKind.fundDai, name: 'WETH' }]);
+      expect(plan).toEqual([{ amount: new BigNumber('100'), kind: OperationKind.fundDai, name: 'WETH' }]);
     });
 
     test('some dgx, no debt', () => {
@@ -24,8 +27,7 @@ describe('plan fund', () => {
 
       const plan = planFundDai(mta, 'DGX', new BigNumber('100'), []);
 
-      expect(plan).toEqual([
-        { amount: new BigNumber('100'), kind: OperationKind.fundDai, name: 'DGX' }]);
+      expect(plan).toEqual([{ amount: new BigNumber('100'), kind: OperationKind.fundDai, name: 'DGX' }]);
     });
 
     // test('dgx with debt, little cash', () => {
@@ -89,14 +91,11 @@ describe('plan fund', () => {
   });
   describe('marginable', () => {
     test('empty weth', () => {
-
       const mta: MTAccount = getMTAccount({ marginableAssets: [wethEmpty] });
 
       const plan = planFund(mta, 'WETH', new BigNumber('25'), []);
 
-      expect(plan).toEqual([
-        { amount: new BigNumber('25'), kind: OperationKind.fundGem, name: 'WETH' },
-      ]);
+      expect(plan).toEqual([{ amount: new BigNumber('25'), kind: OperationKind.fundGem, name: 'WETH' }]);
     });
   });
 });

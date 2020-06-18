@@ -1,11 +1,13 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { BigNumber } from 'bignumber.js';
 import { Observable } from 'rxjs';
-import {
-  first,
-  switchMap,
-} from 'rxjs/operators';
+import { first, switchMap } from 'rxjs/operators';
 import { Calls$ } from '../../blockchain/calls/calls';
 import { AssetKind } from '../../blockchain/config';
+import { GasPrice$ } from '../../blockchain/network';
 import { TxState } from '../../blockchain/transactions';
 import { RawMTHistoryEvent } from './mtHistory';
 
@@ -14,33 +16,38 @@ export enum OperationKind {
   fundDai = 'fundDai',
   drawGem = 'drawGem',
   drawDai = 'drawDai',
-  buyRecursively = 'buyLev',
-  sellRecursively = 'sellLev',
+  buyRecursively = 'buy',
+  sellRecursively = 'sell',
 }
 
-export type Operation = {
-  kind: OperationKind.fundGem;
-  name: string;
-  amount: BigNumber;
-} | {
-  kind: OperationKind.fundDai;
-  name: string;
-  amount: BigNumber;
-} | {
-  kind: OperationKind.drawGem;
-  name: string;
-  amount: BigNumber;
-} | {
-  kind: OperationKind.drawDai;
-  name: string;
-  amount: BigNumber;
-} | {
-  kind: OperationKind.buyRecursively | OperationKind.sellRecursively;
-  name: string;
-  amount: BigNumber;
-  maxTotal: BigNumber;
-  slippageLimit: BigNumber;
-};
+export type Operation =
+  | {
+      kind: OperationKind.fundGem;
+      name: string;
+      amount: BigNumber;
+    }
+  | {
+      kind: OperationKind.fundDai;
+      name: string;
+      amount: BigNumber;
+    }
+  | {
+      kind: OperationKind.drawGem;
+      name: string;
+      amount: BigNumber;
+    }
+  | {
+      kind: OperationKind.drawDai;
+      name: string;
+      amount: BigNumber;
+    }
+  | {
+      kind: OperationKind.buyRecursively | OperationKind.sellRecursively;
+      name: string;
+      amount: BigNumber;
+      maxTotal: BigNumber;
+      slippageLimit: BigNumber;
+    };
 
 export enum UserActionKind {
   buy = 'buy',
@@ -74,8 +81,8 @@ export enum MTHistoryEventKind {
   drawGem = 'DrawGem',
   drawDai = 'DrawDai',
   adjust = 'Adjust',
-  buyLev = 'BuyLev',
-  sellLev = 'SellLev',
+  buy = 'Buy',
+  sell = 'Sell',
   bite = 'Bite',
   kick = 'Kick',
   tend = 'Tend',
@@ -111,19 +118,26 @@ export type MTHistoryEvent = {
 export type MTMarginEvent = {
   timestamp: number;
   token: string;
-} & ({
-  kind: MTHistoryEventKind.fundGem | MTHistoryEventKind.fundDai |
-    MTHistoryEventKind.drawGem | MTHistoryEventKind.drawDai;
-  amount: BigNumber;
-} | {
-  kind: MTHistoryEventKind.adjust;
-  dgem: BigNumber;
-  ddai: BigNumber;
-} | {
-  kind: MTHistoryEventKind.buyLev | MTHistoryEventKind.sellLev;
-  amount: BigNumber;
-  payAmount: BigNumber;
-});
+} & (
+  | {
+      kind:
+        | MTHistoryEventKind.fundGem
+        | MTHistoryEventKind.fundDai
+        | MTHistoryEventKind.drawGem
+        | MTHistoryEventKind.drawDai;
+      amount: BigNumber;
+    }
+  | {
+      kind: MTHistoryEventKind.adjust;
+      dgem: BigNumber;
+      ddai: BigNumber;
+    }
+  | {
+      kind: MTHistoryEventKind.buy | MTHistoryEventKind.sell;
+      amount: BigNumber;
+      payAmount: BigNumber;
+    }
+);
 
 export type MTLiquidationEvent = {
   // `lot` gems for sale
@@ -133,24 +147,29 @@ export type MTLiquidationEvent = {
   timestamp: number;
   token: string;
   id: number;
-} & ({
-  kind: MTHistoryEventKind.bite
-  ink: BigNumber;
-  tab: BigNumber;
-} | {
-  kind: MTHistoryEventKind.kick
-  lot: BigNumber;
-  tab: BigNumber;
-} | {
-  kind: MTHistoryEventKind.tend | MTHistoryEventKind.dent;
-  lot: BigNumber;
-  bid: BigNumber;
-} | {
-  kind: MTHistoryEventKind.deal;
-} | {
-  kind: MTHistoryEventKind.redeem;
-  amount: BigNumber;
-}
+} & (
+  | {
+      kind: MTHistoryEventKind.bite;
+      ink: BigNumber;
+      tab: BigNumber;
+    }
+  | {
+      kind: MTHistoryEventKind.kick;
+      lot: BigNumber;
+      tab: BigNumber;
+    }
+  | {
+      kind: MTHistoryEventKind.tend | MTHistoryEventKind.dent;
+      lot: BigNumber;
+      bid: BigNumber;
+    }
+  | {
+      kind: MTHistoryEventKind.deal;
+    }
+  | {
+      kind: MTHistoryEventKind.redeem;
+      amount: BigNumber;
+    }
 );
 
 export type MarginableAssetHistory = MTHistoryEvent[];
@@ -174,17 +193,17 @@ export interface MarginableAssetCore extends Core {
 export interface MarginableAsset extends MarginableAssetCore {
   // balance: BigNumber;
   balanceInCash: BigNumber;
-  balanceInDai: BigNumber;
-  midpointPrice: BigNumber;
+  balanceInDai?: BigNumber;
+  midpointPrice?: BigNumber;
   currentCollRatio?: BigNumber;
   cash: BigNumber;
   // maxDebtForOther: BigNumber; // max possible debt for other assets
   maxDebt: BigNumber; // max possible targetDebt for this asset
   liquidationPrice: BigNumber;
   markPrice: BigNumber;
-  leverage: BigNumber;
+  multiple: BigNumber;
   availableDebt: BigNumber;
-  maxSafeLeverage: BigNumber;
+  maxSafeMultiply: BigNumber;
   availableActions: UserActionKind[];
   availableBalance: BigNumber;
   lockedBalance: BigNumber;
@@ -197,8 +216,9 @@ export interface MarginableAsset extends MarginableAssetCore {
   amountBeingLiquidated: BigNumber;
   nextPriceUpdateDelta: string;
   purchasingPower: BigNumber;
-  equity: BigNumber;
+  equity?: BigNumber;
   isSafeCollRatio?: boolean;
+  priceDropWarning: boolean;
 }
 
 // export interface NonMarginableAssetCore extends Core {
@@ -234,13 +254,13 @@ export interface MTAccount {
   proxy: any;
 }
 
-export function createMTProxyApprove(calls$: Calls$) {
-  return (args: {token: string; proxyAddress: string}): Observable<TxState> => {
+export function createMTProxyApprove(gasPrice$: GasPrice$, calls$: Calls$) {
+  return (args: { token: string; proxyAddress: string }): Observable<TxState> => {
     const r = calls$.pipe(
       first(),
-      switchMap(calls => {
-        return calls.approveMTProxy(args);
-      })
+      switchMap((calls) => {
+        return calls.approveMTProxy(gasPrice$, args);
+      }),
     );
     r.subscribe();
     return r;
@@ -248,8 +268,9 @@ export function createMTProxyApprove(calls$: Calls$) {
 }
 
 export function findAsset(
-  name: string, mta?: MTAccount
-): MarginableAsset /* | NonMarginableAsset | CashAsset */ | undefined {
+  name: string,
+  mta?: MTAccount,
+): MarginableAsset | /* | NonMarginableAsset | CashAsset */ undefined {
   if (!mta) {
     return undefined;
   }
@@ -258,18 +279,16 @@ export function findAsset(
   //   return mta.cash;
   // }
 
-  return mta.marginableAssets.find(a => a.name === name);
+  return mta.marginableAssets.find((a) => a.name === name);
   // || mta.nonMarginableAssets.find(a => a.name === name);
 }
 
-export function findMarginableAsset(
-  name: string, mta?: MTAccount
-): MarginableAsset | undefined {
+export function findMarginableAsset(name: string, mta?: MTAccount): MarginableAsset | undefined {
   if (!mta) {
     return undefined;
   }
 
-  return mta.marginableAssets.find(a => a.name === name);
+  return mta.marginableAssets.find((a) => a.name === name);
 }
 
 // export function findNonMarginableAsset(

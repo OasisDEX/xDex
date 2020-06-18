@@ -1,10 +1,14 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import createBrowserHistory from 'history/createBrowserHistory';
 import * as React from 'react';
 import { Redirect, Route, Router, Switch } from 'react-router';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
-import * as mixpanel from 'mixpanel-browser';
 import { map } from 'rxjs/operators';
+import { trackingEvents } from './analytics/analytics';
 import { setupAppContext, theAppContext } from './AppContext';
 import { BalancesView } from './balances/BalancesView';
 import { WalletStatus, walletStatus$ } from './blockchain/wallet';
@@ -18,21 +22,14 @@ import { TransactionNotifierHooked } from './transactionNotifier/TransactionNoti
 import { SetupModal } from './utils/modalHook';
 import { useObservable } from './utils/observableHook';
 
-const {
-  REACT_APP_INSTANT_ENABLED,
-  REACT_APP_LT_ENABLED,
-  REACT_APP_SUBDIR,
-} = process.env;
+const { REACT_APP_INSTANT_ENABLED, REACT_APP_LT_ENABLED, REACT_APP_SUBDIR } = process.env;
 
 const browserHistoryInstance = createBrowserHistory({
-  basename: REACT_APP_SUBDIR ? REACT_APP_SUBDIR : '/'
+  basename: REACT_APP_SUBDIR ? REACT_APP_SUBDIR : '/',
 });
 
-browserHistoryInstance.listen(location => {
-  mixpanel.track('Pageview', {
-    product: 'oasis-trade',
-    id: location.pathname
-  });
+browserHistoryInstance.listen((location) => {
+  trackingEvents.pageView(location.pathname);
 });
 
 export const Main = () => {
@@ -40,23 +37,23 @@ export const Main = () => {
     <theAppContext.Provider value={setupAppContext()}>
       <SetupModal>
         <Router history={browserHistoryInstance}>
-          <MainContentWithRouter/>
+          <MainContentWithRouter />
         </Router>
       </SetupModal>
     </theAppContext.Provider>
   );
 };
 
-export interface RouterProps extends RouteComponentProps<any> {
-}
+export interface RouterProps extends RouteComponentProps<any> {}
 
 export const MainContent = (props: RouterProps) => {
-  const routesState = useObservable(walletStatus$
-    .pipe(
-      map(status => ({
-        status
-      }))
-    ));
+  const routesState = useObservable(
+    walletStatus$.pipe(
+      map((status) => ({
+        status,
+      })),
+    ),
+  );
 
   if (!routesState) return null;
 
@@ -65,8 +62,8 @@ export const MainContent = (props: RouterProps) => {
       <div className={styles.container}>
         <TransactionNotifierHooked />
         <HeaderHooked />
-        <Routes {...routesState}/>
-        <TheFooterHooked/>
+        <Routes {...routesState} />
+        <TheFooterHooked />
       </div>
     </routerContext.Provider>
   );
@@ -75,21 +72,14 @@ export const MainContent = (props: RouterProps) => {
 const Routes = ({ status }: { status: WalletStatus }) => {
   return (
     <Switch>
-      <Route exact={false} path={'/market'} component={ExchangeViewHooked}/>
-      {
-        REACT_APP_INSTANT_ENABLED === '1' &&
-        <Route exact={false} path={'/instant'} component={InstantExchange}/>}
-      {
-        status === 'connected' &&
-        <Route path={'/balances'} component={BalancesView}/>
-      }
-      {
-        REACT_APP_LT_ENABLED === '1' &&
-        status === 'connected' &&
+      <Route exact={false} path={'/market'} component={ExchangeViewHooked} />
+      {REACT_APP_INSTANT_ENABLED === '1' && <Route exact={false} path={'/instant'} component={InstantExchange} />}
+      {status === 'connected' && <Route path={'/balances'} component={BalancesView} />}
+      {REACT_APP_LT_ENABLED === '1' && status === 'connected' && (
         <Route path={'/leverage'} component={MarginTradingSimpleTxRx} />
-      }
-      <Redirect from={'/account'} to={'/balances'}/>
-      <Redirect from={'/'} to={'/market'}/>
+      )}
+      <Redirect from={'/account'} to={'/balances'} />
+      <Redirect from={'/'} to={'/market'} />
     </Switch>
   );
 };

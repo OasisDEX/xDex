@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { from, Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
 // tslint:disable:import-name
@@ -9,7 +13,7 @@ const ethereum = {
   url: infuraUrl,
 };
 
-export let web3 : Web3;
+export let web3: Web3;
 
 export type Web3Status = 'ready' | 'readonly' | 'missing' | 'initializing';
 

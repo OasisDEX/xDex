@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import * as classnames from 'classnames';
 import * as React from 'react';
 import chevronDownSvg from '../icons/chevron-down.svg';
@@ -14,13 +18,7 @@ interface AssetDropdownMenuProps {
   tid?: string;
 }
 
-export const AssetDropdownMenu = ({
-  asset,
-  actions,
-  withIcon,
-  label,
-  tid
-}: AssetDropdownMenuProps) => {
+export const AssetDropdownMenu = ({ asset, actions, withIcon, label, tid }: AssetDropdownMenuProps) => {
   const [isCollapsed, collapse] = React.useState(false);
 
   return (
@@ -30,19 +28,12 @@ export const AssetDropdownMenu = ({
       onMouseOver={() => collapse(true)}
       onMouseLeave={() => collapse(false)}
     >
-      <Button
-        size="md"
-        color="secondaryOutlined"
-        className={styles.dropdownButton}
-      >
+      <Button size="md" color="secondaryOutlined" className={styles.dropdownButton}>
         {withIcon && <SvgImage image={dottedMenuSvg} />}
         {label && (
           <>
             <span>{label}</span>
-            <SvgImage
-              image={chevronDownSvg}
-              className={classnames(styles.arrowDown, styles.dark)}
-            />
+            <SvgImage image={chevronDownSvg} className={classnames(styles.arrowDown, styles.dark)} />
           </>
         )}
       </Button>

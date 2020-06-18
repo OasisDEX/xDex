@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import * as React from 'react';
 import { Redirect, Route, RouteComponentProps, Switch } from 'react-router';
 import { map } from 'rxjs/operators';
@@ -39,53 +43,57 @@ const Content = (props: any | { parentMatch: string }) => {
   return (
     <div>
       <div style={{ marginBottom: '1.75rem' }}>
-        <Banner content={
-                <div style={bannerStyle}>
-                  You are currently accessing a <strong>beta version</strong> of Oasis Trade.
-                  This includes an early access to Leverage Trading, which may
-                  contain bugs and usability issues.
-                  Please use this feature with caution.
-                </div>
-                }
-                theme="warning"/>
+        <Banner
+          content={
+            /* tslint:disable */
+            <div style={bannerStyle}>
+              You are currently accessing a <strong>beta version</strong> of Oasis Multiply Trading, which may contain
+              bugs and usability issues. Please use this feature with caution. You can read more about this release{' '}
+              <a href="https://blog.oasis.app/introducing-multiply-on-oasis-trade/" target="_blank">
+                here
+              </a>
+              .
+            </div>
+            /* tslint:enable */
+          }
+          theme="warning"
+        />
       </div>
       <FlexLayoutRow>
         <TradingPairViewHook parentMatch={parentMatch} />
       </FlexLayoutRow>
       <FlexLayoutRow>
-          <theAppContext.Consumer>
-            { ({ MTLiquidationNotificationRxTx }) =>
-              // @ts-ignore
-              <MTLiquidationNotificationRxTx />
-            }
-          </theAppContext.Consumer>
+        <theAppContext.Consumer>
+          {({ MTLiquidationNotificationRxTx }) => (
+            // @ts-ignore
+            <MTLiquidationNotificationRxTx />
+          )}
+        </theAppContext.Consumer>
       </FlexLayoutRow>
       <FlexLayoutRow>
         <Panel className={styles.priceChartPanel} footerBordered={true}>
-          <PriceChartWithLoading/>
+          <PriceChartWithLoading />
         </Panel>
         <Panel className={styles.allTradesPanel} footerBordered={true}>
-          <AllTradesHooked/>
+          <AllTradesHooked />
         </Panel>
       </FlexLayoutRow>
       <FlexLayoutRow>
         <Panel className={styles.orderFormPanel}>
-          <theAppContext.Consumer>
-            { ({ MTSimpleOrderPanelRxTx }) => <MTSimpleOrderPanelRxTx /> }
-          </theAppContext.Consumer>
+          <theAppContext.Consumer>{({ MTSimpleOrderPanelRxTx }) => <MTSimpleOrderPanelRxTx />}</theAppContext.Consumer>
         </Panel>
         <Panel className={styles.orderBookPanel}>
           <theAppContext.Consumer>
-            { ({ MTSimpleOrderbookPanelTxRx }) => <MTSimpleOrderbookPanelTxRx /> }
+            {({ MTSimpleOrderbookPanelTxRx }) => <MTSimpleOrderbookPanelTxRx />}
           </theAppContext.Consumer>
         </Panel>
       </FlexLayoutRow>
       <FlexLayoutRow>
         <theAppContext.Consumer>
-          { ({ MTMyPositionPanelRxTx }) =>
+          {({ MTMyPositionPanelRxTx }) => (
             // @ts-ignore
-            <MTMyPositionPanelRxTx/>
-          }
+            <MTMyPositionPanelRxTx />
+          )}
         </theAppContext.Consumer>
       </FlexLayoutRow>
     </div>
@@ -104,18 +112,11 @@ export class MarginTradingSimple extends React.Component<MarginTradingProps> {
         <Switch>
           <Route
             path={`${matchUrl}/:base/:quote`}
-            render={props => (
-              <Content
-                {...props}
-                tp={tp}
-                parentMatch={matchUrl}
-                setTradingPair={this.props.setTradingPair}
-              />
+            render={(props) => (
+              <Content {...props} tp={tp} parentMatch={matchUrl} setTradingPair={this.props.setTradingPair} />
             )}
           />
-          <Redirect push={true}
-                    from={'/leverage'}
-                    to={`/leverage/${tp.base}/${tp.quote}`} />
+          <Redirect push={true} from={'/multiply'} to={`/multiply/${tp.base}/${tp.quote}`} />
         </Switch>
       </div>
     );
@@ -124,8 +125,10 @@ export class MarginTradingSimple extends React.Component<MarginTradingProps> {
 
 export const MarginTradingSimpleTxRx = connect<MarginTradingOwnProps, RouteComponentProps<any>>(
   MarginTradingSimple,
-  currentTradingPair$.pipe(map((tp: TradingPair) => ({
-    tp,
-    setTradingPair: currentTradingPair$.next.bind(currentTradingPair$),
-  })))
+  currentTradingPair$.pipe(
+    map((tp: TradingPair) => ({
+      tp,
+      setTradingPair: currentTradingPair$.next.bind(currentTradingPair$),
+    })),
+  ),
 );

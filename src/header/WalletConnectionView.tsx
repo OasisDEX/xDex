@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import classnames from 'classnames';
 import * as React from 'react';
 import { BehaviorSubject } from 'rxjs';
@@ -14,7 +18,7 @@ import {
   Status,
   Trezor,
   Trust,
-  WebWallet
+  WebWallet,
 } from '../utils/providers';
 import * as styles from './WalletConnection.scss';
 
@@ -34,30 +38,20 @@ const {
   buttonPlaceholder,
 } = styles;
 
-const ListItem = (props: Provider & {
-  className?: string,
-  isSelected?: boolean,
-  onSelect?: () => void, tid?: string
-}) => {
-  const {
-    supported,
-    isSelected,
-    className,
-    name: fullName,
-    icon: walletIcon,
-    onSelect,
-    tid
-  } = props;
+const ListItem = (
+  props: Provider & {
+    className?: string;
+    isSelected?: boolean;
+    onSelect?: () => void;
+    tid?: string;
+  },
+) => {
+  const { supported, isSelected, className, name: fullName, icon: walletIcon, onSelect, tid } = props;
   return (
-    <li className={
-      classnames(
-        item, wallet, className,
-        !supported && inactive,
-        isSelected && selected
-      )
-    }
-        onClick={onSelect}
-        data-test-id={tid}
+    <li
+      className={classnames(item, wallet, className, !supported && inactive, isSelected && selected)}
+      onClick={onSelect}
+      data-test-id={tid}
     >
       <div className={icon}>{walletIcon}</div>
       <span>{fullName}</span>
@@ -65,13 +59,13 @@ const ListItem = (props: Provider & {
   );
 };
 
-const Panel = (props: { heading?: string | React.ReactNode, children?: any }) => {
+const Panel = (props: { heading?: string | React.ReactNode; children?: any }) => {
   return (
     <section data-test-id="wallet-connection-panel" className={section}>
-      <h4 data-test-id="heading" className={heading}>{props.heading}</h4>
-      {
-        props.children
-      }
+      <h4 data-test-id="heading" className={heading}>
+        {props.heading}
+      </h4>
+      {props.children}
     </section>
   );
 };
@@ -81,30 +75,26 @@ class SuggestedClients extends React.Component {
     return (
       <Panel heading="Get a Wallet">
         <ul className={classnames(single, list)} data-test-id="suggested-clients">
-          {
-            [Metamask, Parity, Status, Trust].map((provider) => {
-              return (
-                <a key={provider.id}
-                   href={provider.website}
-                   rel="noreferrer noopener"
-                   target="_blank"
-                >
-                  <ListItem id={provider.id}
-                            icon={provider.iconWhite}
-                            name={provider.name}
-                            supported={provider.supported}
-                  />
-                </a>
-              );
-            })
-          }
+          {[Metamask, Parity, Status, Trust].map((provider) => {
+            return (
+              <a key={provider.id} href={provider.website} rel="noreferrer noopener" target="_blank">
+                <ListItem
+                  id={provider.id}
+                  icon={provider.iconWhite}
+                  name={provider.name}
+                  supported={provider.supported}
+                />
+              </a>
+            );
+          })}
         </ul>
         <div className={buttonPlaceholder}>
-          <Button size="md"
-                  color="secondaryOutlined"
-                  className={classnames(item)}
-                  data-test-id="go-back"
-                  onClick={this._goBack}
+          <Button
+            size="md"
+            color="secondaryOutlined"
+            className={classnames(item)}
+            data-test-id="go-back"
+            onClick={this._goBack}
           >
             Back
           </Button>
@@ -115,15 +105,15 @@ class SuggestedClients extends React.Component {
 
   private _goBack = () => {
     walletConnectionViewManual$.next(WalletConnectionViewKind.noClient);
-  }
+  };
 }
 
-class NotConnected extends React.Component<{}, { isChecked: boolean, selectedWallet: Provider }> {
+class NotConnected extends React.Component<{}, { isChecked: boolean; selectedWallet: Provider }> {
   public constructor(props: any) {
     super(props);
     this.state = {
       isChecked: false,
-      selectedWallet: {} as Provider
+      selectedWallet: {} as Provider,
     };
   }
 
@@ -132,42 +122,38 @@ class NotConnected extends React.Component<{}, { isChecked: boolean, selectedWal
     return (
       <Panel heading="Connect Wallet">
         <ul className={classnames(single, list)}>
-          <ListItem icon={provider.icon}
-                    name={provider.name}
-                    supported={provider.supported}
-                    isSelected={this.state.selectedWallet.id === provider.id}
-                    onSelect={() => this._selectWallet(provider)}
-                    tid="web-wallet"
+          <ListItem
+            icon={provider.icon}
+            name={provider.name}
+            supported={provider.supported}
+            isSelected={this.state.selectedWallet.id === provider.id}
+            onSelect={() => this._selectWallet(provider)}
+            tid="web-wallet"
           />
-          {
-            [...hwWallets].map((hwWallet) =>
-              <ListItem key={hwWallet.id}
-                        icon={hwWallet.icon}
-                        name={hwWallet.name}
-                        supported={hwWallet.supported}
-                        isSelected={this.state.selectedWallet.id === hwWallet.id}/>
-            )
-          }
+          {[...hwWallets].map((hwWallet) => (
+            <ListItem
+              key={hwWallet.id}
+              icon={hwWallet.icon}
+              name={hwWallet.name}
+              supported={hwWallet.supported}
+              isSelected={this.state.selectedWallet.id === hwWallet.id}
+            />
+          ))}
         </ul>
-        <Checkbox name="tos"
-                  data-test-id="accept-tos"
-                  onChange={this._toggle}
-                  className={termsAndConditions}
-        >
-          I accept&nbsp;<a target="_blank"
-                           rel="noopener noreferrer"
-                           href="/terms"
-        >
-          Terms of Service
-        </a>
+        <Checkbox name="tos" data-test-id="accept-tos" onChange={this._toggle} className={termsAndConditions}>
+          I accept&nbsp;
+          <a target="_blank" rel="noopener noreferrer" href="/terms">
+            Terms of Service
+          </a>
         </Checkbox>
         <div className={buttonPlaceholder}>
-          <Button size="md"
-                  color="secondaryOutlined"
-                  className={item}
-                  disabled={!this._canConnect()}
-                  onClick={this._connect}
-                  data-test-id="connect-wallet"
+          <Button
+            size="md"
+            color="secondaryOutlined"
+            className={item}
+            disabled={!this._canConnect()}
+            onClick={this._connect}
+            data-test-id="connect-wallet"
           >
             Connect
           </Button>
@@ -181,32 +167,28 @@ class NotConnected extends React.Component<{}, { isChecked: boolean, selectedWal
       const isChecked = !state.isChecked;
       return { isChecked };
     });
-  }
+  };
 
   private _selectWallet = (selectedWallet: Provider) => {
     this.setState({ selectedWallet });
-  }
+  };
 
   private _connect = () => {
     connectToWallet();
-  }
+  };
 
   private _canConnect = () => {
     const selectedWallet = this.state.selectedWallet;
-    return this.state.isChecked &&
-      selectedWallet && (
-        selectedWallet.id !== undefined &&
-        selectedWallet.id !== null
-      );
-  }
+    return this.state.isChecked && selectedWallet && selectedWallet.id !== undefined && selectedWallet.id !== null;
+  };
 }
 
-class NoClient extends React.Component<{}, { isChecked: boolean, selectedWallet: Provider }> {
+class NoClient extends React.Component<{}, { isChecked: boolean; selectedWallet: Provider }> {
   public constructor(props: any) {
     super(props);
     this.state = {
       isChecked: false,
-      selectedWallet: {} as Provider
+      selectedWallet: {} as Provider,
     };
   }
 
@@ -214,42 +196,38 @@ class NoClient extends React.Component<{}, { isChecked: boolean, selectedWallet:
     return (
       <Panel heading="Connect Wallet">
         <ul className={classnames(single, list)}>
-          <ListItem icon={WebWallet.icon}
-                    name={WebWallet.name}
-                    supported={WebWallet.supported}
-                    isSelected={this.state.selectedWallet.id === WebWallet.id}
-                    onSelect={this._suggestClients}
-                    tid="web-wallet"
+          <ListItem
+            icon={WebWallet.icon}
+            name={WebWallet.name}
+            supported={WebWallet.supported}
+            isSelected={this.state.selectedWallet.id === WebWallet.id}
+            onSelect={this._suggestClients}
+            tid="web-wallet"
           />
-          {
-            [...hwWallets].map((hwWallet) =>
-              <ListItem key={hwWallet.id}
-                        icon={hwWallet.icon}
-                        name={hwWallet.name}
-                        supported={hwWallet.supported}
-                        isSelected={this.state.selectedWallet.id === hwWallet.id}/>
-            )
-          }
+          {[...hwWallets].map((hwWallet) => (
+            <ListItem
+              key={hwWallet.id}
+              icon={hwWallet.icon}
+              name={hwWallet.name}
+              supported={hwWallet.supported}
+              isSelected={this.state.selectedWallet.id === hwWallet.id}
+            />
+          ))}
         </ul>
-        <Checkbox name="tos"
-                  data-test-id="accept-tos"
-                  onChange={this._toggle}
-                  className={termsAndConditions}
-        >
-          I accept&nbsp;<a target="_blank"
-                           rel="noopener noreferrer"
-                           href="/terms"
-        >
-          Terms of Service
-        </a>
+        <Checkbox name="tos" data-test-id="accept-tos" onChange={this._toggle} className={termsAndConditions}>
+          I accept&nbsp;
+          <a target="_blank" rel="noopener noreferrer" href="/terms">
+            Terms of Service
+          </a>
         </Checkbox>
         <div className={buttonPlaceholder}>
-          <Button size="md"
-                  color="secondaryOutlined"
-                  className={classnames(item)}
-                  disabled={!this._canConnect()}
-                  onClick={this._connect}
-                  data-test-id="connect-wallet"
+          <Button
+            size="md"
+            color="secondaryOutlined"
+            className={classnames(item)}
+            disabled={!this._canConnect()}
+            onClick={this._connect}
+            data-test-id="connect-wallet"
           >
             Connect
           </Button>
@@ -263,25 +241,20 @@ class NoClient extends React.Component<{}, { isChecked: boolean, selectedWallet:
       const isChecked = !state.isChecked;
       return { isChecked };
     });
-  }
+  };
 
   private _connect = () => {
     connectToWallet();
-  }
+  };
 
   private _canConnect = () => {
     const selectedWallet = this.state.selectedWallet;
-    return this.state.isChecked &&
-      selectedWallet && (
-        selectedWallet.id !== undefined &&
-        selectedWallet.id !== null
-      )
-      ;
-  }
+    return this.state.isChecked && selectedWallet && selectedWallet.id !== undefined && selectedWallet.id !== null;
+  };
 
   private _suggestClients = () => {
     walletConnectionViewManual$.next(WalletConnectionViewKind.suggest);
-  }
+  };
 }
 
 class Connected extends React.Component {
@@ -289,15 +262,15 @@ class Connected extends React.Component {
     return (
       <Panel heading={`${getCurrentProviderName().name} Connected`}>
         <ul className={classnames(list, single)}>
-          {
-            hwWallets.map((hwWallet) =>
-              <ListItem id={hwWallet.id}
-                        key={hwWallet.id}
-                        icon={hwWallet.icon}
-                        name={hwWallet.name}
-                        supported={hwWallet.supported}/>
-            )
-          }
+          {hwWallets.map((hwWallet) => (
+            <ListItem
+              id={hwWallet.id}
+              key={hwWallet.id}
+              icon={hwWallet.icon}
+              name={hwWallet.name}
+              supported={hwWallet.supported}
+            />
+          ))}
         </ul>
       </Panel>
     );
@@ -305,38 +278,40 @@ class Connected extends React.Component {
 }
 
 const Connecting = (props: any) => {
-  const _connectingContainerStyles = () => ({
-    fontSize: '14px',
-    letterSpacing: '.4px',
-    lineHeight: '24px',
-    height: '216px',
-    color: '#828288',
-    width: '100%',
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderTop: '1px solid rgba(88, 88, 95, 0.2)',
-    borderBottom: '1px solid rgba(88, 88, 95, 0.2)',
-    flexDirection: 'column',
-    textAlign: 'center'
-  } as React.CSSProperties);
+  const _connectingContainerStyles = () =>
+    ({
+      fontSize: '14px',
+      letterSpacing: '.4px',
+      lineHeight: '24px',
+      height: '216px',
+      color: '#828288',
+      width: '100%',
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderTop: '1px solid rgba(88, 88, 95, 0.2)',
+      borderBottom: '1px solid rgba(88, 88, 95, 0.2)',
+      flexDirection: 'column',
+      textAlign: 'center',
+    } as React.CSSProperties);
 
   return (
     <Panel heading="Connecting...">
       <div style={_connectingContainerStyles()}>
         <div>
-          <LoadingIndicator size="lg"/>
+          <LoadingIndicator size="lg" />
           Waiting for Approval
-          <br/>
+          <br />
           on {getCurrentProviderName().name}
         </div>
       </div>
       <div className={buttonPlaceholder}>
-        <Button size="md"
-                color="secondaryOutlined"
-                className={classnames(item)}
-                onClick={props.close}
-                data-test-id="connect-wallet"
+        <Button
+          size="md"
+          color="secondaryOutlined"
+          className={classnames(item)}
+          onClick={props.close}
+          data-test-id="connect-wallet"
         >
           Cancel
         </Button>
@@ -355,11 +330,10 @@ export enum WalletConnectionViewKind {
 
 export const walletConnectionViewManual$ = new BehaviorSubject('');
 
-export const WalletConnectionViews = new Map<WalletConnectionViewKind, any>(
-  [
-    [WalletConnectionViewKind.connected, Connected],
-    [WalletConnectionViewKind.notConnected, NotConnected],
-    [WalletConnectionViewKind.noClient, NoClient],
-    [WalletConnectionViewKind.suggest, SuggestedClients],
-    [WalletConnectionViewKind.connecting, Connecting],
-  ]);
+export const WalletConnectionViews = new Map<WalletConnectionViewKind, any>([
+  [WalletConnectionViewKind.connected, Connected],
+  [WalletConnectionViewKind.notConnected, NotConnected],
+  [WalletConnectionViewKind.noClient, NoClient],
+  [WalletConnectionViewKind.suggest, SuggestedClients],
+  [WalletConnectionViewKind.connecting, Connecting],
+]);

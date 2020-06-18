@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 // ***********************************************************
 // This example support/index.js is processed and
 // loaded automatically before your test files.

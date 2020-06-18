@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { tid } from '../utils/index';
 
 class Trade {
@@ -23,7 +27,6 @@ class Trade {
 }
 
 export class Trades {
-
   public static countIs(number: number) {
     cy.get(tid('my-trades')).should('have.length', number);
   }
@@ -35,7 +38,9 @@ export class Trades {
   }
 
   public static number(number: number) {
-    cy.get(tid('my-trades'), { timeout: 10000 }).eq(number - 1).as('trade');
+    cy.get(tid('my-trades'), { timeout: 10000 })
+      .eq(number - 1)
+      .as('trade');
 
     return new Trade();
   }

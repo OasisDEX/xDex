@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { BigNumber } from 'bignumber.js';
 import * as React from 'react';
 import * as Web3Utils from 'web3-utils';
@@ -31,23 +35,27 @@ export const makeLinearOffers: TransactionDef<MakeLinearOffersData> = {
     new web3.eth.Contract(dsProxy as any, proxyAddress).methods['execute(address,bytes)'],
   prepareArgs: (
     { baseToken, quoteToken, midPrice, delta, baseAmount, count }: MakeLinearOffersData,
-    context: NetworkConfig
+    context: NetworkConfig,
   ) => [
     context.liquidityProvider.address,
-    context.liquidityProvider.contract.methods.linearOffers(
-      context.otc.address,
-      context.tokens[baseToken].address,
-      context.tokens[quoteToken].address,
-      q18(midPrice),
-      q18(delta),
-      q18(baseAmount),
-      String(count),
-    ).encodeABI(),
+    context.liquidityProvider.contract.methods
+      .linearOffers(
+        context.otc.address,
+        context.tokens[baseToken].address,
+        context.tokens[quoteToken].address,
+        q18(midPrice),
+        q18(delta),
+        q18(baseAmount),
+        String(count),
+      )
+      .encodeABI(),
   ],
   kind: TxMetaKind.makeLinearOffers,
-  description: ({ count, midPrice, baseToken, quoteToken }: MakeLinearOffersData) => <>
-    Create {count} offer pairs for trading {baseToken}/{quoteToken} around price {midPrice}
-  </>,
+  description: ({ count, midPrice, baseToken, quoteToken }: MakeLinearOffersData) => (
+    <>
+      Create {count} offer pairs for trading {baseToken}/{quoteToken} around price {midPrice}
+    </>
+  ),
 };
 
 export interface CancelAllOffersData {
@@ -59,21 +67,18 @@ export interface CancelAllOffersData {
 export const cancelAllOffers: TransactionDef<CancelAllOffersData> = {
   call: ({ proxyAddress }: CancelAllOffersData, _context: NetworkConfig) =>
     new web3.eth.Contract(dsProxy as any, proxyAddress).methods['execute(address,bytes)'],
-  prepareArgs: (
-    { baseToken, quoteToken }: CancelAllOffersData,
-    context: NetworkConfig
-  ) => [
+  prepareArgs: ({ baseToken, quoteToken }: CancelAllOffersData, context: NetworkConfig) => [
     context.liquidityProvider.address,
-    context.liquidityProvider.contract.methods.cancelMyOffers(
-      context.otc.address,
-      context.tokens[baseToken].address,
-      context.tokens[quoteToken].address,
-    ).encodeABI(),
+    context.liquidityProvider.contract.methods
+      .cancelMyOffers(context.otc.address, context.tokens[baseToken].address, context.tokens[quoteToken].address)
+      .encodeABI(),
   ],
   kind: TxMetaKind.cancelAllOffers,
-  description: ({ baseToken, quoteToken }: CancelAllOffersData) => <>
-    Cancel all your offers of {baseToken}/{quoteToken} !!!
-  </>,
+  description: ({ baseToken, quoteToken }: CancelAllOffersData) => (
+    <>
+      Cancel all your offers of {baseToken}/{quoteToken} !!!
+    </>
+  ),
 };
 
 export interface DripData {
@@ -82,9 +87,7 @@ export interface DripData {
 
 export const drip: TransactionDef<DripData> = {
   call: (_data: DripData, context: NetworkConfig) => context.mcd.jug.contract.methods.drip,
-  prepareArgs: ({ token }: DripData, context: NetworkConfig) => [
-    Web3Utils.asciiToHex(context.mcd.ilks[token]),
-  ],
+  prepareArgs: ({ token }: DripData, context: NetworkConfig) => [Web3Utils.asciiToHex(context.mcd.ilks[token])],
   kind: TxMetaKind.devDrip,
   description: ({ token }: DripData) => <React.Fragment>Drip {token}</React.Fragment>,
 };
@@ -94,8 +97,7 @@ export interface ReadPriceData {
 }
 
 export const readPrice: CallDef<ReadPriceData, BigNumber> = {
-  call: ({ token }: ReadPriceData, context: NetworkConfig) =>
-    context.mcd.prices[token].contract.methods.read,
+  call: ({ token }: ReadPriceData, context: NetworkConfig) => context.mcd.prices[token].contract.methods.read,
   prepareArgs: () => [],
   postprocess: (price: string) => amountFromWei(new BigNumber(price), 'DAI'),
 };
@@ -108,47 +110,46 @@ export interface ChangePriceData {
 export const changePrice: TransactionDef<ChangePriceData> = {
   call: ({ token }: ChangePriceData, context: NetworkConfig) => {
     return context.mcd.prices[token].contract.methods.poke;
-  }
-    ,
+  },
   prepareArgs: ({ price }: ChangePriceData) => [
-    `0x${amountToWei(new BigNumber(price), 'DAI').toNumber().toString(16).padStart(64, '0')}`
+    `0x${amountToWei(new BigNumber(price), 'DAI').toNumber().toString(16).padStart(64, '0')}`,
   ],
   kind: TxMetaKind.devChangePrice,
-  description: ({ token, price }: ChangePriceData) =>
-    <React.Fragment>Change price of {token} to {price}</React.Fragment>,
+  description: ({ token, price }: ChangePriceData) => (
+    <React.Fragment>
+      Change price of {token} to {price}
+    </React.Fragment>
+  ),
 };
 
 export const changePriceAndPoke: TransactionDef<ChangePriceData> = {
-  call: (_: ChangePriceData, context: NetworkConfig) =>
-    context.txManager.contract.methods.execute,
+  call: (_: ChangePriceData, context: NetworkConfig) => context.txManager.contract.methods.execute,
   prepareArgs: ({ price, token }: ChangePriceData, context: NetworkConfig) => {
     return [
       buildCalls(web3, [
         {
           address: context.mcd.prices[token].address,
-          calldata: context.mcd.prices[token].contract.methods
-            .poke(`0x${amountToWei(new BigNumber(price), 'DAI')
-              .toNumber()
-              .toString(16)
-              .padStart(64, '0')
-            }`)
+          calldata: context.mcd.prices[token].contract.methods.poke(
+            `0x${amountToWei(new BigNumber(price), 'DAI').toNumber().toString(16).padStart(64, '0')}`,
+          ),
         },
         {
           address: context.mcd.osms[token].address,
-          calldata: context.mcd.osms[token].contract.methods
-            .poke()
+          calldata: context.mcd.osms[token].contract.methods.poke(),
         },
         {
           address: context.mcd.spot.address,
-          calldata: context.mcd.spot.contract.methods
-            .poke(Web3Utils.asciiToHex(context.mcd.ilks[token]))
+          calldata: context.mcd.spot.contract.methods.poke(Web3Utils.asciiToHex(context.mcd.ilks[token])),
         },
-      ])
+      ]),
     ];
   },
   kind: TxMetaKind.devChangePrice,
-  description: ({ token, price }: ChangePriceData) =>
-    <React.Fragment>Change price of {token} to {price}</React.Fragment>,
+  description: ({ token, price }: ChangePriceData) => (
+    <React.Fragment>
+      Change price of {token} to {price}
+    </React.Fragment>
+  ),
 };
 
 export interface PokeOsmData {
@@ -156,12 +157,10 @@ export interface PokeOsmData {
 }
 
 export const pokeOsm: TransactionDef<PokeOsmData> = {
-  call: ({ token }: PokeOsmData, context: NetworkConfig) =>
-    context.mcd.osms[token].contract.methods.poke,
+  call: ({ token }: PokeOsmData, context: NetworkConfig) => context.mcd.osms[token].contract.methods.poke,
   prepareArgs: () => [],
   kind: TxMetaKind.devPokeOsm,
-  description: ({ token }: PokeOsmData) =>
-    <React.Fragment>Poke osm of {token}</React.Fragment>,
+  description: ({ token }: PokeOsmData) => <React.Fragment>Poke osm of {token}</React.Fragment>,
 };
 
 export interface PokeSpotterData {
@@ -169,17 +168,13 @@ export interface PokeSpotterData {
 }
 
 export const pokeSpotter: TransactionDef<PokeSpotterData> = {
-  call: (_data: PokeOsmData, context: NetworkConfig) =>
-    context.mcd.spot.contract.methods.poke,
-  prepareArgs: ({ token }: PokeOsmData, context: NetworkConfig) => [
-    Web3Utils.asciiToHex(context.mcd.ilks[token]),
-  ],
+  call: (_data: PokeOsmData, context: NetworkConfig) => context.mcd.spot.contract.methods.poke,
+  prepareArgs: ({ token }: PokeOsmData, context: NetworkConfig) => [Web3Utils.asciiToHex(context.mcd.ilks[token])],
   kind: TxMetaKind.devPokeSpotter,
-  description: ({ token }: PokeOsmData) =>
-    <React.Fragment>Poke spotter of {token}</React.Fragment>,
+  description: ({ token }: PokeOsmData) => <React.Fragment>Poke spotter of {token}</React.Fragment>,
 };
 
-export const printOsmInfo = (context: NetworkConfig) => ({ token }: {token: string}) => {
+export const printOsmInfo = (context: NetworkConfig) => ({ token }: { token: string }) => {
   const slotCurrent = 3;
   const slotNext = 4;
 
@@ -193,6 +188,6 @@ export const printOsmInfo = (context: NetworkConfig) => ({ token }: {token: stri
 
       console.log('CURR: ', amountFromWei(curr[1], token).toString(10));
       console.log('NEXT: ', amountFromWei(next[1], token).toString(10));
-    })
+    }),
   );
 };

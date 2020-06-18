@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { storiesOf } from '@storybook/react';
 import * as React from 'react';
 
@@ -60,15 +64,11 @@ const stories = storiesOf('Notification', module);
 stories.add('Approve transfer', () => <Notification {...cancelledByTheUserTx} />);
 
 stories.add('Disapprove transfer', () => (
-  <Notification
-    {...{ ...cancelledByTheUserTx, meta: { ...disapproveWallet, args: { token: 'WETH' } } }}
-  />
+  <Notification {...{ ...cancelledByTheUserTx, meta: { ...disapproveWallet, args: { token: 'WETH' } } }} />
 ));
 
 stories.add('Disapprove transfer (DAI)', () => (
-  <Notification
-    {...{ ...cancelledByTheUserTx, meta: { ...disapproveWallet, args: { token: 'DAI' } } }}
-  />
+  <Notification {...{ ...cancelledByTheUserTx, meta: { ...disapproveWallet, args: { token: 'DAI' } } }} />
 ));
 
 stories.add('Cancel offer', () => (
@@ -81,8 +81,8 @@ stories.add('Cancel offer', () => (
           offerId: zero,
           type: 'buy',
           amount: new BigNumber('1.2345'),
-          token: 'WETH'
-        } as CancelData
+          token: 'WETH',
+        } as CancelData,
       },
     }}
   />
@@ -156,6 +156,4 @@ const failureTx: NotificationProps = {
   blockNumber: 123,
   receipt: {},
 };
-stories.add('Wrap (Failure)', () => (
-  <Notification {...{ ...failureTx, meta: { ...wrap, args: { amount: zero } } }} />
-));
+stories.add('Wrap (Failure)', () => <Notification {...{ ...failureTx, meta: { ...wrap, args: { amount: zero } } }} />);

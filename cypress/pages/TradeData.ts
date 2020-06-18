@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { tid, timeout } from '../utils';
 
 export class TradeData {
@@ -12,5 +16,4 @@ export class TradeData {
   public static expectSlippageLimit(expected: string | RegExp) {
     cy.get(tid('trade-slippage-limit', tid('value')), timeout()).contains(expected);
   }
-
 }

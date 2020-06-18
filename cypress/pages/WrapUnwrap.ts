@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { tid } from '../utils/index';
 
 export const wrapping = (amount: string) => {
@@ -17,7 +21,6 @@ const type = (amount: string) => {
 };
 
 class Assertion {
-
   public static shouldProceed() {
     cy.get(tid('proceed')).click();
   }

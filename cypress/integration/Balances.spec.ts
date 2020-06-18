@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { Balance } from '../pages/Balance';
 import { Tab } from '../pages/Tab';
 import { WalletConnection } from '../pages/WalletConnection';
@@ -5,7 +9,6 @@ import { cypressVisitWithWeb3 } from '../utils/index';
 import { makeScreenshots } from '../utils/makeScreenshots';
 
 describe('Balances', () => {
-
   beforeEach(() => {
     cypressVisitWithWeb3();
     WalletConnection.connect();

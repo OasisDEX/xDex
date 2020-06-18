@@ -1,8 +1,13 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { BigNumber } from 'bignumber.js';
 import classnames from 'classnames';
-import * as mixpanel from 'mixpanel-browser';
 import * as React from 'react';
+import { trackingEvents } from '../../analytics/analytics';
 import { etherscan, EtherscanConfig } from '../../blockchain/etherscan';
+import { OfferType } from '../../exchange/orderbook/orderbook';
 import swapArrowsSvg from '../../icons/swap-arrows.svg';
 import { formatAmountInstant } from '../../utils/formatters/format';
 import { Button } from '../../utils/forms/Buttons';
@@ -20,22 +25,22 @@ import {
   MessageKind,
   ProgressKind,
   TxInProgressMessage,
-  ViewKind
+  ViewKind,
 } from '../instantForm';
 import { InstantFormWrapper } from '../InstantFormWrapper';
 import { Buying, Selling } from '../TradingSide';
 
-const inProgressMessages = new Map<ProgressKind, (msg: TxInProgressMessage) => string>(
+const inProgressMessages = new Map<ProgressKind, (msg: TxInProgressMessage) => string>([
+  [ProgressKind.onlyProxy, (_: TxInProgressMessage) => `Your manual proxy creation is pending...`],
   [
-    [ProgressKind.onlyProxy, (_: TxInProgressMessage) =>
-      `Your manual proxy creation is pending...`],
-    [ProgressKind.onlyAllowance, (msg: TxInProgressMessage) => {
+    ProgressKind.onlyAllowance,
+    (msg: TxInProgressMessage) => {
       const progress = msg.progress as ManualAllowanceProgress;
 
       return `Your ${progress.token.toUpperCase()} ${progress.direction} is pending...`;
-    }]
-  ]
-);
+    },
+  ],
+]);
 
 function error(msg: Message | undefined) {
   if (!msg) {
@@ -47,7 +52,8 @@ function error(msg: Message | undefined) {
       return (
         <>
           You don't have {formatAmountInstant(msg.amount, msg.token)} {msg.token.toUpperCase()} in your wallet
-        </>);
+        </>
+      );
     case MessageKind.dustAmount:
       return (
         <>
@@ -67,40 +73,35 @@ function error(msg: Message | undefined) {
         </>
       );
     case MessageKind.notConnected:
-      return (
-        <>
-          Connect wallet to proceed with order
-        </>
-      );
+      return <>Connect wallet to proceed with order</>;
     case MessageKind.txInProgress:
       let message = 'A transaction is pending...';
       const customize = inProgressMessages.get(msg.progress.kind);
 
       if (customize) {
-        message = customize(msg)
+        message = customize(msg);
       }
 
       const txHash = (msg.progress as { txHash?: string }).txHash;
-      return txHash
-        ? (
-          <a href={etherscan(msg.etherscan || {} as EtherscanConfig).transaction(txHash).url}
-             rel='noreferrer noopener'
-             target='_blank'
-             style={{
-               color: '#80D8FF'
-             }}
-          >
-            {message}
-          </a>
-        )
-        : <> {message} </>
-
+      return txHash ? (
+        <a
+          href={etherscan(msg.etherscan || ({} as EtherscanConfig)).transaction(txHash).url}
+          rel="noreferrer noopener"
+          target="_blank"
+          style={{
+            color: '#80D8FF',
+          }}
+        >
+          {message}
+        </a>
+      ) : (
+        <> {message} </>
+      );
   }
-// tslint:enable
+  // tslint:enable
 }
 
 export class NewTradeView extends React.Component<InstantFormState> {
-
   public render() {
     const {
       sellToken,
@@ -116,18 +117,15 @@ export class NewTradeView extends React.Component<InstantFormState> {
     } = this.props;
 
     return (
-      <InstantFormWrapper heading="Enter Order Details"
-                          btnLabel="Start Transaction"
-                          btnAction={this.startTx}
-                          btnDisabled={!this.props.readyToProceed}
-                          btnDataTestId="initiate-trade"
+      <InstantFormWrapper
+        heading="Enter Order Details"
+        btnLabel="Start Transaction"
+        btnAction={this.startTx}
+        btnDisabled={!this.props.readyToProceed}
+        btnDataTestId="initiate-trade"
       >
         <TopRightCorner>
-          <SettingsIcon
-            disabled={!price}
-            data-test-id="trade-settings"
-            onClick={this.showTradeSettings}
-          />
+          <SettingsIcon disabled={!price} data-test-id="trade-settings" onClick={this.showTradeSettings} />
         </TopRightCorner>
         <TopLeftCorner>
           <AccountIcon
@@ -137,60 +135,51 @@ export class NewTradeView extends React.Component<InstantFormState> {
           />
         </TopLeftCorner>
         <div className={styles.tradeDetails}>
-          {
-            message && message.top
-              ? <TradeDetails.Error dataTestId={'top-error'}
-                                    message={error(message.top)}
-              />
-              : (
-                price
-                  ? <TradeDetails {...this.props}/>
-                  : null
-              )
-          }
+          {message && message.top ? (
+            <TradeDetails.Error dataTestId={'top-error'} message={error(message.top)} />
+          ) : price ? (
+            <TradeDetails {...this.props} />
+          ) : null}
         </div>
         <div className={styles.assets}>
-          <Selling asset={sellToken}
-                   amount={sellAmount}
-                   onAmountChange={this.updateSellingAmount}
-                   change={this.props.change}
-                   balance={
-                     (sellToken === 'ETH' && etherBalance ||
-                       balances && balances[sellToken]) || undefined
-                   }
-                   user={user}
-                   approx={sellAmount && kind === 'buy'}/>
-          <Button data-test-id="swap"
-                  className={
-                    classnames(
-                      styles.swapBtn
-                    )}
-                  disabled={this.props.sellToken === 'SAI'}
-                  onClick={this.swap}>
-            <SvgImage image={swapArrowsSvg}/>
+          <Selling
+            asset={sellToken}
+            amount={sellAmount}
+            onAmountChange={this.updateSellingAmount}
+            change={this.props.change}
+            balance={(sellToken === 'ETH' && etherBalance) || (balances && balances[sellToken]) || undefined}
+            user={user}
+            approx={sellAmount && kind === 'buy'}
+          />
+          <Button
+            data-test-id="swap"
+            className={classnames(styles.swapBtn)}
+            disabled={this.props.sellToken === 'SAI'}
+            onClick={this.swap}
+          >
+            <SvgImage image={swapArrowsSvg} />
           </Button>
-          <Buying asset={buyToken}
-                  amount={buyAmount}
-                  onAmountChange={this.updateBuyingAmount}
-                  change={this.props.change}
-                  balance={
-                    (buyToken === 'ETH' && etherBalance ||
-                      balances && balances[buyToken]) || undefined
-                  }
-                  user={user}
-                  approx={buyAmount && kind === 'sell'}/>
+          <Buying
+            asset={buyToken}
+            amount={buyAmount}
+            onAmountChange={this.updateBuyingAmount}
+            change={this.props.change}
+            balance={(buyToken === 'ETH' && etherBalance) || (balances && balances[buyToken]) || undefined}
+            user={user}
+            approx={buyAmount && kind === 'sell'}
+          />
         </div>
-        <div data-test-id="bottom-error"
-             className={classnames(
-               message && message.bottom &&
-               (message.bottom.kind === MessageKind.notConnected
-                 || message.bottom.kind === MessageKind.txInProgress)
-                 ? styles.warnings
-                 : styles.errors,
-               message && message.bottom
-                 ? ''
-                 : styles.hidden,
-             )}>
+        <div
+          data-test-id="bottom-error"
+          className={classnames(
+            message &&
+              message.bottom &&
+              (message.bottom.kind === MessageKind.notConnected || message.bottom.kind === MessageKind.txInProgress)
+              ? styles.warnings
+              : styles.errors,
+            message && message.bottom ? '' : styles.hidden,
+          )}
+        >
           {message && message.bottom && error(message.bottom)}
         </div>
       </InstantFormWrapper>
@@ -203,23 +192,23 @@ export class NewTradeView extends React.Component<InstantFormState> {
       buyToken: this.props.sellToken,
       sellToken: this.props.buyToken,
     });
-  }
+  };
 
   private updateSellingAmount = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/,/g, '');
     this.props.change({
       kind: InstantFormChangeKind.sellAmountFieldChange,
-      value: value === '' ? undefined : new BigNumber(value)
+      value: value === '' ? undefined : new BigNumber(value),
     } as ManualChange);
-  }
+  };
 
   private updateBuyingAmount = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/,/g, '');
     this.props.change({
       kind: InstantFormChangeKind.buyAmountFieldChange,
-      value: value === '' ? undefined : new BigNumber(value)
+      value: value === '' ? undefined : new BigNumber(value),
     } as ManualChange);
-  }
+  };
 
   private startTx = () => {
     const priceImpact = this.props.priceImpact;
@@ -227,36 +216,35 @@ export class NewTradeView extends React.Component<InstantFormState> {
     if (priceImpact && priceImpact.gt(new BigNumber(5))) {
       this.props.change({
         kind: InstantFormChangeKind.viewChange,
-        view: ViewKind.priceImpactWarning
+        view: ViewKind.priceImpactWarning,
       });
     } else {
-      mixpanel.track('btn-click', {
-        id: 'initiate-trade',
-        product: 'oasis-trade',
-        page: 'Instant',
-        section: 'order-details'
-      });
+      const { kind, quotation, buyAmount, sellAmount } = this.props;
+      const amount = kind === OfferType.buy ? sellAmount : buyAmount;
+      if (kind && amount && quotation) {
+        trackingEvents.initiateTradeInstant(kind, amount.toNumber(), quotation.replace('/', ''));
+      }
       this.props.submit(this.props);
       this.props.change({
         kind: InstantFormChangeKind.viewChange,
-        view: ViewKind.finalization
+        view: ViewKind.finalization,
       });
     }
-  }
+  };
 
   // @ts-ignore
   private showAccountSettings = () => {
     this.props.change({
       kind: InstantFormChangeKind.viewChange,
-      view: ViewKind.account
+      view: ViewKind.account,
     });
-  }
+  };
 
   // @ts-ignore
   private showTradeSettings = () => {
     this.props.change({
       kind: InstantFormChangeKind.viewChange,
-      view: ViewKind.settings
+      view: ViewKind.settings,
     });
-  }
+  };
 }

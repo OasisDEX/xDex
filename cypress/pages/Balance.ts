@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { tid } from '../utils/index';
 
 export class Balance {
@@ -12,5 +16,5 @@ export class Balance {
         });
       },
     };
-  }
+  };
 }

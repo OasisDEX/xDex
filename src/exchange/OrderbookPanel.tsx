@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import React, { useContext } from 'react';
 import { Observable } from 'rxjs';
 import { useObservable } from '../utils/observableHook';
@@ -12,7 +16,7 @@ import { OrderbookViewHooked } from '../exchange/orderbook/OrderbookView';
 
 export enum OrderbookViewKind {
   depthChart = 'depthChart',
-  list = 'list'
+  list = 'list',
 }
 
 export interface OrderbookPanelProps {
@@ -20,15 +24,15 @@ export interface OrderbookPanelProps {
 }
 
 export interface SubViewsProps {
-  DepthChartWithLoading : React.ComponentType;
+  DepthChartWithLoading: React.ComponentType;
   OrderbookView: React.ComponentType;
 }
 
 export const OrderbookPanel = (props: OrderbookPanelProps & SubViewsProps) => {
   if (props.kind === OrderbookViewKind.depthChart) {
-    return (<props.DepthChartWithLoading/>);
+    return <props.DepthChartWithLoading />;
   }
-  return (<props.OrderbookView/>);
+  return <props.OrderbookView />;
 };
 
 export const OrderbookHooked = () => {
@@ -37,27 +41,22 @@ export const OrderbookHooked = () => {
 
   if (!state) return null;
 
-  const Wrapper = inject<OrderbookPanelProps, SubViewsProps>(
-    OrderbookPanel, {
-      DepthChartWithLoading: DepthChartWithLoadingHooked,
-      OrderbookView: OrderbookViewHooked
-    }
-  );
+  const Wrapper = inject<OrderbookPanelProps, SubViewsProps>(OrderbookPanel, {
+    DepthChartWithLoading: DepthChartWithLoadingHooked,
+    OrderbookView: OrderbookViewHooked,
+  });
 
-  return <Wrapper {...state}/>;
+  return <Wrapper {...state} />;
 };
 
-export function createOrderbookPanel$(): [
-  (kind: OrderbookViewKind) => void,
-  Observable<OrderbookPanelProps>
-] {
+export function createOrderbookPanel$(): [(kind: OrderbookViewKind) => void, Observable<OrderbookPanelProps>] {
   const kind$ = new BehaviorSubject(OrderbookViewKind.list);
   return [
     kind$.next.bind(kind$),
     kind$.pipe(
-      map(kind => ({
+      map((kind) => ({
         kind,
-      }))
-    )
+      })),
+    ),
   ];
 }

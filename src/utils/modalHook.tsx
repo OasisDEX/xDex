@@ -1,7 +1,9 @@
 import React, { useContext, useState } from 'react';
 import * as ReactDOM from 'react-dom';
 
-export interface ModalProps { close: () => void; }
+export interface ModalProps {
+  close: () => void;
+}
 export type Modal = React.FunctionComponent<ModalProps>;
 export type ModalOpener = (modal: Modal) => void;
 
@@ -10,15 +12,16 @@ const ModalContext = React.createContext<ModalOpener>(() => {
 });
 
 export function SetupModal(props: { children?: React.ReactNode }) {
-
   const [TheModal, setModal] = useState<Modal>();
 
-  function close() { setModal(undefined); }
+  function close() {
+    setModal(undefined);
+  }
 
   return (
     <ModalContext.Provider value={(modal: Modal) => setModal(() => modal)}>
       {props.children}
-      {TheModal && ReactDOM.createPortal(<TheModal {...{  close }}/>, document.body)}
+      {TheModal && ReactDOM.createPortal(<TheModal {...{ close }} />, document.body)}
     </ModalContext.Provider>
   );
 }

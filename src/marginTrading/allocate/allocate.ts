@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { BigNumber } from 'bignumber.js';
 import { Observable } from 'rxjs';
 import { Calls } from '../../blockchain/calls/calls';
@@ -37,9 +41,5 @@ export interface DebtDelta {
 
 export function hintLast(temporaryHint?: string) {
   return (a1: AllocationRequestAssetInfo, a2: AllocationRequestAssetInfo) =>
-    a1.name === temporaryHint ?
-      -1 :
-      a1 === a2 ?
-        0 :
-        a1 > a2 ? -1 : 1;
+    a1.name === temporaryHint ? -1 : a1 === a2 ? 0 : a1 > a2 ? -1 : 1;
 }

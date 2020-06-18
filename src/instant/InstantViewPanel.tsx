@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import classnames from 'classnames';
 import * as React from 'react';
 import { theAppContext } from '../AppContext';
@@ -28,19 +32,18 @@ const views: Record<ViewKind, React.ComponentType<InstantFormState>> = {
 };
 
 export class InstantViewPanel extends React.Component<Loadable<InstantFormState>> {
-
   public render() {
     const { status, value } = this.props;
 
     if (status === 'loaded') {
       const formState = value as InstantFormState;
       const View = views[formState.view];
-      return (<View {...formState}/>);
+      return <View {...formState} />;
     }
 
     return (
       <section className={classnames(styles.panel, panelStyling.panel)}>
-        <LoadingIndicator/>
+        <LoadingIndicator />
       </section>
     );
   }
@@ -48,12 +51,6 @@ export class InstantViewPanel extends React.Component<Loadable<InstantFormState>
 
 export class InstantExchange extends React.Component<any> {
   public render() {
-    return (
-      <theAppContext.Consumer>
-        {({ InstantTxRx }) =>
-          <InstantTxRx/>
-        }
-      </theAppContext.Consumer>
-    );
+    return <theAppContext.Consumer>{({ InstantTxRx }) => <InstantTxRx />}</theAppContext.Consumer>;
   }
 }

@@ -1,8 +1,12 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { tid } from '../utils';
 
 export enum ProxyStatus {
   ENABLED = 'connected',
-  MISSING = 'missing'
+  MISSING = 'missing',
 }
 
 export const settings = () => cy.get(tid('account-settings'));
@@ -18,10 +22,11 @@ export const hasStatus = (status: ProxyStatus) => {
   }
 };
 
-export const  create = () => {
+export const create = () => {
   cy.get(tid('create-proxy')).click();
 };
 
-export const  clear = () => cy.window().then((win: any) => {
-  win.removeProxy();
-});
+export const clear = () =>
+  cy.window().then((win: any) => {
+    win.removeProxy();
+  });

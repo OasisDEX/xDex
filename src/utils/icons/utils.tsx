@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import * as React from 'react';
 
 interface SvgImageProps extends React.HTMLAttributes<HTMLSpanElement> {
@@ -5,8 +9,7 @@ interface SvgImageProps extends React.HTMLAttributes<HTMLSpanElement> {
 }
 
 export function SvgImage({ image, ...props }: SvgImageProps) {
-  return <span style={{ fontSize: '0' }}
-               dangerouslySetInnerHTML={{ __html: loadDataUrl(image) }} {...props} />;
+  return <span style={{ fontSize: '0' }} dangerouslySetInnerHTML={{ __html: loadDataUrl(image) }} {...props} />;
 }
 
 export function SvgImageSimple(image: string) {

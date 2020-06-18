@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { storiesOf } from '@storybook/react';
 import { BigNumber } from 'bignumber.js';
 import * as React from 'react';
@@ -69,37 +73,24 @@ const sampleTrades = [
 
 stories.add('Not logged in', () => (
   <Panel>
-    <MyTrades
-      {...defaultProps}
-      authorized={false}
-    />
+    <MyTrades {...defaultProps} authorized={false} />
   </Panel>
 ));
 
 stories.add('Empty open', () => (
   <Panel>
-    <MyTrades
-      {...defaultProps}
-      value={{ ...defaultProps.value, value: [] }}
-    />
+    <MyTrades {...defaultProps} value={{ ...defaultProps.value, value: [] }} />
   </Panel>
 ));
 
 stories.add('Open with sample trades', () => (
   <Panel style={{ width: '936px' }}>
-    <MyTrades
-      {...defaultProps}
-      value={{ ...defaultProps.value, value: sampleTrades }}
-    />
+    <MyTrades {...defaultProps} value={{ ...defaultProps.value, value: sampleTrades }} />
   </Panel>
 ));
 
 stories.add('Close with sample trades', () => (
   <Panel style={{ width: '936px' }}>
-    <MyTrades
-      {...defaultProps}
-      kind={MyTradesKind.closed}
-      value={{ ...defaultProps.value, value: sampleTrades }}
-    />
+    <MyTrades {...defaultProps} kind={MyTradesKind.closed} value={{ ...defaultProps.value, value: sampleTrades }} />
   </Panel>
 ));

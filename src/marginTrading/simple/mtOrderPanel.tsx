@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import * as React from 'react';
 import { Link } from 'react-router-dom';
 import { AssetKind, getToken, tradingPairs } from '../../blockchain/config';
@@ -16,37 +20,32 @@ export interface MTSimpleOrderPanelProps {
 }
 
 export class MTSimpleOrderPanel extends React.Component<
-  LoadableWithTradingPair<MTSimpleFormState>
-  & MTSimpleOrderPanelProps
-  & ModalOpenerProps
+  LoadableWithTradingPair<MTSimpleFormState> & MTSimpleOrderPanelProps & ModalOpenerProps
 > {
   public render() {
     if (
       getToken(this.props.tradingPair.base).assetKind !== AssetKind.marginable ||
       this.props.tradingPair.quote !== 'DAI'
     ) {
-      const marginablePairs = tradingPairs
-        .filter(
-          ({ base, quote }) => getToken(base).assetKind === AssetKind.marginable && quote === 'DAI'
-        );
+      const marginablePairs = tradingPairs.filter(
+        ({ base, quote }) => getToken(base).assetKind === AssetKind.marginable && quote === 'DAI',
+      );
 
       return (
         <>
-          <PanelHeader>Manage Your Leverage</PanelHeader>
-          <PanelBody  className={styles.orderPanel}>
-            Leverage trading is enabled only on following markets:
+          <PanelHeader>Manage Your Position</PanelHeader>
+          <PanelBody className={styles.orderPanel}>
+            Multiply trading is enabled only on following markets:
             {marginablePairs.map(({ base, quote }) => (
               <routerContext.Consumer key={base}>
-                {({ rootUrl }) =>
+                {({ rootUrl }) => (
                   <>
                     {marginablePairs.length > 1 && <>, </>}
-                    <Link
-                      to={`${rootUrl}leverage/${base}/${quote}`}
-                      style={{ whiteSpace: 'nowrap' }}>
+                    <Link to={`${rootUrl}multiply/${base}/${quote}`} style={{ whiteSpace: 'nowrap' }}>
                       {base}
                     </Link>
                   </>
-                }
+                )}
               </routerContext.Consumer>
             ))}
           </PanelBody>
@@ -56,12 +55,14 @@ export class MTSimpleOrderPanel extends React.Component<
 
     if (this.props.status === 'loaded' && this.props.value && this.props.value.mta) {
       const formState = this.props.value;
-      return (<MtSimpleOrderFormView {...{ ...this.props, ...formState }} />);
+      return <MtSimpleOrderFormView {...{ ...this.props, ...formState }} />;
     }
 
-    return <div className={styles.orderPanel}>
-      <PanelHeader  style={{ width: '100%' }}>Manage Your Leverage</PanelHeader>
-      <LoadingIndicator size="lg"/>
-    </div>;
+    return (
+      <div className={styles.orderPanel}>
+        <PanelHeader style={{ width: '100%' }}>Manage Your Position</PanelHeader>
+        <LoadingIndicator size="lg" />
+      </div>
+    );
   }
 }

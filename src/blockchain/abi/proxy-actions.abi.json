@@ -27,7 +27,7 @@
         "type": "uint256"
       }
     ],
-    "name": "BuyLev",
+    "name": "Buy",
     "type": "event"
   },
   {
@@ -203,7 +203,7 @@
         "type": "uint256"
       }
     ],
-    "name": "SellLev",
+    "name": "Sell",
     "type": "event"
   },
   {
@@ -271,9 +271,9 @@
     "constant": false,
     "inputs": [
       {
-        "internalType": "address[7]",
+        "internalType": "address[8]",
         "name": "contracts",
-        "type": "address[7]"
+        "type": "address[8]"
       },
       {
         "internalType": "bytes32",
@@ -291,7 +291,7 @@
         "type": "uint256"
       }
     ],
-    "name": "buyLev",
+    "name": "buy",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
@@ -323,6 +323,11 @@
       {
         "internalType": "address",
         "name": "vat",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "jug",
         "type": "address"
       }
     ],
@@ -530,11 +535,6 @@
         "internalType": "uint256",
         "name": "amount",
         "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "adapter",
-        "type": "address"
       }
     ],
     "name": "redeem",
@@ -567,7 +567,7 @@
         "type": "uint256"
       }
     ],
-    "name": "sellLev",
+    "name": "sell",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",

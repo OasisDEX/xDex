@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import * as React from 'react';
 
 import { User } from '../../blockchain/user';
@@ -12,7 +16,9 @@ interface AuthorizationProps<T> {
 }
 
 export function Authorization<T>({ authorizable, children, view }: AuthorizationProps<T>) {
-  return <Gate isOpen={authorizable.authorized} closed={<LoggedOut view={view}/>}>
-    { children(authorizable.value as T, authorizable.user as User) }
-    </Gate>;
+  return (
+    <Gate isOpen={authorizable.authorized} closed={<LoggedOut view={view} />}>
+      {children(authorizable.value as T, authorizable.user as User)}
+    </Gate>
+  );
 }

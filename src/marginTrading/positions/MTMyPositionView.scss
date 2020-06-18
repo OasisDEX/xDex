@@ -1,3 +1,7 @@
+/*!
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 @import "../../utils/Variables";
 
 .MTPositionPanel {
@@ -76,11 +80,25 @@
   font-size: 13px;
 }
 
+.messagesWrapper {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: stretch;
+  align-content: stretch;
+
+  &:last-child {
+    margin-bottom: 25px;
+  }
+}
+
 .message {
+  width: 100%;
   display: flex;
   border-radius: 4px;
   padding: 20px;
-  margin: 25px 20px;
+  margin: 10px 20px;
   font-size: 14px;
   line-height: 22px;
 
@@ -91,7 +109,6 @@
 
   span {
     align-self: center;
-    flex-grow: 1;
   }
 
   .redeemButton {
@@ -105,11 +122,12 @@
 .infoMessage {
   @extend .message;
 
-  color: #828288;
+  color: $grey-light-mid;
+  background: white;
   border: 1px solid $another-light-grayish-blue-3;
 }
 
-.warningMessage {
+.dangerMessage {
   @extend .message;
 
   width: 100%;
@@ -118,13 +136,23 @@
   background: $light-grayish-red;
 }
 
+.warningMessage {
+  @extend .message;
+
+  width: 100%;
+  color: $warning-color;
+  border: 1px solid $warning-border;
+  background: $warning-background;
+}
+
 .warningText {
   margin-left: 10px;
+  flex-grow: 1;
 }
 
 .redeemButton {
   &:disabled {
-    color: #58585F !important;
+    color: $grey-light !important;
   }
 
   .buttonLoading {

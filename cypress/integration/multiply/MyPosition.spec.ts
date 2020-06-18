@@ -1,21 +1,23 @@
-import { Account } from '../../pages/leverage/Account';
-import { Modal } from '../../pages/leverage/Modal';
-import { Position } from '../../pages/leverage/Position';
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
+import { Account } from '../../pages/multiply/Account';
+import { Modal } from '../../pages/multiply/Modal';
+import { Position } from '../../pages/multiply/Position';
 import { Tab } from '../../pages/Tab';
 import { WalletConnection } from '../../pages/WalletConnection';
 import { cypressVisitWithWeb3 } from '../../utils';
 
 describe('My Position panel', () => {
-
   beforeEach(() => {
     cypressVisitWithWeb3();
     WalletConnection.connect();
     WalletConnection.isConnected();
-    Tab.leverage();
+    Tab.multiply();
   });
 
   context('with proxy and DAI allowance', () => {
-
     beforeEach(() => {
       Modal.open(Position.new('DAI'));
       Account.setupProxy();

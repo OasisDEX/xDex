@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { clear, create, hasStatus, ProxyStatus, settings } from '../../pages/Proxy';
 import { Tab } from '../../pages/Tab';
 import { instantForm } from '../../pages/Trade';

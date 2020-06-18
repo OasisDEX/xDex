@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { BigNumber } from 'bignumber.js';
 import { omit } from 'lodash';
 import { of } from 'rxjs';
@@ -10,12 +14,7 @@ import { unpack } from '../../utils/testHelpers';
 import { noCash, wethEmpty } from '../plan/planFixtures';
 import { CashAssetCore, MTAccount } from '../state/mtAccount';
 import { getMTAccount } from '../state/mtTestUtils';
-import {
-  createMTSimpleOrderForm$,
-  ExternalChangeKind,
-  MessageKind,
-  MTSimpleOrderFormParams
-} from './mtOrderForm';
+import { createMTSimpleOrderForm$, ExternalChangeKind, MessageKind, MTSimpleOrderFormParams } from './mtOrderForm';
 setupFakeWeb3ForTesting();
 
 function snapshotify(object: any): any {
@@ -29,8 +28,7 @@ const defaultCalls = {
   mtSellEstimateGas: () => of(30),
 } as any;
 
-const defaultReadCalls = {
-} as any;
+const defaultReadCalls = {} as any;
 
 const defaultUser = '0x1234';
 
@@ -44,26 +42,24 @@ const defParams = {
   readCalls$: of(defaultReadCalls) as ReadCalls$,
   dustLimits$: of({ DAI: new BigNumber(0.1), WETH: new BigNumber(0.1) }),
   account$: of(defaultUser),
-  riskComplianceCheck$: of(true)
+  riskComplianceCheck$: of(true),
 };
 
-const controllerWithFakeOrderBook = (
-  buys: any = [], sells: any = [], mta: MTAccount = mtaEmpty
-) => {
+const controllerWithFakeOrderBook = (buys: any = [], sells: any = [], mta: MTAccount = mtaEmpty) => {
   const orderbook = createFakeOrderbook(buys, sells);
-  orderbook.buy.forEach((v, i) => v.offerId = new BigNumber(i + 1));
-  orderbook.sell.forEach((v, i) => v.offerId = new BigNumber(i + 1));
+  orderbook.buy.forEach((v, i) => (v.offerId = new BigNumber(i + 1)));
+  orderbook.sell.forEach((v, i) => (v.offerId = new BigNumber(i + 1)));
   return createMTSimpleOrderForm$(
     {
       ...defParams,
       orderbook$: of(orderbook),
       mta$: of(mta),
     } as MTSimpleOrderFormParams,
-    tradingPair
+    tradingPair,
   );
 };
 
-test('initial state', done => {
+test('initial state', (done) => {
   // const controller = createMTSimpleOrderForm$(defParams, tradingPair);
   const sells = [
     { price: 1, amount: 3 }, // 1
@@ -72,7 +68,7 @@ test('initial state', done => {
     { price: 5, amount: 4 }, // 4
   ];
   const controller = controllerWithFakeOrderBook([], sells);
-  controller.subscribe(state => {
+  controller.subscribe((state) => {
     expect(snapshotify(state)).toMatchSnapshot();
     done();
   });
@@ -91,7 +87,7 @@ test('set price and amount', () => {
   change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(1) });
   change({
     kind: ExternalChangeKind.riskCompliance,
-    hasRiskAccepted: true
+    hasRiskAccepted: true,
   });
 
   expect(unpack(controller).amount).toEqual(new BigNumber(1));
@@ -109,7 +105,7 @@ test('calculate position in order book for buy', () => {
     { price: 2, amount: 4 }, // 4
     { price: 1, amount: 4 }, // 5
   ];
-  const  controller = controllerWithFakeOrderBook(buys);
+  const controller = controllerWithFakeOrderBook(buys);
   expect(unpack(controller).amount).toBeUndefined();
   expect(unpack(controller).total).toBeUndefined();
 
@@ -146,7 +142,7 @@ test('calculate position in orderbook for sell', () => {
   expect(unpack(controller).total).toEqual(new BigNumber(3));
 });
 
-test('buy with leverage - match exactly one order', () => {
+test('buy with multiple - match exactly one order', () => {
   const cash: CashAssetCore = {
     ...noCash,
   };
@@ -155,7 +151,7 @@ test('buy with leverage - match exactly one order', () => {
     referencePrice: new BigNumber(1),
     balance: new BigNumber(0),
     debt: new BigNumber(0),
-    dai: new BigNumber(100)
+    dai: new BigNumber(100),
   };
 
   const mta: MTAccount = getMTAccount({ cash, marginableAssets: [weth] });
@@ -173,18 +169,18 @@ test('buy with leverage - match exactly one order', () => {
   change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(20) });
   change({
     kind: ExternalChangeKind.riskCompliance,
-    hasRiskAccepted: true
+    hasRiskAccepted: true,
   });
   expect(unpack(controller).readyToProceed).toEqual(true);
   expect(unpack(controller).realPurchasingPowerPost).toEqual(new BigNumber(179.98779296875));
 });
 
-test('buy with leverage - match more than one order', () => {
+test('buy with multiple - match more than one order', () => {
   const weth = {
     ...wethEmpty,
     referencePrice: new BigNumber(10),
     balance: new BigNumber(30),
-    debt: new BigNumber(0)
+    debt: new BigNumber(0),
   };
 
   const mta: MTAccount = getMTAccount({ marginableAssets: [weth] });
@@ -202,21 +198,18 @@ test('buy with leverage - match more than one order', () => {
 
   const s = unpack(controller);
   expect(s.readyToProceed).toEqual(true);
-  expect(s.realPurchasingPowerPost.toFixed(0))
-    .toEqual(new BigNumber('275').toFixed());
+  expect(s.realPurchasingPowerPost.toFixed(0)).toEqual(new BigNumber('275').toFixed());
 });
 
-test('buy with leverage - purchasing power too low', () => {
+test('buy with multiple - purchasing power too low', () => {
   const weth = {
     ...wethEmpty,
     referencePrice: new BigNumber('100'),
     balance: new BigNumber('2'),
-    debt: new BigNumber('0')
+    debt: new BigNumber('0'),
   };
   const mta: MTAccount = getMTAccount({ marginableAssets: [weth] });
-  const sells = [
-    { price: 100, amount: 100 }
-  ];
+  const sells = [{ price: 100, amount: 100 }];
 
   const controller = controllerWithFakeOrderBook([], sells, mta);
   const { change } = unpack(controller);
@@ -226,17 +219,15 @@ test('buy with leverage - purchasing power too low', () => {
   expect(unpack(controller).messages[0].kind).toEqual(MessageKind.insufficientAmount);
 });
 
-test('buy with leverage - orderbook too shallow', () => {
+test('buy with multiple - orderbook too shallow', () => {
   const weth = {
     ...wethEmpty,
     referencePrice: new BigNumber('1'),
     balance: new BigNumber('20'),
-    debt: new BigNumber('0')
+    debt: new BigNumber('0'),
   };
   const mta: MTAccount = getMTAccount({ marginableAssets: [weth] });
-  const sells = [
-    { price: 1, amount: 10 }
-  ];
+  const sells = [{ price: 1, amount: 10 }];
 
   const controller = controllerWithFakeOrderBook([], sells, mta);
   const { change } = unpack(controller);
@@ -246,7 +237,7 @@ test('buy with leverage - orderbook too shallow', () => {
   expect(unpack(controller).messages[0].message).toEqual('orderbook too shallow');
 });
 
-test('buy with leverage - collateral and cash', () => {
+test('buy with multiple - collateral and cash', () => {
   const weth = {
     ...wethEmpty,
     referencePrice: new BigNumber(100),
@@ -255,19 +246,17 @@ test('buy with leverage - collateral and cash', () => {
     dai: new BigNumber(500),
   };
   const mta: MTAccount = getMTAccount({ marginableAssets: [weth] });
-  const sells = [
-    { price: 100, amount: 20 }
-  ];
+  const sells = [{ price: 100, amount: 20 }];
 
   const controller = controllerWithFakeOrderBook([], sells, mta);
   const { change } = unpack(controller);
 
-  expect(unpack(controller).leverage).toEqual(new BigNumber(1));
+  expect(unpack(controller).multiple).toEqual(new BigNumber(1));
   change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(14.98) });
-  expect(unpack(controller).leveragePost).toEqual(new BigNumber(1.499));
+  expect(unpack(controller).multiplePost).toEqual(new BigNumber(1.499));
 });
 
-test('buy with leverage - cash only', () => {
+test('buy with multiple - cash only', () => {
   const weth = {
     ...wethEmpty,
     referencePrice: new BigNumber(100),
@@ -276,13 +265,114 @@ test('buy with leverage - cash only', () => {
     dai: new BigNumber(1000),
   };
   const mta: MTAccount = getMTAccount({ marginableAssets: [weth] });
-  const sells = [
-    { price: 100, amount: 20 }
-  ];
+  const sells = [{ price: 100, amount: 20 }];
 
   const controller = controllerWithFakeOrderBook([], sells, mta);
   const { change } = unpack(controller);
 
   change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(15) });
-  expect(unpack(controller).leveragePost).toEqual(new BigNumber(1.5));
+  expect(unpack(controller).multiplePost).toEqual(new BigNumber(1.5));
+});
+
+test('buy with multiple - add more to actual debt', () => {
+  const weth = {
+    ...wethEmpty,
+    referencePrice: new BigNumber(100),
+    balance: new BigNumber(10),
+    debt: new BigNumber(200),
+    dai: new BigNumber(10).div(10e18),
+  };
+  const mta: MTAccount = getMTAccount({ marginableAssets: [weth] });
+  const sells = [{ price: 100, amount: 20 }];
+
+  const controller = controllerWithFakeOrderBook([], sells, mta);
+  const { change } = unpack(controller);
+
+  change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(5) });
+
+  expect(unpack(controller).multiplePost).toEqual(new BigNumber(1.875));
+});
+
+// Below happens with the current OTC contract. Dusty amount of dai may rest in urn after
+// an OTC transaction during buy/sell procedure.
+test('buy with multiple - with debt and dusty dai balance (edge case)', () => {
+  const weth = {
+    ...wethEmpty,
+    referencePrice: new BigNumber(100),
+    balance: new BigNumber(10),
+    debt: new BigNumber(200),
+    dai: new BigNumber(10).div(10e18),
+  };
+  const mta: MTAccount = getMTAccount({ marginableAssets: [weth] });
+  const sells = [{ price: 100, amount: 20 }];
+
+  const controller = controllerWithFakeOrderBook([], sells, mta);
+  const { change } = unpack(controller);
+
+  change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(5) });
+
+  expect(unpack(controller).multiplePost).toEqual(new BigNumber(1.875));
+});
+
+test('sell multiple - partial debt repayment', () => {
+  const weth = {
+    ...wethEmpty,
+    referencePrice: new BigNumber(100),
+    balance: new BigNumber(10),
+    debt: new BigNumber(200),
+    dai: new BigNumber(0),
+  };
+  const mta: MTAccount = getMTAccount({ marginableAssets: [weth] });
+  const buys = [{ price: 100, amount: 200 }];
+
+  const controller = controllerWithFakeOrderBook(buys, [], mta);
+  const { change } = unpack(controller);
+
+  change({ kind: FormChangeKind.kindChange, newKind: OfferType.sell });
+  change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(1) });
+
+  expect(unpack(controller).multiplePost).toEqual(new BigNumber(1.125));
+  expect(unpack(controller).daiBalancePost).toEqual(new BigNumber(-100));
+});
+
+test('sell multiple - full debt repayment', () => {
+  const weth = {
+    ...wethEmpty,
+    referencePrice: new BigNumber(100),
+    balance: new BigNumber(10),
+    debt: new BigNumber(200),
+    dai: new BigNumber(0),
+  };
+  const mta: MTAccount = getMTAccount({ marginableAssets: [weth] });
+  const buys = [{ price: 100, amount: 200 }];
+
+  const controller = controllerWithFakeOrderBook(buys, [], mta);
+  const { change } = unpack(controller);
+
+  change({ kind: FormChangeKind.kindChange, newKind: OfferType.sell });
+  change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(2) });
+
+  expect(unpack(controller).multiplePost).toEqual(new BigNumber(1));
+  expect(unpack(controller).daiBalancePost).toEqual(new BigNumber(0));
+});
+
+test('sell without multiple', () => {
+  const weth = {
+    ...wethEmpty,
+    referencePrice: new BigNumber(100),
+    balance: new BigNumber(10),
+    debt: new BigNumber(0),
+    dai: new BigNumber(0),
+  };
+  const mta: MTAccount = getMTAccount({ marginableAssets: [weth] });
+  const buys = [{ price: 100, amount: 200 }];
+
+  const controller = controllerWithFakeOrderBook(buys, [], mta);
+  const { change } = unpack(controller);
+
+  change({ kind: FormChangeKind.kindChange, newKind: OfferType.sell });
+  change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(2) });
+
+  expect(unpack(controller).multiplePost).toEqual(new BigNumber(1));
+  expect(unpack(controller).daiBalancePost).toEqual(new BigNumber(200));
 });

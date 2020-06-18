@@ -1,17 +1,21 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { Observable, Subscription } from 'rxjs';
 
 export function inductor<T>(seed: T, next: (p: T) => Observable<T> | undefined): Observable<T> {
-  return new Observable<T>(s => {
+  return new Observable<T>((s) => {
     let last: T;
     let child: Subscription;
 
     const switchTo = (o: Observable<T>) => {
       child = o.subscribe({
-        next: v => {
+        next: (v) => {
           last = v;
           s.next(v);
         },
-        error: err => s.error(err),
+        error: (err) => s.error(err),
         complete: () => {
           if (child) {
             child.unsubscribe();
@@ -22,7 +26,7 @@ export function inductor<T>(seed: T, next: (p: T) => Observable<T> | undefined):
           } else {
             switchTo(nextObservable);
           }
-        }
+        },
       });
     };
 

@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { BigNumber } from 'bignumber.js';
 import classnames from 'classnames';
 import * as React from 'react';
@@ -6,8 +10,8 @@ import { formatAmountInstant } from '../utils/formatters/format';
 import * as styles from './Instant.scss';
 
 export class CurrentPrice extends React.Component<{
-  price?: BigNumber,
-  quotation?: string
+  price?: BigNumber;
+  quotation?: string;
 }> {
   public render() {
     const { price, quotation } = this.props;

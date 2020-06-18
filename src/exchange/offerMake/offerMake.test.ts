@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { BigNumber } from 'bignumber.js';
 import { omit } from 'lodash';
 import { of } from 'rxjs';
@@ -42,20 +46,20 @@ const defParams = {
 
 const controllerWithFakeOrderBook = (buys: any = [], sells: any = []) => {
   const orderbook = createFakeOrderbook(buys, sells);
-  orderbook.buy.forEach((v, i) => v.offerId = new BigNumber(i + 1));
-  orderbook.sell.forEach((v, i) => v.offerId = new BigNumber(i + 1));
+  orderbook.buy.forEach((v, i) => (v.offerId = new BigNumber(i + 1)));
+  orderbook.sell.forEach((v, i) => (v.offerId = new BigNumber(i + 1)));
   return createFormController$(
     {
       ...defParams,
       orderbook$: of(orderbook),
     },
-    tradingPair
+    tradingPair,
   );
 };
 
-test('initial state', done => {
+test('initial state', (done) => {
   const controller = createFormController$(defParams, tradingPair);
-  controller.subscribe(state => {
+  controller.subscribe((state) => {
     expect(snapshotify(state)).toMatchSnapshot();
     done();
   });
@@ -80,9 +84,7 @@ test('set price and amount', () => {
 });
 
 test('estimate gas calculation', () => {
-
-  const estimateGasMock = jest.fn(() => of(new BigNumber(20)))
-    .mockName('offerMakeEstimateGas');
+  const estimateGasMock = jest.fn(() => of(new BigNumber(20))).mockName('offerMakeEstimateGas');
 
   const controller = createFormController$(
     {
@@ -90,9 +92,9 @@ test('estimate gas calculation', () => {
       calls$: of({
         ...defaultCalls,
         offerMakeEstimateGas: estimateGasMock,
-      })
+      }),
     },
-    tradingPair
+    tradingPair,
   );
 
   const { change } = unpack(controller);
@@ -130,7 +132,6 @@ test('estimate gas calculation', () => {
     gasPrice: new BigNumber(0.01),
     position: undefined,
   });
-
 });
 
 test('calculate position in order book for buy', () => {
@@ -141,7 +142,7 @@ test('calculate position in order book for buy', () => {
     { price: 2, amount: 4 }, // 4
     { price: 1, amount: 4 }, // 5
   ];
-  const  controller = controllerWithFakeOrderBook(buys);
+  const controller = controllerWithFakeOrderBook(buys);
   const { change } = unpack(controller);
   expect(unpack(controller).position).toBeUndefined();
 
@@ -199,25 +200,27 @@ test('calculate position in orderbook for sell', () => {
 
   change({ kind: FormChangeKind.priceFieldChange, value: new BigNumber(1.3) });
   expect(unpack(controller).position).toEqual(new BigNumber(2));
-
 });
 
 test('click buy button', () => {
-  const offerMakeMock = jest.fn(
-    () => of({
-      status: TxStatus.WaitingForApproval
-    } as TxState),
-  ).mockName('offerMake');
+  const offerMakeMock = jest
+    .fn(() =>
+      of({
+        status: TxStatus.WaitingForApproval,
+      } as TxState),
+    )
+    .mockName('offerMake');
 
   const controller = createFormController$(
     {
       ...defParams,
       calls$: of({
         ...defaultCalls,
-        offerMake: offerMakeMock
+        offerMake: offerMakeMock,
       }),
     },
-    tradingPair);
+    tradingPair,
+  );
 
   const { change } = unpack(controller);
 
@@ -243,10 +246,13 @@ test('click buy button', () => {
 });
 
 test('click sell button...', () => {
-  const offerMakeMock = jest.fn(() => of({
-      status: TxStatus.WaitingForApproval
-    } as TxState),
-  ).mockName('offerMake');
+  const offerMakeMock = jest
+    .fn(() =>
+      of({
+        status: TxStatus.WaitingForApproval,
+      } as TxState),
+    )
+    .mockName('offerMake');
   const controller = createFormController$(
     {
       ...defParams,
@@ -255,7 +261,8 @@ test('click sell button...', () => {
         offerMake: offerMakeMock,
       }),
     },
-    tradingPair);
+    tradingPair,
+  );
 
   const { change } = unpack(controller);
 
@@ -284,14 +291,14 @@ test('click sell button...', () => {
     position: undefined,
     gasEstimation: 20,
   });
-
 });
 
 test('click buy button confirmed', () => {
-  const offerMakeMock = jest.fn(() => of(
-    { status: TxStatus.WaitingForApproval } as TxState,
-    { status: TxStatus.WaitingForConfirmation } as TxState
-  )).mockName('offerMake');
+  const offerMakeMock = jest
+    .fn(() =>
+      of({ status: TxStatus.WaitingForApproval } as TxState, { status: TxStatus.WaitingForConfirmation } as TxState),
+    )
+    .mockName('offerMake');
 
   const controller = createFormController$(
     {
@@ -301,7 +308,8 @@ test('click buy button confirmed', () => {
         offerMake: offerMakeMock,
       }),
     },
-    tradingPair);
+    tradingPair,
+  );
 
   const { change } = unpack(controller);
 
@@ -327,7 +335,6 @@ test('click buy button confirmed', () => {
     position: undefined,
     gasEstimation: 20,
   });
-
 });
 
 test('click buy button canceled', () => {
@@ -336,12 +343,14 @@ test('click buy button canceled', () => {
       ...defParams,
       calls$: of({
         ...defaultCalls,
-        offerMake: () => of({
-          status: TxStatus.CancelledByTheUser
-        } as TxState),
+        offerMake: () =>
+          of({
+            status: TxStatus.CancelledByTheUser,
+          } as TxState),
       }),
     },
-    tradingPair);
+    tradingPair,
+  );
 
   const { change } = unpack(controller);
 
@@ -363,7 +372,8 @@ test('validation - allowance not given', () => {
       ...defParams,
       allowance$: () => of(false),
     },
-    tradingPair);
+    tradingPair,
+  );
 
   const { change } = unpack(controller);
 
@@ -410,7 +420,8 @@ test('validation - too small amount with unknown token dustLimits', () => {
       ...defParams,
       dustLimits$: of({ WETH: new BigNumber(0.1) }),
     },
-    tradingPair);
+    tradingPair,
+  );
 
   const { change } = unpack(controller);
 
@@ -434,7 +445,8 @@ test('validation - too big amount', () => {
       ...defParams,
       balances$: of({ DAI: new BigNumber(20000000000000000) }),
     },
-    tradingPair);
+    tradingPair,
+  );
 
   const { change } = unpack(controller);
 
@@ -443,7 +455,7 @@ test('validation - too big amount', () => {
   expect(unpack(controller).messages).toEqual([]);
   change({
     kind: FormChangeKind.amountFieldChange,
-    value: new BigNumber(10000000000000000)
+    value: new BigNumber(10000000000000000),
   });
   expect(unpack(controller).messages).not.toEqual([]);
 
@@ -460,7 +472,7 @@ test('validation - amount exceeds orderbook', () => {
   });
   change({
     kind: FormChangeKind.amountFieldChange,
-    value: new BigNumber(1)
+    value: new BigNumber(1),
   });
   expect(unpack(controller).messages).not.toEqual([]);
   expect(snapshotify(unpack(controller).messages)).toMatchSnapshot();
@@ -667,7 +679,7 @@ test('change match type', () => {
 
   change({
     kind: FormChangeKind.matchTypeChange,
-    matchType: OfferMatchType.direct
+    matchType: OfferMatchType.direct,
   });
   expect(unpack(controller).matchType).toEqual(OfferMatchType.direct);
 });
@@ -679,9 +691,10 @@ test('estimation gas error', () => {
       calls$: of({
         ...defaultCalls,
         offerMakeEstimateGas: () => throwError('test estimation gas error'),
-      })
+      }),
     },
-    tradingPair);
+    tradingPair,
+  );
   const { change } = unpack(controller);
 
   expect(unpack(controller).gasEstimationStatus).toEqual(GasEstimationStatus.unset);
@@ -699,10 +712,10 @@ test('switch from direct to limit order', () => {
 
   expect(unpack(controller).matchType).toEqual(OfferMatchType.limitOrder);
 
-  change({ kind:  FormChangeKind.matchTypeChange, matchType: OfferMatchType.direct });
+  change({ kind: FormChangeKind.matchTypeChange, matchType: OfferMatchType.direct });
   expect(unpack(controller).matchType).toEqual(OfferMatchType.direct);
 
-  change({ kind:  FormChangeKind.matchTypeChange, matchType: OfferMatchType.limitOrder });
+  change({ kind: FormChangeKind.matchTypeChange, matchType: OfferMatchType.limitOrder });
   expect(unpack(controller).matchType).toEqual(OfferMatchType.limitOrder);
 });
 
@@ -712,10 +725,10 @@ test('open offer type picker and close it', () => {
 
   expect(unpack(controller).pickerOpen).toBeFalsy();
 
-  change({ kind:  OfferMakeChangeKind.pickerOpenChange });
+  change({ kind: OfferMakeChangeKind.pickerOpenChange });
   expect(unpack(controller).pickerOpen).toBeTruthy();
 
-  change({ kind:  OfferMakeChangeKind.pickerOpenChange });
+  change({ kind: OfferMakeChangeKind.pickerOpenChange });
   expect(unpack(controller).pickerOpen).toBeFalsy();
 });
 
@@ -1013,9 +1026,7 @@ test('place direct sell order', () => {
 });
 
 test('place direct sell order using all of your balance', () => {
-  const buys = [
-    { price: 2, amount: 10 },
-  ];
+  const buys = [{ price: 2, amount: 10 }];
 
   const controller = controllerWithFakeOrderBook(buys);
   const { change } = unpack(controller);

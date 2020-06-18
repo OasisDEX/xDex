@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { BigNumber } from 'bignumber.js';
 import * as React from 'react';
 import { FormatAmount } from '../../utils/formatters/Formatters';
@@ -16,24 +20,24 @@ export interface SwapData {
   gasPrice?: BigNumber;
 }
 
-const execute = (proxyAddress: string) => new web3.eth.Contract(dsProxy as any, proxyAddress)
-  .methods['execute(address,bytes)'];
+const execute = (proxyAddress: string) =>
+  new web3.eth.Contract(dsProxy as any, proxyAddress).methods['execute(address,bytes)'];
 
 export const swapSaiToDai: TransactionDef<SwapData> = {
   call: ({ proxyAddress }: SwapData) => execute(proxyAddress),
   prepareArgs: ({ amount }: SwapData, context: NetworkConfig) => [
     context.migrationProxyActions,
     new web3.eth.Contract(migrationProxyActions as any, context.migrationProxyActions).methods
-      .swapSaiToDai(
-        context.migration,
-        amountToWei(amount, 'SAI').toFixed(0)
-      ).encodeABI()
+      .swapSaiToDai(context.migration, amountToWei(amount, 'SAI').toFixed(0))
+      .encodeABI(),
   ],
   kind: TxMetaKind.swapDai,
   options: () => ({ gas: 5000000 }),
-  description: ({ amount }) => <>
-    Swapping SAI <FormatAmount value={amount} token={'SAI'}/> for DAI
-  </>,
+  description: ({ amount }) => (
+    <>
+      Swapping SAI <FormatAmount value={amount} token={'SAI'} /> for DAI
+    </>
+  ),
 };
 
 export const swapDaiToSai: TransactionDef<SwapData> = {
@@ -41,10 +45,8 @@ export const swapDaiToSai: TransactionDef<SwapData> = {
   prepareArgs: ({ amount }: SwapData, context: NetworkConfig) => [
     context.migrationProxyActions,
     new web3.eth.Contract(migrationProxyActions as any, context.migrationProxyActions).methods
-      .swapDaiToSai(
-        context.migration,
-        amountToWei(amount, 'DAI').toFixed(0)
-      ).encodeABI()
+      .swapDaiToSai(context.migration, amountToWei(amount, 'DAI').toFixed(0))
+      .encodeABI(),
   ],
   kind: TxMetaKind.swapSai,
   options: () => ({ gas: 5000000 }),

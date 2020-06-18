@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import moment from 'moment';
 import React, { useContext } from 'react';
 import { default as MediaQuery } from 'react-responsive';
@@ -33,18 +37,10 @@ export const TheFooterHooked = () => {
             <span>
               Market Closing Time -{' '}
               <WithLoadingIndicatorInline loadable={expirationDate}>
-                {expDate => (
-                  <span data-vis-reg-hide={true}>
-                    {moment(expDate).format('DD.MM.YYYY')}
-                  </span>
-                )}
+                {(expDate) => <span data-vis-reg-hide={true}>{moment(expDate).format('DD.MM.YYYY')}</span>}
               </WithLoadingIndicatorInline>
             </span>
-            <a
-              target="_blank"
-              rel="noopener noreferrer"
-              href={`${etherscan.url}/address/${address}`}
-            >
+            <a target="_blank" rel="noopener noreferrer" href={`${etherscan.url}/address/${address}`}>
               Market Contract
             </a>
             <a target="_blank" rel="noopener noreferrer" href="/terms">
@@ -53,11 +49,7 @@ export const TheFooterHooked = () => {
             <a target="_blank" rel="noopener noreferrer" href="/privacy">
               Privacy
             </a>
-            <a
-              target="_blank"
-              rel="noopener noreferrer"
-              href="https://github.com/OasisDEX/oasis-market/issues"
-            >
+            <a target="_blank" rel="noopener noreferrer" href="https://github.com/OasisDEX/oasis-market/issues">
               Report Issues
             </a>
             <span>
@@ -96,8 +88,7 @@ export const TheFooterHooked = () => {
               >
                 {process.env.__NAME__} Commit {process.env.__HASH__}
               </a>{' '}
-              - Build Date{' '}
-              {moment(process.env.__DATE__).format('DD.MM.YYYY HH:MM')}
+              - Build Date {moment(process.env.__DATE__).format('DD.MM.YYYY HH:MM')}
             </span>
           </div>
         </MediaQuery>
@@ -105,19 +96,11 @@ export const TheFooterHooked = () => {
           <div>
             Market Closing Time -{' '}
             <WithLoadingIndicatorInline loadable={expirationDate}>
-              {expDate => (
-                <span data-vis-reg-hide={true}>
-                  {moment(expDate).format('DD.MM.YYYY')}
-                </span>
-              )}
+              {(expDate) => <span data-vis-reg-hide={true}>{moment(expDate).format('DD.MM.YYYY')}</span>}
             </WithLoadingIndicatorInline>
           </div>
           <div className={styles.links}>
-            <a
-              target="_blank"
-              rel="noopener noreferrer"
-              href={`${etherscan.url}/address/${address}`}
-            >
+            <a target="_blank" rel="noopener noreferrer" href={`${etherscan.url}/address/${address}`}>
               Market Contract
             </a>
             <a target="_blank" rel="noopener noreferrer" href="/terms">
@@ -126,11 +109,7 @@ export const TheFooterHooked = () => {
             <a target="_blank" rel="noopener noreferrer" href="/privacy">
               Privacy
             </a>
-            <a
-              target="_blank"
-              rel="noopener noreferrer"
-              href="https://github.com/OasisDEX/oasis-market/issues"
-            >
+            <a target="_blank" rel="noopener noreferrer" href="https://github.com/OasisDEX/oasis-market/issues">
               Report Issues
             </a>
           </div>
@@ -169,9 +148,7 @@ export const TheFooterHooked = () => {
               {process.env.__NAME__} Commit {process.env.__HASH__}
             </a>
           </div>
-          <div data-vis-reg-hide={true}>
-            Build Date {moment(process.env.__DATE__).format('DD.MM.YYYY HH:MM')}
-          </div>
+          <div data-vis-reg-hide={true}>Build Date {moment(process.env.__DATE__).format('DD.MM.YYYY HH:MM')}</div>
         </MediaQuery>
       </div>
     </div>
@@ -180,18 +157,18 @@ export const TheFooterHooked = () => {
 
 export function createFooter$(context$: Observable<NetworkConfig>): Observable<FooterProps> {
   return context$.pipe(
-    switchMap(context =>
+    switchMap((context) =>
       loadablifyLight<Date>(
         from(context.otc.contract.methods.close_time().call()).pipe(
           map((closeTime: string) => moment.unix(Number(closeTime)).toDate()),
-        )
+        ),
       ).pipe(
-        map(expirationDate => ({
+        map((expirationDate) => ({
           expirationDate,
           etherscan: context.etherscan,
           address: context.otc.contract.options.address,
-        }))
-      )
+        })),
+      ),
     ),
   );
 }

@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import classnames from 'classnames';
 import { isEqual } from 'lodash';
 import * as React from 'react';
@@ -26,17 +30,9 @@ import { WithLoadingIndicatorInline } from '../utils/loadingIndicator/LoadingInd
 import * as styles from './Header.scss';
 import { NetworkHooked } from './Network';
 import OasisDexLogo from './OasisDexLogo.svg';
-import {
-  WalletConnectionViewKind,
-  walletConnectionViewManual$,
-  WalletConnectionViews
-} from './WalletConnectionView';
+import { WalletConnectionViewKind, walletConnectionViewManual$, WalletConnectionViews } from './WalletConnectionView';
 
-const {
-  REACT_APP_INSTANT_ENABLED,
-  REACT_APP_LT_ENABLED,
-  REACT_APP_SUBDIR
-} = process.env;
+const { REACT_APP_INSTANT_ENABLED, REACT_APP_LT_ENABLED, REACT_APP_SUBDIR } = process.env;
 
 const {
   header,
@@ -60,26 +56,28 @@ interface HeaderProps {
   walletStatus: WalletStatus;
 }
 
-const walletConnectionView$: Observable<WalletConnectionViewKind> =
-  combineLatest(walletConnectionViewManual$, walletStatus$, web3Status$)
-    .pipe(
-      map(([manualViewChange, walletStatus, web3Status]) => {
-        if (manualViewChange) {
-          return manualViewChange;
-        }
+const walletConnectionView$: Observable<WalletConnectionViewKind> = combineLatest(
+  walletConnectionViewManual$,
+  walletStatus$,
+  web3Status$,
+).pipe(
+  map(([manualViewChange, walletStatus, web3Status]) => {
+    if (manualViewChange) {
+      return manualViewChange;
+    }
 
-        if (web3Status === 'readonly') {
-          return WalletConnectionViewKind.noClient;
-        }
+    if (web3Status === 'readonly') {
+      return WalletConnectionViewKind.noClient;
+    }
 
-        if (walletStatus === 'connected') {
-          return WalletConnectionViewKind.connected;
-        }
+    if (walletStatus === 'connected') {
+      return WalletConnectionViewKind.connected;
+    }
 
-        return WalletConnectionViewKind.notConnected;
-      }),
-      distinctUntilChanged(isEqual)
-    );
+    return WalletConnectionViewKind.notConnected;
+  }),
+  distinctUntilChanged(isEqual),
+);
 
 const popup = new BehaviorSubject(false);
 
@@ -92,20 +90,18 @@ const popup$ = combineLatest(walletStatus$, popup, walletConnectionView$).pipe(
       popup.next(false);
       setTimeout(() => {
         walletConnectionViewManual$.next('');
-      },         500);
+      }, 500);
     },
     isConnected: status === 'connected',
     isConnecting: status === 'connecting',
-  }))
+  })),
 );
 
-walletStatus$.pipe().subscribe(
-  status => {
-    if (status === 'connected' || status === 'disconnected') {
-      popup.next(false);
-    }
+walletStatus$.pipe().subscribe((status) => {
+  if (status === 'connected' || status === 'disconnected') {
+    popup.next(false);
   }
-);
+});
 
 const Header = ({ walletStatus }: HeaderProps) => {
   return (
@@ -113,10 +109,7 @@ const Header = ({ walletStatus }: HeaderProps) => {
       {({ rootUrl }) => (
         <header className={header}>
           <section className={section}>
-            <a
-              href={REACT_APP_SUBDIR ? REACT_APP_SUBDIR : '/'}
-              className={logo}
-            >
+            <a href={REACT_APP_SUBDIR ? REACT_APP_SUBDIR : '/'} className={logo}>
               <SvgImage image={OasisDexLogo} />
             </a>
           </section>
@@ -124,21 +117,16 @@ const Header = ({ walletStatus }: HeaderProps) => {
             <nav className={nav}>
               <div className={list}>
                 <HeaderNavLink to={`${rootUrl}market`} name="Market" />
-                {REACT_APP_INSTANT_ENABLED === '1' && (
-                  <HeaderNavLink to={`${rootUrl}instant`} name="Instant" />
+                {REACT_APP_INSTANT_ENABLED === '1' && <HeaderNavLink to={`${rootUrl}instant`} name="Instant" />}
+                {REACT_APP_LT_ENABLED === '1' && walletStatus === 'connected' && (
+                  <HeaderNavLink to={`${rootUrl}Multiply`} name="Multiply" />
                 )}
-                {REACT_APP_LT_ENABLED === '1' &&
-                  walletStatus === 'connected' && (
-                    <HeaderNavLink to={`${rootUrl}Leverage`} name="Leverage" />
-                  )}
-                {walletStatus === 'connected' && (
-                  <HeaderNavLink to={`${rootUrl}balances`} name="Balances" />
-                )}
+                {walletStatus === 'connected' && <HeaderNavLink to={`${rootUrl}balances`} name="Balances" />}
               </div>
             </nav>
           </section>
           <section className={classnames(section, sectionStatus)}>
-            <WalletConnectionHooked/>
+            <WalletConnectionHooked />
           </section>
         </header>
       )}
@@ -147,11 +135,7 @@ const Header = ({ walletStatus }: HeaderProps) => {
 };
 
 export const HeaderHooked = () => {
-  const state = useObservable(
-    combineLatest(walletStatus$).pipe(
-      map(([walletStatus]) => ({ walletStatus }))
-    )
-  );
+  const state = useObservable(combineLatest(walletStatus$).pipe(map(([walletStatus]) => ({ walletStatus }))));
 
   if (!state) return null;
 
@@ -169,9 +153,7 @@ interface WalletConnectionStatusProps {
 
 const WalletConnectionStatus = (props: WalletConnectionStatusProps) => {
   const { open, close, view, isConnected, isConnecting, isOpen } = props;
-  const View = WalletConnectionViews.get(
-    isConnecting ? WalletConnectionViewKind.connecting : view
-  );
+  const View = WalletConnectionViews.get(isConnecting ? WalletConnectionViewKind.connecting : view);
 
   return (
     <ReactPopover
@@ -184,16 +166,12 @@ const WalletConnectionStatus = (props: WalletConnectionStatusProps) => {
       body={<View close={close} />}
     >
       <div className={walletConnection}>
-        <NetworkHooked/>
+        <NetworkHooked />
         {isConnected ? (
           <>
-            <SAI2DAIMigrationHooked
-              label="Upgrade Sai"
-              tid="update-btn-header"
-              className={styles.redeemBtn}
-            />
+            <SAI2DAIMigrationHooked label="Upgrade Sai" tid="update-btn-header" className={styles.redeemBtn} />
             <div onClick={open} data-test-id="wallet-status">
-              <StatusHooked/>
+              <StatusHooked />
             </div>
           </>
         ) : (
@@ -205,15 +183,12 @@ const WalletConnectionStatus = (props: WalletConnectionStatusProps) => {
             className={classnames(styles.login, styles.connectWalletButton)}
           >
             <MediaQuery minWidth={880}>
-              {matches => {
+              {(matches) => {
                 if (matches) {
                   return (
                     <>
                       Connect Wallet
-                      <SvgImage
-                        image={chevronDownSvg}
-                        className={classnames(arrowDown, dark)}
-                      />
+                      <SvgImage image={chevronDownSvg} className={classnames(arrowDown, dark)} />
                     </>
                   );
                 }
@@ -232,7 +207,7 @@ const WalletConnectionHooked = () => {
 
   if (!state) return null;
 
-  return <WalletConnectionStatus {...state}/>;
+  return <WalletConnectionStatus {...state} />;
 };
 
 export const StatusHooked = () => {
@@ -242,30 +217,23 @@ export const StatusHooked = () => {
 
   return (
     <span className={styles.accountLoader}>
-    <WithLoadingIndicatorInline loadable={loadableState} className={styles.account}>
-    {({ account }: Account) => {
-      const label = account ? account.slice(0, 6) + '...' + account.slice(-4) : 'Logged out';
+      <WithLoadingIndicatorInline loadable={loadableState} className={styles.account}>
+        {({ account }: Account) => {
+          const label = account ? account.slice(0, 6) + '...' + account.slice(-4) : 'Logged out';
 
-      return (
-        <div title={account}
-            data-test-id="status"
-            className={classnames(navElement, styles.account)}
-        >
-          <Jazzicon diameter={20} seed={jsNumberForAddress(account)}/>
-          <span data-test-id="account"
-                style={{ marginLeft: '.625rem', letterSpacing: '.2px' }}
-          >
-            {label}
-          </span>
-          {/* TODO: Unify this with the market dropdown icon. Extract?*/}
+          return (
+            <div title={account} data-test-id="status" className={classnames(navElement, styles.account)}>
+              <Jazzicon diameter={20} seed={jsNumberForAddress(account)} />
+              <span data-test-id="account" style={{ marginLeft: '.625rem', letterSpacing: '.2px' }}>
+                {label}
+              </span>
+              {/* TODO: Unify this with the market dropdown icon. Extract?*/}
 
-          <SvgImage image={chevronDownSvg}
-                    className={classnames(arrowDown, mild)}
-          />
-        </div>
-      );
-    }}
-    </WithLoadingIndicatorInline>
+              <SvgImage image={chevronDownSvg} className={classnames(arrowDown, mild)} />
+            </div>
+          );
+        }}
+      </WithLoadingIndicatorInline>
     </span>
   );
 };
@@ -275,27 +243,20 @@ interface Account {
   available?: boolean;
 }
 
-const loadableAccount$: Observable<Loadable<Account>> = combineLatest(
-  walletStatus$,
-  account$
-).pipe(
+const loadableAccount$: Observable<Loadable<Account>> = combineLatest(walletStatus$, account$).pipe(
   map(([walletStatus, account]) => {
     if (walletStatus === 'connecting') {
       return { status: 'loading' } as Loadable<Account>;
     }
     return {
       status: 'loaded',
-      value: { account, available: walletStatus !== 'missing' }
+      value: { account, available: walletStatus !== 'missing' },
     } as Loadable<Account>;
   }),
 );
 
-export const HeaderNavLink = ({ to, name }: { to: string, name: string }) => (
-  <NavLink
-    data-test-id={name}
-    to={to}
-    className={classnames(item, navLink)}
-    activeClassName={activeNavLink}>
+export const HeaderNavLink = ({ to, name }: { to: string; name: string }) => (
+  <NavLink data-test-id={name} to={to} className={classnames(item, navLink)} activeClassName={activeNavLink}>
     {name}
   </NavLink>
 );

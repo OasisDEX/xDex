@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { BigNumber } from 'bignumber.js';
 import classnames from 'classnames';
 import * as React from 'react';
@@ -22,28 +26,21 @@ export class Asset extends React.Component<AssetProps> {
     const { user, currency, onClick, isLocked } = this.props;
     const balance = user && user.account ? this.props.balance : new BigNumber(0);
     return (
-      <button className={classnames(styles.asset, isLocked && styles.locked)}
-              disabled={isLocked}
-              data-test-id="asset-button"
-              onClick={onClick}>
-        <span className={styles.icon}>
-          {getToken(currency).iconColor}
-        </span>
-        {
-          !balance && <ProgressIcon size="sm"/>
-        }
-        {
-          balance &&
+      <button
+        className={classnames(styles.asset, isLocked && styles.locked)}
+        disabled={isLocked}
+        data-test-id="asset-button"
+        onClick={onClick}
+      >
+        <span className={styles.icon}>{getToken(currency).iconColor}</span>
+        {!balance && <ProgressIcon size="sm" />}
+        {balance && (
           <div data-test-id="balance">
-            <span data-vis-reg-hide={true}>
-              {
-                formatAmountInstant(balance, currency)
-              }
-            </span>
+            <span data-vis-reg-hide={true}>{formatAmountInstant(balance, currency)}</span>
             &nbsp;
-            <Currency value={currency} theme="medium"/>
+            <Currency value={currency} theme="medium" />
           </div>
-        }
+        )}
       </button>
     );
   }

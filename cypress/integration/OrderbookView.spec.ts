@@ -1,9 +1,12 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import { WalletConnection } from '../pages/WalletConnection';
 import { cypressVisitWithWeb3, tid } from '../utils';
 import { makeScreenshots } from '../utils/makeScreenshots';
 
 describe('Orderbook view ', () => {
-
   beforeEach(() => {
     cypressVisitWithWeb3();
     WalletConnection.connect();

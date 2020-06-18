@@ -4,7 +4,6 @@ import { useObservable } from '../../utils/observableHook';
 import { OfferMakePanel } from './OfferMakePanel';
 
 export function OfferMakePanelHooked() {
-
   const { offerMakeLoadable$ } = useContext(theAppContext);
   const loadableState = useObservable(offerMakeLoadable$);
 
@@ -12,7 +11,9 @@ export function OfferMakePanelHooked() {
     return <>...</>;
   }
 
-  return (<>
-    <OfferMakePanel {...loadableState}/>
-  </>);
+  return (
+    <>
+      <OfferMakePanel {...loadableState} />
+    </>
+  );
 }

@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 import classnames from 'classnames';
 import * as React from 'react';
 import { Button } from '../utils/forms/Buttons';
@@ -17,31 +21,25 @@ export class InstantFormWrapper extends React.Component<InstantFormProps> {
     const { heading, btnLabel, btnAction, btnDisabled, btnDataTestId, children } = this.props;
 
     return (
-      <section className={classnames(styles.panel, panelStyling.panel)}
-               data-test-id="instant-form"
-      >
+      <section className={classnames(styles.panel, panelStyling.panel)} data-test-id="instant-form">
         <header className={styles.header}>
           <h1>{heading}</h1>
         </header>
-        {
-          children
-        }
-        {
-          btnLabel && (
-            <footer className={styles.footer}>
-              <Button
-                data-test-id={btnDataTestId}
-                size="md"
-                color="primary"
-                onClick={btnAction}
-                className={styles.button}
-                disabled={btnDisabled}
-              >
-                {btnLabel}
-              </Button>
-            </footer>
-          )
-        }
+        {children}
+        {btnLabel && (
+          <footer className={styles.footer}>
+            <Button
+              data-test-id={btnDataTestId}
+              size="md"
+              color="primary"
+              onClick={btnAction}
+              className={styles.button}
+              disabled={btnDisabled}
+            >
+              {btnLabel}
+            </Button>
+          </footer>
+        )}
       </section>
     );
   }

@@ -1,4 +1,8 @@
-import { BigNumber }from 'bignumber.js';
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
+import { BigNumber } from 'bignumber.js';
 import { Observable, of, throwError } from 'rxjs';
 import { shareReplay } from 'rxjs/internal/operators';
 
@@ -8,12 +12,7 @@ setupFakeWeb3ForTesting();
 import { Calls$ } from '../blockchain/calls/calls';
 import { FormChangeKind } from '../utils/form';
 import { unpack } from '../utils/testHelpers';
-import {
-  createWrapUnwrapForm$,
-    MessageKind,
-    WrapUnwrapFormKind,
-    WrapUnwrapFormState
-} from './wrapUnwrapForm';
+import { createWrapUnwrapForm$, MessageKind, WrapUnwrapFormKind, WrapUnwrapFormState } from './wrapUnwrapForm';
 
 const defaultCalls = {
   wrapEstimateGas: () => of(100),
@@ -28,19 +27,13 @@ const calls$ = of(defaultCalls) as Calls$;
 const wrap = WrapUnwrapFormKind.wrap;
 const unwrap = WrapUnwrapFormKind.unwrap;
 
-describe('Wrapping' , () => {
-  let controller:Observable<WrapUnwrapFormState>;
+describe('Wrapping', () => {
+  let controller: Observable<WrapUnwrapFormState>;
 
   beforeEach(() => {
-    controller =
-        createWrapUnwrapForm$(
-          gasPrice$,
-          etherPriceUsd$,
-          ethBalance$,
-          wethBalance$,
-          calls$,
-          wrap
-        ).pipe(shareReplay(1));
+    controller = createWrapUnwrapForm$(gasPrice$, etherPriceUsd$, ethBalance$, wethBalance$, calls$, wrap).pipe(
+      shareReplay(1),
+    );
   });
 
   test('initial state', () => {
@@ -49,24 +42,23 @@ describe('Wrapping' , () => {
 
   test('happy path', () => {
     const { change } = unpack(controller);
-    change({ kind:FormChangeKind.amountFieldChange , value: new BigNumber(100) });
+    change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(100) });
 
     expect(unpack(controller).readyToProceed).toBeTruthy();
   });
 
   test('not enough balance', () => {
     const { change } = unpack(controller);
-    change({ kind:FormChangeKind.amountFieldChange , value: new BigNumber(1001) });
+    change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(1001) });
 
     expect(unpack(controller).readyToProceed).toBeFalsy();
     expect(unpack(controller).messages.length).toBe(1);
-    expect(unpack(controller).messages[0])
-      .toEqual({ kind: MessageKind.insufficientAmount, token: 'ETH' });
+    expect(unpack(controller).messages[0]).toEqual({ kind: MessageKind.insufficientAmount, token: 'ETH' });
   });
 
   test('negative amount', () => {
     const { change } = unpack(controller);
-    change({ kind:FormChangeKind.amountFieldChange , value: new BigNumber(-1) });
+    change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(-1) });
 
     expect(unpack(controller).readyToProceed).toBeFalsy();
     expect(unpack(controller).messages.length).toBe(1);
@@ -75,7 +67,7 @@ describe('Wrapping' , () => {
 
   test('zero amount', () => {
     const { change } = unpack(controller);
-    change({ kind:FormChangeKind.amountFieldChange , value: new BigNumber(-1) });
+    change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(-1) });
 
     expect(unpack(controller).readyToProceed).toBeFalsy();
     expect(unpack(controller).messages.length).toBe(1);
@@ -83,19 +75,13 @@ describe('Wrapping' , () => {
   });
 
   test('failed estimation', () => {
-    const callsCopy = of({ ...defaultCalls, wrapEstimateGas: () =>
-        throwError(new Error('Kurcze'))}) as Calls$;
-    controller = createWrapUnwrapForm$(
-        gasPrice$,
-        etherPriceUsd$,
-        ethBalance$,
-        wethBalance$,
-        callsCopy,
-        wrap
-    ).pipe(shareReplay(1));
+    const callsCopy = of({ ...defaultCalls, wrapEstimateGas: () => throwError(new Error('Kurcze')) }) as Calls$;
+    controller = createWrapUnwrapForm$(gasPrice$, etherPriceUsd$, ethBalance$, wethBalance$, callsCopy, wrap).pipe(
+      shareReplay(1),
+    );
 
     const { change } = unpack(controller);
-    change({ kind:FormChangeKind.amountFieldChange , value: new BigNumber(1) });
+    change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(1) });
 
     expect(unpack(controller).readyToProceed).toBeFalsy();
   });
@@ -105,15 +91,9 @@ describe('Unwrapping', () => {
   let controller: Observable<WrapUnwrapFormState>;
 
   beforeEach(() => {
-    controller =
-        createWrapUnwrapForm$(
-            gasPrice$,
-            etherPriceUsd$,
-            ethBalance$,
-            wethBalance$,
-            calls$,
-            unwrap
-        ).pipe(shareReplay(1));
+    controller = createWrapUnwrapForm$(gasPrice$, etherPriceUsd$, ethBalance$, wethBalance$, calls$, unwrap).pipe(
+      shareReplay(1),
+    );
   });
 
   test('initial state', () => {
@@ -122,24 +102,23 @@ describe('Unwrapping', () => {
 
   test('happy path', () => {
     const { change } = unpack(controller);
-    change({ kind:FormChangeKind.amountFieldChange , value: new BigNumber(100) });
+    change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(100) });
 
     expect(unpack(controller).readyToProceed).toBeTruthy();
   });
 
   test('not enough balance', () => {
     const { change } = unpack(controller);
-    change({ kind:FormChangeKind.amountFieldChange , value: new BigNumber(1001) });
+    change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(1001) });
 
     expect(unpack(controller).readyToProceed).toBeFalsy();
     expect(unpack(controller).messages.length).toBe(1);
-    expect(unpack(controller).messages[0])
-      .toEqual({ kind: MessageKind.insufficientAmount, token: 'WETH' });
+    expect(unpack(controller).messages[0]).toEqual({ kind: MessageKind.insufficientAmount, token: 'WETH' });
   });
 
   test('negative amount', () => {
     const { change } = unpack(controller);
-    change({ kind:FormChangeKind.amountFieldChange , value: new BigNumber(-1) });
+    change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(-1) });
 
     expect(unpack(controller).readyToProceed).toBeFalsy();
     expect(unpack(controller).messages.length).toBe(1);
@@ -148,7 +127,7 @@ describe('Unwrapping', () => {
 
   test('zero amount', () => {
     const { change } = unpack(controller);
-    change({ kind:FormChangeKind.amountFieldChange , value: new BigNumber(-1) });
+    change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(-1) });
 
     expect(unpack(controller).readyToProceed).toBeFalsy();
     expect(unpack(controller).messages.length).toBe(1);
@@ -156,19 +135,13 @@ describe('Unwrapping', () => {
   });
 
   test('failed estimation', () => {
-    const callsCopy = of({ ...defaultCalls, unwrapEstimateGas: () =>
-            throwError(new Error('Kurcze'))}) as Calls$;
-    controller = createWrapUnwrapForm$(
-            gasPrice$,
-            etherPriceUsd$,
-            ethBalance$,
-            wethBalance$,
-            callsCopy,
-            unwrap
-        ).pipe(shareReplay(1));
+    const callsCopy = of({ ...defaultCalls, unwrapEstimateGas: () => throwError(new Error('Kurcze')) }) as Calls$;
+    controller = createWrapUnwrapForm$(gasPrice$, etherPriceUsd$, ethBalance$, wethBalance$, callsCopy, unwrap).pipe(
+      shareReplay(1),
+    );
 
     const { change } = unpack(controller);
-    change({ kind:FormChangeKind.amountFieldChange , value: new BigNumber(1) });
+    change({ kind: FormChangeKind.amountFieldChange, value: new BigNumber(1) });
 
     expect(unpack(controller).readyToProceed).toBeFalsy();
   });

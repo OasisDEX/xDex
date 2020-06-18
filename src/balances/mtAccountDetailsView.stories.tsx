@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
+ */
+
 // import { storiesOf } from '@storybook/react';
 // import { BigNumber } from 'bignumber.js';
 // import * as React from 'react';
@@ -43,7 +47,7 @@
 //   referencePrice: new BigNumber(200),
 //   minCollRatio: new BigNumber(1.5),
 //   safeCollRatio: new BigNumber(1.9),
-//   // maxSafeLeverage: new BigNumber(2),
+//   // maxSafeMultiply: new BigNumber(2),
 // });
 //
 // const mkrMarginableAsset = getMarginableCore({
@@ -57,7 +61,7 @@
 //   referencePrice: new BigNumber(500),
 //   minCollRatio: new BigNumber(1.8),
 //   safeCollRatio: new BigNumber(2.5),
-//   // maxSafeLeverage: new BigNumber(4),
+//   // maxSafeMultiply: new BigNumber(4),
 // });
 //
 // const wethNonMarginableAsset = getNonMarginableCore({
