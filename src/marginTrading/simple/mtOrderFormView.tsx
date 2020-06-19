@@ -519,11 +519,11 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState & {
       >
         <div className={styles.orderSummaryLabel}>Multiple</div>
         <div className={styles.orderSummaryValue}>
-          {multipleDisplay.gt(zero) ? <>{formatPrecision(multipleDisplay, 1)}x</> : <span>-</span>}
+          {multipleDisplay.gt(zero) ? <>{formatPrecision(multipleDisplay, 2)}x</> : <span>-</span>}
           {multiplePost && (
             <>
               <span className={styles.transitionArrow} />
-              {multiplePostDisplay.gte(zero) ? <>{formatPrecision(multiplePostDisplay, 1)}x</> : <span>-</span>}
+              {multiplePostDisplay.gte(zero) ? <>{formatPrecision(multiplePostDisplay, 2)}x</> : <span>-</span>}
             </>
           )}
         </div>

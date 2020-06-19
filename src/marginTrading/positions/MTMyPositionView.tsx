@@ -148,7 +148,7 @@ export class MTMyPositionView extends React.Component<MTMyPositionViewProps & Mo
             <div className={styles.summaryRow}>
               <div className={styles.summaryLabel}>Multiple</div>
               <div className={styles.summaryValue}>
-                {multiple.gt(zero) ? <> Long - {formatPrecision(multiple, 1)}x</> : <span>-</span>}
+                {multiple.gt(zero) ? <> Long - {formatPrecision(multiple, 2)}x</> : <span>-</span>}
               </div>
             </div>
             <div className={styles.summaryRow}>

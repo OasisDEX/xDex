@@ -159,7 +159,7 @@ export const trackingEvents = {
       account,
       network,
       product: 'oasis-trade',
-      wallet: 'metamask',
+      walletType: 'metamask',
     });
     Fathom.trackGoal(Fathom.fathomGoals.connectWallet, 0);
   },
