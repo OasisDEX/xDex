@@ -469,7 +469,7 @@ const kovan: NetworkConfig = {
     return asMap('token', [
       loadToken('WETH', eth, '0xd0a1e359811322d97991e03f863a0c30c2cf029c'),
       loadToken('SAI', erc20, '0xc4375b7de8af5a38a93548eb8453a498222c4ff2'),
-      loadToken('DAI', erc20, '0x08ae34860fbfe73e223596e65663683973c72dd3'),
+      loadToken('DAI', erc20, '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa'),
       loadToken('REP', erc20, '0xc7aa227823789e363f29679f23f7e8f6d9904a9b'),
       loadToken('ZRX', erc20, '0x18392097549390502069c17700d21403ea3c721a'),
       loadToken('BAT', erc20, '0x9f8cfb61d3b2af62864408dd703f9c3beb55dff7'),
@@ -481,17 +481,17 @@ const kovan: NetworkConfig = {
     ]);
   },
   mcd: {
-    vat: '0x8a08a09dbe85018cb1a36c344a629b43f983b66c',
+    vat: '0xba987bdb501d131f766fee8180da5d81b34b69d9',
     get cat() {
-      return load(mcdCat, '0xa9fa5837eea55f3038a2ca755ce4b5dfac599c37');
+      return load(mcdCat, '0x0511674a67192fe51e86fe55ed660eb4f995bdd6');
     },
     get jug() {
-      return load(mcdJug, '0x01e87d5fdcb506c0b8062502d551e04474354f0d');
+      return load(mcdJug, '0xcbb7718c9f39d05aeede1c472ca8bf804b2f1ead');
     },
     get spot() {
-      return load(mcdSpotter, '0x65b2cd8c3d90fb1dd94965073bf5798d94489e04');
+      return load(mcdSpotter, '0x3a042de6413edb15f2784f2f97cc68c7e9750b2d');
     },
-    dssCdpManager: '0x7a35ea756a9f1fc5d8a1c8013ade80e036c5f8bb',
+    dssCdpManager: '0x1476483dd8c35f25e568113c5f70249d3976ba21',
     ilks: {
       WETH: 'ETH-A',
       // REP: 'REP-A',
@@ -500,8 +500,8 @@ const kovan: NetworkConfig = {
       // DGD: 'DGD-A',
     },
     joins: {
-      WETH: '0x5028243160c4e650bde9646d22395a60fdcb6e67',
-      DAI: '0x259494bdd124b75d622755c181b457ae0283257d',
+      WETH: '0x775787933e92b709f2a3c70aa87999696e74a9f8',
+      DAI: '0x5aa71a3ae1c0bd6ac27a1f28e1415fffb6f15b8c',
       // REP: '0x0',
       // ZRX: '0x0',
       // BAT: '0x0',
@@ -509,7 +509,7 @@ const kovan: NetworkConfig = {
     },
     flip: {
       get WETH() {
-        return load(mcdFlipper, '0x2024c9c3772543081352d72bda936240afa43bd5');
+        return load(mcdFlipper, '0xb40139ea36d35d0c9f6a2e62601b616f1ffbbd1b ');
       },
       // get REP() {
       //   return load(mcdFlipper, '0x0');
@@ -526,7 +526,7 @@ const kovan: NetworkConfig = {
     },
     prices: {
       get WETH() {
-        return load(dsValue, '0xd44d1823c8839559c2d663e98261e0b193c256ad');
+        return load(dsValue, '0x75dd74e8afe8110c8320ed397cccff3b8134d981');
       },
       // get BAT() {
       //   return load(dsValue, '0x5c40c9eb35c76069fa4c3a00ea59fac6ffa9c113');
@@ -534,7 +534,7 @@ const kovan: NetworkConfig = {
     },
     osms: {
       get WETH() {
-        return load(mcdOsm, '0x19342077d07a578c49421e5656c8de5c3e718f92');
+        return load(mcdOsm, '0x75dd74e8afe8110c8320ed397cccff3b8134d981');
       },
       // get BAT() {
       //   return load(mcdOsm, '0x0');
@@ -547,7 +547,7 @@ const kovan: NetworkConfig = {
       // },
     },
   } as { [key: string]: any },
-  cdpManager: '0x1a4a0603d8ba90571b1e95d996588b205edfb0fd', // Oasis CDP Manager
+  cdpManager: '0x4626e05f1e138fd4561b9986edd1007b760c6ed8', // Oasis CDP Manager
   get otcSupportMethods() {
     return load(otcSupport, '0x303f2bf24d98325479932881657f45567b3e47a8');
   },

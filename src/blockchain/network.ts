@@ -66,7 +66,7 @@ combineLatest(account$, context$)
     }),
   )
   .subscribe(([account, network]) => {
-    mixpanelIdentify(account!, { wallet: 'metamask' });
+    mixpanelIdentify(account!, { walletType: 'metamask' });
     trackingEvents.accountChange(account!, network!);
   });
 
