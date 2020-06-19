@@ -11,7 +11,6 @@ import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
 import { trackingEvents } from '../../analytics/analytics';
 import { getToken, isDAIEnabled } from '../../blockchain/config';
 import { routerContext } from '../../Main';
-import { SAI2DAIMigrationHooked } from '../../migration/MigrationFormView';
 import { BigNumberInput, lessThanOrEqual } from '../../utils/bigNumberInput/BigNumberInput';
 import { FormChangeKind, OfferMatchType } from '../../utils/form';
 import { formatAmount, formatPrice } from '../../utils/formatters/format';
@@ -224,13 +223,6 @@ export class OfferMakeForm extends React.Component<OfferFormState> {
               and swap your SAI to DAI
             </p>
           </div>
-          {this.props.user && this.props.user.account && (
-            <SAI2DAIMigrationHooked
-              label={'Start Dai Migration'}
-              className={styles.migrateButton}
-              tid="update-btn-market"
-            />
-          )}
         </PanelBody>
       </div>
     );

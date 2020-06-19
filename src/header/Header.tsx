@@ -22,7 +22,6 @@ import { WalletStatus, walletStatus$ } from '../blockchain/wallet';
 import { web3Status$ } from '../blockchain/web3';
 import chevronDownSvg from '../icons/chevron-down.svg';
 import { routerContext } from '../Main';
-import { SAI2DAIMigrationHooked } from '../migration/MigrationFormView';
 import { Button } from '../utils/forms/Buttons';
 import { SvgImage } from '../utils/icons/utils';
 import { Loadable } from '../utils/loadable';
@@ -119,7 +118,7 @@ const Header = ({ walletStatus }: HeaderProps) => {
                 <HeaderNavLink to={`${rootUrl}market`} name="Market" />
                 {REACT_APP_INSTANT_ENABLED === '1' && <HeaderNavLink to={`${rootUrl}instant`} name="Instant" />}
                 {REACT_APP_LT_ENABLED === '1' && walletStatus === 'connected' && (
-                    <HeaderNavLink to={`${rootUrl}multiply`} name="Multiply" />
+                  <HeaderNavLink to={`${rootUrl}multiply`} name="Multiply" />
                 )}
                 {walletStatus === 'connected' && <HeaderNavLink to={`${rootUrl}balances`} name="Balances" />}
               </div>
@@ -168,12 +167,9 @@ const WalletConnectionStatus = (props: WalletConnectionStatusProps) => {
       <div className={walletConnection}>
         <NetworkHooked />
         {isConnected ? (
-          <>
-            <SAI2DAIMigrationHooked label="Upgrade Sai" tid="update-btn-header" className={styles.redeemBtn} />
-            <div onClick={open} data-test-id="wallet-status">
-              <StatusHooked />
-            </div>
-          </>
+          <div onClick={open} data-test-id="wallet-status">
+            <StatusHooked />
+          </div>
         ) : (
           <Button
             color="secondaryOutlined"
