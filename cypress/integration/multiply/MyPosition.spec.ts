@@ -24,6 +24,7 @@ describe('My Position panel', () => {
       Account.setAllowance();
       Modal.hasActiveTab('Deposit');
       Account.deposit(100);
+      Modal.hasActiveTab('Buy')
       Modal.close();
     });
 
@@ -73,6 +74,7 @@ describe('My Position panel', () => {
       Account.setAllowance();
       Modal.hasActiveTab('Deposit');
       Account.deposit(5);
+      Modal.hasActiveTab('Buy')
       Modal.close();
     });
 
@@ -120,6 +122,7 @@ describe('My Position panel', () => {
       Account.setAllowance();
       Modal.hasActiveTab('Deposit');
       Account.deposit(5);
+      Modal.hasActiveTab('Buy');
       Modal.close();
       Position.enableDAI('deposit');
       Position.depositDAI(100);
