@@ -32,7 +32,9 @@ export const mixpanelInit = () => {
 export const mixpanelIdentify = (id: string, props: any) => {
   // @ts-ignore
   if (!mixpanel.config) return;
-  console.debug(`[Mixpanel] Identifying as ${id} ${props && props.wallet ? `using wallet ${props.wallet}` : ''}`);
+  console.debug(
+    `[Mixpanel] Identifying as ${id} ${props && props.walletType ? `using wallet ${props.walletType}` : ''}`,
+  );
   mixpanel.identify(id);
   if (props) mixpanel.people.set(props);
 };
