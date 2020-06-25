@@ -519,7 +519,7 @@ const kovan: NetworkConfig = {
       loadToken('LINK', erc20, '0x046acb204091d5296461c66cfd911114de5c6a4c'),
       loadToken('WBTC', erc20, '0xA08d982C2deBa0DbE433a9C6177a219E96CeE656'),
       loadToken('KNC', erc20, '0x6cdd25a4365db73831078982de110ca50d058cc5'),
-      loadToken('COMP', erc20, '0xA08d982C2deBa0DbE433a9C6177a219E96CeE656'),
+      loadToken('COMP', erc20, '0xcc4034e05dffdb142a373de49cf8a2356cae7bf6'),
     ]);
   },
   mcd: {
