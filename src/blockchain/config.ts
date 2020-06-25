@@ -39,6 +39,14 @@ import zrxCircleSvg from '../icons/coins/zrx-circle.svg';
 import zrxColorSvg from '../icons/coins/zrx-color.svg';
 import zrxSvg from '../icons/coins/zrx.svg';
 
+import kncCircleSvg from '../icons/coins/knc-circle.svg';
+import kncColorSvg from '../icons/coins/knc-color.svg';
+import kncSvg from '../icons/coins/knc.svg';
+
+import compCircleSvg from '../icons/coins/comp-circle.svg';
+import compColorSvg from '../icons/coins/comp-color.svg';
+import compSvg from '../icons/coins/comp.svg';
+
 import { SvgImageSimple } from '../utils/icons/utils';
 import * as eth from './abi/ds-eth-token.abi.json';
 import * as dsProxyFactory from './abi/ds-proxy-factory.abi.json';
@@ -72,6 +80,8 @@ export const tradingPairs: TradingPair[] = [
     ? [
         { base: 'LINK', quote: 'DAI' },
         { base: 'WBTC', quote: 'DAI' },
+        { base: 'COMP', quote: 'DAI' },
+        { base: 'KNC', quote: 'DAI' },
       ]
     : []),
   { base: 'DAI', quote: 'USDC' },
@@ -88,6 +98,8 @@ export const tradingPairs: TradingPair[] = [
     ? [
         { base: 'LINK', quote: 'WETH' },
         { base: 'WBTC', quote: 'WETH' },
+        { base: 'COMP', quote: 'WETH' },
+        { base: 'KNC', quote: 'WETH' },
       ]
     : []),
 ];
@@ -283,6 +295,32 @@ const tokens = asMap('symbol', [
           iconColor: SvgImageSimple(wbtcColorSvg),
           ticker: 'wbtc-wrapped-bitcoin',
         },
+        {
+          symbol: 'COMP',
+          precision: 18,
+          digits: 5,
+          digitsInstant: 3,
+          safeCollRatio: 1.5,
+          maxSell: '1000000000000000',
+          name: 'Compound',
+          icon: SvgImageSimple(compSvg),
+          iconCircle: SvgImageSimple(compCircleSvg),
+          iconColor: SvgImageSimple(compColorSvg),
+          ticker: 'comp-compound',
+        },
+        {
+          symbol: 'KNC',
+          precision: 18,
+          digits: 5,
+          digitsInstant: 3,
+          safeCollRatio: 1.5,
+          maxSell: '1000000000000000',
+          name: 'Kyber Network',
+          icon: SvgImageSimple(kncSvg),
+          iconCircle: SvgImageSimple(kncCircleSvg),
+          iconColor: SvgImageSimple(kncColorSvg),
+          ticker: 'knc-kyber-network',
+        },
       ]),
 ]);
 
@@ -358,6 +396,8 @@ const protoMain = {
       loadToken('PAX', erc20, '0x8e870d67f660d95d5be530380d0ec0bd388289e1'),
       loadToken('LINK', erc20, '0x514910771af9ca656af840dff83e8264ecf986ca'),
       loadToken('WBTC', erc20, '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599'),
+      loadToken('KNC', erc20, nullAddress),
+      loadToken('COMP', erc20, nullAddress),
     ]);
   },
   cdpManager: '0x60762005be465901ca18ba34416b35143de72c0c',
@@ -478,6 +518,8 @@ const kovan: NetworkConfig = {
       loadToken('PAX', erc20, '0x7ac82C960d70A9f62a645eb57f446985Bf23e224'),
       loadToken('LINK', erc20, '0x046acb204091d5296461c66cfd911114de5c6a4c'),
       loadToken('WBTC', erc20, '0xA08d982C2deBa0DbE433a9C6177a219E96CeE656'),
+      loadToken('KNC', erc20, '0x6cdd25a4365db73831078982de110ca50d058cc5'),
+      loadToken('COMP', erc20, '0xA08d982C2deBa0DbE433a9C6177a219E96CeE656'),
     ]);
   },
   mcd: {
