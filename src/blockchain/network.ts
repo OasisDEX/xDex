@@ -4,7 +4,7 @@
 
 // tslint:disable:no-console
 import { BigNumber } from 'bignumber.js';
-import { bindNodeCallback, combineLatest, concat, forkJoin, from, interval, Observable, of } from 'rxjs';
+import { bindNodeCallback, combineLatest, concat, forkJoin, from, interval, Observable, of, timer } from 'rxjs';
 import { takeWhileInclusive } from 'rxjs-take-while-inclusive';
 import { ajax } from 'rxjs/ajax';
 import {
@@ -19,6 +19,15 @@ import {
   skip,
   startWith,
   switchMap,
+  bufferCount,
+  delay,
+  flatMap,
+  concatMap,
+  mergeAll,
+  tap,
+  concatAll,
+  scan,
+  delayWhen,
 } from 'rxjs/operators';
 
 import { trackingEvents } from '../analytics/analytics';
@@ -126,32 +135,48 @@ export interface Ticker {
   [label: string]: BigNumber;
 }
 
+const usdPricesProbing$ = from(tradingTokens)
+  .pipe(
+    bufferCount(10),
+    concatMap((tokens: string[]) =>
+      of(
+        tokens.map((token) =>
+          ajax({
+            url: `https://api.coinpaprika.com/v1/tickers/${getToken(token).ticker}/`,
+            method: 'GET',
+            headers: {
+              Accept: 'application/json',
+            },
+          }).pipe(
+            map(({ response }) => ({
+              [token]: new BigNumber(response.quotes.USD.price),
+            })),
+            catchError((error) => {
+              console.debug(`Error fetching price data: ${error}`);
+              return of({});
+            }),
+          ),
+        ),
+      ).pipe(
+        map((v) => v),
+        delayWhen(() => timer(1000).pipe(startWith(1000))),
+      ),
+    ),
+    concatAll()
+  )
+  .pipe(
+    concatMap(value => value.pipe(map(v => v)))
+  )
+   
+
 // TODO: This should be unified with fetching price for ETH.
 // Either this logic should contain only fetching from 3rd party endpoint
 // or we wait until all of the tokens have PIP deployed.
 export const tokenPricesInUSD$: Observable<Ticker> = onEveryBlock$.pipe(
-  switchMap(() =>
-    forkJoin(
-      tradingTokens.map((token) =>
-        ajax({
-          url: `https://api.coinpaprika.com/v1/tickers/${getToken(token).ticker}/`,
-          method: 'GET',
-          headers: {
-            Accept: 'application/json',
-          },
-        }).pipe(
-          map(({ response }) => ({
-            [token]: new BigNumber(response.quotes.USD.price),
-          })),
-          catchError((error) => {
-            console.debug(`Error fetching price data: ${error}`);
-            return of({});
-          }),
-        ),
-      ),
-    ),
-  ),
-  map((prices) => prices.reduce((a, e) => ({ ...a, ...e }))),
+  switchMap(() => usdPricesProbing$ ),
+  scan((prices, value) => {
+    return {...prices, ...value}
+  }, {}),
   shareReplay(1),
 );
 
