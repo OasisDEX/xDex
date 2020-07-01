@@ -669,8 +669,8 @@ const localnet: NetworkConfig = {
       loadToken('PAX', erc20, '0xb02048C28D9BEE6989E8D48e3972F283D3B7822c'),
       loadToken('LINK', erc20, '0x54729948EbD535aBC2492FdAAabb4153E9aC28f7'),
       loadToken('WBTC', erc20, '0x85a91f61feA8f173434424F9758a12fEA11B613c'),
-      loadToken('COMP', erc20, '0x85a91f61feA8f173434424F9758a12fEA11B613c'),// New token should be deployed (WBTC address used)
-      loadToken('KNC', erc20, '0x85a91f61feA8f173434424F9758a12fEA11B613c'),// New token should be deployed (WBTC address used)
+      loadToken('COMP', erc20, '0x85a91f61feA8f173434424F9758a12fEA11B613c'), // New token should be deployed (WBTC address used)
+      loadToken('KNC', erc20, '0x85a91f61feA8f173434424F9758a12fEA11B613c'), // New token should be deployed (WBTC address used)
     ]);
   },
   mcd: {
