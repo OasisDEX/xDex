@@ -10,7 +10,6 @@ import * as ReactDOM from 'react-dom';
 import { combineLatest, Observable, of } from 'rxjs';
 import { distinctUntilChanged, startWith, switchMap, tap } from 'rxjs/internal/operators';
 import { map } from 'rxjs/operators';
-import { fathomInit } from './analytics/fathom';
 import { mixpanelInit } from './analytics/mixpanel';
 import { networks } from './blockchain/config';
 import { account$, networkId$ } from './blockchain/network';
@@ -29,7 +28,6 @@ interface Props {
 }
 
 mixpanelInit();
-fathomInit();
 
 class App extends React.Component<Props> {
   public render() {

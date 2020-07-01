@@ -439,7 +439,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
     const { mta, amount, actionKind, token } = this.props;
     if (mta && mta.state !== MTAccountState.notSetup && amount) {
       this.props.transfer(this.props);
-      trackingEvents.transferTokens(actionKind, token, amount.toNumber());
+      trackingEvents.transferTokens(actionKind, token);
     }
   }
 

@@ -100,7 +100,7 @@ export const etherBalance$: Observable<BigNumber> = initializedAccount$.pipe(
   shareReplay(1),
 );
 
-export const MIN_ALLOWANCE = new BigNumber('0x845951614014880000000'); // 1e+25 = 10**25 
+export const MIN_ALLOWANCE = new BigNumber('0x845951614014880000000'); // 1e+25 = 10**25
 
 export function allowance$(token: string, guy?: string): Observable<boolean> {
   return combineLatest(context$, initializedAccount$, onEveryBlock$).pipe(
