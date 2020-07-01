@@ -4,7 +4,7 @@
 
 // tslint:disable:no-console
 import { BigNumber } from 'bignumber.js';
-import { bindNodeCallback, combineLatest, concat, forkJoin, from, interval, Observable, of } from 'rxjs';
+import { bindNodeCallback, combineLatest, concat, from, interval, Observable, of } from 'rxjs';
 import { takeWhileInclusive } from 'rxjs-take-while-inclusive';
 import { ajax } from 'rxjs/ajax';
 import {
@@ -23,7 +23,7 @@ import {
 
 import { trackingEvents } from '../analytics/analytics';
 import { mixpanelIdentify } from '../analytics/mixpanel';
-import { getToken, NetworkConfig, networks, tradingTokens } from './config';
+import { NetworkConfig, networks, tradingTokens } from './config';
 import { amountFromWei } from './utils';
 import { web3 } from './web3';
 
@@ -100,7 +100,7 @@ export const etherBalance$: Observable<BigNumber> = initializedAccount$.pipe(
   shareReplay(1),
 );
 
-export const MIN_ALLOWANCE = new BigNumber('0x845951614014880000000'); // 1e+25 = 10**25 
+export const MIN_ALLOWANCE = new BigNumber('0x845951614014880000000'); // 1e+25 = 10**25
 
 export function allowance$(token: string, guy?: string): Observable<boolean> {
   return combineLatest(context$, initializedAccount$, onEveryBlock$).pipe(
@@ -131,27 +131,26 @@ export interface Ticker {
 // or we wait until all of the tokens have PIP deployed.
 export const tokenPricesInUSD$: Observable<Ticker> = onEveryBlock$.pipe(
   switchMap(() =>
-    forkJoin(
-      tradingTokens.map((token) =>
-        ajax({
-          url: `https://api.coinpaprika.com/v1/tickers/${getToken(token).ticker}/`,
-          method: 'GET',
-          headers: {
-            Accept: 'application/json',
-          },
-        }).pipe(
-          map(({ response }) => ({
-            [token]: new BigNumber(response.quotes.USD.price),
-          })),
-          catchError((error) => {
-            console.debug(`Error fetching price data: ${error}`);
-            return of({});
-          }),
-        ),
+    ajax({
+      url: `https://api.coinpaprika.com/v1/tickers`,
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+      },
+    }).pipe(
+      map(({ response }) => response.filter(({ symbol }: { symbol: string }) => tradingTokens.includes(symbol))),
+      map((supportedTokens) =>
+        supportedTokens.map((token: any) => {
+          return { [token.symbol]: new BigNumber(token.quotes.USD.price) } as Ticker;
+        }),
       ),
+      catchError((error) => {
+        console.debug(`Error fetching price data: ${error}`);
+        return of({});
+      }),
     ),
   ),
-  map((prices) => prices.reduce((a, e) => ({ ...a, ...e }))),
+  map((prices: Ticker[]) => prices.reduce((a, e) => ({ ...a, ...e }))),
   shareReplay(1),
 );
 
