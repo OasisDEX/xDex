@@ -1,8 +1,5 @@
 import * as mixpanel from 'mixpanel-browser';
-import { Dictionary } from 'ramda';
 import { OfferType } from '../exchange/orderbook/orderbook';
-import { UserActionKind } from '../marginTrading/state/mtAccount';
-import * as Fathom from './fathom';
 
 export enum Pages {
   instant = 'Instant',
@@ -17,24 +14,16 @@ export const trackingEvents = {
       product: 'oasis-trade',
       id: location,
     });
-    Fathom.trackPageview();
   },
-  initiateTradeInstant: (kind: OfferType, total: number, pair: string) => {
+  initiateTradeInstant: () => {
     mixpanel.track('btn-click', {
       id: 'initiate-trade',
       product: 'oasis-trade',
       page: Pages.instant,
       section: 'order-details',
     });
-
-    const fathomGoal: Dictionary<string> =
-      kind === OfferType.buy
-        ? (Fathom.fathomGoals.instantBuy as Dictionary<string>)
-        : (Fathom.fathomGoals.instantSell as Dictionary<string>);
-
-    Fathom.trackGoal(fathomGoal[pair], total);
   },
-  initiateTradeMarket: (kind: OfferType, total: number, pair: string) => {
+  initiateTradeMarket: (kind: OfferType) => {
     mixpanel.track('btn-click', {
       kind,
       page: Pages.market,
@@ -42,15 +31,8 @@ export const trackingEvents = {
       product: 'oasis-trade',
       section: 'create-order',
     });
-
-    const fathomGoal: Dictionary<string> =
-      kind === OfferType.buy
-        ? (Fathom.fathomGoals.marketBuy as Dictionary<string>)
-        : (Fathom.fathomGoals.marketSell as Dictionary<string>);
-
-    Fathom.trackGoal(fathomGoal[pair], total);
   },
-  initiateTradeMultiply: (kind: OfferType, total: number) => {
+  initiateTradeMultiply: (kind: OfferType) => {
     mixpanel.track('btn-click', {
       kind,
       page: Pages.mt,
@@ -58,10 +40,6 @@ export const trackingEvents = {
       product: 'oasis-trade',
       section: 'manage-multiple',
     });
-
-    const fathomGoal = kind === OfferType.buy ? Fathom.fathomGoals.multipleBuy : Fathom.fathomGoals.multipleSell;
-
-    Fathom.trackGoal(fathomGoal, total);
   },
   taxExport: () => {
     mixpanel.track('btn-click', {
@@ -96,9 +74,7 @@ export const trackingEvents = {
       section: 'asset-picker',
     });
   },
-  transferTokens: (actionKind: string, token: string, amount: number) => {
-    const { depositDai, depositCollateral, withdrawDai, withdrawCollateral } = Fathom.fathomGoals;
-
+  transferTokens: (actionKind: string, token: string) => {
     mixpanel.track('btn-click', {
       page: Pages.mt,
       id: `${actionKind}-${token === 'DAI' ? 'dai' : 'collateral'}-submit`,
@@ -106,12 +82,6 @@ export const trackingEvents = {
       section: 'deposit-withdraw-modal',
       currency: token,
     });
-    if (actionKind === UserActionKind.fund) {
-      Fathom.trackGoal(token === 'DAI' ? depositDai : depositCollateral, amount);
-    }
-    if (actionKind === UserActionKind.draw) {
-      Fathom.trackGoal(token === 'DAI' ? withdrawDai : withdrawCollateral, amount);
-    }
   },
   daiUsdToggle: (toggle: boolean) => {
     mixpanel.track('btn-click', {
@@ -161,7 +131,6 @@ export const trackingEvents = {
       product: 'oasis-trade',
       walletType: 'metamask',
     });
-    Fathom.trackGoal(Fathom.fathomGoals.connectWallet, 0);
   },
   txNotification: (txStatus: string, network: string) => {
     mixpanel.track('notification', {
@@ -171,6 +140,11 @@ export const trackingEvents = {
     });
   },
   cancelOffer: () => {
-    Fathom.trackGoal(Fathom.fathomGoals.cancelOffer, 0);
+    mixpanel.track('btn-click', {
+      page: Pages.market,
+      id: 'cancel-offer',
+      product: 'oasis-trade',
+      section: 'offers',
+    });
   },
 };
