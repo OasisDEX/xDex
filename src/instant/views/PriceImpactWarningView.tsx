@@ -69,7 +69,7 @@ export class PriceImpactWarningView extends React.Component<InstantFormState> {
     const { kind, quotation, buyAmount, sellAmount } = this.props;
     const amount = kind === OfferType.buy ? sellAmount : buyAmount;
     if (kind && amount && quotation) {
-      trackingEvents.initiateTradeInstant(kind, amount.toNumber(), quotation.replace('/', ''));
+      trackingEvents.initiateTradeInstant();
     }
     this.props.submit(this.props);
     this.props.change({

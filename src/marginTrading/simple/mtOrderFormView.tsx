@@ -720,7 +720,7 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState & {
         disabled={!readyToProceed || !!progress}
         onClick={() => {
           if (total) {
-            trackingEvents.initiateTradeMultiply(kind, total.toNumber());
+            trackingEvents.initiateTradeMultiply(kind);
           }
         }}
       >
