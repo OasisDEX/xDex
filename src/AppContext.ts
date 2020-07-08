@@ -288,7 +288,7 @@ export function setupAppContext() {
       });
     });
 
-  const instant$ = createInstantFormController$({
+  const instantForm$ = createInstantFormController$({
     gasPrice$,
     calls$,
     readCalls$,
@@ -307,7 +307,7 @@ export function setupAppContext() {
     ),
   });
 
-  const InstantTxRx = connect<Loadable<InstantFormState>, {}>(InstantViewPanel, loadablifyLight(instant$));
+  const instant$ = loadablifyLight(instantForm$)
 
   const exportTax$ = createTaxExport$(context$, initializedAccount$);
 
@@ -342,7 +342,7 @@ export function setupAppContext() {
     disapproveWallet$,
     allTrades$,
     myTrades$,
-    InstantTxRx,
+    instant$,
     transactionNotifier$,
     MTSimpleOrderPanelRxTx,
     MTSimpleOrderBuyPanelRxTx,

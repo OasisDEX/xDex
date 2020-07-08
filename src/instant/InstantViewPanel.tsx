@@ -3,7 +3,7 @@
  */
 
 import classnames from 'classnames';
-import * as React from 'react';
+import React, { useContext } from 'react';
 import { theAppContext } from '../AppContext';
 import { Loadable } from '../utils/loadable';
 import { LoadingIndicator } from '../utils/loadingIndicator/LoadingIndicator';
@@ -18,6 +18,7 @@ import { NewTradeView } from './views/NewTradeView';
 import { PriceImpactWarningView } from './views/PriceImpactWarningView';
 import { TradeSettingsView } from './views/TradeSettingsView';
 import { TradeSummaryView } from './views/TradeSummaryView';
+import { useObservable } from 'src/utils/observableHook';
 
 const views: Record<ViewKind, React.ComponentType<InstantFormState>> = {
   [ViewKind.buyAssetSelector]: BuyAssetSelectorView,
@@ -49,8 +50,11 @@ export class InstantViewPanel extends React.Component<Loadable<InstantFormState>
   }
 }
 
-export class InstantExchange extends React.Component<any> {
-  public render() {
-    return <theAppContext.Consumer>{({ InstantTxRx }) => <InstantTxRx />}</theAppContext.Consumer>;
-  }
+export function InstantExchange() {
+  const { instant$ } = useContext(theAppContext);
+  const state = useObservable(instant$);
+
+  if (!state) return null;
+
+  return <InstantViewPanel {...state} />;
 }
