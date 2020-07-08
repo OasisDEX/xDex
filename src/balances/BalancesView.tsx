@@ -5,9 +5,9 @@
 import * as React from 'react';
 
 import { FlexLayoutRow } from '../utils/layout/FlexLayoutRow';
+import { MTBalancesView } from './mtBalancesView';
 import { TaxExporterHooked } from './TaxExporterView';
 import { WalletViewHooked } from './WalletView';
-import { MTBalancesView } from './mtBalancesView';
 
 const { REACT_APP_TAX_EXPORTER_ENABLED, REACT_APP_LT_ENABLED } = process.env;
 

@@ -9,11 +9,14 @@ import { Loadable } from '../../utils/loadable';
 import { Panel, PanelBody, PanelHeader } from '../../utils/panel/Panel';
 import { zero } from '../../utils/zero';
 import { MarginableAsset, MTAccount, MTAccountState, UserActionKind } from '../state/mtAccount';
-import { CreateMTFundForm$, MTTransferFormState } from '../transfer/mtTransferForm';
+import { CreateMTFundForm$ } from '../transfer/mtTransferForm';
 import { MTMyPositionView } from './MTMyPositionView';
 
 import { default as BigNumber } from 'bignumber.js';
 import { Observable } from 'rxjs';
+import { theAppContext } from 'src/AppContext';
+import { ModalOpener, useModal } from 'src/utils/modalHook';
+import { useObservable } from 'src/utils/observableHook';
 import { trackingEvents } from '../../analytics/analytics';
 import { AssetDropdownMenu } from '../../balances/AssetDropdownMenu';
 import { TxMetaKind } from '../../blockchain/calls/txMeta';
@@ -27,9 +30,6 @@ import { MtTransferFormView } from '../transfer/mtTransferFormView';
 import backArrowSvg from './back-arrow.svg';
 import * as myPositionStyles from './MTMyPositionView.scss';
 import warningIconSvg from './warning-icon.svg';
-import { useObservable } from 'src/utils/observableHook';
-import { theAppContext } from 'src/AppContext';
-import { useModal, ModalOpener } from 'src/utils/modalHook';
 
 interface RedeemButtonProps {
   disabled: boolean;
@@ -181,8 +181,7 @@ export function MTMyPositionPanel() {
   return <MTMyPositionPanelView open={open} {...state} />;
 }
 
-
-// If it's <Loadable<MTMyPositionPanelInternalProps>> there is a type error 
+// If it's <Loadable<MTMyPositionPanelInternalProps>> there is a type error
 // about mta being undefined in <MTMyPositionPanelView open={open} {...state} />; call
 // in the MTMyPositionPanel
 export function MTMyPositionPanelView(props: Loadable<any> & { open: ModalOpener }) {

@@ -6,6 +6,8 @@ import { BigNumber } from 'bignumber.js';
 import * as classnames from 'classnames';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import { ModalOpener } from 'src/utils/modalHook';
+import { useObservable } from 'src/utils/observableHook';
 import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
 import { trackingEvents } from '../../analytics/analytics';
 import { getToken } from '../../blockchain/config';
@@ -40,8 +42,6 @@ import {
 } from './mtOrderForm';
 import * as styles from './mtOrderFormView.scss';
 import { MTSimpleOrderPanelProps } from './mtOrderPanel';
-import { ModalOpener } from 'src/utils/modalHook';
-import { useObservable } from 'src/utils/observableHook';
 
 /* tslint:disable */
 const collateralBalanceTooltip = (collateral: string) => `
@@ -771,12 +771,12 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState & {
 
 export function MtSimpleOrderFormView(props: MTSimpleFormState & MTSimpleOrderPanelProps & { open: ModalOpener }) {
   const { change, createMTFundForm$, open, view, kind, slippageLimit } = props;
-  let slippageLimitInput: HTMLElement | undefined = undefined;
+  let slippageLimitInput: HTMLElement | undefined;
 
-  function handleKindChange(kind: OfferType) {
+  function handleKindChange(newKind: OfferType) {
     change({
+      newKind,
       kind: FormChangeKind.kindChange,
-      newKind: kind,
     });
   }
 
@@ -806,7 +806,7 @@ export function MtSimpleOrderFormView(props: MTSimpleFormState & MTSimpleOrderPa
           withOnboarding,
         }),
       );
-      return fundForm ? <MtTransferFormView close={close} {...fundForm} /> : null
+      return fundForm ? <MtTransferFormView close={close} {...fundForm} /> : null;
     });
   }
 
@@ -865,9 +865,7 @@ export function MtSimpleOrderFormView(props: MTSimpleFormState & MTSimpleOrderPa
         <InputGroupAddon className={formStyles.inputHeader}>Slippage limit</InputGroupAddon>
         <div className={formStyles.inputTail}>
           <BigNumberInput
-            ref={(el: any) =>
-              (slippageLimitInput = (el && (ReactDOM.findDOMNode(el) as HTMLElement)) || undefined)
-            }
+            ref={(el: any) => (slippageLimitInput = (el && (ReactDOM.findDOMNode(el) as HTMLElement)) || undefined)}
             data-test-id="slippage-limit"
             type="text"
             mask={createNumberMask({

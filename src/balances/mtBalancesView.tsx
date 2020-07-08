@@ -9,6 +9,9 @@ import classnames from 'classnames';
 import { withRouter } from 'react-router';
 import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
 import { map, switchMap } from 'rxjs/internal/operators';
+import { theAppContext } from 'src/AppContext';
+import { ModalOpener, useModal } from 'src/utils/modalHook';
+import { useObservable } from 'src/utils/observableHook';
 import { AssetKind, getToken } from '../blockchain/config';
 import { TxState } from '../blockchain/transactions';
 import { RouterProps } from '../Main';
@@ -26,9 +29,6 @@ import { Currency, InfoLabel } from '../utils/text/Text';
 import { one, zero } from '../utils/zero';
 import { CombinedBalances } from './balances';
 import * as styles from './mtBalancesView.scss';
-import { ModalOpener, useModal } from 'src/utils/modalHook';
-import { useObservable } from 'src/utils/observableHook';
-import { theAppContext } from 'src/AppContext';
 
 export type MTBalancesProps = CombinedBalances & {
   ma?: MarginableAsset;
@@ -36,7 +36,7 @@ export type MTBalancesProps = CombinedBalances & {
   daiPrice: BigNumber;
 };
 
-export type MTBalancesOwnProps = { open: ModalOpener} & {
+export type MTBalancesOwnProps = { open: ModalOpener } & {
   createMTFundForm$: (params: { actionKind: UserActionKind; token: string }) => Observable<MTTransferFormState>;
   approveMTProxy: (args: { token: string; proxyAddress: string }) => Observable<TxState>;
   redeem: (args: { token: string; proxy: any; amount: BigNumber }) => void;
@@ -45,15 +45,14 @@ export type MTBalancesOwnProps = { open: ModalOpener} & {
   daiAllowance: Observable<boolean>;
 };
 
-
 export function MTBalancesView() {
-  const { createMTFundForm$, approveMTProxy, mtLoadingBalances$ } = useContext(theAppContext)
-  const state = useObservable(mtLoadingBalances$)
-  const open = useModal()
+  const { createMTFundForm$, approveMTProxy, mtLoadingBalances$ } = useContext(theAppContext);
+  const state = useObservable(mtLoadingBalances$);
+  const open = useModal();
 
   if (!state) return null;
 
-  const { status, value, error,  ...props } = state as Loadable<MTBalancesProps> & MTBalancesOwnProps;
+  const { status, value, error, ...props } = state as Loadable<MTBalancesProps> & MTBalancesOwnProps;
 
   return (
     <Panel className={styles.balancesPanel}>
@@ -66,7 +65,7 @@ export function MTBalancesView() {
                 open,
                 createMTFundForm$,
                 approveMTProxy,
-                close: () => combinedBalances.selectMa(undefined),               
+                close: () => combinedBalances.selectMa(undefined),
                 account: 'TODO',
                 redeem: props.redeem,
                 transactions: props.transactions,
@@ -81,7 +80,7 @@ export function MTBalancesView() {
               {...{
                 ...combinedBalances,
                 ...props,
-                daiPrice: new BigNumber(0)
+                daiPrice: new BigNumber(0),
               }}
             />
           )

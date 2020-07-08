@@ -9,6 +9,7 @@ import { combineLatest } from 'rxjs';
 import { Observable } from 'rxjs/index';
 import { first, switchMap } from 'rxjs/internal/operators';
 import { map } from 'rxjs/operators';
+import { ModalOpener } from 'src/utils/modalHook';
 import { CDPHistoryView } from '../../balances/CDPHistoryView';
 import { Calls$ } from '../../blockchain/calls/calls';
 import { transactions$, TxState } from '../../blockchain/transactions';
@@ -19,7 +20,6 @@ import { minusOne, one, zero } from '../../utils/zero';
 import { findMarginableAsset, MarginableAsset, MTAccount } from '../state/mtAccount';
 import { CreateMTFundForm$ } from '../transfer/mtTransferForm';
 import * as styles from './MTMyPositionView.scss';
-import { ModalOpener } from 'src/utils/modalHook';
 
 /* tslint:disable */
 const stabilityFeeTooltip = `

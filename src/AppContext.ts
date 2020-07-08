@@ -19,7 +19,7 @@ import {
   createWalletApprove,
   createWalletDisapprove,
 } from './balances/balances';
-import { createBalancesView$, MTBalancesView } from './balances/mtBalancesView';
+import { createBalancesView$ } from './balances/mtBalancesView';
 import { createTaxExport$ } from './balances/taxExporter';
 import { calls$, readCalls$ } from './blockchain/calls/calls';
 import {
@@ -52,11 +52,7 @@ import {
   loadPriceDaysAgo,
   loadVolumeForThePastDay,
 } from './exchange/allTrades/allTrades';
-import {
-  createDepthChartWithLoading$,
-  DepthChartProps,
-  DepthChartWithLoading,
-} from './exchange/depthChart/DepthChartWithLoading';
+import { createDepthChartWithLoading$ } from './exchange/depthChart/DepthChartWithLoading';
 import {
   createCurrentPrice$,
   createDailyVolume$,
@@ -68,15 +64,14 @@ import { createMyClosedTrades$ } from './exchange/myTrades/closedTrades';
 import { createMyCurrentTrades$, createMyTrades$, createMyTradesKind$ } from './exchange/myTrades/myTrades';
 import { aggregateMyOpenTradesFor$, createMyOpenTrades$ } from './exchange/myTrades/openTrades';
 import { createFormController$, OfferFormState } from './exchange/offerMake/offerMake';
-import { createOrderbookForView, OrderbookView, Props } from './exchange/orderbook/OrderbookView';
-import { createOrderbookPanel$, OrderbookPanel, OrderbookPanelProps, SubViewsProps } from './exchange/OrderbookPanel';
+import { createOrderbookForView } from './exchange/orderbook/OrderbookView';
+import { createOrderbookPanel$ } from './exchange/OrderbookPanel';
 import { GroupMode, loadAggregatedTrades, PriceChartDataPoint } from './exchange/priceChart/pricechart';
 import { createPriceChartLoadable$ } from './exchange/priceChart/PriceChartWithLoading';
 import { createFormController$ as createInstantFormController$ } from './instant/instantForm';
 import { createExchangeMigration$, createMigrationOps$ } from './migration/migration';
 import { createMigrationForm$, MigrationFormKind } from './migration/migrationForm';
 
-import { MTMyPositionPanel } from './marginTrading/positions/MTMyPositionPanel';
 import { createMTMyPositionView$ } from './marginTrading/positions/MTMyPositionView';
 import { createMTSimpleOrderForm$, createRiskComplianceProbe$ } from './marginTrading/simple/mtOrderForm';
 import { createMTProxyApprove, MTAccount, MTAccountState } from './marginTrading/state/mtAccount';
@@ -84,9 +79,7 @@ import { createMta$ } from './marginTrading/state/mtAggregate';
 import { CreateMTFundForm$, createMTTransferForm$ } from './marginTrading/transfer/mtTransferForm';
 import { createTransactionNotifier$ } from './transactionNotifier/transactionNotifier';
 import { pluginDevModeHelpers } from './utils/devModeHelpers';
-import { inject } from './utils/inject';
-import { Loadable, LoadableWithTradingPair, loadablifyLight } from './utils/loadable';
-import { withModal } from './utils/modal';
+import { LoadableWithTradingPair, loadablifyLight } from './utils/loadable';
 import { zero } from './utils/zero';
 import { createWrapUnwrapForm$ } from './wrapUnwrap/wrapUnwrapForm';
 
@@ -163,10 +156,12 @@ export function setupAppContext() {
     onEveryBlock$,
   );
 
-  const {
-    mtOrderFormLoadable$,
-    mtMyPositionPanel$,
-  } = mtSimpleOrderForm(mta$, currentOrderbook$, createMTFundForm$, approveMTProxy);
+  const { mtOrderFormLoadable$, mtMyPositionPanel$ } = mtSimpleOrderForm(
+    mta$,
+    currentOrderbook$,
+    createMTFundForm$,
+    approveMTProxy,
+  );
 
   const tradeHistory = memoizeTradingPair(curry(loadAllTrades)(context$, onEveryBlock$));
 
@@ -281,7 +276,7 @@ export function setupAppContext() {
     ),
   });
 
-  const instant$ = loadablifyLight(instantForm$)
+  const instant$ = loadablifyLight(instantForm$);
 
   const exportTax$ = createTaxExport$(context$, initializedAccount$);
 

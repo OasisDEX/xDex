@@ -27,11 +27,11 @@ import { TransactionStateDescription } from '../../utils/text/TransactionStateDe
 import { zero } from '../../utils/zero';
 
 import * as ReactDOM from 'react-dom';
+import { ModalProps } from 'src/utils/modalHook';
+import { useObservable } from 'src/utils/observableHook';
 import { trackingEvents } from '../../analytics/analytics';
 import { theAppContext } from '../../AppContext';
 import { SvgImage } from '../../utils/icons/utils';
-import { LoadableWithTradingPair } from '../../utils/loadable';
-import { MTSimpleFormState } from '../simple/mtOrderForm';
 import { MtSimpleOrderFormBody } from '../simple/mtOrderFormView';
 import * as stylesOrder from '../simple/mtOrderFormView.scss';
 import {
@@ -46,8 +46,6 @@ import {
 import checkIconSvg from './check-icon.svg';
 import { Message, MessageKind, MTTransferFormState, MTTransferFormTab } from './mtTransferForm';
 import * as styles from './mtTransferFormView.scss';
-import { ModalProps } from 'src/utils/modalHook';
-import { useObservable } from 'src/utils/observableHook';
 
 type MTFundFormProps = MTTransferFormState & ModalProps;
 

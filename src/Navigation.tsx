@@ -15,9 +15,9 @@ import { SvgImage } from './utils/icons/utils';
 import { useObservable } from './utils/observableHook';
 
 export const Navigation = ({ children }: any) => {
-  const state = useObservable(walletStatus$.pipe(map((walletStatus) => ({ walletStatus }))))
+  const state = useObservable(walletStatus$.pipe(map((walletStatus) => ({ walletStatus }))));
 
-  const connected = state &&  state.walletStatus === 'connected';
+  const connected = state && state.walletStatus === 'connected';
   return (
     <div className={styles.container}>
       <div className={styles.horizontal}>

@@ -6,19 +6,18 @@ import * as React from 'react';
 import { Redirect, Route, RouteComponentProps, Switch } from 'react-router';
 import { map } from 'rxjs/operators';
 
-import { theAppContext } from '../AppContext';
 import { currentTradingPair$, TradingPair } from '../exchange/tradingPair/tradingPair';
 import { FlexLayoutRow } from '../utils/layout/FlexLayoutRow';
 import { Panel } from '../utils/panel/Panel';
 
 import { AllTradesHooked } from 'src/exchange/allTrades/AllTradesView';
+import { OrderbookHooked } from 'src/exchange/OrderbookPanel';
 import { PriceChartWithLoading } from 'src/exchange/priceChart/PriceChartWithLoading';
 import { TradingPairViewHook } from 'src/exchange/tradingPair/TradingPairView';
-import * as styles from './MarginTradingSimple.scss';
-import { OrderbookHooked } from 'src/exchange/OrderbookPanel';
-import { MTSimpleOrderPanel } from './simple/mtOrderPanel';
-import { MTLiquidationNotification, MTMyPositionPanel } from './positions/MTMyPositionPanel';
 import { useObservable } from 'src/utils/observableHook';
+import * as styles from './MarginTradingSimple.scss';
+import { MTLiquidationNotification, MTMyPositionPanel } from './positions/MTMyPositionPanel';
+import { MTSimpleOrderPanel } from './simple/mtOrderPanel';
 
 export interface MarginTradingOwnProps {
   setTradingPair: (tp: TradingPair) => void;
@@ -70,8 +69,8 @@ const Content = (props: any | { parentMatch: string }) => {
 export function MarginTradingSimple(props: any) {
   const state = useObservable(
     currentTradingPair$.pipe(
-      map((tp: TradingPair) => ({
-        tp,
+      map((tradingPair: TradingPair) => ({
+        tp: tradingPair,
         setTradingPair: currentTradingPair$.next.bind(currentTradingPair$),
       })),
     ),
@@ -90,8 +89,8 @@ export function MarginTradingSimple(props: any) {
       <Switch>
         <Route
           path={`${matchUrl}/:base/:quote`}
-          render={(props) => (
-            <Content {...props} tp={tp} parentMatch={matchUrl} setTradingPair={state.setTradingPair} />
+          render={(localProps) => (
+            <Content {...localProps} tp={tp} parentMatch={matchUrl} setTradingPair={state.setTradingPair} />
           )}
         />
         <Redirect push={true} from={'/multiply'} to={`/multiply/${tp.base}/${tp.quote}`} />

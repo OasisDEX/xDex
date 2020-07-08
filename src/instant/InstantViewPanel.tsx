@@ -4,6 +4,7 @@
 
 import classnames from 'classnames';
 import React, { useContext } from 'react';
+import { useObservable } from 'src/utils/observableHook';
 import { theAppContext } from '../AppContext';
 import { Loadable } from '../utils/loadable';
 import { LoadingIndicator } from '../utils/loadingIndicator/LoadingIndicator';
@@ -18,7 +19,6 @@ import { NewTradeView } from './views/NewTradeView';
 import { PriceImpactWarningView } from './views/PriceImpactWarningView';
 import { TradeSettingsView } from './views/TradeSettingsView';
 import { TradeSummaryView } from './views/TradeSummaryView';
-import { useObservable } from 'src/utils/observableHook';
 
 const views: Record<ViewKind, React.ComponentType<InstantFormState>> = {
   [ViewKind.buyAssetSelector]: BuyAssetSelectorView,

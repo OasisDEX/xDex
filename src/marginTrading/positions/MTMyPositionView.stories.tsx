@@ -13,7 +13,7 @@ import { calculateMarginable } from '../state/mtCalculate';
 import { RawMTHistoryEvent } from '../state/mtHistory';
 import { getMarginableCore, getMTAccount } from '../state/mtTestUtils';
 import { MTTransferFormState } from '../transfer/mtTransferForm';
-import { MTMyPositionPanel, MTMyPositionPanelView } from './MTMyPositionPanel';
+import { MTMyPositionPanelView } from './MTMyPositionPanel';
 import { MTMyPositionView } from './MTMyPositionView';
 
 const stories = storiesOf('Multiply Trading/Your Position Panel', module).addDecorator((story) => (
