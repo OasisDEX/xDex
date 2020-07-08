@@ -187,7 +187,6 @@ export function setupAppContext() {
     mtOrderFormLoadable$,
     mtMyPositionPanel$,
     MTSimpleOrderBuyPanelRxTx,
-    MTMyPositionPanelRxTx,
   } = mtSimpleOrderForm(mta$, currentOrderbook$, createMTFundForm$, approveMTProxy);
 
   const MTAccountDetailsRxTx = connect<MTAccount, {}>(MtAccountDetailsView, mta$);
@@ -346,7 +345,6 @@ export function setupAppContext() {
     mtOrderFormLoadable$,
     mtMyPositionPanel$,
     MTSimpleOrderBuyPanelRxTx,
-    MTMyPositionPanelRxTx,
     MTAccountDetailsRxTx,
     MTBalancesViewRxTx,
     walletView$,
@@ -406,22 +404,10 @@ function mtSimpleOrderForm(
     approveMTProxy,
   );
 
-  const MTMyPositionPanelRxTx =
-    // @ts-ignore
-    withModal(
-      // @ts-ignore
-      connect(
-        // @ts-ignore
-        MTMyPositionPanel,
-        mtMyPositionPanel$,
-      ),
-    );
-
   return {
     mtOrderFormLoadable$,
     mtMyPositionPanel$,
     MTSimpleOrderBuyPanelRxTx,
-    MTMyPositionPanelRxTx,
   };
 }
 

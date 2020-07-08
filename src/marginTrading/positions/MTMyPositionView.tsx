@@ -20,6 +20,7 @@ import { minusOne, one, zero } from '../../utils/zero';
 import { findMarginableAsset, MarginableAsset, MTAccount } from '../state/mtAccount';
 import { CreateMTFundForm$ } from '../transfer/mtTransferForm';
 import * as styles from './MTMyPositionView.scss';
+import { ModalOpener } from 'src/utils/modalHook';
 
 /* tslint:disable */
 const stabilityFeeTooltip = `
@@ -116,7 +117,7 @@ export function createMTMyPositionView$(
   );
 }
 
-export class MTMyPositionView extends React.Component<MTMyPositionViewProps & ModalOpenerProps> {
+export class MTMyPositionView extends React.Component<MTMyPositionViewProps & { open: ModalOpener }> {
   public render() {
     const { ma, inDai, daiPrice } = this.props;
     const { liquidationPenalty } = ma;

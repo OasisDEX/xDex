@@ -21,7 +21,6 @@ import { InputGroup, InputGroupAddon } from '../../utils/forms/InputGroup';
 import { GasCost } from '../../utils/gasCost/GasCost';
 import { BorderBox, Hr } from '../../utils/layout/LayoutHelpers';
 import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
-import { ModalProps } from '../../utils/modal';
 import { Panel, PanelBody, PanelFooter, PanelHeader } from '../../utils/panel/Panel';
 import { Muted } from '../../utils/text/Text';
 import { TransactionStateDescription } from '../../utils/text/TransactionStateDescription';
@@ -47,6 +46,7 @@ import {
 import checkIconSvg from './check-icon.svg';
 import { Message, MessageKind, MTTransferFormState, MTTransferFormTab } from './mtTransferForm';
 import * as styles from './mtTransferFormView.scss';
+import { ModalProps } from 'src/utils/modalHook';
 
 type MTFundFormProps = MTTransferFormState & ModalProps;
 
