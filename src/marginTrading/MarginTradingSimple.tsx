@@ -8,7 +8,6 @@ import { map } from 'rxjs/operators';
 
 import { theAppContext } from '../AppContext';
 import { currentTradingPair$, TradingPair } from '../exchange/tradingPair/tradingPair';
-import { connect } from '../utils/connect';
 import { FlexLayoutRow } from '../utils/layout/FlexLayoutRow';
 import { Panel } from '../utils/panel/Panel';
 

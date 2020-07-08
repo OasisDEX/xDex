@@ -11,7 +11,6 @@ import borrowSvg from './icons/navigation/borrow.svg';
 import saveSvg from './icons/navigation/save.svg';
 import tradeSvg from './icons/navigation/trade.svg';
 import * as styles from './Navigation.scss';
-import { connect } from './utils/connect';
 import { SvgImage } from './utils/icons/utils';
 import { useObservable } from './utils/observableHook';
 

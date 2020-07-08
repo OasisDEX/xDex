@@ -13,7 +13,6 @@ import * as formStyles from '../../exchange/offerMake/OfferMakeForm.scss';
 import { OfferType } from '../../exchange/orderbook/orderbook';
 import { ApproximateInputValue } from '../../utils/Approximate';
 import { BigNumberInput, lessThanOrEqual } from '../../utils/bigNumberInput/BigNumberInput';
-import { connect } from '../../utils/connect';
 import { FormChangeKind, ProgressStage } from '../../utils/form';
 import { formatAmount, formatPrecision, formatPrice } from '../../utils/formatters/format';
 import { CryptoMoney, FormatPercent, Money } from '../../utils/formatters/Formatters';

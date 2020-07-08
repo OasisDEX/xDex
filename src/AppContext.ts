@@ -83,7 +83,6 @@ import { createMTProxyApprove, MTAccount, MTAccountState } from './marginTrading
 import { createMta$ } from './marginTrading/state/mtAggregate';
 import { CreateMTFundForm$, createMTTransferForm$ } from './marginTrading/transfer/mtTransferForm';
 import { createTransactionNotifier$ } from './transactionNotifier/transactionNotifier';
-import { connect } from './utils/connect';
 import { pluginDevModeHelpers } from './utils/devModeHelpers';
 import { inject } from './utils/inject';
 import { Loadable, LoadableWithTradingPair, loadablifyLight } from './utils/loadable';
