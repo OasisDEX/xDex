@@ -146,22 +146,7 @@ export function setupAppContext() {
   const wrapUnwrapForm$ = curry(createWrapUnwrapForm$)(gasPrice$, etherPriceUsd$, etherBalance$, wethBalance$, calls$);
   const approveWallet$ = createWalletApprove(calls$, gasPrice$);
   const disapproveWallet$ = createWalletDisapprove(calls$, gasPrice$);
-
-  const MTBalancesViewRxTx = inject(
-    // @ts-ignore
-    withModal(
-      // @ts-ignore
-      connect(
-        // @ts-ignore
-        MTBalancesView,
-        loadablifyLight(createBalancesView$(initializedAccount$, mtBalances$, daiPriceUsd$)),
-      ),
-    ),
-    {
-      createMTFundForm$,
-      approveMTProxy,
-    },
-  );
+  const mtLoadingBalances$ = loadablifyLight(createBalancesView$(initializedAccount$, mtBalances$, daiPriceUsd$));
 
   const walletView$ = loadablifyLight(mtBalances$);
 
@@ -331,6 +316,7 @@ export function setupAppContext() {
     wrapUnwrapForm$,
     approveWallet$,
     disapproveWallet$,
+    approveMTProxy,
     allTrades$,
     myTrades$,
     instant$,
@@ -338,7 +324,7 @@ export function setupAppContext() {
     mtOrderFormLoadable$,
     mtMyPositionPanel$,
     mta$,
-    MTBalancesViewRxTx,
+    mtLoadingBalances$,
     walletView$,
     sai2DAIMigrationForm$,
     tradingPairView$,

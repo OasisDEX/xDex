@@ -2,7 +2,7 @@
  * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
  */
 
-import * as React from 'react';
+import React, { useContext } from 'react';
 
 import { default as BigNumber } from 'bignumber.js';
 import classnames from 'classnames';
@@ -20,13 +20,15 @@ import { formatDateTime, formatPrecision } from '../utils/formatters/format';
 import { CryptoMoney, Money } from '../utils/formatters/Formatters';
 import { Loadable } from '../utils/loadable';
 import { WithLoadingIndicator } from '../utils/loadingIndicator/LoadingIndicator';
-import { ModalOpenerProps } from '../utils/modal';
 import { Panel, PanelHeader } from '../utils/panel/Panel';
 import { Table } from '../utils/table/Table';
 import { Currency, InfoLabel } from '../utils/text/Text';
 import { one, zero } from '../utils/zero';
 import { CombinedBalances } from './balances';
 import * as styles from './mtBalancesView.scss';
+import { ModalOpener, useModal } from 'src/utils/modalHook';
+import { useObservable } from 'src/utils/observableHook';
+import { theAppContext } from 'src/AppContext';
 
 export type MTBalancesProps = CombinedBalances & {
   ma?: MarginableAsset;
@@ -34,7 +36,7 @@ export type MTBalancesProps = CombinedBalances & {
   daiPrice: BigNumber;
 };
 
-export type MTBalancesOwnProps = ModalOpenerProps & {
+export type MTBalancesOwnProps = { open: ModalOpener} & {
   createMTFundForm$: (params: { actionKind: UserActionKind; token: string }) => Observable<MTTransferFormState>;
   approveMTProxy: (args: { token: string; proxyAddress: string }) => Observable<TxState>;
   redeem: (args: { token: string; proxy: any; amount: BigNumber }) => void;
@@ -43,44 +45,50 @@ export type MTBalancesOwnProps = ModalOpenerProps & {
   daiAllowance: Observable<boolean>;
 };
 
-export class MTBalancesView extends React.Component<Loadable<MTBalancesProps> & MTBalancesOwnProps> {
-  public render() {
-    const { status, value, error, ...props } = this.props;
 
-    return (
-      <Panel className={styles.balancesPanel}>
-        <PanelHeader>Multiply Account</PanelHeader>
-        <WithLoadingIndicator loadable={this.props}>
-          {(combinedBalances) =>
-            combinedBalances.ma && combinedBalances.mta.state === MTAccountState.setup ? (
-              <MTMyPositionPanelInternal
-                {...{
-                  open: props.open,
-                  close: () => combinedBalances.selectMa(undefined),
-                  createMTFundForm$: props.createMTFundForm$,
-                  approveMTProxy: props.approveMTProxy,
-                  account: 'TODO',
-                  redeem: props.redeem,
-                  transactions: props.transactions,
-                  daiAllowance: props.daiAllowance,
-                  ma: findMarginableAsset(combinedBalances.ma.name, combinedBalances.mta)!,
-                  mta: combinedBalances.mta,
-                  daiPrice: new BigNumber(0),
-                }}
-              />
-            ) : (
-              <MTBalancesViewInternal
-                {...{
-                  ...combinedBalances,
-                  ...props,
-                }}
-              />
-            )
-          }
-        </WithLoadingIndicator>
-      </Panel>
-    );
-  }
+export function MTBalancesView() {
+  const { createMTFundForm$, approveMTProxy, mtLoadingBalances$ } = useContext(theAppContext)
+  const state = useObservable(mtLoadingBalances$)
+  const open = useModal()
+
+  if (!state) return null;
+
+  const { status, value, error,  ...props } = state as Loadable<MTBalancesProps> & MTBalancesOwnProps;
+
+  return (
+    <Panel className={styles.balancesPanel}>
+      <PanelHeader>Multiply Account</PanelHeader>
+      <WithLoadingIndicator loadable={state}>
+        {(combinedBalances) =>
+          combinedBalances.ma && combinedBalances.mta.state === MTAccountState.setup ? (
+            <MTMyPositionPanelInternal
+              {...{
+                open,
+                createMTFundForm$,
+                approveMTProxy,
+                close: () => combinedBalances.selectMa(undefined),               
+                account: 'TODO',
+                redeem: props.redeem,
+                transactions: props.transactions,
+                daiAllowance: props.daiAllowance,
+                ma: findMarginableAsset(combinedBalances.ma.name, combinedBalances.mta)!,
+                mta: combinedBalances.mta,
+                daiPrice: new BigNumber(0),
+              }}
+            />
+          ) : (
+            <MTBalancesViewInternal
+              {...{
+                ...combinedBalances,
+                ...props,
+                daiPrice: new BigNumber(0)
+              }}
+            />
+          )
+        }
+      </WithLoadingIndicator>
+    </Panel>
+  );
 }
 
 export function createBalancesView$(

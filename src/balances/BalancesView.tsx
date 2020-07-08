@@ -4,35 +4,31 @@
 
 import * as React from 'react';
 
-import { theAppContext } from '../AppContext';
 import { FlexLayoutRow } from '../utils/layout/FlexLayoutRow';
 import { TaxExporterHooked } from './TaxExporterView';
 import { WalletViewHooked } from './WalletView';
+import { MTBalancesView } from './mtBalancesView';
 
 const { REACT_APP_TAX_EXPORTER_ENABLED, REACT_APP_LT_ENABLED } = process.env;
 
 export const BalancesView = () => {
   return (
     <div>
-      <theAppContext.Consumer>
-        {({ MTBalancesViewRxTx }) => (
-          <div>
-            <FlexLayoutRow>
-              <WalletViewHooked />
-            </FlexLayoutRow>
-            {REACT_APP_LT_ENABLED === '1' && (
-              <FlexLayoutRow>
-                <MTBalancesViewRxTx />
-              </FlexLayoutRow>
-            )}
-            {REACT_APP_TAX_EXPORTER_ENABLED === '1' && (
-              <FlexLayoutRow>
-                <TaxExporterHooked />
-              </FlexLayoutRow>
-            )}
-          </div>
+      <div>
+        <FlexLayoutRow>
+          <WalletViewHooked />
+        </FlexLayoutRow>
+        {REACT_APP_LT_ENABLED === '1' && (
+          <FlexLayoutRow>
+            <MTBalancesView />
+          </FlexLayoutRow>
         )}
-      </theAppContext.Consumer>
+        {REACT_APP_TAX_EXPORTER_ENABLED === '1' && (
+          <FlexLayoutRow>
+            <TaxExporterHooked />
+          </FlexLayoutRow>
+        )}
+      </div>
     </div>
   );
 };

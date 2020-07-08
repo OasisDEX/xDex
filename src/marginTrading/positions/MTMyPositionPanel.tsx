@@ -6,7 +6,6 @@ import React, { useContext } from 'react';
 import * as styles from '../../balances/mtBalancesView.scss';
 import { SvgImage } from '../../utils/icons/utils';
 import { Loadable } from '../../utils/loadable';
-import { ModalOpenerProps, ModalProps } from '../../utils/modal';
 import { Panel, PanelBody, PanelHeader } from '../../utils/panel/Panel';
 import { zero } from '../../utils/zero';
 import { MarginableAsset, MTAccount, MTAccountState, UserActionKind } from '../state/mtAccount';
@@ -222,54 +221,6 @@ export function MTMyPositionPanelView(props: Loadable<any> & { open: ModalOpener
 
   return null;
 }
-
-// export class MTMyPositionPanel extends React.Component<Loadable<MTMyPositionPanelInternalProps> & ModalOpenerProps> {
-//   public render() {
-//     if (this.props.value) {
-//       const panelTitle =
-//         this.props.value.ma && this.props.value.ma.name ? `${this.props.value.ma.name} Position` : 'Your Position';
-//       if (this.props.value && !this.props.value.account) {
-//         return (
-//           <Panel style={{ flexGrow: 1 }}>
-//             <PanelHeader>{panelTitle}</PanelHeader>
-//             {this.props.value.ma && this.props.value.ma.name && (
-//               <div style={{ padding: '150px 30px' }}>
-//                 <LoggedOut view={`${this.props.value.ma.name} Position`} />
-//               </div>
-//             )}
-//           </Panel>
-//         );
-//       }
-
-//       if (this.props.status === 'loaded' && this.props.value.mta) {
-//         const { ma } = this.props.value;
-
-//         const hasHistoryEvents = ma && ma.rawHistory.length > 0;
-
-//         if (ma && (hasHistoryEvents || ma.balance.gt(zero) || ma.dai.gt(zero))) {
-//           return (
-//             <Panel style={{ flexGrow: 1 }}>
-//               <MTMyPositionPanelInternal {...this.props.value} {...{ open: this.props.open }} />
-//             </Panel>
-//           );
-//         }
-//       }
-//     }
-
-//     return null;
-//   }
-
-//   public transfer(actionKind: UserActionKind, token: string, ilk?: string) {
-//     const fundForm$ = this.props.value!.createMTFundForm$({
-//       actionKind,
-//       token,
-//       ilk,
-//       withOnboarding: false,
-//     });
-//     const MTFundFormViewRxTx = connect<MTTransferFormState, ModalProps>(MtTransferFormView, fundForm$);
-//     this.props.open(MTFundFormViewRxTx);
-//   }
-// }
 
 export class MTMyPositionPanelInternal extends React.Component<
   MTMyPositionPanelInternalProps & { open: ModalOpener },
