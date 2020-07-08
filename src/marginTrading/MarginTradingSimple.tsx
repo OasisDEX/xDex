@@ -18,6 +18,7 @@ import { TradingPairViewHook } from 'src/exchange/tradingPair/TradingPairView';
 import * as styles from './MarginTradingSimple.scss';
 import { OrderbookHooked } from 'src/exchange/OrderbookPanel';
 import { MTSimpleOrderPanel } from './simple/mtOrderPanel';
+import { MTLiquidationNotification } from './positions/MTMyPositionPanel';
 
 export interface MarginTradingOwnProps {
   setTradingPair: (tp: TradingPair) => void;
@@ -41,12 +42,7 @@ const Content = (props: any | { parentMatch: string }) => {
         <TradingPairViewHook parentMatch={parentMatch} />
       </FlexLayoutRow>
       <FlexLayoutRow>
-        <theAppContext.Consumer>
-          {({ MTLiquidationNotificationRxTx }) => (
-            // @ts-ignore
-            <MTLiquidationNotificationRxTx />
-          )}
-        </theAppContext.Consumer>
+        <MTLiquidationNotification/>
       </FlexLayoutRow>
       <FlexLayoutRow>
         <Panel className={styles.priceChartPanel} footerBordered={true}>

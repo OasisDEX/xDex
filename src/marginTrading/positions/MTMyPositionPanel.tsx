@@ -2,7 +2,7 @@
  * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
  */
 
-import * as React from 'react';
+import React, { useContext } from 'react';
 import * as styles from '../../balances/mtBalancesView.scss';
 import { SvgImage } from '../../utils/icons/utils';
 import { Loadable } from '../../utils/loadable';
@@ -29,6 +29,8 @@ import { MtTransferFormView } from '../transfer/mtTransferFormView';
 import backArrowSvg from './back-arrow.svg';
 import * as myPositionStyles from './MTMyPositionView.scss';
 import warningIconSvg from './warning-icon.svg';
+import { useObservable } from 'src/utils/observableHook';
+import { theAppContext } from 'src/AppContext';
 
 interface RedeemButtonProps {
   disabled: boolean;
@@ -71,52 +73,55 @@ interface MTMyPositionPanelInternalProps {
   liquidationMessage?: LiquidationMessage;
 }
 
-export class MTLiquidationNotification extends React.Component<Loadable<MTMyPositionPanelInternalProps>> {
-  public render() {
-    if (this.props.value && this.props.status === 'loaded' && this.props.value.mta) {
-      const { mta, ma, redeem, transactions, liquidationMessage } = this.props.value;
+export function MTLiquidationNotification() {
+  const state = useObservable(useContext(theAppContext).mtMyPositionPanel$)
 
-      const warnings = [];
-      if (liquidationMessage) {
-        const warningClass =
-          liquidationMessage.kind === LiquidationMessageKind.redeemable
-            ? myPositionStyles.infoMessage
-            : myPositionStyles.dangerMessage;
+  if(!state) return null
+  const { status, value } = state
 
-        warnings.push(
-          <div className={warningClass} key="liquidation-warning">
-            <>{liquidationMessage.kind !== LiquidationMessageKind.redeemable && <SvgImage image={warningIconSvg} />}</>
-            <span className={myPositionStyles.warningText}>{liquidationMessageContent(liquidationMessage)}</span>
-            {liquidationMessage.kind === LiquidationMessageKind.redeemable && ma.redeemable.gt(zero) && (
-              <RedeemButton
-                redeem={() =>
-                  redeem({
-                    token: ma.name,
-                    proxy: mta.proxy,
-                    amount: ma.redeemable,
-                  })
-                }
-                token={ma.name}
-                disabled={false}
-                transactions={transactions}
-              />
-            )}
-          </div>,
-        );
-      }
+  if (value && status === 'loaded' && value.mta) {
+    const { mta, ma, redeem, transactions, liquidationMessage } = value;
 
-      if (ma && ma.priceDropWarning) {
-        warnings.push(
-          <div className={myPositionStyles.warningMessage} key="price-drop-warning">
-            {liquidationMessageContent({ kind: LiquidationMessageKind.priceDrop })}
-          </div>,
-        );
-      }
+    const warnings = [];
+    if (liquidationMessage) {
+      const warningClass =
+        liquidationMessage.kind === LiquidationMessageKind.redeemable
+          ? myPositionStyles.infoMessage
+          : myPositionStyles.dangerMessage;
 
-      return <div className={myPositionStyles.messagesWrapper}>{warnings}</div>;
+      warnings.push(
+        <div className={warningClass} key="liquidation-warning">
+          <>{liquidationMessage.kind !== LiquidationMessageKind.redeemable && <SvgImage image={warningIconSvg} />}</>
+          <span className={myPositionStyles.warningText}>{liquidationMessageContent(liquidationMessage)}</span>
+          {liquidationMessage.kind === LiquidationMessageKind.redeemable && ma.redeemable.gt(zero) && (
+            <RedeemButton
+              redeem={() =>
+                redeem({
+                  token: ma.name,
+                  proxy: mta.proxy,
+                  amount: ma.redeemable,
+                })
+              }
+              token={ma.name}
+              disabled={false}
+              transactions={transactions}
+            />
+          )}
+        </div>,
+      );
     }
-    return null;
+
+    if (ma && ma.priceDropWarning) {
+      warnings.push(
+        <div className={myPositionStyles.warningMessage} key="price-drop-warning">
+          {liquidationMessageContent({ kind: LiquidationMessageKind.priceDrop })}
+        </div>,
+      );
+    }
+
+    return <div className={myPositionStyles.messagesWrapper}>{warnings}</div>;
   }
+  return null;
 }
 
 function liquidationMessageContent(msg: LiquidationMessage) {

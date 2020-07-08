@@ -73,12 +73,11 @@ import { createOrderbookForView, OrderbookView, Props } from './exchange/orderbo
 import { createOrderbookPanel$, OrderbookPanel, OrderbookPanelProps, SubViewsProps } from './exchange/OrderbookPanel';
 import { GroupMode, loadAggregatedTrades, PriceChartDataPoint } from './exchange/priceChart/pricechart';
 import { createPriceChartLoadable$ } from './exchange/priceChart/PriceChartWithLoading';
-import { createFormController$ as createInstantFormController$, InstantFormState } from './instant/instantForm';
-import { InstantViewPanel } from './instant/InstantViewPanel';
+import { createFormController$ as createInstantFormController$ } from './instant/instantForm';
 import { createExchangeMigration$, createMigrationOps$ } from './migration/migration';
 import { createMigrationForm$, MigrationFormKind } from './migration/migrationForm';
 
-import { MTLiquidationNotification, MTMyPositionPanel } from './marginTrading/positions/MTMyPositionPanel';
+import { MTMyPositionPanel } from './marginTrading/positions/MTMyPositionPanel';
 import { createMTMyPositionView$ } from './marginTrading/positions/MTMyPositionView';
 import { createMTSimpleOrderForm$, createRiskComplianceProbe$ } from './marginTrading/simple/mtOrderForm';
 import { MTSimpleOrderPanel } from './marginTrading/simple/mtOrderPanel';
@@ -186,9 +185,9 @@ export function setupAppContext() {
 
   const {
     mtOrderFormLoadable$,
+    mtMyPositionPanel$,
     MTSimpleOrderBuyPanelRxTx,
     MTMyPositionPanelRxTx,
-    MTLiquidationNotificationRxTx,
   } = mtSimpleOrderForm(mta$, currentOrderbook$, createMTFundForm$, approveMTProxy);
 
   const MTAccountDetailsRxTx = connect<MTAccount, {}>(MtAccountDetailsView, mta$);
@@ -345,9 +344,9 @@ export function setupAppContext() {
     instant$,
     transactionNotifier$,
     mtOrderFormLoadable$,
+    mtMyPositionPanel$,
     MTSimpleOrderBuyPanelRxTx,
     MTMyPositionPanelRxTx,
-    MTLiquidationNotificationRxTx,
     MTAccountDetailsRxTx,
     MTBalancesViewRxTx,
     walletView$,
@@ -399,7 +398,7 @@ function mtSimpleOrderForm(
   // @ts-ignore
   const MTSimpleOrderBuyPanelRxTx = connect(MTSimpleOrderBuyPanel, mtOrderFormLoadable$);
 
-  const MTMyPositionPanel$ = createMTMyPositionView$(
+  const mtMyPositionPanel$ = createMTMyPositionView$(
     mtOrderFormLoadable$,
     createMTFundForm$,
     calls$,
@@ -414,23 +413,15 @@ function mtSimpleOrderForm(
       connect(
         // @ts-ignore
         MTMyPositionPanel,
-        MTMyPositionPanel$,
+        mtMyPositionPanel$,
       ),
-    );
-
-  const MTLiquidationNotificationRxTx =
-    // @ts-ignore
-    connect(
-      // @ts-ignore
-      MTLiquidationNotification,
-      MTMyPositionPanel$,
     );
 
   return {
     mtOrderFormLoadable$,
+    mtMyPositionPanel$,
     MTSimpleOrderBuyPanelRxTx,
     MTMyPositionPanelRxTx,
-    MTLiquidationNotificationRxTx,
   };
 }
 
