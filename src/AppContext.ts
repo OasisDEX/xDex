@@ -19,7 +19,6 @@ import {
   createWalletApprove,
   createWalletDisapprove,
 } from './balances/balances';
-import { MtAccountDetailsView } from './balances/mtAccountDetailsView';
 import { createBalancesView$, MTBalancesView } from './balances/mtBalancesView';
 import { createTaxExport$ } from './balances/taxExporter';
 import { calls$, readCalls$ } from './blockchain/calls/calls';
@@ -189,8 +188,6 @@ export function setupAppContext() {
     MTSimpleOrderBuyPanelRxTx,
   } = mtSimpleOrderForm(mta$, currentOrderbook$, createMTFundForm$, approveMTProxy);
 
-  const MTAccountDetailsRxTx = connect<MTAccount, {}>(MtAccountDetailsView, mta$);
-
   const tradeHistory = memoizeTradingPair(curry(loadAllTrades)(context$, onEveryBlock$));
 
   const currentTradeHistory$ = currentTradingPair$.pipe(switchMap(tradeHistory));
@@ -344,8 +341,8 @@ export function setupAppContext() {
     transactionNotifier$,
     mtOrderFormLoadable$,
     mtMyPositionPanel$,
+    mta$,
     MTSimpleOrderBuyPanelRxTx,
-    MTAccountDetailsRxTx,
     MTBalancesViewRxTx,
     walletView$,
     sai2DAIMigrationForm$,
