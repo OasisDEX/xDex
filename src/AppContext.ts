@@ -189,7 +189,6 @@ export function setupAppContext() {
     MTSimpleOrderBuyPanelRxTx,
     MTMyPositionPanelRxTx,
     MTLiquidationNotificationRxTx,
-    MTSimpleOrderbookPanelTxRx,
   } = mtSimpleOrderForm(mta$, currentOrderbook$, createMTFundForm$, approveMTProxy);
 
   const MTAccountDetailsRxTx = connect<MTAccount, {}>(MtAccountDetailsView, mta$);
@@ -348,7 +347,6 @@ export function setupAppContext() {
     MTSimpleOrderBuyPanelRxTx,
     MTMyPositionPanelRxTx,
     MTLiquidationNotificationRxTx,
-    MTSimpleOrderbookPanelTxRx,
     MTAccountDetailsRxTx,
     MTBalancesViewRxTx,
     walletView$,
@@ -436,45 +434,11 @@ function mtSimpleOrderForm(
       MTMyPositionPanel$,
     );
 
-  const [kindChange, orderbookPanel$] = createOrderbookPanel$();
-
-  const orderbookForView$ = createOrderbookForView(
-    orderbook$,
-    of({
-      change: () => {
-        return;
-      },
-    }),
-    kindChange,
-  );
-  const OrderbookViewTxRx = connect<Props, {}>(OrderbookView, orderbookForView$);
-
-  const depthChartWithLoading$ = createDepthChartWithLoading$(
-    mtOrderForm$.pipe(map((f) => ({ ...f, matchType: OfferMatchType.direct }))),
-    orderbook$,
-    kindChange,
-  );
-
-  const DepthChartWithLoadingTxRx = connect<DepthChartProps, {}>(DepthChartWithLoading, depthChartWithLoading$);
-
-  const MTSimpleOrderbookPanelTxRx = connect(
-    inject<OrderbookPanelProps, SubViewsProps>(
-      OrderbookPanel,
-      // @ts-ignore
-      {
-        DepthChartWithLoading: DepthChartWithLoadingTxRx,
-        OrderbookView: OrderbookViewTxRx,
-      },
-    ),
-    orderbookPanel$,
-  );
-
   return {
     MTSimpleOrderPanelRxTx,
     MTSimpleOrderBuyPanelRxTx,
     MTMyPositionPanelRxTx,
     MTLiquidationNotificationRxTx,
-    MTSimpleOrderbookPanelTxRx,
   };
 }
 

@@ -16,6 +16,7 @@ import { AllTradesHooked } from 'src/exchange/allTrades/AllTradesView';
 import { PriceChartWithLoading } from 'src/exchange/priceChart/PriceChartWithLoading';
 import { TradingPairViewHook } from 'src/exchange/tradingPair/TradingPairView';
 import * as styles from './MarginTradingSimple.scss';
+import { OrderbookHooked } from 'src/exchange/OrderbookPanel';
 
 export interface MarginTradingOwnProps {
   setTradingPair: (tp: TradingPair) => void;
@@ -59,9 +60,7 @@ const Content = (props: any | { parentMatch: string }) => {
           <theAppContext.Consumer>{({ MTSimpleOrderPanelRxTx }) => <MTSimpleOrderPanelRxTx />}</theAppContext.Consumer>
         </Panel>
         <Panel className={styles.orderBookPanel}>
-          <theAppContext.Consumer>
-            {({ MTSimpleOrderbookPanelTxRx }) => <MTSimpleOrderbookPanelTxRx />}
-          </theAppContext.Consumer>
+          <OrderbookHooked/>
         </Panel>
       </FlexLayoutRow>
       <FlexLayoutRow>
