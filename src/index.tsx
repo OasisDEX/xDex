@@ -16,7 +16,7 @@ import { account$, networkId$ } from './blockchain/network';
 import { Web3Status, web3Status$ } from './blockchain/web3';
 import { LoadingState } from './landingPage/LandingPage';
 import { Main } from './Main';
-import { NavigationTxRx } from './Navigation';
+import { Navigation } from './Navigation';
 import { useObservable } from './utils/observableHook';
 import { UnreachableCaseError } from './utils/UnreachableCaseError';
 
@@ -39,9 +39,9 @@ const App = ({ network, status }: Props) => {
         return LoadingState.UNSUPPORTED;
       }
       return (
-        <NavigationTxRx>
+        <Navigation>
           <Main />
-        </NavigationTxRx>
+        </Navigation>
       );
     default:
       throw new UnreachableCaseError(status);

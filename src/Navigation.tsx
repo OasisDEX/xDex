@@ -13,9 +13,12 @@ import tradeSvg from './icons/navigation/trade.svg';
 import * as styles from './Navigation.scss';
 import { connect } from './utils/connect';
 import { SvgImage } from './utils/icons/utils';
+import { useObservable } from './utils/observableHook';
 
-const Navigation = ({ walletStatus, children }: any) => {
-  const connected = walletStatus === 'connected';
+export const Navigation = ({ children }: any) => {
+  const state = useObservable(walletStatus$.pipe(map((walletStatus) => ({ walletStatus }))))
+
+  const connected = state &&  state.walletStatus === 'connected';
   return (
     <div className={styles.container}>
       <div className={styles.horizontal}>
@@ -28,8 +31,6 @@ const Navigation = ({ walletStatus, children }: any) => {
     </div>
   );
 };
-
-export const NavigationTxRx = connect(Navigation, walletStatus$.pipe(map((walletStatus) => ({ walletStatus }))));
 
 export const VerticalNav = ({ connected }: any) => {
   return (
