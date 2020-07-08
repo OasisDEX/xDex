@@ -79,15 +79,12 @@ import { createMigrationForm$, MigrationFormKind } from './migration/migrationFo
 import { MTMyPositionPanel } from './marginTrading/positions/MTMyPositionPanel';
 import { createMTMyPositionView$ } from './marginTrading/positions/MTMyPositionView';
 import { createMTSimpleOrderForm$, createRiskComplianceProbe$ } from './marginTrading/simple/mtOrderForm';
-import { MTSimpleOrderPanel } from './marginTrading/simple/mtOrderPanel';
 import { createMTProxyApprove, MTAccount, MTAccountState } from './marginTrading/state/mtAccount';
 import { createMta$ } from './marginTrading/state/mtAggregate';
 import { CreateMTFundForm$, createMTTransferForm$ } from './marginTrading/transfer/mtTransferForm';
-import { MTSimpleOrderBuyPanel } from './marginTrading/transfer/mtTransferFormView';
 import { createTransactionNotifier$ } from './transactionNotifier/transactionNotifier';
 import { connect } from './utils/connect';
 import { pluginDevModeHelpers } from './utils/devModeHelpers';
-import { OfferMatchType } from './utils/form';
 import { inject } from './utils/inject';
 import { Loadable, LoadableWithTradingPair, loadablifyLight } from './utils/loadable';
 import { withModal } from './utils/modal';
@@ -185,7 +182,6 @@ export function setupAppContext() {
   const {
     mtOrderFormLoadable$,
     mtMyPositionPanel$,
-    MTSimpleOrderBuyPanelRxTx,
   } = mtSimpleOrderForm(mta$, currentOrderbook$, createMTFundForm$, approveMTProxy);
 
   const tradeHistory = memoizeTradingPair(curry(loadAllTrades)(context$, onEveryBlock$));
@@ -342,7 +338,6 @@ export function setupAppContext() {
     mtOrderFormLoadable$,
     mtMyPositionPanel$,
     mta$,
-    MTSimpleOrderBuyPanelRxTx,
     MTBalancesViewRxTx,
     walletView$,
     sai2DAIMigrationForm$,
@@ -390,9 +385,6 @@ function mtSimpleOrderForm(
     ),
   );
 
-  // @ts-ignore
-  const MTSimpleOrderBuyPanelRxTx = connect(MTSimpleOrderBuyPanel, mtOrderFormLoadable$);
-
   const mtMyPositionPanel$ = createMTMyPositionView$(
     mtOrderFormLoadable$,
     createMTFundForm$,
@@ -404,7 +396,6 @@ function mtSimpleOrderForm(
   return {
     mtOrderFormLoadable$,
     mtMyPositionPanel$,
-    MTSimpleOrderBuyPanelRxTx,
   };
 }
 
