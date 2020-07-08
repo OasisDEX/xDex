@@ -17,7 +17,7 @@ import { TheFooterHooked } from './footer/Footer';
 import { HeaderHooked } from './header/Header';
 import * as styles from './index.scss';
 import { InstantExchange } from './instant/InstantViewPanel';
-import { MarginTradingSimpleTxRx } from './marginTrading/MarginTradingSimple';
+import { MarginTradingSimple } from './marginTrading/MarginTradingSimple';
 import { TransactionNotifierHooked } from './transactionNotifier/TransactionNotifierView';
 import { SetupModal } from './utils/modalHook';
 import { useObservable } from './utils/observableHook';
@@ -76,7 +76,7 @@ const Routes = ({ status }: { status: WalletStatus }) => {
       {REACT_APP_INSTANT_ENABLED === '1' && <Route exact={false} path={'/instant'} component={InstantExchange} />}
       {status === 'connected' && <Route path={'/balances'} component={BalancesView} />}
       {REACT_APP_LT_ENABLED === '1' && status === 'connected' && (
-        <Route path={'/multiply'} component={MarginTradingSimpleTxRx} />
+        <Route path={'/multiply'} component={MarginTradingSimple} />
       )}
       <Redirect from={'/account'} to={'/balances'} />
       <Redirect from={'/'} to={'/market'} />

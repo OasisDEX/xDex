@@ -19,6 +19,7 @@ import * as styles from './MarginTradingSimple.scss';
 import { OrderbookHooked } from 'src/exchange/OrderbookPanel';
 import { MTSimpleOrderPanel } from './simple/mtOrderPanel';
 import { MTLiquidationNotification, MTMyPositionPanel } from './positions/MTMyPositionPanel';
+import { useObservable } from 'src/utils/observableHook';
 
 export interface MarginTradingOwnProps {
   setTradingPair: (tp: TradingPair) => void;
@@ -42,7 +43,7 @@ const Content = (props: any | { parentMatch: string }) => {
         <TradingPairViewHook parentMatch={parentMatch} />
       </FlexLayoutRow>
       <FlexLayoutRow>
-        <MTLiquidationNotification/>
+        <MTLiquidationNotification />
       </FlexLayoutRow>
       <FlexLayoutRow>
         <Panel className={styles.priceChartPanel} footerBordered={true}>
@@ -54,48 +55,48 @@ const Content = (props: any | { parentMatch: string }) => {
       </FlexLayoutRow>
       <FlexLayoutRow>
         <Panel className={styles.orderFormPanel}>
-          <MTSimpleOrderPanel/>
+          <MTSimpleOrderPanel />
         </Panel>
         <Panel className={styles.orderBookPanel}>
-          <OrderbookHooked/>
+          <OrderbookHooked />
         </Panel>
       </FlexLayoutRow>
       <FlexLayoutRow>
-        <MTMyPositionPanel/>
+        <MTMyPositionPanel />
       </FlexLayoutRow>
     </div>
   );
 };
 
-export class MarginTradingSimple extends React.Component<MarginTradingProps> {
-  public render() {
-    const {
-      match: { url: matchUrl },
-      tp,
-    } = this.props;
+export function MarginTradingSimple(props: any) {
+  const state = useObservable(
+    currentTradingPair$.pipe(
+      map((tp: TradingPair) => ({
+        tp,
+        setTradingPair: currentTradingPair$.next.bind(currentTradingPair$),
+      })),
+    ),
+  );
 
-    return (
-      <div>
-        <Switch>
-          <Route
-            path={`${matchUrl}/:base/:quote`}
-            render={(props) => (
-              <Content {...props} tp={tp} parentMatch={matchUrl} setTradingPair={this.props.setTradingPair} />
-            )}
-          />
-          <Redirect push={true} from={'/multiply'} to={`/multiply/${tp.base}/${tp.quote}`} />
-        </Switch>
-      </div>
-    );
-  }
+  if (!state) return null;
+
+  const { tp } = state as MarginTradingProps;
+
+  const {
+    match: { url: matchUrl },
+  } = props;
+
+  return (
+    <div>
+      <Switch>
+        <Route
+          path={`${matchUrl}/:base/:quote`}
+          render={(props) => (
+            <Content {...props} tp={tp} parentMatch={matchUrl} setTradingPair={state.setTradingPair} />
+          )}
+        />
+        <Redirect push={true} from={'/multiply'} to={`/multiply/${tp.base}/${tp.quote}`} />
+      </Switch>
+    </div>
+  );
 }
-
-export const MarginTradingSimpleTxRx = connect<MarginTradingOwnProps, RouteComponentProps<any>>(
-  MarginTradingSimple,
-  currentTradingPair$.pipe(
-    map((tp: TradingPair) => ({
-      tp,
-      setTradingPair: currentTradingPair$.next.bind(currentTradingPair$),
-    })),
-  ),
-);
