@@ -185,7 +185,7 @@ export function setupAppContext() {
   );
 
   const {
-    MTSimpleOrderPanelRxTx,
+    mtOrderFormLoadable$,
     MTSimpleOrderBuyPanelRxTx,
     MTMyPositionPanelRxTx,
     MTLiquidationNotificationRxTx,
@@ -336,6 +336,7 @@ export function setupAppContext() {
     orderbookForView$,
     orderbookPanel$,
     depthChartWithLoading$,
+    createMTFundForm$,
     wrapUnwrapForm$,
     approveWallet$,
     disapproveWallet$,
@@ -343,7 +344,7 @@ export function setupAppContext() {
     myTrades$,
     instant$,
     transactionNotifier$,
-    MTSimpleOrderPanelRxTx,
+    mtOrderFormLoadable$,
     MTSimpleOrderBuyPanelRxTx,
     MTMyPositionPanelRxTx,
     MTLiquidationNotificationRxTx,
@@ -395,15 +396,6 @@ function mtSimpleOrderForm(
     ),
   );
 
-  const MTSimpleOrderPanelRxTx = inject(
-    // @ts-ignore
-    withModal(
-      // @ts-ignore
-      connect(MTSimpleOrderPanel, mtOrderFormLoadable$),
-    ),
-    { createMTFundForm$ },
-  );
-
   // @ts-ignore
   const MTSimpleOrderBuyPanelRxTx = connect(MTSimpleOrderBuyPanel, mtOrderFormLoadable$);
 
@@ -435,7 +427,7 @@ function mtSimpleOrderForm(
     );
 
   return {
-    MTSimpleOrderPanelRxTx,
+    mtOrderFormLoadable$,
     MTSimpleOrderBuyPanelRxTx,
     MTMyPositionPanelRxTx,
     MTLiquidationNotificationRxTx,
