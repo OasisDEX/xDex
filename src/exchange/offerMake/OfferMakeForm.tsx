@@ -587,8 +587,8 @@ function messageContent(msg: Message) {
           {`Unlock ${msg.token} for Trading in the `}
           <routerContext.Consumer>
             {({ rootUrl }) => (
-              <Link to={`${rootUrl}account`} style={{ whiteSpace: 'nowrap' }}>
-                Account Page
+              <Link to={`${rootUrl}balances`} style={{ whiteSpace: 'nowrap' }}>
+                Balances Page
               </Link>
             )}
           </routerContext.Consumer>
