@@ -35,6 +35,6 @@ export const mixpanelIdentify = (id: string, props: any) => {
   console.debug(
     `[Mixpanel] Identifying as ${id} ${props && props.walletType ? `using wallet ${props.walletType}` : ''}`,
   );
-  mixpanel.identify(id);
+  mixpanel.identify(id.toLowerCase());
   if (props) mixpanel.people.set(props);
 };
