@@ -386,7 +386,7 @@ export class OfferMakeForm extends React.Component<OfferFormState> {
   }
 
   private submitButton() {
-    const { stage, kind, total, baseToken, quoteToken } = this.props;
+    const { stage, kind, total } = this.props;
     return (
       <Button
         data-test-id="place-order"
@@ -397,7 +397,7 @@ export class OfferMakeForm extends React.Component<OfferFormState> {
         disabled={stage !== 'readyToProceed'}
         onClick={() => {
           if (total) {
-            trackingEvents.initiateTradeMarket(kind, total.toNumber(), `${baseToken}${quoteToken}`);
+            trackingEvents.initiateTradeMarket(kind);
           }
         }}
       >
@@ -587,8 +587,8 @@ function messageContent(msg: Message) {
           {`Unlock ${msg.token} for Trading in the `}
           <routerContext.Consumer>
             {({ rootUrl }) => (
-              <Link to={`${rootUrl}account`} style={{ whiteSpace: 'nowrap' }}>
-                Account Page
+              <Link to={`${rootUrl}balances`} style={{ whiteSpace: 'nowrap' }}>
+                Balances Page
               </Link>
             )}
           </routerContext.Consumer>
