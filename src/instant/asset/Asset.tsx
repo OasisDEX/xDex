@@ -26,13 +26,8 @@ export class Asset extends React.Component<AssetProps> {
     const { user, currency, onClick, isLocked } = this.props;
     const balance = user && user.account ? this.props.balance : new BigNumber(0);
     return (
-      <button
-        className={classnames(styles.asset, isLocked && styles.locked)}
-        disabled={isLocked}
-        data-test-id="asset-button"
-        onClick={onClick}
-      >
-        <span className={styles.icon}>{getToken(currency).iconColor}</span>
+      <button className={classnames(styles.asset)} disabled={isLocked} data-test-id="asset-button" onClick={onClick}>
+        <span className={styles.icon}>{isLocked ? getToken(currency).iconDisabled : getToken(currency).iconColor}</span>
         {!balance && <ProgressIcon size="sm" />}
         {balance && (
           <div data-test-id="balance">

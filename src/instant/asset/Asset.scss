@@ -27,18 +27,6 @@
   &:hover {
     border-color: $dark-grayish-blue;
   }
-
-  &.locked {
-    pointer-events: none;
-
-    border-color: $disabled;
-    color: $disabled;
-
-    @include iconsDisabled(
-        $disabled,
-        $white
-    )
-  }
 }
 
 .icon {
