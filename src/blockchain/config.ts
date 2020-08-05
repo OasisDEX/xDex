@@ -82,6 +82,7 @@ export const tradingPairs: TradingPair[] = [
         { base: 'WBTC', quote: 'DAI' },
         { base: 'COMP', quote: 'DAI' },
         { base: 'KNC', quote: 'DAI' },
+        { base: 'MANA', quote: 'DAI' },
       ]
     : []),
   { base: 'DAI', quote: 'USDC' },
@@ -100,6 +101,7 @@ export const tradingPairs: TradingPair[] = [
         { base: 'WBTC', quote: 'WETH' },
         { base: 'COMP', quote: 'WETH' },
         { base: 'KNC', quote: 'WETH' },
+        { base: 'MANA', quote: 'WETH' },
       ]
     : []),
 ];
@@ -321,6 +323,19 @@ const tokens = asMap('symbol', [
           iconColor: SvgImageSimple(kncColorSvg),
           ticker: 'knc-kyber-network',
         },
+        {
+          symbol: 'MANA',
+          precision: 18,
+          digits: 5,
+          digitsInstant: 3,
+          safeCollRatio: 1.5,
+          maxSell: '1000000000000000',
+          name: 'Decentraland MANA',
+          icon: SvgImageSimple(kncSvg),
+          iconCircle: SvgImageSimple(kncCircleSvg),
+          iconColor: SvgImageSimple(kncColorSvg),
+          ticker: 'mana-decentraland',
+        },
       ]),
 ]);
 
@@ -398,6 +413,7 @@ const protoMain = {
       loadToken('WBTC', erc20, '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599'),
       loadToken('KNC', erc20, '0xdd974d5c2e2928dea5f71b9825b8b646686bd200'),
       loadToken('COMP', erc20, '0xc00e94cb662c3520282e6f5717214004a7f26888'),
+      loadToken('MANA', erc20, '0x0f5d2fb29fb7d3cfee444a200298f468908cc942'),
     ]);
   },
   cdpManager: '0x60762005be465901ca18ba34416b35143de72c0c',
@@ -520,6 +536,7 @@ const kovan: NetworkConfig = {
       loadToken('WBTC', erc20, '0xA08d982C2deBa0DbE433a9C6177a219E96CeE656'),
       loadToken('KNC', erc20, '0x6cdd25a4365db73831078982de110ca50d058cc5'),
       loadToken('COMP', erc20, '0xcc4034e05dffdb142a373de49cf8a2356cae7bf6'),
+      loadToken('MANA', erc20, '0x221f4d62636b7b51b99e36444ea47dc7831c2b2f'),
     ]);
   },
   mcd: {
@@ -671,6 +688,7 @@ const localnet: NetworkConfig = {
       loadToken('WBTC', erc20, '0x85a91f61feA8f173434424F9758a12fEA11B613c'),
       loadToken('COMP', erc20, '0x85a91f61feA8f173434424F9758a12fEA11B613c'), // New token should be deployed (WBTC address used)
       loadToken('KNC', erc20, '0x85a91f61feA8f173434424F9758a12fEA11B613c'), // New token should be deployed (WBTC address used)
+      loadToken('MANA', erc20, '0x85a91f61feA8f173434424F9758a12fEA11B613c'), // New token should be deployed (WBTC address used)
     ]);
   },
   mcd: {
