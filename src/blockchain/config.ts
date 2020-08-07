@@ -7,44 +7,61 @@ import { fromPairs, memoize, zip } from 'lodash';
 import { TradingPair } from '../exchange/tradingPair/tradingPair';
 import batCircleSvg from '../icons/coins/bat-circle.svg';
 import batColorSvg from '../icons/coins/bat-color.svg';
+import batDisabledSvg from '../icons/coins/bat-disabled.svg';
 import batSvg from '../icons/coins/bat.svg';
 import daiCircleSvg from '../icons/coins/dai-circle.svg';
 import daiColorSvg from '../icons/coins/dai-color.svg';
+import daiDisabledSvg from '../icons/coins/dai-disabled.svg';
 import daiSvg from '../icons/coins/dai.svg';
 import ethCircleSvg from '../icons/coins/eth-circle.svg';
 import ethColorSvg from '../icons/coins/eth-color.svg';
+import ethDisabledSvg from '../icons/coins/eth-disabled.svg';
 import ethSvg from '../icons/coins/eth.svg';
 import linkCircleSvg from '../icons/coins/link-circle.svg';
 import linkColorSvg from '../icons/coins/link-color.svg';
+import linkDisabledSvg from '../icons/coins/link-disabled.svg';
 import linkSvg from '../icons/coins/link.svg';
+import manaCircleSvg from '../icons/coins/mana-circle.svg';
+import manaColorSvg from '../icons/coins/mana-color.svg';
+import manaDisabledSvg from '../icons/coins/mana-disabled.svg';
+import manaSvg from '../icons/coins/mana.svg';
 import paxCircleSvg from '../icons/coins/pax-circle.svg';
 import paxColorSvg from '../icons/coins/pax-color.svg';
+import paxDisabledSvg from '../icons/coins/pax-disabled.svg';
 import paxSvg from '../icons/coins/pax.svg';
 import repCircleSvg from '../icons/coins/rep-circle.svg';
 import repColorSvg from '../icons/coins/rep-color.svg';
+import repDisabledSvg from '../icons/coins/rep-disabled.svg';
 import repSvg from '../icons/coins/rep.svg';
 import saiCircleSvg from '../icons/coins/sai-circle.svg';
 import saiColorSvg from '../icons/coins/sai-color.svg';
 import saiSvg from '../icons/coins/sai.svg';
 import tusdCircleSvg from '../icons/coins/tusd-circle.svg';
 import tusdColorSvg from '../icons/coins/tusd-color.svg';
+import tusdDisabledSvg from '../icons/coins/tusd-disabled.svg';
 import tusdSvg from '../icons/coins/tusd.svg';
 import usdcCircleSvg from '../icons/coins/usdc-circle.svg';
 import usdcColorSvg from '../icons/coins/usdc-color.svg';
+import usdcDisabledSvg from '../icons/coins/usdc-disabled.svg';
 import usdcSvg from '../icons/coins/usdc.svg';
 import wbtcCircleSvg from '../icons/coins/wbtc-circle.svg';
 import wbtcColorSvg from '../icons/coins/wbtc-color.svg';
+import wbtcDisabledSvg from '../icons/coins/wbtc-disabled.svg';
 import wbtcSvg from '../icons/coins/wbtc.svg';
+import wethDisabledSvg from '../icons/coins/weth-disabled.svg';
 import zrxCircleSvg from '../icons/coins/zrx-circle.svg';
 import zrxColorSvg from '../icons/coins/zrx-color.svg';
+import zrxDisabledSvg from '../icons/coins/zrx-disabled.svg';
 import zrxSvg from '../icons/coins/zrx.svg';
 
 import kncCircleSvg from '../icons/coins/knc-circle.svg';
 import kncColorSvg from '../icons/coins/knc-color.svg';
+import kncDisabledSvg from '../icons/coins/knc-disabled.svg';
 import kncSvg from '../icons/coins/knc.svg';
 
 import compCircleSvg from '../icons/coins/comp-circle.svg';
 import compColorSvg from '../icons/coins/comp-color.svg';
+import compDisabledSvg from '../icons/coins/comp-disabled.svg';
 import compSvg from '../icons/coins/comp.svg';
 
 import { SvgImageSimple } from '../utils/icons/utils';
@@ -82,6 +99,7 @@ export const tradingPairs: TradingPair[] = [
         { base: 'WBTC', quote: 'DAI' },
         { base: 'COMP', quote: 'DAI' },
         { base: 'KNC', quote: 'DAI' },
+        { base: 'MANA', quote: 'DAI' },
       ]
     : []),
   { base: 'DAI', quote: 'USDC' },
@@ -100,6 +118,7 @@ export const tradingPairs: TradingPair[] = [
         { base: 'WBTC', quote: 'WETH' },
         { base: 'COMP', quote: 'WETH' },
         { base: 'KNC', quote: 'WETH' },
+        { base: 'MANA', quote: 'WETH' },
       ]
     : []),
 ];
@@ -131,7 +150,7 @@ const tokens = asMap('symbol', [
     maxSell: '10000000',
     name: 'Ether',
     icon: SvgImageSimple(ethSvg),
-    // iconInverse: SvgImageSimple(ethInverseSvg),
+    iconDisabled: SvgImageSimple(ethDisabledSvg),
     iconCircle: SvgImageSimple(ethCircleSvg),
     iconColor: SvgImageSimple(ethColorSvg),
     ticker: 'eth-ethereum',
@@ -146,7 +165,7 @@ const tokens = asMap('symbol', [
     maxSell: '10000000',
     name: 'Wrapped Ether',
     icon: SvgImageSimple(ethSvg),
-    // iconInverse: SvgImageSimple(ethCircleSvg),
+    iconDisabled: SvgImageSimple(wethDisabledSvg),
     iconCircle: SvgImageSimple(ethCircleSvg),
     iconColor: SvgImageSimple(ethCircleSvg),
     ticker: 'eth-ethereum',
@@ -174,7 +193,7 @@ const tokens = asMap('symbol', [
     maxSell: '10000000',
     name: 'Dai',
     icon: SvgImageSimple(daiSvg),
-    // iconInverse: SvgImageSimple(daiInverseSvg),
+    iconDisabled: SvgImageSimple(daiDisabledSvg),
     iconCircle: SvgImageSimple(daiCircleSvg),
     iconColor: SvgImageSimple(daiColorSvg),
     ticker: 'dai-dai',
@@ -191,7 +210,7 @@ const tokens = asMap('symbol', [
           maxSell: '1000000000000000',
           name: 'Augur',
           icon: SvgImageSimple(repSvg),
-          // iconInverse: SvgImageSimple(repInverseSvg),
+          iconDisabled: SvgImageSimple(repDisabledSvg),
           iconCircle: SvgImageSimple(repCircleSvg),
           iconColor: SvgImageSimple(repColorSvg),
           ticker: 'rep-augur',
@@ -206,7 +225,7 @@ const tokens = asMap('symbol', [
           maxSell: '1000000000000000',
           name: '0x',
           icon: SvgImageSimple(zrxSvg),
-          // iconInverse: SvgImageSimple(mkrInverseSvg),
+          iconDisabled: SvgImageSimple(zrxDisabledSvg),
           iconCircle: SvgImageSimple(zrxCircleSvg),
           iconColor: SvgImageSimple(zrxColorSvg),
           ticker: 'zrx-0x',
@@ -224,6 +243,7 @@ const tokens = asMap('symbol', [
           // iconInverse: SvgImageSimple(batInverseSvg),
           iconCircle: SvgImageSimple(batCircleSvg),
           iconColor: SvgImageSimple(batColorSvg),
+          iconDisabled: SvgImageSimple(batDisabledSvg),
           ticker: 'bat-basic-attention-token',
           assetKind: AssetKind.nonMarginable,
         },
@@ -236,7 +256,7 @@ const tokens = asMap('symbol', [
           maxSell: '1000000000000000',
           name: 'USD Coin',
           icon: SvgImageSimple(usdcSvg),
-          // iconInverse: SvgImageSimple(usdcInverseSvg),
+          iconDisabled: SvgImageSimple(usdcDisabledSvg),
           iconCircle: SvgImageSimple(usdcCircleSvg),
           iconColor: SvgImageSimple(usdcColorSvg),
           ticker: 'usdc-usd-coin',
@@ -252,6 +272,7 @@ const tokens = asMap('symbol', [
           maxSell: '1000000000000000',
           name: 'True USD',
           icon: SvgImageSimple(tusdSvg),
+          iconDisabled: SvgImageSimple(tusdDisabledSvg),
           iconCircle: SvgImageSimple(tusdCircleSvg),
           iconColor: SvgImageSimple(tusdColorSvg),
           ticker: 'tusd-trueusd',
@@ -265,6 +286,7 @@ const tokens = asMap('symbol', [
           maxSell: '1000000000000000',
           name: 'Paxos Standard',
           icon: SvgImageSimple(paxSvg),
+          iconDisabled: SvgImageSimple(paxDisabledSvg),
           iconCircle: SvgImageSimple(paxCircleSvg),
           iconColor: SvgImageSimple(paxColorSvg),
           ticker: 'pax-paxos-standard-token',
@@ -278,6 +300,7 @@ const tokens = asMap('symbol', [
           maxSell: '1000000000000000',
           name: 'Chainlink',
           icon: SvgImageSimple(linkSvg),
+          iconDisabled: SvgImageSimple(linkDisabledSvg),
           iconCircle: SvgImageSimple(linkCircleSvg),
           iconColor: SvgImageSimple(linkColorSvg),
           ticker: 'link-chainlink',
@@ -291,6 +314,7 @@ const tokens = asMap('symbol', [
           maxSell: '1000000000000000',
           name: 'Wrapped Bitcoin',
           icon: SvgImageSimple(wbtcSvg),
+          iconDisabled: SvgImageSimple(wbtcDisabledSvg),
           iconCircle: SvgImageSimple(wbtcCircleSvg),
           iconColor: SvgImageSimple(wbtcColorSvg),
           ticker: 'wbtc-wrapped-bitcoin',
@@ -306,6 +330,7 @@ const tokens = asMap('symbol', [
           icon: SvgImageSimple(compSvg),
           iconCircle: SvgImageSimple(compCircleSvg),
           iconColor: SvgImageSimple(compColorSvg),
+          iconDisabled: SvgImageSimple(compDisabledSvg),
           ticker: 'comp-compound',
         },
         {
@@ -317,9 +342,24 @@ const tokens = asMap('symbol', [
           maxSell: '1000000000000000',
           name: 'Kyber Network',
           icon: SvgImageSimple(kncSvg),
+          iconDisabled: SvgImageSimple(kncDisabledSvg),
           iconCircle: SvgImageSimple(kncCircleSvg),
           iconColor: SvgImageSimple(kncColorSvg),
           ticker: 'knc-kyber-network',
+        },
+        {
+          symbol: 'MANA',
+          precision: 18,
+          digits: 5,
+          digitsInstant: 3,
+          safeCollRatio: 1.5,
+          maxSell: '1000000000000000',
+          name: 'Decentraland MANA',
+          icon: SvgImageSimple(manaSvg),
+          iconDisabled: SvgImageSimple(manaDisabledSvg),
+          iconCircle: SvgImageSimple(manaCircleSvg),
+          iconColor: SvgImageSimple(manaColorSvg),
+          ticker: 'mana-decentraland',
         },
       ]),
 ]);
@@ -398,6 +438,7 @@ const protoMain = {
       loadToken('WBTC', erc20, '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599'),
       loadToken('KNC', erc20, '0xdd974d5c2e2928dea5f71b9825b8b646686bd200'),
       loadToken('COMP', erc20, '0xc00e94cb662c3520282e6f5717214004a7f26888'),
+      loadToken('MANA', erc20, '0x0f5d2fb29fb7d3cfee444a200298f468908cc942'),
     ]);
   },
   cdpManager: '0x60762005be465901ca18ba34416b35143de72c0c',
@@ -520,6 +561,7 @@ const kovan: NetworkConfig = {
       loadToken('WBTC', erc20, '0xA08d982C2deBa0DbE433a9C6177a219E96CeE656'),
       loadToken('KNC', erc20, '0x6cdd25a4365db73831078982de110ca50d058cc5'),
       loadToken('COMP', erc20, '0xcc4034e05dffdb142a373de49cf8a2356cae7bf6'),
+      loadToken('MANA', erc20, '0x221f4d62636b7b51b99e36444ea47dc7831c2b2f'),
     ]);
   },
   mcd: {
@@ -671,6 +713,7 @@ const localnet: NetworkConfig = {
       loadToken('WBTC', erc20, '0x85a91f61feA8f173434424F9758a12fEA11B613c'),
       loadToken('COMP', erc20, '0x85a91f61feA8f173434424F9758a12fEA11B613c'), // New token should be deployed (WBTC address used)
       loadToken('KNC', erc20, '0x85a91f61feA8f173434424F9758a12fEA11B613c'), // New token should be deployed (WBTC address used)
+      loadToken('MANA', erc20, '0x85a91f61feA8f173434424F9758a12fEA11B613c'), // New token should be deployed (WBTC address used)
     ]);
   },
   mcd: {

@@ -66,8 +66,10 @@ combineLatest(account$, context$)
     }),
   )
   .subscribe(([account, network]) => {
-    mixpanelIdentify(account!, { walletType: 'metamask' });
-    trackingEvents.accountChange(account!, network!);
+    if (account) {
+      mixpanelIdentify(account, { walletType: 'metamask' });
+      trackingEvents.accountChange(account, network!);
+    }
   });
 
 export const onEveryBlock$ = combineLatest(every5Seconds$, context$).pipe(
