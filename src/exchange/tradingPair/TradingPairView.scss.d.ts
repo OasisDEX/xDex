@@ -1,4 +1,6 @@
 export const container: string;
+export const tradingPairPanel: string;
+export const pairPickerOpen: string;
 export const dropdown: string;
 export const mobileWrapper: string;
 export const dropdownIcon: string;

@@ -73,5 +73,3 @@ export const walletStatus$: Observable<WalletStatus> = combineLatest(account$, a
   tap(console.log),
   shareReplay(1),
 );
-
-// walletStatus$.subscribe(console.log);

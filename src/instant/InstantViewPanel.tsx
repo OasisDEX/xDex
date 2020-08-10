@@ -3,7 +3,8 @@
  */
 
 import classnames from 'classnames';
-import * as React from 'react';
+import React, { useContext } from 'react';
+import { useObservable } from 'src/utils/observableHook';
 import { theAppContext } from '../AppContext';
 import { Loadable } from '../utils/loadable';
 import { LoadingIndicator } from '../utils/loadingIndicator/LoadingIndicator';
@@ -49,8 +50,11 @@ export class InstantViewPanel extends React.Component<Loadable<InstantFormState>
   }
 }
 
-export class InstantExchange extends React.Component<any> {
-  public render() {
-    return <theAppContext.Consumer>{({ InstantTxRx }) => <InstantTxRx />}</theAppContext.Consumer>;
-  }
+export function InstantExchange() {
+  const { instant$ } = useContext(theAppContext);
+  const state = useObservable(instant$);
+
+  if (!state) return null;
+
+  return <InstantViewPanel {...state} />;
 }

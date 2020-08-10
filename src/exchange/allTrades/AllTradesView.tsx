@@ -3,7 +3,7 @@
  */
 
 import { equals } from 'ramda';
-import * as React from 'react';
+import React, { useContext } from 'react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import { Subject } from 'rxjs';
 
@@ -24,7 +24,10 @@ import { TradingPair } from '../tradingPair/tradingPair';
 import { AllTradesProps } from './allTrades';
 import * as styles from './AllTradesView.scss';
 
-export class AllTrades extends React.Component<AllTradesProps> {
+import { theAppContext } from 'src/AppContext';
+import { useObservable } from '../../utils/observableHook';
+
+class AllTrades extends React.Component<AllTradesProps> {
   private lastTradingPair?: TradingPair;
   private lastLoadingStatus?: LoadableStatus;
 
@@ -47,7 +50,6 @@ export class AllTrades extends React.Component<AllTradesProps> {
         this.forceUpdate();
       });
     }
-    console.log(this.props.status);
     return (
       <>
         <PanelHeader>Trade history</PanelHeader>
@@ -128,3 +130,12 @@ export class AllTrades extends React.Component<AllTradesProps> {
     };
   };
 }
+
+export const AllTradesHooked = () => {
+  const { allTrades$ } = useContext(theAppContext);
+  const state = useObservable(allTrades$);
+
+  if (!state) return null;
+
+  return <AllTrades {...state} />;
+};

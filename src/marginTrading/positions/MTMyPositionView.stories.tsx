@@ -13,7 +13,7 @@ import { calculateMarginable } from '../state/mtCalculate';
 import { RawMTHistoryEvent } from '../state/mtHistory';
 import { getMarginableCore, getMTAccount } from '../state/mtTestUtils';
 import { MTTransferFormState } from '../transfer/mtTransferForm';
-import { MTMyPositionPanel } from './MTMyPositionPanel';
+import { MTMyPositionPanelView } from './MTMyPositionPanel';
 import { MTMyPositionView } from './MTMyPositionView';
 
 const stories = storiesOf('Multiply Trading/Your Position Panel', module).addDecorator((story) => (
@@ -269,7 +269,7 @@ const defaultBalancesProps = {
 };
 
 stories.add('Not connected', () => (
-  <MTMyPositionPanel
+  <MTMyPositionPanelView
     value={{
       ...defaultBalancesProps,
       account: undefined,
@@ -285,7 +285,7 @@ stories.add('Not connected', () => (
 ));
 
 stories.add('Not setup', () => (
-  <MTMyPositionPanel
+  <MTMyPositionPanelView
     value={{
       ...defaultBalancesProps,
       account: '0x123',

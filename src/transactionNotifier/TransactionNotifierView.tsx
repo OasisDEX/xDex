@@ -2,11 +2,13 @@
  * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
  */
 
-import * as React from 'react';
+import React, { useContext } from 'react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 
+import { theAppContext } from 'src/AppContext';
 import { transactionObserver, TxRebroadcastStatus, TxState, TxStatus } from '../blockchain/transactions';
 import { CloseButton } from '../utils/forms/Buttons';
+import { useObservable } from '../utils/observableHook';
 import { Timer } from '../utils/Timer';
 import { UnreachableCaseError } from '../utils/UnreachableCaseError';
 import * as styles from './TransactionNotifier.scss';
@@ -18,37 +20,44 @@ export interface TransactionNotifierPros {
   etherscan: { url: string; apiUrl: string; apiKey: string };
 }
 
-export class TransactionNotifierView extends React.Component<TransactionNotifierPros> {
-  public render() {
-    const now = new Date().getTime();
-    return (
-      <TransitionGroup className={styles.main}>
-        {this.props.transactions
-          .filter(
-            (transaction) =>
-              !transaction.dismissed &&
-              ((transaction.status === TxStatus.Success && transaction.confirmations < transaction.safeConfirmations) ||
-                !transaction.end ||
-                now - transaction.lastChange.getTime() < VISIBILITY_TIMEOUT * 1000),
-          )
-          .map((transaction) => (
-            <CSSTransition key={transaction.txNo} classNames="transaction" timeout={1000}>
-              <Notification
-                {...transaction}
-                etherscan={this.props.etherscan}
-                onDismiss={() =>
-                  transactionObserver.next({
-                    kind: 'dismissed',
-                    txNo: transaction.txNo,
-                  })
-                }
-              />
-            </CSSTransition>
-          ))}
-      </TransitionGroup>
-    );
-  }
-}
+export const TransactionNotifierView = ({ transactions, etherscan }: TransactionNotifierPros) => {
+  const now = new Date().getTime();
+  return (
+    <TransitionGroup className={styles.main}>
+      {transactions
+        .filter(
+          (transaction) =>
+            !transaction.dismissed &&
+            ((transaction.status === TxStatus.Success && transaction.confirmations < transaction.safeConfirmations) ||
+              !transaction.end ||
+              now - transaction.lastChange.getTime() < VISIBILITY_TIMEOUT * 1000),
+        )
+        .map((transaction) => (
+          <CSSTransition key={transaction.txNo} classNames="transaction" timeout={1000}>
+            <Notification
+              {...transaction}
+              etherscan={etherscan}
+              onDismiss={() =>
+                transactionObserver.next({
+                  kind: 'dismissed',
+                  txNo: transaction.txNo,
+                })
+              }
+            />
+          </CSSTransition>
+        ))}
+    </TransitionGroup>
+  );
+};
+
+export const TransactionNotifierHooked = () => {
+  const { transactionNotifier$ } = useContext(theAppContext);
+  const state = useObservable(transactionNotifier$);
+
+  if (!state) return null;
+
+  return <TransactionNotifierView {...state} />;
+};
 
 export type NotificationProps = TxState & { etherscan: { url: string }; onDismiss: () => void };
 

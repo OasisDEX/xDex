@@ -2,15 +2,16 @@
  * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
  */
 
+import classnames from 'classnames';
 import * as React from 'react';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
-
-import classnames from 'classnames';
+import { theAppContext } from 'src/AppContext';
 import { Button, ButtonGroup } from '../../utils/forms/Buttons';
 import { LoadableWithTradingPair } from '../../utils/loadable';
 import { WithLoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
 import { ServerUnreachable } from '../../utils/loadingIndicator/ServerUnreachable';
+import { useObservable } from '../../utils/observableHook';
 import { PanelHeader } from '../../utils/panel/Panel';
 import { GroupMode, PriceChartDataPoint } from './pricechart';
 import { PriceChartView } from './PriceChartView';
@@ -21,45 +22,48 @@ export interface PriceChartProps extends LoadableWithTradingPair<PriceChartDataP
   groupMode$: BehaviorSubject<GroupMode>;
 }
 
-export class PriceChartWithLoading extends React.Component<PriceChartProps> {
-  public handleKindChange = (groupMode: GroupMode) => () => {
-    this.props.groupMode$.next(groupMode);
+export const PriceChartWithLoading = () => {
+  const { priceChartLoadable$ } = React.useContext(theAppContext);
+  const loadableState: PriceChartProps | undefined = useObservable(priceChartLoadable$);
+
+  const handleKindChange = (groupMode: GroupMode) => () => {
+    loadableState?.groupMode$.next(groupMode);
   };
 
-  public render() {
-    return (
-      <>
-        <PanelHeader bordered={true}>
-          Price chart
-          <ButtonGroup style={{ marginLeft: 'auto' }}>
-            {this.button('1M', 'byMonth')}
-            {this.button('1W', 'byWeek')}
-            {this.button('1D', 'byDay')}
-            {this.button('1H', 'byHour')}
-          </ButtonGroup>
-        </PanelHeader>
-        <WithLoadingIndicator error={<ServerUnreachable />} size="lg" loadable={this.props}>
-          {(points: PriceChartDataPoint[]) => <PriceChartView data={points} groupMode={this.props.groupMode} />}
-        </WithLoadingIndicator>
-      </>
-    );
-  }
-
-  private button = (label: string, groupMode: GroupMode) => (
+  const button = (label: string, groupMode: GroupMode) => (
     <Button
-      color={this.props.groupMode === groupMode ? 'primary' : 'greyOutlined'}
+      color={loadableState?.groupMode === groupMode ? 'primary' : 'greyOutlined'}
       size="sm"
       className={classnames(styles.btn)}
-      onClick={this.handleKindChange(groupMode)}
+      onClick={handleKindChange(groupMode)}
     >
       {label}
     </Button>
   );
-}
+
+  return loadableState ? (
+    <>
+      <PanelHeader bordered={true}>
+        Price chart
+        <ButtonGroup style={{ marginLeft: 'auto' }}>
+          {button('1M', 'byMonth')}
+          {button('1W', 'byWeek')}
+          {button('1D', 'byDay')}
+          {button('1H', 'byHour')}
+        </ButtonGroup>
+      </PanelHeader>
+      <WithLoadingIndicator error={<ServerUnreachable />} size="lg" loadable={loadableState}>
+        {(points: PriceChartDataPoint[]) => <PriceChartView data={points} groupMode={loadableState?.groupMode} />}
+      </WithLoadingIndicator>
+    </>
+  ) : null;
+};
 
 export function createPriceChartLoadable$(
   groupMode$: Observable<GroupMode>,
-  dataSources$: { [key in GroupMode]: Observable<LoadableWithTradingPair<PriceChartDataPoint[]>> },
+  dataSources$: {
+    [key in GroupMode]: Observable<LoadableWithTradingPair<PriceChartDataPoint[]>>;
+  },
 ): Observable<PriceChartProps> {
   return groupMode$.pipe(
     switchMap((groupMode: GroupMode) =>

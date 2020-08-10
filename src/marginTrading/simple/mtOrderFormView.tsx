@@ -6,6 +6,8 @@ import { BigNumber } from 'bignumber.js';
 import * as classnames from 'classnames';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import { ModalOpener } from 'src/utils/modalHook';
+import { useObservable } from 'src/utils/observableHook';
 import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
 import { trackingEvents } from '../../analytics/analytics';
 import { getToken } from '../../blockchain/config';
@@ -13,7 +15,6 @@ import * as formStyles from '../../exchange/offerMake/OfferMakeForm.scss';
 import { OfferType } from '../../exchange/orderbook/orderbook';
 import { ApproximateInputValue } from '../../utils/Approximate';
 import { BigNumberInput, lessThanOrEqual } from '../../utils/bigNumberInput/BigNumberInput';
-import { connect } from '../../utils/connect';
 import { FormChangeKind, ProgressStage } from '../../utils/form';
 import { formatAmount, formatPrecision, formatPrice } from '../../utils/formatters/format';
 import { CryptoMoney, FormatPercent, Money } from '../../utils/formatters/Formatters';
@@ -25,13 +26,11 @@ import { Radio } from '../../utils/forms/Radio';
 import { SettingsIcon } from '../../utils/icons/Icons';
 import { Hr } from '../../utils/layout/LayoutHelpers';
 import { LoggedOut } from '../../utils/loadingIndicator/LoggedOut';
-import { ModalOpenerProps, ModalProps } from '../../utils/modal';
 import { PanelBody, PanelFooter, PanelHeader } from '../../utils/panel/Panel';
 import { Muted } from '../../utils/text/Text';
 import { WarningTooltip } from '../../utils/tooltip/Tooltip';
 import { minusOne, zero } from '../../utils/zero';
 import { findMarginableAsset, MarginableAsset, MTAccountState, UserActionKind } from '../state/mtAccount';
-import { MTTransferFormState } from '../transfer/mtTransferForm';
 import { MtTransferFormView } from '../transfer/mtTransferFormView';
 import {
   Message,
@@ -139,7 +138,7 @@ const slippageLimitTooltip = `
 //         referencePrice:
 //         {referencePrice && referencePrice.toString()}
 //         <br/>
-//         LEVERAGE:
+//         Multiply:
 //         {multiple && multiple.toString()}
 //         <br/>
 //       </> : null
@@ -770,35 +769,126 @@ export class MtSimpleOrderFormBody extends React.Component<MTSimpleFormState & {
   }
 }
 
-export class MtSimpleOrderFormView extends React.Component<
-  MTSimpleFormState & MTSimpleOrderPanelProps & ModalOpenerProps
-> {
-  private slippageLimitInput?: HTMLElement;
+export function MtSimpleOrderFormView(props: MTSimpleFormState & MTSimpleOrderPanelProps & { open: ModalOpener }) {
+  const { change, createMTFundForm$, open, view, kind, slippageLimit } = props;
+  let slippageLimitInput: HTMLElement | undefined;
 
-  public handleKindChange(kind: OfferType) {
-    this.props.change({
+  function handleKindChange(newKind: OfferType) {
+    change({
+      newKind,
       kind: FormChangeKind.kindChange,
-      newKind: kind,
     });
   }
 
-  public handleSlippageLimitChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  function handleSlippageLimitChange(e: React.ChangeEvent<HTMLInputElement>) {
     const value = new BigNumber(e.target.value.replace(/,/g, ''));
     if (!value.isNaN()) {
-      this.props.change({
+      change({
         kind: FormChangeKind.slippageLimitChange,
         value: value.div(100),
       });
     }
-  };
+  }
 
-  public handleSlippageLimitFocus = () => {
-    if (this.slippageLimitInput) {
-      this.slippageLimitInput.focus();
+  function handleSlippageLimitFocus() {
+    if (slippageLimitInput) {
+      slippageLimitInput.focus();
     }
-  };
+  }
 
-  public CallForDeposit(message: OrderFormMessage, ma?: MarginableAsset) {
+  function transfer(actionKind: UserActionKind, token: string, withOnboarding: boolean, ilk?: string) {
+    open(({ close }) => {
+      const fundForm = useObservable(
+        createMTFundForm$({
+          actionKind,
+          token,
+          ilk,
+          withOnboarding,
+        }),
+      );
+      return fundForm ? <MtTransferFormView close={close} {...fundForm} /> : null;
+    });
+  }
+
+  function switchToInstantOrderForm() {
+    change({ kind: FormChangeKind.viewChange, value: ViewKind.instantTradeForm });
+  }
+
+  function advancedSettings() {
+    return (
+      <>
+        <div className={formStyles.pickerOrderType}>
+          <Radio dataTestId="fillOrKill" name="orderType" value="direct" defaultChecked={true}>
+            Average price fill or kill order type
+          </Radio>
+          <Muted className={formStyles.pickerDescription}>
+            The order is executed in its entirety such that the average fill price is the limit price or better,
+            otherwise it is canceled
+          </Muted>
+          {slippageLimitForm()}
+        </div>
+      </>
+    );
+  }
+
+  function headerButtons() {
+    return (
+      <>
+        <ButtonGroup style={{ marginLeft: 'auto' }}>
+          <Button
+            data-test-id="new-buy-order"
+            className={styles.btn}
+            onClick={() => handleKindChange(OfferType.buy)}
+            color={kind === OfferType.buy ? 'primary' : 'greyOutlined'}
+            size="sm"
+          >
+            Buy
+          </Button>
+          <Button
+            data-test-id="new-sell-order"
+            className={styles.btn}
+            onClick={() => handleKindChange(OfferType.sell)}
+            color={kind === OfferType.sell ? 'danger' : 'greyOutlined'}
+            size="sm"
+          >
+            Sell
+          </Button>
+        </ButtonGroup>
+      </>
+    );
+  }
+
+  function slippageLimitForm() {
+    const slippageLimitValue = slippageLimit ? slippageLimit.times(100).valueOf() : '';
+    return (
+      <InputGroup sizer="lg" style={{ marginTop: '24px' }}>
+        <InputGroupAddon className={formStyles.inputHeader}>Slippage limit</InputGroupAddon>
+        <div className={formStyles.inputTail}>
+          <BigNumberInput
+            ref={(el: any) => (slippageLimitInput = (el && (ReactDOM.findDOMNode(el) as HTMLElement)) || undefined)}
+            data-test-id="slippage-limit"
+            type="text"
+            mask={createNumberMask({
+              allowDecimal: true,
+              precision: 2,
+              prefix: '',
+            })}
+            pipe={lessThanOrEqual(new BigNumber(100))}
+            onChange={handleSlippageLimitChange}
+            value={slippageLimitValue}
+            guide={true}
+            placeholder={slippageLimitValue}
+            className={styles.input}
+          />
+          <InputGroupAddon className={formStyles.inputPercentAddon} onClick={handleSlippageLimitFocus}>
+            %
+          </InputGroupAddon>
+        </div>
+      </InputGroup>
+    );
+  }
+
+  function CallForDeposit(message: OrderFormMessage, ma?: MarginableAsset) {
     const transferWithOnboarding = message ? message.kind === OrderFormMessageKind.onboarding : false;
 
     return (
@@ -809,7 +899,7 @@ export class MtSimpleOrderFormView extends React.Component<
           color="primary"
           data-test-id="open-position-with-DAI"
           disabled={!ma}
-          onClick={() => this.transfer(UserActionKind.fund, 'DAI', transferWithOnboarding, ma!.name)}
+          onClick={() => transfer(UserActionKind.fund, 'DAI', transferWithOnboarding, ma!.name)}
         >
           Deposit DAI
         </Button>
@@ -819,7 +909,7 @@ export class MtSimpleOrderFormView extends React.Component<
           color="primary"
           data-test-id={`open-position-with-${ma?.name}`}
           disabled={!ma}
-          onClick={() => this.transfer(UserActionKind.fund, ma!.name, transferWithOnboarding, ma!.name)}
+          onClick={() => transfer(UserActionKind.fund, ma!.name, transferWithOnboarding, ma!.name)}
         >
           Deposit {ma && ma.name}
         </Button>
@@ -827,132 +917,41 @@ export class MtSimpleOrderFormView extends React.Component<
     );
   }
 
-  public transfer(actionKind: UserActionKind, token: string, withOnboarding: boolean, ilk?: string) {
-    const fundForm$ = this.props.createMTFundForm$({
-      actionKind,
-      token,
-      ilk,
-      withOnboarding,
-    });
-    const MTFundFormViewRxTx = connect<MTTransferFormState, ModalProps>(MtTransferFormView, fundForm$);
-    this.props.open(MTFundFormViewRxTx);
-  }
-
-  public MainContent() {
-    const { mta, baseToken, orderFormMessage } = this.props;
+  function MainContent() {
+    const { mta, baseToken, orderFormMessage } = props;
     const ma = findMarginableAsset(baseToken, mta);
 
     if (orderFormMessage) {
-      return this.CallForDeposit(orderFormMessage, ma);
+      return CallForDeposit(orderFormMessage, ma);
     }
 
-    return <MtSimpleOrderFormBody {...this.props} />;
+    return <MtSimpleOrderFormBody {...props} />;
   }
 
-  public render() {
-    return (
-      <>
-        <PanelHeader>
-          {this.props.view === ViewKind.instantTradeForm ? (
-            <>
-              Manage your Position
-              {this.headerButtons()}
-            </>
-          ) : (
-            'Advanced Settings'
-          )}
-        </PanelHeader>
-        <PanelBody style={{ paddingBottom: '16px' }}>
-          {this.props.view === ViewKind.instantTradeForm ? this.MainContent() : this.advancedSettings()}
-        </PanelBody>
-        {this.props.view === ViewKind.settings && (
-          <PanelFooter className={styles.settingsFooter}>
-            <Button className={formStyles.confirmButton} type="submit" onClick={this.switchToInstantOrderForm}>
-              Done
-            </Button>
-          </PanelFooter>
-        )}
-      </>
-    );
-  }
-
-  private switchToInstantOrderForm = () => {
-    this.props.change({ kind: FormChangeKind.viewChange, value: ViewKind.instantTradeForm });
-  };
-
-  private advancedSettings = () => (
+  return (
     <>
-      <div className={formStyles.pickerOrderType}>
-        <Radio dataTestId="fillOrKill" name="orderType" value="direct" defaultChecked={true}>
-          Average price fill or kill order type
-        </Radio>
-        <Muted className={formStyles.pickerDescription}>
-          The order is executed in its entirety such that the average fill price is the limit price or better, otherwise
-          it is canceled
-        </Muted>
-        {this.slippageLimitForm()}
-      </div>
+      <PanelHeader>
+        {props.view === ViewKind.instantTradeForm ? (
+          <>
+            Manage your Position
+            {headerButtons()}
+          </>
+        ) : (
+          'Advanced Settings'
+        )}
+      </PanelHeader>
+      <PanelBody style={{ paddingBottom: '16px' }}>
+        {view === ViewKind.instantTradeForm ? MainContent() : advancedSettings()}
+      </PanelBody>
+      {view === ViewKind.settings && (
+        <PanelFooter className={styles.settingsFooter}>
+          <Button className={formStyles.confirmButton} type="submit" onClick={switchToInstantOrderForm}>
+            Done
+          </Button>
+        </PanelFooter>
+      )}
     </>
   );
-
-  private headerButtons() {
-    return (
-      <>
-        <ButtonGroup style={{ marginLeft: 'auto' }}>
-          <Button
-            data-test-id="new-buy-order"
-            className={styles.btn}
-            onClick={() => this.handleKindChange(OfferType.buy)}
-            color={this.props.kind === OfferType.buy ? 'primary' : 'greyOutlined'}
-            size="sm"
-          >
-            Buy
-          </Button>
-          <Button
-            data-test-id="new-sell-order"
-            className={styles.btn}
-            onClick={() => this.handleKindChange(OfferType.sell)}
-            color={this.props.kind === OfferType.sell ? 'danger' : 'greyOutlined'}
-            size="sm"
-          >
-            Sell
-          </Button>
-        </ButtonGroup>
-      </>
-    );
-  }
-
-  private slippageLimitForm() {
-    const slippageLimit = this.props.slippageLimit ? this.props.slippageLimit.times(100).valueOf() : '';
-    return (
-      <InputGroup sizer="lg" style={{ marginTop: '24px' }}>
-        <InputGroupAddon className={formStyles.inputHeader}>Slippage limit</InputGroupAddon>
-        <div className={formStyles.inputTail}>
-          <BigNumberInput
-            ref={(el: any) =>
-              (this.slippageLimitInput = (el && (ReactDOM.findDOMNode(el) as HTMLElement)) || undefined)
-            }
-            data-test-id="slippage-limit"
-            type="text"
-            mask={createNumberMask({
-              allowDecimal: true,
-              precision: 2,
-              prefix: '',
-            })}
-            pipe={lessThanOrEqual(new BigNumber(100))}
-            onChange={this.handleSlippageLimitChange}
-            value={slippageLimit}
-            guide={true}
-            placeholder={slippageLimit}
-            className={styles.input}
-          />
-          <InputGroupAddon className={formStyles.inputPercentAddon} onClick={this.handleSlippageLimitFocus}>
-            %
-          </InputGroupAddon>
-        </div>
-      </InputGroup>
-    );
-  }
 }
 
 const Error = ({ field, messages, tid }: { field: string; messages?: Message[]; tid?: string }) => {

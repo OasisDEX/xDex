@@ -3,7 +3,7 @@
  */
 
 import { BigNumber } from 'bignumber.js';
-import * as moment from 'moment';
+import moment from 'moment';
 
 import { getToken } from '../../blockchain/config';
 import { billion, million, one, oneThousandth, ten, thousand, zero } from '../zero';
