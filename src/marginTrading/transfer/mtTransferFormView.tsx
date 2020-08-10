@@ -3,7 +3,7 @@
  */
 
 import { BigNumber } from 'bignumber.js';
-import * as React from 'react';
+import React, { useContext } from 'react';
 import * as ReactModal from 'react-modal';
 
 import classnames from 'classnames';
@@ -21,18 +21,17 @@ import { InputGroup, InputGroupAddon } from '../../utils/forms/InputGroup';
 import { GasCost } from '../../utils/gasCost/GasCost';
 import { BorderBox, Hr } from '../../utils/layout/LayoutHelpers';
 import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
-import { ModalProps } from '../../utils/modal';
 import { Panel, PanelBody, PanelFooter, PanelHeader } from '../../utils/panel/Panel';
 import { Muted } from '../../utils/text/Text';
 import { TransactionStateDescription } from '../../utils/text/TransactionStateDescription';
 import { zero } from '../../utils/zero';
 
 import * as ReactDOM from 'react-dom';
+import { ModalProps } from 'src/utils/modalHook';
+import { useObservable } from 'src/utils/observableHook';
 import { trackingEvents } from '../../analytics/analytics';
 import { theAppContext } from '../../AppContext';
 import { SvgImage } from '../../utils/icons/utils';
-import { LoadableWithTradingPair } from '../../utils/loadable';
-import { MTSimpleFormState } from '../simple/mtOrderForm';
 import { MtSimpleOrderFormBody } from '../simple/mtOrderFormView';
 import * as stylesOrder from '../simple/mtOrderFormView.scss';
 import {
@@ -228,12 +227,7 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
               )}
               {currentTab === MTTransferFormTab.buy && (
                 <>
-                  <theAppContext.Consumer>
-                    {({ MTSimpleOrderBuyPanelRxTx }) => (
-                      // @ts-ignore
-                      <MTSimpleOrderBuyPanelRxTx close={this.props.close} />
-                    )}
-                  </theAppContext.Consumer>
+                  <MTSimpleOrderBuyPanel close={this.props.close} />
                 </>
               )}
             </>
@@ -586,39 +580,41 @@ export class MtTransferFormView extends React.Component<MTFundFormProps> {
   }
 }
 
-export class MTSimpleOrderBuyPanel extends React.Component<
-  LoadableWithTradingPair<MTSimpleFormState> & { close: () => void }
-> {
-  public render() {
-    if (this.props.status === 'loaded' && this.props.value && this.props.value.mta) {
-      const formState = this.props.value;
-      const { mta } = formState;
-      const ma = findMarginableAsset(formState.baseToken, mta);
+export function MTSimpleOrderBuyPanel({ close }: ModalProps) {
+  const state = useObservable(useContext(theAppContext).mtOrderFormLoadable$);
 
-      if (mta && mta.proxy && ma && (ma.balance.gt(zero) || ma.dai.gt(zero))) {
-        return (
-          <div className={stylesOrder.buyFormWrapper}>
-            <MtSimpleOrderFormBody {...{ ...this.props, ...formState, close: this.props.close }} />
-            <Button
-              size="md"
-              className={styles.cancelButton}
-              data-test-id="close-modal"
-              block={true}
-              color="greyOutlined"
-              onClick={() => this.props.close()}
-            >
-              Cancel
-            </Button>
-          </div>
-        );
-      }
+  if (!state) return null;
+
+  const { status, value } = state;
+
+  if (status === 'loaded' && value && value.mta) {
+    const formState = value;
+    const { mta } = formState;
+    const ma = findMarginableAsset(formState.baseToken, mta);
+
+    if (mta && mta.proxy && ma && (ma.balance.gt(zero) || ma.dai.gt(zero))) {
+      return (
+        <div className={stylesOrder.buyFormWrapper}>
+          <MtSimpleOrderFormBody {...{ ...state, ...formState, close }} />
+          <Button
+            size="md"
+            className={styles.cancelButton}
+            data-test-id="close-modal"
+            block={true}
+            color="greyOutlined"
+            onClick={() => close()}
+          >
+            Cancel
+          </Button>
+        </div>
+      );
     }
-
-    return (
-      <div className={stylesOrder.orderPanel}>
-        <PanelHeader>Manage Your Position</PanelHeader>
-        <LoadingIndicator size="lg" />
-      </div>
-    );
   }
+
+  return (
+    <div className={stylesOrder.orderPanel}>
+      <PanelHeader>Manage Your Position</PanelHeader>
+      <LoadingIndicator size="lg" />
+    </div>
+  );
 }

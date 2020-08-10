@@ -4,7 +4,7 @@
 
 import { BigNumber } from 'bignumber.js';
 import { findLastIndex } from 'lodash';
-import * as moment from 'moment';
+import moment from 'moment';
 import { Dictionary } from 'ramda';
 import { nullAddress } from '../../blockchain/utils';
 import { Offer, OfferType, Orderbook } from '../../exchange/orderbook/orderbook';

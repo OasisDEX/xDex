@@ -2,9 +2,9 @@
  * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
  */
 
-import * as React from 'react';
-import { Observable } from 'rxjs';
+import React, { useContext, useState } from 'react';
 import { take } from 'rxjs/internal/operators';
+import { theAppContext } from 'src/AppContext';
 import { trackingEvents } from '../analytics/analytics';
 import { Button } from '../utils/forms/Buttons';
 import { ProgressIcon } from '../utils/icons/Icons';
@@ -13,61 +13,47 @@ import { Muted } from '../utils/text/Text';
 import { TradeExport } from './taxExporter';
 import * as styles from './TaxExporter.scss';
 
-export interface TaxExporterViewProps {
-  export: () => Observable<any[]>;
-}
+export const TaxExporterHooked = () => {
+  const { exportTax$ } = useContext(theAppContext);
+  const [state, updateState] = useState({ inProgress: false });
 
-export interface TaxExporterState {
-  inProgress: boolean;
-}
-
-export class TaxExporterView extends React.Component<TaxExporterViewProps, TaxExporterState> {
-  public state = {
-    inProgress: false,
-  };
-
-  public render(): React.ReactNode {
-    return (
-      <Panel footerBordered={true} style={{ width: '100%' }}>
-        <PanelHeader>History export</PanelHeader>
-        <PanelBody paddingVertical={true} className={styles.taxExporterPanelBody}>
-          <Muted className={styles.taxExporterDescription}>
-            <span>Export your trades from Oasis Contracts (2018-2019)</span>
-            From oasis.app/trade, oasis.direct, oasisdex.com and cdp.makerdao.com
-          </Muted>
-          <Button
-            size="sm"
-            color="secondaryOutlined"
-            onClick={() => {
-              this.exportTrades();
-              trackingEvents.taxExport();
-            }}
-            className={styles.taxExporterButton}
-          >
-            {this.state.inProgress ? <ProgressIcon className={styles.progressIcon} /> : 'Export'}
-          </Button>
-        </PanelBody>
-      </Panel>
-    );
-  }
-
-  private exportTrades = () => {
-    if (!this.state.inProgress) {
-      this.setState({ ...this.state, inProgress: true });
-      this.props
-        .export()
-        .pipe(take(1))
-        .subscribe({
-          next: (trades: TradeExport[]) => {
-            trades = trades.filter((trade) => trade.exchange !== '');
-            const url = 'data:text/csv;charset=utf-8,' + encodeURIComponent(toCSV(trades));
-            downloadCSV(url);
-          },
-          complete: () => this.setState({ ...this.state, inProgress: false }),
-        });
+  const exportTrades = () => {
+    if (!state.inProgress) {
+      updateState({ ...state, inProgress: true });
+      exportTax$.pipe(take(1)).subscribe({
+        next: (trades: TradeExport[]) => {
+          trades = trades.filter((trade) => trade.exchange !== '');
+          const url = 'data:text/csv;charset=utf-8,' + encodeURIComponent(toCSV(trades));
+          downloadCSV(url);
+        },
+        complete: () => updateState({ ...state, inProgress: false }),
+      });
     }
   };
-}
+
+  return (
+    <Panel footerBordered={true} style={{ width: '100%' }}>
+      <PanelHeader>History export</PanelHeader>
+      <PanelBody paddingVertical={true} className={styles.taxExporterPanelBody}>
+        <Muted className={styles.taxExporterDescription}>
+          <span>Export your trades from Oasis Contracts (2018-2019)</span>
+          From oasis.app/trade, oasis.direct, oasisdex.com and cdp.makerdao.com
+        </Muted>
+        <Button
+          size="sm"
+          color="secondaryOutlined"
+          onClick={() => {
+            exportTrades();
+            trackingEvents.taxExport();
+          }}
+          className={styles.taxExporterButton}
+        >
+          {state.inProgress ? <ProgressIcon className={styles.progressIcon} /> : 'Export'}
+        </Button>
+      </PanelBody>
+    </Panel>
+  );
+};
 
 function toCSVRow(trade: any): string {
   return `"${Object.keys(trade)

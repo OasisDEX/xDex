@@ -4,19 +4,6 @@
 
 @import "../utils/Mixins";
 
-.tradingPairPanel {
-  flex-grow: 1;
-  flex-direction: row;
-  z-index: 1;
-  &.pairPickerOpen {
-    border-bottom-left-radius: 0;
-  }
-
-  @include media-breakpoint-down(md-lg){
-    flex-direction: column;
-  }
-}
-
 $historyPanelsHeight: 342px;
 $offerMakePanelHeight: 474px;
 $twoColumnsPanelWidth: 454px;

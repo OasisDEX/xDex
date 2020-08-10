@@ -10,7 +10,6 @@
 // import { shareReplay } from 'rxjs/operators';
 // import { Calls, ReadCalls } from '../../blockchain/calls/calls';
 // import { OfferType } from '../../exchange/orderbook/orderbook';
-// import { connect } from '../../utils/connect';
 // import { GasEstimationStatus, ProgressStage } from '../../utils/form';
 // import { impossible } from '../../utils/impossible';
 // import { inject } from '../../utils/inject';

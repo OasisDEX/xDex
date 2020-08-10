@@ -2,11 +2,17 @@
  * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
  */
 
-import * as React from 'react';
+import React, { useContext } from 'react';
 import { Observable } from 'rxjs';
+import { useObservable } from '../utils/observableHook';
 
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
 import { map } from 'rxjs/operators';
+import { theAppContext } from 'src/AppContext';
+import { inject } from 'src/utils/inject';
+
+import { DepthChartWithLoadingHooked } from '../exchange/depthChart/DepthChartWithLoading';
+import { OrderbookViewHooked } from '../exchange/orderbook/OrderbookView';
 
 export enum OrderbookViewKind {
   depthChart = 'depthChart',
@@ -18,18 +24,30 @@ export interface OrderbookPanelProps {
 }
 
 export interface SubViewsProps {
-  DepthChartWithLoadingTxRx: React.ComponentType;
-  OrderbookViewTxRx: React.ComponentType;
+  DepthChartWithLoading: React.ComponentType;
+  OrderbookView: React.ComponentType;
 }
 
-export class OrderbookPanel extends React.Component<OrderbookPanelProps & SubViewsProps> {
-  public render() {
-    if (this.props.kind === OrderbookViewKind.depthChart) {
-      return <this.props.DepthChartWithLoadingTxRx />;
-    }
-    return <this.props.OrderbookViewTxRx />;
+export const OrderbookPanel = (props: OrderbookPanelProps & SubViewsProps) => {
+  if (props.kind === OrderbookViewKind.depthChart) {
+    return <props.DepthChartWithLoading />;
   }
-}
+  return <props.OrderbookView />;
+};
+
+export const OrderbookHooked = () => {
+  const { orderbookPanel$ } = useContext(theAppContext);
+  const state = useObservable(orderbookPanel$);
+
+  if (!state) return null;
+
+  const Wrapper = inject<OrderbookPanelProps, SubViewsProps>(OrderbookPanel, {
+    DepthChartWithLoading: DepthChartWithLoadingHooked,
+    OrderbookView: OrderbookViewHooked,
+  });
+
+  return <Wrapper {...state} />;
+};
 
 export function createOrderbookPanel$(): [(kind: OrderbookViewKind) => void, Observable<OrderbookPanelProps>] {
   const kind$ = new BehaviorSubject(OrderbookViewKind.list);

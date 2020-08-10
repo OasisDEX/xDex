@@ -11,7 +11,6 @@
 // import { createFakeOrderbook, emptyOrderBook } from '../../exchange/depthChart/fakeOrderBook';
 // import { OfferType, Orderbook } from '../../exchange/orderbook/orderbook';
 // import { TradingPair } from '../../exchange/tradingPair/tradingPair';
-// import { connect } from '../../utils/connect';
 // import { FormChangeKind } from '../../utils/form';
 // import { zero } from '../../utils/zero';
 // import { MTAccount } from '../state/mtAccount';

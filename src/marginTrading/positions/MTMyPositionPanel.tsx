@@ -2,24 +2,25 @@
  * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
  */
 
-import * as React from 'react';
+import React, { useContext } from 'react';
 import * as styles from '../../balances/mtBalancesView.scss';
 import { SvgImage } from '../../utils/icons/utils';
 import { Loadable } from '../../utils/loadable';
-import { ModalOpenerProps, ModalProps } from '../../utils/modal';
 import { Panel, PanelBody, PanelHeader } from '../../utils/panel/Panel';
 import { zero } from '../../utils/zero';
 import { MarginableAsset, MTAccount, MTAccountState, UserActionKind } from '../state/mtAccount';
-import { CreateMTFundForm$, MTTransferFormState } from '../transfer/mtTransferForm';
+import { CreateMTFundForm$ } from '../transfer/mtTransferForm';
 import { MTMyPositionView } from './MTMyPositionView';
 
 import { default as BigNumber } from 'bignumber.js';
 import { Observable } from 'rxjs';
+import { theAppContext } from 'src/AppContext';
+import { ModalOpener, useModal } from 'src/utils/modalHook';
+import { useObservable } from 'src/utils/observableHook';
 import { trackingEvents } from '../../analytics/analytics';
 import { AssetDropdownMenu } from '../../balances/AssetDropdownMenu';
 import { TxMetaKind } from '../../blockchain/calls/txMeta';
 import { isDone, TxState } from '../../blockchain/transactions';
-import { connect } from '../../utils/connect';
 import { Button } from '../../utils/forms/Buttons';
 import { Switch } from '../../utils/forms/Slider';
 import { LoadingIndicator } from '../../utils/loadingIndicator/LoadingIndicator';
@@ -71,52 +72,55 @@ interface MTMyPositionPanelInternalProps {
   liquidationMessage?: LiquidationMessage;
 }
 
-export class MTLiquidationNotification extends React.Component<Loadable<MTMyPositionPanelInternalProps>> {
-  public render() {
-    if (this.props.value && this.props.status === 'loaded' && this.props.value.mta) {
-      const { mta, ma, redeem, transactions, liquidationMessage } = this.props.value;
+export function MTLiquidationNotification() {
+  const state = useObservable(useContext(theAppContext).mtMyPositionPanel$);
 
-      const warnings = [];
-      if (liquidationMessage) {
-        const warningClass =
-          liquidationMessage.kind === LiquidationMessageKind.redeemable
-            ? myPositionStyles.infoMessage
-            : myPositionStyles.dangerMessage;
+  if (!state) return null;
+  const { status, value } = state;
 
-        warnings.push(
-          <div className={warningClass} key="liquidation-warning">
-            <>{liquidationMessage.kind !== LiquidationMessageKind.redeemable && <SvgImage image={warningIconSvg} />}</>
-            <span className={myPositionStyles.warningText}>{liquidationMessageContent(liquidationMessage)}</span>
-            {liquidationMessage.kind === LiquidationMessageKind.redeemable && ma.redeemable.gt(zero) && (
-              <RedeemButton
-                redeem={() =>
-                  redeem({
-                    token: ma.name,
-                    proxy: mta.proxy,
-                    amount: ma.redeemable,
-                  })
-                }
-                token={ma.name}
-                disabled={false}
-                transactions={transactions}
-              />
-            )}
-          </div>,
-        );
-      }
+  if (value && status === 'loaded' && value.mta) {
+    const { mta, ma, redeem, transactions, liquidationMessage } = value;
 
-      if (ma && ma.priceDropWarning) {
-        warnings.push(
-          <div className={myPositionStyles.warningMessage} key="price-drop-warning">
-            {liquidationMessageContent({ kind: LiquidationMessageKind.priceDrop })}
-          </div>,
-        );
-      }
+    const warnings = [];
+    if (liquidationMessage) {
+      const warningClass =
+        liquidationMessage.kind === LiquidationMessageKind.redeemable
+          ? myPositionStyles.infoMessage
+          : myPositionStyles.dangerMessage;
 
-      return <div className={myPositionStyles.messagesWrapper}>{warnings}</div>;
+      warnings.push(
+        <div className={warningClass} key="liquidation-warning">
+          <>{liquidationMessage.kind !== LiquidationMessageKind.redeemable && <SvgImage image={warningIconSvg} />}</>
+          <span className={myPositionStyles.warningText}>{liquidationMessageContent(liquidationMessage)}</span>
+          {liquidationMessage.kind === LiquidationMessageKind.redeemable && ma.redeemable.gt(zero) && (
+            <RedeemButton
+              redeem={() =>
+                redeem({
+                  token: ma.name,
+                  proxy: mta.proxy,
+                  amount: ma.redeemable,
+                })
+              }
+              token={ma.name}
+              disabled={false}
+              transactions={transactions}
+            />
+          )}
+        </div>,
+      );
     }
-    return null;
+
+    if (ma && ma.priceDropWarning) {
+      warnings.push(
+        <div className={myPositionStyles.warningMessage} key="price-drop-warning">
+          {liquidationMessageContent({ kind: LiquidationMessageKind.priceDrop })}
+        </div>,
+      );
+    }
+
+    return <div className={myPositionStyles.messagesWrapper}>{warnings}</div>;
   }
+  return null;
 }
 
 function liquidationMessageContent(msg: LiquidationMessage) {
@@ -168,56 +172,56 @@ function liquidationMessageContent(msg: LiquidationMessage) {
   }
 }
 
-export class MTMyPositionPanel extends React.Component<Loadable<MTMyPositionPanelInternalProps> & ModalOpenerProps> {
-  public render() {
-    if (this.props.value) {
-      const panelTitle =
-        this.props.value.ma && this.props.value.ma.name ? `${this.props.value.ma.name} Position` : 'Your Position';
-      if (this.props.value && !this.props.value.account) {
+export function MTMyPositionPanel() {
+  const state = useObservable(useContext(theAppContext).mtMyPositionPanel$);
+  const open = useModal();
+
+  if (!state) return null;
+
+  return <MTMyPositionPanelView open={open} {...state} />;
+}
+
+// If it's <Loadable<MTMyPositionPanelInternalProps>> there is a type error
+// about mta being undefined in <MTMyPositionPanelView open={open} {...state} />; call
+// in the MTMyPositionPanel
+export function MTMyPositionPanelView(props: Loadable<any> & { open: ModalOpener }) {
+  const { status, value, open } = props;
+
+  if (value) {
+    const panelTitle = value.ma && value.ma.name ? `${value.ma.name} Position` : 'Your Position';
+    if (value && !value.account) {
+      return (
+        <Panel style={{ flexGrow: 1 }}>
+          <PanelHeader>{panelTitle}</PanelHeader>
+          {value.ma && value.ma.name && (
+            <div style={{ padding: '150px 30px' }}>
+              <LoggedOut view={`${value.ma.name} Position`} />
+            </div>
+          )}
+        </Panel>
+      );
+    }
+
+    if (status === 'loaded' && value.mta) {
+      const { ma } = value;
+
+      const hasHistoryEvents = ma && ma.rawHistory.length > 0;
+
+      if (ma && (hasHistoryEvents || ma.balance.gt(zero) || ma.dai.gt(zero))) {
         return (
           <Panel style={{ flexGrow: 1 }}>
-            <PanelHeader>{panelTitle}</PanelHeader>
-            {this.props.value.ma && this.props.value.ma.name && (
-              <div style={{ padding: '150px 30px' }}>
-                <LoggedOut view={`${this.props.value.ma.name} Position`} />
-              </div>
-            )}
+            <MTMyPositionPanelInternal {...value} {...{ open }} />
           </Panel>
         );
       }
-
-      if (this.props.status === 'loaded' && this.props.value.mta) {
-        const { ma } = this.props.value;
-
-        const hasHistoryEvents = ma && ma.rawHistory.length > 0;
-
-        if (ma && (hasHistoryEvents || ma.balance.gt(zero) || ma.dai.gt(zero))) {
-          return (
-            <Panel style={{ flexGrow: 1 }}>
-              <MTMyPositionPanelInternal {...this.props.value} {...{ open: this.props.open }} />
-            </Panel>
-          );
-        }
-      }
     }
-
-    return null;
   }
 
-  public transfer(actionKind: UserActionKind, token: string, ilk?: string) {
-    const fundForm$ = this.props.value!.createMTFundForm$({
-      actionKind,
-      token,
-      ilk,
-      withOnboarding: false,
-    });
-    const MTFundFormViewRxTx = connect<MTTransferFormState, ModalProps>(MtTransferFormView, fundForm$);
-    this.props.open(MTFundFormViewRxTx);
-  }
+  return null;
 }
 
 export class MTMyPositionPanelInternal extends React.Component<
-  MTMyPositionPanelInternalProps & ModalOpenerProps,
+  MTMyPositionPanelInternalProps & { open: ModalOpener },
   { blocked: boolean }
 > {
   public constructor(props: any) {
@@ -397,13 +401,16 @@ export class MTMyPositionPanelInternal extends React.Component<
   }
 
   private transfer(actionKind: UserActionKind, token: string, ilk?: string) {
-    const fundForm$ = this.props.createMTFundForm$({
-      actionKind,
-      token,
-      ilk,
-      withOnboarding: false,
+    this.props.open(({ close }) => {
+      const fundForm = useObservable(
+        this.props.createMTFundForm$({
+          actionKind,
+          token,
+          ilk,
+          withOnboarding: false,
+        }),
+      );
+      return fundForm ? <MtTransferFormView close={close} {...fundForm} /> : null;
     });
-    const MTFundFormViewRxTx = connect<MTTransferFormState, ModalProps>(MtTransferFormView, fundForm$);
-    this.props.open(MTFundFormViewRxTx);
   }
 }

@@ -68,8 +68,8 @@ stories.add('My Wallet - Assets', () => (
     {...{
       open: () => null,
       wrapUnwrapForm$: () => of({} as WrapUnwrapFormState),
-      approveWallet: () => of({} as TxState),
-      disapproveWallet: () => of({} as TxState),
+      approveWallet$: () => of({} as TxState),
+      disapproveWallet$: () => of({} as TxState),
     }}
   />
 ));

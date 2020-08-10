@@ -618,11 +618,15 @@ function evaluateTrade(
     });
   }
 
-  // console.log(
-  //   state.kind,
-  //   state.buyToken, state.buyAmount && state.buyAmount.toString(),
-  //   state.sellToken, state.sellAmount && state.sellAmount.toString()
-  // );
+  console.log(
+    state.kind,
+    'buy:',
+    state.buyToken,
+    state.buyAmount && state.buyAmount.toString(),
+    'sell:',
+    state.sellToken,
+    state.sellAmount && state.sellAmount.toString(),
+  );
 
   return theCalls$.pipe(
     first(),

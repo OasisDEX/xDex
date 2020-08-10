@@ -10,7 +10,7 @@ import { Tab } from '../../pages/Tab';
 import { WalletConnection } from '../../pages/WalletConnection';
 import { cypressVisitWithoutProvider, cypressVisitWithWeb3 } from '../../utils';
 
-describe('New Leverage Position', () => {
+describe('New Multiply Position', () => {
   beforeEach(() => {
     cypressVisitWithWeb3();
 
@@ -49,7 +49,7 @@ describe('New Leverage Position', () => {
   });
 });
 
-describe('Leverage form', () => {
+describe('Multiply form', () => {
   context.skip('without provider', () => {
     beforeEach(() => {
       cypressVisitWithoutProvider();

@@ -4,9 +4,12 @@
 
 import { BigNumber } from 'bignumber.js';
 import classnames from 'classnames';
-import * as React from 'react';
-import { NavLink } from 'react-router-dom';
 
+import React, { useContext, useEffect, useState } from 'react';
+import { NavLink } from 'react-router-dom';
+import { theAppContext } from 'src/AppContext';
+import { useObservable } from 'src/utils/observableHook';
+import { Panel } from 'src/utils/panel/Panel';
 import { trackingEvents } from '../../analytics/analytics';
 import { getToken, tradingPairs } from '../../blockchain/config';
 import { FormatAmount, FormatPercent, FormatPrice, FormatQuoteToken } from '../../utils/formatters/Formatters';
@@ -19,18 +22,30 @@ import { MarketsDetails } from '../exchange';
 import { TradingPair, tradingPairResolver, TradingPairsProps } from './tradingPair';
 import * as styles from './TradingPairView.scss';
 
-interface PairInfoVP {
+interface PairInfoVPProps {
   value: any;
   label: string;
   dataTestId?: string;
 }
 
-interface TradingPairViewState {
-  showMenu: boolean;
-}
+export const TradingPairView = (props: TradingPairsProps) => {
+  const [showMenu, toggleMenu] = useState(false);
 
-export class TradingPairView extends React.Component<TradingPairsProps, TradingPairViewState> {
-  public static PairVP({
+  useEffect(() => {
+    showMenu ? document.addEventListener('click', closeMenu) : document.removeEventListener('click', closeMenu);
+  }, [showMenu]);
+
+  const toggle = () => {
+    toggleMenu(!showMenu);
+  };
+
+  const closeMenu = (_event: any) => {
+    if (_event.path.filter((p: any) => p.className === styles.dropdown).length === 0) {
+      toggleMenu(false);
+    }
+  };
+
+  const PairVP = ({
     pair,
     parentMatch,
     marketsDetailsLoadable,
@@ -40,7 +55,7 @@ export class TradingPairView extends React.Component<TradingPairsProps, TradingP
     parentMatch?: string;
     marketsDetailsLoadable: Loadable<MarketsDetails>;
     clickHandler: () => void;
-  }) {
+  }) => {
     const pathname = `${parentMatch}/${pair.base}/${pair.quote}`;
 
     return (
@@ -55,19 +70,19 @@ export class TradingPairView extends React.Component<TradingPairsProps, TradingP
             trackingEvents.changeAssetPair(pair.base, pair.quote);
           }}
         >
-          <TradingPairView.PairView {...{ pair, marketsDetailsLoadable }} />
+          <PairView {...{ pair, marketsDetailsLoadable }} />
         </NavLink>
       </li>
     );
-  }
+  };
 
-  public static PairView({
+  const PairView = ({
     pair,
     marketsDetailsLoadable,
   }: {
     pair: TradingPair;
     marketsDetailsLoadable: Loadable<MarketsDetails>;
-  }) {
+  }) => {
     const { base, quote } = pair;
     return (
       <>
@@ -100,165 +115,138 @@ export class TradingPairView extends React.Component<TradingPairsProps, TradingP
         </WithLoadingIndicatorInline>
       </>
     );
-  }
+  };
 
-  public static ActivePairView({ base, quote }: any) {
-    return (
-      <div data-test-id="active-pair" className={styles.activePairView}>
-        <div className={styles.activePairViewIcon}>{getToken(base).iconCircle}</div>
-        <span data-test-id="base" className={styles.activePairViewTokenBase}>
-          {base}
-        </span>
-        <span data-test-id="quote" className={styles.activePairViewTokenQuote}>
-          <FormatQuoteToken token={quote} />
-        </span>
-        <span className={styles.dropdownIcon} />
-      </div>
-    );
-  }
+  const ActivePairView = ({ base, quote }: any) => (
+    <div data-test-id="active-pair" className={styles.activePairView}>
+      <div className={styles.activePairViewIcon}>{getToken(base).iconCircle}</div>
+      <span data-test-id="base" className={styles.activePairViewTokenBase}>
+        {base}
+      </span>
+      <span data-test-id="quote" className={styles.activePairViewTokenQuote}>
+        <FormatQuoteToken token={quote} />
+      </span>
+      <span className={styles.dropdownIcon} />
+    </div>
+  );
 
-  public static YesterdayPriceVP({ yesterdayPriceChange }: { yesterdayPriceChange: BigNumber | undefined }) {
+  const YesterdayPriceVP = ({ yesterdayPriceChange }: { yesterdayPriceChange: BigNumber | undefined }) => {
     return !yesterdayPriceChange ? null : (
       <BoundarySpan value={yesterdayPriceChange}>
         <FormatPercent value={yesterdayPriceChange} plus={true} fallback="" />
       </BoundarySpan>
     );
-  }
+  };
 
-  public static PairInfoVP({ value, label, dataTestId }: PairInfoVP) {
-    return (
-      <div className={styles.pairInfo}>
-        <div data-test-id={dataTestId} className={styles.mobileWrapper}>
-          <span data-test-id="value" className={styles.pairInfoValue}>
-            {value}
-          </span>
-          <InfoLabel className={styles.pairInfoLabel}>{label}</InfoLabel>
-        </div>
+  const PairInfoVP = ({ value, label, dataTestId }: PairInfoVPProps) => (
+    <div className={styles.pairInfo}>
+      <div data-test-id={dataTestId} className={styles.mobileWrapper}>
+        <span data-test-id="value" className={styles.pairInfoValue}>
+          {value}
+        </span>
+        <InfoLabel className={styles.pairInfoLabel}>{label}</InfoLabel>
       </div>
-    );
-  }
+    </div>
+  );
 
-  public constructor(props: TradingPairsProps) {
-    super(props);
-    this.state = {
-      showMenu: false,
-    };
-  }
+  const dropdownDisabled = tradingPairs.length <= 1;
 
-  public render() {
-    const { parentMatch = '/', base, currentPrice, quote, weeklyVolume, yesterdayPriceChange } = this.props;
-    const dropdownDisabled = tradingPairs.length <= 1;
-
-    return (
-      <>
-        <div className={styles.dropdown}>
-          <div
-            tabIndex={dropdownDisabled ? undefined : -1}
-            data-test-id="select-pair"
-            onClick={dropdownDisabled ? undefined : this.showMenu}
-            className={classnames(styles.dropdownBtn, {
-              [styles.dropdownBtnDisabled]: dropdownDisabled,
-              [styles.dropdownBtnActive]: this.state.showMenu,
-            })}
-          >
-            <TradingPairView.ActivePairView base={base} quote={quote} />
+  return (
+    <>
+      <div className={styles.dropdown}>
+        <div
+          tabIndex={dropdownDisabled ? undefined : -1}
+          data-test-id="select-pair"
+          onClick={dropdownDisabled ? undefined : toggle}
+          className={classnames(styles.dropdownBtn, {
+            [styles.dropdownBtnDisabled]: dropdownDisabled,
+            [styles.dropdownBtnActive]: showMenu,
+          })}
+        >
+          <ActivePairView base={props.base} quote={props.quote} />
+        </div>
+        {showMenu && (
+          <div className={styles.dropdownListWrapper}>
+            <ul className={styles.dropdownList}>
+              <Scrollbar autoHeight={true}>
+                {tradingPairs.map((pair, i) => (
+                  <PairVP
+                    key={i}
+                    parentMatch={props.parentMatch}
+                    pair={pair}
+                    marketsDetailsLoadable={props.marketsDetails}
+                    clickHandler={toggle}
+                  />
+                ))}
+              </Scrollbar>
+            </ul>
           </div>
-          {this.state.showMenu && (
-            <div className={styles.dropdownListWrapper}>
-              <ul className={styles.dropdownList}>
-                <Scrollbar autoHeight={true}>
-                  {tradingPairs.map((pair, i) => (
-                    <TradingPairView.PairVP
-                      key={i}
-                      parentMatch={parentMatch}
-                      pair={pair}
-                      marketsDetailsLoadable={this.props.marketsDetails}
-                      clickHandler={this.closeMenuHandler}
-                    />
-                  ))}
-                </Scrollbar>
-              </ul>
-            </div>
-          )}
-        </div>
-        <div className={styles.container} data-test-id="trading-pair-info">
-          <TradingPairView.PairInfoVP
-            dataTestId="last-price"
-            label="Last price"
-            value={
-              <WithLoadingIndicatorInline
-                error={<ServerUnreachableInline fallback="-" />}
-                loadable={currentPrice}
-                className={styles.pairInfo}
-              >
-                {(currentPriceLoaded?: BigNumber) =>
-                  currentPriceLoaded ? <FormatPrice value={currentPriceLoaded} token={quote} /> : <span>?</span>
-                }
-              </WithLoadingIndicatorInline>
-            }
-          />
-          <TradingPairView.PairInfoVP
-            dataTestId="24h-price"
-            label="24h price"
-            value={
-              <WithLoadingIndicatorInline
-                error={<ServerUnreachableInline fallback="-" />}
-                loadable={yesterdayPriceChange}
-                className={styles.pairInfo}
-              >
-                {(yesterdayPriceChangeLoaded?: BigNumber) =>
-                  yesterdayPriceChangeLoaded ? (
-                    <TradingPairView.YesterdayPriceVP yesterdayPriceChange={yesterdayPriceChangeLoaded} />
-                  ) : (
-                    <span>?</span>
-                  )
-                }
-              </WithLoadingIndicatorInline>
-            }
-          />
-          <TradingPairView.PairInfoVP
-            dataTestId="24h-volume"
-            label="24h volume"
-            value={
-              <WithLoadingIndicatorInline
-                loadable={weeklyVolume}
-                className={styles.pairInfo}
-                error={<ServerUnreachableInline fallback="-" />}
-              >
-                {(weeklyVolumeLoaded: BigNumber) => <FormatAmount value={weeklyVolumeLoaded} token={quote} />}
-              </WithLoadingIndicatorInline>
-            }
-          />
-        </div>
-      </>
+        )}
+      </div>
+      <div className={styles.container} data-test-id="trading-pair-info">
+        <PairInfoVP
+          dataTestId="last-price"
+          label="Last price"
+          value={
+            <WithLoadingIndicatorInline
+              error={<ServerUnreachableInline fallback="-" />}
+              loadable={props.currentPrice}
+              className={styles.pairInfo}
+            >
+              {(currentPriceLoaded?: BigNumber) =>
+                currentPriceLoaded ? <FormatPrice value={currentPriceLoaded} token={props.quote} /> : <span>?</span>
+              }
+            </WithLoadingIndicatorInline>
+          }
+        />
+        <PairInfoVP
+          dataTestId="24h-price"
+          label="24h price"
+          value={
+            <WithLoadingIndicatorInline
+              error={<ServerUnreachableInline fallback="-" />}
+              loadable={props.yesterdayPriceChange}
+              className={styles.pairInfo}
+            >
+              {(yesterdayPriceChangeLoaded?: BigNumber) =>
+                yesterdayPriceChangeLoaded ? (
+                  <YesterdayPriceVP yesterdayPriceChange={yesterdayPriceChangeLoaded} />
+                ) : (
+                  <span>?</span>
+                )
+              }
+            </WithLoadingIndicatorInline>
+          }
+        />
+        <PairInfoVP
+          dataTestId="24h-volume"
+          label="24h volume"
+          value={
+            <WithLoadingIndicatorInline
+              loadable={props.weeklyVolume}
+              className={styles.pairInfo}
+              error={<ServerUnreachableInline fallback="-" />}
+            >
+              {(weeklyVolumeLoaded: BigNumber) => <FormatAmount value={weeklyVolumeLoaded} token={props.quote} />}
+            </WithLoadingIndicatorInline>
+          }
+        />
+      </div>
+    </>
+  );
+};
+
+export const TradingPairViewHook = (props: { parentMatch?: string }) => {
+  const { tradingPairView$ } = useContext(theAppContext);
+  const observableProps = useObservable<TradingPairsProps>(tradingPairView$);
+
+  if (observableProps) {
+    return (
+      <Panel className={classnames(styles.tradingPairPanel)}>
+        <TradingPairView {...{ ...observableProps, ...props }} />
+      </Panel>
     );
   }
 
-  private showMenu = (event: any) => {
-    event.preventDefault();
-
-    this.setState({ showMenu: true }, () => {
-      document.addEventListener('click', this.closeMenu);
-    });
-
-    if (this.props.setPairPickerOpen) {
-      this.props.setPairPickerOpen(true);
-    }
-  };
-
-  private closeMenu = (_event: any) => {
-    if (_event.path.filter((p: any) => p.className === styles.dropdown).length === 0) {
-      this.closeMenuHandler();
-    }
-  };
-
-  private closeMenuHandler = () => {
-    this.setState({ showMenu: false }, () => {
-      document.removeEventListener('click', this.closeMenu);
-    });
-
-    if (this.props.setPairPickerOpen) {
-      this.props.setPairPickerOpen(false);
-    }
-  };
-}
+  return null;
+};

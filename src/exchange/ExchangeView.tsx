@@ -2,18 +2,22 @@
  * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
  */
 
-import classnames from 'classnames';
 import * as React from 'react';
 import { Redirect, Route, RouteComponentProps, Switch } from 'react-router';
 import { map } from 'rxjs/operators';
 
-import { theAppContext } from '../AppContext';
+import { useObservable } from 'src/utils/observableHook';
 import { tradingPairs } from '../blockchain/config';
-import { connect } from '../utils/connect';
 import { FlexLayoutRow } from '../utils/layout/FlexLayoutRow';
 import { Panel } from '../utils/panel/Panel';
+import { AllTradesHooked } from './allTrades/AllTradesView';
 import * as styles from './ExchangeView.scss';
+import { MyTradesHooked } from './myTrades/MyTradesView';
+import { OfferMakePanelHooked } from './offerMake/OfferMakePanelHooked';
+import { OrderbookHooked } from './OrderbookPanel';
+import { PriceChartWithLoading } from './priceChart/PriceChartWithLoading';
 import { currentTradingPair$, TradingPair } from './tradingPair/tradingPair';
+import { TradingPairViewHook } from './tradingPair/TradingPairView';
 
 export interface ExchangeViewOwnProps {
   setTradingPair: (tp: TradingPair) => void;
@@ -28,104 +32,88 @@ interface ContentProps extends RouteComponentProps<any> {
   setTradingPair: (tp: TradingPair) => void;
 }
 
-class Content extends React.Component<ContentProps, { pairPickerOpen: boolean }> {
-  constructor(props: ContentProps) {
-    super(props);
-    this.state = { pairPickerOpen: false };
+export const Content = (props: ContentProps) => {
+  const {
+    match: { params },
+    parentMatch,
+    tp,
+    setTradingPair,
+  } = props;
+
+  if (tp.base !== params.base || tp.quote !== params.quote) {
+    setTradingPair(params);
   }
 
-  public render() {
-    const {
-      match: { params },
-      parentMatch,
-      tp,
-      setTradingPair,
-    } = this.props;
+  return (
+    <div>
+      <FlexLayoutRow>
+        <TradingPairViewHook parentMatch={parentMatch} />
+      </FlexLayoutRow>
+      <FlexLayoutRow>
+        <Panel className={styles.priceChartPanel} footerBordered={true}>
+          <PriceChartWithLoading />
+        </Panel>
+        <Panel className={styles.allTradesPanel} footerBordered={true}>
+          <AllTradesHooked />
+        </Panel>
+      </FlexLayoutRow>
+      <FlexLayoutRow>
+        <Panel className={styles.offerMakePanel}>
+          <OfferMakePanelHooked />
+        </Panel>
+        <Panel footerBordered={true} className={styles.orderbookPanel}>
+          <OrderbookHooked />
+        </Panel>
+      </FlexLayoutRow>
+      <FlexLayoutRow>
+        <Panel className={styles.myOrdersPanel} footerBordered={true}>
+          <MyTradesHooked />
+        </Panel>
+      </FlexLayoutRow>
+    </div>
+  );
+};
 
-    if (tp.base !== params.base || tp.quote !== params.quote) {
-      setTradingPair(params);
-    }
+export const ExchangeView = (props: ExchangeViewProps) => {
+  const {
+    match: { url: matchUrl },
+    tp,
+    setTradingPair,
+  } = props;
 
-    return (
-      <div>
-        <FlexLayoutRow>
-          <Panel className={classnames(styles.tradingPairPanel, this.state.pairPickerOpen && styles.pairPickerOpen)}>
-            <theAppContext.Consumer>
-              {({ TradingPairsTxRx }) => (
-                <TradingPairsTxRx
-                  // @ts-ignore
-                  parentMatch={parentMatch}
-                  setPairPickerOpen={(pairPickerOpen: boolean) => this.setState({ pairPickerOpen })}
-                />
-              )}
-            </theAppContext.Consumer>
-          </Panel>
-        </FlexLayoutRow>
-        <FlexLayoutRow>
-          <Panel className={styles.priceChartPanel} footerBordered={true}>
-            <theAppContext.Consumer>
-              {({ PriceChartWithLoadingTxRx }) => <PriceChartWithLoadingTxRx />}
-            </theAppContext.Consumer>
-          </Panel>
-          <Panel className={styles.allTradesPanel} footerBordered={true}>
-            <theAppContext.Consumer>{({ AllTradesTxRx }) => <AllTradesTxRx />}</theAppContext.Consumer>
-          </Panel>
-        </FlexLayoutRow>
-        <FlexLayoutRow>
-          <Panel className={styles.offerMakePanel}>
-            <theAppContext.Consumer>{({ OfferMakePanelTxRx }) => <OfferMakePanelTxRx />}</theAppContext.Consumer>
-          </Panel>
-          <Panel footerBordered={true} className={styles.orderbookPanel}>
-            <theAppContext.Consumer>{({ OrderbookPanelTxRx }) => <OrderbookPanelTxRx />}</theAppContext.Consumer>
-          </Panel>
-        </FlexLayoutRow>
-        <FlexLayoutRow>
-          <Panel className={styles.myOrdersPanel} footerBordered={true}>
-            <theAppContext.Consumer>{({ MyTradesTxRx }) => <MyTradesTxRx />}</theAppContext.Consumer>
-          </Panel>
-        </FlexLayoutRow>
-      </div>
-    );
-  }
-}
+  return (
+    <div>
+      <Switch>
+        <Route
+          path={`${matchUrl}/:base/:quote`}
+          render={(localProps) => {
+            const valid = tradingPairs.find((t) => t.base === tp.base && t.quote === tp.quote);
 
-export class ExchangeView extends React.Component<ExchangeViewProps> {
-  public render() {
-    const {
-      match: { url: matchUrl },
-      tp,
-    } = this.props;
+            if (!valid) {
+              // It should be a redirect, but I can't make it work!
+              window.location.href = `${matchUrl}/${tradingPairs[0].base}/${tradingPairs[0].quote}`;
+              return;
+            }
 
-    return (
-      <div>
-        <Switch>
-          <Route
-            path={`${matchUrl}/:base/:quote`}
-            render={(props) => {
-              const valid = tradingPairs.find((t) => t.base === tp.base && t.quote === tp.quote);
+            return <Content {...localProps} tp={tp} parentMatch={matchUrl} setTradingPair={setTradingPair} />;
+          }}
+        />
+        <Redirect push={false} from={'/market'} to={`/market/${tp.base}/${tp.quote}`} />
+      </Switch>
+    </div>
+  );
+};
 
-              if (!valid) {
-                // It should be a redirect, but I can't make it work!
-                window.location.href = `${matchUrl}/${tradingPairs[0].base}/${tradingPairs[0].quote}`;
-                return;
-              }
+export const ExchangeViewHooked = (props: RouteComponentProps<any>) => {
+  const state: ExchangeViewOwnProps | undefined = useObservable(
+    currentTradingPair$.pipe(
+      map((tp: TradingPair) => ({
+        tp,
+        setTradingPair: currentTradingPair$.next.bind(currentTradingPair$),
+      })),
+    ),
+  );
+  if (!state) return null;
 
-              return <Content {...props} tp={tp} parentMatch={matchUrl} setTradingPair={this.props.setTradingPair} />;
-            }}
-          />
-          <Redirect push={false} from={'/market'} to={`/market/${tp.base}/${tp.quote}`} />
-        </Switch>
-      </div>
-    );
-  }
-}
-
-export const ExchangeViewTxRx = connect<ExchangeViewOwnProps, RouteComponentProps<any>>(
-  ExchangeView,
-  currentTradingPair$.pipe(
-    map((tp: TradingPair) => ({
-      tp,
-      setTradingPair: currentTradingPair$.next.bind(currentTradingPair$),
-    })),
-  ),
-);
+  return <ExchangeView {...{ ...state, ...props }} />;
+};

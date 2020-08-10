@@ -4,12 +4,14 @@
 
 // tslint:disable:no-console
 import { equals } from 'ramda';
-import * as React from 'react';
+import React, { useContext } from 'react';
 import { default as MediaQuery } from 'react-responsive';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import { combineLatest, Observable } from 'rxjs';
 import { distinctUntilKeyChanged, map, startWith } from 'rxjs/operators';
+import { useObservable } from '../../utils/observableHook';
 
+import { theAppContext } from 'src/AppContext';
 import { trackingEvents } from '../../analytics/analytics';
 import { FormChangeKind, PickOfferChange } from '../../utils/form';
 import { FormatAmount, FormatPercent, FormatPriceOrder } from '../../utils/formatters/Formatters';
@@ -260,3 +262,12 @@ export class OrderbookView extends React.Component<Props> {
     }
   };
 }
+
+export const OrderbookViewHooked = () => {
+  const { orderbookForView$ } = useContext(theAppContext);
+  const state = useObservable(orderbookForView$);
+
+  if (!state) return null;
+
+  return <OrderbookView {...state} />;
+};
