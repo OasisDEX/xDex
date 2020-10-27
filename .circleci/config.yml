@@ -180,6 +180,7 @@ workflows:
             branches:
               ignore:
                 - gh-pages
+                - dev
       - test-e2e:
           requires:
             - install
@@ -187,6 +188,7 @@ workflows:
             branches:
               ignore:
                 - gh-pages
+                - dev
       - codechecks:
           requires:
             - install
@@ -194,7 +196,7 @@ workflows:
             branches:
               ignore:
                 - gh-pages
-
+                - dev
       - codechecks-e2e:
           requires:
             - test-e2e
@@ -202,9 +204,10 @@ workflows:
             branches:
               ignore:
                 - gh-pages
+                - dev
       - deploy_dev:
           requires:
-            - test
+            - install
           filters:
             branches:
               only: dev
