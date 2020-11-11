@@ -194,7 +194,6 @@ workflows:
             branches:
               ignore:
                 - gh-pages
-
       - codechecks-e2e:
           requires:
             - test-e2e
