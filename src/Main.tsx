@@ -17,6 +17,7 @@ import { TheFooterHooked } from './footer/Footer';
 import { HeaderHooked } from './header/Header';
 import * as styles from './index.scss';
 import { InstantExchange } from './instant/InstantViewPanel';
+import { Banner } from './landingPage/Banner';
 import { MarginTradingSimple } from './marginTrading/MarginTradingSimple';
 import { TransactionNotifierHooked } from './transactionNotifier/TransactionNotifierView';
 import { SetupModal } from './utils/modalHook';
@@ -61,6 +62,22 @@ export const MainContent = (props: RouterProps) => {
     <routerContext.Provider value={{ rootUrl: props.match.url }}>
       <div className={styles.container}>
         <TransactionNotifierHooked />
+        <Banner
+          content={
+            <span>
+              We are currently experiencing issues with Infura when connecting with Metamask.
+              <br /> If you are using Metamask, please create a Custom RPC, you can see how to{' '}
+              <a
+                href="https://www.notion.so/makerdao/How-to-connect-Metamask-to-a-Custome-RPC-da53e6f2d1f54fb7abf38decc645a80c"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                here
+              </a>
+            </span>
+          }
+          theme="warning"
+        />
         <HeaderHooked />
         <Routes {...routesState} />
         <TheFooterHooked />
