@@ -7,9 +7,10 @@ import { map, shareReplay } from 'rxjs/operators';
 // tslint:disable:import-name
 import Web3 from 'web3';
 
-const nodeRpcURL = `https://eth-mainnet.alchemyapi.io/v2/Kmj43CpNy9pPV5JCfoPq3XIbX6-WnKA4`;
+const infuraProjectId = 'd96fcc7c667e4a03abf1cecd266ade2d';
+const infuraUrl = `https://mainnet.infura.io/v3/${infuraProjectId}`;
 const ethereum = {
-  url: nodeRpcURL,
+  url: infuraUrl,
 };
 
 export let web3: Web3;
