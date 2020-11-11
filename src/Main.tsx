@@ -65,15 +65,9 @@ export const MainContent = (props: RouterProps) => {
         <Banner
           content={
             <span>
-              We are currently experiencing issues with Infura when connecting with Metamask.
-              <br /> If you are using Metamask, please create a Custom RPC, you can see how to{' '}
-              <a
-                href="https://www.notion.so/makerdao/How-to-connect-Metamask-to-a-Custome-RPC-da53e6f2d1f54fb7abf38decc645a80c"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                here
-              </a>
+              The recent issues with Infura have now been resolved. If you are using Metamask, and switched your RPC to
+              a custom endpoint using our provided Alchemy endpoint, please switch back to Metamask Mainnet as access to
+              the Alchemy endpoint provided will soon be revoked
             </span>
           }
           theme="warning"
