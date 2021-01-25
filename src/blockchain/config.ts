@@ -543,7 +543,7 @@ const kovan: NetworkConfig = {
   avgBlocksPerDay: 21600 * 0.55,
   startingBlock: 5216718,
   get otc() {
-    return load(otc, '0xd9f71ac53425171e63c2f4ec05fac40c93106fff');
+    return load(otc, '0xfcbebe883b891ba55d231bdf5a9ffb7e63b4354b');
   },
   // get saiTub() { return load(saiTub, '0xa71937147b55deb8a530c7229c442fd3f31b7db2'); },
   get tokens() {
