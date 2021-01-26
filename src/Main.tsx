@@ -99,16 +99,6 @@ export const MainContent = (props: RouterProps) => {
               }
             theme='warning'/>
         }
-        <Banner
-          content={
-            <span>
-              The recent issues with Infura have now been resolved. If you are using Metamask, and switched to a custom
-              RPC using our provided Alchemy endpoint, please switch back to Metamask Mainnet as access to our Alchemy
-              endpoint provided will soon be revoked
-            </span>
-          }
-          theme="warning"
-        />
         <HeaderHooked />
         <Routes {...routesState} />
         <TheFooterHooked />

@@ -251,7 +251,13 @@ export class OfferMakeForm extends React.Component<OfferFormState> {
         <p className={styles.text}>
           You should cancel any open orders you have and move your liquidity to the new contract.
           You can find the latest contract and markets at Oasis.app/trade.
-          You can read more information about this contract and why it has now closed here.
+          You can read more information about this contract and why it has now closed
+          {' '}<a href="https://oasisdex.com/docs/announcements/oasis1-1" 
+              target="_blank"
+              rel="noopener noreferrer"
+          >
+            here
+          </a> .
         </p>
       </div>
     </PanelBody>
