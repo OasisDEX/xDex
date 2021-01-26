@@ -48,7 +48,6 @@ export const Main = () => {
 
 export interface RouterProps extends RouteComponentProps<any> {}
 
-<<<<<<< HEAD
 export const MainContent = (props: RouterProps) => {
   const routesState = useObservable(
     walletStatus$.pipe(
@@ -57,17 +56,19 @@ export const MainContent = (props: RouterProps) => {
       })),
     ),
   );
-=======
-export class MainContent extends React.Component<RouterProps> {
-  public render() {
-    return (
-      <routerContext.Provider value={{ rootUrl: this.props.match.url }}>
+
+  if (!routesState) return null;
+
+  return (
+    <routerContext.Provider value={{ rootUrl: props.match.url }}>
+      <div className={styles.container}>
+        <TransactionNotifierHooked />
         {
           isMarketClosed
           ? <Banner content={
               <span>
                 {/*tslint:disable*/}
-                This version of the UI uses an OasisDEX contract which expired on 08.02.2020.
+                This version of the UI uses an OasisDEX contract which expired on 04.02.2021.
                 <br/>
                 <strong> You should cancel any open orders you have and move your liquidity to the new contract.<br/>
                 You can find the latest contract and markets at { ' ' }
@@ -82,10 +83,10 @@ export class MainContent extends React.Component<RouterProps> {
           : <Banner content={
               <span>
                 {/*tslint:disable*/}
-                The current OasisDEX contract used by Oasis Trade will be closing on 08.02.2020 and replaced with a new contract. 
+                The current OasisDEX contract used by Oasis Trade will be closing on 04.02.2021 and replaced with a new contract. 
                 <br/>
                 <strong> Please see { ' ' }
-                  <a href="https://www.reddit.com/r/MakerDAO/comments/euplem/oasisdex_contract_will_be_upgraded_on_8th_feb_2020/" 
+                  <a href="https://oasisdex.com/docs/announcements/oasis1-1" 
                      target="_blank"
                      rel="noopener noreferrer"
                   >
@@ -98,32 +99,6 @@ export class MainContent extends React.Component<RouterProps> {
               }
             theme='warning'/>
         }
-        <div className={styles.container}>
-          <theAppContext.Consumer>
-            {({ TransactionNotifierTxRx }) =>
-              <TransactionNotifierTxRx/>
-            }
-          </theAppContext.Consumer>
-          <HeaderTxRx/>
-          <RoutesRx/>
-          <theAppContext.Consumer>
-            {({ TheFooterTxRx }) =>
-              <TheFooterTxRx/>
-            }
-          </theAppContext.Consumer>
-        </div>
-      </routerContext.Provider>
-    );
-  }
-}
->>>>>>> 65f6a312... Banner and locked form when the market is closed. Feature flag to enable the check
-
-  if (!routesState) return null;
-
-  return (
-    <routerContext.Provider value={{ rootUrl: props.match.url }}>
-      <div className={styles.container}>
-        <TransactionNotifierHooked />
         <Banner
           content={
             <span>

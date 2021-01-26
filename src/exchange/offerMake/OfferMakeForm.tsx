@@ -8,14 +8,8 @@ import * as ReactDOM from 'react-dom';
 import { Link } from 'react-router-dom';
 import { createNumberMask } from 'text-mask-addons/dist/textMaskAddons';
 
-<<<<<<< HEAD
 import { trackingEvents } from '../../analytics/analytics';
-import { getToken, isDAIEnabled } from '../../blockchain/config';
-=======
-import * as mixpanel from 'mixpanel-browser';
-import { theAppContext } from '../../AppContext';
 import { getToken, isDAIEnabled, isMarketClosed } from '../../blockchain/config';
->>>>>>> 65f6a312... Banner and locked form when the market is closed. Feature flag to enable the check
 import { routerContext } from '../../Main';
 import { BigNumberInput, lessThanOrEqual } from '../../utils/bigNumberInput/BigNumberInput';
 import { FormChangeKind, OfferMatchType } from '../../utils/form';
@@ -124,9 +118,6 @@ export class OfferMakeForm extends React.Component<OfferFormState> {
       this.props.quoteToken === 'SAI' &&
       // this.props.baseToken !== 'WETH' &&
       isDAIEnabled();
-<<<<<<< HEAD
-    return this.props.pickerOpen ? this.orderTypePicker() : isSaiMarket ? this.lockedSaiMarket() : this.formProper();
-=======
     return this.props.pickerOpen
       ? this.orderTypePicker()
       : isMarketClosed
@@ -134,7 +125,6 @@ export class OfferMakeForm extends React.Component<OfferFormState> {
        : isSaiMarket
         ? this.lockedSaiMarket()
         : this.formProper();
->>>>>>> 65f6a312... Banner and locked form when the market is closed. Feature flag to enable the check
   }
 
   private slippageLimit() {
@@ -211,7 +201,6 @@ export class OfferMakeForm extends React.Component<OfferFormState> {
 
             {this.amount()}
 
-<<<<<<< HEAD
             {this.gasCost()}
             {this.total()}
 
@@ -221,42 +210,6 @@ export class OfferMakeForm extends React.Component<OfferFormState> {
       </div>
     );
   }
-=======
-  private lockedSaiMarket() {
-    return <div data-test-id="create-order-widget">
-      <PanelHeader bordered={true}>
-        Create order
-        {this.headerButtons()}
-      </PanelHeader>
-
-      <PanelBody paddingVertical={true}>
-        {this.balanceButtons(true)}
-        <Hr color="dark" className={styles.hrMargin}/>
-        <div className={styles.migrationDescription}>
-          <p className={styles.text}>
-            Oasis Trade does not support SAI markets.
-          </p>
-          <p className={styles.text}>
-            You can cancel resting orders manually or use our migration
-            process which will cancel your resting orders
-            and swap your SAI to DAI
-          </p>
-        </div>
-        {
-          this.props.user && this.props.user.account && (
-            <theAppContext.Consumer>
-              {({ SAI2DAIMigrationTxRx }) =>
-                // @ts-ignore
-                <SAI2DAIMigrationTxRx
-                  label={'Start Dai Migration'}
-                  className={styles.migrateButton}
-                  tid="update-btn-market"
-                />
-              }
-            </theAppContext.Consumer>
-          )
-        }
->>>>>>> 65f6a312... Banner and locked form when the market is closed. Feature flag to enable the check
 
   private lockedSaiMarket() {
     return (
@@ -293,7 +246,7 @@ export class OfferMakeForm extends React.Component<OfferFormState> {
       <Hr color="dark" className={styles.hrMargin}/>
       <div className={styles.migrationDescription}>
         <p className={styles.text}>
-          This version of the UI uses an OasisDEX contract which expired on 08.02.2020.
+          This version of the UI uses an OasisDEX contract which expired on 04.02.2021.
         </p>
         <p className={styles.text}>
           You should cancel any open orders you have and move your liquidity to the new contract.
