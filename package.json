@@ -8,7 +8,7 @@
     "build": "node scripts/build.js",
     "build:ci": "ENV=dev REACT_APP_ENV='test' node scripts/build.js",
     "build:ci-dev-old": "ENV=olddev REACT_APP_ENV='test' node scripts/build.js",
-    "build:ci-prod-old": "ENV=oldprod node scripts/build.js",
+    "build:ci-prod-old": "ENV=oldproduction node scripts/build.js",
     "format": "prettier --check \"./**/*.{ts,tsx}\"",
     "format:fix": "prettier --write \"./**/*.{ts,tsx}\"",
     "test": "yarn tsc &&  node scripts/test.js --env=jsdom",

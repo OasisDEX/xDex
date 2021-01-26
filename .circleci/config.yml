@@ -248,3 +248,9 @@ workflows:
           filters:
             branches:
               only: master
+      - deploy_old_prod:
+          requires:
+            - test
+          filters:
+            branches:
+              only: old-frontend-deployment
