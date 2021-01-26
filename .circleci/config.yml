@@ -149,6 +149,34 @@ jobs:
             - v11-dependencies-{{ checksum "package.json" }}
       - run: yarn run deploy:dev
 
+  deploy_old_dev:
+    docker:
+      - image: circleci/node:10.19.0-stretch
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v11-dependencies-{{ checksum "package.json" }}
+      - run: yarn run deploy:old-dev
+
+  deploy_old_prod:
+    docker:
+      - image: circleci/node:10.19.0-stretch
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - 'd2:4f:e3:c0:5d:8e:2b:14:6b:67:74:e2:2f:f2:a8:43'
+      - checkout
+      - restore_cache:
+          keys:
+            - v11-dependencies-{{ checksum "package.json" }}
+      - run:
+          name: Configure git defaults
+          command: git config user.email "circleci@makerdao.com" && git config user.name "CircleCI"
+      - run:
+          name: Deploying to production
+          command: yarn run deploy:old-prod
+
   deploy_prod:
     docker:
       - image: circleci/node:10.19.0-stretch
@@ -207,6 +235,12 @@ workflows:
           filters:
             branches:
               only: dev
+      - deploy_old_dev:
+          requires:
+            - test
+          filters:
+            branches:
+              only: old-frontend-deployment
       - deploy_prod:
           requires:
             - test
