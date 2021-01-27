@@ -63,11 +63,23 @@ export const MainContent = (props: RouterProps) => {
       <div className={styles.container}>
         <TransactionNotifierHooked />
         <Banner
+          isClosable={true}
           content={
             <span>
-              The recent issues with Infura have now been resolved. If you are using Metamask, and switched to a custom
-              RPC using our provided Alchemy endpoint, please switch back to Metamask Mainnet as access to our Alchemy
-              endpoint provided will soon be revoked
+              {/*tslint:disable*/}
+              This version of the interface uses an OasisDEX contract, which will expire on 04-Feb-2021. A new version
+              of the interface using
+              <br /> upgraded contract will be deployed on 02-Feb-2021.
+              <br />
+              You should consider canceling any open orders and recreate them via the new interface between 02 and
+              04-Feb-2021.
+              <br />
+              For details on the OasisDEX contract upgrade, please refer to{' '}
+              <a href="https://oasisdex.com/docs/announcements/oasis1-1" target="_blank" rel="noopener noreferrer">
+                OasisDEX 1.1 upgrade
+              </a>{' '}
+              documentation.
+              {/*tslint:enable*/}
             </span>
           }
           theme="warning"

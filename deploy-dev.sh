@@ -1,7 +1,7 @@
 rm -rf ./build
 
 # This is using `.env.dev` configuration file with feature flags
-PUBLIC_URL='https://oasisapp-staging.makerfoundation.com/trade' yarn build:ci
+PUBLIC_URL='https://staging.oasis.app/trade' yarn build:ci
 
 # Deploy to AWS
 sudo apt update
