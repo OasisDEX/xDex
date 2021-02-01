@@ -58,6 +58,7 @@ export const MainContent = (props: RouterProps) => {
 
   if (!routesState) return null;
 
+  const tradeOldUrl = `${window.location.protocol}//${window.location.hostname}/trade-old`;
   return (
     <routerContext.Provider value={{ rootUrl: props.match.url }}>
       <div className={styles.container}>
@@ -67,19 +68,19 @@ export const MainContent = (props: RouterProps) => {
           content={
             <span>
               {/*tslint:disable*/}
-              This version of the interface uses an OasisDEX contract, which will expire on 04-Feb-2021. A new version
-              of the interface using
-              <br /> upgraded contract will be deployed on 02-Feb-2021.
-              <br />
-              You should consider canceling any open orders and recreate them via the new interface between 02 and
-              04-Feb-2021.
-              <br />
-              For details on the OasisDEX contract upgrade, please refer to{' '}
+              This version of the interface uses an upgraded version of the OasisDEX 1.1 contract (
               <a href="https://oasisdex.com/docs/announcements/oasis1-1" target="_blank" rel="noopener noreferrer">
-                OasisDEX 1.1 upgrade
-              </a>{' '}
-              documentation.
-              {/*tslint:enable*/}
+                details
+              </a>
+              ).
+              <br />
+              You should consider canceling any open orders created using the old contract (before 02-Feb-2021).
+              <br />
+              For canceling them, visit{' '}
+              <a href={tradeOldUrl} target="_blank" rel="noopener noreferrer">
+                {tradeOldUrl}
+              </a>
+              .{/*tslint:enable*/}
             </span>
           }
           theme="warning"
