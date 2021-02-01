@@ -1,7 +1,6 @@
 /*
  * Copyright (C) 2020 Maker Ecosystem Growth Holdings, INC.
  */
-
 import { from, Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
 // tslint:disable:import-name
@@ -25,8 +24,8 @@ export interface Web3Window {
 export const web3Status$: Observable<Web3Status> = from(['initializing']).pipe(
   map(() => {
     const win = window as Web3Window;
-    if (win.web3) {
-      web3 = new Web3(win.web3.currentProvider);
+    if (win.ethereum) {
+      web3 = new Web3(win.ethereum);
       return 'ready';
     }
     web3 = new Web3(new Web3.providers.HttpProvider(ethereum.url));
