@@ -59,46 +59,54 @@ export const MainContent = (props: RouterProps) => {
 
   if (!routesState) return null;
 
+  const tradeUrl = `${window.location.protocol}//${window.location.hostname}/trade`;
   return (
     <routerContext.Provider value={{ rootUrl: props.match.url }}>
       <div className={styles.container}>
         <TransactionNotifierHooked />
-        {
-          isMarketClosed
-          ? <Banner content={
+        {isMarketClosed ? (
+          <Banner
+            content={
               <span>
                 {/*tslint:disable*/}
-                This version of the UI uses an OasisDEX contract which expired on 04.02.2021.
-                <br/>
-                <strong> You should cancel any open orders you have and move your liquidity to the new contract.<br/>
-                You can find the latest contract and markets at { ' ' }
-                <a 
-                  href="https://oasis.app/trade" 
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >Oasis.app/trade</a>.</strong>
+                This version of the interface enables the cancellation of the orders created before 02-Feb-2021<br/>
+                with the old version of OasisDEX smart contract.
+                <br />
+                For placing new orders, please visit {' '}
+                <a href={tradeUrl} target="_blank" rel="noopener noreferrer">
+                  {tradeUrl}
+                </a>
+                .<br />
+                For details on the OasisDEX contract upgrade, please visit{' '}
+                <a href="https://oasisdex.com" target="_blank" rel="noopener noreferrer">
+                  https://oasisdex.com
+                </a>
+                .
               </span>
             }
-            theme='warning'/>
-          : <Banner content={
+            theme="warning"
+          />
+        ) : (
+          <Banner
+            content={
               <span>
                 {/*tslint:disable*/}
-                The current OasisDEX contract used by Oasis Trade will be closing on 04.02.2021 and replaced with a new contract. 
-                <br/>
-                <strong> Please see { ' ' }
-                  <a href="https://oasisdex.com/docs/announcements/oasis1-1" 
-                     target="_blank"
-                     rel="noopener noreferrer"
-                  >
+                The current OasisDEX contract used by Oasis Trade will be closing on 04.02.2021 and replaced with a new
+                contract.
+                <br />
+                <strong>
+                  {' '}
+                  Please see{' '}
+                  <a href="https://oasisdex.com/docs/announcements/oasis1-1" target="_blank" rel="noopener noreferrer">
                     this announcement
-                  </a> 
-                  { ' ' }
+                  </a>{' '}
                   for more details
                 </strong>
-                </span>
-              }
-            theme='warning'/>
-        }
+              </span>
+            }
+            theme="warning"
+          />
+        )}
         <HeaderHooked />
         <Routes {...routesState} />
         <TheFooterHooked />

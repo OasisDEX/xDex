@@ -121,10 +121,10 @@ export class OfferMakeForm extends React.Component<OfferFormState> {
     return this.props.pickerOpen
       ? this.orderTypePicker()
       : isMarketClosed
-       ? this.lockedTrading()
-       : isSaiMarket
-        ? this.lockedSaiMarket()
-        : this.formProper();
+      ? this.lockedTrading()
+      : isSaiMarket
+      ? this.lockedSaiMarket()
+      : this.formProper();
   }
 
   private slippageLimit() {
@@ -235,33 +235,33 @@ export class OfferMakeForm extends React.Component<OfferFormState> {
   }
 
   private lockedTrading() {
-    return <div data-test-id="create-order-widget">
-    <PanelHeader bordered={true}>
-      Create order
-      {this.headerButtons()}
-    </PanelHeader>
+    return (
+      <div data-test-id="create-order-widget">
+        <PanelHeader bordered={true}>
+          Create order
+          {this.headerButtons()}
+        </PanelHeader>
 
-    <PanelBody paddingVertical={true}>
-      {this.balanceButtons(true)}
-      <Hr color="dark" className={styles.hrMargin}/>
-      <div className={styles.migrationDescription}>
-        <p className={styles.text}>
-          This version of the UI uses an OasisDEX contract which expired on 04.02.2021.
-        </p>
-        <p className={styles.text}>
-          You should cancel any open orders you have and move your liquidity to the new contract.
-          You can find the latest contract and markets at Oasis.app/trade.
-          You can read more information about this contract and why it has now closed
-          {' '}<a href="https://oasisdex.com/docs/announcements/oasis1-1" 
-              target="_blank"
-              rel="noopener noreferrer"
-          >
-            here
-          </a> .
-        </p>
+        <PanelBody paddingVertical={true}>
+          {this.balanceButtons(true)}
+          <Hr color="dark" className={styles.hrMargin} />
+          <div className={styles.migrationDescription}>
+            <p className={styles.text}>This version of the UI uses an OasisDEX contract which expired on 04.02.2021.</p>
+            <p className={styles.text}>
+              You should cancel any open orders you have and move your liquidity to the new contract. You can find the
+              latest contract and markets at Oasis.app/trade. You can read more information about this contract and why
+              it has now closed{' '}
+              <b>
+                <a href="https://oasisdex.com/docs/announcements/oasis1-1" target="_blank" rel="noopener noreferrer">
+                  here
+                </a>
+              </b>
+              .
+            </p>
+          </div>
+        </PanelBody>
       </div>
-    </PanelBody>
-  </div>;
+    );
   }
 
   private headerButtons() {
