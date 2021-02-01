@@ -15,6 +15,7 @@ import { NetworkConfig } from '../config';
 import { MIN_ALLOWANCE } from '../network';
 import { amountFromWei, amountToWei } from '../utils';
 import { web3 } from '../web3';
+import {uintMax} from './approveCalls';
 import { DEFAULT_GAS } from './callsHelpers';
 import { TxMetaKind } from './txMeta';
 
@@ -36,7 +37,7 @@ export const approveMTProxy = {
     context.tokens[token].contract.methods['approve(address,uint256)'],
   prepareArgs: ({ token, proxyAddress }: ApproveData, context: NetworkConfig) => {
     console.log('proxyAddress', proxyAddress, 'token', token, context.tokens[token].contract.options.address);
-    return [proxyAddress, -1];
+    return [proxyAddress, uintMax];
   },
   options: () => ({ gas: DEFAULT_GAS }),
   kind: TxMetaKind.approveMTProxy,

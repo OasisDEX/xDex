@@ -7,6 +7,7 @@ import * as React from 'react';
 
 import { Currency } from '../../utils/text/Text';
 import { getToken, NetworkConfig } from '../config';
+import {web3} from '../web3';
 import { TransactionDef } from './callsHelpers';
 import { TxMetaKind } from './txMeta';
 
@@ -14,10 +15,12 @@ export interface ApproveWalletData {
   token: string;
 }
 
+export const uintMax = web3.utils.toBN(2).pow(web3.utils.toBN(256)).sub(web3.utils.toBN(1));
+
 export const approveWallet: TransactionDef<ApproveWalletData> = {
   call: ({ token }: ApproveWalletData, context: NetworkConfig) =>
     context.tokens[token].contract.methods['approve(address,uint256)'],
-  prepareArgs: (_: ApproveWalletData, context: NetworkConfig) => [context.otc.address, -1],
+  prepareArgs: (_: ApproveWalletData, context: NetworkConfig) => [context.otc.address, uintMax],
   options: () => ({ gas: 100000 }),
   kind: TxMetaKind.approveWallet,
   descriptionIcon: ({ token }: ApproveWalletData) => getToken(token).iconCircle,
@@ -56,7 +59,8 @@ export interface ApproveProxyData {
 export const approveProxy = {
   call: ({ token }: ApproveProxyData, context: NetworkConfig) =>
     context.tokens[token].contract.methods['approve(address,uint256)'],
-  prepareArgs: ({ proxyAddress }: ApproveProxyData, _context: NetworkConfig) => [proxyAddress, -1],
+  prepareArgs: ({ proxyAddress }: ApproveProxyData, _context: NetworkConfig) =>
+    [proxyAddress, uintMax],
   options: ({ gasPrice, gasEstimation }: ApproveProxyData) => ({
     ...(gasPrice ? gasPrice : {}),
     ...(gasEstimation ? { gas: gasEstimation } : {}),
