@@ -420,7 +420,7 @@ const protoMain = {
   avgBlocksPerDay: 5760 * 1.05,
   startingBlock: 4751582,
   get otc() {
-    return load(otc, '0x794e6e91555438aFc3ccF1c5076A74F42133d08D');
+    return load(otc, '0x5e3e0548935a83aD29fb2A9153d331dc6d49020f');
   },
   // get saiTub() { return load(saiTub, '0x448a5065aebb8e423f0896e6c5d525c040f59af3'); },
   get tokens() {
