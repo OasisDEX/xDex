@@ -78,7 +78,7 @@ export const MainContent = (props: RouterProps) => {
                 </a>
                 .<br />
                 For details on the OasisDEX contract upgrade, please visit{' '}
-                <a href="https://oasisdex.com" target="_blank" rel="noopener noreferrer">
+                <a href="https://oasisdex.com/docs/announcements/oasis1-1" target="_blank" rel="noopener noreferrer">
                   https://oasisdex.com
                 </a>
                 .
