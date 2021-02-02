@@ -69,17 +69,17 @@ export const MainContent = (props: RouterProps) => {
             <span>
               {/*tslint:disable*/}
               This version of the interface uses an upgraded version of the OasisDEX 1.1 contract (
-              <a href="https://oasisdex.com/docs/announcements/oasis1-1" target="_blank" rel="noopener noreferrer">
+              <b><a href="https://oasisdex.com/docs/announcements/oasis1-1" target="_blank" rel="noopener noreferrer">
                 details
-              </a>
+              </a></b>
               ).
               <br />
               You should consider canceling any open orders created using the old contract (before 02-Feb-2021).
               <br />
-              For canceling them, visit{' '}
-              <a href={tradeOldUrl} target="_blank" rel="noopener noreferrer">
-                {tradeOldUrl}
-              </a>
+              For canceling them, visit the{' '}
+              <b><a href={tradeOldUrl} target="_blank" rel="noopener noreferrer">
+                old Trade interface
+              </a></b>
               .{/*tslint:enable*/}
             </span>
           }
