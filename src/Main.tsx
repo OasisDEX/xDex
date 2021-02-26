@@ -17,7 +17,6 @@ import { TheFooterHooked } from './footer/Footer';
 import { HeaderHooked } from './header/Header';
 import * as styles from './index.scss';
 import { InstantExchange } from './instant/InstantViewPanel';
-import { Banner } from './landingPage/Banner';
 import { MarginTradingSimple } from './marginTrading/MarginTradingSimple';
 import { TransactionNotifierHooked } from './transactionNotifier/TransactionNotifierView';
 import { SetupModal } from './utils/modalHook';
@@ -58,33 +57,10 @@ export const MainContent = (props: RouterProps) => {
 
   if (!routesState) return null;
 
-  const tradeOldUrl = `${window.location.protocol}//${window.location.hostname}/trade-old`;
   return (
     <routerContext.Provider value={{ rootUrl: props.match.url }}>
       <div className={styles.container}>
         <TransactionNotifierHooked />
-        <Banner
-          isClosable={true}
-          content={
-            <span>
-              {/*tslint:disable*/}
-              This version of the interface uses an upgraded version of the OasisDEX 1.1 contract (
-              <b><a href="https://oasisdex.com/docs/announcements/oasis1-1" target="_blank" rel="noopener noreferrer">
-                details
-              </a></b>
-              ).
-              <br />
-              You should consider canceling any open orders created using the old contract (before 02-Feb-2021).
-              <br />
-              For canceling them, visit the{' '}
-              <b><a href={tradeOldUrl} target="_blank" rel="noopener noreferrer">
-                old Trade interface
-              </a></b>
-              .{/*tslint:enable*/}
-            </span>
-          }
-          theme="warning"
-        />
         <HeaderHooked />
         <Routes {...routesState} />
         <TheFooterHooked />
