@@ -17,7 +17,6 @@ import { TheFooterHooked } from './footer/Footer';
 import { HeaderHooked } from './header/Header';
 import * as styles from './index.scss';
 import { InstantExchange } from './instant/InstantViewPanel';
-import { Banner } from './landingPage/Banner';
 import { MarginTradingSimple } from './marginTrading/MarginTradingSimple';
 import { TransactionNotifierHooked } from './transactionNotifier/TransactionNotifierView';
 import { SetupModal } from './utils/modalHook';
@@ -58,7 +57,6 @@ export const MainContent = (props: RouterProps) => {
 
   if (!routesState) return null;
 
-  const tradeOldUrl = `${window.location.protocol}//${window.location.hostname}/trade-old`;
   return (
     <routerContext.Provider value={{ rootUrl: props.match.url }}>
       <div className={styles.container}>
