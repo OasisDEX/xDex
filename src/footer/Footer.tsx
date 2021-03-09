@@ -49,6 +49,9 @@ export const TheFooterHooked = () => {
             <a target="_blank" rel="noopener noreferrer" href="/privacy">
               Privacy
             </a>
+            <a target="_blank" rel="noopener noreferrer" href="https://github.com/OasisDEX/OasisTradeDigitalAssessmentFramework/raw/main/Oasis%20Trade%20Digital%20Asset%20Assessment%20Framework.pdf">
+              Asset Ass. Framework
+            </a>
             <a target="_blank" rel="noopener noreferrer" href="https://github.com/OasisDEX/oasis-market/issues">
               Report Issues
             </a>
@@ -108,6 +111,9 @@ export const TheFooterHooked = () => {
             </a>
             <a target="_blank" rel="noopener noreferrer" href="/privacy">
               Privacy
+            </a>
+            <a target="_blank" rel="noopener noreferrer" href="https://github.com/OasisDEX/OasisTradeDigitalAssessmentFramework/raw/main/Oasis%20Trade%20Digital%20Asset%20Assessment%20Framework.pdf">
+              Asset Ass. Framework
             </a>
             <a target="_blank" rel="noopener noreferrer" href="https://github.com/OasisDEX/oasis-market/issues">
               Report Issues
