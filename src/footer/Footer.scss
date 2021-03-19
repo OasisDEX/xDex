@@ -16,6 +16,10 @@
   & > *:last-child:after {
     content: "";
   }
+
+  a {
+    white-space: nowrap;
+  }
 }
 
 .footerSeparator {
