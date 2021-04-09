@@ -557,7 +557,7 @@ const kovan: NetworkConfig = {
       loadToken('USDC', erc20, '0x198419c5c340e8De47ce4C0E4711A03664d42CB2'),
       loadToken('TUSD', erc20, '0x18C06d61007Cbeb072F84C28aB7698F2bfd145B5'),
       loadToken('PAX', erc20, '0x7ac82C960d70A9f62a645eb57f446985Bf23e224'),
-      loadToken('LINK', erc20, '0x046acb204091d5296461c66cfd911114de5c6a4c'),
+      loadToken('LINK', erc20, '0xa36085f69e2889c224210f603d836748e7dc0088'),
       loadToken('WBTC', erc20, '0xA08d982C2deBa0DbE433a9C6177a219E96CeE656'),
       loadToken('KNC', erc20, '0x6cdd25a4365db73831078982de110ca50d058cc5'),
       loadToken('COMP', erc20, '0xcc4034e05dffdb142a373de49cf8a2356cae7bf6'),
