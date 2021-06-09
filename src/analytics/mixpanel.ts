@@ -9,14 +9,14 @@ const env = process.env.NODE_ENV === 'production' ? 'prod' : 'test';
 const config = {
   test: {
     mixpanel: {
-      token: '4ff3f85397ffc3c6b6f0d4120a4ea40a',
-      config: { debug: false, ip: false, api_host: 'https://mpp.makerfoundation.com' },
+      token: 'b10b850880cb0a8557d878c2e6024d03',
+      config: { debug: false, ip: false, api_host: 'https://mpp.oazolabs.xyz' },
     },
   },
   prod: {
     mixpanel: {
-      token: 'a030d8845e34bfdc11be3d9f3054ad67',
-      config: { ip: false, api_host: 'https://mpp.makerfoundation.com' },
+      token: 'a15aec2e0c806315e4646a120dfb7515',
+      config: { ip: false, api_host: 'https://mpp.oazolabs.xyz' },
     },
   },
 }[env];
