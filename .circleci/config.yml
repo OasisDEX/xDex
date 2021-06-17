@@ -162,7 +162,7 @@ jobs:
             - v11-dependencies-{{ checksum "package.json" }}
       - run:
           name: Configure git defaults
-          command: git config user.email "circleci@makerdao.com" && git config user.name "CircleCI"
+          command: git config user.email "circleci@oazo.app" && git config user.name "CircleCI"
       - run:
           name: Deploying to production
           command: yarn run deploy:prod
@@ -179,7 +179,7 @@ jobs:
             - v11-dependencies-{{ checksum "package.json" }}
       - run:
           name: Configure git defaults
-          command: git config user.email "circleci@makerdao.com" && git config user.name "CircleCI"
+          command: git config user.email "circleci@oazo.app" && git config user.name "CircleCI"
       - run:
           name: Deploying to production
           command: yarn run deploy:oazoprod
