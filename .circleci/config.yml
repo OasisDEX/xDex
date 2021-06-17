@@ -162,10 +162,28 @@ jobs:
             - v11-dependencies-{{ checksum "package.json" }}
       - run:
           name: Configure git defaults
-          command: git config user.email "circleci@makerdao.com" && git config user.name "CircleCI"
+          command: git config user.email "circleci@oasis.app" && git config user.name "CircleCI"
       - run:
           name: Deploying to production
           command: yarn run deploy:prod
+
+  deploy_new_oasis_prod:
+    docker:
+      - image: circleci/node:10.19.0-stretch
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - 'd2:4f:e3:c0:5d:8e:2b:14:6b:67:74:e2:2f:f2:a8:43'
+      - checkout
+      - restore_cache:
+          keys:
+            - v11-dependencies-{{ checksum "package.json" }}
+      - run:
+          name: Configure git defaults
+          command: git config user.email "circleci@oasis.app" && git config user.name "CircleCI"
+      - run:
+          name: Deploying to production
+          command: yarn run deploy:newoasisprod
 
 workflows:
   version: 2
@@ -207,10 +225,10 @@ workflows:
           filters:
             branches:
               only: dev
-      - deploy_prod:
+      - deploy_new_oasis_prod:
           requires:
             - test
             # - test-e2e
           filters:
             branches:
-              only: master
+              only: new_oasis.app

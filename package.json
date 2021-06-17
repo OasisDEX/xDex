@@ -18,6 +18,7 @@
     "postinstall": "rm -f node_modules/web3/index.d.ts",
     "deploy:dev": "sh ./deploy-dev.sh",
     "deploy:prod": "sh ./deploy-prod.sh",
+    "deploy:newoasisprod": "sh ./deploy-new-oasis-prod.sh",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
     "cypress:run": "rm -rf cypress/screenshots/* && cypress run",
