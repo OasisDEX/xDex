@@ -1,7 +1,7 @@
 rm -rf ./build
 
 # This is using `.env.prod` configuration file with feature flags
-PUBLIC_URL='https://oazo.app/trade' yarn build
+PUBLIC_URL='https://new.oasis.app/trade' yarn build
 
 # Push to ghpages branch
 cp ./build/200.html ./build/404.html
