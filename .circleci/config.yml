@@ -36,7 +36,6 @@ jobs:
 
   test-e2e:
     machine:
-      enabled: true
       image: circleci/classic:201808-01
       docker_layer_caching: true
     parallelism: 3
