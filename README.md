@@ -1,6 +1,7 @@
 # Oasis Trade
 
-[![CircleCI](https://circleci.com/gh/OasisDEX/oasis-market.svg?style=svg)](https://circleci.com/gh/OasisDEX/oasis-market)
+![Build Workflow](https://github.com/OasisDex/xDex/actions/workflows/build.yml/badge.svg)
+![Build Workflow](https://github.com/OasisDex/xDex/actions/workflows/aws-staging.yml/badge.svg)
 
 **Oasis Trade** is a marketplace that allows fully on-chain exchange of **ETH** and **DAI** tokens. It uses the [**matching_market**](https://etherscan.io/address/0xb7ac09c2c0217b07d7c103029b4918a2c401eecb) smart contract on the Ethereum blockchain.
 
